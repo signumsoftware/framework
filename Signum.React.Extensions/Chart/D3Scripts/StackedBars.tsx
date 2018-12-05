@@ -1,15 +1,19 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, PivotRow } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn } from '../ChartClient';
+import ReactChartBase from './ReactChartBase';
+import { XScaleTicks, YKeyTicks } from './Components/Ticks';
+import Legend from './Components/Legend';
+import { XAxis, YAxis } from './Components/Axis';
+import TextEllipsis from './Components/TextEllipsis';
 
 
-export default class StackedBarsChart extends D3ChartBase {
+export default class StackedBarsChart extends ReactChartBase {
 
-  drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+  renderChart(data: ChartTable, width: number, height: number): React.ReactElement<any> {
 
     var c = data.columns;
     var keyColumn = c.c0 as ChartColumn<unknown>;
@@ -73,154 +77,98 @@ export default class StackedBarsChart extends D3ChartBase {
 
     var xTicks = x.ticks(width / 60);
 
-    chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-      .enterData(xTicks, 'line', 'y-lines')
-      .attr('x1', t => x(t))
-      .attr('x2', t => x(t))
-      .attr('y1', yRule.size('content'))
-      .style('stroke', 'LightGray');
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
 
-    chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content'), yRule.start('ticks')))
-      .enterData(xTicks, 'line', 'x-tick')
-      .attr('x1', x)
-      .attr('x2', x)
-      .attr('y2', yRule.size('ticks'))
-      .style('stroke', 'Black');
-
-    var formatter = pStack == "expand" ? d3.format(".0%") :
+    var format = pStack == "expand" ? d3.format(".0%") :
       pStack == "zero" ? d3.format("") :
         (n: number) => d3.format("")(n) + "?";
 
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('labels')))
-      .enterData(xTicks, 'text', 'x-label')
-      .attr('x', x)
-      .attr('text-anchor', 'middle')
-      .text(formatter);
+    var labelMargin = 5;
 
-    chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
-      .append('svg:text').attr('class', 'x-title')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .text(pivot.title);
+    var size = xRule.size('content');
+
+    return (
+      <svg direction="rtl" width={width} height={height}>
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
+        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} />
 
 
-    chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
-      .enterData(pivot.rows, 'line', 'y-tick')
-      .attr('x2', xRule.size('ticks'))
-      .attr('y1', r => -y(keyColumn.getKey(r.rowValue))!)
-      .attr('y2', r => -y(keyColumn.getKey(r.rowValue))!)
-      .style('stroke', 'Black');
+        {stackedSeries.map(s => <g key={s.key} className="shape-serie"
+          transform={translate(xRule.start('content'), yRule.start('content'))}>
 
-    chart.append('svg:g')
-      .attr('class', 'y-title')
-      .attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
-      .append('svg:text').attr('class', 'y-title')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .text(keyColumn.title);
+          {s.filter(r => r.data.values[s.key] != undefined)
+            .map(r => <rect key={keyColumn.getKey(r.data.rowValue)} className="shape"
+              stroke={y.bandwidth() > 4 ? '#fff' : undefined}
+              fill={color(s.key)}
+              height={y.bandwidth()}
+              width={x(r[1]) - x(r[0])}
+              x={x(r[0])}
+              y={y(keyColumn.getKey(r.data.rowValue))!}
+              onClick={e => this.props.onDrillDown(r.data.values[s.key].rowClick)}
+              cursor="pointer">
+              <title>
+                {r.data.values[s.key].valueTitle}
+              </title>
+            </rect>)}
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
+          {y.bandwidth() > 15 && parseFloat(data.parameters["NumberOpacity"]) > 0 &&
+            s.filter(r => (x(r[1]) - x(r[0])) > 20)
+              .map(r => <text key={keyColumn.getKey(r.data.rowValue)} className="number-label"
+                x={x(r[0]) * 0.5 + x(r[1]) * 0.5}
+                y={y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2}
+                fill={data.parameters["NumberColor"]}
+                dominantBaseline="central"
+                opacity={data.parameters["NumberOpacity"]}
+                textAnchor="middle"
+                fontWeight="bold">
+                {r.data.values[s.key].value}
+                <title>
+                  {r.data.values[s.key].valueTitle}
+                </title>
+              </text>)
+          }
+        </g>)}
 
-    var me = this;
-    //PAINT GRAPH
-    chart.enterData(stackedSeries, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-      .each(function (s) {
+        {y.bandwidth() > 15 && pivot.columns.length > 0 && (
+          data.parameters["Labels"] == "Margin" ?
+            <g className="y-label" transform={translate(xRule.end('labels'), yRule.start('content') + y.bandwidth() / 2)}>
+              {pivot.rows.map(v => <TextEllipsis key={keyColumn.getKey(v.rowValue)}
+                maxWidth={xRule.size('labels')}
+                padding={labelMargin}
+                className="y-label"
+                y={y(keyColumn.getKey(v.rowValue))!}
+                dominantBaseline="central"
+                textAnchor="end">
+                {keyColumn.getNiceName(v.rowValue)}
+              </TextEllipsis>)}
+            </g> :
+            data.parameters["Labels"] == "Inside" ?
+              <g className="y-axis-tick-label" transform={translate(xRule.start('content'), yRule.start('content') + y.bandwidth() / 2)}>
+                {pivot.rows.map((r, i) => {
+                  var maxValue = stackedSeries[stackedSeries.length - 1][i][1];
+                  var posx = x(maxValue);
+                  return (<TextEllipsis key={keyColumn.getKey(r.rowValue)}
+                    maxWidth={posx >= size / 2 ? posx : size - posx}
+                    padding={labelMargin}
+                    className="y-axis-tick-label sf-chart-strong"
+                    y={y(keyColumn.getKey(r.rowValue))!}
+                    x={posx >= size / 2 ? 0 : posx}
+                    dx={labelMargin}
+                    textAnchor="start"
+                    fill={posx >= size / 2 ? '#fff' : '#000'}
+                    dominantBaseline="central"
+                    fontWeight="bold">
+                    {keyColumn.getNiceName(r.rowValue)}
+                  </TextEllipsis>);
+                })}
+              </g> : null
+        )}
 
-        d3.select(this).enterData(s, 'rect', 'shape')
-          .filter(r => r.data.values[s.key] != undefined)
-          .attr('stroke', y.bandwidth() > 4 ? '#fff' : null)
-          .attr('fill', r => color(s.key))
-          .attr('height', y.bandwidth())
-          .attr('width', r => x(r[1]) - x(r[0]))
-          .attr('x', r => x(r[0]))
-          .attr('y', r => y(keyColumn.getKey(r.data.rowValue))!)
-          .on('click', r => me.props.onDrillDown(r.data.values[s.key].rowClick))
-          .style("cursor", "pointer")
-          .append('svg:title')
-          .text(r => r.data.values[s.key].valueTitle);
+        <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} />
 
-        if (y.bandwidth() > 15 && parseFloat(data.parameters["NumberOpacity"]) > 0) {
-          d3.select(this).enterData(s, 'text', 'number-label')
-            .filter(p => (x(p[1]) - x(p[0])) > 20)
-            .attr('x', p => x(p[0]) * 0.5 + x(p[1]) * 0.5)
-            .attr('y', p => y(keyColumn.getKey(p.data.rowValue))! + y.bandwidth() / 2)
-            .attr('fill', data.parameters["NumberColor"])
-            .attr('dominant-baseline', 'central')
-            .attr('opacity', data.parameters["NumberOpacity"])
-            .attr('text-anchor', 'middle')
-            .attr('font-weight', 'bold')
-            .text(p => p.data.values[s.key].value)
-            .on('click', p => me.props.onDrillDown(p.data.values[s.key].rowClick))
-            .style("cursor", "pointer")
-            .append('svg:title')
-            .text(p => p.data.values[s.key].valueTitle);
-        }
-      });
-
-
-    if (y.bandwidth() > 15 && pivot.columns.length > 0) {
-
-      if (data.parameters["Labels"] == "Margin") {
-        chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.end('labels'), yRule.start('content') + y.bandwidth() / 2))
-          .enterData(pivot.rows, 'text', 'y-label')
-          .attr('y', v => y(keyColumn.getKey(v.rowValue))!)
-          .attr('dominant-baseline', 'central')
-          .attr('text-anchor', 'end')
-          .text(v => keyColumn.getNiceName(v.rowValue))
-          .each(function (v) { ellipsis(this as SVGTextElement, xRule.size('labels'), labelMargin); });
-      }
-      else if (data.parameters["Labels"] == "Inside") {
-        var maxValue = (rowIndex: number) => stackedSeries[stackedSeries.length - 1][rowIndex][1];
-
-        var size = xRule.size('content');
-        var labelMargin = 5;
-        chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.bandwidth() / 2))
-          .enterData(pivot.rows, 'text', 'y-axis-tick-label sf-chart-strong')
-          .attr('y', r => y(keyColumn.getKey(r.rowValue))!)
-          .attr('x', (r, i) => x(maxValue(i)) >= size / 2 ? 0 : x(maxValue(i)))
-          .attr('dx', (r, i) => labelMargin)
-          .attr('text-anchor', r => 'start')
-          .attr('fill', (r, i) => x(maxValue(i)) >= size / 2 ? '#fff' : '#000')
-          .attr('dominant-baseline', 'central')
-          .attr('font-weight', 'bold')
-          .text(r => keyColumn.getNiceName(r.rowValue))
-          .each(function (r, i) { var posx = x(maxValue(i)); ellipsis(this as SVGTextElement, posx >= size / 2 ? posx : size - posx, labelMargin); });
-      }
-    }
-
-    var legendScale = d3.scaleBand()
-      .domain(pivot.columns.map((s, i) => i.toString()))
-      .range([0, xRule.size('content')]);
-
-    if (legendScale.bandwidth() > 50) {
-      var legendMargin = yRule.size('legend') + 4;
-      chart.append('svg:g').attr('class', 'color-legend').attr('transform', translate(xRule.start('content'), yRule.start('legend')))
-        .enterData(pivot.columns, 'rect', 'color-rect')
-        .attr('x', (s, i) => legendScale(i.toString())!)
-        .attr('width', yRule.size('legend'))
-        .attr('height', yRule.size('legend'))
-        .attr('fill', s => s.color || color(s.key));
-
-      chart.append('svg:g').attr('class', 'color-legend').attr('transform', translate(xRule.start('content') + legendMargin, yRule.middle('legend') + 1))
-        .enterData(pivot.columns, 'text', 'color-text')
-        .attr('x', (s, i) => legendScale(i.toString())!)
-        .attr('dominant-baseline', 'middle')
-        .text(s => s.niceName!)
-        .each(function (s) { ellipsis(this as SVGTextElement, legendScale.bandwidth() - legendMargin); });
-    }
-
-    chart.append('svg:g')
-      .attr('class', 'x-axis')
-      .attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .append('svg:line')
-      .attr('class', 'x-axis')
-      .attr('x2', xRule.size('content'))
-      .style('stroke', 'Black');
-
-    chart.append('svg:g').attr('class', 'y-axis').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-      .append('svg:line')
-      .attr('class', 'y-axis')
-      .attr('y2', yRule.size('content'))
-      .style('stroke', 'Black');
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </svg>
+    );
   }
 }

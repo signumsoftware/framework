@@ -1,15 +1,16 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, Folder, isFolder, Root, isRoot } from '../Templates/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
+import ReactChartBase from './ReactChartBase';
+import TextEllipsis from './Components/TextEllipsis';
 
 
-export default class BubblePackChart extends D3ChartBase {
+export default class BubblePackChart extends ReactChartBase {
 
-  drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+  renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactElement<any> {
 
     var keyColumn = data.columns.c0!;
     var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
@@ -18,7 +19,7 @@ export default class BubblePackChart extends D3ChartBase {
     var colorSchemeColumn = data.columns.c4;
 
     if (width == 0 || height == 0)
-      return;
+      return <svg direction="rtl" width={width} height={height}></svg>;
 
     var color: (v: ChartRow) => string | undefined;
     if (colorScaleColumn) {
@@ -60,66 +61,49 @@ export default class BubblePackChart extends D3ChartBase {
       .padding(2);
 
     const circularRoot = bubble(root);
-
+    
     var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
-
-    var node = chart.selectAll("g.node")
-      .data(nodes)
-      .enter().append("g")
-      .attr("class", "node")
-      .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
-      .style("cursor", "pointer")
-      .on('click', p => isFolder(p.data) ?
-        this.props.onDrillDown({ c2: p.data.folder }) :
-        this.props.onDrillDown(p.data));
-
-    node.append("circle")
-      .attr('shape-rendering', 'initial')
-      .attr("r", d => d.r)
-      .style("fill", d => isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!)
-      .style("fill-opacity", d => data.parameters["FillOpacity"] || null)
-      .style("stroke", d => data.parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || null)))
-      .style("stroke-width", data.parameters["StrokeWidth"])
-      .style("stroke-opacity", 1);
 
     var showNumber = parseFloat(data.parameters["NumberOpacity"]) > 0;
     var numberSizeLimit = parseInt(data.parameters["NumberSizeLimit"]);
 
-    node.filter(d => !isFolder(d.data)).append("text")
-      .attr('dominant-baseline', 'central')
-      .attr('text-anchor', 'middle')
-      .attr("dy", d => showNumber && d.r > numberSizeLimit ? "-0.5em" : null)
-      .text(d => keyColumn.getValueNiceName(d.data as ChartRow))
-      .each(function (d) { return ellipsis(this as SVGTextElement, d.r * 2, 1, ""); });
-
-    if (showNumber) {
-      node.filter(d => d.r > numberSizeLimit && !isFolder(d.data))
-        .append("text")
-        .attr('fill', data.parameters["NumberColor"] || "#000")
-        .attr('dominant-baseline', 'central')
-        .attr('text-anchor', 'middle')
-        .attr('font-weight', 'bold')
-        .attr('opacity', d => parseFloat(data.parameters["NumberOpacity"]) * d.r / 30)
-        .attr("dy", ".5em")
-        .text(d => valueColumn.getValueNiceName(d.data as ChartRow));
-    }
-
-    node.append('svg:title')
-      .text(d => {
-        var key = isFolder(d.data) ?
-          parentColumn!.getNiceName(d.data.folder) :
-          (keyColumn.getValueNiceName(d.data as ChartRow)
-            + (parentColumn == null ? '' : (' (' + parentColumn.getValueNiceName(d.data as ChartRow) + ')')));
-
-
-        var value = isFolder(d.data) ?
-          format(size.invert(d.value!)) :
-          (valueColumn.getValueNiceName(d.data)
-            + (colorScaleColumn == null ? '' : (' (' + colorScaleColumn.getValueNiceName(d.data) + ')'))
-            + (colorSchemeColumn == null ? '' : (' (' + colorSchemeColumn.getValueNiceName(d.data) + ')'))
-          );
-
-        return key + ': ' + value;
-      });
+    return (
+      <svg direction="rtl" width={width} height={height}>
+        {
+          nodes.map(d => <g className="node" transform={translate(d.x, d.y)} cursor="pointer"
+            onClick={e => isFolder(d.data) ? this.props.onDrillDown({ c2: d.data.folder }) : this.props.onDrillDown(d.data)}>
+            <circle shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
+              fillOpacity={data.parameters["FillOpacity"] || undefined}
+              stroke={data.parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || undefined))}
+              strokeWidth={data.parameters["StrokeWidth"]} strokeOpacity={1} />
+            {!isFolder(d.data) &&
+              <TextEllipsis maxWidth={d.r * 2} padding={1}
+                dominantBaseline="central" textAnchor="middle" dy={showNumber && d.r > numberSizeLimit ? "-0.5em" : undefined}>
+                {keyColumn.getValueNiceName(d.data as ChartRow)}
+              </TextEllipsis>
+            }
+            {showNumber && d.r > numberSizeLimit && !isFolder(d.data) &&
+              <text fill={data.parameters["NumberColor"] || "#000"}
+                dominantBaseline="central"
+                textAnchor="middle"
+                fontWeight="bold"
+                opacity={parseFloat(data.parameters["NumberOpacity"]) * d.r / 30}
+                dy=".5em">
+                {valueColumn.getValueNiceName(d.data as ChartRow)}
+              </text>
+            }
+            <title>
+              {isFolder(d.data) ? parentColumn!.getNiceName(d.data.folder) :
+                (keyColumn.getValueNiceName(d.data as ChartRow) + (parentColumn == null ? '' : (' (' + parentColumn.getValueNiceName(d.data as ChartRow) + ')')))}:
+              {isFolder(d.data) ? format(size.invert(d.value!)) :
+                (valueColumn.getValueNiceName(d.data)
+                  + (colorScaleColumn == null ? '' : (' (' + colorScaleColumn.getValueNiceName(d.data) + ')'))
+                  + (colorSchemeColumn == null ? '' : (' (' + colorSchemeColumn.getValueNiceName(d.data) + ')'))
+                )}
+            </title>
+          </g>)
+        }
+      </svg>
+    );
   }
 }

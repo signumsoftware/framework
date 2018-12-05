@@ -1,15 +1,15 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
+import ReactChartBase from './ReactChartBase';
 
 
-export default class CalendarStreamChart extends D3ChartBase {
+export default class CalendarStreamChart extends ReactChartBase {
 
-  drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+  renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactElement<any> {
 
     var dateColumn = data.columns.c0! as ChartClient.ChartColumn<string>;
     var valueColumn = data.columns.c1 as ChartClient.ChartColumn<number>;
@@ -71,55 +71,8 @@ export default class CalendarStreamChart extends D3ChartBase {
 
     var yearRange = d3.range(minDate.getFullYear(), maxDate.getFullYear() + 1);
 
-    var svg = chart
-      .append('svg:g')
-      .attr("transform", translate(xRule.start("content"), yRule.start("content")))
-      .enterData(yearRange, "g", "year-group")
-      .attr("transform", yr => horizontal ?
-        translate(0, (yr - minDate.getFullYear()) * (cellSize * (7 + 1))) :
-        translate((yr - minDate.getFullYear()) * (cellSize * (7 + 1)), 0)
-      );
-
-    svg.append("text")
-      .attr("transform", horizontal ? translate(-6, cellSize * 3.5) + rotate(-90) :
-        translate(cellSize * 3.5, -6))
-      .attr("text-anchor", "middle")
-      .text(String);
-
-    var groups = data.rows.toObject(r => dateColumn.getValueKey(r));
-
-    var rect = svg.selectAll("rect.day")
-      .data(d => d3.utcDays(new Date(Date.UTC(d, 0, 1)), new Date(Date.UTC(d + 1, 0, 1))))
-      .enter().append("rect")
-      .attr("stroke", "#ccc")
-      .attr("fill", d => {
-        var r = groups[cleanDate(d)];
-        return r == undefined ? "#fff" : color(r);
-      })
-      .attr("width", cellSize)
-      .attr("height", cellSize)
-      .attr("x", d => (horizontal ? week(d) : day(d)) * cellSize)
-      .attr("y", d => (horizontal ? (6 - day(d)) : week(d)) * cellSize)
-      .style("cursor", "pointer")
-      .on('click', d => {
-        var r = groups[cleanDate(d)];
-        return r == undefined ? null : this.props.onDrillDown(r);
-      })
-      .append("title")
-      .text(d => {
-        var r = groups[cleanDate(d)];
-        return format(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"));
-      });
-
-    svg.selectAll("path.month")
-      .data(d => d3.timeMonths(new Date(d, 0, 1), new Date(d + 1, 0, 1)))
-      .enter().append("path")
-      .attr("class", "month")
-      .attr("stroke", "#666")
-      .attr("stroke-width", 1)
-      .attr("fill", "none")
-      .attr("d", horizontal ? monthPathH : monthPathV);
-
+    var rowYByDate = data.rows.toObject(r => dateColumn.getValueKey(r));
+    
 
     function monthPathH(t0: Date): string {
       var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
@@ -142,7 +95,51 @@ export default class CalendarStreamChart extends D3ChartBase {
         + "V" + (w1 + 1) * cellSize + "H" + (d1 + 1) * cellSize
         + "V" + (w1) * cellSize + "H" + 7 * cellSize
         + "V" + (w0) * cellSize + "Z";
-
     }
+    
+    return (
+      <svg direction="rtl" width={width} height={height}>
+        <g transform={translate(xRule.start("content"), yRule.start("content"))}>
+          {yearRange.map(yr => <g key={yr} className="year-group"
+            transform={horizontal ?
+              translate(0, (yr - minDate.getFullYear()) * (cellSize * (7 + 1))) :
+              translate((yr - minDate.getFullYear()) * (cellSize * (7 + 1)), 0)}>
+
+            <text transform={horizontal ? translate(-6, cellSize * 3.5) + rotate(-90) :
+              translate(cellSize * 3.5, -6)} textAnchor="middle">
+              {yr}
+            </text>
+
+            {d3.utcDays(new Date(Date.UTC(yr, 0, 1)), new Date(Date.UTC(yr + 1, 0, 1))).map(d => {
+              const r = rowYByDate[cleanDate(d)];
+              return <rect
+                stroke="#ccc"
+                fill={r == undefined ? "#fff" : color(r)}
+                width={cellSize}
+                height={cellSize}
+                x={(horizontal ? week(d) : day(d)) * cellSize}
+                y={(horizontal ? (6 - day(d)) : week(d)) * cellSize}
+                cursor="pointer"
+                onClick={e => r == undefined ? null : this.props.onDrillDown(r)}>
+                <title>
+                  {format(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"))}
+                </title>
+              </rect>
+            })}
+
+            {d3.timeMonths(new Date(yr, 0, 1), new Date(yr + 1, 0, 1))
+              .map(m => <path key={m.toString()}
+                className="month"
+                stroke="#666"
+                strokeWidth={1}
+                fill="none"
+                d={horizontal ? monthPathH(m) : monthPathV(m)} />
+              )
+            }
+          </g>)}
+        </g>
+      </svg>
+    );
+
   }
 }

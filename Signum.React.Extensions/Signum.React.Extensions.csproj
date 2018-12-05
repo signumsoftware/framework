@@ -46,6 +46,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Axis.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Legend.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Components\TextEllipsis.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Ticks.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\ReactChartBase.tsx" />
   </ItemGroup>
   

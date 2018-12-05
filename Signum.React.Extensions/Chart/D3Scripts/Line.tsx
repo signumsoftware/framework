@@ -6,6 +6,9 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsi
 import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
 import { KeyCodes } from '@framework/Components';
 import ReactChartBase from './ReactChartBase';
+import TextEllipsis from './Components/TextEllipsis';
+import { XKeyTicks, YScaleTicks } from './Components/Ticks';
+import { XAxis, YAxis } from './Components/Axis';
 
 
 export default class LineChart extends ReactChartBase {
@@ -50,9 +53,6 @@ export default class LineChart extends ReactChartBase {
 
     var rowByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
 
-    var yTicks = y.ticks(height / 50);
-    var yTickFormat = y.tickFormat(height / 50);
-
     var line = d3.line<unknown>()
       .defined(key => rowByKey[keyColumn.getKey(key)] != null)
       .x(key => x(keyColumn.getKey(key))!)
@@ -63,60 +63,9 @@ export default class LineChart extends ReactChartBase {
 
     return (
       <svg direction="rtl" width={width} height={height}>
-        <g className="x-tick" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks'))}>
-          {keyValues.map((r, i) => <line className="x-tick"
-            y2={yRule.start('labels' + (i % 2)) - yRule.start('ticks')}
-            x1={x(keyColumn.getKey(r))!}
-            x2={x(keyColumn.getKey(r))!}
-            stroke="Black" />)}
-        </g>
-        {(x.bandwidth() * 2) > 60 &&
-          <g className="x-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('labels0'))}>
-            {keyValues.map((r, i) => <TextEllipsis maxWidth={x.bandwidth() * 2} className="x-label"
-              x={x(keyColumn.getKey(r))!}
-              y={yRule.middle('labels' + (i % 2)) - yRule.middle('labels0')}
-              dominant-baseline="middle"
-              text-anchor="middle">
-              {keyColumn.getNiceName(r)}
-            </TextEllipsis>)}
-          </g>
-        }
-        <g className="x-title" transform={translate(xRule.middle('content'), yRule.middle('title'))}>
-          <text className="x-title" text-anchor="middle" dominant-baseline="middle">
-            {keyColumn.title}
-          </text>
-        </g>
 
-        <g className="y-line" transform={translate(xRule.start('content'), yRule.end('content'))}>
-          {yTicks.map(t => <line className="y-line"
-            x2={xRule.size('content')}
-            y1={-y(t)}
-            y2={-y(t)}
-            stroke="LightGray" />)}
-        </g>
-
-        <g className="y-tick" transform={translate(xRule.start('ticks'), yRule.end('content'))}>
-          {yTicks.map(t => <line className="y-tick"
-            x2={xRule.size('ticks')}
-            y1={-y(t)}
-            y2={-y(t)}
-            stroke="Black" />)}
-        </g>
-
-        <g className="y-label" transform={translate(xRule.end('labels'), yRule.end('content'))}>
-          {yTicks.map(t => <text className="y-label"
-            y={-y(t)}
-            dominant-baseline="middle"
-            text-anchor="end">
-            {yTickFormat}
-          </text>)}
-        </g>
-
-        <g className="y-label" transform={translate(xRule.middle('title'), yRule.middle('content')) + rotate(270)}>
-          <text className="y-label" text-anchor="middle" dominant-baseline="middle">
-            {valueColumn.title}
-          </text>
-        </g>
+        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
 
         {/*PAINT CHART'*/}
         <g className="shape" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
@@ -127,7 +76,13 @@ export default class LineChart extends ReactChartBase {
         <g className="hover-trigger" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
           {keyValues
             .filter(key => rowByKey[keyColumn.getKey(key)] != null)
-            .map(key => <circle className="hover-trigger" fill="#fff" fillOpacity={0} stroke="none" cursor="pointer" r={15}
+            .map(key => <circle key={keyColumn.getKey(key)}
+              className="hover-trigger"
+              fill="#fff"
+              fillOpacity={0}
+              stroke="none"
+              cursor="pointer"
+              r={15}
               cx={x(keyColumn.getKey(key))!}
               cy={-y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))}
               onClick={e => this.props.onDrillDown(rowByKey[keyColumn.getKey(key)])}>
@@ -141,7 +96,8 @@ export default class LineChart extends ReactChartBase {
         <g className="point" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
           {keyValues
             .filter(key => rowByKey[keyColumn.getKey(key)] != null)
-            .map(key => <circle className="point"
+            .map(key => <circle key={keyColumn.getKey(key)}
+              className="point"
               fill={color}
               r={5}
               cx={x(keyColumn.getKey(key))!}
@@ -160,7 +116,8 @@ export default class LineChart extends ReactChartBase {
           <g className="point-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
             {keyValues
               .filter(key => rowByKey[keyColumn.getKey(key)] != null)
-              .map(key => <text className="point-label"
+              .map(key => <text key={keyColumn.getKey(key)}
+                className="point-label"
                 r={5}
                 x={x(keyColumn.getKey(key))!}
                 y={-y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])) - 10}
@@ -174,51 +131,13 @@ export default class LineChart extends ReactChartBase {
           </g>
         }
 
-
-        <g className="x-axis" transform={translate(xRule.start('content'), yRule.end('content'))}>
-          <line className="x-axis" x2={xRule.size('content')} stroke="Black" />
-        </g>
-
-        <g className="y-axis" transform={translate(xRule.start('content'), yRule.start('content'))}>
-          <line className="y-axis" y2={yRule.size('content')} stroke="Black" />
-        </g>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+        
       </svg>
     );
   }
-}
 
 
-export class TextEllipsis extends React.Component<{ maxWidth: number, padding?: number } & React.SVGProps<SVGTextElement>> {
 
-  txt?: SVGTextElement | null;
-
-  render() {
-
-    var { maxWidth, padding, children, ...atts } = this.props;
-
-    return (
-      <text ref={t => this.txt = t} {...atts} >
-        {children || ""}
-      </text>
-    );
-  }
-
-
-  componentDidMount() {
-
-    var width = this.props.maxWidth;
-    if (this.props.padding)
-      width -= this.props.padding * 2;
-
-    let txtElement = this.txt!;
-    let textLength = txtElement.getComputedTextLength();
-    let text = txtElement.textContent!;
-    while (textLength > width && text.length > 0) {
-      text = text.slice(0, -1);
-      while (text[text.length - 1] == ' ' && text.length > 0)
-        text = text.slice(0, -1);
-      txtElement.textContent = text + '…';
-      textLength = txtElement.getComputedTextLength();
-    }
-  }
 }

@@ -1,11 +1,12 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
 import { Dic } from '@framework/Globals';
+import ReactChartBase from './ReactChartBase';
+import { XKeyTicks } from './Components/Ticks';
 
 interface ColumnWithScales {
   column: ChartColumn<number>;
@@ -13,9 +14,33 @@ interface ColumnWithScales {
   colorScale: (r: ChartRow) => string;
 }
 
-export default class ParallelCoordinatesChart extends D3ChartBase {
+export default class ParallelCoordinatesChart extends ReactChartBase {
+  renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactElement<any> {
+    return <ParallelCoordinatesImp data={data} width={width} height={height} onDrillDown={this.props.onDrillDown} />
+  }
+}
 
-  drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+interface ParallelCoordinatesImpProps {
+  data: ChartClient.ChartTable;
+  width: number;
+  height: number;
+  onDrillDown: (e: ChartRow) => void;
+}
+
+interface ParallelCoordinatesImpState {
+  selectedColumn?: string;
+}
+
+export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesImpProps, ParallelCoordinatesImpState> {
+
+  constructor(props: ParallelCoordinatesImpProps) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+
+    const { data, width, height } = this.props;
 
     var keyColumn = data.columns.c0!;
 
@@ -62,82 +87,93 @@ export default class ParallelCoordinatesChart extends D3ChartBase {
       .domain(cords.map(d => d.column.name))
       .rangeRound([0, xRule.size('content')]);
 
-    chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content')))
-      .enterData(cords, 'line', 'x-tick')
-      .attr('y2', d => yRule.size('content'))
-      .attr('x1', d => x(d.column.name)!)
-      .attr('x2', d => x(d.column.name)!)
-      .style('stroke', 'black');
-
-
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('title')))
-      .enterData(cords, 'text', 'x-label')
-      .attr('x', d => x(d.column.name)!)
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'middle')
-      .attr("font-weight", "bold")
-      .text(d => d.column.title);
-
-    chart.append('svg:g').attr('class', 'x-label-max').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('max')))
-      .enterData(cords, 'text', 'x-label-max')
-      .attr('x', d => x(d.column.name)!)
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'middle')
-      .text(d => d.column.type != "Date" && d.column.type != "DateTime" ?
-        d.scale.domain()[1] :
-        d.column.getNiceName(d3.max(data.rows, r => d.column.getValue(r))!)
-      );
-
-
-    chart.append('svg:g').attr('class', 'x-label-min').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('min')))
-      .enterData(cords, 'text', 'x-label-min')
-      .attr('x', d => x(d.column.name)!)
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'middle')
-      .text(d => d.column.type != "Date" && d.column.type != "DateTime" ?
-        d.column.getNiceName(d.scale.domain()[0]) :
-        d.column.getNiceName(d3.min(data.rows, r => d.column.getValue(r))!));
-
     var line = d3.line<{ col: ColumnWithScales, row: ChartRow }>()
       .defined(t => t.col.column.getValue(t.row) != undefined)
       .x(t => x(t.col.column.name)!)
       .y(t => - t.col.scale(t.col.column.getValue(t.row)))
       .curve(ChartUtils.getCurveByName(data.parameters["Interpolate"])!);//"linear"
 
-    //paint graph - line
-    var lines = chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content')))
-      .append('svg:path').attr('class', 'shape')
-      .attr('fill', 'none')
-      .attr('stroke-width', 1)
-      .attr('stroke', 'black')
-      .attr('shape-rendering', 'initial')
-      .on('click', r => this.props.onDrillDown(r))
-      .style("cursor", "pointer")
-      .attr('d', r => line(cords.map(c => ({ col: c, row: r })))!);
-
-    lines
-      .append("title")
-      .text(r => keyColumn.getValueNiceName(r) + "\n" +
-        cords.map(c => c.column.title + ": " + c.column.getValueNiceName(r)).join("\n")
-      );
-
     var boxWidth = 10;
-    var box = chart.append('svg:g').attr('class', 'x-tick-box').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content')))
-      .enterData(cords, 'rect', 'x-tick-box')
-      .attr('height', d => yRule.size('content'))
-      .attr('width', boxWidth)
-      .attr('x', d => x(d.column.name)! - boxWidth / 2)
-      .style('stroke', '#ccc')
-      .style('fill', '#ccc')
-      .style('fill-opacity', '.2')
-      .on("click", d => drawGradient(d));
+
+    var selectedColumn = cords.firstOrNull(a => a.column.name == this.state.selectedColumn) || cords.first();
+
+    return (
+      <svg direction="rtl" width={width} height={height}>
+        <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
+          {cords.map(d => <line key={d.column.name} className="x-tick"
+            y2={yRule.size('content')}
+            x1={x(d.column.name)!}
+            x2={x(d.column.name)!}
+            stroke="black" />)}
+        </g>
+
+        <g className="x-label" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('title'))}>
+          {cords.map(d => <text key={d.column.name} className="x-label"
+            x={x(d.column.name)!}
+            dominantBaseline="middle"
+            textAnchor="middle"
+            fontWeight="bold">
+            {d.column.title}
+          </text>)}
+        </g>
+
+        <g className="x-label-max" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('max'))}>
+          {cords.map(d => <text key={d.column.name} className="x-label-max"
+            x={x(d.column.name)!}
+            dominantBaseline="middle"
+            textAnchor="middle">
+            {d.column.type != "Date" && d.column.type != "DateTime" ?
+              d.scale.domain()[1] :
+              d.column.getNiceName(d3.max(data.rows, r => d.column.getValue(r))!)}
+          </text>)}
+        </g>
+
+        <g className="x-label-min" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('min'))}>
+          {cords.map(d => <text key={d.column.name} className="x-label-min"
+            x={x(d.column.name)!}
+            dominantBaseline="middle"
+            textAnchor="middle">
+            {d.column.type != "Date" && d.column.type != "DateTime" ?
+              d.column.getNiceName(d.scale.domain()[0]) :
+              d.column.getNiceName(d3.min(data.rows, r => d.column.getValue(r))!)}
+          </text>)}
+        </g>
 
 
-    var drawGradient = function (col: ColumnWithScales) {
-      box.style('fill', d => col.column.name != d.column.name ? '#ccc' : '#000');
-      lines.attr("stroke", r => col.colorScale(r));
-    };
-    
-    drawGradient(cords.first());
+        {data.rows.map((r, i) => <g key={i} className="shape-serie"
+          transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
+          <path
+            className="shape"
+            fill="none"
+            strokeWidth={1}
+            stroke={selectedColumn.colorScale(r)}
+            shapeRendering="initial"
+            onClick={e => this.props.onDrillDown(r)}
+            cursor="pointer"
+            d={line(cords.map(c => ({ col: c, row: r })))!}>
+            <title>
+              {keyColumn.getValueNiceName(r) + "\n" +
+                cords.map(c => c.column.title + ": " + c.column.getValueNiceName(r)).join("\n")}
+            </title>
+          </path>
+        </g>)}
+
+
+        <g className="x-tick-box" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
+          {cords.map(d => <rect key={d.column.name}
+            className="x-tick-box"
+            height={yRule.size('content')}
+            width={boxWidth}
+            x={x(d.column.name)! - boxWidth / 2}
+            stroke="#ccc"
+            fill={selectedColumn.column.name != d.column.name ? '#ccc' : '#000'}
+            fillOpacity=".2"
+            onClick={e => this.setState({ selectedColumn: d.column.name })} />)}
+        </g>
+      </svg>
+    );
+
   }
 }
+
+

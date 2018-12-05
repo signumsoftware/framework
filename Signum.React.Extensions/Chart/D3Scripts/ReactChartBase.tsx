@@ -42,7 +42,7 @@ export default abstract class ReactChartBase extends React.Component<ReactChartB
     );
   }
 
-  renderChartOrMessage(width: number, height: number): React.ReactElement<any> {
+  renderChartOrMessage(width: number, height: number): React.ReactNode  {
 
     const data = this.props.data;
 
@@ -57,5 +57,5 @@ export default abstract class ReactChartBase extends React.Component<ReactChartB
       return this.renderChart(data, width, height);
   }
 
-  abstract renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactElement<any>;
+  abstract renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactNode ;
 }

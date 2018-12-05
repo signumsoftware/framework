@@ -5,11 +5,14 @@ import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
+import ReactChartBase from './ReactChartBase';
+import { YScaleTicks, XScaleTicks } from './Components/Ticks';
+import { XAxis, YAxis } from './Components/Axis';
 
 
-export default class ScatterplotChart extends D3ChartBase {
+export default class ScatterplotChart extends ReactChartBase {
 
-  drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+  renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactNode {
 
     var colorKeyColumn = data.columns.c0!;
     var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
@@ -51,62 +54,7 @@ export default class ScatterplotChart extends D3ChartBase {
     var xTicks = x.ticks(width / numXTicks);
     var xTickFormat = x.tickFormat(width / numXTicks);
 
-    chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-      .enterData(xTicks, 'line', 'y-lines')
-      .attr('x1', t => x(t))
-      .attr('x2', t => x(t))
-      .attr('y1', yRule.size('content'))
-      .style('stroke', 'LightGray');
 
-    chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content'), yRule.start('ticks')))
-      .enterData(xTicks, 'line', 'x-tick')
-      .attr('x1', x)
-      .attr('x2', x)
-      .attr('y2', yRule.size('ticks'))
-      .style('stroke', 'Black');
-
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('labels')))
-      .enterData(xTicks, 'text', 'x-label')
-      .attr('x', x)
-      .attr('text-anchor', 'middle')
-      .text(xTickFormat);
-
-    chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
-      .append('svg:text').attr('class', 'x-title')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .text(horizontalColumn.title);
-
-    var yTicks = y.ticks(height / 50);
-    var yTickFormat = y.tickFormat(height / 50);
-    chart.append('svg:g').attr('class', 'y-lines').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .enterData(yTicks, 'line', 'y-lines')
-      .attr('x2', xRule.size('content'))
-      .attr('y1', t => -y(t))
-      .attr('y2', t => -y(t))
-      .style('stroke', 'LightGray');
-
-    chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
-      .enterData(yTicks, 'line', 'y-tick')
-      .attr('x2', xRule.size('ticks'))
-      .attr('y1', t => -y(t))
-      .attr('y2', t => -y(t))
-      .style('stroke', 'Black');
-
-    chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.end('labels'), yRule.end('content')))
-      .enterData(yTicks, 'text', 'y-label')
-      .attr('y', t => -y(t))
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'end')
-      .text(yTickFormat);
-
-    chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
-      .append('svg:text').attr('class', 'y-title')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .text(verticalColumn.title);
-
-    debugger;
     var color: (val: ChartRow) => string;
     if (data.parameters["ColorScale"] == "Ordinal") {
       var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]));
@@ -120,130 +68,148 @@ export default class ScatterplotChart extends D3ChartBase {
       color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number));
     }
 
+    return (
+      <>
+        <svg direction="rtl" width={width} height={height}>
+          <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
+          <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
-    var svg = chart.node()!;
-    var container = svg.parentNode!;
+          {data.parameters["DrawingMode"] == "Svg" &&
+            data.rows.map((r, i) => <g key={i} className="shape-serie"
+              transform={translate(xRule.start('content'), yRule.end('content'))}>
+              <circle className="shape" stroke={colorKeyColumn.getValueColor(r) || color(r)} fill={colorKeyColumn.getValueColor(r) || color(r)} shapeRendering="initial" r={pointSize} cx={x(horizontalColumn.getValue(r))} cy={-y(verticalColumn.getValue(r))} onClick={e => this.props.onDrillDown(r)} cursor="pointer">
+                <title>
+                  {colorKeyColumn.getValueNiceName(r) +
+                    ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
+                    ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r))}
+                </title>
+              </circle>
+            </g>)
+          }
 
-    if (data.parameters["DrawingMode"] == "Svg") {
-
-      //PAINT GRAPH
-      chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-        .append('svg:circle').attr('class', 'shape')
-        .attr('stroke', r => colorKeyColumn.getValueColor(r) || color(r))
-        .attr('fill', r => colorKeyColumn.getValueColor(r) || color(r))
-        .attr('shape-rendering', 'initial')
-        .attr('r', pointSize)
-        .attr('cx', r => x(horizontalColumn.getValue(r)))
-        .attr('cy', r => -y(verticalColumn.getValue(r)))
-        .on('click', r => this.props.onDrillDown(r))
-        .style("cursor", "pointer")
-        .append('svg:title')
-        .text(r => colorKeyColumn.getValueNiceName(r) +
-          ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
-          ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r))
-        );
-    } else {
-      var w = xRule.size('content');
-      var h = yRule.size('content');
-
-      var c = document.createElement('canvas');
-      var vc = document.createElement('canvas');
-      container.appendChild(c);
-
-      var dummy = chart.append('svg:circle')
-        .attr('class', 'dummy')
-        .node();
-
-      const canvas = d3.select(c)
-        .attr('width', w)
-        .attr('height', h)
-        .style('position', 'absolute')
-        .style('left', xRule.start('content') + 'px')
-        .style('top', yRule.start('content') + 'px');
-
-      const virtualCanvas = d3.select(vc)
-        .attr('width', w)
-        .attr('height', h)
-        .style('position', 'absolute')
-        .style('left', xRule.start('content') + 'px')
-        .style('top', yRule.start('content') + 'px');
-
-      const ctx = c.getContext("2d")!;
-      const vctx = vc.getContext("2d")!;
-      var colorToData: { [key: string]: ChartRow } = {};
-      ctx.clearRect(0, 0, w, h);
-      vctx.clearRect(0, 0, w, h);
-      data.rows.forEach(function (r, i) {
-
-        var c = colorKeyColumn.getValueColor(r) || color(r);
-
-        ctx.fillStyle = c;
-        ctx.strokeStyle = c;
-        var vColor = getVirtualColor(i);
-        vctx.fillStyle = vColor;
-        vctx.strokeStyle = vColor;
-        colorToData[vColor] = r;
-
-        var xVal = x(horizontalColumn.getValue(r));
-        var yVal = h - y(verticalColumn.getValue(r));
-
-        ctx.beginPath();
-        ctx.arc(xVal, yVal, pointSize, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-
-        vctx.beginPath();
-        vctx.arc(xVal, yVal, pointSize, 0, 2 * Math.PI);
-        vctx.fill();
-        vctx.stroke();
-
-      });
-
-      console.log(colorToData)
-
-      var getVirtualColor = (index: number): string => d3.rgb(
-        Math.floor(index / 256 / 256) % 256,
-        Math.floor(index / 256) % 256,
-        index % 256)
-        .toString();
-
-      c.addEventListener('mousemove', function (e) {
-        const imageData = vctx.getImageData(e.offsetX, e.offsetY, 1, 1);
-        const color = d3.rgb.apply(null, imageData.data).toString();
-        const r = colorToData[color];
-        if (r) {
-          c.style.cursor = "pointer";
-          c.setAttribute("title", colorKeyColumn.getNiceName(r) +
-            ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
-            ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)));
-        } else {
-          c.style.cursor = "initial";
-          c.setAttribute("title", "...");
+          <XAxis xRule={xRule} yRule={yRule} />
+          <YAxis xRule={xRule} yRule={yRule} />
+        </svg>
+        {data.parameters["DrawingMode"] != "Svg" &&
+          <CanvasScatterplot
+            color={color}
+            colorKeyColumn={colorKeyColumn}
+            horizontalColumn={horizontalColumn}
+            verticalColumn={verticalColumn}
+            onDrillDown={this.props.onDrillDown}
+            data={data}
+            x={x}
+            y={y}
+            pointSize={pointSize}
+            xRule={xRule}
+            yRule={yRule}
+          />
         }
-      });
-
-      c.addEventListener('mouseup', e => {
-        const imageData = vctx.getImageData(e.offsetX, e.offsetY, 1, 1);
-
-        const color = d3.rgb.apply(null, imageData.data).toString();
-        const p = colorToData[color];
-        if (p) {
-          this.props.onDrillDown(p);
-        }
-      });
-    }
-
-    chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .append('svg:line')
-      .attr('class', 'x-axis')
-      .attr('x2', xRule.size('content'))
-      .style('stroke', 'Black');
-
-    chart.append('svg:g').attr('class', 'y-axis').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-      .append('svg:line')
-      .attr('class', 'y-axis')
-      .attr('y2', yRule.size('content'))
-      .style('stroke', 'Black');
-
+      </>
+    );
   }
 }
+
+class CanvasScatterplot extends React.Component<{
+  xRule: ChartUtils.Rule,
+  yRule: ChartUtils.Rule,
+  colorKeyColumn: ChartClient.ChartColumn<unknown>,
+  horizontalColumn: ChartClient.ChartColumn<number>,
+  verticalColumn: ChartClient.ChartColumn<number>,
+  pointSize: number,
+  data: ChartClient.ChartTable,
+  onDrillDown: (e: ChartRow) => void,
+  color: (val: ChartRow) => string,
+  x: d3.ScaleContinuousNumeric<number, number>,
+  y: d3.ScaleContinuousNumeric<number, number>,
+}> {
+
+  componentDidMount() {
+    var { xRule, yRule, horizontalColumn, verticalColumn, colorKeyColumn, data, pointSize, onDrillDown, color, x, y } = this.props;
+
+    var w = xRule.size('content');
+    var h = yRule.size('content');
+    var c = this.c!;
+    var vc = this.vc!;
+
+    const ctx = c.getContext("2d")!;
+    const vctx = vc.getContext("2d")!;
+    var colorToData: { [key: string]: ChartRow } = {};
+    ctx.clearRect(0, 0, w, h);
+    vctx.clearRect(0, 0, w, h);
+    data.rows.forEach((r, i) => {
+
+      var c = colorKeyColumn.getValueColor(r) || color(r);
+
+      ctx.fillStyle = c;
+      ctx.strokeStyle = c;
+      var vColor = getVirtualColor(i);
+      vctx.fillStyle = vColor;
+      vctx.strokeStyle = vColor;
+      colorToData[vColor] = r;
+
+      var xVal = x(horizontalColumn.getValue(r));
+      var yVal = h - y(verticalColumn.getValue(r));
+
+      ctx.beginPath();
+      ctx.arc(xVal, yVal, pointSize, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      vctx.beginPath();
+      vctx.arc(xVal, yVal, pointSize, 0, 2 * Math.PI);
+      vctx.fill();
+      vctx.stroke();
+
+    });
+
+    var getVirtualColor = (index: number): string => d3.rgb(
+      Math.floor(index / 256 / 256) % 256,
+      Math.floor(index / 256) % 256,
+      index % 256)
+      .toString();
+
+    c.addEventListener('mousemove', function (e) {
+      const imageData = vctx.getImageData(e.offsetX, e.offsetY, 1, 1);
+      const color = d3.rgb.apply(null, imageData.data).toString();
+      const r = colorToData[color];
+      if (r) {
+        c.style.cursor = "pointer";
+        c.setAttribute("title", colorKeyColumn.getNiceName(r) +
+          ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
+          ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)));
+      } else {
+        c.style.cursor = "initial";
+        c.setAttribute("title", "...");
+      }
+    });
+
+    c.addEventListener('mouseup', e => {
+      const imageData = vctx.getImageData(e.offsetX, e.offsetY, 1, 1);
+
+      const color = d3.rgb.apply(null, imageData.data).toString();
+      const p = colorToData[color];
+      if (p) {
+        onDrillDown(p);
+      }
+    });
+  }
+
+  c?: HTMLCanvasElement | null;
+  vc?: HTMLCanvasElement | null;
+
+  render() {
+
+    var { xRule, yRule } = this.props;
+
+    var w = xRule.size('content');
+    var h = yRule.size('content');
+    return (
+      <>
+        <canvas ref={c => this.c = c} style={{ width: w, height: h, position: "absolute", left: xRule.start('content') + 'px', top: yRule.start('content') + 'px' }} />
+        <canvas ref={c => this.vc = c} style={{ width: w, height: h, position: "absolute", left: xRule.start('content') + 'px', top: yRule.start('content') + 'px' }} />
+      </>
+    );
+  }
+}
+

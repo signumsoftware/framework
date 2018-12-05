@@ -1,12 +1,13 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
 import ReactChartBase from './ReactChartBase';
-import { TextEllipsis } from './Line';
+import TextEllipsis from './Components/TextEllipsis';
+import { XKeyTicks, YScaleTicks, YKeyTicks, XScaleTicks } from './Components/Ticks';
+import { XAxis, YAxis } from './Components/Axis';
 
 
 export default class BarsChart extends ReactChartBase {
@@ -40,7 +41,6 @@ export default class BarsChart extends ReactChartBase {
     }, height);
     //yRule.debugY(chart);
 
-
     var x = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, xRule.size('content'), data.parameters['Scale']);
 
     var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
@@ -48,9 +48,6 @@ export default class BarsChart extends ReactChartBase {
     var y = d3.scaleBand()
       .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, yRule.size('content')]);
-
-    var xTicks = x.ticks(width / 50);
-    var xTickFormat = x.tickFormat(width / 50);
 
     var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]!)))
       .domain(data.rows.map(r => keyColumn.getValueKey(r)));
@@ -60,54 +57,14 @@ export default class BarsChart extends ReactChartBase {
 
     return (
       <svg direction="rtl" width={width} height={height}>
-        <g className="x-lines" transform={translate(xRule.start('content'), yRule.start('content'))}>
-          {xTicks.map(t => <line className="y-lines"
-            x1={x(t)}
-            x2={x(t)}
-            y1={yRule.size('content')}
-            stroke="LightGray" />)}
-        </g>
 
-        <g className="x-tick" transform={translate(xRule.start('content'), yRule.start('ticks'))}>
-          {xTicks.map(t => <line className="x-tick"
-            x1={x(t)}
-            x2={x(t)}
-            y2={yRule.size('ticks')}
-            stroke="Black" />)}
-        </g>
-
-        <g className="x-label" transform={translate(xRule.start('content'), yRule.end('labels'))}>
-          {xTicks.map(t => <text className="x-label"
-            x={x(t)}
-            textAnchor="middle">
-            {xTickFormat}
-          </text>)}
-        </g>
-
-        <g className="x-title" transform={translate(xRule.middle('content'), yRule.middle('title'))}>
-          <text className="x-title" textAnchor="middle" dominantBaseline="central">
-            {valueColumn.title || ""}
-          </text>
-        </g>
-
-
-        <g className="y-tick" transform={translate(xRule.start('ticks'), yRule.end('content'))}>
-          {data.rows.map(r => <line className="y-tick"
-            x2={xRule.size('ticks')}
-            y1={-y(keyColumn.getValueKey(r))!}
-            y2={-y(keyColumn.getValueKey(r))!}
-            stroke="Black" />)}
-        </g>
-
-        <g className="y-title" transform={translate(xRule.middle('title'), yRule.middle('content')) + rotate(270)}>
-          <text className="y-title" textAnchor="middle" dominantBaseline="central">
-            {keyColumn.title || ""}
-          </text>
-        </g>
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} x={x} />
+        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} />
 
         {/*PAINT GRAPH*/}
         <g className="shape" transform={translate(xRule.start('content'), yRule.start('content'))}>
-          {data.rows.map(r => <rect className="shape"
+          {data.rows.map(r => <rect key={keyColumn.getValueKey(r)}
+            className="shape"
             width={x(valueColumn.getValue(r))}
             height={y.bandwidth()}
             y={y(keyColumn.getValueKey(r))!}
@@ -124,7 +81,10 @@ export default class BarsChart extends ReactChartBase {
         {y.bandwidth() > 15 &&
           (data.parameters["Labels"] == "Margin" ?
             <g className="y-label" transform={translate(xRule.end('labels'), yRule.start('content') + y.bandwidth() / 2)}>
-              {data.rows.map(r => <TextEllipsis maxWidth={xRule.size('labels')} padding={labelMargin} className="y-label"
+              {data.rows.map(r => <TextEllipsis key={keyColumn.getValueKey(r)}
+                maxWidth={xRule.size('labels')}
+                padding={labelMargin}
+                className="y-label"
                 y={y(keyColumn.getValueKey(r))!}
                 fill={(keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
                 dominantBaseline="central"
@@ -140,7 +100,10 @@ export default class BarsChart extends ReactChartBase {
                 {data.rows.map(r => {
                   var posx = x(valueColumn.getValue(r));
                   return (
-                    <TextEllipsis maxWidth={posx >= size / 2 ? posx : size - posx} padding={labelMargin} className="y-label"
+                    <TextEllipsis key={keyColumn.getValueKey(r)}
+                      maxWidth={posx >= size / 2 ? posx : size - posx}
+                      padding={labelMargin}
+                      className="y-label"
                       x={posx >= size / 2 ? 0 : posx}
                       y={y(keyColumn.getValueKey(r))!}
                       fill={x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
@@ -162,7 +125,10 @@ export default class BarsChart extends ReactChartBase {
               .map(r => {
                 var posx = x(valueColumn.getValue(r));
 
-                return (<TextEllipsis maxWidth={posx >= size / 2 ? posx : size - posx} padding={labelMargin} className="number-label"
+                return (<TextEllipsis key={keyColumn.getValueKey(r)}
+                  maxWidth={posx >= size / 2 ? posx : size - posx}
+                  padding={labelMargin}
+                  className="number-label"
                   y={y(keyColumn.getValueKey(r))! + y.bandwidth() / 2}
                   x={x(valueColumn.getValue(r)) / 2}
                   fill={data.parameters["NumberColor"] || "#000"}
@@ -178,13 +144,8 @@ export default class BarsChart extends ReactChartBase {
           </g>
         }
 
-        <g className="x-axis" transform={translate(xRule.start('content'), yRule.end('content'))}>
-          <line className="x-axis" x2={xRule.size('content')} stroke="Black" />
-        </g>
-
-        <g className="y-axis" transform={translate(xRule.start('content'), yRule.start('content'))}>
-          <line className="y-axis" y2={yRule.size('content')} stroke="Black" />
-        </g>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
       </svg>
     );
   }

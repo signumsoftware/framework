@@ -70,7 +70,7 @@ namespace Signum.Logic.Chart.Scripts
                 },
                 new ChartScriptParameterGroup("Inner Size")
                 { 
-                    new ChartScriptParameter("InnerSizeType", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Absolute|Relative") },
+                    new ChartScriptParameter("InnerSizeType", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Absolute|Relative|Independent") },
                     new ChartScriptParameter("InnerFillColor", ChartParameterType.String) {  ValueDefinition = new StringValue("red") },
                 }
             };

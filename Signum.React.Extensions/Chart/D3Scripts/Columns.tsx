@@ -1,11 +1,12 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn } from '../ChartClient';
 import ReactChartBase from './ReactChartBase';
-import { TextEllipsis } from './Line';
+import TextEllipsis from './Components/TextEllipsis';
+import { XKeyTicks, YScaleTicks } from './Components/Ticks';
+import { XAxis, YAxis } from './Components/Axis';
 
 
 export default class ColumnsChart extends ReactChartBase {
@@ -61,45 +62,9 @@ export default class ColumnsChart extends ReactChartBase {
     return (
       <svg direction="rtl" width={width} height={height}>
 
-        <g className="x-title" transform={translate(xRule.middle('content'), yRule.middle('title'))}>
-          <text className="x-title" textAnchor="middle" dominantBaseline="middle">
-            {keyColumn.title}
-          </text>
-        </g>
-
-        <g className="y-line" transform={translate(xRule.start('content'), yRule.end('content'))}>
-          {yTicks.map(t => <line className="y-line"
-            x2={xRule.size('content')}
-            y1={-y(t)}
-            y2={-y(t)}
-            stroke="LightGray" />)}
-        </g>
-
-
-        <g className="y-tick" transform={translate(xRule.start('ticks'), yRule.end('content'))}>
-          {yTicks.map(t => <line className="y-tick"
-            x2={xRule.size('ticks')}
-            y1={-y(t)}
-            y2={-y(t)}
-            stroke="Black" />)}
-        </g>
-
-        <g className="y-label" transform={translate(xRule.end('labels'), yRule.end('content'))}>
-          {yTicks.map(t => <text className="y-label"
-            y={-y(t)}
-            dominantBaseline="middle"
-            textAnchor="end">
-            {yTickFormat}
-          </text>)}
-        </g>
-
-        <g className="y-label" transform={translate(xRule.middle('title'), yRule.middle('content')) + rotate(270)}>
-          <text className="y-label" textAnchor="middle" dominantBaseline="middle">
-            {valueColumn.title}
-          </text>
-        </g>
-
-
+        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
+        
         {/*PAINT CHART*/}
 
         <g className="shape" transform={translate(xRule.start('content'), yRule.end('content'))}>
@@ -169,13 +134,8 @@ export default class ColumnsChart extends ReactChartBase {
               </text>)}
           </g>}
 
-        <g className="x-axis" transform={translate(xRule.start('content'), yRule.end('content'))}>
-          <line className="x-axis" x2={xRule.size('content')} stroke="Black" />
-        </g>
-
-        <g className="y-axis" transform={translate(xRule.start('content'), yRule.start('content'))}>
-          <line className="y-axis" y2={yRule.size('content')} stroke="Black" />
-        </g>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
       </svg>
     );
   }
