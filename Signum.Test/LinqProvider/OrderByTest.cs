@@ -54,28 +54,28 @@ namespace Signum.Test.LinqProvider
         public void OrderByLast()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last();
-            Assert.Contains(michael.Name, "Michael");
+            Assert.Contains("Michael", michael.Name);
         }
 
         [Fact]
         public void OrderByLastPredicate()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last(a => a.Name.Length > 1);
-            Assert.Contains(michael.Name, "Michael");
+            Assert.Contains("Michael", michael.Name);
         }
 
         [Fact]
         public void OrderByLastOrDefault()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault();
-            Assert.Contains(michael.Name, "Michael");
+            Assert.Contains("Michael", michael.Name);
         }
 
         [Fact]
         public void OrderByLastOrDefaultPredicate()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault(a => a.Name.Length > 1);
-            Assert.Contains(michael.Name, "Michael");
+            Assert.Contains("Michael", michael.Name);
         }
 
         [Fact]
