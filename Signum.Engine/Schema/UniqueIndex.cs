@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
@@ -118,10 +119,14 @@ namespace Signum.Engine.Maps
 
             if (columns.Body.NodeType == ExpressionType.New)
             {
-                return (from a in ((NewExpression)columns.Body).Arguments
-                        from c in GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters))
-                        select c).ToArray();
+                var resultColumns = (from a in ((NewExpression)columns.Body).Arguments
+                    from c in GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters))
+                    select c);
+                
+                return resultColumns.ToArray();
             }
+
+
 
             return GetColumns(finder, columns);
         }
