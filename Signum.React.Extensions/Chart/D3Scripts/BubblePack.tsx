@@ -19,7 +19,7 @@ export default class BubblePackChart extends ReactChartBase {
     var colorSchemeColumn = data.columns.c4;
 
     if (width == 0 || height == 0)
-      return <svg direction="rtl" width={width} height={height}></svg>;
+      return <svg direction="ltr" width={width} height={height}></svg>;
 
     var color: (v: ChartRow) => string | undefined;
     if (colorScaleColumn) {
@@ -49,9 +49,6 @@ export default class BubblePackChart extends ReactChartBase {
 
     var root = ChartUtils.stratifyTokens(data, keyColumn, parentColumn);
 
-    //root.sum(d => valueColumn.getValue(d as ChartRow))
-    //.sort(function (a, b) { return b.value - a.value; })
-
     var size = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, 1, data.parameters["Scale"]);
 
     root.sum(r => r == null ? 0 : size(valueColumn.getValue(r as ChartRow)));
@@ -61,30 +58,30 @@ export default class BubblePackChart extends ReactChartBase {
       .padding(2);
 
     const circularRoot = bubble(root);
-    
+
     var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
 
     var showNumber = parseFloat(data.parameters["NumberOpacity"]) > 0;
     var numberSizeLimit = parseInt(data.parameters["NumberSizeLimit"]);
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         {
-          nodes.map(d => <g className="node" transform={translate(d.x, d.y)} cursor="pointer"
+          nodes.map((d, i) => <g key={i} className="node" transform={translate(d.x, d.y)} cursor="pointer"
             onClick={e => isFolder(d.data) ? this.props.onDrillDown({ c2: d.data.folder }) : this.props.onDrillDown(d.data)}>
             <circle shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
               fillOpacity={data.parameters["FillOpacity"] || undefined}
               stroke={data.parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || undefined))}
               strokeWidth={data.parameters["StrokeWidth"]} strokeOpacity={1} />
             {!isFolder(d.data) &&
-              <TextEllipsis maxWidth={d.r * 2} padding={1}
-                dominantBaseline="central" textAnchor="middle" dy={showNumber && d.r > numberSizeLimit ? "-0.5em" : undefined}>
+              <TextEllipsis maxWidth={d.r * 2} padding={1} etcText=""
+                dominantBaseline="middle" textAnchor="middle" dy={showNumber && d.r > numberSizeLimit ? "-0.5em" : undefined}>
                 {keyColumn.getValueNiceName(d.data as ChartRow)}
               </TextEllipsis>
             }
             {showNumber && d.r > numberSizeLimit && !isFolder(d.data) &&
               <text fill={data.parameters["NumberColor"] || "#000"}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 textAnchor="middle"
                 fontWeight="bold"
                 opacity={parseFloat(data.parameters["NumberOpacity"]) * d.r / 30}

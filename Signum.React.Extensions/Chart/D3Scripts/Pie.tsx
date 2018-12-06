@@ -43,7 +43,7 @@ export default class PieChart extends ReactChartBase {
 
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <g className="shape" transform={translate(width / 2, height / 2)}>
           {pie(data.rows).map(slice => <g key={slice.index} className="slice">
             <path className="shape" d={arc(slice)!} fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))} shapeRendering="initial" onClick={e => this.props.onDrillDown(slice.data)} cursor="pointer">

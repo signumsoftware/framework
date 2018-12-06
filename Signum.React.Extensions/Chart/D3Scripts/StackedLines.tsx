@@ -102,7 +102,7 @@ export default class StackedLinesChart extends ReactChartBase {
     var rectRadious = 2;
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
 
@@ -141,7 +141,7 @@ export default class StackedLinesChart extends ReactChartBase {
                 x={x(keyColumn.getKey(v.data))!}
                 y={-y(v[1]) * 0.5 - y(v[0]) * 0.5}
                 fill={data.parameters["NumberColor"]}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 opacity={data.parameters["NumberOpacity"]}
                 textAnchor="middle"
                 fontWeight="bold">

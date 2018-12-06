@@ -98,7 +98,7 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
     var selectedColumn = cords.firstOrNull(a => a.column.name == this.state.selectedColumn) || cords.first();
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
           {cords.map(d => <line key={d.column.name} className="x-tick"
             y2={yRule.size('content')}

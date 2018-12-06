@@ -98,7 +98,7 @@ export default class CalendarStreamChart extends ReactChartBase {
     }
     
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <g transform={translate(xRule.start("content"), yRule.start("content"))}>
           {yearRange.map(yr => <g key={yr} className="year-group"
             transform={horizontal ?

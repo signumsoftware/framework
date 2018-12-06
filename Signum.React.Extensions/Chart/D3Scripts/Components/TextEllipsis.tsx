@@ -10,7 +10,7 @@ export default class TextEllipsis extends React.Component<{ maxWidth: number, pa
 
   render() {
 
-    var { maxWidth, padding, children, ...atts } = this.props;
+    var { maxWidth, padding, children, etcText, ...atts } = this.props;
 
     return (
       <text ref={t => this.txt = t} {...atts} >
@@ -21,7 +21,7 @@ export default class TextEllipsis extends React.Component<{ maxWidth: number, pa
 
 
   componentDidMount() {
-    var etcText = this.props.etcText == null ? this.props.etcText : "…";
+    var etcText = this.props.etcText == null ? "…" : this.props.etcText;
 
     var width = this.props.maxWidth;
     if (this.props.padding)

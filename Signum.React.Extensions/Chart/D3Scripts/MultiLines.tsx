@@ -64,7 +64,7 @@ export default class MultiLineChart extends ReactChartBase {
     var pInterpolate = data.parameters["Interpolate"];
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
 

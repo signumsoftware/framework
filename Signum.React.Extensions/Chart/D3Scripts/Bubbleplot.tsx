@@ -71,7 +71,7 @@ export default class BubblePlotChart extends ReactChartBase {
 
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
@@ -98,7 +98,7 @@ export default class BubblePlotChart extends ReactChartBase {
               x={x(horizontalColumn.getValue(r))}
               y={-y(verticalColumn.getValue(r))}
               fill={data.parameters["LabelColor"] || colorKeyColumn.getValueColor(r) || color(r)}
-              dominantBaseline="central"
+              dominantBaseline="middle"
               textAnchor="middle"
               fontWeight="bold">
               {sizeColumn.getValueNiceName(r)}

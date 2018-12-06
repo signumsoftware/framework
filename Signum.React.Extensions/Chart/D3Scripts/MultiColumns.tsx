@@ -70,7 +70,7 @@ export default class MultiColumnsChart extends ReactChartBase {
 
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
 
@@ -104,7 +104,7 @@ export default class MultiColumnsChart extends ReactChartBase {
                 transform={translate(xSubscale(s.key)!, 0)}
                 opacity={data.parameters["NumberOpacity"]}
                 fill={data.parameters["NumberColor"]}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 textAnchor="middle"
                 fontWeight="bold">
                 {r.values[s.key].value}

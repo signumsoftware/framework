@@ -19,7 +19,7 @@ export default class TreeMapChart extends ReactChartBase {
     var colorSchemeColumn = data.columns.c4;
 
     if (width == 0 || height == 0)
-      return <svg direction="rtl" width={width} height={height} />;
+      return <svg direction="ltr" width={width} height={height} />;
 
     var color: (v: ChartRow) => string | undefined;
     if (colorScaleColumn) {
@@ -70,7 +70,7 @@ export default class TreeMapChart extends ReactChartBase {
     var showNumber = parseFloat(data.parameters["NumberOpacity"]) > 0;
 
     return (
-      <svg direction="rtl" width={width} height={height} >
+      <svg direction="ltr" width={width} height={height} >
         {nodes.map((d, i) =>
           <g key={i} className="node" transform={translate(d.x0 - p2, d.y0 - p2)}>
             {isFolder(d.data) &&
@@ -113,7 +113,7 @@ export default class TreeMapChart extends ReactChartBase {
             {!isFolder(d.data) && nodeWidth(d) > 10 && nodeHeight(d) > 25 && showNumber &&
               <TextEllipsis maxWidth={nodeWidth(d)} padding={1} etcText=""
                 fill={data.parameters["NumberColor"] || "#fff"}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 opacity={parseFloat(data.parameters["NumberOpacity"])}
                 textAnchor="middle"
                 fontWeight="bold"

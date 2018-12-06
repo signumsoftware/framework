@@ -184,7 +184,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Enum") {
 
-    var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).map(a => a.name);
+    var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).filter(a => !a.isIgnoredEnum).map(a => a.name);
 
     return complete(values, allValues, column, insertPoint);
   }

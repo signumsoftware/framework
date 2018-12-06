@@ -70,7 +70,7 @@ export default class ScatterplotChart extends ReactChartBase {
 
     return (
       <>
-        <svg direction="rtl" width={width} height={height}>
+        <svg direction="ltr" width={width} height={height}>
           <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
           <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 

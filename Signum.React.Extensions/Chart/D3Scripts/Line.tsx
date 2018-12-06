@@ -62,9 +62,9 @@ export default class LineChart extends ReactChartBase {
     var color = data.parameters["Color"]!;// 'steelblue'
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
 
-        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
+        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={true} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
 
         {/*PAINT CHART'*/}
@@ -98,7 +98,9 @@ export default class LineChart extends ReactChartBase {
             .filter(key => rowByKey[keyColumn.getKey(key)] != null)
             .map(key => <circle key={keyColumn.getKey(key)}
               className="point"
-              fill={color}
+              stroke={color}
+              stroke-width={2}
+              fill="white"
               r={5}
               cx={x(keyColumn.getKey(key))!}
               cy={-y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))}

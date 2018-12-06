@@ -28,7 +28,7 @@ export default class Legend extends React.Component<LegendProps> {
     return (
       <g>
         <g className="color-legend" transform={translate(xRule.start('content'), yRule.start('legend'))}>
-          {pivot.columns.map((s, i) => <rect className="color-rect"
+          {pivot.columns.map((s, i) => <rect key={s.key} className="color-rect"
             x={legendScale(i.toString())!}
             width={yRule.size('legend')}
             height={yRule.size('legend')}
@@ -36,7 +36,7 @@ export default class Legend extends React.Component<LegendProps> {
         </g>
 
         <g className="color-legend" transform={translate(xRule.start('content') + legendMargin, yRule.middle('legend') + 1)}>
-          {pivot.columns.map((s, i) => <TextEllipsis maxWidth={legendScale.bandwidth() - legendMargin} className="color-text"
+          {pivot.columns.map((s, i) => <TextEllipsis key={s.key} maxWidth={legendScale.bandwidth() - legendMargin} className="color-text"
             x={legendScale(i.toString())!}
             dominantBaseline="middle">
             {s.niceName!}

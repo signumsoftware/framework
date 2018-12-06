@@ -201,9 +201,10 @@ export default class PunchcardChart extends ReactChartBase {
       );
 
     return (
-      <svg direction="rtl" width={width} height={height}>
-        <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} />
-        <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} />
+      <svg direction="ltr" width={width} height={height}>
+        <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={true} />
+        <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={true} showLabels={true}  />
+
         {data.rows.map((r, i) =>
           <g key={i.toString()} className="chart-groups"
             cursor="pointer"
@@ -216,7 +217,7 @@ export default class PunchcardChart extends ReactChartBase {
                 transform={tr}
                 x={x(horizontalColumn.getValueKey(r))!} y={-y(verticalColumn.getValueKey(r))!}
                 fill={data.parameters["NumberColor"]}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 opacity={parseFloat(data.parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(sizeColumn ? 0 : sizeColumn!.getValue(r)))}
                 textAnchor="middle"
                 fontWeight="bold">

@@ -88,9 +88,9 @@ export default class StackedBarsChart extends ReactChartBase {
     var size = xRule.size('content');
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
-        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} />
+        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={false}/>
 
 
         {stackedSeries.map(s => <g key={s.key} className="shape-serie"
@@ -117,7 +117,7 @@ export default class StackedBarsChart extends ReactChartBase {
                 x={x(r[0]) * 0.5 + x(r[1]) * 0.5}
                 y={y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2}
                 fill={data.parameters["NumberColor"]}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 opacity={data.parameters["NumberOpacity"]}
                 textAnchor="middle"
                 fontWeight="bold">
@@ -137,7 +137,7 @@ export default class StackedBarsChart extends ReactChartBase {
                 padding={labelMargin}
                 className="y-label"
                 y={y(keyColumn.getKey(v.rowValue))!}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 textAnchor="end">
                 {keyColumn.getNiceName(v.rowValue)}
               </TextEllipsis>)}
@@ -156,7 +156,7 @@ export default class StackedBarsChart extends ReactChartBase {
                     dx={labelMargin}
                     textAnchor="start"
                     fill={posx >= size / 2 ? '#fff' : '#000'}
-                    dominantBaseline="central"
+                    dominantBaseline="middle"
                     fontWeight="bold">
                     {keyColumn.getNiceName(r.rowValue)}
                   </TextEllipsis>);

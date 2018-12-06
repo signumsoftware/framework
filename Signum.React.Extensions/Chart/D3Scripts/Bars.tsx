@@ -56,10 +56,10 @@ export default class BarsChart extends ReactChartBase {
     var labelMargin = 10;
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
 
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} x={x} />
-        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} />
+        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={false} />
 
         {/*PAINT GRAPH*/}
         <g className="shape" transform={translate(xRule.start('content'), yRule.start('content'))}>
@@ -87,7 +87,7 @@ export default class BarsChart extends ReactChartBase {
                 className="y-label"
                 y={y(keyColumn.getValueKey(r))!}
                 fill={(keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 textAnchor="end"
                 fontWeight="bold"
                 onClick={e => this.props.onDrillDown(r)}
@@ -107,7 +107,7 @@ export default class BarsChart extends ReactChartBase {
                       x={posx >= size / 2 ? 0 : posx}
                       y={y(keyColumn.getValueKey(r))!}
                       fill={x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
-                      dominantBaseline="central"
+                      dominantBaseline="middle"
                       fontWeight="bold"
                       onClick={e => this.props.onDrillDown(r)}
                       cursor="pointer">
@@ -132,7 +132,7 @@ export default class BarsChart extends ReactChartBase {
                   y={y(keyColumn.getValueKey(r))! + y.bandwidth() / 2}
                   x={x(valueColumn.getValue(r)) / 2}
                   fill={data.parameters["NumberColor"] || "#000"}
-                  dominantBaseline="central"
+                  dominantBaseline="middle"
                   opacity={data.parameters["NumberOpacity"]}
                   textAnchor="middle"
                   fontWeight="bold"

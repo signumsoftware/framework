@@ -71,21 +71,21 @@ export default class MultiBarsChart extends ReactChartBase {
       .range([interMagin, y.bandwidth() - interMagin]);
 
     return (
-      <svg direction="rtl" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height}>
 
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} />
-        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} />
-        
+        <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={true} />
+
         {pivot.columns.map(s => <g className="shape-serie"
           transform={translate(xRule.start('content'), yRule.start('content'))} >
 
           {pivot.rows
             .filter(r => r.values[s.key] != undefined)
-            .map(r => <rect className="shape"
+            .map((r, i) => <rect key={i} className="shape"
               stroke={ySubscale.bandwidth() > 4 ? '#fff' : undefined}
               fill={s.color || color(s.key)}
               y={ySubscale(s.key)!}
-              transform="translate(0, ' + y(keyColumn.getKey(r.rowValue))! + ')"
+              transform={translate(0, y(keyColumn.getKey(r.rowValue))!)}
               height={ySubscale.bandwidth()}
               width={x(r.values[s.key] && r.values[s.key].value)}
               onClick={e => this.props.onDrillDown(r.values[s.key].rowClick)}
@@ -99,13 +99,13 @@ export default class MultiBarsChart extends ReactChartBase {
             ySubscale.bandwidth() > 15 && parseFloat(data.parameters["NumberOpacity"]) > 0 &&
             pivot.rows
               .filter(r => r.values[s.key] != undefined && x(r.values[s.key] && r.values[s.key].value) > 16)
-              .map(r => <text className="number-label"
+              .map((r, i) => <text key={i} className="number-label"
                 y={ySubscale(s.key)! + ySubscale.bandwidth() / 2}
                 x={x(r.values[s.key] && r.values[s.key].value) / 2}
-                transform="translate(0, ' + y(keyColumn.getKey(r.rowValue)) + ')"
+                transform={translate(0, y(keyColumn.getKey(r.rowValue))!)}
                 opacity={data.parameters["NumberOpacity"]}
                 fill={data.parameters["NumberColor"]}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 textAnchor="middle"
                 fontWeight="bold">
                 {r.values[s.key].value}
@@ -122,11 +122,11 @@ export default class MultiBarsChart extends ReactChartBase {
             transform={translate(xRule.start('content'), yRule.start('content'))}>
             {pivot.rows
               .filter(r => r.values[s.key] != undefined)
-              .map(r => <rect className="shape"
+              .map((r, i) => <rect key={i} className="shape"
                 stroke={ySubscale.bandwidth() > 4 ? '#fff' : undefined}
                 fill={s.color || color(s.key)}
                 y={ySubscale(s.key)!}
-                transform="translate(0, ' + y(keyColumn.getKey(r.rowValue))! + ')"
+                transform={translate(0, y(keyColumn.getKey(r.rowValue))!)}
                 height={ySubscale.bandwidth()}
                 width={x(r.values[s.key] && r.values[s.key].value)}
                 onClick={e => this.props.onDrillDown(r.values[s.key].rowClick)}
@@ -139,13 +139,13 @@ export default class MultiBarsChart extends ReactChartBase {
             {ySubscale.bandwidth() > 15 && parseFloat(data.parameters["NumberOpacity"]) > 0 &&
               pivot.rows
                 .filter(r => r.values[s.key] != undefined && x(r.values[s.key] && r.values[s.key].value) > 16)
-                .map(r => <text className="number-label"
+                .map((r, i) => <text key={i} className="number-label"
                   y={ySubscale(s.key)! + ySubscale.bandwidth() / 2}
                   x={x(r.values[s.key] && r.values[s.key].value) / 2}
-                  transform="translate(0, ' + y(keyColumn.getKey(r.rowValue)) + ')"
+                  transform={translate(0, y(keyColumn.getKey(r.rowValue))!)}
                   opacity={data.parameters["NumberOpacity"]}
                   fill={data.parameters["NumberColor"]}
-                  dominantBaseline="central"
+                  dominantBaseline="middle"
                   textAnchor="middle"
                   fontWeight="bold">
                   {r.values[s.key].value}
@@ -156,7 +156,7 @@ export default class MultiBarsChart extends ReactChartBase {
           </g>)
         }
 
-        <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color}/>
+        <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} />
 
         <XAxis xRule={xRule} yRule={yRule} />
         <YAxis xRule={xRule} yRule={yRule} />

@@ -48,7 +48,7 @@ export default abstract class ReactChartBase extends React.Component<ReactChartB
 
     if (this.props.data.rows.length == 0)
       return (
-        <svg direction="rtl" width={width} height={height}>
+        <svg direction="ltr" width={width} height={height}>
           <rect className="sf-chart-error" x={width / 4} y={(height / 2) - 10} fill="#EFF4FB" stroke="#FAC0DB" width={width / 2} height={20} />
           <text className="sf-chart-error" x={width / 4} y={(height / 2)} fill="#EFF4FB" dy={4} dx={4}>{SearchMessage.NoResultsFound.niceToString()}</text>
         </svg>

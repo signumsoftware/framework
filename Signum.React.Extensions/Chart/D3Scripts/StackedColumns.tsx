@@ -5,7 +5,7 @@ import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, PivotRow } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn } from '../ChartClient';
 import ReactChartBase from './ReactChartBase';
-import { XKeyTicks, YScaleTicks } from './Components/Ticks';
+import { XKeyTicks, YScaleTicks, XTitle } from './Components/Ticks';
 import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
@@ -88,8 +88,8 @@ export default class StackedColumnsChart extends ReactChartBase {
     var size = yRule.size('content');
 
     return (
-      <svg direction="rtl" width={width} height={height}>
-        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
+      <svg direction="ltr" width={width} height={height}>
+        <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
 
         {stackedSeries.map(s => <g key={s.key} className="shape-serie"
@@ -116,7 +116,7 @@ export default class StackedColumnsChart extends ReactChartBase {
                 x={x(keyColumn.getKey(r.data.rowValue))! + x.bandwidth() / 2}
                 y={-y(r[0]) * 0.5 - y(r[1]) * 0.5}
                 fill={data.parameters["NumberColor"]}
-                dominantBaseline="central"
+                dominantBaseline="middle"
                 opacity={data.parameters["NumberOpacity"]}
                 textAnchor="middle"
                 fontWeight="bold">
