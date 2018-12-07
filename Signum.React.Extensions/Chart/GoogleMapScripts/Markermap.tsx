@@ -184,7 +184,6 @@ export default class MarkermapChart extends React.Component<{ data: ChartClient.
       }
     }
     else {
-      //debugger;
       var markerCluster = new window.MarkerClusterer(map, markers,
         { imagePath: GoogleMapsChartUtils.urlCdnClusterImages });
     }

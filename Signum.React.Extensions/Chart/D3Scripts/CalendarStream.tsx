@@ -112,7 +112,7 @@ export default class CalendarStreamChart extends ReactChartBase {
 
             {d3.utcDays(new Date(Date.UTC(yr, 0, 1)), new Date(Date.UTC(yr + 1, 0, 1))).map(d => {
               const r = rowYByDate[cleanDate(d)];
-              return <rect
+              return <rect key={d.toISOString()}
                 stroke="#ccc"
                 fill={r == undefined ? "#fff" : color(r)}
                 width={cellSize}

@@ -73,7 +73,6 @@ export module Converter {
 
 
   export function applyUserChart(cr: ChartRequestModel, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
-
     cr.chartScript = uq.chartScript;
 
     const promise = UserAssetsClient.API.parseFilters({
