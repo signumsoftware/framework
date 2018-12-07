@@ -477,6 +477,15 @@ namespace Signum.Engine.Linq
             return new ColumnDeclaration(c.Name, e);
         }
 
+        internal Expression VisitToDayOfWeek(ToDayOfWeekExpression toDayOfWeek)
+        {
+            var exp = Visit(toDayOfWeek.Expression);
+            if (exp == toDayOfWeek.Expression)
+                return toDayOfWeek;
+
+            return new ToDayOfWeekExpression(exp);
+        }
+
         protected internal virtual OrderExpression VisitOrderBy(OrderExpression o)
         {
             var e = Visit(o.Expression);

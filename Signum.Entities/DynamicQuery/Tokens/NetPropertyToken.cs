@@ -68,7 +68,8 @@ namespace Signum.Entities.DynamicQuery
                 MemberInfo is MethodInfo mi ? (mi.IsStatic ? Expression.Call(null, mi, result.UnNullify()) : Expression.Call(result.UnNullify(), mi)) :
                 throw new UnexpectedValueException(MemberInfo);
 
-            return Expression.Call(miInSql.MakeGenericMethod(prop.Type), prop).Nullify();
+            return prop;
+            //return Expression.Call(miInSql.MakeGenericMethod(prop.Type), prop).Nullify();
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)

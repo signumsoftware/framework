@@ -922,9 +922,6 @@ namespace Signum.Engine.Linq
                 if (newItem.Type.UnNullify() == typeof(PrimaryKey))
                     return SmartEqualizer.InPrimaryKey(newItem, col.Cast<PrimaryKey>().ToArray());
 
-                if (newItem.Type.UnNullify() == typeof(DayOfWeek))
-                    return SmartEqualizer.In(newItem, col.Cast<DayOfWeek>().Select(a => (object)DbExpressionNominator.ToSqlWeekDay(a,  DbExpressionNominator.DateFirst.Value.Item1)).ToArray());
-
                 return SmartEqualizer.In(newItem, col.Cast<object>().ToArray());
             }
             else

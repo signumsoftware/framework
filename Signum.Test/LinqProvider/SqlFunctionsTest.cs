@@ -107,8 +107,8 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void DayOfWeekWhereConstant()
         {
-            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
-            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
+            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Monday).Count();
+            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Monday).Count();
             Assert.Equal(memCount, dbCount);
         }
 

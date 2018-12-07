@@ -575,7 +575,19 @@ namespace Signum.Engine.Linq
 
         public static Expression In(Expression element, object[] values)
         {
-            return InExpression.FromValues(DbExpressionNominator.FullNominate(element), values);
+            var nominate = DbExpressionNominator.FullNominate(element);
+
+            if (nominate is ToDayOfWeekExpression dowe)
+            {
+                byte dateFirs = ToDayOfWeekExpression.DateFirst.Value.Item1;
+                var sqlWeekDays = values.Cast<DayOfWeek>()
+                    .Select(a => (object)ToDayOfWeekExpression.ToSqlWeekDay(a, dateFirs))
+                    .ToArray();
+
+                return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+            }
+            else
+                return InExpression.FromValues(nominate, values);
         }
 
         public static Expression InPrimaryKey(Expression element, PrimaryKey[] values)
