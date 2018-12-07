@@ -652,10 +652,10 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression Expression;
         public ToDayOfWeekExpression(Expression expression)
-            : base(DbExpressionType.ToDayOfWeek, expression.Type.IsNullable() ? typeof(DayOfWeek?) : typeof(DayOfWeek))
+            : base(DbExpressionType.ToDayOfWeek, typeof(DayOfWeek?))
         {
-            if (expression.Type.UnNullify() != typeof(int))
-                throw new InvalidOperationException("Int expected");
+            if (expression.Type != typeof(int?))
+                throw new InvalidOperationException("int? expected");
 
             this.Expression = expression;
         }
@@ -671,10 +671,13 @@ namespace Signum.Engine.Linq
 
         public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
 
-        static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
-        public static DayOfWeek ToDayOfWeek(int sqlServerWeekDay, byte dateFirst)
+        internal static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
+        public static DayOfWeek? ToDayOfWeek(int? sqlServerWeekDay, byte dateFirst)
         {
-            return (DayOfWeek)((dateFirst + sqlServerWeekDay - 1) % 7);
+            if (sqlServerWeekDay == null)
+                return null;
+
+            return (DayOfWeek)((dateFirst + sqlServerWeekDay.Value - 1) % 7);
         }
 
         public static int ToSqlWeekDay(DayOfWeek dayOfWeek, byte dateFirst /*keep parameter here to evaluate now*/)

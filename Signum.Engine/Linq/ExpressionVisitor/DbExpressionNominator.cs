@@ -77,7 +77,7 @@ namespace Signum.Engine.Linq
         public override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp) && !(result is ToDayOfWeekExpression))
+            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp) && !ExtractDayOfWeek(result, out var _))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.ToString());
 
 
@@ -250,7 +250,7 @@ namespace Signum.Engine.Linq
                 {
                     var dayNumber = c.Value == null ? (int?)null : ToDayOfWeekExpression.ToSqlWeekDay((DayOfWeek)c.Value, ToDayOfWeekExpression.DateFirst.Value.Item1);
 
-                    return new ToDayOfWeekExpression(Add(Expression.Constant(dayNumber, c.Type.IsNullable() ? typeof(int?) : typeof(int))));
+                    return new ToDayOfWeekExpression(Add(Expression.Constant(dayNumber, typeof(int?))));
                 }
 
                 if (Schema.Current.Settings.IsDbType(ut))
@@ -486,11 +486,11 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr);
+            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int?), new SqlEnumExpression(SqlEnums.weekday), expr);
 
             Add(number);
 
-            return new ToDayOfWeekExpression(number);
+            return new ToDayOfWeekExpression(number).TryConvert(typeof(DayOfWeek));
         }
         
         private Expression TrySqlStartOf(Expression expression, SqlEnums part)
@@ -593,11 +593,11 @@ namespace Signum.Engine.Linq
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
-                    if(left is ToDayOfWeekExpression ldow && 
-                        right is ToDayOfWeekExpression rdow)
+                    if(ExtractDayOfWeek(left, out var ldow) &&
+                       ExtractDayOfWeek(left, out var rdow))
                     {
-                        left = ldow.Expression;
-                        right = rdow.Expression;
+                        left = ldow;
+                        right = rdow;
                     }
 
                     newB = MakeBinaryFlexible(b.NodeType, left, right);
@@ -666,6 +666,21 @@ namespace Signum.Engine.Linq
 
                 return result;
             }
+        }
+
+        private bool ExtractDayOfWeek(Expression exp, out Expression result)
+        {
+            if (exp is ToDayOfWeekExpression tdow)
+            {
+                result = tdow.Expression;
+                return true;
+            }
+
+            if (exp.NodeType == ExpressionType.Convert && exp.Type.UnNullify() == typeof(DayOfWeek))
+                return ExtractDayOfWeek((UnaryExpression)exp, out result);
+
+            result = null;
+            return false;
         }
 
         private BinaryExpression MakeBinaryFlexible(ExpressionType nodeType, Expression left, Expression right)

@@ -29,7 +29,7 @@ namespace Signum.Test.Environment
                     .AddUserSecrets(typeof(MusicStarter).Assembly)
                     .Build();
 
-                var connectionString = conf.GetConnectionString("SignumTest");
+                var connectionString = conf.GetConnectionString("SignumTest") ?? "Data Source=.\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true";
 
                 Start(connectionString);
 
