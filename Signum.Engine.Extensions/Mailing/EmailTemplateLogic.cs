@@ -233,13 +233,20 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity model = null, ISystemEmail systemEmail = null, MList<EmailTemplateRecipientEmbedded> additionalRecipients=null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity model = null, ISystemEmail systemEmail = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
-            if (additionalRecipients != null)
-            {
-                template.Recipients.AddRange(additionalRecipients);
-            }
+
+            return CreateEmailMessage(template, model, ref systemEmail);
+        }
+
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity model = null, ISystemEmail systemEmail = null)
+        {
+            return CreateEmailMessage(template, model, ref systemEmail);
+        }
+
+        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity model, ref ISystemEmail systemEmail)
+        {
             Entity entity = null;
             if (template.SystemEmail != null)
             {
