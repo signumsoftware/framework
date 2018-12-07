@@ -107,8 +107,8 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void DayOfWeekWhereConstant()
         {
-            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Monday).Count();
-            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Monday).Count();
+            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
+            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
             Assert.Equal(memCount, dbCount);
         }
 
@@ -116,7 +116,10 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void DayOfWeekSelectNullable()
         {
-            var dbCount = Database.Query<ArtistEntity>().Select(a => Database.Query<NoteWithDateEntity>().Where(n => n.Target.Is(a)).FirstOrDefault().CreationTime.DayOfWeek).ToList();
+            var list = Database.Query<ArtistEntity>()
+                .Select(a => (DayOfWeek?)Database.Query<NoteWithDateEntity>().Where(n => n.Target.Is(a)).FirstOrDefault().CreationTime.DayOfWeek)
+                .ToList();
+            Assert.Contains(null, list);
         }
 
         [Fact]

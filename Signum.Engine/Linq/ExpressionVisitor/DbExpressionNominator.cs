@@ -77,7 +77,7 @@ namespace Signum.Engine.Linq
         public override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp) && !ExtractDayOfWeek(result, out var _))
+            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp) && !ExtractDayOfWeek(result, out var bla))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.ToString());
 
 
@@ -594,7 +594,7 @@ namespace Signum.Engine.Linq
                     var right = Visit(newB.Right);
 
                     if(ExtractDayOfWeek(left, out var ldow) &&
-                       ExtractDayOfWeek(left, out var rdow))
+                       ExtractDayOfWeek(right, out var rdow))
                     {
                         left = ldow;
                         right = rdow;
@@ -677,7 +677,7 @@ namespace Signum.Engine.Linq
             }
 
             if (exp.NodeType == ExpressionType.Convert && exp.Type.UnNullify() == typeof(DayOfWeek))
-                return ExtractDayOfWeek((UnaryExpression)exp, out result);
+                return ExtractDayOfWeek(((UnaryExpression)exp).Operand, out result);
 
             result = null;
             return false;
