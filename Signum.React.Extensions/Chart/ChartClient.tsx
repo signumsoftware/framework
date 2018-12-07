@@ -520,17 +520,21 @@ export module Decoder {
 
           cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
+          var cr = query.script == undefined ? scripts.first("ChartScript") :
+            scripts
+              .filter(cs => cs.symbol.key.after(".") == query.script)
+              .single(`ChartScript '${query.queryKey}'`);
+              
+
           const chartRequest = ChartRequestModel.New({
-            chartScript: query.script == undefined ? scripts.first("ChartScript").symbol :
-              scripts
-                .filter(cs => cs.symbol.key.after(".") == query.script)
-                .single(`ChartScript '${query.queryKey}'`)
-                .symbol,
+            chartScript: cr.symbol,
             queryKey: getQueryKey(queryName),
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
           });
+
+          synchronizeColumns(chartRequest, cr);
 
           return Finder.parseFilterValues(chartRequest.filterOptions)
             .then(() => chartRequest);

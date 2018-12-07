@@ -1,15 +1,15 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
+import ReactChartBase from './ReactChartBase';
 
 
-export default class PieChart extends D3ChartBase {
+export default class PieChart extends ReactChartBase {
 
-  drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+  renderChart(data: ChartTable, width: number, height: number): React.ReactElement<any> {
 
     var keyColumn = data.columns.c0!;
     var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
@@ -36,35 +36,42 @@ export default class PieChart extends D3ChartBase {
       .outerRadius(outerRadious)
       .innerRadius(rInner);
 
-    chart.append('svg:g').attr('class', 'shape').attr('transform', translate(width / 2, height / 2))
-      .enterData(pie(data.rows), 'g', 'slice')
-      .append('svg:path').attr('class', 'shape')
-      .attr('d', slice => arc(slice)!)
-      .attr('fill', slice => keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data)))
-      .attr('shape-rendering', 'initial')
-      .on('click', slice => this.props.onDrillDown(slice.data))
-      .style("cursor", "pointer")
-      .append('svg:title')
-      .text(slice => keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data));
-
-    //paint color legend
     var cx = (width / 2),
       cy = (height / 2),
       legendRadius = 1.2;
 
-    chart.append('svg:g').data([data.rows]).attr('class', 'color-legend').attr('transform', translate(cx, cy))
-      .enterData(pie, 'g', 'color-legend')
-      .append('svg:text').attr('class', 'color-legend sf-chart-strong')
-      .attr('x', slice => { var m = (slice.endAngle + slice.startAngle) / 2; return Math.sin(m) * outerRadious * legendRadius; })
-      .attr('y', slice => { var m = (slice.endAngle + slice.startAngle) / 2; return -Math.cos(m) * outerRadious * legendRadius; })
-      .attr('text-anchor', slice => {
-        var m = (slice.endAngle + slice.startAngle) / 2;
-        var cuadr = Math.floor(12 * m / (2 * Math.PI));
-        return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle';
-      })
-      .attr('fill', slice => keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data)))
-      .on('click', slice => this.props.onDrillDown(slice.data))
-      .style("cursor", "pointer")
-      .text(slice => ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : '');
+
+
+    return (
+      <svg direction="ltr" width={width} height={height}>
+        <g className="shape" transform={translate(width / 2, height / 2)}>
+          {pie(data.rows).map(slice => <g key={slice.index} className="slice">
+            <path className="shape" d={arc(slice)!} fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))} shapeRendering="initial" onClick={e => this.props.onDrillDown(slice.data)} cursor="pointer">
+              <title>
+                {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
+              </title>
+            </path>
+          </g>)}
+        </g>
+        <g className="color-legend" transform={translate(cx, cy)}>
+          {pie(data.rows).map(slice => {
+
+            var m = (slice.endAngle + slice.startAngle) / 2;
+            var cuadr = Math.floor(12 * m / (2 * Math.PI));
+
+            return <g key={slice.index} className="color-legend">
+              <text className="color-legend sf-chart-strong"
+                x={Math.sin(m) * outerRadious * legendRadius}
+                y={-Math.cos(m) * outerRadious * legendRadius}
+                textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
+                fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))}
+                onClick={e => this.props.onDrillDown(slice.data)} cursor="pointer">
+                {((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : ''}
+              </text>
+            </g>;
+          })}
+        </g>
+      </svg>
+    );
   }
 }

@@ -143,7 +143,6 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
   }
 
   renderParameters(chartScript: ChartScript) {
-
     var parameterDic = mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
     return (
@@ -152,8 +151,8 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
           {
             chartScript.parameterGroups.map((gr, i) =>
               <div className="col-sm-2" key={i}>
-                <span style={{ color: "gray", textDecoration: "underline"}}>{gr.name}</span>
-                {gr.parameters.map((p, j) => parameterDic[p.name] && this.getParameterValueLine(parameterDic[p.name], p, j))}
+                <span style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</span>
+                {gr.parameters.map((p, j) => parameterDic[p.name] ? this.getParameterValueLine(parameterDic[p.name], p, j) : <p key={p.name} className="text-danger">{p.name}</p>)}
               </div>
             )
           }

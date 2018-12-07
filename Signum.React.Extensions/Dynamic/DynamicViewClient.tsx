@@ -221,7 +221,7 @@ export function patchComponent(component: React.ComponentClass<{ ctx: TypeContex
   if (component.prototype.render.isDynamic)
     return;
 
-  const staticRender = component.prototype.render as () => void;
+  const staticRender = component.prototype.render as (this: React.Component<any>) => React.ReactElement<any>;
 
   component.prototype.render = function (this: React.Component<any, any>) {
 
