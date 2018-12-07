@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Mailing;
@@ -233,10 +233,13 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity model = null, ISystemEmail systemEmail = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity model = null, ISystemEmail systemEmail = null, MList<EmailTemplateRecipientEmbedded> additionalRecipients=null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
-
+            if (additionalRecipients != null)
+            {
+                template.Recipients.AddRange(additionalRecipients);
+            }
             Entity entity = null;
             if (template.SystemEmail != null)
             {
