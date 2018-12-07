@@ -88,7 +88,8 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
   if (scaleName == "ZeroMax")
     return d3.scaleLinear()
       .domain([0, d3.max(values)!])
-      .range([minRange, maxRange]);
+      .range([minRange, maxRange])
+      .nice();
 
   if (scaleName == "MinMax") {
     if (column.type == "Date" || column.type == "DateTime") {
@@ -104,18 +105,20 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
     else {
       return d3.scaleLinear()
         .domain([d3.min(values)!, d3.max(values)!])
-        .range([minRange, maxRange]);
+        .range([minRange, maxRange])
+        .nice();
     }
   }
 
   if (scaleName == "Log")
     return d3.scaleLog()
-      .domain(values)
-      .range([minRange, maxRange]);
+      .domain([d3.min(values)!, d3.max(values)!])
+      .range([minRange, maxRange])
+      .nice();
 
   if (scaleName == "Sqrt")
     return d3.scalePow().exponent(.5)
-      .domain(values)
+      .domain([d3.min(values)!, d3.max(values)!])
       .range([minRange, maxRange]);
 
   throw Error("Unexpected scale: " + scaleName);

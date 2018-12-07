@@ -22,7 +22,6 @@ export default class MultiBarsChart extends ReactChartBase {
       ChartUtils.toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
       ChartUtils.groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
-
     var xRule = rule({
       _1: 5,
       title: 15,
@@ -76,7 +75,7 @@ export default class MultiBarsChart extends ReactChartBase {
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} />
         <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={true} />
 
-        {pivot.columns.map(s => <g className="shape-serie"
+        {pivot.columns.map(s => <g key={s.key} className="shape-serie"
           transform={translate(xRule.start('content'), yRule.start('content'))} >
 
           {pivot.rows
@@ -118,7 +117,7 @@ export default class MultiBarsChart extends ReactChartBase {
 
         {
           /*PAINT GRAPH*/
-          pivot.columns.map(s => <g className="shape-serie"
+          pivot.columns.map(s => <g key={s.key} className="shape-serie"
             transform={translate(xRule.start('content'), yRule.start('content'))}>
             {pivot.rows
               .filter(r => r.values[s.key] != undefined)

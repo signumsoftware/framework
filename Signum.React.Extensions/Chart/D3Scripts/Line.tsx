@@ -69,7 +69,7 @@ export default class LineChart extends ReactChartBase {
 
         {/*PAINT CHART'*/}
         <g className="shape" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
-          <path className="shape" stroke={color} fill="none" stroke-width={3} shape-rendering="initial" d={line(keyValues)!} />
+          <path className="shape" stroke={color} fill="none" strokeWidth={3} shapeRendering="initial" d={line(keyValues)!} />
         </g>
 
         {/*paint graph - hover area trigger*/}
@@ -99,7 +99,7 @@ export default class LineChart extends ReactChartBase {
             .map(key => <circle key={keyColumn.getKey(key)}
               className="point"
               stroke={color}
-              stroke-width={2}
+              strokeWidth={2}
               fill="white"
               r={5}
               cx={x(keyColumn.getKey(key))!}
