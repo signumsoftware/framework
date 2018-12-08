@@ -43,9 +43,11 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
   }
 
   handleOnChange = (cr: ChartRequestModel, uc?: Lite<UserChartEntity>) => {
-    ChartClient.Encoder.chartPathPromise(cr, uc)
-      .then(path => Navigator.history.replace(path))
-      .done();
+    this.setState({ userChart: uc }, () =>
+      ChartClient.Encoder.chartPathPromise(cr, uc)
+        .then(path => Navigator.history.replace(path))
+        .done()
+    );
   }
 
   render() {

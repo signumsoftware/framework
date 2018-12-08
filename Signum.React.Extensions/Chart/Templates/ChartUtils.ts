@@ -88,7 +88,8 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
   if (scaleName == "ZeroMax")
     return d3.scaleLinear()
       .domain([0, d3.max(values)!])
-      .range([minRange, maxRange]);
+      .range([minRange, maxRange])
+      .nice();
 
   if (scaleName == "MinMax") {
     if (column.type == "Date" || column.type == "DateTime") {
@@ -104,18 +105,20 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
     else {
       return d3.scaleLinear()
         .domain([d3.min(values)!, d3.max(values)!])
-        .range([minRange, maxRange]);
+        .range([minRange, maxRange])
+        .nice();
     }
   }
 
   if (scaleName == "Log")
     return d3.scaleLog()
-      .domain(values)
-      .range([minRange, maxRange]);
+      .domain([d3.min(values)!, d3.max(values)!])
+      .range([minRange, maxRange])
+      .nice();
 
   if (scaleName == "Sqrt")
     return d3.scalePow().exponent(.5)
-      .domain(values)
+      .domain([d3.min(values)!, d3.max(values)!])
       .range([minRange, maxRange]);
 
   throw Error("Unexpected scale: " + scaleName);
@@ -133,7 +136,7 @@ export function insertPoint(column: ChartColumn<any>, valueColumn: ChartColumn<a
   }
 }
 
-export function completeValues(column: ChartColumn<any>, values: any[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): any[] {
+export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): unknown[] {
   
   if (completeValues == null || completeValues == "No")
     return values;
@@ -145,8 +148,8 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
 
   if (column.type == "Date" || column.type == "DateTime") {
 
-    const min = d3.min(values);
-    const max = d3.max(values);
+    const min = d3.min(values as string[]);
+    const max = d3.max(values as string[]);
 
     if (min == undefined || max == undefined)
       return values; 
@@ -175,24 +178,24 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(minMoment.toJSON());
+      allValues.push(minMoment.format("YYYY-MM-DDTHH:mm:ss"));
       minMoment.add(unit, 1);
     }
 
-    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+    return complete(values, allValues, column, insertPoint);
   }
 
   if (column.type == "Enum") {
 
-    var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).map(a => a.name);
+    var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).filter(a => !a.isIgnoredEnum).map(a => a.name);
 
-    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+    return complete(values, allValues, column, insertPoint);
   }
 
   if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
 
-    const min = d3.min(values) as number | undefined;
-    const max = d3.max(values) as number | undefined;
+    const min = d3.min(values as number[]) as number | undefined;
+    const max = d3.max(values as number[]) as number | undefined;
 
     if (min == undefined || max == undefined)
       return values;
@@ -228,22 +231,26 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
         v += step;
       }
     }
-    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+    return complete(values, allValues, column, insertPoint);
   }
 
   return values;
 }
 
-function complete(values: any[], allValues: any[], column: ChartColumn<any>, insertPoint: "Middle" | "Before" | "After", isEqual: (a: any, b: any) => boolean): any[] {
+function complete(values: unknown[], allValues: unknown[], column: ChartColumn<unknown>, insertPoint: "Middle" | "Before" | "After"): any[] {
   
   if (insertPoint == "Middle") {
-    var oldValues = values.filter(a => !allValues.some(b => isEqual(a, b)));
+    
+    const allValuesDic = allValues.toObject(column.getKey);
+    
+    var oldValues = values.filter(a => !allValuesDic.hasOwnProperty(column.getKey(a)));
 
     return [...allValues, ...oldValues];
   }
-  else
-  {
-    var newValues = allValues.filter(a => !values.some(b => isEqual(a, b)));
+  else {
+    const valuesDic = values.toObject(column.getKey);
+    
+    var newValues = allValues.filter(a => !valuesDic.hasOwnProperty(column.getKey(a)));
 
     if (insertPoint == "Before")
       return [...newValues, ...values];
