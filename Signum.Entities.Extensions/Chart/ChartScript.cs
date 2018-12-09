@@ -47,7 +47,6 @@ namespace Signum.Entities.Chart
         public static readonly ChartScriptSymbol ParallelCoordinates;
         public static readonly ChartScriptSymbol Punchcard;
         public static readonly ChartScriptSymbol CalendarStream;
-        public static readonly ChartScriptSymbol ForceGraph;
         public static readonly ChartScriptSymbol Treemap;
 
     }

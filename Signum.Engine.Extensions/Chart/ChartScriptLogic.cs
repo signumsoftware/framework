@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.DynamicQuery;
@@ -49,7 +49,6 @@ namespace Signum.Engine.Chart
                 RegisterScript(new ParallelCoordiantesChartScript());
                 RegisterScript(new PunchcardChartScript());
                 RegisterScript(new CalendarStreamChartScript());
-                RegisterScript(new ForceGraphChartScript());
                 RegisterScript(new TreeMapChartScript());
 
                 RegisterScript(new HeatmapChartScript());

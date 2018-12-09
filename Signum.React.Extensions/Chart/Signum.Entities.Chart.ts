@@ -146,7 +146,6 @@ export module D3ChartScript {
   export const ParallelCoordinates : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ParallelCoordinates");
   export const Punchcard : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Punchcard");
   export const CalendarStream : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.CalendarStream");
-  export const ForceGraph : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ForceGraph");
   export const Treemap : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Treemap");
 }
 
