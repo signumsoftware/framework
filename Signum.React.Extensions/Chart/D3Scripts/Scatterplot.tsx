@@ -1,118 +1,128 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
-import * as ChartUtils from '../Templates/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import * as ChartUtils from './Components/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { ChartRow } from '../ChartClient';
-import ReactChartBase from './ReactChartBase';
 import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
+import { Rule } from './Components/Rule';
+import InitialMessage from './Components/InitialMessage';
 
 
-export default class ScatterplotChart extends ReactChartBase {
+export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+  
+  var xRule = new Rule({
+    _1: 5,
+    title: 15,
+    _2: 5,
+    labels: parseInt(parameters["UnitMargin"]),
+    _3: 5,
+    ticks: 4,
+    content: '*',
+    _4: 5,
+  }, width);
+  //xRule.debugX(chart)
 
-  renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactNode {
+  var yRule = new Rule({
+    _1: 5,
+    content: '*',
+    ticks: 4,
+    _2: 5,
+    labels: 10,
+    _3: 10,
+    title: 15,
+    _4: 5,
+  }, height);
+  //yRule.debugY(chart);
 
-    var colorKeyColumn = data.columns.c0!;
-    var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
-    var verticalColumn = data.columns.c2! as ChartClient.ChartColumn<number>;
-
-    var xRule = rule({
-      _1: 5,
-      title: 15,
-      _2: 5,
-      labels: parseInt(data.parameters["UnitMargin"]),
-      _3: 5,
-      ticks: 4,
-      content: '*',
-      _4: 5,
-    }, width);
-    //xRule.debugX(chart)
-
-    var yRule = rule({
-      _1: 5,
-      content: '*',
-      ticks: 4,
-      _2: 5,
-      labels: 10,
-      _3: 10,
-      title: 15,
-      _4: 5,
-    }, height);
-    //yRule.debugY(chart);
-
-    var x = scaleFor(horizontalColumn, data.rows.map(horizontalColumn.getValue), 0, xRule.size('content'), data.parameters["HorizontalScale"]);
-
-    var y = scaleFor(verticalColumn, data.rows.map(verticalColumn.getValue), 0, yRule.size('content'), data.parameters["VerticalScale"]);
-
-
-    var pointSize = parseInt(data.parameters["PointSize"]);
-
-    var numXTicks = horizontalColumn.type == 'Date' || horizontalColumn.type == 'DateTime' ? 100 : 60;
-
-    var xTicks = x.ticks(width / numXTicks);
-    var xTickFormat = x.tickFormat(width / numXTicks);
-
-
-    var color: (val: ChartRow) => string;
-    if (data.parameters["ColorScale"] == "Ordinal") {
-      var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]));
-      var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorKeyColumn.getValueKey));
-      color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
-
-    } else {
-      var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(colorKeyColumn.getValue) as number[], 0, 1, data.parameters["ColorScale"]);
-      var colorInterpolate = data.parameters["ColorInterpolate"];
-      var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate);
-      color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number));
-    }
-
+  if (data == null || data.rows.length == 0)
     return (
-      <>
-        <svg direction="ltr" width={width} height={height}>
-          <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
-          <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
-
-          {data.parameters["DrawingMode"] == "Svg" &&
-            data.rows.map((r, i) => <g key={i} className="shape-serie"
-              transform={translate(xRule.start('content'), yRule.end('content'))}>
-              <circle className="shape" stroke={colorKeyColumn.getValueColor(r) || color(r)} fill={colorKeyColumn.getValueColor(r) || color(r)} shapeRendering="initial" r={pointSize} cx={x(horizontalColumn.getValue(r))} cy={-y(verticalColumn.getValue(r))} onClick={e => this.props.onDrillDown(r)} cursor="pointer">
-                <title>
-                  {colorKeyColumn.getValueNiceName(r) +
-                    ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
-                    ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r))}
-                </title>
-              </circle>
-            </g>)
-          }
-
-          <XAxis xRule={xRule} yRule={yRule} />
-          <YAxis xRule={xRule} yRule={yRule} />
-        </svg>
-        {data.parameters["DrawingMode"] != "Svg" &&
-          <CanvasScatterplot
-            color={color}
-            colorKeyColumn={colorKeyColumn}
-            horizontalColumn={horizontalColumn}
-            verticalColumn={verticalColumn}
-            onDrillDown={this.props.onDrillDown}
-            data={data}
-            x={x}
-            y={y}
-            pointSize={pointSize}
-            xRule={xRule}
-            yRule={yRule}
-          />
-        }
-      </>
+      <svg direction="ltr" width={width} height={height}>
+        <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </svg>
     );
+
+
+  var colorKeyColumn = data.columns.c0!;
+  var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
+  var verticalColumn = data.columns.c2! as ChartClient.ChartColumn<number>;
+
+  var x = scaleFor(horizontalColumn, data.rows.map(horizontalColumn.getValue), 0, xRule.size('content'), parameters["HorizontalScale"]);
+
+  var y = scaleFor(verticalColumn, data.rows.map(verticalColumn.getValue), 0, yRule.size('content'), parameters["VerticalScale"]);
+  
+  var pointSize = parseInt(parameters["PointSize"]);
+  
+  var color: (val: ChartRow) => string;
+  if (parameters["ColorScale"] == "Ordinal") {
+    var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
+    var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorKeyColumn.getValueKey));
+    color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
+
+  } else {
+    var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(colorKeyColumn.getValue) as number[], 0, 1, parameters["ColorScale"]);
+    var colorInterpolate = parameters["ColorInterpolate"];
+    var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate);
+    color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number));
   }
+
+  return (
+    <>
+      <svg direction="ltr" width={width} height={height}>
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
+
+        {parameters["DrawingMode"] == "Svg" &&
+          data.rows.map((r, i) => <g key={i} className="shape-serie"
+            transform={translate(xRule.start('content'), yRule.end('content'))}>
+            <circle className="shape"
+              stroke={colorKeyColumn.getValueColor(r) || color(r)}
+              fill={colorKeyColumn.getValueColor(r) || color(r)}
+              shapeRendering="initial"
+              r={pointSize}
+              cx={x(horizontalColumn.getValue(r))}
+              cy={-y(verticalColumn.getValue(r))}
+              onClick={e => onDrillDown(r)}
+              cursor="pointer">
+              <title>
+                {colorKeyColumn.getValueNiceName(r) +
+                  ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
+                  ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r))}
+              </title>
+            </circle>
+          </g>)
+        }
+
+        <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
+
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </svg>
+      {parameters["DrawingMode"] != "Svg" &&
+        <CanvasScatterplot
+          color={color}
+          colorKeyColumn={colorKeyColumn}
+          horizontalColumn={horizontalColumn}
+          verticalColumn={verticalColumn}
+          onDrillDown={onDrillDown}
+          data={data}
+          x={x}
+          y={y}
+          pointSize={pointSize}
+          xRule={xRule}
+          yRule={yRule}
+        />
+      }
+    </>
+  );
 }
 
 class CanvasScatterplot extends React.Component<{
-  xRule: ChartUtils.Rule,
-  yRule: ChartUtils.Rule,
+  xRule: Rule,
+  yRule: Rule,
   colorKeyColumn: ChartClient.ChartColumn<unknown>,
   horizontalColumn: ChartClient.ChartColumn<number>,
   verticalColumn: ChartClient.ChartColumn<number>,

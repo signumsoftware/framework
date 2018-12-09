@@ -1,17 +1,17 @@
 import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
-import * as ChartUtils from '../Templates/ChartUtils';
+import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import googleMapStyles from "./GoogleMapStyles"
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from '../D3Scripts/Components/ChartUtils';
 
 
-export default class HeatmapChart extends React.Component<{ data: ChartClient.ChartTable, onDrillDown: (e: ChartClient.ChartRow) => void }> {
+export default class HeatmapChart extends React.Component<ChartClient.ChartComponentProps> {
 
   componentDidMount() {
     GoogleMapsChartUtils.loadGoogleMapsScript(() => {
-      this.drawChart(this.props.data)
+      this.drawChart(this.props)
     });
   }
 
@@ -25,28 +25,28 @@ export default class HeatmapChart extends React.Component<{ data: ChartClient.Ch
     );
   }
 
-  drawChart(data: ChartClient.ChartTable) {
-
-    var latitudeColumn = data.columns.c0! as ChartClient.ChartColumn<number>;
-    var longitudeColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
-    var weightColumn = data.columns.c2! as ChartClient.ChartColumn<number> | undefined;
-
-
+  drawChart({ data, parameters }: ChartClient.ChartComponentProps) {
+    
     var bounds = new google.maps.LatLngBounds();
-
-
+    
     var coords: any[] = [];
 
-    data.rows.forEach(r => {
-      if (latitudeColumn.getValue(r) != null &&
-        longitudeColumn.getValue(r) != null) {
-        var position = new google.maps.LatLng(latitudeColumn.getValue(r), longitudeColumn.getValue(r));
-        bounds.extend(position);
-        coords.push(weightColumn && weightColumn.getValue(r) != null ? { location: position, weight: weightColumn.getValue(r) } : position);
-      }
-    });
+    if (data) {
+      var latitudeColumn = data.columns.c0! as ChartClient.ChartColumn<number>;
+      var longitudeColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
+      var weightColumn = data.columns.c2! as ChartClient.ChartColumn<number> | undefined;
 
-    var mapType = data.parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
+      data.rows.forEach(r => {
+        if (latitudeColumn.getValue(r) != null &&
+          longitudeColumn.getValue(r) != null) {
+          var position = new google.maps.LatLng(latitudeColumn.getValue(r), longitudeColumn.getValue(r));
+          bounds.extend(position);
+          coords.push(weightColumn && weightColumn.getValue(r) != null ? { location: position, weight: weightColumn.getValue(r) } : position);
+        }
+      });
+    }
+
+    var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
     var mapOptions = {
       center: new google.maps.LatLng(coords[0].lat, coords[0].lng),
@@ -59,10 +59,10 @@ export default class HeatmapChart extends React.Component<{ data: ChartClient.Ch
 
     var map = new google.maps.Map(this.divElement!, mapOptions);
 
-    if (data.parameters["MapStyle"] != null &&
-      data.parameters["MapStyle"] != "Standard") {
+    if (parameters["MapStyle"] != null &&
+      parameters["MapStyle"] != "Standard") {
 
-      var json = googleMapStyles[data.parameters["MapStyle"]];
+      var json = googleMapStyles[parameters["MapStyle"]];
 
       if (json != null) {
         map.mapTypes.set("styled_map", new google.maps.StyledMapType(json, { name: 'Styled Map' }));
@@ -78,19 +78,19 @@ export default class HeatmapChart extends React.Component<{ data: ChartClient.Ch
       map: map
     });
 
-    if (data.parameters["Opacity"] != null) {
-      heatmap.set("opacity", parseFloat(data.parameters["Opacity"]));
+    if (parameters["Opacity"] != null) {
+      heatmap.set("opacity", parseFloat(parameters["Opacity"]));
     }
 
-    if (data.parameters["Radius(px)"] != null) {
-      heatmap.set("radius", parseFloat(data.parameters["Radius(px)"]));
+    if (parameters["Radius(px)"] != null) {
+      heatmap.set("radius", parseFloat(parameters["Radius(px)"]));
     }
 
-    if (data.parameters["ColorGradient"] != null &&
-      data.parameters["ColorGradient"] != "Default") {
+    if (parameters["ColorGradient"] != null &&
+      parameters["ColorGradient"] != "Default") {
       var gradient;
 
-      switch (data.parameters["ColorGradient"]) {
+      switch (parameters["ColorGradient"]) {
         case "Blue-Red":
           gradient = [
             "rgba(0, 255, 255, 0)",

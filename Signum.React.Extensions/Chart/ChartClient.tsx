@@ -44,43 +44,55 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   UserChartClient.start({ routes: options.routes });
 
 
-  registerChartScrtiptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
-  registerChartScrtiptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
-  registerChartScrtiptComponent(D3ChartScript.Bubbleplot, () => import("./D3Scripts/Bubbleplot"));
-  registerChartScrtiptComponent(D3ChartScript.CalendarStream, () => import("./D3Scripts/CalendarStream"));
-  registerChartScrtiptComponent(D3ChartScript.Columns, () => import("./D3Scripts/Columns"));
-  registerChartScrtiptComponent(D3ChartScript.ForceGraph, () => import("./D3Scripts/ForceGraph"));
-  registerChartScrtiptComponent(D3ChartScript.Line, () => import("./D3Scripts/Line"));
-  registerChartScrtiptComponent(D3ChartScript.MultiBars, () => import("./D3Scripts/MultiBars"));
-  registerChartScrtiptComponent(D3ChartScript.MultiColumns, () => import("./D3Scripts/MultiColumns"));
-  registerChartScrtiptComponent(D3ChartScript.MultiLines, () => import("./D3Scripts/MultiLines"));
-  registerChartScrtiptComponent(D3ChartScript.ParallelCoordinates, () => import("./D3Scripts/ParallelCoordiantes"));
-  registerChartScrtiptComponent(D3ChartScript.Pie, () => import("./D3Scripts/Pie"));
-  registerChartScrtiptComponent(D3ChartScript.Punchcard, () => import("./D3Scripts/Punchcard"));
-  registerChartScrtiptComponent(D3ChartScript.Scatterplot, () => import("./D3Scripts/Scatterplot"));
-  registerChartScrtiptComponent(D3ChartScript.StackedBars, () => import("./D3Scripts/StackedBars"));
-  registerChartScrtiptComponent(D3ChartScript.StackedColumns, () => import("./D3Scripts/StackedColumns"));
-  registerChartScrtiptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
-  registerChartScrtiptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/Treemap"));
+  registerChartScriptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
+  registerChartScriptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
+  registerChartScriptComponent(D3ChartScript.Bubbleplot, () => import("./D3Scripts/Bubbleplot"));
+  registerChartScriptComponent(D3ChartScript.CalendarStream, () => import("./D3Scripts/CalendarStream"));
+  registerChartScriptComponent(D3ChartScript.Columns, () => import("./D3Scripts/Columns"));
+  registerChartScriptComponent(D3ChartScript.Line, () => import("./D3Scripts/Line"));
+  registerChartScriptComponent(D3ChartScript.MultiBars, () => import("./D3Scripts/MultiBars"));
+  registerChartScriptComponent(D3ChartScript.MultiColumns, () => import("./D3Scripts/MultiColumns"));
+  registerChartScriptComponent(D3ChartScript.MultiLines, () => import("./D3Scripts/MultiLines"));
+  registerChartScriptComponent(D3ChartScript.ParallelCoordinates, () => import("./D3Scripts/ParallelCoordiantes"));
+  registerChartScriptComponent(D3ChartScript.Pie, () => import("./D3Scripts/Pie"));
+  registerChartScriptComponent(D3ChartScript.Punchcard, () => import("./D3Scripts/Punchcard"));
+  registerChartScriptComponent(D3ChartScript.Scatterplot, () => import("./D3Scripts/Scatterplot"));
+  registerChartScriptComponent(D3ChartScript.StackedBars, () => import("./D3Scripts/StackedBars"));
+  registerChartScriptComponent(D3ChartScript.StackedColumns, () => import("./D3Scripts/StackedColumns"));
+  registerChartScriptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
+  registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/Treemap"));
 
   if (options.googleMapsApiKey) {
     window.__google_api_key = options.googleMapsApiKey;
-    registerChartScrtiptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
-    registerChartScrtiptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
+    registerChartScriptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
+    registerChartScriptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
   }
 }
 
+export interface ChartComponentProps {
+  data?: ChartTable;
+  parameters: { [name: string]: string },
+  loading: boolean;
+  onDrillDown: (e: ChartRow) => void;
+}
+
+export interface ChartScriptProps extends ChartComponentProps {
+  width: number;
+  height: number;
+  initialLoad: boolean;
+}
+
 interface ChartScriptModule {
-  default: React.ComponentClass<any /* { data: ChartTable }*/>
+  default: (React.ComponentClass<ChartComponentProps>) | ((p: ChartScriptProps) => React.ReactNode);
 }
 
 const registeredChartScriptComponents: { [key: string]: () => Promise<ChartScriptModule> } = {};
 
-export function registerChartScrtiptComponent(symbol: ChartScriptSymbol, module: () => Promise<ChartScriptModule>) {
+export function registerChartScriptComponent(symbol: ChartScriptSymbol, module: () => Promise<ChartScriptModule>) {
   registeredChartScriptComponents[symbol.key] = module;
 }
 
-export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol) {
+export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol): ()=> Promise<ChartScriptModule> {
 
   var result = registeredChartScriptComponents[symbol.key];
   if (!result)
@@ -739,8 +751,6 @@ export module API {
       } as ChartColumn<Lite<Entity> | undefined>) as ChartColumn<unknown>);
     }
 
-    var params = getParameterWithDefault(request, chartScript);
-
     var rows = rt.rows.map(row => {
       var cr = request.columns.map((c, i) => {
         var tuple = chartColToTableCol[i];
@@ -760,7 +770,6 @@ export module API {
 
     var chartTable: ChartTable = {
       columns: cols.filter(c => c != null).toObjectDistinct(c => c!.name) as any,
-      parameters: params,
       rows: rows
     };
 
@@ -812,7 +821,6 @@ export interface ChartTable {
     c7?: ChartColumn<unknown>;
     c8?: ChartColumn<unknown>;
   },
-  parameters: { [name: string]: string },
   rows: ChartRow[]
 }
 

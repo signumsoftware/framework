@@ -17,6 +17,7 @@ export interface UserChartPartProps {
 export interface UserChartPartState {
   chartRequest?: ChartRequestModel;
   result?: ChartClient.API.ExecuteChartResult;
+  loading: boolean;
   error?: any;
   showData?: boolean;
 }
@@ -24,7 +25,7 @@ export interface UserChartPartState {
 export default class UserChartPart extends React.Component<UserChartPartProps, UserChartPartState> {
   constructor(props: UserChartPartProps) {
     super(props);
-    this.state = { showData: props.part.showData };
+    this.state = { showData: props.part.showData, loading: false };
   }
 
   componentWillMount() {
@@ -48,10 +49,10 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
   }
 
   makeQuery() {
-    this.setState({ result: undefined, error: undefined }, () =>
+    this.setState({ result: undefined, error: undefined, loading: true }, () =>
       ChartClient.getChartScript(this.state.chartRequest!.chartScript)
         .then(cs => ChartClient.API.executeChart(this.state.chartRequest!, cs))
-        .then(rt => this.setState({ result: rt }))
+        .then(rt => this.setState({ result: rt, loading: false }))
         .catch(e => { this.setState({ error: e }); })
         .done());
   }
@@ -81,7 +82,8 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
         {this.state.showData ?
           <ChartTableComponent chartRequest={s.chartRequest} lastChartRequest={s.chartRequest}
             resultTable={s.result.resultTable} onOrderChanged={() => this.makeQuery()} /> :
-          <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} data={s.result.chartTable} />
+          <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest}
+            data={s.result.chartTable} loading={s.loading} />
         }
       </div>
     );
