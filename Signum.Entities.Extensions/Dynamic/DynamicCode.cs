@@ -14,6 +14,7 @@ namespace Signum.Entities.Dynamic
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
         public static string CodeGenAssembly = "CodeGenAssembly.dll";
+        public static string CodeGenGeneratedAssembly = "CodeGenAssembly.dll";
         public static string CodeGenAssemblyPath;
         public static Action OnApplicationServerRestarted;
 

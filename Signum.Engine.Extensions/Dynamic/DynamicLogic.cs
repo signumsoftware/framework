@@ -160,7 +160,18 @@ namespace Signum.Engine.Dynamic
             using (HeavyProfiler.Log("COMPILE"))
             {
                 Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
-                Directory.EnumerateFiles(DynamicCode.CodeGenDirectory).Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
+
+                try
+                {
+                    Directory.EnumerateFiles(DynamicCode.CodeGenDirectory)
+                        .Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath)
+                        .ToList()
+                        .ForEach(a => File.Delete(a));
+                }
+                catch (Exception)
+                {
+                    // Maybe we have Access denied exception to CodeGenAssembly*.dll
+                }
 
                 var utf8 = Encoding.UTF8;
 
@@ -174,7 +185,8 @@ namespace Signum.Engine.Dynamic
                       .AddReferences(references)
                       .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName))));
 
-                var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly);
+                DynamicCode.CodeGenGeneratedAssembly = $"{DynamicCode.CodeGenAssembly.Before(".")}.{Guid.NewGuid()}.dll";
+                var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenGeneratedAssembly);
 
                 using (var stream = inMemory ? (Stream)new MemoryStream() : File.Create(outputAssembly))
                 {
