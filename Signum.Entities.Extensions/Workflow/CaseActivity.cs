@@ -73,6 +73,7 @@ namespace Signum.Entities.Workflow
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
+        (@this.WorkflowActivity is WorkflowEventEntity) ? CaseActivityState.PendingNext :
         (@this.WorkflowActivity as WorkflowActivityEntity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
         CaseActivityState.PendingNext;
         [ExpressionField("StateExpression")]
