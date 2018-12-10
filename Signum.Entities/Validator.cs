@@ -21,7 +21,7 @@ namespace Signum.Entities
         {
             var old = inModelBinderVariable.Value;
             inModelBinderVariable.Value = true;
-            return new Disposable(() => inModelBinderVariable.Value = false);
+            return new Disposable(() => inModelBinderVariable.Value = old);
         }
 
         public static Func<ModifiableEntity, PropertyInfo, string> GlobalValidation { get; set; }

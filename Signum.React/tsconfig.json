@@ -10,7 +10,7 @@
     "baseUrl": ".",
     "lib": [
       "es2017",
-      "esnext",
+      //"esnext",
       "dom"
     ]
   },
