@@ -49,7 +49,6 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   registerChartScrtiptComponent(D3ChartScript.Bubbleplot, () => import("./D3Scripts/Bubbleplot"));
   registerChartScrtiptComponent(D3ChartScript.CalendarStream, () => import("./D3Scripts/CalendarStream"));
   registerChartScrtiptComponent(D3ChartScript.Columns, () => import("./D3Scripts/Columns"));
-  registerChartScrtiptComponent(D3ChartScript.ForceGraph, () => import("./D3Scripts/ForceGraph"));
   registerChartScrtiptComponent(D3ChartScript.Line, () => import("./D3Scripts/Line"));
   registerChartScrtiptComponent(D3ChartScript.MultiBars, () => import("./D3Scripts/MultiBars"));
   registerChartScrtiptComponent(D3ChartScript.MultiColumns, () => import("./D3Scripts/MultiColumns"));
