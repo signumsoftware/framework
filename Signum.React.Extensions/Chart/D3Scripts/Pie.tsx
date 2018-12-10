@@ -5,8 +5,9 @@ import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
+import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components';
 
-export default function renderPie({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -45,12 +46,14 @@ export default function renderPie({ data, width, height, parameters, loading, on
     legendRadius = 1.2;
 
 
+  var orderedPie = pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
 
   return (
     <svg direction="ltr" width={width} height={height}>
       <g className="shape" transform={translate(width / 2, height / 2)}>
-        {pie(data.rows).map(slice => <g key={slice.index} className="slice">
-          <path className="shape" d={arc(slice)!}
+        {orderedPie.map(slice => <g key={slice.index} className="slice">
+          <path className="shape sf-transition" d={arc(slice)!}
+            transform={initialLoad ? scale(0,0) : scale(1,1)}
             fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))}
             shapeRendering="initial"
             onClick={e => onDrillDown(slice.data)} cursor="pointer">
@@ -61,15 +64,16 @@ export default function renderPie({ data, width, height, parameters, loading, on
         </g>)}
       </g>
       <g className="color-legend" transform={translate(cx, cy)}>
-        {pie(data.rows).map(slice => {
+        {orderedPie.orderBy(r => keyColumn.getValueKey(r.data)).map(slice => {
 
           var m = (slice.endAngle + slice.startAngle) / 2;
           var cuadr = Math.floor(12 * m / (2 * Math.PI));
 
           return <g key={slice.index} className="color-legend">
-            <text className="color-legend sf-chart-strong"
-              x={Math.sin(m) * outerRadious * legendRadius}
-              y={-Math.cos(m) * outerRadious * legendRadius}
+            <text className="color-legend sf-chart-strong sf-transition"
+              transform={translate(
+                Math.sin(m) * outerRadious * legendRadius,
+                -Math.cos(m) * outerRadious * legendRadius)}
               textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
               fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))}
               onClick={e => onDrillDown(slice.data)} cursor="pointer">

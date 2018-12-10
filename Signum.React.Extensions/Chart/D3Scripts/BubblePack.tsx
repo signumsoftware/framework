@@ -8,7 +8,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderBubblePack({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderBubblePack({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -64,15 +64,20 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
 
+  const getNodeKey = (n: d3.HierarchyCircularNode<ChartRow | Folder>) => {
+    return isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :
+      keyColumn!.getValueKey(n.data) + (colorSchemeColumn ? colorSchemeColumn.getValueKey(n.data) : "")
+  };
+  
   var showNumber = parseFloat(parameters["NumberOpacity"]) > 0;
   var numberSizeLimit = parseInt(parameters["NumberSizeLimit"]);
 
   return (
     <svg direction="ltr" width={width} height={height}>
       {
-        nodes.map((d, i) => <g key={i} className="node" transform={translate(d.x, d.y)} cursor="pointer"
+        nodes.orderBy(getNodeKey).map(d => <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x, d.y) + (initialLoad? scale(0,0) : scale(1,1))} cursor="pointer"
           onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }) : onDrillDown(d.data)}>
-          <circle shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
+          <circle className="sf-transition" shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
             fillOpacity={parameters["FillOpacity"] || undefined}
             stroke={parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || undefined))}
             strokeWidth={parameters["StrokeWidth"]} strokeOpacity={1} />

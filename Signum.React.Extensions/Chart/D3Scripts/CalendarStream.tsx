@@ -106,7 +106,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   return (
     <svg direction="ltr" width={width} height={height}>
       <g transform={translate(xRule.start("content"), yRule.start("content"))}>
-        {yearRange.map(yr => <g key={yr} className="year-group"
+        {yearRange.map(yr => <g key={yr} className="year-group sf-transition"
           transform={horizontal ?
             translate(0, (yr - minDate.getFullYear()) * (cellSize * (7 + 1))) :
             translate((yr - minDate.getFullYear()) * (cellSize * (7 + 1)), 0)}>

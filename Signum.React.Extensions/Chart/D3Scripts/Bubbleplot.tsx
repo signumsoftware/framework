@@ -9,10 +9,11 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
-export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
-  
+export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+
   var xRule = new Rule({
     _1: 5,
     title: 15,
@@ -57,10 +58,11 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   var xTickSize = verticalColumn.type == "Date" || verticalColumn.type == "DateTime" ? 100 : 60;
 
+  var orderRows = data.rows.orderBy(r => colorKeyColumn.getValueKey(r));
   var color: (r: ChartRow) => string;
   if (parameters["ColorScale"] == "Ordinal") {
     var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
-    var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => colorKeyColumn.getValueKey(r)));
+    var categoryColor = d3.scaleOrdinal(scheme).domain(orderRows.map(r => colorKeyColumn.getValueKey(r)));
     color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
   } else {
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(r => colorKeyColumn.getValue(r) as number), 0, 1, parameters["ColorScale"]);
@@ -76,50 +78,47 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   var sizeScale = scaleFor(sizeColumn, sizeList, 0, (xRule.size('content') * yRule.size('content')) / (totalSizeTemp * 3), parameters["SizeScale"]);
 
-
   return (
     <svg direction="ltr" width={width} height={height}>
       <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
+      <g className="panel" transform={translate(xRule.start('content'), yRule.end('content'))}>
+        {orderRows.map(r => <g key={colorKeyColumn.getValueKey(r)}
+          className="shape-serie sf-transition"
+          transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r))) + (initialLoad ? scale(0, 0) : scale(1, 1))}
+          cursor="pointer"
+          onClick={e => onDrillDown(r)}
+        >
+          <circle className="shape sf-transition"
+            stroke={colorKeyColumn.getValueColor(r) || color(r)}
+            strokeWidth={3} fill={colorKeyColumn.getValueColor(r) || color(r)}
+            fillOpacity={parseFloat(parameters["FillOpacity"])}
+            shapeRendering="initial"
+            r={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI)} />
 
-      {data.rows.orderByDescending(r => sizeColumn.getValue(r)).map((r, i) => <g key={i}
-        className="shape-serie"
-        transform={translate(xRule.start('content'), yRule.end('content'))}
-        cursor="pointer"
-        onClick={e => onDrillDown(r)}
-      >
-        <circle className="shape"
-          stroke={colorKeyColumn.getValueColor(r) || color(r)}
-          strokeWidth={3} fill={colorKeyColumn.getValueColor(r) || color(r)}
-          fillOpacity={parseFloat(parameters["FillOpacity"])}
-          shapeRendering="initial"
-          r={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI)}
-          cx={x(horizontalColumn.getValue(r))} cy={-y(verticalColumn.getValue(r))} />
+          {
+            parameters["ShowLabel"] == 'Yes' &&
+            <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI) * 2}
+              padding={0} etcText=""
+              className="number-label"
+              fill={parameters["LabelColor"] || colorKeyColumn.getValueColor(r) || color(r)}
+              dominantBaseline="middle"
+              textAnchor="middle"
+              fontWeight="bold">
+              {sizeColumn.getValueNiceName(r)}
+            </TextEllipsis>
+          }
 
-        {
-          parameters["ShowLabel"] == 'Yes' &&
-          <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI) * 2}
-            padding={0} etcText=""
-            className="number-label"
-            x={x(horizontalColumn.getValue(r))}
-            y={-y(verticalColumn.getValue(r))}
-            fill={parameters["LabelColor"] || colorKeyColumn.getValueColor(r) || color(r)}
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontWeight="bold">
-            {sizeColumn.getValueNiceName(r)}
-          </TextEllipsis>
-        }
+          <title>
+            {colorKeyColumn.getValueNiceName(r) +
+              ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
+              ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)) +
+              ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))}
+          </title>
 
-        <title>
-          {colorKeyColumn.getValueNiceName(r) +
-            ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
-            ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)) +
-            ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))}
-        </title>
-
-      </g>)}
+        </g>)}
+      </g>
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <XAxis xRule={xRule} yRule={yRule} />

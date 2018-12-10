@@ -32,7 +32,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
 
   render() {
 
-    const { data, width, height, parameters, loading, onDrillDown } = this.props;
+    const { data, width, height, parameters, loading, onDrillDown, initialLoad } = this.props;
     
     var yRule = new Rule({
       _1: 5,
@@ -99,16 +99,15 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
     return (
       <svg direction="ltr" width={width} height={height}>
         <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
-          {cords.map(d => <line key={d.column.name} className="x-tick"
+          {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"
+            transform={translate(x(d.column.name)!, 0)}
             y2={yRule.size('content')}
-            x1={x(d.column.name)!}
-            x2={x(d.column.name)!}
             stroke="black" />)}
         </g>
 
         <g className="x-label" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('title'))}>
-          {cords.map(d => <text key={d.column.name} className="x-label"
-            x={x(d.column.name)!}
+          {cords.map(d => <text key={d.column.name} className="x-label sf-transition"
+            transform={translate(x(d.column.name)!, 0)}
             dominantBaseline="middle"
             textAnchor="middle"
             fontWeight="bold">
@@ -117,8 +116,8 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
         </g>
 
         <g className="x-label-max" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('max'))}>
-          {cords.map(d => <text key={d.column.name} className="x-label-max"
-            x={x(d.column.name)!}
+          {cords.map(d => <text key={d.column.name} className="x-label-max sf-transition"
+            transform={translate(x(d.column.name)!,0)}
             dominantBaseline="middle"
             textAnchor="middle">
             {d.column.type != "Date" && d.column.type != "DateTime" ?
@@ -128,8 +127,8 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
         </g>
 
         <g className="x-label-min" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('min'))}>
-          {cords.map(d => <text key={d.column.name} className="x-label-min"
-            x={x(d.column.name)!}
+          {cords.map(d => <text key={d.column.name} className="x-label-min sf-transition"
+            transform={translate(x(d.column.name)!, 0)}
             dominantBaseline="middle"
             textAnchor="middle">
             {d.column.type != "Date" && d.column.type != "DateTime" ?
@@ -139,15 +138,16 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
         </g>
 
 
-        {data.rows.map((r, i) => <g key={i} className="shape-serie"
+        {data.rows.orderBy(r => keyColumn.getValueKey(r)).map((r, i) => <g key={i} className="shape-serie"
           transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
           <path
-            className="shape"
+            opacity={initialLoad ? 0 : 1}
+            className="shape sf-transition"
             fill="none"
             strokeWidth={1}
             stroke={selectedColumn.colorScale(r)}
             shapeRendering="initial"
-            onClick={e => this.props.onDrillDown(r)}
+            onClick={e => onDrillDown(r)}
             cursor="pointer"
             d={line(cords.map(c => ({ col: c, row: r })))!}>
             <title>
@@ -160,10 +160,10 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
 
         <g className="x-tick-box" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
           {cords.map(d => <rect key={d.column.name}
-            className="x-tick-box"
+            transform={translate(x(d.column.name)! - boxWidth / 2, 0)}
+            className="x-tick-box sf-transition"
             height={yRule.size('content')}
             width={boxWidth}
-            x={x(d.column.name)! - boxWidth / 2}
             stroke="#ccc"
             fill={selectedColumn.column.name != d.column.name ? '#ccc' : '#000'}
             fillOpacity=".2"
