@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
@@ -62,7 +62,7 @@ namespace Signum.Engine.Migrations
 
                 SqlBuilder.CreateTableSql(table).ExecuteNonQuery();
 
-                foreach (var i in table.GeneratAllIndexes())
+                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryClusteredIndex)))
                 {
                     SqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
                 }
