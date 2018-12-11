@@ -349,7 +349,7 @@ namespace Signum.Engine
 
                              var name = SqlBuilder.ForeignKeyName(tab.Name.Name, colModel.Name);
                              return SqlPreCommand.Combine(Spacing.Simple,
-                                name != coldb.ForeignKey.Name.Name ? SqlBuilder.RenameForeignKey(coldb.ForeignKey.Name, name) : null,
+                                name != coldb.ForeignKey.Name.Name ? SqlBuilder.RenameForeignKey(coldb.ForeignKey.Name.OnSchema(tab.Name.Schema), name) : null,
                                 (coldb.ForeignKey.IsDisabled || coldb.ForeignKey.IsNotTrusted) && !replacements.SchemaOnly ? SqlBuilder.EnableForeignKey(tab.Name, name) : null);
                          })
                      );
