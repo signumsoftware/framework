@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -601,7 +601,8 @@ FROM {oldTable.Name}");
             AliasGenerator ag = new AliasGenerator();
 
             return new SqlPreCommandSimple(
-@"UPDATE {2}
+@"-- Column {0} was referencing {3} but not references {1}. An update is needed?
+UPDATE {2}
 SET {0} =  -- get {5} id from {4}.Id
 FROM {1} {2}
 JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
