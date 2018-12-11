@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -283,7 +283,16 @@ namespace Signum.Engine.Cache
 
                     foreach (var item in oldProcedures)
                     {
-                        Executor.ExecuteNonQuery(new SqlPreCommandSimple($"DROP PROCEDURE {item.ToString()}"));
+                        try
+                        {
+                            Executor.ExecuteNonQuery(new SqlPreCommandSimple($"DROP PROCEDURE {item.ToString()}"));
+
+                        }
+                        catch (SqlException ex)
+                        {
+                            if (ex.Number != 15151)
+                                throw;
+                        }
                     }
 
                 }
