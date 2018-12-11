@@ -11,7 +11,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = new Rule({
     _1: 5,
@@ -119,6 +119,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     innerSize = scaleFor(innerSizeColumn, data.rows.map(innerSizeColumn.getValue), 0, 100, parameters["OpacityScale"])
   }
 
+  var scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);
+
 
   function configureShape(column: ChartColumn<number> | undefined, rowValue: (r: ChartRow) => number, extra: (r: ChartRow) => React.SVGAttributes<SVGElement>): { numberOpacity: (val: number) => number, renderer: (r: ChartRow) => React.ReactElement<any> } | undefined {
 
@@ -132,8 +134,10 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       return {
         numberOpacity: n => area(n) / 500,
         renderer: r => <circle
-          cx={x(horizontalColumn.getValueKey(r))!}
-          cy={-y(verticalColumn.getValueKey(r))!}
+          transform={translate(
+            x(horizontalColumn.getValueKey(r))!,
+            -y(verticalColumn.getValueKey(r))!
+          ) + scaleTransform}
           r={Math.sqrt(area(rowValue(r)))}
           {...extra(r)} />
       };
@@ -148,9 +152,10 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
       return {
         numberOpacity: n => area(n) / 500,
-        renderer: r => <rect
-          x={x(horizontalColumn.getValueKey(r))! - recWidth(r) / 2}
-          y={-y(verticalColumn.getValueKey(r))! - recHeight(r) / 2}
+        renderer: r => <rect transform={translate(
+          x(horizontalColumn.getValueKey(r))! - recWidth(r) / 2,
+          -y(verticalColumn.getValueKey(r))! - recHeight(r) / 2
+        ) + scaleTransform}
           width={recWidth(r)}
           height={recHeight(r)}
           {...extra(r)}
@@ -163,9 +168,10 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
       return {
         numberOpacity: n => 1,
-        renderer: r => <rect
-          x={x(horizontalColumn.getValueKey(r))! - x.bandwidth() / 2}
-          y={-y(verticalColumn.getValueKey(r))! - y.bandwidth() / 2}
+        renderer: r => <rect transform={translate(
+            x(horizontalColumn.getValueKey(r))! - x.bandwidth() / 2,
+            -y(verticalColumn.getValueKey(r))! - y.bandwidth() / 2
+        ) + scaleTransform}
           width={progressWidth(rowValue(r))}
           height={y.bandwidth()}
           {...extra(r)} />
@@ -176,12 +182,10 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   }
 
   var fillOpacity = (r: ChartRow) => parseFloat(parameters["FillOpacity"]) * (opacity != null ? opacity(opacityColumn!.getValue(r)) : 1);
-
-  var tr = translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2);
-
+  
   var mainShape = configureShape(sizeColumn, r => sizeColumn ? sizeColumn.getValue(r) : 0,
     r => ({
-      transform: tr,
+      className:"punch sf-transition",
       shapeRendering: "initial",
       fillOpacity: fillOpacity(r),
       fill: color == null ? (parameters["FillColor"] || 'black') : color(colorColumn!.getValue(r)),
@@ -202,7 +206,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         ist == "Absolute" ? r => innerSizeColumn!.getValue(r) :
             /*ist == "Independent" ?*/ r => innerSizeColumn!.getValue(r),
       r => ({
-        transform: tr,
+        className: "punch-inner sf-transition",
         shapeRendering: "initial",
         fillOpacity: fillOpacity(r),
         fill: parameters["InnerFillColor"] || 'black'
@@ -213,18 +217,19 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     <svg direction="ltr" width={width} height={height}>
       <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={true} />
       <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={true} showLabels={true} />
-
-      {data.rows.map((r, i) =>
-        <g key={i.toString()} className="chart-groups"
+      <g className="punch-panel" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2)}>
+      {data.rows
+        .orderBy(horizontalColumn.getValueKey)
+        .orderBy(verticalColumn.getValueKey)
+        .map(r =>
+          <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
           cursor="pointer"
           onClick={e => onDrillDown(r)}>
           {mainShape && mainShape.renderer(r)}
           {innerShape && innerShape.renderer(r)}
           {
             parseFloat(parameters["NumberOpacity"]) > 0 &&
-            <text className="punch"
-              transform={tr}
-              x={x(horizontalColumn.getValueKey(r))!} y={-y(verticalColumn.getValueKey(r))!}
+              <text className="punch-text sf-transition"
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               opacity={parseFloat(parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(sizeColumn ? 0 : sizeColumn!.getValue(r)))}
@@ -244,8 +249,9 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
               (innerSizeColumn == null ? "" : ("\n" + innerSizeColumn.title + ": " + (ist == "Relative" ? percentage(innerSizeColumn.getValue(r)) : innerSizeColumn.getValueNiceName(r)))) +
               (orderingColumn == null ? "" : ("\n" + orderingColumn.title + ": " + orderingColumn.getValueNiceName(r)))}
           </title>
-        </g>
-      )}
+          </g>
+        )}
+      </g>>
       <XAxis xRule={xRule} yRule={yRule} />
       <YAxis xRule={xRule} yRule={yRule} />
     </svg>

@@ -10,8 +10,8 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
-  
+export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+
   var xRule = new Rule({
     _1: 5,
     title: 15,
@@ -53,11 +53,11 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   var x = scaleFor(horizontalColumn, data.rows.map(horizontalColumn.getValue), 0, xRule.size('content'), parameters["HorizontalScale"]);
 
   var y = scaleFor(verticalColumn, data.rows.map(verticalColumn.getValue), 0, yRule.size('content'), parameters["VerticalScale"]);
-  
+
   var pointSize = parseInt(parameters["PointSize"]);
-  
+
   var color: (val: ChartRow) => string;
-  if (parameters["ColorScale"] == "Ordinal") {
+  if (parameters["ColorScale"] == "Ordinal" || (colorKeyColumn.type != "Integer" && colorKeyColumn.type != "Real")) {
     var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
     var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorKeyColumn.getValueKey));
     color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
@@ -76,15 +76,14 @@ export default function renderScatterplot({ data, width, height, parameters, loa
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
         {parameters["DrawingMode"] == "Svg" &&
-          data.rows.map((r, i) => <g key={i} className="shape-serie"
-            transform={translate(xRule.start('content'), yRule.end('content'))}>
-            <circle className="shape"
+          data.rows.map((r, i) => <g key={i} className="shape-serie sf-transition"
+            transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
+            <circle className="shape sf-transition"
+              transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}
               stroke={colorKeyColumn.getValueColor(r) || color(r)}
               fill={colorKeyColumn.getValueColor(r) || color(r)}
               shapeRendering="initial"
               r={pointSize}
-              cx={x(horizontalColumn.getValue(r))}
-              cy={-y(verticalColumn.getValue(r))}
               onClick={e => onDrillDown(r)}
               cursor="pointer">
               <title>

@@ -8,7 +8,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -119,8 +119,9 @@ export default function renderCalendarStream({ data, width, height, parameters, 
           {d3.utcDays(new Date(Date.UTC(yr, 0, 1)), new Date(Date.UTC(yr + 1, 0, 1))).map(d => {
             const r = rowYByDate[cleanDate(d)];
             return <rect key={d.toISOString()}
+              className="sf-transition"
               stroke="#ccc"
-              fill={r == undefined ? "#fff" : color(r)}
+              fill={r == undefined || initialLoad ? "#fff" : color(r)}
               width={cellSize}
               height={cellSize}
               x={(horizontal ? week(d) : day(d)) * cellSize}

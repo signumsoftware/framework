@@ -8,7 +8,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -71,12 +71,14 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   var showNumber = parseFloat(parameters["NumberOpacity"]) > 0;
 
+  const scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);
+
   return (
     <svg direction="ltr" width={width} height={height} >
       {nodes.map((d, i) =>
-        <g key={i} className="node" transform={translate(d.x0 - p2, d.y0 - p2)}>
+        <g key={i} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
           {isFolder(d.data) &&
-            <rect shapeRendering="initial"
+            <rect className="folder sf-transition" shapeRendering="initial"
               width={nodeWidth(d)}
               height={nodeHeight(d)}
               fill={parentColumn!.getColor((d.data as Folder).folder) || folderColor!((d.data as Folder).folder)}
@@ -87,7 +89,8 @@ export default function renderTreeMap({ data, width, height, parameters, loading
             </rect>
           }
           {!isFolder(d.data) &&
-            <rect shapeRendering="initial" opacity={opacity}
+            <rect className="leaf sf-transition"
+              shapeRendering="initial" opacity={opacity}
               width={nodeWidth(d)}
               height={nodeHeight(d)}
               fill={color(d.data as ChartRow)!}
