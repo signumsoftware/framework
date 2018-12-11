@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Entities.Migrations;
@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Migrations
@@ -178,7 +179,7 @@ namespace Signum.Engine.Migrations
 
                     string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment): null) + ".sql";
 
-                    File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString());
+                    File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
                 }
 
                 return true;
@@ -219,7 +220,7 @@ namespace Signum.Engine.Migrations
         private static void Execute(MigrationInfo mi)
         {
             string title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
-            string text = File.ReadAllText(mi.FileName);
+            string text = File.ReadAllText(mi.FileName, Encoding.UTF8);
             
             using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
