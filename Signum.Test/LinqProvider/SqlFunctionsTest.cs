@@ -112,6 +112,16 @@ namespace Signum.Test.LinqProvider
             Assert.Equal(memCount, dbCount);
         }
 
+
+        [Fact]
+        public void DayOfWeekSelectNullable()
+        {
+            var list = Database.Query<ArtistEntity>()
+                .Select(a => (DayOfWeek?)Database.Query<NoteWithDateEntity>().Where(n => n.Target.Is(a)).FirstOrDefault().CreationTime.DayOfWeek)
+                .ToList();
+            Assert.Contains(null, list);
+        }
+
         [Fact]
         public void DayOfWeekSelectConstant()
         {

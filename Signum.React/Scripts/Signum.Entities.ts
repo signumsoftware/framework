@@ -197,8 +197,8 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
   if (a.id != undefined || b.id != undefined)
     return a.id == b.id && (!compareTicks || (a as T).ticks == (b as T).ticks);
 
-  const aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
-  const bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
+  const aEntity = isEntity(a) ? a as unknown as T: a.entity;
+  const bEntity = isEntity(b) ? b as unknown as T : b.entity;
 
   return aEntity == bEntity;
 }

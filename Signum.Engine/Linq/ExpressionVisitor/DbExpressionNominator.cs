@@ -77,7 +77,7 @@ namespace Signum.Engine.Linq
         public override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp))
+            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp) && !ExtractDayOfWeek(result, out var bla))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.ToString());
 
 
@@ -248,9 +248,9 @@ namespace Signum.Engine.Linq
             {
                 if (ut == typeof(DayOfWeek))
                 {
-                    var dayNumber = c.Value == null ? (int?)null : ToSqlWeekDay((DayOfWeek)c.Value, DateFirst.Value.Item1);
+                    var dayNumber = c.Value == null ? (int?)null : ToDayOfWeekExpression.ToSqlWeekDay((DayOfWeek)c.Value, ToDayOfWeekExpression.DateFirst.Value.Item1);
 
-                    return Add(Expression.Constant(dayNumber, c.Type.IsNullable() ? typeof(int?) : typeof(int)));
+                    return new ToDayOfWeekExpression(Add(Expression.Constant(dayNumber, typeof(int?))));
                 }
 
                 if (Schema.Current.Settings.IsDbType(ut))
@@ -486,31 +486,13 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr);
+            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int?), new SqlEnumExpression(SqlEnums.weekday), expr);
 
             Add(number);
 
-            if (isFullNominate)
-                return number; //Risky, type changes
-
-            Expression result = Expression.Call(miToDayOfWeek, number, Expression.Constant(DateFirst.Value.Item1, typeof(byte)));
-
-            return result;
-        }
-
-        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
-
-        static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
-        public static DayOfWeek ToDayOfWeek(int sqlServerWeekDay, byte dateFirst)
-        {
-            return (DayOfWeek)((dateFirst + sqlServerWeekDay - 1) % 7);
+            return new ToDayOfWeekExpression(number).TryConvert(typeof(DayOfWeek));
         }
         
-        public static int ToSqlWeekDay(DayOfWeek dayOfWeek, byte dateFirst)
-        {
-            return (((int)dayOfWeek - dateFirst + 7) % 7) + 1;
-        }
-
         private Expression TrySqlStartOf(Expression expression, SqlEnums part)
         {
             Expression expr = Visit(expression);
@@ -611,6 +593,13 @@ namespace Signum.Engine.Linq
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
+                    if(ExtractDayOfWeek(left, out var ldow) &&
+                       ExtractDayOfWeek(right, out var rdow))
+                    {
+                        left = ldow;
+                        right = rdow;
+                    }
+
                     newB = MakeBinaryFlexible(b.NodeType, left, right);
                     if (Has(left) && Has(right))
                         candidates.Add(newB);
@@ -677,6 +666,21 @@ namespace Signum.Engine.Linq
 
                 return result;
             }
+        }
+
+        private bool ExtractDayOfWeek(Expression exp, out Expression result)
+        {
+            if (exp is ToDayOfWeekExpression tdow)
+            {
+                result = tdow.Expression;
+                return true;
+            }
+
+            if (exp.NodeType == ExpressionType.Convert && exp.Type.UnNullify() == typeof(DayOfWeek))
+                return ExtractDayOfWeek(((UnaryExpression)exp).Operand, out result);
+
+            result = null;
+            return false;
         }
 
         private BinaryExpression MakeBinaryFlexible(ExpressionType nodeType, Expression left, Expression right)
