@@ -67,7 +67,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
     registerChartScriptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
     registerChartScriptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
   }
-}
+  }
 
 export interface ChartComponentProps {
   data?: ChartTable;
