@@ -33,6 +33,7 @@ interface ChartRequestViewState {
   queryDescription?: QueryDescription;
   lastChartRequest?: ChartRequestModel;
   chartResult?: ChartClient.API.ExecuteChartResult;
+  loading: boolean;
 }
 
 export default class ChartRequestView extends React.Component<ChartRequestViewProps, ChartRequestViewState> {
@@ -41,7 +42,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
   constructor(props: ChartRequestViewProps) {
     super(props);
-    this.state = {};
+    this.state = { loading: false };
 
   }
 
@@ -100,7 +101,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
   handleOnDrawClick = () => {
 
-    this.setState({ chartResult: undefined, lastChartRequest: undefined });
+    this.setState({ loading: true, });
 
     var cr = this.props.chartRequest!;
 
@@ -114,7 +115,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     ChartClient.getChartScript(cr.chartScript)
       .then(cs => this.abortableQuery.getData({ cr, cs }))
       .then(rt => {
-        this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
+        this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)), loading: false });
         this.props.onChange(cr, this.props.userChart);
       }, ifError(ValidationError, e => {
         GraphExplorer.setModelState(cr, e.modelState, "");
@@ -175,18 +176,18 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
           </div>
           <br />
           <div className="sf-scroll-table-container" >
-            {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
-              <UncontrolledTabs id="chartResultTabs">
-                <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-                  <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
-                </Tab>
+            <UncontrolledTabs id="chartResultTabs">
+              <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
+                <ChartRenderer chartRequest={cr} loading={s.loading} lastChartRequest={s.lastChartRequest} data={s.chartResult && s.chartResult.chartTable} />
+              </Tab>
 
+              {s.chartResult && s.lastChartRequest &&
                 <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(s.chartResult.resultTable.rows.length)})</span> as any}>
                   <ChartTableComponent chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable}
                     onOrderChanged={() => this.handleOnDrawClick()} />
                 </Tab>
-              </UncontrolledTabs>
-            }
+              }
+            </UncontrolledTabs>
           </div>
         </div>
       </div>

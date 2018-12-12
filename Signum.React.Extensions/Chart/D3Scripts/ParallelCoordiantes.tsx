@@ -1,12 +1,13 @@
 import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
-import * as ChartUtils from '../Templates/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
-import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
+import * as ChartUtils from './Components/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
+import { ChartTable, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import { Dic } from '@framework/Globals';
-import ReactChartBase from './ReactChartBase';
 import { XKeyTicks } from './Components/Ticks';
+import { Rule } from './Components/Rule';
+import InitialMessage from './Components/InitialMessage';
 
 interface ColumnWithScales {
   column: ChartColumn<number>;
@@ -14,37 +15,26 @@ interface ColumnWithScales {
   colorScale: (r: ChartRow) => string;
 }
 
-export default class ParallelCoordinatesChart extends ReactChartBase {
-  renderChart(data: ChartClient.ChartTable, width: number, height: number): React.ReactElement<any> {
-    return <ParallelCoordinatesImp data={data} width={width} height={height} onDrillDown={this.props.onDrillDown} />
-  }
-}
-
-interface ParallelCoordinatesImpProps {
-  data: ChartClient.ChartTable;
-  width: number;
-  height: number;
-  onDrillDown: (e: ChartRow) => void;
+export default function renderParallelCoordinates(p: ChartScriptProps): React.ReactElement<any> {
+  return <ParallelCoordinatesImp {...p} />
 }
 
 interface ParallelCoordinatesImpState {
   selectedColumn?: string;
 }
 
-export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesImpProps, ParallelCoordinatesImpState> {
+class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelCoordinatesImpState> {
 
-  constructor(props: ParallelCoordinatesImpProps) {
+  constructor(props: ChartScriptProps) {
     super(props);
     this.state = {};
   }
 
   render() {
 
-    const { data, width, height } = this.props;
-
-    var keyColumn = data.columns.c0!;
-
-    var yRule = rule({
+    const { data, width, height, parameters, loading, onDrillDown, initialLoad } = this.props;
+    
+    var yRule = new Rule({
       _1: 5,
       title: 15,
       _2: 5,
@@ -56,14 +46,23 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
       _5: 5,
     }, height);
 
-    var xRule = rule({
+    var xRule = new Rule({
       _1: 20,
       content: '*',
       _2: 20,
     }, width);
     //xRule.debugX(chart);
 
-    var colorInterpolate = data.parameters["ColorInterpolate"];
+    if (data == null || data.rows.length == 0)
+      return (
+        <svg direction="ltr" width={width} height={height}>
+          <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
+        </svg>
+      );
+
+    var keyColumn = data.columns.c0!;
+    
+    var colorInterpolate = parameters["ColorInterpolate"];
     var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
 
     var cords = Dic.getValues(data.columns)
@@ -71,7 +70,7 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
       .map(p => {
         const c = p! as ChartColumn<number>;
         var values = data.rows.map(r => c.getValue(r));
-        var scaleType = data.parameters["Scale" + c.name.after("c")];
+        var scaleType = parameters["Scale" + c.name.after("c")];
         var scale = scaleFor(c, values, 0, yRule.size('content'), scaleType);
         var scaleFunc = scaleFor(c, values, 0, 1, scaleType);
         var colorScale = (r: ChartRow) => colorInterpolation(scaleFunc(c.getValue(r)));
@@ -91,7 +90,7 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
       .defined(t => t.col.column.getValue(t.row) != undefined)
       .x(t => x(t.col.column.name)!)
       .y(t => - t.col.scale(t.col.column.getValue(t.row)))
-      .curve(ChartUtils.getCurveByName(data.parameters["Interpolate"])!);//"linear"
+      .curve(ChartUtils.getCurveByName(parameters["Interpolate"])!);//"linear"
 
     var boxWidth = 10;
 
@@ -100,16 +99,15 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
     return (
       <svg direction="ltr" width={width} height={height}>
         <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
-          {cords.map(d => <line key={d.column.name} className="x-tick"
+          {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"
+            transform={translate(x(d.column.name)!, 0)}
             y2={yRule.size('content')}
-            x1={x(d.column.name)!}
-            x2={x(d.column.name)!}
             stroke="black" />)}
         </g>
 
         <g className="x-label" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('title'))}>
-          {cords.map(d => <text key={d.column.name} className="x-label"
-            x={x(d.column.name)!}
+          {cords.map(d => <text key={d.column.name} className="x-label sf-transition"
+            transform={translate(x(d.column.name)!, 0)}
             dominantBaseline="middle"
             textAnchor="middle"
             fontWeight="bold">
@@ -118,8 +116,8 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
         </g>
 
         <g className="x-label-max" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('max'))}>
-          {cords.map(d => <text key={d.column.name} className="x-label-max"
-            x={x(d.column.name)!}
+          {cords.map(d => <text key={d.column.name} className="x-label-max sf-transition"
+            transform={translate(x(d.column.name)!,0)}
             dominantBaseline="middle"
             textAnchor="middle">
             {d.column.type != "Date" && d.column.type != "DateTime" ?
@@ -129,8 +127,8 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
         </g>
 
         <g className="x-label-min" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('min'))}>
-          {cords.map(d => <text key={d.column.name} className="x-label-min"
-            x={x(d.column.name)!}
+          {cords.map(d => <text key={d.column.name} className="x-label-min sf-transition"
+            transform={translate(x(d.column.name)!, 0)}
             dominantBaseline="middle"
             textAnchor="middle">
             {d.column.type != "Date" && d.column.type != "DateTime" ?
@@ -140,15 +138,16 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
         </g>
 
 
-        {data.rows.map((r, i) => <g key={i} className="shape-serie"
+        {data.rows.orderBy(r => keyColumn.getValueKey(r)).map((r, i) => <g key={i} className="shape-serie"
           transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
           <path
-            className="shape"
+            opacity={initialLoad ? 0 : 1}
+            className="shape sf-transition"
             fill="none"
             strokeWidth={1}
             stroke={selectedColumn.colorScale(r)}
             shapeRendering="initial"
-            onClick={e => this.props.onDrillDown(r)}
+            onClick={e => onDrillDown(r)}
             cursor="pointer"
             d={line(cords.map(c => ({ col: c, row: r })))!}>
             <title>
@@ -161,15 +160,17 @@ export class ParallelCoordinatesImp extends React.Component<ParallelCoordinatesI
 
         <g className="x-tick-box" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
           {cords.map(d => <rect key={d.column.name}
-            className="x-tick-box"
+            transform={translate(x(d.column.name)! - boxWidth / 2, 0)}
+            className="x-tick-box sf-transition"
             height={yRule.size('content')}
             width={boxWidth}
-            x={x(d.column.name)! - boxWidth / 2}
             stroke="#ccc"
             fill={selectedColumn.column.name != d.column.name ? '#ccc' : '#000'}
             fillOpacity=".2"
             onClick={e => this.setState({ selectedColumn: d.column.name })} />)}
         </g>
+
+        <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       </svg>
     );
 

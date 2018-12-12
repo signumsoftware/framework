@@ -1,13 +1,14 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartUtils from '../../Templates/ChartUtils';
-import { translate } from '../../Templates/ChartUtils';
+import * as ChartUtils from '.././Components/ChartUtils';
+import { translate } from '.././Components/ChartUtils';
 import TextEllipsis from './TextEllipsis';
+import { Rule } from './Rule';
 
 interface LegendProps {
   pivot: ChartUtils.PivotTable;
-  xRule: ChartUtils.Rule;
-  yRule: ChartUtils.Rule;
+  xRule: Rule;
+  yRule: Rule;
   color: d3.ScaleOrdinal<string, string>;
 }
 
@@ -28,16 +29,15 @@ export default class Legend extends React.Component<LegendProps> {
     return (
       <g>
         <g className="color-legend" transform={translate(xRule.start('content'), yRule.start('legend'))}>
-          {pivot.columns.map((s, i) => <rect key={s.key} className="color-rect"
-            x={legendScale(i.toString())!}
+          {pivot.columns.map((s, i) => <rect key={s.key} className="color-rect" transform={translate(legendScale(i.toString())!, 0)}
             width={yRule.size('legend')}
             height={yRule.size('legend')}
             fill={s.color || color(s.key)} />)}
         </g>
 
         <g className="color-legend" transform={translate(xRule.start('content') + legendMargin, yRule.middle('legend') + 1)}>
-          {pivot.columns.map((s, i) => <TextEllipsis key={s.key} maxWidth={legendScale.bandwidth() - legendMargin} className="color-text"
-            x={legendScale(i.toString())!}
+          {pivot.columns.map((s, i) => <TextEllipsis key={s.key} transform={translate(legendScale(i.toString())!, 0)}
+            maxWidth={legendScale.bandwidth() - legendMargin} className="color-text"
             dominantBaseline="middle">
             {s.niceName!}
           </TextEllipsis>)}

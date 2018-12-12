@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartUtils from '../../Templates/ChartUtils';
-import { translate } from '../../Templates/ChartUtils';
+import * as ChartUtils from './ChartUtils';
+import { translate } from './ChartUtils';
 
 
 export default class TextEllipsis extends React.Component<{ maxWidth: number, padding?: number, etcText?: string; } & React.SVGProps<SVGTextElement>> {

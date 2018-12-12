@@ -13,17 +13,20 @@ import { ChartScript, chartScripts, ChartRow } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ReactChart from '../D3Scripts/Components/ReactChart';
 
 
 export interface ChartRendererProps {
-  data: ChartClient.ChartTable;
   chartRequest: ChartRequestModel;
-  lastChartRequest: ChartRequestModel;
+  loading: boolean;
+  data?: ChartClient.ChartTable;
+  lastChartRequest?: ChartRequestModel;
 }
 
 export interface ChartRendererState {
   chartScript?: ChartScript;
-  chartComponent?: React.ComponentClass<{ data: ChartClient.ChartTable, onDrillDown: (e: ChartRow) => void }>;
+  parameters?: { [name: string]: string };
+  chartComponent?: (React.ComponentClass<ChartClient.ChartComponentProps>) | ((p: ChartClient.ChartScriptProps) => React.ReactNode);
 }
 
 
@@ -50,11 +53,9 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     const chartScript = await chartScriptPromise;
     const chartComponentModule = await chartComponentModulePromise();
 
+    const parameters = ChartClient.API.getParameterWithDefault(this.props.chartRequest, chartScript);
 
-    const data = this.props.data;
-    data.parameters = ChartClient.API.getParameterWithDefault(this.props.chartRequest, chartScript);
-
-    this.setState({ chartComponent: chartComponentModule.default, chartScript });
+    this.setState({ chartComponent: chartComponentModule.default, chartScript, parameters });
   }
 
 
@@ -105,7 +106,20 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     return (
       <FullscreenComponent>
         <ErrorBoundary>
-          {this.state.chartComponent && React.createElement(this.state.chartComponent, { data: this.props.data, onDrillDown: this.handleDrillDown })}
+          {this.state.chartComponent && this.state.parameters &&
+            (this.state.chartComponent.prototype instanceof React.Component ?
+              React.createElement(this.state.chartComponent as React.ComponentClass<ChartClient.ChartComponentProps>, {
+                data: this.props.data,
+                loading: this.props.loading,
+                onDrillDown: this.handleDrillDown,
+                parameters: this.state.parameters
+              }) :
+              <ReactChart data={this.props.data}
+                loading={this.props.loading}
+                onDrillDown={this.handleDrillDown}
+                parameters={this.state.parameters}
+                onRenderChart={this.state.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />)
+      }
         </ErrorBoundary>
       </FullscreenComponent>
     );
