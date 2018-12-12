@@ -417,3 +417,7 @@ table.sf-multi-value {
     border-radius: 0.25rem;
     background-color: #efefef;
 }
+
+.sf-mandatory {
+    border-left: 2px solid red;
+}

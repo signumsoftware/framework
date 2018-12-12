@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Navigator from '../Navigator'
 import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
@@ -154,7 +154,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     return (
       <Typeahead ref={ta => this.typeahead = ta}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete") }}
+        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", this.mandatoryClass) }}
         getItems={query => ac!.getItems(query)}
         getItemsDelay={ac.getItemsDelay}
         minLength={ac.minLength}

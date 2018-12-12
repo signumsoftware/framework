@@ -1,4 +1,4 @@
-﻿import * as moment from 'moment';
+import * as moment from 'moment';
 import * as numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES!
@@ -45,6 +45,7 @@ export interface MemberInfo {
   isIgnoredEnum?: boolean;
   unit?: string;
   format?: string;
+  required?: boolean;
   maxLength?: number;
   isMultiline?: boolean;
   preserveOrder?: boolean;
