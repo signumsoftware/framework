@@ -2114,7 +2114,7 @@
     <Member Name="Minutes" Description="Minuten" />
     <Member Name="Seconds" Description="Sekunden" />
   </Type>
-  <Type Name="ToolbarElementEmbedded" Description="Symbolleiste-element">
+  <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
     <Member Name="Content" Description="Inhalt" />
     <Member Name="IconColor" Description="Symbolfarbe" />
@@ -2124,13 +2124,13 @@
     <Member Name="Type" Description="Typ" />
     <Member Name="Url" Description="URL" />
   </Type>
-  <Type Name="ToolbarElementType" Description="Symbolleiste-Elementtyp">
+  <Type Name="ToolbarElementType" Description="Toolbar-Elementtyp">
     <Member Name="Divider" Description="Teiler" />
     <Member Name="Header" Description="Kopfzeile" />
     <Member Name="Link" Description="Link" />
     <Member Name="Menu" Description="Menü" />
   </Type>
-  <Type Name="ToolbarEntity" Description="Symbolleiste">
+  <Type Name="ToolbarEntity" Description="Toolbar">
     <Member Name="Elements" Description="Elemente" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Location" Description="Position" />
@@ -2138,7 +2138,7 @@
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Priority" Description="Priorität" />
   </Type>
-  <Type Name="ToolbarLocation" Description="Symbolleisten Position">
+  <Type Name="ToolbarLocation" Description="Toolbar-Position">
     <Member Name="Side" Description="Seite" />
     <Member Name="Top" Description="Oben" />
   </Type>
