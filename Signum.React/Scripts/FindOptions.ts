@@ -61,7 +61,7 @@ export interface FilterConditionOption {
 }
 
 export interface FilterGroupOption {
-  token: string;
+  token?: string;
   groupOperation: FilterGroupOperation;
   filters: FilterOption[];
 }
