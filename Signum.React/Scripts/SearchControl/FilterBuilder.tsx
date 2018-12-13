@@ -100,12 +100,12 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                     <a href="#" title={SearchMessage.AddFilter.niceToString()}
                       className="sf-line-button sf-create"
                       onClick={e => this.handlerNewFilter(e, false)}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddFilter.niceToString()}
                     </a>
                     <a href="#" title={SearchMessage.AddGroup.niceToString()}
                       className="sf-line-button sf-create ml-3"
                       onClick={e => this.handlerNewFilter(e, true)}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
                     </a>
                   </td>
                 </tr>
