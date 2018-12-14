@@ -146,7 +146,17 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Enum") {
 
-    var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).filter(a => !a.isIgnoredEnum).map(a => a.name);
+    var typeName = column.token!.type.name; 
+    
+    if (typeName == "boolean") {
+      return complete(values, [false, true], column, insertPoint);
+    }
+
+    var typeInfo = getTypeInfo(column.token!.type.name);
+    if (typeInfo == null)
+      throw new Error("No Metadata found for " + typeName);
+
+    var allValues = Dic.getValues(typeInfo.members).filter(a => !a.isIgnoredEnum).map(a => a.name);
 
     return complete(values, allValues, column, insertPoint);
   }

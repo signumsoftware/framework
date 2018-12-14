@@ -228,8 +228,11 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
           {mainShape && mainShape.renderer(r)}
           {innerShape && innerShape.renderer(r)}
           {
-            parseFloat(parameters["NumberOpacity"]) > 0 &&
-              <text className="punch-text sf-transition"
+              parseFloat(parameters["NumberOpacity"]) > 0 &&
+              <text className="punch-text sf-transition" transform={translate(
+                x(horizontalColumn.getValueKey(r))!,
+                -y(verticalColumn.getValueKey(r))!
+              )}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               opacity={parseFloat(parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(sizeColumn ? 0 : sizeColumn!.getValue(r)))}
