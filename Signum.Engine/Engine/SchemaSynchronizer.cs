@@ -262,7 +262,7 @@ namespace Signum.Engine
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
                                         difCol.CompatibleTypes(tabCol) ?
                                                  SqlPreCommand.Combine(Spacing.Simple,
-                                                    difCol.Nullable && !tabCol.Nullable.ToBool() ? NotNullUpdate(tab, tabCol, replacements) : null,
+                                                    difCol.Nullable && !tabCol.Nullable.ToBool() ? NotNullUpdate(tab, tabCol, replacements, difCol.Name != tabCol.Name) : null,
                                                     SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name)
                                                 ):
                                                 SqlPreCommand.Combine(Spacing.Simple,
@@ -410,14 +410,14 @@ namespace Signum.Engine
             }
         }
 
-        private static SqlPreCommandSimple NotNullUpdate(ITable tab, IColumn tabCol, Replacements rep)
+        private static SqlPreCommandSimple NotNullUpdate(ITable tab, IColumn tabCol, Replacements rep, bool goBefore)
         {
             var defaultValue = GetDefaultValue(tab, tabCol, rep, forNewColumn: false);
 
             if (defaultValue == "force")
                 return null;
 
-            return new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL");
+            return new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL") { GoBefore = goBefore };
         }
 
         private static bool DifferentDatabase(ObjectName name, ObjectName name2)
