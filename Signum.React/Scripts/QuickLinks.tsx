@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type } from './Reflection'
@@ -15,6 +15,8 @@ export function start() {
 
   onWidgets.push(getQuickLinkWidget);
   onContextualItems.push(getQuickLinkContextMenus);
+
+  Navigator.clearSettingsActions.push(clearQuickLinks);
 }
 
 export interface QuickLinkContext<T extends Entity> {
@@ -24,6 +26,11 @@ export interface QuickLinkContext<T extends Entity> {
 }
 
 type Seq<T> = (T | undefined)[] | T | undefined;
+
+export function clearQuickLinks() {
+  onGlobalQuickLinks.clear();
+  Dic.clear(onQuickLinks);
+}
 
 export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> = [];
 export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {

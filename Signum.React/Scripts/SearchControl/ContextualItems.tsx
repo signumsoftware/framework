@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { QueryDescription, } from '../FindOptions'
 import { Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
@@ -23,6 +23,10 @@ export interface MarkedRowsDictionary {
 export interface MarkedRow {
   className: string;
   message?: string;
+}
+
+export function clearContextualItems() {
+  onContextualItems.clear();
 }
 
 export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock | undefined> | undefined)[] = [];
