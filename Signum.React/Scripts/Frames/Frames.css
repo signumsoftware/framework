@@ -147,3 +147,12 @@ a.expand-window:hover {
 .sf-quicklinks{
     display: flex;
 }
+
+.sf-guid-id {
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.sf-guid-id:hover{
+    opacity: 1;
+}

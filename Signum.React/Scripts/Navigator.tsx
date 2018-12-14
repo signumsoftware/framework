@@ -91,10 +91,15 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
     if (entity.isNew)
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return NormalWindowMessage.Type0Id1.niceToString().formatWith(typeInfo.niceName, (entity as Entity).id);
+    return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
   }
 }
 
+let renderId = (entity: Entity): React.ReactChild => <span className={classes(getTypeInfo(entity.Type).members["Id"].type!.name == "Guid" ? "sf-guid-id" : "")}>{entity.id}</span>;
+
+export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
+  renderId = newFunction;
+}
 
 export function navigateRoute(entity: Entity): string;
 export function navigateRoute(lite: Lite<Entity>): string;
