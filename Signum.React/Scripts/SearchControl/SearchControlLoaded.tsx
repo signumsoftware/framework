@@ -1109,7 +1109,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }));
 
     const ctx: Finder.CellFormatterContext = {
-      refresh: () => this.doSearch(true).done()
+      refresh: () => this.doSearch(true).done(),
+      systemTime: this.props.findOptions.systemTime,
     };
 
     const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;

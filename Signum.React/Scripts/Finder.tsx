@@ -3,7 +3,7 @@ import * as moment from "moment"
 import * as numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
-import { Dic } from './Globals'
+import { Dic, classes } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -11,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, SystemTime
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
@@ -1125,6 +1125,7 @@ export class CellFormatter {
 
 export interface CellFormatterContext {
   refresh?: () => void;
+  systemTime?: SystemTime;
 }
 
 
@@ -1183,11 +1184,43 @@ export const formatRules: FormatRule[] = [
     formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
-    name: "DateTime",
+    name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
       const momentFormat = toMomentFormat(col.token!.format);
-      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi>{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+    }
+  },
+  {
+    name: "SystemValidFrom",
+    isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
+    formatter: col => {
+      return new CellFormatter((cell: string, ctx) => {
+        if (cell == undefined || cell == "")
+          return "";
+
+        var className = cell.startsWith("0001-") ? "date-start" :
+          ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+            undefined;
+
+        return <bdi className={classes("date", className)}>{moment(cell).format("YYYY-MM-DDTHH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+      });
+    }
+  },
+  {
+    name: "SystemValidTo",
+    isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidTo",
+    formatter: col => {
+      return new CellFormatter((cell: string, ctx) => {
+        if (cell == undefined || cell == "")
+          return "";
+
+        var className = cell.startsWith("9999-") ? "date-end" :
+          ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+            undefined;
+
+        return <bdi className={classes("date", className)}>{moment(cell).format("YYYY-MM-DDTHH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+      });
     }
   },
   {
