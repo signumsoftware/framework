@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
  using System.Data;
@@ -332,7 +332,7 @@ WHERE {oldPrimaryKey} NOT IN
     FROM {oldTableName}
     {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-)");
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}");
         }
 
         public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
@@ -378,8 +378,9 @@ WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
     FROM {uniqueIndex.Table.Name}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
     GROUP BY {columns}
-)".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)}".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
         }
 
         public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)
