@@ -245,6 +245,10 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
       return columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption)
         .concat(columnOptions);
 
+    case "InsertStart":
+      return columnOptions
+        .concat(columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption));
+
     case "Remove":
       return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.token == cd.name))
         .map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
