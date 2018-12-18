@@ -53,7 +53,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     return {
       queryKey: fo.queryKey,
       filters: toFilterRequests(fo.filterOptions),
-      valueToken: this.props.valueToken
+      valueToken: this.props.valueToken,
+      systemTime: fo.systemTime && { ...fo.systemTime }
     };
   }
 

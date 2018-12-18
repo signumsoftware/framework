@@ -245,6 +245,7 @@ export interface QueryValueRequest {
   queryKey: string;
   filters: FilterRequest[];
   valueToken?: string;
+  systemTime?: SystemTime;
 }
 
 export interface ResultColumn {

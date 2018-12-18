@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -111,32 +111,38 @@ namespace Signum.Engine.DynamicQuery
 
         public override object ExecuteQueryValue(QueryValueRequest request)
         {
-            var query = Query.ToDQueryable(GetQueryDescription())
+            using (SystemTime.Override(request.SystemTime))
+            {
+                var query = Query.ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters);
 
-            if (request.ValueToken == null)
-                return query.Query.Count();
+                if (request.ValueToken == null)
+                    return query.Query.Count();
 
-            if (request.ValueToken is AggregateToken)
-                return query.SimpleAggregate((AggregateToken)request.ValueToken);
+                if (request.ValueToken is AggregateToken)
+                    return query.SimpleAggregate((AggregateToken)request.ValueToken);
 
-            return query.SelectOne(request.ValueToken).Unique(UniqueType.Single);
+                return query.SelectOne(request.ValueToken).Unique(UniqueType.Single);
+            }
         }
 
         public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
         {
-            var query = Query.ToDQueryable(GetQueryDescription())
+            using (SystemTime.Override(request.SystemTime))
+            {
+                var query = Query.ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters);
 
-            if (request.ValueToken == null)
-                return await query.Query.CountAsync(token);
+                if (request.ValueToken == null)
+                    return await query.Query.CountAsync(token);
 
-            if (request.ValueToken is AggregateToken)
-                return await query.SimpleAggregateAsync((AggregateToken)request.ValueToken, token);
+                if (request.ValueToken is AggregateToken)
+                    return await query.SimpleAggregateAsync((AggregateToken)request.ValueToken, token);
 
-            return await query.SelectOne(request.ValueToken).UniqueAsync(UniqueType.Single, token);
+                return await query.SelectOne(request.ValueToken).UniqueAsync(UniqueType.Single, token);
+            }
         }
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
