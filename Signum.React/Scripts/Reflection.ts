@@ -88,8 +88,8 @@ export function toMomentFormat(format: string | undefined): string | undefined {
     case "M":
     case "m": return "D MMM";
     case "u":
-    case "s":
-    case "o": return undefined;
+    case "s": return "YYYY-MM-DDTHH:mm:ss";
+    case "o": 
     case "t": return "LT";
     case "T": return "LTS";
     case "y": return "LTS";
