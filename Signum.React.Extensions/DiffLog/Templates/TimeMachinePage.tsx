@@ -43,7 +43,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
     Navigator.API.fillToStrings(lite).then(() => {
       this.setState({ lite });
     }).catch(a => {
-      lite.toStr = EngineMessage.EntityWithType0AndId1NotFound.niceToString();
+      lite.toStr = TimeMachineMessage.EntityDeleted.niceToString();
       this.setState({ lite });
     });
 
@@ -83,9 +83,9 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
             filterOptions: [{ token: "Entity", operation: "EqualTo", value: lite }],
             columnOptions: [
               { token: "Entity.SystemValidFrom" },
-              ...Dic.getValues(this.state.queryDescription.columns).map(c => ({ token: c.name }) as ColumnOption)
+              { token: "Entity.SystemValidTo" },
             ],
-            columnOptionsMode: "Replace",
+            columnOptionsMode: "InsertStart",
             orderOptions: [{ token: "Entity.SystemValidFrom", orderType: "Ascending" }],
             systemTime: { mode: "All" }
           }}
