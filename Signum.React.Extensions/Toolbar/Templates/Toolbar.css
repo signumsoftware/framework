@@ -47,3 +47,7 @@ li.menu-item-1 > a {
     height: 2px;
     background-color: #e7e7e7;
 }
+
+.sidebar .dropdown-item .icon {
+    width: 20px;
+}
