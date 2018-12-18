@@ -38,22 +38,30 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
   }
 
   componentWillMount() {
-    this.requestAndRedraw().done();
+    this.requestAndRedraw(this.props).done();
   }
 
   componentWillReceiveProps(newProps: ChartRendererProps) {
-    this.requestAndRedraw().done();
+    if (!is(this.props.chartRequest.chartScript, newProps.chartRequest.chartScript))
+      this.requestAndRedraw(newProps).done();
+    else {
+      if (this.state.chartScript) {
+        var newParams = ChartClient.API.getParameterWithDefault(newProps.chartRequest, this.state.chartScript);
+        if (!Dic.equals(this.state.parameters, newParams, false))
+          this.setState({ parameters: newParams });
+      }
+    }
   }
 
-  async requestAndRedraw() {
+  async requestAndRedraw(newProps: ChartRendererProps) {
 
-    const chartScriptPromise = ChartClient.getChartScript(this.props.chartRequest.chartScript);
-    const chartComponentModulePromise = ChartClient.getRegisteredChartScriptComponent(this.props.chartRequest.chartScript);
+    const chartScriptPromise = ChartClient.getChartScript(newProps.chartRequest.chartScript);
+    const chartComponentModulePromise = ChartClient.getRegisteredChartScriptComponent(newProps.chartRequest.chartScript);
 
     const chartScript = await chartScriptPromise;
     const chartComponentModule = await chartComponentModulePromise();
 
-    const parameters = ChartClient.API.getParameterWithDefault(this.props.chartRequest, chartScript);
+    const parameters = ChartClient.API.getParameterWithDefault(newProps.chartRequest, chartScript);
 
     this.setState({ chartComponent: chartComponentModule.default, chartScript, parameters });
   }
