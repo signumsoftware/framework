@@ -132,7 +132,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         scaleFor(column, data!.rows.map(column.getValue), 0, circleSize * circleSize, parameters["SizeScale"]);
 
       return {
-        numberOpacity: n => area(n) / 500,
+        numberOpacity: n => { return area(n) / (15 * 15); },
         renderer: r => <circle
           transform={translate(
             x(horizontalColumn.getValueKey(r))!,
@@ -151,7 +151,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       var recHeight = (r: ChartRow) => Math.sqrt(area(rowValue(r)) / ratio);
 
       return {
-        numberOpacity: n => area(n) / 500,
+        numberOpacity: n => area(n) / (22 * 22),
         renderer: r => <rect transform={translate(
           x(horizontalColumn.getValueKey(r))! - recWidth(r) / 2,
           -y(verticalColumn.getValueKey(r))! - recHeight(r) / 2
@@ -235,7 +235,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
               )}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
-              opacity={parseFloat(parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(sizeColumn ? 0 : sizeColumn!.getValue(r)))}
+              opacity={parseFloat(parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(!sizeColumn ? 0 : sizeColumn.getValue(r)))}
               textAnchor="middle"
               fontWeight="bold">
               {sizeColumn ? sizeColumn.getValueNiceName(r) :
