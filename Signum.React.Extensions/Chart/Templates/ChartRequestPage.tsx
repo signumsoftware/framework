@@ -12,7 +12,12 @@ interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string;
 
 }
 
-export default class ChartRequestPage extends React.Component<ChartRequestPageProps, { chartRequest?: ChartRequestModel; userChart?: Lite<UserChartEntity> }> {
+interface ChartRequestPageState {
+  chartRequest?: ChartRequestModel;
+  userChart?: Lite<UserChartEntity>;
+}
+
+export default class ChartRequestPage extends React.Component<ChartRequestPageProps, ChartRequestPageState> {
 
   constructor(props: ChartRequestPageProps) {
     super(props);
@@ -25,6 +30,19 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
 
   componentWillReceiveProps(nextProps: ChartRequestPageProps) {
     this.load(nextProps);
+  }
+
+  shouldComponentUpdate(nextProps: ChartRequestPageProps, nextState: ChartRequestPageState) {
+
+    if (this.state.chartRequest != nextState.chartRequest || this.state.userChart != nextState.userChart)
+      return true;
+    
+    if ((nextProps.location.pathname + nextProps.location.search) == this.justReplacedPath) {
+      this.justReplacedPath = undefined;
+      return false;
+    }
+
+    return true
   }
 
   load(props: ChartRequestPageProps) {
@@ -43,11 +61,22 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
   }
 
   handleOnChange = (cr: ChartRequestModel, uc?: Lite<UserChartEntity>) => {
-    this.setState({ userChart: uc }, () =>
-      ChartClient.Encoder.chartPathPromise(cr, uc)
-        .then(path => Navigator.history.replace(path))
-        .done()
-    );
+
+    if (this.state.userChart != uc)
+      this.setState({ userChart: uc }, () => this.changeUrl(cr, uc));
+    else
+      this.changeUrl(cr, uc);
+  }
+
+
+  justReplacedPath?: string;
+  changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
+    ChartClient.Encoder.chartPathPromise(cr, uc)
+      .then(path => {
+        this.justReplacedPath = path;
+        Navigator.history.replace(path);
+      })
+      .done()
   }
 
   render() {
