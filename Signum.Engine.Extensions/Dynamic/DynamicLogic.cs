@@ -231,7 +231,7 @@ namespace Signum.Engine.Dynamic
                         .Select(d => new CompilationError
                         {
                             Column = d.Location.GetLineSpan().StartLinePosition.Character,
-                            Line = d.Location.GetLineSpan().StartLinePosition.Line,
+                            Line = d.Location.GetLineSpan().StartLinePosition.Line + 1,
                             FileContent = d.Location.SourceTree.ToString(),
                             FileName = d.Location.SourceTree.FilePath,
                             ErrorNumber = d.Descriptor.Id,
