@@ -28,8 +28,12 @@ export interface CompilationError {
 }
 
 export namespace API {
+  export function compile(): Promise<CompilationError[]> {
+    return ajaxPost<CompilationError[]>({ url: `~/api/dynamic/compile?inMemory=false` }, null);
+  }
+
   export function getCompilationErrors(): Promise<CompilationError[]> {
-    return ajaxPost<CompilationError[]>({ url: `~/api/dynamic/compile` }, null);
+    return ajaxPost<CompilationError[]>({ url: `~/api/dynamic/compile?inMemory=true` }, null);
   }
 
   export function restartServer(): Promise<void> {
@@ -43,6 +47,10 @@ export namespace API {
   export function getEvalErrors(request: QueryEntitiesRequest): Promise<EvalEntityError[]> {
     return ajaxPost<EvalEntityError[]>({ url: `~/api/dynamic/evalErrors` }, request);
   }
+
+  export function getPanelInformation(): Promise<DynamicPanelInformation> {
+    return ajaxPost<DynamicPanelInformation>({ url: `~/api/dynamic/getPanelInformation` }, null);
+  }
 }
 
 export interface EvalEntityError {
@@ -50,5 +58,9 @@ export interface EvalEntityError {
   error: string;
 }
 
-
+export interface DynamicPanelInformation {
+  lastDynamicCompilationDateTime?: string;
+  loadedCodeGenAssemblyDateTime?: string;
+  lastDynamicChangeDateTime?: string;
+}
 

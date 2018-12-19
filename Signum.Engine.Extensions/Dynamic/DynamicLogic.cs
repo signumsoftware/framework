@@ -39,6 +39,26 @@ namespace Signum.Engine.Dynamic
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
 
+        public static FileInfo GetLastCodeGenAssemblyFileInfo()
+        {
+            return new DirectoryInfo(DynamicCode.CodeGenDirectory)
+                .GetFiles($"{DynamicCode.CodeGenAssembly.Before(".")}*.dll")
+                .OrderByDescending(f => f.CreationTime)
+                .FirstOrDefault();
+        }
+
+        public static FileInfo GetLoadedCodeGenAssemblyFileInfo()
+        {
+            return new DirectoryInfo(DynamicCode.CodeGenDirectory)
+                .GetFiles(Path.GetFileName(DynamicCode.CodeGenAssemblyPath))
+                .FirstOrDefault();
+        }
+
+        public static void BindCodeGenAssembly()
+        {
+            DynamicCode.CodeGenAssemblyPath = GetLastCodeGenAssemblyFileInfo()?.FullName;
+        }
+
         public static void CompileDynamicCode()
         {
             try
