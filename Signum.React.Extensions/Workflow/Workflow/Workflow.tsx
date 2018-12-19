@@ -83,19 +83,26 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     var ctx = this.props.ctx.subCtx({ labelColumns: 3 });
     return (
       <div>
-        <div className="row">
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx.subCtx(d => d.name)} />
-            <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-              autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
-              find={false}
-              onRemove={this.handleMainEntityTypeChange} />
-            <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
+        <CollapsableCard
+          header={<span className="display-7">{WorkflowMessage.WorkflowProperties.niceToString()}</span>}
+          cardStyle={{ background: "info" }}
+          headerStyle={{ text: "light" }}
+          bodyStyle={{ background: "light" }}
+          defaultOpen={ctx.value.isNew} >
+          <div className="row">
+            <div className="col-sm-6">
+              <ValueLine ctx={ctx.subCtx(d => d.name)} />
+              <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
+                autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
+                find={false}
+                onRemove={this.handleMainEntityTypeChange} />
+              <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
+            </div>
+            <div className="col-sm-6">
+              <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-25px" } }} />
+            </div>
           </div>
-          <div className="col-sm-6">
-            <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-25px" } }} />
-          </div>
-        </div>
+        </CollapsableCard>
         {this.renderIssues()}
         <fieldset>
           {this.state.initialXmlDiagram ?
