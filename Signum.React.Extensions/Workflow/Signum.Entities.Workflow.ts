@@ -612,6 +612,7 @@ export module WorkflowMessage {
   export const ResetZoom = new MessageKey("WorkflowMessage", "ResetZoom");
   export const Color = new MessageKey("WorkflowMessage", "Color");
   export const WorkflowIssues = new MessageKey("WorkflowMessage", "WorkflowIssues");
+  export const WorkflowProperties = new MessageKey("WorkflowMessage", "WorkflowProperties");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");

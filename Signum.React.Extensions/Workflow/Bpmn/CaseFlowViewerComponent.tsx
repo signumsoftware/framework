@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
@@ -7,8 +7,10 @@ import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'
 import searchPad from 'bpmn-js/lib/features/search'
+import * as customMinimap from './CustomMinimap'
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
+import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
@@ -31,7 +33,7 @@ class CustomViewer extends NavigatedViewer {
 }
 
 CustomViewer.prototype._modules =
-  CustomViewer.prototype._modules.concat([caseFlowRenderer]);
+  CustomViewer.prototype._modules.concat([caseFlowRenderer, customMinimap]);
 
 export default class CaseFlowViewerComponent extends React.Component<CaseFlowViewerComponentProps, CaseFlowViewerComponentState> {
 

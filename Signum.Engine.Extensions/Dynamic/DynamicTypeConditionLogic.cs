@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Cache;
+using Signum.Engine.Cache;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -68,6 +68,7 @@ namespace Signum.Engine.Dynamic
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+                DynamicCode.RegisteredDynamicTypes.Add(typeof(DynamicTypeConditionEntity));
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType == type));
                 sb.AddUniqueIndex((DynamicTypeConditionEntity e) => new { e.SymbolName, e.EntityType });
             }

@@ -10,7 +10,7 @@ import { ValueSearchControl, FindOptions } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
-import { API, CompilationError, EvalEntityError } from './DynamicClient'
+import { API, CompilationError, EvalEntityError, DynamicPanelInformation } from './DynamicClient'
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -21,12 +21,15 @@ import { Tab, Tabs } from '@framework/Components/Tabs';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
+import { validate } from './View/NodeUtils';
+import { JavascriptMessage } from '@framework/Signum.Entities';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
 
 interface DynamicPanelState {
   startErrors?: WebApiHttpError[];
+  panelInformation?: DynamicPanelInformation;
 }
 
 type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
@@ -49,8 +52,14 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
   }
 
   componentWillMount() {
+    this.loadData();
+  }
+
+  loadData() {
     API.getStartErrors()
       .then(errors => this.setState({ startErrors: errors }))
+      .then(() => API.getPanelInformation())
+      .then(info => this.setState({ panelInformation: info }))
       .done();
   }
 
@@ -68,15 +77,17 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
             {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                     </div>
         }
+        {this.state.panelInformation ? this.renderPanelInformation() : JavascriptMessage.loading.niceToString()}
         <Tabs activeEventKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
           <Tab eventKey="compile" title="1. Edit and Compile">
-            <CompileStep />
+            <CompileStep refreshView={() => this.loadData()} />
           </Tab>
 
           <Tab eventKey="restartServerApp" title="2. Restart Server Application">
             <RestartServerAppStep
               startErrors={this.state.startErrors}
-              setStartErrors={errors => this.setState({ startErrors: errors })} />
+              setStartErrors={errors => this.setState({ startErrors: errors })}
+              refreshView={() => this.loadData()} />
           </Tab>
 
           {Options.getDynaicMigrationsStep &&
@@ -96,6 +107,39 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
       </div>
     );
   }
+
+  renderPanelInformation() {
+    const lastCompile = this.state.panelInformation && this.state.panelInformation.lastDynamicCompilationDateTime;
+    const lastChange = this.state.panelInformation && this.state.panelInformation.lastDynamicChangeDateTime;
+    const loadedAssembly = this.state.panelInformation && this.state.panelInformation.loadedCodeGenAssemblyDateTime;
+
+    const validStyle = { color: "green" } as React.CSSProperties;
+    const invalidStyle = { color: "red", fontWeight: "bold" } as React.CSSProperties;
+
+    const isValidCompile = lastChange && lastCompile && moment(lastCompile).isBefore(moment(lastChange)) ? false : true;
+    const isValidAssembly = lastChange && loadedAssembly && moment(loadedAssembly).isBefore(moment(lastChange)) ? false : true;
+
+    return (
+      <table className="table table-condensed form-vertical" style={{ width: "20%" }}>
+        <tr>
+          <th>Last Dynamic Change</th>
+          <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
+        </tr>
+        <tr>
+          <th>Last Dynamic Compilation</th>
+          <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? moment(lastCompile).format("L LT") : "-"}</td>
+        </tr>
+        <tr>
+          <th>Loaded CodeGen Assembly</th>
+          <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
+        </tr>
+      </table>
+    );
+  }
+}
+
+interface DynamicCompileStepProps {
+  refreshView?: () => void;
 }
 
 interface DynamicCompileStepState {
@@ -104,14 +148,23 @@ interface DynamicCompileStepState {
   applicationRestarting?: moment.Moment;
 }
 
-export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
+export class CompileStep extends React.Component<DynamicCompileStepProps, DynamicCompileStepState>{
 
   constructor(props: any) {
     super(props);
-    this.state = {};
+    this.state = { };
   }
 
   handleCompile = (e: React.MouseEvent<any>) => {
+    e.preventDefault();
+    API.compile()
+      .then(errors => {
+        this.setState({ complationErrors: errors, selectedErrorIndex: undefined });
+        this.props.refreshView && this.props.refreshView();
+      }).done();
+  }
+
+  handleCheck = (e: React.MouseEvent<any>) => {
     e.preventDefault();
     API.getCompilationErrors()
       .then(errors => this.setState({ complationErrors: errors, selectedErrorIndex: undefined }))
@@ -130,8 +183,9 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
       <div>
         {lineContainer}
         <br />
-        {<a href="#" className="sf-button btn btn-success" onClick={this.handleCompile}>Compile</a>}
-        {errors && this.renderCompileResult(errors)}
+          {<a href="#" className="sf-button btn btn-warning" onClick={this.handleCheck}>Check</a>}&nbsp;
+          {<a href="#" className="sf-button btn btn-success" onClick={this.handleCompile}>Compile</a>}
+          {errors && this.renderCompileResult(errors)}
       </div>
     );
   }
@@ -195,6 +249,7 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
 interface RestartServerAppStepProps {
   setStartErrors: (startErrors?: WebApiHttpError[]) => void;
   startErrors?: WebApiHttpError[];
+  refreshView?: () => void;
 }
 
 interface RestartServerAppStepState {
@@ -233,6 +288,7 @@ export class RestartServerAppStep extends React.Component<RestartServerAppStepPr
         var errors = await API.getStartErrors();
         this.props.setStartErrors(errors);
         this.setState({ serverRestarting: undefined });
+        this.props.refreshView && this.props.refreshView();
         return;
       } catch (e) {
         if (e instanceof SyntaxError) {

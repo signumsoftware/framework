@@ -1,4 +1,4 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage, WorkflowEventTaskModel, WorkflowTimerEmbedded, WorkflowGatewayModel } from '../Signum.Entities.Workflow'
 import Modeler from "bpmn-js/lib/Modeler"
@@ -8,7 +8,9 @@ import * as connectionIcons from './ConnectionIcons'
 import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'
 import * as customContextPad from './CustomContextPad'
+import * as customMinimap from './CustomMinimap'
 import * as BpmnUtils from './BpmnUtils'
+import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
@@ -16,6 +18,7 @@ import { Button } from '@framework/Components';
 import { newMListElement } from '@framework/Signum.Entities';
 import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
 import { Dic } from '@framework/Globals';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 export interface BpmnModelerComponentProps {
   workflow: WorkflowEntity;
@@ -28,7 +31,7 @@ class CustomModeler extends Modeler {
 }
 
 CustomModeler.prototype._modules =
-  CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu, customContextPad]);
+  CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu, customContextPad, customMinimap]);
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
   private modeler!: Modeler;
@@ -51,7 +54,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       },
       additionalModules: [
         connectionIcons,
-      ],
+     ],
     });
     this.configureModules();
     this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
@@ -503,9 +506,32 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
   render() {
     return (
       <div>
-        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick}>
+          <FontAwesomeIcon icon="image" />
+        </Button>
         <div ref={this.setDiv} />
       </div>
     );
+  }
+
+  handleSaveSvgClick = () => {
+    const fileName = this.props.workflow.name ? `${this.props.workflow.name}.svg` : "diagram.svg";
+
+    this.getSvg()
+      .then(svgData => {
+        var svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+        var svgUrl = URL.createObjectURL(svgBlob);
+        var downloadLink = document.createElement("a");
+        downloadLink.href = svgUrl;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        try {
+          downloadLink.click();
+        }
+        finally {
+          document.body.removeChild(downloadLink);
+        }
+      }).done();
   }
 }

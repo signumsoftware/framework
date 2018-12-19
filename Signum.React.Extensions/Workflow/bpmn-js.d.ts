@@ -274,4 +274,11 @@ declare module 'bpmn-js/lib/features/search' {
   export default a;
 }
 
+declare module 'diagram-js-minimap/lib/Minimap' {
+
+  export default class Minimap {
+    constructor(config: any, injector: any, eventBus: any, canvas: any, elementRegistry: any);
+  }
+}
+
 
