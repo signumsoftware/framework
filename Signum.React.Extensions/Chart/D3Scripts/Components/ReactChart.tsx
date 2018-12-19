@@ -30,7 +30,7 @@ export default class ReactChart extends React.Component<ReactChartProps, { width
   setDivElement(div?: HTMLDivElement | null) {
     if (this.divElement == null && div != null) {
       const rect = div.getBoundingClientRect();
-      if (this.state.width != rect.width || this.state.height != rect.height) {
+      if (this.state.width != rect.width && this.state.height != rect.height) {
         this.setState({ width: rect.width, height: rect.height });
       }
 
