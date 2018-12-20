@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
  using System.Data;
@@ -453,24 +453,30 @@ WHERE {primaryKey.Name} NOT IN
                 ));
         }
 
-        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
+        public static SqlPreCommand RenameOrChangeSchema(ObjectName oldTableName, ObjectName newTableName)
         {
-            if (object.Equals(oldTable.Name.Schema, newTable.Name.Schema))
-                return RenameTable(oldTable.Name, newTable.Name.Name);
+            if (!object.Equals(oldTableName.Schema.Database, newTableName.Schema.Database))
+                throw new InvalidOperationException("Different database");
 
-            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
-            {
-                var oldNewSchema = oldTable.Name.OnSchema(newTable.Name.Schema);
-
-                return SqlPreCommand.Combine(Spacing.Simple,
-                    AlterSchema(oldTable.Name, newTable.Name.Schema),
-                    oldNewSchema.Equals(newTable.Name) ? null : RenameTable(oldNewSchema, newTable.Name.Name));
-            }
+            if (object.Equals(oldTableName.Schema, newTableName.Schema))
+                return RenameTable(oldTableName, newTableName.Name);
+            
+            var oldNewSchema = oldTableName.OnSchema(newTableName.Schema);
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                CreateTableSql(newTable),
-                MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
-                DropTable(oldTable));
+                AlterSchema(oldTableName, newTableName.Schema),
+                oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name));
+        }
+
+        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
+        {
+            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
+                return RenameOrChangeSchema(oldTable.Name, newTable.Name);
+            
+            return SqlPreCommand.Combine(Spacing.Simple,
+              CreateTableSql(newTable),
+              MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
+              DropTable(oldTable));
         }
 
         public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)
