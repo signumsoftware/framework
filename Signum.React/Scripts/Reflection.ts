@@ -883,8 +883,8 @@ export class Type<T extends ModifiableEntity> implements IType {
 /*  Some examples being in ExceptionEntity:
  *  "User" -> ExceptionEntity.token().append(a => a.user) 
  *            ExceptionEntity.token(a => a.user) 
- *  "Entity.User" -> ExceptionEntity.token().entity(a => a.user)
- *                   ExceptionEntity.token().entity().append(a=>a.user)
+ *  "Entity.User" -> ExceptionEntity.token().entity().append(a=>a.user)
+ *                   ExceptionEntity.token().entity(a => a.user)
  * 
  */
 export class QueryTokenString<T> {
