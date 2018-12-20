@@ -514,7 +514,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
       </FormGroup>
     );
 
@@ -528,12 +528,17 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   if (!showTime)
     currentDate = currentDate.startOf("day");
 
+  const htmlAttributes = {
+    placeholder: getPlaceholder(vl),
+    ...vl.state.valueHtmlAttributes
+  } as React.AllHTMLAttributes<any>;
+
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
         <div className={s.ctx.rwWidgetClass}>
           <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
-            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
+            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
       )}
     </FormGroup>
