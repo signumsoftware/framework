@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Dynamic;
+using Signum.Engine;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Dynamic
 {
@@ -30,11 +32,11 @@ namespace Signum.React.Dynamic
         }
 
         [HttpPost("api/dynamic/compile")]
-        public List<CompilationErrorTS> Compile()
+        public List<CompilationErrorTS> Compile(bool inMemory)
         {
             SystemEventLogLogic.Log("DynamicController.Compile");
             Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
-            var result = DynamicLogic.Compile(codeFiles, inMemory: true);
+            var result = DynamicLogic.Compile(codeFiles, inMemory: inMemory);
             return (from ce in result.Errors
                     let fileName = Path.GetFileName(ce.FileName)
                     select (new CompilationErrorTS
@@ -98,11 +100,30 @@ namespace Signum.React.Dynamic
             .Where(ee => ee.error.HasText())
             .ToList();
         }
+
+        [HttpPost("api/dynamic/getPanelInformation")]
+        public DynamicPanelInformation GetPanelInformation()
+        {
+            return new DynamicPanelInformation() {
+                lastDynamicCompilationDateTime = DynamicLogic.GetLastCodeGenAssemblyFileInfo()?.CreationTime,
+                loadedCodeGenAssemblyDateTime = DynamicLogic.GetLoadedCodeGenAssemblyFileInfo()?.CreationTime,
+                lastDynamicChangeDateTime = Database.Query<OperationLogEntity>()
+                        .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target.EntityType))
+                        .Max(a => a.End),
+            };
+        } 
     }
 
     public class EvalEntityError
     {
         public Lite<Entity> lite;
         public string error;
+    }
+
+    public class DynamicPanelInformation
+    {
+        public DateTime? lastDynamicCompilationDateTime;
+        public DateTime? loadedCodeGenAssemblyDateTime;
+        public DateTime? lastDynamicChangeDateTime;
     }
 }
