@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
@@ -35,7 +35,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
           <div className="col-sm-5">
             <ValueLine ctx={ctx4.subCtx(t => t.type)} onChange={this.handleTypeChanges} />
           </div>
-          <div className="col-sm-5 col-sm-offset-1">
+          <div className="col-sm-5 offset-sm-1">
             {ctx2.value.type != "Divider" && <EntityLine ctx={ctx2.subCtx(t => t.content)} onChange={() => this.forceUpdate()} />}
           </div>
         </div>
@@ -50,8 +50,8 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
               {icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
             </div>
             <div className="col-sm-5">
-              <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
-              {ctx2.value.type == "Link" && ctx2.value.content == null && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
+            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
+            {ctx2.value.type == "Link" && ctx2.value.content == null && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
               {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
                 <div>
                   <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)} />
