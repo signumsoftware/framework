@@ -173,7 +173,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       groupResults: fo.groupResults,
       filters: toFilterRequests(fo.filterOptions),
       columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-        .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token, displayName: "" }))),
+        .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
       orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
       pagination: fo.pagination,
       systemTime: fo.systemTime,

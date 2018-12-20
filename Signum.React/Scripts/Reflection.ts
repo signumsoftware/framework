@@ -4,6 +4,7 @@ import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
+import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
@@ -864,6 +865,85 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   isLite(obj: any): obj is Lite<T & Entity> {
     return obj && (obj as Lite<Entity>).EntityType == this.typeName;
+  }
+
+  /* Constructs a QueryToken compatible string like "Name" from a strongly typed lambda like a => a.name
+   * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc) but this method works in the common simple cases*/
+  token(): QueryTokenString<T>;
+  token<S>(lambdaToColumn: (v: T) => S) : QueryTokenString<S>;
+  token(lambdaToColumn?: Function): QueryTokenString<any> {
+    if (lambdaToColumn == null)
+      return new QueryTokenString("");
+    else
+      return new QueryTokenString(getLambdaMembers(lambdaToColumn).map(a => a.name.firstUpper()).join("."));
+  }
+}
+
+
+/*  Some examples being in ExceptionEntity:
+ *  "User" -> ExceptionEntity.token().append(a => a.user) 
+ *            ExceptionEntity.token(a => a.user) 
+ *  "Entity.User" -> ExceptionEntity.token().entity(a => a.user)
+ *                   ExceptionEntity.token().entity().append(a=>a.user)
+ * 
+ */
+export class QueryTokenString<T> {
+
+  token: string;
+  constructor(token: string) {
+    this.token = token;
+  }
+
+  toString() {
+    return this.token;
+  }
+
+  static entity<T extends Entity = Entity>() {
+    return new QueryTokenString<T>("Entity");
+  }
+
+  static count() {
+    return new QueryTokenString("Count");
+  }
+
+  systemValidFrom() {
+    return new QueryTokenString(this.token + ".SystemValidFrom");
+  }
+
+  systemValidTo() {
+    return new QueryTokenString(this.token + "Entity.SystemValidTo");
+  }
+
+  entity() : QueryTokenString<T>;
+  entity<S>(lambdaToProperty: (v: T) => S) : QueryTokenString<S>;
+  entity(lambdaToProperty?: Function): QueryTokenString<any> {
+    if (this.token != "")
+      throw new Error("entity is only meant to be used with an empty token");
+
+    if (lambdaToProperty == null)
+      return new QueryTokenString("Entity")
+    else
+      return new QueryTokenString("Entity." + getLambdaMembers(lambdaToProperty).map(a => a.name.firstUpper()).join("."));
+  }
+
+  cast<R extends Entity>(t: Type<R>): QueryTokenString<R> {
+    return new QueryTokenString<R>(this.token + ".(" + t.typeName + ")");
+  }
+
+  append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + "." + getLambdaMembers(lambdaToProperty).map(a => a.name.firstUpper()).join("."));
+  }
+
+  mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
+    return new QueryTokenString<M>(this.token);
+  }
+
+  implicit<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token);
+  }
+
+  expression<S>(expressionName: string): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + "." + expressionName);
   }
 }
 

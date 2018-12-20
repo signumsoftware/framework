@@ -327,11 +327,11 @@ export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boo
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-  orderOptions.forEach(a => completer.request(a.token, sto));
+  orderOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
     .then(() => orderOptions.map(oo => ({
-      token: completer.get(oo.token),
+      token: completer.get(oo.token.toString()),
       orderType: oo.orderType || "Ascending",
     }) as OrderOptionParsed));
 }
@@ -340,12 +340,12 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-  columnOptions.forEach(a => completer.request(a.token, sto));
+  columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
     .then(() => columnOptions.map(co => ({
-      token: completer.get(co.token),
-      displayName: co.displayName || completer.get(co.token).niceName,
+      token: completer.get(co.token.toString()),
+      displayName: co.displayName || completer.get(co.token.toString()).niceName,
     }) as ColumnOptionParsed));
 }
 
@@ -496,10 +496,10 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     fo.filterOptions.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
   if (fo.orderOptions)
-    fo.orderOptions.forEach(oo => completer.request(oo.token, SubTokensOptions.CanElement | canAggregate));
+    fo.orderOptions.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions)
-    fo.columnOptions.forEach(co => completer.request(co.token, SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   return completer.finished().then(() => {
 
@@ -510,12 +510,12 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
       systemTime: fo.systemTime,
 
       columnOptions: (fo.columnOptions || []).map(co => ({
-        token: completer.get(co.token),
-        displayName: co.displayName || completer.get(co.token).niceName
+        token: completer.get(co.token.toString()),
+        displayName: co.displayName || completer.get(co.token.toString()).niceName
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions || []).map(oo => ({
-        token: completer.get(oo.token),
+        token: completer.get(oo.token.toString()),
         orderType: oo.orderType,
       }) as OrderOptionParsed),
 
@@ -642,7 +642,7 @@ export function expandParentColumn(fo: FindOptions): FindOptions {
     ...(fo.filterOptions || [])
   ];
 
-  if (!fo.parentToken.contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
+  if (!fo.parentToken.toString().contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
     fo.columnOptions = [
       { token: fo.parentToken },
       ...(fo.columnOptions || [])
@@ -680,12 +680,12 @@ export class TokenCompleter {
   requestFilter(fo: FilterOption, options: SubTokensOptions) {
 
     if (isFilterGroupOption(fo)) {
-      fo.token && this.request(fo.token, options);
+      fo.token && this.request(fo.token.toString(), options);
 
       fo.filters.forEach(f => this.requestFilter(f, options));
     } else {
 
-      this.request(fo.token, options);
+      this.request(fo.token.toString(), options);
     }
   }
 
@@ -735,13 +735,13 @@ export class TokenCompleter {
   toFilterOptionParsed(fo: FilterOption): FilterOptionParsed {
     if (isFilterGroupOption(fo))
       return ({
-        token: fo.token && this.get(fo.token),
+        token: fo.token && this.get(fo.token.toString()),
         groupOperation: fo.groupOperation,
         filters: fo.filters.map(f => this.toFilterOptionParsed(f))
       } as FilterGroupOptionParsed);
     else
       return ({
-        token: this.get(fo.token),
+        token: this.get(fo.token.toString()),
         operation: fo.operation || "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,

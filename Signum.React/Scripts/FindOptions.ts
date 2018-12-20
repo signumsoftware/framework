@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";
@@ -25,7 +25,7 @@ export interface ModalFindOptions {
 export interface FindOptions {
   queryName: PseudoType | QueryKey;
   groupResults?: boolean;
-  parentToken?: string;
+  parentToken?: string | QueryTokenString<any>;
   parentValue?: any;
 
   filterOptions?: FilterOption[];
@@ -54,14 +54,14 @@ export function isFilterGroupOption(fo: FilterOption): fo is FilterGroupOption {
 }
 
 export interface FilterConditionOption {
-  token: string;
+  token: string | QueryTokenString<any>;
   frozen?: boolean;
   operation?: FilterOperation;
   value: any;
 }
 
 export interface FilterGroupOption {
-  token?: string;
+  token?: string | QueryTokenString<any>;
   groupOperation: FilterGroupOperation;
   filters: FilterOption[];
 }
@@ -87,7 +87,7 @@ export interface FilterGroupOptionParsed {
 }
 
 export interface OrderOption {
-  token: string;
+  token: string | QueryTokenString<any>;
   orderType: OrderType;
 }
 
@@ -97,7 +97,7 @@ export interface OrderOptionParsed {
 }
 
 export interface ColumnOption {
-  token: string;
+  token: string | QueryTokenString<any>;
   displayName?: string;
 }
 
