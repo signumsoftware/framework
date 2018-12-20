@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
@@ -100,19 +100,19 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
               navigate={false}
               findOptions={{
                 queryName: CaseActivityEntity,
-                parentToken: "Case",
+                parentToken: CaseActivityEntity.token(e => e.case),
                 parentValue: ctx.value,
                 columnOptionsMode: "Replace",
                 columnOptions: [
-                  { token: "Id" },
-                  { token: "WorkflowActivity" },
-                  { token: "StartDate" },
-                  { token: "DoneDate" },
-                  { token: "DoneBy" },
-                  { token: "Previous.ToString" },
+                  { token: CaseActivityEntity.token(e => e.id) },
+                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
+                  { token: CaseActivityEntity.token(e => e.startDate) },
+                  { token: CaseActivityEntity.token(e => e.doneDate) },
+                  { token: CaseActivityEntity.token(e => e.doneBy) },
+                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
                 ],
                 orderOptions: [{
-                  token: "StartDate",
+                  token: CaseActivityEntity.token(e => e.startDate),
                   orderType: "Ascending",
                 }],
               }}
@@ -128,22 +128,22 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
               navigate={false}
               findOptions={{
                 queryName: CaseActivityEntity,
-                parentToken: "Case",
+                parentToken: CaseActivityEntity.token(e => e.case),
                 parentValue: ctx.value,
                 filterOptions: [
-                  { token: "DoneDate", operation: "EqualTo", value: null, frozen: true },
+                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
                 ],
                 columnOptionsMode: "Replace",
                 columnOptions: [
-                  { token: "Id" },
-                  { token: "WorkflowActivity" },
-                  { token: "StartDate" },
-                  { token: "DoneDate" },
-                  { token: "DoneBy" },
-                  { token: "Previous.ToString" },
+                  { token: CaseActivityEntity.token(e => e.id) },
+                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
+                  { token: CaseActivityEntity.token(e => e.startDate) },
+                  { token: CaseActivityEntity.token(e => e.doneDate) },
+                  { token: CaseActivityEntity.token(e => e.doneBy) },
+                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
                 ],
                 orderOptions: [{
-                  token: "StartDate",
+                  token: CaseActivityEntity.token(e => e.startDate),
                   orderType: "Descending",
                 }]
               }}

@@ -23,7 +23,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -57,10 +57,10 @@ export function start(options: { routes: JSX.Element[] }) {
     <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
   );
 
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: "Entity.ActorsEval", operation: "DistinctTo", value: null }] });
+  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token().entity(e => e.actorsEval), operation: "DistinctTo", value: null }] });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: "Entity.SubWorkflow", operation: "DistinctTo", value: null }] });
+  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token().entity(e => e.subWorkflow), operation: "DistinctTo", value: null }] });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
@@ -74,7 +74,7 @@ export function start(options: { routes: JSX.Element[] }) {
   ]);
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
-    new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentToken: "Workflow", parentValue: ctx.lite },
+    new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentToken: CaseEntity.token(e => e.workflow), parentValue: ctx.lite },
       { icon: "tasks", iconColor: "blue" })
   ]);
 
@@ -87,7 +87,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Finder.addSettings({
     queryName: CaseActivityQuery.Inbox,
     hiddenColumns: [
-      { token: "State" },
+      { token: CaseNotificationEntity.token(e => e.state) },
     ],
     rowAttributes: (row, columns) => {
       var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
@@ -292,7 +292,7 @@ export function getDefaultInboxUrl() {
   return Finder.findOptionsPath({
     queryName: CaseActivityQuery.Inbox,
     filterOptions: [{
-      token: "State",
+      token: CaseNotificationEntity.token(e => e.state),
       operation: "IsIn",
       value: ["New", "Opened", "InProgress"]
     }]

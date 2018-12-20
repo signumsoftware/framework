@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { WorkflowEntity, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow';
 import * as Finder from '@framework/Finder'
 import { TypeHelpMode } from '../../TypeHelp/TypeHelpClient'
@@ -23,7 +23,7 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
   handleActivityIsClick = () => {
     Finder.find<WorkflowEntity>({
       queryName: WorkflowEntity,
-      parentToken: "Entity.MainEntityType.CleanName",
+      parentToken: WorkflowEntity.token().entity(a => a.mainEntityType!.cleanName),
       parentValue: this.props.typeName,
     }).then(w => {
       if (!w)
@@ -31,7 +31,7 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
 
       Finder.findMany<WorkflowActivityEntity>({
         queryName: WorkflowActivityEntity,
-        parentToken: "Workflow",
+        parentToken: WorkflowActivityEntity.token(e => e.lane!.pool!.workflow),
         parentValue: w
       }).then(acts => {
 

@@ -1,8 +1,8 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityRepeater } from '@framework/Lines'
 import { ValueSearchControlLine } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
-import { Pop3ConfigurationEntity } from '../Signum.Entities.Mailing'
+import { Pop3ConfigurationEntity, EmailMessageEntity } from '../Signum.Entities.Mailing'
 
 export default class Pop3Configuration extends React.Component<{ ctx: TypeContext<Pop3ConfigurationEntity> }> {
   render() {
@@ -19,7 +19,6 @@ export default class Pop3Configuration extends React.Component<{ ctx: TypeContex
         <ValueLine ctx={sc.subCtx(s => s.readTimeout)} />
         <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)} />
         <EntityRepeater ctx={sc.subCtx(s => s.clientCertificationFiles)} />
-        {sc.value.isNew && <ValueSearchControlLine ctx={sc} findOptions={{ queryName: Pop3ConfigurationEntity, parentToken: "Pop3Configuration", parentValue: sc.value }} />}
       </div>
     );
   }

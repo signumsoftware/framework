@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
@@ -15,7 +15,7 @@ export default class NewsletterDelivery extends React.Component<{ ctx: TypeConte
         <ValueLine ctx={nc.subCtx(n => n.sendDate)} />
         <EntityLine ctx={nc.subCtx(n => n.recipient)} />
         <EntityLine ctx={nc.subCtx(n => n.newsletter)} />
-        <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: "Line", parentValue: nc.value }} />
+        <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: ProcessExceptionLineEntity.token(e => e.line), parentValue: nc.value }} />
       </div>
     );
   }

@@ -1,10 +1,10 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { MoveTreeModel, TreeEntity } from '../Signum.Entities.Tree'
 import * as TreeClient from '../TreeClient'
-import { TypeReference } from "../../../../Framework/Signum.React/Scripts/Reflection";
+import { TypeReference, QueryTokenString } from "../../../../Framework/Signum.React/Scripts/Reflection";
 
 export interface MoveTreeModelComponentProps {
   ctx: TypeContext<MoveTreeModel>;
@@ -21,16 +21,16 @@ export default class MoveTreeModelComponent extends React.Component<MoveTreeMode
         <EntityLine ctx={ctx.subCtx(a => a.newParent)} type={type} onChange={() => this.forceUpdate()}
           findOptions={{
             queryName: typeName,
-            filterOptions: [{ token: "Entity", operation: "DistinctTo", value: this.props.lite, frozen: true }]
+            filterOptions: [{ token: QueryTokenString.entity(), operation: "DistinctTo", value: this.props.lite, frozen: true }]
           }}
-          onFind={() => TreeClient.openTree(typeName, [{ token: "Entity", operation: "DistinctTo", value: this.props.lite, frozen: true }])} />
+          onFind={() => TreeClient.openTree(typeName, [{ token: QueryTokenString.entity(), operation: "DistinctTo", value: this.props.lite, frozen: true }])} />
 
         <ValueLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => this.forceUpdate()} />
 
         {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
           <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}
-            findOptions={{ queryName: typeName, parentToken: "Entity.Parent", parentValue: ctx.value.newParent }}
-            onFind={() => TreeClient.openTree(typeName, [{ token: "Entity.Parent", value: ctx.value.newParent }])} />}
+            findOptions={{ queryName: typeName, parentToken: QueryTokenString.entity<TreeEntity>().expression("Parent"), parentValue: ctx.value.newParent }}
+            onFind={() => TreeClient.openTree(typeName, [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }])} />}
       </div>
     );
   }

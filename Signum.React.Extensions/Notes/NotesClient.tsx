@@ -1,4 +1,4 @@
-﻿import { EntitySettings } from '@framework/Navigator'
+import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
@@ -18,7 +18,7 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: NoteEntity,
-    parentToken: "Target",
+    parentToken: NoteEntity.token(e => e.target),
     parentValue: ctx.lite
   }, { isVisible: couldHaveNotes(ctx.lite.EntityType), icon: "sticky-note", iconColor: "#337ab7" }));
 }

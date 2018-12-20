@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import * as moment from 'moment'
 import * as Navigator from '@framework/Navigator'
@@ -93,7 +93,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
           <SearchControl
             findOptions={{
               queryName: ScheduledTaskLogEntity,
-              orderOptions: [{ token: "StartTime", orderType: "Descending" }],
+              orderOptions: [{ token: ScheduledTaskLogEntity.token(e => e.startTime), orderType: "Descending" }],
               pagination: { elementsPerPage: 10, mode: "Firsts" }
             }} />
         </div>

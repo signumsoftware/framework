@@ -4,6 +4,7 @@ import { PredictorEntity, PredictSimpleResultEntity, DefaultColumnEncodings } fr
 import * as ChartClient from '../../Chart/ChartClient'
 import { TypeContext } from '@framework/Lines';
 import { is } from '@framework/Signum.Entities';
+import { QueryTokenString } from '@framework/Reflection';
 
 interface SimpleResultButtonProps {
   ctx: TypeContext<PredictorEntity>;
@@ -42,23 +43,23 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
     if (is(outCol.encoding, DefaultColumnEncodings.OneHot))
       return await ChartClient.Encoder.chartPath({
         queryName: PredictSimpleResultEntity,
-        filterOptions: [{ token: "Predictor", value: predictor }],
+        filterOptions: [{ token: PredictSimpleResultEntity.token(e => e.predictor), value: predictor }],
         chartScript: "Punchcard",
         columnOptions: [
-          { token: "OriginalCategory", displayName: "Original " + outToken.niceName },
-          { token: "PredictedCategory", displayName: "Predicted " + outToken.niceName },
-          { token: "Count" },
+          { token: PredictSimpleResultEntity.token(e => e.originalCategory), displayName: "Original " + outToken.niceName },
+          { token: PredictSimpleResultEntity.token(e => e.predictedCategory), displayName: "Predicted " + outToken.niceName },
+          { token: QueryTokenString.count() },
         ],
       });
     else
       return await  ChartClient.Encoder.chartPath({
         queryName: PredictSimpleResultEntity,
-        filterOptions: [{ token: "Predictor", value: predictor }],
+        filterOptions: [{ token: PredictSimpleResultEntity.token(e => e.predictor), value: predictor }],
         chartScript: "Scatterplot",
         columnOptions: [
-          { token: "Type" },
-          { token: "OriginalValue", displayName: "Original " + outToken.niceName },
-          { token: "PredictedValue", displayName: "Predicted " + outToken.niceName },
+          { token: PredictSimpleResultEntity.token(e => e.type) },
+          { token: PredictSimpleResultEntity.token(e => e.originalValue), displayName: "Original " + outToken.niceName },
+          { token: PredictSimpleResultEntity.token(e => e.predictedValue), displayName: "Predicted " + outToken.niceName },
         ],
       });
   }

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
 import { ValueSearchControl } from '@framework/Search'
@@ -148,10 +148,10 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
       <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
         {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
           queryName: PredictorCodificationEntity,
-          parentToken: "Predictor",
+          parentToken: PredictorCodificationEntity.token(e => e.predictor),
           parentValue: p,
           filterOptions: [
-            { token: "Usage", value: usage }
+            { token: PredictorCodificationEntity.token(e => e.usage), value: usage }
           ]
         }} />}
       </FormGroup>

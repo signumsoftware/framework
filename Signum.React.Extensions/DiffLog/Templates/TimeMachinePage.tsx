@@ -9,7 +9,7 @@ import { Entity, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
-import { newLite } from '@framework/Reflection'
+import { newLite, QueryTokenString } from '@framework/Reflection'
 import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
@@ -80,13 +80,13 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
         {
           this.state.queryDescription && <SearchControl ref={sc => this.searchControl = sc} findOptions={{
             queryName: lite.EntityType,
-            filterOptions: [{ token: "Entity", operation: "EqualTo", value: lite }],
+            filterOptions: [{ token: QueryTokenString.entity(), operation: "EqualTo", value: lite }],
             columnOptions: [
-              { token: "Entity.SystemValidFrom" },
-              { token: "Entity.SystemValidTo" },
+              { token: QueryTokenString.entity().expression("SystemValidFrom") },
+              { token: QueryTokenString.entity().expression("SystemValidTo") },
             ],
             columnOptionsMode: "InsertStart",
-            orderOptions: [{ token: "Entity.SystemValidFrom", orderType: "Ascending" }],
+            orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Ascending" }],
             systemTime: { mode: "All" }
           }}
             onSelectionChanged={() => this.forceUpdate()}

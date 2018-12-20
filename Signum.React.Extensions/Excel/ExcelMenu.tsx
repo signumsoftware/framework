@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
 import { Lite } from '@framework/Signum.Entities'
@@ -52,7 +52,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
   }
 
   handleAdmnister = () => {
-    Finder.explore({ queryName: ExcelReportEntity, parentToken: "Query.Key", parentValue: this.props.searchControl.props.findOptions.queryKey })
+    Finder.explore({ queryName: ExcelReportEntity, parentToken: ExcelReportEntity.token(a => a.query!.key), parentValue: this.props.searchControl.props.findOptions.queryKey })
       .then(() => this.reloadList())
       .done();
   }
