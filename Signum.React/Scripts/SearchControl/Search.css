@@ -61,12 +61,16 @@ table.sf-search-results > tbody > tr > td {
 }
 
 .sf-search-results > thead > tr > th {
-    text-align: center;
+   
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     cursor: pointer;
     background-color: #f8f8f8;
 }
+
+    .sf-search-results > thead > tr > th.sf-th-selection {
+        text-align: center;
+    }
 
     .sf-search-results > thead > tr > th.noOrder {
         cursor: default;
