@@ -42,7 +42,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
   }
 
   componentWillReceiveProps(newProps: ChartRendererProps) {
-    if (!is(this.props.chartRequest.chartScript, newProps.chartRequest.chartScript))
+    if (this.state.chartScript == null || !is(this.state.chartScript.symbol, newProps.chartRequest.chartScript))
       this.requestAndRedraw(newProps).done();
     else {
       if (this.state.chartScript) {
