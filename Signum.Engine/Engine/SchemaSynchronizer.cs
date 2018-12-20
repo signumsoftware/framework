@@ -173,11 +173,6 @@ namespace Signum.Engine
                     removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !ix.IsPrimary).Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                     mergeBoth: (tn, tab, dif) =>
                     {
-                        if(tn == "kostentraeger.Institution")
-                        {
-
-                        }
-
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                         var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
