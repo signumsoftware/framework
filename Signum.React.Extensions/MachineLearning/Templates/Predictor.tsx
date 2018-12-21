@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as OrderUtils from '@framework/Frames/OrderUtils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
@@ -214,7 +214,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
                   <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                     queryKey={queryKey}
-                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate} />
+                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                    showUserFilters={false} />
                   <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
                     { property: a => a.usage },
                     {

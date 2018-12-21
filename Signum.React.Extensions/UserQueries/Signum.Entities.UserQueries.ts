@@ -10,6 +10,16 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const PinnedQueryFilterEmbedded = new Type<PinnedQueryFilterEmbedded>("PinnedQueryFilterEmbedded");
+export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
+  Type: "PinnedQueryFilterEmbedded";
+  label?: string | null;
+  column?: number | null;
+  row?: number | null;
+  disableOnNull?: boolean;
+  splitText?: boolean;
+}
+
 export const QueryColumnEmbedded = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");
 export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnEmbedded";
@@ -25,6 +35,7 @@ export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   groupOperation?: DynamicQuery.FilterGroupOperation | null;
   operation?: DynamicQuery.FilterOperation | null;
   valueString?: string | null;
+  pinned?: PinnedQueryFilterEmbedded | null;
   indentation?: number;
 }
 

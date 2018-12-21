@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
@@ -294,6 +295,8 @@ namespace Signum.Entities.UserQueries
 
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString { get; set; }
+        
+        public PinnedQueryFilterEmbedded Pinned { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Indentation { get; set; }
@@ -372,7 +375,8 @@ namespace Signum.Entities.UserQueries
                     new XAttribute("Indentation", Indentation),
                     new XAttribute("Token", Token.Token.FullKey()),
                     new XAttribute("Operation", Operation),
-                    new XAttribute("Value", ValueString ?? ""));
+                    new XAttribute("Value", ValueString ?? ""),
+                    Pinned?.ToXml(ctx));
             }
         }
 
@@ -384,6 +388,7 @@ namespace Signum.Entities.UserQueries
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
             ValueString = element.Attribute("Value")?.Value;
+            Pinned = element.Element("Pinned")?.Let(p => new PinnedQueryFilterEmbedded().FromXml(p, ctx));
         }
 
         public override string ToString()
@@ -399,6 +404,42 @@ namespace Signum.Entities.UserQueries
         };
     }
 
+
+    [Serializable]
+    public class PinnedQueryFilterEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Label { get; set; }
+
+        public int? Column { get; set; }
+
+        public int? Row { get; set; }
+
+        public bool DisableOnNull { get; set; }
+
+        public bool SplitText { get; set; }
+
+        internal PinnedQueryFilterEmbedded FromXml(XElement p, IFromXmlContext ctx)
+        {
+            Label = p.Attribute("Label")?.Value;
+            Column = p.Attribute("Column")?.Value.ToInt();
+            Row = p.Attribute("Row")?.Value.ToInt();
+            DisableOnNull = p.Attribute("DisableOnNull")?.Value.ToBool() ?? false;
+            DisableOnNull = p.Attribute("SplitText")?.Value.ToBool() ?? false;
+            return this;
+        }
+
+        internal XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Pinned",
+                Label.DefaultText(null)?.Let(l => new XAttribute("Label", l)),
+                Column?.Let(l => new XAttribute("Column", l)),
+                Row?.Let(l => new XAttribute("Row", l)),
+                DisableOnNull == false ? null : new XAttribute("DisableOnNull", DisableOnNull),
+                SplitText == false ? null : new XAttribute("SplitText", SplitText)
+            );
+        }
+    }
 
 
 
