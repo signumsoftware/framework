@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
@@ -285,7 +285,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
                 {this.renderExpandLink()}
         <br />
-        <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+        <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
       </span>
     );
   }

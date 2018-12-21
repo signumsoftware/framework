@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -194,6 +194,7 @@ namespace Signum.Entities.DynamicQuery
     public class QueryValueRequest : BaseQueryRequest
     {
         public QueryToken ValueToken { get; set; }
+        public SystemTime SystemTime { get; set; }
 
         public List<CollectionElementToken> Multiplications
         {
@@ -207,6 +208,7 @@ namespace Signum.Entities.DynamicQuery
                   .ToHashSet());
             }
         }
+
     }
 
     [Serializable]

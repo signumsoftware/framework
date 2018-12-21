@@ -61,9 +61,9 @@ label > input[type=checkbox] {
         max-width: 120px;
     }
 
-
-.sf-entity-line-entity {
-    background: transparent;
+.sf-entity-line-entity,
+.sf-entity-line-entity:focus{
+    background-color: #f8f8f8;
     overflow: hidden;
 }
 
@@ -421,4 +421,9 @@ table.sf-multi-value {
     line-height: 1;
     border-radius: 0.25rem;
     background-color: #efefef;
+}
+
+.sf-mandatory,
+.sf-mandatory-widget .rw-input {
+    border-left: 2px solid red;
 }

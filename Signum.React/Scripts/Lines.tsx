@@ -1,4 +1,4 @@
-﻿import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons } from './TypeContext'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons } from './TypeContext'
 export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons };
 
 import { PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
@@ -100,6 +100,16 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
     state.ctx.readOnly = true;
   }
 }
+
+tasks.push(taskSetMandatory);
+export function taskSetMandatory(lineBase: LineBase<any, any>, state: LineBaseProps) {
+  if (state.ctx.propertyRoute &&
+    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+    state.ctx.propertyRoute.member!.required) {
+    state.mandatory = true;
+  }
+}
+
 
 tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) {

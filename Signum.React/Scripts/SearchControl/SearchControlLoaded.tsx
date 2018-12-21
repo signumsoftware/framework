@@ -49,6 +49,7 @@ export interface SearchControlLoadedProps {
   searchOnLoad: boolean;
   allowSelection: boolean;
   showContextMenu: boolean | "Basic";
+  showSelectedButton: boolean;
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
   showHeader: boolean;
@@ -104,7 +105,6 @@ export interface SearchControlLoadedState {
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
 }
-
 
 export default class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
 
@@ -174,7 +174,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       groupResults: fo.groupResults,
       filters: toFilterRequests(fo.filterOptions),
       columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-        .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token, displayName: "" }))),
+        .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
       orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
       pagination: fo.pagination,
       systemTime: fo.systemTime,
@@ -517,10 +517,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const p = this.props;
     const s = this.state;
 
-    var buttons = [
+    var leftButtons = [
 
       p.showFilterButton && OrderUtils.setOrder(-5, <button
-        className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", !s.showFilters && p.findOptions.filterOptions.length > 0 ? "btn-warning" : "btn-light")}
+        className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
+        style={!s.showFilters && p.findOptions.filterOptions.length > 0 ? { border: "1px solid #b3b3b3" } : undefined}
         onClick={this.handleToggleFilters}
         title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}>
         <FontAwesomeIcon icon="filter" />
@@ -540,17 +541,26 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <FontAwesomeIcon icon="history" />
       </button>),
 
-      OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
-
-      p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-        <FontAwesomeIcon icon="plus" className="sf-create" />
+      OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-light")} onClick={this.handleSearchClick}>
+        <FontAwesomeIcon icon={p.findOptions.pagination.mode == "All" ? "search" : "sync-alt"} />&nbsp;{p.findOptions.pagination.mode == "All" ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
       </button>),
 
-      this.props.showContextMenu != false && this.renderSelectedButton(),
+      this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
-      ...(this.props.hideButtonBar ? [] : Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this })),
+      p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-create ml-2" title={this.createTitle()} onClick={this.handleCreate}>
+        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
+      </button>),
+
 
       ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
+    ]
+      .filter(a => a)
+      .map(a => a as React.ReactElement<any>)
+      .orderBy(a => OrderUtils.getOrder(a))
+      .map(a => OrderUtils.cloneElementWithoutOrder(a!));
+
+    var rightButtons = [
+      ...(this.props.hideButtonBar ? [] : Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this })),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
       <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
@@ -562,7 +572,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       .orderBy(a => OrderUtils.getOrder(a))
       .map(a => OrderUtils.cloneElementWithoutOrder(a!));
 
-    return React.cloneElement(<div className={classes("sf-query-button-bar btn-toolbar", !this.props.largeToolbarButtons && "btn-toolbar-small")} />, undefined, ...buttons);
+    return (
+      <div className={classes("sf-query-button-bar d-flex justify-content-between", !this.props.largeToolbarButtons && "btn-toolbar-small")}>
+        {React.createElement("div", { className: "btn-toolbar"}, ...leftButtons)}
+        {React.createElement("div", { className: "btn-toolbar" }, ...rightButtons)}
+      </div>
+    );
   }
 
 
@@ -684,7 +699,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
 
     return OrderUtils.setOrder(-1,
-      <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected"
+      <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
         isOpen={this.state.isSelectOpen}
         toggle={this.handleSelectedToggle}
         disabled={this.state.selectedRows!.length == 0}>
@@ -1114,7 +1129,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }));
 
     const ctx: Finder.CellFormatterContext = {
-      refresh: () => this.doSearch(true).done()
+      refresh: () => this.doSearch(true).done(),
+      systemTime: this.props.findOptions.systemTime,
     };
 
     const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;

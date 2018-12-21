@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { EntityPack, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext } from '../TypeContext'
 import "./Widgets.css"
@@ -9,6 +9,10 @@ export interface WidgetContext<T extends ModifiableEntity> {
 }
 
 export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any>> = [];
+
+export function clearWidgets() {
+  onWidgets.clear();
+}
 
 export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactNode | undefined {
   const widgets = onWidgets.map(a => a(wc)).filter(a => a != undefined);

@@ -317,10 +317,10 @@ namespace Signum.Entities
             + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$", RegexOptions.IgnoreCase);
 
         public static Regex SiteRelativeRegex = new Regex(
-            "^(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
+            "^/|(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
 
         public static Regex AspNetRelativeRegex = new Regex(
-            "^~(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
+            "^~(/|(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+)$", RegexOptions.IgnoreCase);
 
 
         public static Regex DocumentRelativeRegex = new Regex(

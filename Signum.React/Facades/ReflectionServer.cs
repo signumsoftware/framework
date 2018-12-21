@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -192,6 +192,7 @@ namespace Signum.React.Facades
                                         TypeNiceName = GetTypeNiceName(p.PropertyInfo?.PropertyType),
                                         Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                         IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
+                                        Required = !IsId(p) && (Validator.TryGetPropertyValidator(p).Validators.Any(v => !v.DisabledInModelBinder && (v is NotNullValidatorAttribute || v is StringLengthValidatorAttribute s && s.AllowNulls == false))),
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                         IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
@@ -362,6 +363,8 @@ namespace Signum.React.Facades
         public string TypeNiceName { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isReadOnly")]
         public bool IsReadOnly { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "required")]
+        public bool Required { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
         public string Unit { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]

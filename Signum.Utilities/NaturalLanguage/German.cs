@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -81,6 +81,8 @@ namespace Signum.Utilities.NaturalLanguage
             {"eur", 'm' },
             {"iker", 'm' },
             {"ps", 'm' },
+            {"typ", 'm' },
+            {"code", 'm' },
 
             //http://www.alemansencillo.com/genero-de-los-sustantivos-masculinos
             {"ei", 'f' },
@@ -106,6 +108,8 @@ namespace Signum.Utilities.NaturalLanguage
             {"ive", 'f' },
             {"se", 'f' },
             {"sis", 'f' },
+            {"e", 'f' },
+            {"art", 'f' },
 
             //http://www.alemansencillo.com/genero-de-los-sustantivos-neutros
             {"chen", 'n' },
@@ -132,7 +136,7 @@ namespace Signum.Utilities.NaturalLanguage
 
             return null;
         }
-
+        
         ReadOnlyCollection<PronomInfo> pronoms = new ReadOnlyCollection<PronomInfo>(new[]
         {
             new PronomInfo('m', "der", "die"),

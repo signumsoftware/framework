@@ -7,6 +7,7 @@ import { TypeReference } from '../Reflection'
 import { EntityBase, EntityBaseProps } from './EntityBase'
 import { FormGroup } from './FormGroup'
 import { FormControlReadonly } from './FormControlReadonly'
+import { classes } from '../Globals';
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -50,6 +51,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
               type={s.type!}
               data={s.data}
               findOptions={s.findOptions}
+              mandatoryClass={this.mandatoryClass}
             />
             {EntityBase.hasChildrens(buttons) ? buttons : undefined}
           </div>
@@ -75,6 +77,7 @@ export interface EntityComboSelectProps {
   type: TypeReference;
   findOptions?: FindOptions;
   data?: Lite<Entity>[];
+  mandatoryClass: string | null; 
 
 }
 
@@ -121,7 +124,7 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
       return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(ctx.value)}</FormControlReadonly>;
 
     return (
-      <select className={ctx.formControlClass} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly} >
+      <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly} >
         {this.renderOptions()}
       </select>
     );
