@@ -446,6 +446,15 @@ export module SearchMessage {
   export const Operations = new MessageKey("SearchMessage", "Operations");
   export const NoResultsFound = new MessageKey("SearchMessage", "NoResultsFound");
   export const Explore = new MessageKey("SearchMessage", "Explore");
+  export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
+  export const Label = new MessageKey("SearchMessage", "Label");
+  export const Column = new MessageKey("SearchMessage", "Column");
+  export const Row = new MessageKey("SearchMessage", "Row");
+  export const DisableOnNull = new MessageKey("SearchMessage", "DisableOnNull");
+  export const SplitText = new MessageKey("SearchMessage", "SplitText");
+  export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
+  export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
+  export const ParentValue = new MessageKey("SearchMessage", "ParentValue");
 }
 
 export module SelectorMessage {

@@ -90,7 +90,7 @@ Lose changes?")]
         ThereAreChanges,
         [Description(@"There are new changes that will be lost.
 
-	Continue?")]
+    Continue?")]
         ThereAreChangesContinue,
         ThereAreErrors,
         Message,
@@ -181,6 +181,17 @@ Lose changes?")]
         Operations,
         NoResultsFound,
         Explore,
+        PinnedFilter,
+        Label,
+        Column,
+        Row,
+        DisableOnNull,
+        SplitText,
+        [Description("When pressed, the filter wil take no effect if the value is null")]
+        WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull,
+        [Description("When pressed, the filter value will be splited and all the words have to be found")]
+        WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound,
+        ParentValue,
     }
 
     public enum SelectorMessage

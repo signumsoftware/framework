@@ -58,12 +58,15 @@ export interface FilterConditionOption {
   frozen?: boolean;
   operation?: FilterOperation;
   value: any;
+  pinned?: PinnedFilter;
 }
 
 export interface FilterGroupOption {
   token: string;
   groupOperation: FilterGroupOperation;
   filters: FilterOption[];
+  pinned?: PinnedFilter;
+  value?: string; /*For search in multiple columns*/
 }
 
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
@@ -77,6 +80,15 @@ export interface FilterConditionOptionParsed {
   frozen: boolean;
   operation?: FilterOperation;
   value: any;
+  pinned?: PinnedFilter;
+}
+
+export interface PinnedFilter {
+  label?: string;
+  row?: number;
+  column?: number;
+  disableOnNull?: boolean;
+  splitText?: boolean;
 }
 
 export interface FilterGroupOptionParsed {
@@ -84,6 +96,8 @@ export interface FilterGroupOptionParsed {
   frozen: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
+  pinned?: PinnedFilter;
+  value?: string; /*For search in multiple columns*/
 }
 
 export interface OrderOption {

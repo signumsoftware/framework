@@ -29,6 +29,7 @@ import SystemTimeEditor from './SystemTimeEditor';
 import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
+import PinnedFilterBuilder from './PinnedFilterBuilder';
 
 export interface ShowBarExtensionOption { }
 
@@ -332,7 +333,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   handleFiltersChanged = () => {
     if (this.props.onFiltersChanged)
       this.props.onFiltersChanged(this.props.findOptions.filterOptions);
-
   }
 
   handleHeightChanged = () => {
@@ -396,16 +396,22 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-              this.state.showFilters ? <FilterBuilder
-                queryDescription={qd}
-                filterOptions={fo.filterOptions}
-                lastToken={this.state.lastToken}
-                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-                onTokenChanged={this.handleFilterTokenChanged}
-                onFiltersChanged={this.handleFiltersChanged}
-                onHeightChanged={this.handleHeightChanged}
-              /> :
-                sfb && <div className="simple-filter-builder">{sfb}</div>
+            this.state.showFilters ? <FilterBuilder
+              queryDescription={qd}
+              filterOptions={fo.filterOptions}
+              lastToken={this.state.lastToken}
+              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+              onTokenChanged={this.handleFilterTokenChanged}
+              onFiltersChanged={this.handleFiltersChanged}
+              onHeightChanged={this.handleHeightChanged}
+              showPinnedFilters={true}
+
+            /> :
+              sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                <PinnedFilterBuilder
+                  filterOptions={fo.filterOptions}
+                  queryDescription={qd}
+                  onFiltersChanged={() => { this.handleFiltersChanged(); this.doSearchPage1(); }} />
             }
           </div>
         }

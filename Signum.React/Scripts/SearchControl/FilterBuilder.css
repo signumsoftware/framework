@@ -5,14 +5,28 @@
 }
 
 div.hidden > .sf-query-token-builder > .sf-query-token-part .rw-widget-input,
-div.hidden > label
-{
+div.hidden > label {
     opacity: .5;
 }
 
 select.form-control.sf-group-selector {
     display: inline;
-    width: auto;
     font-weight: bold;
     text-transform: uppercase;
 }
+
+.sf-user-filter {
+    opacity: .3;
+    transition: opacity .5s ease-in-out;
+    padding: 0px 3px;
+    vertical-align: top;
+}
+
+    .sf-user-filter.active {
+        opacity: 1;
+        border: 1px solid orange;
+    }
+
+    .sf-user-filter:hover {
+        opacity: 1;
+    }
