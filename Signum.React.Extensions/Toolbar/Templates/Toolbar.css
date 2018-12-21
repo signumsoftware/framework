@@ -33,6 +33,10 @@ li.menu-item-1 > a {
     background-color: #e7e7e7;
 }
 
+.sidebar .dropdown-header{
+    width: 100%;
+}
+
 .menu-item-1 {
     background-color: #f3f3f3;
 }
@@ -50,4 +54,9 @@ li.menu-item-1 > a {
 
 .sidebar .dropdown-item .icon {
     width: 20px;
+    margin-left: -5px;
+}
+
+.sf-cursor-pointer{
+    cursor:pointer;
 }

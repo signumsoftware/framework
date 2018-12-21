@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Chart;
@@ -166,7 +166,7 @@ namespace Signum.Engine.Toolbar
 
             return new ToolbarResponse
             {
-                type = ToolbarElementType.Menu,
+                type = ToolbarElementType.Header,
                 content = curr.ToLite(),
                 label = curr.Name,
                 elements = responses,
@@ -177,16 +177,22 @@ namespace Signum.Engine.Toolbar
         {
             var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
 
+
             retry:
                 var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (i == 0 || result[i - 1].type == ToolbarElementType.Divider || i == result.Count)).ToList();
                 result.RemoveAll(extraDividers.Contains);
-                var extraHeaders = result.Where((a, i) => a.type == ToolbarElementType.Header && (i == result.Count || result[i + 1].type == ToolbarElementType.Header || result[i + 1].type == ToolbarElementType.Divider)).ToList();
+                var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (i == result.Count || IsPureHeader(result[i + 1]) || result[i + 1].type == ToolbarElementType.Divider)).ToList();
                 result.RemoveAll(extraHeaders.Contains);
 
             if (extraDividers.Any() || extraHeaders.Any())
                 goto retry;
 
             return result;
+        }
+
+        private static bool IsPureHeader(ToolbarResponse tr)
+        {
+            return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
         }
 
         private static ToolbarResponse ToResponse(ToolbarElementEmbedded element)

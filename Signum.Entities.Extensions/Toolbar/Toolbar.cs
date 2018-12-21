@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
@@ -81,7 +81,7 @@ namespace Signum.Entities.Toolbar
     {
         public ToolbarElementType Type { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
         public string Label { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
@@ -93,7 +93,7 @@ namespace Signum.Entities.Toolbar
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
         public Lite<Entity> Content { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
         public string Url { get; set; }
 
         public bool OpenInPopup { get; set; }
@@ -142,34 +142,25 @@ namespace Signum.Entities.Toolbar
                 (n => n.Type,                   n => n.Content, n=> n.Url, n => n.IconName, n => n.Label)
             {
                 { ToolbarElementType.Divider,   false,          false,     false,          false  },
-                { ToolbarElementType.Header,    false,          false,     null,           true  },
-                { ToolbarElementType.Link,      null,           null,      null,           null },
-                { ToolbarElementType.Menu,      true,           false,     null,           null },
+                { ToolbarElementType.Header,    null,           null,       null,           null  },
+                { ToolbarElementType.Item,      null,           null,      null,           null },
             };
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Name == nameof(this.Content) && this.Content != null)
+            if(this.Type == ToolbarElementType.Item || this.Type == ToolbarElementType.Header)
             {
-                if (this.Type == ToolbarElementType.Link) {
-                    if (this.Content.EntityType == typeof(ToolbarMenuEntity))
-                        return ValidationMessage._0ShouldNotBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
-
-                    if (this.Content == null && string.IsNullOrEmpty(this.Url))
-                        return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Url).NiceName());
+                if (pi.Name == nameof(this.Label))
+                {
+                    if (string.IsNullOrEmpty(this.Label) && this.Content == null)
+                        return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
                 }
 
-
-                if (Type == ToolbarElementType.Menu) {
-                    if (this.Content.EntityType != typeof(ToolbarMenuEntity))
-                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
+                if(pi.Name == nameof(this.Url))
+                { 
+                    if (string.IsNullOrEmpty(this.Url) && this.Content == null && this.Type == ToolbarElementType.Item)
+                        return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
                 }
-            }
-
-            if (pi.Name == nameof(this.Label) && (this.Type == ToolbarElementType.Menu || this.Type == ToolbarElementType.Link))
-            {
-                if (string.IsNullOrEmpty(this.Label) && this.Content == null)
-                    return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
             }
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
@@ -178,10 +169,9 @@ namespace Signum.Entities.Toolbar
 
     public enum ToolbarElementType
     {
-        Link,
-        Menu,
-        Header,
-        Divider
+        Header = 2,
+        Divider,
+        Item,
     }
 
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]

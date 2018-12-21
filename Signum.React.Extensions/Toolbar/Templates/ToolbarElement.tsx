@@ -10,10 +10,12 @@ import * as Dashboard from '../../Dashboard/Admin/Dashboard'
 export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }> {
   handleTypeChanges = () => {
     var a = this.props.ctx.value;
-    a.iconName == null;
-    a.content == null;
-    a.label == null;
-    a.modified = true;
+    if (a.type == "Divider") {
+      a.iconName == null;
+      a.content == null;
+      a.label == null;
+      a.modified = true;
+    }
     this.forceUpdate();
   }
 
@@ -51,7 +53,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
             </div>
             <div className="col-sm-5">
             <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
-            {ctx2.value.type == "Link" && ctx2.value.content == null && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
+            {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && ctx2.value.content == null && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
               {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
                 <div>
                   <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)} />
@@ -61,12 +63,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
             </div>
           </div>
         }
-
       </div>
     );
   }
 }
-
-
-
-
