@@ -436,6 +436,7 @@ export module SearchMessage {
   export const First0Results_N = new MessageKey("SearchMessage", "First0Results_N");
   export const _01of2Results_N = new MessageKey("SearchMessage", "_01of2Results_N");
   export const Search = new MessageKey("SearchMessage", "Search");
+  export const Refresh = new MessageKey("SearchMessage", "Refresh");
   export const Create = new MessageKey("SearchMessage", "Create");
   export const CreateNew0_G = new MessageKey("SearchMessage", "CreateNew0_G");
   export const SearchControl_Pagination_All = new MessageKey("SearchMessage", "SearchControl_Pagination_All");

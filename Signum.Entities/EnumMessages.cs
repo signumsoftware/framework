@@ -167,6 +167,7 @@ Lose changes?")]
         [Description("{0} - {1} of {2} result[s].")]
         _01of2Results_N,
         Search,
+        Refresh,
         Create,
         [Description("Create new {0}")]
         CreateNew0_G,
