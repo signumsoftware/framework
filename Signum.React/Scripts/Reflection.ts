@@ -911,7 +911,7 @@ export class QueryTokenString<T> {
   }
 
   systemValidTo() {
-    return new QueryTokenString(this.token + "Entity.SystemValidTo");
+    return new QueryTokenString(this.token + ".SystemValidTo");
   }
 
   entity() : QueryTokenString<T>;
