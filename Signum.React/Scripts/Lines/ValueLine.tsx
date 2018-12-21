@@ -530,13 +530,13 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const htmlAttributes = {
     placeholder: getPlaceholder(vl),
-    ...vl.state.valueHtmlAttributes
+    ...vl.state.valueHtmlAttributes,
   } as React.AllHTMLAttributes<any>;
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
-        <div className={s.ctx.rwWidgetClass}>
+        <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
           <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
             format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
