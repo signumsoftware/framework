@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export module DiffLogMessage {
@@ -31,6 +32,11 @@ export interface DiffLogMixin extends Entities.MixinEntity {
 
 export module TimeMachineMessage {
   export const TimeMachine = new MessageKey("TimeMachineMessage", "TimeMachine");
+  export const EntityDeleted = new MessageKey("TimeMachineMessage", "EntityDeleted");
+}
+
+export module TimeMachinePermission {
+  export const ShowTimeMachine : Authorization.PermissionSymbol = registerSymbol("Permission", "TimeMachinePermission.ShowTimeMachine");
 }
 
 

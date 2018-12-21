@@ -16,7 +16,11 @@ export default class Package extends React.Component<{ ctx: TypeContext<PackageL
         <ValueLine ctx={e.subCtx(f => f.finishTime)} />
         <fieldset>
           <legend>{PackageLineEntity.nicePluralName()}</legend>
-          <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: "Line", parentValue: e.value }} />
+          <SearchControl findOptions={{
+            queryName: ProcessExceptionLineEntity,
+            parentToken: ProcessExceptionLineEntity.token(e => e.line),
+            parentValue: e.value
+          }} />
         </fieldset>
       </div>
     );

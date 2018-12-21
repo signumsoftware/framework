@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Cache;
+using Signum.Engine.Cache;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -49,6 +49,7 @@ namespace Signum.Engine.Dynamic
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+                DynamicCode.RegisteredDynamicTypes.Add(typeof(DynamicExpressionEntity));
 
                 DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
                 {

@@ -1,9 +1,9 @@
-﻿import { EntitySettings } from '@framework/Navigator'
+import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { DisableOperation } from './Signum.Entities.Basics'
+import { DisableOperation, DisabledMixin } from './Signum.Entities.Basics'
 import { getAllTypes } from "@framework/Reflection";
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -43,7 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
       }
 
       querySettings.hiddenColumns = [
-        { token: "Entity.IsDisabled" }
+        { token: DisabledMixin.token().entity(e => e.isDisabled) }
       ];
 
       querySettings.rowAttributes = (row, columns) => {
@@ -64,7 +64,7 @@ export function start(options: { routes: JSX.Element[] }) {
       if (!entitySettings.findOptions) {
         entitySettings.findOptions = {
           queryName: ti.name,
-          filterOptions: [{ token: "Entity.IsDisabled", operation: "EqualTo", value: false, frozen: true }]
+          filterOptions: [{ token: DisabledMixin.token().entity(e => e.isDisabled), operation: "EqualTo", value: false, frozen: true }]
         };
       }
     }

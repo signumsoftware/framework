@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
@@ -286,7 +286,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 {this.renderExpandLink()}
         <br />
         {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
-        <small> {Navigator.getTypeTitle(activity, undefined)}</small>
+        <small className="sf-type-nice-name text-muted"> {Navigator.getTypeTitle(activity, undefined)}</small>
       </div>
     );
   }

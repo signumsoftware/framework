@@ -7,26 +7,30 @@ import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
-import { TimeMachineMessage } from './Signum.Entities.DiffLog';
+import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
 import { ImportRoute } from '@framework/AsyncImport';
 import { getTypeInfo } from '@framework/Reflection';
-import { EntityLink } from '@framework/Search';
+import { EntityLink, SearchControl } from '@framework/Search';
 import { liteKey } from '@framework/Signum.Entities';
 import { EntityControlMessage } from '@framework/Signum.Entities';
 import { getTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
+import { isPermissionAuthorized } from '../Authorization/AuthClient';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 
   if (options.timeMachine) {
-    QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned ? new QuickLinks.QuickLinkLink("TimeMachine",
-      TimeMachineMessage.TimeMachine.niceToString(),
-      timeMachineRoute(ctx.lite), {
-        icon: "history",
-        iconColor: "blue"
-      }) : undefined);
+    QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
+      new QuickLinks.QuickLinkLink("TimeMachine",
+        TimeMachineMessage.TimeMachine.niceToString(),
+        timeMachineRoute(ctx.lite), {
+          icon: "history",
+          iconColor: "blue"
+        }) : undefined);
+
+    SearchControl.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
     options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
 

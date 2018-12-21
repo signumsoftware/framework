@@ -7,7 +7,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption
 } from '@framework/FindOptions'
@@ -366,7 +366,7 @@ export interface ChartOptions {
 }
 
 export interface ChartColumnOption {
-  token?: string;
+  token?: string | QueryTokenString<any>;
   displayName?: string;
   orderByIndex?: number;
   orderByType?: OrderType;
@@ -523,7 +523,7 @@ export module Decoder {
         fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
 
         const oos = Finder.Decoder.decodeOrders(query);
-        oos.forEach(oo => completer.request(oo.token, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
+        oos.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
 
         const cols = Decoder.decodeColumns(query);
         cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement));

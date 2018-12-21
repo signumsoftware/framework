@@ -39,6 +39,29 @@ namespace Signum.Engine.Dynamic
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
 
+        public static FileInfo GetLastCodeGenAssemblyFileInfo()
+        {
+            return new DirectoryInfo(DynamicCode.CodeGenDirectory)
+                .GetFiles($"{DynamicCode.CodeGenAssembly.Before(".")}*.dll")
+                .OrderByDescending(f => f.CreationTime)
+                .FirstOrDefault();
+        }
+
+        public static FileInfo GetLoadedCodeGenAssemblyFileInfo()
+        {
+            if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
+                return null;
+
+            return new DirectoryInfo(DynamicCode.CodeGenDirectory)
+                .GetFiles(Path.GetFileName(DynamicCode.CodeGenAssemblyPath))
+                .FirstOrDefault();
+        }
+
+        public static void BindCodeGenAssembly()
+        {
+            DynamicCode.CodeGenAssemblyPath = GetLastCodeGenAssemblyFileInfo()?.FullName;
+        }
+
         public static void CompileDynamicCode()
         {
             try
@@ -164,7 +187,7 @@ namespace Signum.Engine.Dynamic
                 try
                 {
                     Directory.EnumerateFiles(DynamicCode.CodeGenDirectory)
-                        .Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath)
+                        .Where(a => a != DynamicCode.CodeGenAssemblyPath)
                         .ToList()
                         .ForEach(a => File.Delete(a));
                 }
@@ -188,9 +211,18 @@ namespace Signum.Engine.Dynamic
                 DynamicCode.CodeGenGeneratedAssembly = $"{DynamicCode.CodeGenAssembly.Before(".")}.{Guid.NewGuid()}.dll";
                 var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenGeneratedAssembly);
 
-                using (var stream = inMemory ? (Stream)new MemoryStream() : File.Create(outputAssembly))
+                using (var stream = (Stream)new MemoryStream())
                 {
                     var emitResult = compilation.Emit(stream);
+
+                    if (emitResult.Success && !inMemory)
+                    {
+                        using (FileStream file = new FileStream(outputAssembly, FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            stream.Position = 0;
+                            stream.CopyTo(file);
+                        }
+                    }
 
                     return new CompilationResult
                     {
@@ -199,7 +231,7 @@ namespace Signum.Engine.Dynamic
                         .Select(d => new CompilationError
                         {
                             Column = d.Location.GetLineSpan().StartLinePosition.Character,
-                            Line = d.Location.GetLineSpan().StartLinePosition.Line,
+                            Line = d.Location.GetLineSpan().StartLinePosition.Line + 1,
                             FileContent = d.Location.SourceTree.ToString(),
                             FileName = d.Location.SourceTree.FilePath,
                             ErrorNumber = d.Descriptor.Id,

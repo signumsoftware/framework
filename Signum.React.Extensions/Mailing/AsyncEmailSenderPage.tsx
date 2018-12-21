@@ -73,13 +73,10 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
         <h2>{EmailMessageEntity.niceName()}</h2>
         <SearchControl findOptions={{
           queryName: EmailMessageEntity,
-          orderOptions: [{ token: "Entity.CreationDate", orderType: "Descending" }],
+          orderOptions: [{ token: EmailMessageEntity.token().entity(e => e.creationDate), orderType: "Descending" }],
           pagination: { elementsPerPage: 10, mode: "Firsts" }
         }} />
       </div>
     );
   }
 }
-
-
-

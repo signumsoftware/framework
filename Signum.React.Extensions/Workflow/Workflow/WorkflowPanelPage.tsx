@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
-import { CaseActivityEntity, WorkflowActivityType, WorkflowPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowActivityType, WorkflowPanelPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UncontrolledTabs, Tab } from '@framework/Components/Tabs';
 
@@ -108,21 +108,21 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
           findOptions={{
             queryName: CaseActivityEntity,
             filterOptions: [
-              { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-              { token: "Entity.DoneDate", operation: "EqualTo", value: null }
+              { token: CaseActivityEntity.token().entity(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+              { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "EqualTo", value: null }
             ],
             columnOptionsMode: "Replace",
             columnOptions: [
-              { token: "Id" },
-              { token: "StartDate" },
-              { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
-              { token: "WorkflowActivity" },
-              { token: "Case" },
-              { token: "Entity.ScriptExecution.NextExecution" },
-              { token: "Entity.ScriptExecution.RetryCount" },
+              { token: CaseActivityEntity.token(e => e.id) },
+              { token: CaseActivityEntity.token(e => e.startDate) },
+              { token: CaseActivityEntity.token(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
+              { token: CaseActivityEntity.token(e => e.workflowActivity) },
+              { token: CaseActivityEntity.token(e => e.case) },
+              { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution) },
+              { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.retryCount) },
             ],
             orderOptions: [
-              { token: "Entity.ScriptExecution.NextExecution", orderType: "Ascending" }
+              { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution), orderType: "Ascending" }
             ],
             pagination: { elementsPerPage: 10, mode: "Firsts" }
           }} />
@@ -132,7 +132,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
               queryName: OperationLogEntity,
               filterOptions: [
                 {
-                  token: "Operation", operation: "IsIn", value: [
+                  token: OperationLogEntity.token(e => e.operation), operation: "IsIn", value: [
                     CaseActivityOperation.ScriptExecute,
                     CaseActivityOperation.ScriptScheduleRetry,
                     CaseActivityOperation.ScriptFailureJump,
@@ -149,23 +149,23 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
               findOptions={{
                 queryName: CaseActivityEntity,
                 filterOptions: [
-                  { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                  { token: "Entity.DoneDate", operation: "DistinctTo", value: null }
+                  { token: CaseActivityEntity.token().entity(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                  { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "DistinctTo", value: null }
                 ],
                 columnOptionsMode: "Replace",
                 columnOptions: [
-                  { token: "Id" },
-                  { token: "StartDate" },
-                  { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
-                  { token: "WorkflowActivity" },
-                  { token: "Case" },
-                  { token: "Entity.DoneDate" },
-                  { token: "Entity.DoneType" },
-                  { token: "Entity.ScriptExecution.NextExecution" },
-                  { token: "Entity.ScriptExecution.RetryCount" },
+                  { token: CaseActivityEntity.token(a => a.id) },
+                  { token: CaseActivityEntity.token(e => e.startDate) },
+                  { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
+                  { token: CaseActivityEntity.token(a => a.workflowActivity) },
+                  { token: CaseActivityEntity.token(a=>a.case) },
+                  { token: CaseActivityEntity.token().entity(e => e.doneDate) },
+                  { token: CaseActivityEntity.token().entity(e => e.doneType) },
+                  { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.nextExecution) },
+                  { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.retryCount) },
                 ],
                 orderOptions: [
-                  { token: "Entity.DoneDate", orderType: "Descending" }
+                  { token: CaseActivityEntity.token().entity(e => e.doneDate), orderType: "Descending" }
                 ],
                 pagination: { elementsPerPage: 10, mode: "Firsts" }
               }} />

@@ -30,8 +30,17 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
   Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => import('./View/DynamicViewOverride')));
 
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewEntity, parentToken: "EntityType.CleanName", parentValue: type }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewSelectorEntity, parentToken: "EntityType.CleanName", parentValue: type }} />);
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
+    queryName: DynamicViewEntity,
+    parentToken: DynamicViewEntity.token(a => a.entityType!.cleanName),
+    parentValue: type
+  }} />);
+
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
+    queryName: DynamicViewSelectorEntity,
+    parentToken: DynamicViewSelectorEntity.token(a => a.entityType!.cleanName),
+    parentValue: type
+  }} />);
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
     onClick: ctx => {

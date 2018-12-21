@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.Cache;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -62,6 +62,7 @@ namespace Signum.Engine.Dynamic
                 DynamicTypeGraph.Register();
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+                DynamicCode.RegisteredDynamicTypes.Add(typeof(DynamicTypeEntity));
             }
         }
 

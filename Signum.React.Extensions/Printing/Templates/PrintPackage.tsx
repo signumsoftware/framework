@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
@@ -13,7 +13,7 @@ export default class PrintPackage extends React.Component<{ ctx: TypeContext<Pri
         <ValueLine ctx={e.subCtx(f => f.name)} />
         <fieldset>
           <legend>{PrintLineEntity.nicePluralName()}</legend>
-          <SearchControl findOptions={{ queryName: PrintLineEntity, parentToken: "Package", parentValue: e.value }} />
+          <SearchControl findOptions={{ queryName: PrintLineEntity, parentToken: PrintLineEntity.token(e => e.package), parentValue: e.value }} />
         </fieldset>
       </div>
     );

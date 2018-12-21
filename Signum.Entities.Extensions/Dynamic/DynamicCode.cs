@@ -18,6 +18,7 @@ namespace Signum.Entities.Dynamic
         public static string CodeGenAssemblyPath;
         public static Action OnApplicationServerRestarted;
 
+        public static HashSet<Type> RegisteredDynamicTypes = new HashSet<Type>();
         public static HashSet<string> Namespaces = new HashSet<string>
         {
             "System",

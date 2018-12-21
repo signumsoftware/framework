@@ -29,8 +29,8 @@ export default class WorkflowReplacementComponent extends React.Component<{ ctx:
                       findOptions={{
                         queryName: CaseActivityEntity,
                         filterOptions: [
-                          { token: "WorkflowActivity", value: ectx.value.oldNode },
-                          { token: "DoneDate", value: null }
+                          { token: CaseActivityEntity.token(e => e.workflowActivity), value: ectx.value.oldNode },
+                          { token: CaseActivityEntity.token(e => e.doneDate), value: null }
                         ]
                       }} />
                   </td>

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { Lite } from '@framework/Signum.Entities'
@@ -80,11 +80,11 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
     var fo: FindOptions = {
       queryName: AlertEntity,
       filterOptions: [
-        { token: "Target", value: this.props.data.caseActivity },
-        { token: "Entity.Recipient", value: Navigator.currentUser },
-        { token: "Entity.CurrentState", value: "Alerted" }
+        { token: AlertEntity.token(a => a.target), value: this.props.data.caseActivity },
+        { token: AlertEntity.token().entity(e => e.recipient), value: Navigator.currentUser },
+        { token: AlertEntity.token().entity().expression("CurrentState"), value: "Alerted" }
       ],
-      columnOptions: [{ token: "Target" }],
+      columnOptions: [{ token: AlertEntity.token(e => e.target) }],
       columnOptionsMode: "Remove",
     };
 
