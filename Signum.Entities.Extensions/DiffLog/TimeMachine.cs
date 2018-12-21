@@ -1,3 +1,4 @@
+using Signum.Entities.Authorization;
 using System.ComponentModel;
 
 namespace Signum.Entities.DiffLog
@@ -7,5 +8,11 @@ namespace Signum.Entities.DiffLog
         TimeMachine,
         [Description("[Entity deleted]")]
         EntityDeleted,
+    }
+
+    [AutoInit]
+    public static class TimeMachinePermission
+    {
+        public static PermissionSymbol ShowTimeMachine;
     }
 }

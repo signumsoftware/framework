@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Basics;
 using System.Threading;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.DiffLog
 {
@@ -23,6 +24,8 @@ namespace Signum.Engine.DiffLog
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
+
+                PermissionAuthLogic.RegisterTypes(typeof(TimeMachinePermission));
 
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
