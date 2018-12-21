@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 import { } from '@framework/Globals'
@@ -33,7 +33,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
   loadEntries(props: HeavyEntryProps) {
     let selectedIndex = props.match.params.selectedIndex;
 
-    return API.Heavy.details(selectedIndex.tryBefore(".") || selectedIndex)
+    return API.Heavy.details(selectedIndex.tryBefore("-") || selectedIndex)
       .then(entries => this.setState({ entries }))
       .done();
   }
@@ -47,7 +47,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
   handleDownload = () => {
     let selectedIndex = this.props.match.params.selectedIndex;
-    API.Heavy.download(selectedIndex.tryBefore(".") || selectedIndex);
+    API.Heavy.download(selectedIndex.tryBefore("-") || selectedIndex);
   }
 
   handleUpdate = () => {
