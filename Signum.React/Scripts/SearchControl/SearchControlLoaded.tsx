@@ -517,6 +517,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const p = this.props;
     const s = this.state;
 
+    const isAll = p.findOptions.pagination.mode == "All";
+
     var leftButtons = [
 
       p.showFilterButton && OrderUtils.setOrder(-5, <button
@@ -541,8 +543,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <FontAwesomeIcon icon="history" />
       </button>),
 
-      OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-light")} onClick={this.handleSearchClick}>
-        <FontAwesomeIcon icon={p.findOptions.pagination.mode == "All" ? "search" : "sync-alt"} />&nbsp;{p.findOptions.pagination.mode == "All" ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+      (isAll || this.state.showFilters) && OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>
+        <FontAwesomeIcon icon={"search"} />&nbsp;{SearchMessage.Search.niceToString()}
       </button>),
 
       this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
@@ -575,7 +577,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <div className={classes("sf-query-button-bar d-flex justify-content-between", !this.props.largeToolbarButtons && "btn-toolbar-small")}>
         {React.createElement("div", { className: "btn-toolbar"}, ...leftButtons)}
-        {React.createElement("div", { className: "btn-toolbar" }, ...rightButtons)}
+        {React.createElement("div", { className: "btn-toolbar", style: { justifyContent: "flex-end" } }, ...rightButtons)}
       </div>
     );
   }
