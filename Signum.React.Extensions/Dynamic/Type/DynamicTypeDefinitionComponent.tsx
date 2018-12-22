@@ -401,8 +401,11 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             <div>
                                 {dt.baseType == "Entity" &&
                                     <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        {CustomCodeTab.suggestWorkflow && < input type="button" className="btn btn-success btn-sm sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
-                                        {CustomCodeTab.suggestTree && < input type="button" className="btn btn-info btn-sm sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
+                                        {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-sm sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
+                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
+                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="CreateRoot" onClick={this.handleOverrideCreateRoot} />}
+                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="CreateChild" onClick={this.handleOverrideCreateChild} />}
+                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="NextSibling" onClick={this.handleOverrideNextSibling} />}
                                         <input type="button" className="btn btn-warning btn-sm sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
                                         <input type="button" className="btn btn-danger btn-sm sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
                                     </div>}
@@ -538,6 +541,51 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 
     handleWithTreeClick = () => {
         this.popupCodeSnippet(`fi.WithTree();`);
+    }
+
+    handleOverrideCreateRoot = () => {
+      let entityName = this.props.dynamicType.typeName!;
+      this.popupCodeSnippet(`Graph<${entityName}Entity>.Construct.Untyped(TreeOperation.CreateRoot).Do(a =>
+{
+    c.Construct = (args) => new ${entityName}Entity
+    {
+        ParentOrSibling = null,
+        Level = 1,
+        IsSibling = false,
+        // Write your code here ...
+    };
+    c.Register(replace: true);
+});`);
+    }
+
+    handleOverrideCreateChild = () => {
+      let entityName = this.props.dynamicType.typeName!;
+      this.popupCodeSnippet(`Graph<${entityName}Entity>.ConstructFrom<${entityName}Entity>.Untyped(TreeOperation.CreateChild).Do(c =>
+{
+    c.Construct = (t, _) => new ${entityName}Entity
+    {
+        ParentOrSibling = t.ToLite(),
+        Level = (short)(t.Level + 1),
+        IsSibling = false,
+        // Write your code here ...
+    };
+    c.Register(replace: true);
+});`);
+    }
+
+    handleOverrideNextSibling = () => {
+      let entityName = this.props.dynamicType.typeName!;
+      this.popupCodeSnippet(`Graph<${entityName}Entity>.ConstructFrom<${entityName}Entity>.Untyped(TreeOperation.CreateNextSibling).Do(c =>
+{
+    c.Construct = (t, _) => new ${entityName}Entity
+    {
+        ParentOrSibling = t.ToLite(),
+        Level = t.Level,
+        IsSibling = true,
+        // Write your code here ...
+    };
+    c.Register(replace: true);
+});`);
     }
 
     handleRegisterOperationsClick = () => {
