@@ -5,6 +5,8 @@ using System.Reflection;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
+using Signum.Entities.UserQueries;
+using Signum.Entities;
 
 namespace Signum.React.UserAssets
 {
@@ -20,7 +22,8 @@ namespace Signum.React.UserAssets
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
             ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded));
-
+            EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
+            EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
 
             var pcs = PropertyConverter.GetPropertyConverters(typeof(QueryTokenEmbedded));
             pcs.Add("token", new PropertyConverter()

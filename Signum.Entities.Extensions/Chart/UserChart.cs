@@ -71,19 +71,6 @@ namespace Signum.Entities.Chart
         [NotNullValidator, NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
-        bool groupResults = true;
-        public bool GroupResults
-        {
-            get { return groupResults; }
-            set
-            {
-                if (Set(ref groupResults, value))
-                {
-                    NotifyAllColumns();
-                }
-            }
-        }
-
         [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
@@ -112,7 +99,7 @@ namespace Signum.Entities.Chart
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (this.GroupResults ? SubTokensOptions.CanAggregate : 0));
+                    f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
 
             if (Columns != null)
                 foreach (var c in Columns)
@@ -157,7 +144,6 @@ namespace Signum.Entities.Chart
                 new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", this.ChartScript.Key),
-                new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
                 Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
@@ -170,7 +156,6 @@ namespace Signum.Entities.Chart
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
-            GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
             Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));

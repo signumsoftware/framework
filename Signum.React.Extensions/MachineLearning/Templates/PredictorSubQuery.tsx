@@ -35,14 +35,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         queryKey: sqd.queryKey,
         canAggregate: true,
         entity: undefined,
-        filters: (this.getMainFilters() || []).concat(sq.filters).map(mle => mle.element).map(f => ({
-          indentation: f.indentation,
-          isGroup: f.isGroup,
-          operation: f.operation,
-          groupOperation: f.groupOperation,
-          tokenString: f.token && f.token.tokenString,
-          valueString: f.valueString,
-        }) as UserAssetsClient.API.ParseFilterRequest)
+        filters: (this.getMainFilters() || []).concat(sq.filters).map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
       }).then(filters => {
         var fo: FindOptions = {
           queryName: sq.query!.key,

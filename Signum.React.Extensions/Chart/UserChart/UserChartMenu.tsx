@@ -1,14 +1,18 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Lite, toLite } from '@framework/Signum.Entities'
+import { Lite, toLite, newMListElement } from '@framework/Signum.Entities'
 import { is } from '@framework/Signum.Entities'
+import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import SearchControl from '@framework/SearchControl/SearchControl'
-import { UserChartEntity, ChartRequestModel, ChartMessage } from '../Signum.Entities.Chart'
+import { UserChartEntity, ChartRequestModel, ChartMessage, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
+import { getQueryKey } from '@framework/Reflection';
+import * as UserAssetClient from '../../UserAssets/UserAssetClient'
+import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestView;
@@ -80,21 +84,36 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
   }
 
 
-  handleCreate = () => {
+  async onCreate() {
 
-    var crView = this.props.chartRequestView;
+    const crView = this.props.chartRequestView;
 
-    var cr = crView.props.chartRequest!;
+    const cr = crView.props.chartRequest!;
 
-    UserChartClient.API.fromChartRequest(cr)
-      .then(userChart => Navigator.view(userChart))
-      .then(uc => {
-        if (uc && uc.id) {
-          this.reloadList()
-            .then(() => crView.props.onChange(cr, toLite(uc)))
-            .done();
-        }
-      }).done();
+    const query = await Finder.API.fetchQueryEntity(cr.queryKey);
+
+    const fos = Finder.toFilterOptions(cr.filterOptions);
+
+    const qfs = await UserAssetClient.API.stringifyFilters({
+      canAggregate: true,
+      queryKey: cr.queryKey,
+      filters: fos.map(fo => UserAssetClient.Converter.toFilterNode(fo))
+    });
+
+    const uc = await Navigator.view(UserChartEntity.New({
+      owner: Navigator.currentUser && toLite(Navigator.currentUser),
+      query: query,
+      chartScript: cr.chartScript,
+      filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
+      columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),
+      parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
+    }));
+    
+    if (uc && uc.id) {
+      await this.reloadList();
+
+      crView.props.onChange(cr, toLite(uc));
+    }
   }
 
   render() {
@@ -118,7 +137,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
           }
           {userCharts && userCharts.length > 0 && <DropdownItem divider />}
           {crView.props.userChart && <DropdownItem onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</DropdownItem>}
-          <DropdownItem onClick={this.handleCreate}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
+          <DropdownItem onClick={() => this.onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
         </DropdownMenu>
       </Dropdown>
     );

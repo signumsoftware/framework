@@ -2,12 +2,15 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, toMList } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { UserQueryEntity, UserQueryMessage } from './Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
+import * as UserAssetClient from '../UserAssets/UserAssetClient'
+import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
 import { DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from '@framework/Components';
+import { getQueryKey } from '@framework/Reflection';
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -75,20 +78,44 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
   }
 
 
-  handleCreate = () => {
+  async createUserQuery(): Promise<void> {
 
-    UserQueryClient.API.fromQueryRequest({
-      queryRequest: this.props.searchControl.getQueryRequest(),
-      defaultPagination: Finder.defaultPagination
-    }).then(userQuery => Navigator.view(userQuery))
-      .then(uq => {
-        if (uq && uq.id) {
-          this.reloadList()
-            .then(() => this.setState({ currentUserQuery: toLite(uq) }))
-            .done();
-        }
-      }).done();
+    const sc = this.props.searchControl;
+
+    const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription);
+
+    const qfs = await UserAssetClient.API.stringifyFilters({
+      canAggregate: fo.groupResults || false,
+      queryKey: getQueryKey(fo.queryName),
+      filters: (fo.filterOptions || []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
+    });
+
+    const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
+    
+    const uq = await Navigator.view(UserQueryEntity.New({
+      query: qe,
+      owner: Navigator.currentUser && toLite(Navigator.currentUser),
+      groupResults: fo.groupResults,
+      filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
+      columns: (fo.columnOptions || []).map(c => newMListElement(QueryColumnEmbedded.New({
+        token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
+        displayName: c.displayName
+      }))),
+      columnsMode: fo.columnOptionsMode,
+      orders: (fo.orderOptions || []).map(c => newMListElement(QueryOrderEmbedded.New({
+        orderType: c.orderType,
+        token: QueryTokenEmbedded.New({ tokenString: c.token.toString() })
+      }))),
+      paginationMode: fo.pagination && fo.pagination.mode,
+      elementsPerPage: fo.pagination && fo.pagination.elementsPerPage
+    }));
+
+    if (uq && uq.id) {
+      await this.reloadList();
+      this.setState({ currentUserQuery: toLite(uq) });
+    }
   }
+
 
   render() {
     const label = <span><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
@@ -108,7 +135,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
           }
           {userQueries && userQueries.length > 0 && <DropdownItem divider />}
           {this.state.currentUserQuery && <DropdownItem onClick={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
-          <DropdownItem onClick={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
+          <DropdownItem onClick={() => { this.createUserQuery().done() }}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
         </DropdownMenu>
       </Dropdown>
     );

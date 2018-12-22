@@ -70,9 +70,7 @@ namespace Signum.Entities.Chart
 
             return false;
         }
-
-
-
+        
         public static bool SynchronizeColumns(this ChartScript chartScript, IChartBase chart)
         {
             bool result = false;
@@ -155,36 +153,7 @@ namespace Signum.Entities.Chart
 
             return result;
         }
-
-        public static UserChartEntity ToUserChart(this ChartRequestModel request)
-        {
-            var result = new UserChartEntity
-            {
-                Owner = UserQueryUtils.DefaultOwner(),
-
-                QueryName = request.QueryName,
-
-                ChartScript = request.ChartScript,
-
-                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded()).ToMList(),
-            };
-
-            result.Columns.ZipForeach(request.Columns, (u, r) =>
-            {
-                u.Token = r.Token;
-                u.DisplayName = r.DisplayName;
-                u.OrderByIndex = r.OrderByIndex;
-                u.OrderByType = r.OrderByType;
-            });
-
-            result.Parameters.ForEach(u =>
-            {
-                u.Value = request.Parameters.FirstOrDefault(r => r.Name == u.Name).Value;
-            });
-
-            return result;
-        }
-
+        
         public static ChartRequestModel ToRequest(this UserChartEntity uq)
         {
             var result = new ChartRequestModel(uq.QueryName)
@@ -207,7 +176,6 @@ namespace Signum.Entities.Chart
             });
             return result;
         }
-
 
         public static Func<Type, PrimaryKey, Color?> GetChartColor = (type, id) => null;
 
