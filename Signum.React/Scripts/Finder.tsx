@@ -420,13 +420,21 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
       findOptions.orderOptions.remove(onlyOrder);
   }
 
+  if (findOptions.filterOptions) {
+    var defaultFilters = getDefaultFilter(qd, qs);
+
+    if (defaultFilters && defaultFilters.length == findOptions.filterOptions.length) {
+      if (JSON.stringify(defaultFilters) == JSON.stringify(findOptions.filterOptions))
+        findOptions.filterOptions = []; 
+    }
+  }
+
   return findOptions;
 }
 
 export const defaultOrderColumn: string = "Id";
 
-export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderOption | undefined {
-  debugger;
+export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefined): OrderOption | undefined {
   const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
@@ -439,22 +447,20 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
   } as OrderOption;
 }
 
-export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings): FilterOption[] | undefined {
-  if (qs.simpleFilterBuilder)
+export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undefined): FilterOption[] | undefined {
+  if (qs && qs.simpleFilterBuilder)
     return undefined;
 
-  if (qs.defaultFilters)
+  if (qs && qs.defaultFilters)
     return JSON.parse(JSON.stringify(qs.defaultFilters));
 
   if (qd.columns["Entity"]) {
-    if (getTypeInfos(qd.columns["Entity"].type).some(a => Boolean(a.toStringFunction))) {
-      return [{
-        token: "Entity.ToString",
-        operation: "EqualTo",
-        value: "",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
-      }];
-    }
+    return [{
+      token: "Entity.ToString",
+      operation: "Contains",
+      value: "",
+      pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
+    }];
   }
 }
 
@@ -485,7 +491,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
         token: fop.token && fop.token.fullKey,
         operation: fop.operation,
         value: fop.value,
-        frozen: fop.frozen,
+        frozen: fop.frozen ? true : undefined,
         pinned: pinned
       }) as FilterConditionOption;
     }
@@ -502,7 +508,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode || "Add", fo.columnOptions || []);
 
-  var qs = querySettings[qd.queryKey];
+  var qs: QuerySettings | undefined = querySettings[qd.queryKey];
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
 
@@ -511,6 +517,13 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
     if (defaultOrder)
       fo.orderOptions = [defaultOrder];
+  }
+
+  if (!fo.filterOptions || fo.filterOptions.length == 0) {
+    var defaultFilters = getDefaultFilter(qd, qs);
+
+    if (defaultFilters)
+      fo.filterOptions = defaultFilters;
   }
 
   var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
@@ -618,15 +631,14 @@ interface OverridenValue {
 }
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
-  debugger;
   if (fop.pinned && overridenValue == null) {
     if (fop.pinned.splitText && fop.value != null && typeof fop.value == "string") {
       var parts = fop.value.split(/\s+/);
-
+      
       return ({
         groupOperation: "And",
         token: fop.token && fop.token.fullKey,
-        filters: parts.map(part => toFilterRequest(fop, { value: part })),
+        filters: parts.filter(a => a.length > 0).map(part => toFilterRequest(fop, { value: part })),
       }) as FilterGroupRequest;
     }
     else if (isFilterGroupOptionParsed(fop)) {
@@ -649,7 +661,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (fop.token == null || fop.token.filterType == null || fop.operation == null)
       return undefined;
 
-    if (overridenValue != null && fop.pinned && fop.pinned.disableOnNull && fop.value == null)
+    if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value == "")) 
       return undefined;
 
     return fop.token && ({
@@ -986,6 +998,8 @@ export module API {
 
 export module Encoder {
 
+
+
   export function encodeFilters(query: any, filterOptions?: FilterOption[]) {
 
     var i: number = 0;
@@ -1000,8 +1014,7 @@ export module Encoder {
         query["filterPinned" + index + identSuffix] = scapeTilde(p.label || "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
-          "~" + (p.splitText ? "split" : "") +
-          "~" + (p.disableOnNull ? "disableNull" : "");
+          "~" + ((p.splitText ? 2 : 0) | (p.disableOnNull ? 1 : 0)).toString();
       }
 
 
@@ -1078,13 +1091,14 @@ export module Decoder {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
+      var flags = parseInt(parts[3]);
       return ({
         label: unscapeTildes(parts[0]),
         column: parts[1].length ? parseInt(parts[1]) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
-        splitText: parts[3] == "split",
-        disableOnNull: parts[4] == "disableNull",
-      })
+        splitText: Boolean(flags & 2),
+        disableOnNull: Boolean(flags & 1),
+      });
     }
 
 

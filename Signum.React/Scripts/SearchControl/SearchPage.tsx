@@ -19,7 +19,7 @@ interface SearchPageState {
 export default class SearchPage extends React.Component<SearchPageProps, SearchPageState> {
   static marginDown = 130;
   static minHeight = 600;
-  static showFilters = (fo: FindOptions) => !anyPinned(fo.filterOptions);
+  static showFilters = (fo: FindOptions) => !(fo.filterOptions == undefined || fo.filterOptions.length == 0 || anyPinned(fo.filterOptions));
 
   constructor(props: SearchPageProps) {
     super(props);

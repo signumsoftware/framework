@@ -335,6 +335,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       this.props.onFiltersChanged(this.props.findOptions.filterOptions);
   }
 
+
+  handlePinnedFilterChanged = () => {
+    this.handleFiltersChanged();
+    if (this.props.findOptions.pagination.mode != "All")
+      this.doSearchPage1();
+  }
+
   handleHeightChanged = () => {
     if (this.props.onHeighChanged)
       this.props.onHeighChanged();
@@ -411,7 +418,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 <PinnedFilterBuilder
                   filterOptions={fo.filterOptions}
                   queryDescription={qd}
-                  onFiltersChanged={() => { this.handleFiltersChanged(); this.doSearchPage1(); }} />
+                  onFiltersChanged={this.handlePinnedFilterChanged} />
             }
           </div>
         }
@@ -442,7 +449,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       </div>
     );
   }
-
 
   // TOOLBAR
 
