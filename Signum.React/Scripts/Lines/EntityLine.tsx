@@ -175,7 +175,6 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
   focusNext?: boolean;
 
   setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
-    debugger;
     if (this.focusNext && linkOrSpan != null) {
       linkOrSpan.focus();
     }
@@ -207,7 +206,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
       );
     } else {
       return (
-        <span tabIndex="0" ref={e => this.setLinkOrSpan(e)} className={classes(s.ctx.formControlClass, "sf-entity-line-entity")} {...s.itemHtmlAttributes} >
+        <span tabIndex={0} ref={e => this.setLinkOrSpan(e)} className={classes(s.ctx.formControlClass, "sf-entity-line-entity")} {...s.itemHtmlAttributes} >
           {str}
         </span>
       );
