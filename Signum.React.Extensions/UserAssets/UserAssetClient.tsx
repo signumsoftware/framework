@@ -3,13 +3,14 @@ import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption } from '@framework/FindOptions'
+import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { QueryToken } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
+import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -55,78 +56,157 @@ export function getToken(token: QueryTokenEmbedded): QueryToken {
 
 export module Converter {
 
-  export function toFilterOptionParsed(fr: API.FilterResponse): FilterOptionParsed {
-    if (API.isFilterGroupResponse(fr))
+  export function toFilterOptionParsed(fr: API.FilterNode): FilterOptionParsed {
+    if (fr.groupOperation)
       return ({
         token: fr.token,
         groupOperation: fr.groupOperation,
-        filters: fr.filters.map(f => toFilterOptionParsed(f)),
+        filters: fr.filters!.map(f => toFilterOptionParsed(f)),
+        pinned: fr.pinned
       } as FilterGroupOptionParsed);
     else
       return ({
         token: fr.token,
         operation: fr.operation || "EqualTo",
         value: fr.value,
-        frozen: true,
+        frozen: false,
+        pinned: fr.pinned,
       } as FilterConditionOptionParsed);
   }
 
-  export function toFilterOption(fr: API.FilterResponse): FilterOption {
-    if (API.isFilterGroupResponse(fr))
+  export function toFilterOption(fr: API.FilterNode): FilterOption {
+    if (fr.groupOperation)
       return ({
         token: fr.token && fr.token.fullKey,
         groupOperation: fr.groupOperation,
-        filters: fr.filters.map(f => toFilterOption(f)),
+        filters: fr.filters!.map(f => toFilterOption(f)),
+        pinned: fr.pinned
       } as FilterGroupOption);
     else
       return ({
-        token: fr.token.fullKey,
+        token: fr.token!.fullKey,
         operation: fr.operation || "EqualTo",
         value: fr.value,
+        pinned: fr.pinned
       } as FilterConditionOption);
   }
 
+  export function toFilterNode(fr: FilterOption) : API.FilterNode {
+
+    if (isFilterGroupOption(fr))
+      return ({
+        groupOperation: fr.groupOperation,
+        tokenString: fr.token && fr.token.toString(),
+        value: fr.value,
+        pinned: fr.pinned,
+        filters: fr.filters.map(f => toFilterNode(f)),
+      });
+
+    else
+      return ({
+        tokenString: fr.token!.toString(),
+        operation: fr.operation || "EqualTo",
+        value: fr.value,
+        pinned: fr.pinned,
+      });
+  }
+
+  export function toQueryFilterEmbedded(e: API.QueryFilterItem): QueryFilterEmbedded {
+
+    function toPinnedFilterEmbedded(e: PinnedFilter): PinnedQueryFilterEmbedded {
+      return PinnedQueryFilterEmbedded.New({
+        label: e.label,
+        column: e.column,
+        row: e.row,
+        disableOnNull: e.disableOnNull,
+        splitText: e.splitText
+      });
+    }
+
+    return QueryFilterEmbedded.New({
+      isGroup: e.isGroup,
+      groupOperation: e.groupOperation,
+      token: e.token && QueryTokenEmbedded.New({
+        tokenString: e.token.fullKey,
+        token: e.token
+      }),
+      operation: e.operation,
+      valueString: e.valueString,
+      pinned: e.pinned && toPinnedFilterEmbedded(e.pinned),
+      indentation: e.indentation,
+    });
+  }
+
+  export function toQueryFilterItem(e: QueryFilterEmbedded): API.QueryFilterItem  {
+
+    function toPinnedFilter(e: PinnedQueryFilterEmbedded): PinnedFilter {
+      return ({
+        label: e.label == null ? undefined : e.label,
+        column: e.column == null ? undefined : e.column,
+        row: e.row == null ? undefined : e.row,
+        disableOnNull: e.disableOnNull,
+        splitText: e.splitText
+      })
+    }
+
+    return ({
+      isGroup: e.isGroup,
+      groupOperation: e.groupOperation || undefined,
+      tokenString: e.token ? e.token.tokenString! : undefined,
+      operation: e.operation || undefined,
+      valueString: e.valueString || undefined,
+      pinned: e.pinned ? toPinnedFilter(e.pinned) : undefined,
+      indentation: e.indentation!,
+    });
+  }
+
+  
 }
+
 
 export module API {
 
-  export function parseFilters(request: ParseFiltersRequest): Promise<FilterResponse[]> {
-    return ajaxPost<FilterResponse[]>({ url: "~/api/userAssets/parseFilters/" }, request);
+  export function parseFilters(request: ParseFiltersRequest): Promise<FilterNode[]> {
+    return ajaxPost<FilterNode[]>({ url: "~/api/userAssets/parseFilters/" }, request);
   }
 
   export interface ParseFiltersRequest {
     queryKey: string;
-    filters: ParseFilterRequest[];
+    filters: QueryFilterItem[];
     entity: Lite<Entity> | undefined;
     canAggregate: boolean
   }
 
-  export interface ParseFilterRequest {
-    isGroup: boolean;
-    tokenString: string;
-    operation?: FilterOperation;
-    valueString: string;
+
+  export function stringifyFilters(request: StringifyFiltersRequest): Promise<QueryFilterItem[]> {
+    return ajaxPost<QueryFilterItem[]>({ url: "~/api/userAssets/stringifyFilters/" }, request);
+  }
+  
+  export interface StringifyFiltersRequest {
+    queryKey: string;
+    filters: FilterNode[];
+    canAggregate: boolean
+  }
+  
+  export interface FilterNode {
     groupOperation?: FilterGroupOperation;
-    indentation: number;
-  }
-
-
-  export type FilterResponse = FilterConditionResponse | FilterGroupResponse;
-
-  export function isFilterGroupResponse(fr: FilterResponse): fr is FilterGroupResponse {
-    return (fr as FilterGroupResponse).groupOperation != null;
-  }
-
-  export interface FilterGroupResponse {
-    groupOperation: FilterGroupOperation;
+    tokenString?: string;
     token?: QueryToken;
-    filters: FilterResponse[];
+    operation?: FilterOperation;
+    value?: any;
+    filters?: FilterNode[];
+    pinned?: PinnedFilter;
   }
 
-  export interface FilterConditionResponse {
-    token: QueryToken;
-    operation: FilterOperation;
-    value: any;
+  export interface QueryFilterItem {
+    token?: QueryToken;
+    tokenString?: string;
+    isGroup?: boolean;
+    groupOperation?: FilterGroupOperation;
+    operation?: FilterOperation ;
+    valueString?: string;
+    pinned?: PinnedFilter;
+    indentation?: number;
   }
 
 

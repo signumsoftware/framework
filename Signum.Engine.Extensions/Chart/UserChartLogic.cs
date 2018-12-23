@@ -45,7 +45,6 @@ namespace Signum.Engine.Chart
                         uq.EntityType,
                         uq.DisplayName,
                         uq.ChartScript,
-                        uq.GroupResults,
                     });
 
                 sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
@@ -194,7 +193,7 @@ namespace Signum.Engine.Chart
                 return cmd;
             }
         }
-
+        
         static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)
         {
             Console.Write(".");
@@ -204,12 +203,10 @@ namespace Signum.Engine.Chart
             {
                 try
                 {
-                    if (uc.Filters.Any(a => a.Token.ParseException != null) ||
-                       uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null))
+                    if (uc.Filters.Any(a => a.Token?.ParseException != null) ||
+                       uc.Columns.Any(a => a.Token?.ParseException != null))
                     {
                         QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
-
-                        SubTokensOptions canAggregate = uc.GroupResults ? SubTokensOptions.CanAggregate : 0;
 
                         if (uc.Filters.Any())
                         {
@@ -220,7 +217,7 @@ namespace Signum.Engine.Chart
                                     QueryTokenEmbedded token = item.Token;
                                     if (item.Token != null)
                                     {
-                                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
+                                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                         {
                                             case FixTokenResult.Nothing: break;
                                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
@@ -244,7 +241,7 @@ namespace Signum.Engine.Chart
                                     if (item.Token == null)
                                         continue;
 
-                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
+                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
                                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
+import { UserChartPartEntity, DashboardEntity } from '../Signum.Entities.Dashboard'
 
 export default class UserChartPart extends React.Component<{ ctx: TypeContext<UserChartPartEntity> }> {
   render() {
@@ -9,9 +9,17 @@ export default class UserChartPart extends React.Component<{ ctx: TypeContext<Us
 
     return (
       <div >
-        <EntityLine ctx={ctx.subCtx(p => p.userChart)} create={false} />
-        <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox={true} formGroupHtmlAttributes={{ style: { display: "block" } }} />
-        <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox={true} formGroupHtmlAttributes={{ style: { display: "block" } }} />
+        <EntityLine ctx={ctx.subCtx(p => p.userChart)} create={false} onChange={() => ctx.findParentCtx(DashboardEntity).frame!.entityComponent!.forceUpdate()} />
+
+        <div className="row">
+          <div className="col-sm-6">
+            <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox={true} />
+          </div>
+          <div className="col-sm-6">
+            <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox={true} />
+          </div>
+        </div>
+
       </div>
     );
   }

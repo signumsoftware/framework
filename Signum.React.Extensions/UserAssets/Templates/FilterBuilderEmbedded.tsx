@@ -7,11 +7,11 @@ import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
-import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
-import FilterBuilder, { MultiValue, FilterConditionComponent } from '@framework/SearchControl/FilterBuilder';
+import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,6 +21,8 @@ interface FilterBuilderEmbeddedProps {
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
+  showUserFilters: boolean
+
 }
 
 interface FilterBuilderEmbeddedState {
@@ -74,11 +76,20 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
           if (gr.elements.length != 0)
             throw new Error("Unexpected childrens of condition");
 
+          const pinned = gr.key.pinned;
+
           return {
             token: completer.get(gr.key.token!.tokenString),
             operation: gr.key.operation,
             value: gr.key.valueString,
             frozen: false,
+            pinned: !pinned ? undefined :
+              {
+                label: pinned.label,
+                column: pinned.column,
+                row: pinned.row,
+                disableOnNull: pinned.disableOnNull,
+              },
           } as FilterConditionOptionParsed;
         }
         else {
@@ -108,7 +119,8 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
             subTokensOptions={this.props.subTokenOptions}
             readOnly={this.props.ctx.readOnly}
             onFiltersChanged={this.handleFiltersChanged}
-            renderValue={this.handleRenderValue} />
+            renderValue={this.handleRenderValue}
+            showPinnedFilters={this.props.showUserFilters} />
         }
       </div>
     );
@@ -138,6 +150,14 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
           operation: fo.operation,
           valueString: fo.value,
           indentation: indent,
+          pinned: !fo.pinned ? undefined :
+            PinnedQueryFilterEmbedded.New({
+              label: fo.pinned.label,
+              column: fo.pinned.column,
+              row: fo.pinned.row,
+              disableOnNull: fo.pinned.disableOnNull,
+              splitText: fo.pinned.splitText,
+            })
         })));
       }
     }
@@ -152,17 +172,31 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
     this.forceUpdate();
   }
 
-  handleRenderValue = (fc: FilterConditionComponent) => {
-    const f = fc.props.filter;
+  handleRenderValue = (fc: FilterConditionComponent | FilterGroupComponent) => {
 
-    const readOnly = fc.props.readOnly || f.frozen;
+    if (fc instanceof FilterGroupComponent) {
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+      const f = fc.props.filterGroup;
 
-    if (isList(f.operation!))
-      return <MultiLineOrExpression ctx={ctx} onRenderItem={ctx => this.handleCreateAppropiateControl(ctx, fc)} onChange={fc.handleValueChange} />;
+      const readOnly = fc.props.readOnly || f.frozen;
 
-    return this.handleCreateAppropiateControl(ctx, fc);
+      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+
+      return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
+
+    } else {
+
+      const f = fc.props.filter;
+
+      const readOnly = fc.props.readOnly || f.frozen;
+
+      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+
+      if (isList(f.operation!))
+        return <MultiLineOrExpression ctx={ctx} onRenderItem={ctx => this.handleCreateAppropiateControl(ctx, fc)} onChange={fc.handleValueChange} />;
+
+      return this.handleCreateAppropiateControl(ctx, fc);
+    }
   }
 
   handleCreateAppropiateControl = (ctx: TypeContext<any>, fc: FilterConditionComponent): React.ReactElement<any> => {

@@ -59,7 +59,8 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
             <div>
               <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
                 subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-                queryKey={ctxxs.value.query!.key} />
+                queryKey={ctxxs.value.query!.key}
+                showUserFilters={true} />
               <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} />
               <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
                 {

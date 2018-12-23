@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities;
 using Signum.React.ApiControllers;
@@ -21,20 +21,6 @@ namespace Signum.React.UserQueries
         public IEnumerable<Lite<UserQueryEntity>> FromEntityType(string typeName)
         {
             return UserQueryLogic.GetUserQueriesEntity(TypeLogic.GetType(typeName));
-        }
-
-        [HttpPost("api/userQueries/fromQueryRequest")]
-        public UserQueryEntity FromQueryRequest([Required, FromBody]CreateRequest request)
-        {
-            var qr = request.queryRequest.ToQueryRequest();
-            var qd = QueryLogic.Queries.QueryDescription(qr.QueryName);
-            return qr.ToUserQuery(qd, QueryLogic.GetQueryEntity(qd.QueryName), request.defaultPagination.ToPagination());
-        }
-
-        public class CreateRequest
-        {
-            public QueryRequestTS queryRequest;
-            public PaginationTS defaultPagination;
         }
     }
 }

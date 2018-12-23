@@ -214,7 +214,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
                   <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                     queryKey={queryKey}
-                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate} />
+                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                    showUserFilters={false} />
                   <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
                     { property: a => a.usage },
                     {

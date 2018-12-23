@@ -41,7 +41,9 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
           </div>
         }
         <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={this.props.ctx.value.query.key}
-          subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
+          subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
+          showUserFilters={true}
+        />
         <ChartBuilder queryKey={queryKey} ctx={this.props.ctx}
             onInvalidate={() => this.forceUpdate()} 
             onTokenChange={() =>  this.forceUpdate()} 

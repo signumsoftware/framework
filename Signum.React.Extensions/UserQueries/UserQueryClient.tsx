@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
@@ -84,14 +84,7 @@ export module Converter {
       queryKey: query.key,
       canAggregate: uq.groupResults || false,
       entity: entity,
-      filters: uq.filters!.map(mle => mle.element).map(f => ({
-        indentation: f.indentation,
-        isGroup: f.isGroup,
-        operation: f.operation,
-        groupOperation: f.groupOperation,
-        tokenString: f.token && f.token.tokenString,
-        valueString: f.valueString,
-      }) as UserAssetsClient.API.ParseFilterRequest)
+      filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
     return convertedFilters.then(filters => {
@@ -148,10 +141,6 @@ export module API {
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
     return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forQuery/" + queryKey });
-  }
-
-  export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination }): Promise<UserQueryEntity> {
-    return ajaxPost<UserQueryEntity>({ url: "~/api/userQueries/fromQueryRequest/" }, request);
   }
 }
 

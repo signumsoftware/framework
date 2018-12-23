@@ -164,7 +164,6 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   displayName: string;
   chartScript: ChartScriptSymbol;
   parameters: Entities.MList<ChartParameterEmbedded>;
-  groupResults: boolean;
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   guid: string;

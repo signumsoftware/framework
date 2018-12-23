@@ -35,14 +35,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         queryKey: sqd.queryKey,
         canAggregate: true,
         entity: undefined,
-        filters: (this.getMainFilters() || []).concat(sq.filters).map(mle => mle.element).map(f => ({
-          indentation: f.indentation,
-          isGroup: f.isGroup,
-          operation: f.operation,
-          groupOperation: f.groupOperation,
-          tokenString: f.token && f.token.tokenString,
-          valueString: f.valueString,
-        }) as UserAssetsClient.API.ParseFilterRequest)
+        filters: (this.getMainFilters() || []).concat(sq.filters).map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
       }).then(filters => {
         var fo: FindOptions = {
           queryName: sq.query!.key,
@@ -130,8 +123,10 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
         {queryKey &&
           <div>
-            <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)} queryKey={queryKey}
-              subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
+          <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)} queryKey={queryKey}
+            subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
+            showUserFilters={false}
+            />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorSubQueryColumnEmbedded>([
               {
                 property: a => a.usage, template: colCtx => <ValueLine ctx={colCtx.subCtx(a => a.usage)} onChange={() => this.handleChangeUsage(colCtx)} />

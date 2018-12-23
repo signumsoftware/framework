@@ -43,7 +43,6 @@ export module DashboardMessage {
 }
 
 export module DashboardOperation {
-  export const Create : Entities.ConstructSymbol_Simple<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Create");
   export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Save");
   export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Clone");
   export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Delete");

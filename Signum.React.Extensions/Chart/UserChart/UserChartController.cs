@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities;
 using Signum.Engine.Basics;
@@ -22,12 +22,6 @@ namespace Signum.React.Chart
         public IEnumerable<Lite<UserChartEntity>> FromEntityType(string typeName)
         {
             return UserChartLogic.GetUserChartsEntity(TypeLogic.GetType(typeName));
-        }
-
-        [HttpPost("api/userChart/fromChartRequest"), ValidateModelFilter]
-        public UserChartEntity FromQueryRequest([FromBody]ChartRequestModel request)
-        {
-            return request.ToUserChart();
         }
     }
 }

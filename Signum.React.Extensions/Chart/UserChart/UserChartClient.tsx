@@ -77,18 +77,10 @@ export module Converter {
 
     const promise = UserAssetsClient.API.parseFilters({
       queryKey: uq.query.key,
-      canAggregate: uq.groupResults,
+      canAggregate: true,
       entity: entity,
-      filters: uq.filters!.map(mle => mle.element).map(f => ({
-        indentation: f.indentation,
-        isGroup: f.isGroup,
-        operation: f.operation,
-        groupOperation: f.groupOperation,
-        tokenString: f.token && f.token.tokenString,
-        valueString: f.valueString,
-      }) as UserAssetsClient.API.ParseFilterRequest)
+      filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
-
 
     return promise.then(filters => {
 
@@ -142,13 +134,6 @@ export module API {
 
   export function forQuery(queryKey: string): Promise<Lite<UserChartEntity>[]> {
     return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forQuery/" + queryKey });
-  }
-
-  export function fromChartRequest(chartRequest: ChartRequestModel): Promise<UserChartEntity> {
-
-    const clone = ChartClient.cleanedChartRequest(chartRequest);
-
-    return ajaxPost<UserChartEntity>({ url: "~/api/userChart/fromChartRequest/" }, clone);
   }
 }
 

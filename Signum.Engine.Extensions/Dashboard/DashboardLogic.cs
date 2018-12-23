@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -133,10 +133,6 @@ namespace Signum.Engine.Dashboard
         {
             public static void Register()
             {
-                new Construct(DashboardOperation.Create)
-                {
-                    Construct = (_) => new DashboardEntity { Owner = UserQueryUtils.DefaultOwner() }
-                }.Register();
 
                 new Execute(DashboardOperation.Save)
                 {

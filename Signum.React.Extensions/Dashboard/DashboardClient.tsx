@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
+import * as Constructor from '@framework/Constructor';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -42,6 +43,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(DashboardEntity);
+
+  Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: Navigator.currentUser && toLite(Navigator.currentUser) }));
 
   Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
 

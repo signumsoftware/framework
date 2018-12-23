@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using System.Reflection;
@@ -195,7 +195,6 @@ namespace Signum.Entities.Dashboard
     [AutoInit]
     public static class DashboardOperation
     {
-        public static ConstructSymbol<DashboardEntity>.Simple Create;
         public static ExecuteSymbol<DashboardEntity> Save;
         public static ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone;
         public static DeleteSymbol<DashboardEntity> Delete;

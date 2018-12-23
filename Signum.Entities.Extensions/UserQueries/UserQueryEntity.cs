@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
@@ -294,6 +295,8 @@ namespace Signum.Entities.UserQueries
 
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString { get; set; }
+        
+        public PinnedQueryFilterEmbedded Pinned { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Indentation { get; set; }
@@ -372,7 +375,8 @@ namespace Signum.Entities.UserQueries
                     new XAttribute("Indentation", Indentation),
                     new XAttribute("Token", Token.Token.FullKey()),
                     new XAttribute("Operation", Operation),
-                    new XAttribute("Value", ValueString ?? ""));
+                    new XAttribute("Value", ValueString ?? ""),
+                    Pinned?.ToXml(ctx));
             }
         }
 
@@ -384,6 +388,7 @@ namespace Signum.Entities.UserQueries
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
             ValueString = element.Attribute("Value")?.Value;
+            Pinned = element.Element("Pinned")?.Let(p => new PinnedQueryFilterEmbedded().FromXml(p, ctx));
         }
 
         public override string ToString()
@@ -400,74 +405,46 @@ namespace Signum.Entities.UserQueries
     }
 
 
+    [Serializable]
+    public class PinnedQueryFilterEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Label { get; set; }
+
+        public int? Column { get; set; }
+
+        public int? Row { get; set; }
+
+        public bool DisableOnNull { get; set; }
+
+        public bool SplitText { get; set; }
+
+        internal PinnedQueryFilterEmbedded FromXml(XElement p, IFromXmlContext ctx)
+        {
+            Label = p.Attribute("Label")?.Value;
+            Column = p.Attribute("Column")?.Value.ToInt();
+            Row = p.Attribute("Row")?.Value.ToInt();
+            DisableOnNull = p.Attribute("DisableOnNull")?.Value.ToBool() ?? false;
+            DisableOnNull = p.Attribute("SplitText")?.Value.ToBool() ?? false;
+            return this;
+        }
+
+        internal XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Pinned",
+                Label.DefaultText(null)?.Let(l => new XAttribute("Label", l)),
+                Column?.Let(l => new XAttribute("Column", l)),
+                Row?.Let(l => new XAttribute("Row", l)),
+                DisableOnNull == false ? null : new XAttribute("DisableOnNull", DisableOnNull),
+                SplitText == false ? null : new XAttribute("SplitText", SplitText)
+            );
+        }
+    }
+
 
 
     public static class UserQueryUtils
     {
-        public static Func<Lite<Entity>> DefaultOwner = () => (Lite<Entity>)UserHolder.Current?.ToLite();
-
-        public static UserQueryEntity ToUserQuery(this QueryRequest request, QueryDescription qd, QueryEntity query, Pagination defaultPagination)
-        {
-            var tuple = SmartColumns(request.Columns, qd);
-
-            var defaultMode = defaultPagination.GetMode();
-            var defaultElementsPerPage = defaultPagination.GetElementsPerPage();
-
-            var mode = request.Pagination.GetMode();
-            var elementsPerPage = request.Pagination.GetElementsPerPage();
-
-            bool isDefaultPaginate = defaultMode == mode && defaultElementsPerPage == elementsPerPage;
-
-            return new UserQueryEntity
-            {
-                Query = query,
-                Owner = DefaultOwner(),
-                GroupResults = request.GroupResults,
-                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded()).ToMList(),
-                ColumnsMode = tuple.mode,
-                Columns = tuple.columns,
-                Orders = request.Orders.Select(oo => new QueryOrderEmbedded
-                {
-                    Token = new QueryTokenEmbedded(oo.Token),
-                    OrderType = oo.OrderType
-                }).ToMList(),
-                PaginationMode = isDefaultPaginate ? (PaginationMode?)null : mode,
-                ElementsPerPage = isDefaultPaginate ? (int?)null : elementsPerPage,
-            };
-        }
-
-        public static IEnumerable<QueryFilterEmbedded> ToQueryFiltersEmbedded(this Filter filter, int ident = 0)
-        {
-            if(filter is FilterCondition fc)
-            {
-                yield return new QueryFilterEmbedded
-                {
-                    Token = new QueryTokenEmbedded(fc.Token),
-                    Operation = fc.Operation,
-                    ValueString = FilterValueConverter.ToString(fc.Value, fc.Token.Type),
-                    Indentation = ident,
-                };
-            }
-            else if(filter is FilterGroup fg)
-            {
-                yield return new QueryFilterEmbedded
-                {
-                    IsGroup = true,
-                    GroupOperation = fg.GroupOperation,
-                    Token = fg.Token == null ? null : new QueryTokenEmbedded(fg.Token),
-                    Indentation = ident,
-                };
-
-                foreach (var f in fg.Filters)
-                {
-                    foreach (var fe in ToQueryFiltersEmbedded(f, ident + 1))
-                    {
-                        yield return fe;
-                    }
-                }
-            }
-        }
-
         public static List<Filter> ToFilterList(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
         {
             return filters.GroupWhen(filter => filter.Indentation == indent).Select(gr =>
