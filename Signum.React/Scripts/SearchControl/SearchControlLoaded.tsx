@@ -417,7 +417,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               sfb ? <div className="simple-filter-builder">{sfb}</div> :
                 <PinnedFilterBuilder
                   filterOptions={fo.filterOptions}
-                  queryDescription={qd}
                   onFiltersChanged={this.handlePinnedFilterChanged} />
             }
           </div>
