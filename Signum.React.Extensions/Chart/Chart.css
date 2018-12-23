@@ -159,6 +159,6 @@ body.rtl .sf-chart-token .sf-query-token {
     background-color:pink;
 }
 
-.sf-transition {
+.sf-chart-animable .sf-transition {
     transition: all 0.4s cubic-bezier(0.92, 0.02, 0.21, 1.01)
 }

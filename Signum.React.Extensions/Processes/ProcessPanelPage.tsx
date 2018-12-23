@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 import * as numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
@@ -110,7 +110,7 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
           <h2>Latest Processes</h2>
           <SearchControl findOptions={{
             queryName: ProcessEntity,
-            orderOptions: [{ token: "CreationDate", orderType: "Descending" }],
+            orderOptions: [{ token: ProcessEntity.token(e => e.creationDate), orderType: "Descending" }],
             pagination: { elementsPerPage: 10, mode: "Firsts" }
           }}
           />

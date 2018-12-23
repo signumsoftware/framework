@@ -9,7 +9,7 @@ import { Entity, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
-import { newLite } from '@framework/Reflection'
+import { newLite, QueryTokenString } from '@framework/Reflection'
 import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
@@ -43,7 +43,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
     Navigator.API.fillToStrings(lite).then(() => {
       this.setState({ lite });
     }).catch(a => {
-      lite.toStr = EngineMessage.EntityWithType0AndId1NotFound.niceToString();
+      lite.toStr = TimeMachineMessage.EntityDeleted.niceToString();
       this.setState({ lite });
     });
 
@@ -80,13 +80,13 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
         {
           this.state.queryDescription && <SearchControl ref={sc => this.searchControl = sc} findOptions={{
             queryName: lite.EntityType,
-            filterOptions: [{ token: "Entity", operation: "EqualTo", value: lite }],
+            filterOptions: [{ token: QueryTokenString.entity(), operation: "EqualTo", value: lite }],
             columnOptions: [
-              { token: "Entity.SystemValidFrom" },
-              ...Dic.getValues(this.state.queryDescription.columns).map(c => ({ token: c.name }) as ColumnOption)
+              { token: QueryTokenString.entity().expression("SystemValidFrom") },
+              { token: QueryTokenString.entity().expression("SystemValidTo") },
             ],
-            columnOptionsMode: "Replace",
-            orderOptions: [{ token: "Entity.SystemValidFrom", orderType: "Ascending" }],
+            columnOptionsMode: "InsertStart",
+            orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Ascending" }],
             systemTime: { mode: "All" }
           }}
             onSelectionChanged={() => this.forceUpdate()}

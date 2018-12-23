@@ -1,4 +1,4 @@
-﻿import * as moment from 'moment'
+import * as moment from 'moment'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
@@ -22,7 +22,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: AlertEntity,
-    parentToken: "Target",
+    parentToken: AlertEntity.token(e => e.target),
     parentValue: ctx.lite
   }, { isVisible: couldHaveAlerts(ctx.lite.EntityType), icon: "bell", iconColor: "orange" }));
 

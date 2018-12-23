@@ -9,7 +9,7 @@ import { WebApiHttpError } from '@framework/Services'
 import { ValueSearchControl, FindOptions } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
+import { getQueryNiceName, QueryTokenString } from '@framework/Reflection'
 import { API, CompilationError, EvalEntityError, DynamicPanelInformation } from './DynamicClient'
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
@@ -440,7 +440,7 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
           var request = {
             queryKey: fop.queryKey,
             filters: toFilterRequests(fop.filterOptions || []),
-            orders: [{ token: "Entity.Id", orderType: "Ascending" }],
+            orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
             count: 10000,
           } as QueryEntitiesRequest;
           API.getEvalErrors(request)

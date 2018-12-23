@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity, EntityPack, toLite, ModifiableEntity, toMList } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
-import { Type, isTypeEntity } from '@framework/Reflection'
+import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as Constructor from '@framework/Constructor'
 import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
@@ -29,7 +29,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     createFromEntities: (wt, lites) => {
       return Navigator.API.fetchAndForget(wt).then(template => QueryModel.New({
         queryKey: template.query!.key,
-        filters: [{ token: "Entity", operation: "IsIn", value: lites }],
+        filters: [{ token: QueryTokenString.entity().toString(), operation: "IsIn", value: lites }],
         orders: [],
         pagination: { mode: "All" },
       }));

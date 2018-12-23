@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { JoyrideEntity, JoyrideStepEntity } from '../Signum.Entities.Joyride'
 import { ValueLine, EntityLine, EntityStrip, TypeContext } from '@framework/Lines'
 
@@ -14,7 +14,7 @@ export default class JoyrideStep extends React.Component<{ ctx: TypeContext<Joyr
         <EntityStrip ctx={ctx.subCtx(a => a.steps)}
           findOptions={{
             queryName: JoyrideStepEntity,
-            parentToken: "Culture",
+            parentToken: JoyrideStepEntity.token(e => e.culture),
             parentValue: ctx.value.culture
           }}
         />

@@ -22,10 +22,9 @@ export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
 
 export const ToolbarElementType = new EnumType<ToolbarElementType>("ToolbarElementType");
 export type ToolbarElementType =
-  "Link" |
-  "Menu" |
   "Header" |
-  "Divider";
+  "Divider" |
+  "Item";
 
 export const ToolbarEntity = new Type<ToolbarEntity>("Toolbar");
 export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEntity {

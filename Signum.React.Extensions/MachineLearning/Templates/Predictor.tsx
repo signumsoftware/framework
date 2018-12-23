@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as OrderUtils from '@framework/Frames/OrderUtils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
@@ -248,13 +248,13 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
           </Tab>
           {
             ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
-              <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentToken: "Predictor", parentValue: ctx.value }} />
+              <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentToken: PredictorCodificationEntity.token(e => e.predictor), parentValue: ctx.value }} />
             </Tab>
           }
           {
             ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
               {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
-              <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentToken: "Predictor", parentValue: ctx.value }} />
+              <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentToken: PredictorEpochProgressEntity.token(e => e.predictor), parentValue: ctx.value }} />
             </Tab>
           }
           {

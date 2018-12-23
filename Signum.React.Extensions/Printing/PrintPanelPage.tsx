@@ -4,7 +4,7 @@ import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '@fram
 import { StyleContext } from '@framework/Lines'
 import { API, PrintStat } from './PrintClient'
 import * as Navigator from '@framework/Navigator'
-import { PrintLineState, PrintLineEntity } from './Signum.Entities.Printing'
+import { PrintLineState, PrintLineEntity, PrintPackageEntity } from './Signum.Entities.Printing'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 
@@ -40,8 +40,8 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                 findOptions={{
                   queryName: PrintLineEntity,
                   filterOptions: [
-                    { token: "State", value: "ReadyToPrint" as PrintLineState },
-                    { token: "File.FileType", value: s.fileType },
+                    { token: PrintLineEntity.token(e => e.state), value: "ReadyToPrint" as PrintLineState },
+                    { token: PrintLineEntity.token(a => a.file!.fileType), value: s.fileType },
                   ]
                 }} />)
             }
@@ -51,7 +51,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
         <h3>{ProcessEntity.nicePluralName()}</h3>
         <SearchControl findOptions={{
           queryName: ProcessEntity,
-          filterOptions: [{ token: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
+          filterOptions: [{ token: ProcessEntity.token().entity(e => e.data).cast(PrintPackageEntity), operation: "DistinctTo", value: undefined }],
           pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1 },
         }}
         />

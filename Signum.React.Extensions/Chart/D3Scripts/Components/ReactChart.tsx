@@ -5,7 +5,7 @@ import * as ChartClient from '../../ChartClient'
 import * as Navigator from '@framework/Navigator';
 import { ColumnOption, FilterOptionParsed } from '@framework/Search';
 import { hasAggregate } from '@framework/FindOptions';
-import { DomUtils } from '@framework/Globals';
+import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 
@@ -19,6 +19,8 @@ export interface ReactChartProps {
 }
 
 export default class ReactChart extends React.Component<ReactChartProps, { width: number | null, height: number | null, initialLoad: boolean }> {
+
+  static maxRowsForAnimation = 500;
 
   constructor(props: ReactChartProps) {
     super(props);
@@ -65,7 +67,10 @@ export default class ReactChart extends React.Component<ReactChartProps, { width
   initialLoadTimeoutHandle?: number;
   componentWillReceiveProps(newProps: ReactChartProps) {
     if (this.props.data == null && newProps.data != null) {
-      this.setInitialTimer();
+      if (newProps.data.rows.length < ReactChart.maxRowsForAnimation)
+        this.setInitialTimer();
+      else
+        this.state.initialLoad = false; //To use the same rendering loop
     }
   }
 
@@ -85,9 +90,9 @@ export default class ReactChart extends React.Component<ReactChartProps, { width
   }
 
   render() {
-    
+    var animated = this.props.data == null || this.props.data.rows.length < ReactChart.maxRowsForAnimation;
     return (
-      <div className="sf-chart-container" ref={d => this.setDivElement(d)}>
+      <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={d => this.setDivElement(d)} >
         {this.state.width != null && this.state.height != null &&
           this.props.onRenderChart({
             data: this.props.data,

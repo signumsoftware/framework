@@ -1,4 +1,4 @@
-﻿import * as moment from 'moment'
+import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -80,7 +80,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
           showGroupButton={true}
           findOptions={{
             queryName: CaseActivityEntity,
-            parentToken: "Entity.WorkflowActivity",
+            parentToken: CaseActivityEntity.token().entity(e => e.workflowActivity),
             parentValue: stats.workflowActivity,
             filterOptions: toFilterOptions(this.props.config.filters.filter(f => !isAggregate(f))),
             columnOptionsMode: "Add",

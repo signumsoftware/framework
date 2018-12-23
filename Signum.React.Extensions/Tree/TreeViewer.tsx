@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { classes } from '@framework/Globals'
@@ -21,6 +21,7 @@ import { tryGetMixin } from "@framework/Signum.Entities";
 import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '@framework/Components';
 import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
+import { QueryTokenString } from '@framework/Reflection';
 
 interface TreeViewerProps {
   typeName: string;
@@ -277,7 +278,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       const frozenFilters = toFilterRequests(filters.filter(fo => fo.frozen == true));
 
       if (userFilters.length == 0)
-        userFilters.push({ token: "Entity.Level", operation: "EqualTo", value: 1 });
+        userFilters.push({ token: QueryTokenString.entity<TreeEntity>().append(e => e.level).toString(), operation: "EqualTo", value: 1 });
 
       return API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes });
     })

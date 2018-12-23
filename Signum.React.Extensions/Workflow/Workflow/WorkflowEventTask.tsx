@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext, EntityCombo } from '@framework/Lines'
 import * as Navigator from '@framework/Navigator'
 import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType, TriggeredOn, WorkflowEventTaskConditionEval, WorkflowEventTaskModel } from '../Signum.Entities.Workflow'
@@ -44,13 +44,11 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
         {ctx.value.workflow && ctx.value.workflow.entity &&
           <div>
             <EntityCombo ctx={ctx.subCtx(wet => wet.event)} findOptions={{
-              queryName: WorkflowEventEntity,
-              parentToken: "Entity.Lane.Pool.Workflow",
+            queryName: WorkflowEventEntity,
+            parentToken: WorkflowEventEntity.token().entity(a => a.lane!.pool!.workflow),
               parentValue: ctx.value.workflow,
               filterOptions: [
-                {
-                  token: "Type", operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart")
-                }
+                { token: WorkflowEventEntity.token(e => e.type), operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart") }
               ]
             }} />
 

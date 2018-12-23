@@ -99,7 +99,7 @@ export function start(options: {
   if (options.quickLinksFrom) {
     QuickLinks.registerGlobalQuickLink(ctx => {
       if (options.quickLinksFrom!.some(e => getTypeName(e) == ctx.lite.EntityType))
-        return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentToken: "Target", parentValue: ctx.lite });
+        return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentToken: EmailMessageEntity.token(e => e.target), parentValue: ctx.lite });
 
       return undefined;
     });

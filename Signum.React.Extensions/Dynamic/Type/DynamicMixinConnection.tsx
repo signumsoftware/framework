@@ -45,8 +45,8 @@ export class MixinCombo extends React.Component<MixinComboProps>{
     return Finder.fetchEntitiesWithFilters(
       DynamicTypeEntity,
       [
-        { token: "Entity.BaseType", operation: "EqualTo", value: "MixinEntity" },
-        { token: "Entity.TypeName", operation: "StartsWith", value: query },
+        { token: DynamicTypeEntity.token().entity(e => e.baseType), operation: "EqualTo", value: "MixinEntity" },
+        { token: DynamicTypeEntity.token().entity(e => e.typeName), operation: "StartsWith", value: query },
       ], [], 5)
       .then(lites => lites && lites.map(a => a.toStr));
   }

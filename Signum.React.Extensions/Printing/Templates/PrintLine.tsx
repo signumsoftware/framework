@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
@@ -20,7 +20,7 @@ export default class PrintLine extends React.Component<{ ctx: TypeContext<PrintL
         {!e.value.isNew &&
           <fieldset>
             <legend>{ProcessExceptionLineEntity.nicePluralName()}</legend>
-            <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: "Line", parentValue: e.value }} />
+            <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: ProcessExceptionLineEntity.token(e => e.line), parentValue: e.value }} />
           </fieldset>
         }
       </div>
