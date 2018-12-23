@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using Signum.Entities.UserAssets;
@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.UserQueries;
+using Signum.Entities;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Dashboard
 {
@@ -144,9 +146,11 @@ namespace Signum.Entities.Dashboard
 
         public UserQueryPartRenderMode RenderMode { get; set; }
 
+        static Expression<Func<UserQueryPartEntity, string>> ToStringExpression = @this => @this.UserQuery + "";
+        [ExpressionField]
         public override string ToString()
         {
-            return UserQuery?.ToString();
+            return ToStringExpression.Evaluate(this);
         }
 
         public bool RequiresTitle
@@ -195,9 +199,11 @@ namespace Signum.Entities.Dashboard
 
         public bool AllowChangeShowData { get; set; } = false;
 
+        static Expression<Func<UserChartPartEntity, string>> ToStringExpression = @this => @this.UserChart + "";
+        [ExpressionField]
         public override string ToString()
         {
-            return UserChart?.ToString();
+            return ToStringExpression.Evaluate(this);
         }
 
         public bool RequiresTitle

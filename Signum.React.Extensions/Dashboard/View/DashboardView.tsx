@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { Entity, getToString, toLite } from '@framework/Signum.Entities'
@@ -242,7 +242,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
             <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
 
         </div>
-        <div className="card-body">
+        <div className="card-body py-2 px-3">
           <ErrorBoundary>
             {
               React.createElement(this.state.component, {

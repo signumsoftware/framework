@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'

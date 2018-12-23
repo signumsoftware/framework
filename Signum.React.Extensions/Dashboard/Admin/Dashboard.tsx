@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
@@ -12,6 +12,7 @@ import * as DashboardClient from "../DashboardClient";
 import { IconTypeaheadLine } from "../../Basics/Templates/IconTypeahead";
 import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
+import { getToString } from '@framework/Signum.Entities';
 
 export default class Dashboard extends React.Component<{ ctx: TypeContext<DashboardEntity> }> {
 
@@ -81,7 +82,7 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
 
   renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
 
-    const tcs = tc.subCtx({ formGroupStyle: "Basic", formSize: "ExtraSmall", placeholderLabels: true });
+    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "ExtraSmall", placeholderLabels: true });
 
     var icon = parseIcon(tc.value.iconName);
 
@@ -92,21 +93,20 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
             {icon && <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
           </div>
           <div className="col-sm-11">
-            <ValueLine ctx={tcs.subCtx(pp => pp.title)} />
+            <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) || tcs.niceName(pp => pp.title)} />
+            <div className="row">
+              <div className="col-sm-4">
+                <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => this.forceUpdate()} />
+              </div>
+              <div className="col-sm-4">
+                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => this.forceUpdate()} />
+              </div>
+              <div className="col-sm-4">
+                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="row">
-          <div className="col-sm-4">
-            <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => this.forceUpdate()} />
-          </div>
-          <div className="col-sm-4">
-            <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => this.forceUpdate()} />
-          </div>
-          <div className="col-sm-4">
-            <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
-          </div>
-        </div>
-
       </div>
     );
 
