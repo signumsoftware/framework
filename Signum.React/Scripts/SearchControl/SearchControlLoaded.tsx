@@ -52,7 +52,7 @@ export interface SearchControlLoadedProps {
   showSelectedButton: boolean;
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
-  showHeader: boolean;
+  showHeader: boolean | "PinnedFilters";
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters: boolean;
@@ -400,7 +400,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       <div className="sf-search-control SF-control-container" ref="container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
-        {p.showHeader &&
+        {p.showHeader == true && 
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
             this.state.showFilters ? <FilterBuilder
@@ -417,15 +417,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               sfb ? <div className="simple-filter-builder">{sfb}</div> :
                 <PinnedFilterBuilder
                   filterOptions={fo.filterOptions}
-                  queryDescription={qd}
                   onFiltersChanged={this.handlePinnedFilterChanged} />
             }
           </div>
         }
-        {p.showHeader && this.renderToolBar()}
-        {p.showHeader && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
+        {p.showHeader == "PinnedFilters" && <PinnedFilterBuilder
+          filterOptions={fo.filterOptions}
+          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />}
+        {p.showHeader == true && this.renderToolBar()}
+        {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
+        {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+        {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
         {this.state.editingColumn && <ColumnEditor
           columnOption={this.state.editingColumn}
           onChange={this.handleColumnChanged}
@@ -880,7 +882,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.forceUpdate();
 
-    if (fo.pagination.mode != "All" || !this.props.showHeader)
+    if (fo.pagination.mode != "All" || this.props.showHeader != true)
       this.doSearchPage1();
   }
 

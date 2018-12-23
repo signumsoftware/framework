@@ -29,7 +29,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   showContextMenu?: boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
-  showHeader?: boolean;
+  showHeader?: boolean | "PinnedFilters";
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters?: boolean;
