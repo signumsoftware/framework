@@ -9,11 +9,12 @@ import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
 import { createFilterValueControl, MultiValue } from './FilterBuilder';
 import { SearchMessage } from '../Signum.Entities';
+import { classes } from '../Globals';
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
-  queryDescription: QueryDescription;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+  extraSmall?: boolean;
 }
 export default class PinnedFilterBuilder extends React.Component<PinnedFilterBuilderProps>{
 
@@ -24,7 +25,7 @@ export default class PinnedFilterBuilder extends React.Component<PinnedFilterBui
       return null;
 
     return (
-      <div className="row mt-3 mb-3">
+      <div className={classes("row", this.props.extraSmall ? "" : "mt-3 mb-3")}>
         {
           allPinned
             .groupBy(a => (a.pinned!.column || 0).toString())
@@ -41,7 +42,7 @@ export default class PinnedFilterBuilder extends React.Component<PinnedFilterBui
 
     const f = filter;
     const readOnly = f.frozen;
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: "Small" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: this.props.extraSmall ? "ExtraSmall" : "Small" }, undefined as any, Binding.create(f, a => a.value));
 
     var labelText = f.pinned!.label || f.token && f.token.niceName;
 
