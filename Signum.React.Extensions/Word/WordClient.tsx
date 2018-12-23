@@ -23,6 +23,10 @@ import { DropdownItem } from '@framework/Components';
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
+
+  if (!Navigator.isViewable(WordTemplateEntity))
+    return;
+
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
   register(QueryModel, {
     createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
