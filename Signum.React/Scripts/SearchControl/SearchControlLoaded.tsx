@@ -525,6 +525,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const isAll = p.findOptions.pagination.mode == "All";
 
+    const isSearch = isAll || this.state.showFilters ||
+      this.state.resultTable == null && !this.props.searchOnLoad ||
+      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey));
+
     var leftButtons = [
 
       p.showFilterButton && OrderUtils.setOrder(-5, <button
@@ -549,8 +553,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <FontAwesomeIcon icon="history" />
       </button>),
 
-      (isAll || this.state.showFilters) && OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>
-        <FontAwesomeIcon icon={"search"} />&nbsp;{SearchMessage.Search.niceToString()}
+      OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick}>
+        <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
       </button>),
 
       this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
