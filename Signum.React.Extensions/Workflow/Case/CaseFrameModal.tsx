@@ -49,7 +49,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   componentWillMount() {
     WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
-      .then(() => this.loadComponent())
+      .then(pack => this.loadComponent(pack))
       .done();
   }
 
@@ -58,7 +58,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
-      .then(() => this.loadComponent())
+      .then(pack => this.loadComponent(pack))
       .done();
   }
 
@@ -69,12 +69,13 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     };
   }
 
-  setPack(pack: WorkflowClient.CaseEntityPack): void {
+  setPack(pack: WorkflowClient.CaseEntityPack): WorkflowClient.CaseEntityPack {
     this.setState({ pack: pack, refreshCount: 0 });
+    return pack;
   }
 
-  loadComponent(): Promise<void> {
-    const ca = this.state.pack!.activity;
+  loadComponent(pack: WorkflowClient.CaseEntityPack): Promise<void> {
+    const ca = pack.activity;
     const wa = ca.workflowActivity as WorkflowActivityEntity;
 
     return Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined).promise

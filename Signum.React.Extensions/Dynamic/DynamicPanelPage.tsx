@@ -120,7 +120,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     const isValidAssembly = lastChange && loadedAssembly && moment(loadedAssembly).isBefore(moment(lastChange)) ? false : true;
 
     return (
-      <table className="table table-condensed form-vertical" style={{ width: "20%" }}>
+      <table className="table table-condensed form-vertical" style={{ width: "30%" }}>
         <tr>
           <th>Last Dynamic Change</th>
           <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
