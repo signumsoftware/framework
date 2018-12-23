@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPostRaw, ajaxGet, saveFile } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -13,6 +13,10 @@ import { ChartPermission } from '../Chart/Signum.Entities.Chart'
 import ExcelMenu from './ExcelMenu'
 
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
+
+  if (!Navigator.isViewable(ExcelReportEntity))
+    return;
+
   if (options.excelReport) {
     Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));
   }
