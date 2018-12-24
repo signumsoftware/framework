@@ -24,9 +24,6 @@ import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
 
-  if (!Navigator.isViewable(WordTemplateEntity))
-    return;
-
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
   register(QueryModel, {
     createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
@@ -85,19 +82,19 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     }
   }));
 
-  if (options.contextual)
+  if (options.contextual && Navigator.isViewable(WordTemplateEntity))
     ContexualItems.onContextualItems.push(getWordTemplates);
 
   if (options.queryButton)
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-      if (!ctx.searchControl.props.showBarExtension)
+      if (!ctx.searchControl.props.showBarExtension || !Navigator.isViewable(WordTemplateEntity))
         return undefined;
 
       return <WordSearchMenu searchControl={ctx.searchControl} />;
     });
 
-  if (options.entityButton) {
+  if (options.entityButton && Navigator.isViewable(WordTemplateEntity)) {
     ButtonBar.onButtonBarRender.push(getEntityWordButtons);
   }
 }

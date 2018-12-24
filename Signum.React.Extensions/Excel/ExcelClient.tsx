@@ -14,16 +14,15 @@ import ExcelMenu from './ExcelMenu'
 
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
 
-  if (!Navigator.isViewable(ExcelReportEntity))
-    return;
-
   if (options.excelReport) {
     Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));
   }
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-    if (!ctx.searchControl.props.showBarExtension || (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false))
+    if (!ctx.searchControl.props.showBarExtension ||
+      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false) ||
+      !Navigator.isViewable(ExcelReportEntity))
       return undefined;
 
     return <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} />;
