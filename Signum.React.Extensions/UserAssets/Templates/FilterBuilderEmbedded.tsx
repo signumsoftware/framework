@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
 import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent } from '@framework/SearchControl/FilterBuilder';
@@ -83,25 +83,32 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
             operation: gr.key.operation,
             value: gr.key.valueString,
             frozen: false,
-            pinned: !pinned ? undefined :
-              {
-                label: pinned.label,
-                column: pinned.column,
-                row: pinned.row,
-                disableOnNull: pinned.disableOnNull,
-              },
+            pinned: !pinned ? undefined : toPinnedFilter(pinned),
           } as FilterConditionOptionParsed;
         }
         else {
+
+          const pinned = gr.key.pinned;
 
           return {
             token: gr.key.token ? completer.get(gr.key.token.tokenString) : null,
             groupOperation: gr.key.groupOperation!,
             filters: toFilterList(gr.elements, indent + 1),
+            value: gr.key.valueString,
             frozen: false,
+            pinned: !pinned ? undefined : toPinnedFilter(pinned),
           } as FilterGroupOptionParsed;
         }
       });
+
+      function toPinnedFilter(pinned: PinnedQueryFilterEmbedded): PinnedFilter {
+        return {
+          label: pinned.label || undefined,
+          column: pinned.column || undefined,
+          row: pinned.row || undefined,
+          disableOnNull: pinned.disableOnNull || undefined,
+        };
+      }
     }
 
     return toFilterList(allFilters.map(a => a.element), 0);
@@ -139,7 +146,9 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
           isGroup: true,
           indentation: indent,
           groupOperation: fo.groupOperation,
-          token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey })
+          token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
+          valueString: fo.value,
+          pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned)
         })));
 
         fo.filters.forEach(f => pushFilter(f, indent + 1));
@@ -150,16 +159,19 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
           operation: fo.operation,
           valueString: fo.value,
           indentation: indent,
-          pinned: !fo.pinned ? undefined :
-            PinnedQueryFilterEmbedded.New({
-              label: fo.pinned.label,
-              column: fo.pinned.column,
-              row: fo.pinned.row,
-              disableOnNull: fo.pinned.disableOnNull,
-              splitText: fo.pinned.splitText,
-            })
+          pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned)
         })));
       }
+
+      function toPinnedQueryFilterEmbedded(pinned: PinnedFilter): PinnedQueryFilterEmbedded {
+            return PinnedQueryFilterEmbedded.New({
+                label: pinned.label,
+                column: pinned.column,
+                row: pinned.row,
+                disableOnNull: pinned.disableOnNull,
+                splitText: pinned.splitText,
+            });
+        }
     }
 
     this.state.filterOptions!.forEach(fo => pushFilter(fo, 0))
