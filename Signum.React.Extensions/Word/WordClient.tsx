@@ -82,7 +82,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     }
   }));
 
-  if (options.contextual && Navigator.isViewable(WordTemplateEntity))
+  if (options.contextual)
     ContexualItems.onContextualItems.push(getWordTemplates);
 
   if (options.queryButton)
@@ -94,13 +94,14 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
       return <WordSearchMenu searchControl={ctx.searchControl} />;
     });
 
-  if (options.entityButton && Navigator.isViewable(WordTemplateEntity)) {
+  if (options.entityButton) {
     ButtonBar.onButtonBarRender.push(getEntityWordButtons);
   }
 }
 
 export function getEntityWordButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
-  if (ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
+
+  if (Navigator.isViewable(WordTemplateEntity) && ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
     return [<WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />]
 
   return undefined;
@@ -119,7 +120,8 @@ export function register<T extends ModifiableEntity>(type: Type<T>, setting: Wor
 }
 
 export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
-  if (ctx.lites.length == 0)
+
+  if (!Navigator.isViewable(WordTemplateEntity) || ctx.lites.length == 0)
     return undefined;
 
   return API.getWordTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", { lite: (ctx.lites.length == 1 ? ctx.lites[0] : null) })
