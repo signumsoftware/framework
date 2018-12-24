@@ -57,7 +57,7 @@ export interface FilterConditionOption {
   token: string | QueryTokenString<any>;
   frozen?: boolean;
   operation?: FilterOperation;
-  value: any;
+  value?: any;
   pinned?: PinnedFilter;
 }
 
