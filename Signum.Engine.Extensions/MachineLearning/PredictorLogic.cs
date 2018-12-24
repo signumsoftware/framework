@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Files;
 using Signum.Engine.Maps;
@@ -93,6 +93,9 @@ namespace Signum.Engine.MachineLearning
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                sb.Settings.AssertIgnored((PredictorEntity p) => p.MainQuery.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");
+                sb.Settings.AssertIgnored((PredictorSubQueryEntity p) => p.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");
+
                 sb.Include<PredictorEntity>()
                     .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
                     .WithQuery(() => e => new
@@ -211,6 +214,12 @@ namespace Signum.Engine.MachineLearning
                     }.Register();
                 });
             }
+        }
+
+        public static void IgnorePinned(SchemaBuilder sb)
+        {
+            sb.Settings.FieldAttributes((PredictorEntity p) => p.MainQuery.Filters.Single().Pinned).Add(new IgnoreAttribute());
+            sb.Settings.FieldAttributes((PredictorSubQueryEntity p) => p.Filters.Single().Pinned).Add(new IgnoreAttribute());
         }
 
         static string SubQueryColumns_StaticPropertyValidation(PredictorSubQueryEntity sq, PropertyInfo pi)

@@ -4,7 +4,13 @@ import * as ChartUtils from './ChartUtils';
 import { translate } from './ChartUtils';
 
 
-export default class TextEllipsis extends React.Component<{ maxWidth: number, padding?: number, etcText?: string; } & React.SVGProps<SVGTextElement>> {
+export interface TextEllipsisProps extends React.SVGProps<SVGTextElement>{
+  maxWidth: number;
+  padding?: number;
+  etcText?: string;
+}
+
+export default class TextEllipsis extends React.Component<TextEllipsisProps> {
 
   txt?: SVGTextElement | null;
 
@@ -21,21 +27,42 @@ export default class TextEllipsis extends React.Component<{ maxWidth: number, pa
 
 
   componentDidMount() {
-    var etcText = this.props.etcText == null ? "…" : this.props.etcText;
+    this.recalculate(this.props);
+  }
 
-    var width = this.props.maxWidth;
-    if (this.props.padding)
-      width -= this.props.padding * 2;
 
-    let txtElement = this.txt!;
-    let textLength = txtElement.getComputedTextLength();
-    let text = txtElement.textContent!;
+
+  componentWillReceiveProps(nextProps: TextEllipsisProps) {
+    if (this.props.maxWidth != nextProps.maxWidth ||
+      this.props.padding != nextProps.padding ||
+      this.props.etcText != nextProps.etcText ||
+      getString(this.props) != getString(nextProps))
+      this.recalculate(nextProps);
+  }
+
+  recalculate(props: TextEllipsisProps) {
+    
+    var etcText = props.etcText == null ? "…" : props.etcText;
+
+    var width = props.maxWidth;
+    if (props.padding)
+      width -= props.padding * 2;
+
+    let txtElem = this.txt!;
+    txtElem.textContent = getString(this.props);
+    let textLength = txtElem.getComputedTextLength();
+    let text = txtElem.textContent!;
     while (textLength > width && text.length > 0) {
       text = text.slice(0, -1);
       while (text[text.length - 1] == ' ' && text.length > 0)
         text = text.slice(0, -1);
-      txtElement.textContent = text + etcText;
-      textLength = txtElement.getComputedTextLength();
+      txtElem.textContent = text + etcText;
+      textLength = txtElem.getComputedTextLength();
     }
   }
+}
+
+
+function getString(props: TextEllipsisProps) {
+  return React.Children.toArray(props.children)[0] as string;
 }
