@@ -500,8 +500,9 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
       return ({
         token: fop.token && fop.token.fullKey,
         groupOperation: fop.groupOperation,
-        filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
+        value: fop.value,
         pinned: pinned,
+        filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
     else {
       if (fop.token == null)
@@ -822,8 +823,9 @@ export class TokenCompleter {
       return ({
         token: fo.token && this.get(fo.token.toString()),
         groupOperation: fo.groupOperation,
-        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
+        value: fo.value,
         pinned: fo.pinned && { ...fo.pinned },
+        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
       } as FilterGroupOptionParsed);
     else
       return ({
