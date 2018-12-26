@@ -52,8 +52,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
       .then(list => this.setState({ userQueries: list }));
   }
 
-
-  handleOnClick = (uq: Lite<UserQueryEntity>) => {
+  ApplyUserQuery(uq: Lite<UserQueryEntity>) {
 
     Navigator.API.fetchAndForget(uq).then(userQuery => {
       const sc = this.props.searchControl
@@ -65,15 +64,20 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
-        })
-        .done();
-    }).then();
+        });
+    }).done()
+  }
+
+  handleOnClick = (uq: Lite<UserQueryEntity>) => {
+
+    this.ApplyUserQuery(uq);
   }
 
   handleEdit = () => {
     Navigator.API.fetchAndForget(this.state.currentUserQuery!)
       .then(userQuery => Navigator.navigate(userQuery))
       .then(() => this.reloadList())
+      .then(() => this.ApplyUserQuery(this.state.currentUserQuery!))
       .done();
   }
 
@@ -91,7 +95,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     });
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
-    
+
     const uq = await Navigator.view(UserQueryEntity.New({
       query: qe,
       owner: Navigator.currentUser && toLite(Navigator.currentUser),
@@ -112,10 +116,10 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
 
     if (uq && uq.id) {
       await this.reloadList();
-      this.setState({ currentUserQuery: toLite(uq) });
+      this.setState({ currentUserQuery: toLite(uq) },
+        () => this.ApplyUserQuery(this.state.currentUserQuery!));
     }
   }
-
 
   render() {
     const label = <span><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
