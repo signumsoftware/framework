@@ -107,6 +107,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
           column: pinned.column || undefined,
           row: pinned.row || undefined,
           disableOnNull: pinned.disableOnNull || undefined,
+          splitText: pinned.splitText || undefined,
         };
       }
     }

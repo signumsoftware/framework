@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
@@ -26,6 +27,14 @@ namespace Signum.Entities.Dynamic
 
         [StringLengthValidator(AllowNulls = false, Max = int.MaxValue, MultiLine = true)]
         public string Script { get; set; }
+
+
+        static Expression<Func<DynamicSqlMigrationEntity, string>> ToStringExpression = @this => @this.Comment.Etc(100);
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     [AutoInit]
