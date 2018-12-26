@@ -52,7 +52,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
       .then(list => this.setState({ userQueries: list }));
   }
 
-  ApplyUserQuery(uq: Lite<UserQueryEntity>) {
+  applyUserQuery(uq: Lite<UserQueryEntity>) {
 
     Navigator.API.fetchAndForget(uq).then(userQuery => {
       const sc = this.props.searchControl
@@ -70,14 +70,14 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
 
   handleOnClick = (uq: Lite<UserQueryEntity>) => {
 
-    this.ApplyUserQuery(uq);
+    this.applyUserQuery(uq);
   }
 
   handleEdit = () => {
     Navigator.API.fetchAndForget(this.state.currentUserQuery!)
       .then(userQuery => Navigator.navigate(userQuery))
       .then(() => this.reloadList())
-      .then(() => this.ApplyUserQuery(this.state.currentUserQuery!))
+      .then(() => this.applyUserQuery(this.state.currentUserQuery!))
       .done();
   }
 
@@ -117,7 +117,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     if (uq && uq.id) {
       await this.reloadList();
       this.setState({ currentUserQuery: toLite(uq) },
-        () => this.ApplyUserQuery(this.state.currentUserQuery!));
+        () => this.applyUserQuery(this.state.currentUserQuery!));
     }
   }
 
