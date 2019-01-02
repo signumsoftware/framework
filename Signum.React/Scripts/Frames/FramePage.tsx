@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -200,7 +200,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       <h4>
         <span className="display-6 sf-entity-title">{getToString(entity)}</span>
         <br />
-        <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
+        <small className="sf-type-nice-name text-muted">{Navigator.getTypeTitle(entity, undefined)}</small>
       </h4>
     );
   }

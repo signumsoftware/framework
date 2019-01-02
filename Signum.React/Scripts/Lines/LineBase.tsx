@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic } from '../Globals'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { TypeReference } from '../Reflection'
@@ -20,6 +20,7 @@ export interface LineBaseProps extends StyleOptions {
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
   helpText?: React.ReactChild;
+  mandatory?: boolean;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
@@ -113,6 +114,13 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
   }
 
   calculateDefaultState(state: S) {
+  }
+
+  get mandatoryClass() {
+    if (this.state.mandatory && !this.state.readOnly && (this.state.ctx.value == null || this.state.ctx.value == ""))
+      return "sf-mandatory"
+
+    return null;
   }
 
   abstract renderInternal(): JSX.Element | null;

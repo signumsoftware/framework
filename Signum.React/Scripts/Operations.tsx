@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
@@ -25,7 +25,7 @@ export function start() {
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,
-    parentToken: "Target",
+    parentToken: OperationLogEntity.token(e => e.target),
     parentValue: ctx.lite
   },
     {

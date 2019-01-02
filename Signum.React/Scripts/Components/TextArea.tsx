@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   innerRef?: (ta: HTMLTextAreaElement | null) => void;
@@ -12,6 +12,7 @@ export default class TextArea extends React.Component<TextAreaProps> {
   handleResize = (ta: HTMLTextAreaElement) => {
     ta.style.height = "0";
     ta.style.height = ta.scrollHeight + 'px';
+    ta.style.minHeight = "50px";
     ta.scrollTop = ta.scrollHeight;
     //window.scrollTo(window.scrollX, (ta.scrollTop + ta.scrollHeight));
   }

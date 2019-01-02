@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 
 namespace Signum.Entities.DynamicQuery
@@ -68,5 +68,6 @@ namespace Signum.Entities.DynamicQuery
         Add,
         Remove,
         Replace,
+        InsertStart,
     }
 }

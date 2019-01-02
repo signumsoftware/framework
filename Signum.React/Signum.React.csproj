@@ -41,5 +41,9 @@
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Remove="Scripts\SearchControl\PinnedFilterBuilder.tsx" />
+  </ItemGroup>
   
 </Project>
