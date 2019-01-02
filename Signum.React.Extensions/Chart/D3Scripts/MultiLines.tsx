@@ -2,7 +2,8 @@ import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, PivotRow, PivotColumn } from './Components/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
+import { PivotRow, toPivotTable, groupedPivotTable } from './Components/PivotTable';
 import { ChartTable, ChartColumn, ChartScriptProps } from '../ChartClient';
 import { XKeyTicks, YScaleTicks } from './Components/Ticks';
 import Legend from './Components/Legend';
@@ -55,8 +56,8 @@ export default function renderMultiLines({ data, width, height, parameters, load
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
   var pivot = c.c1 == null ?
-    ChartUtils.toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
-    ChartUtils.groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
+    toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
+    groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
 
   var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));

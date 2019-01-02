@@ -49,8 +49,10 @@
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Axis.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\InitialMessage.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Legend.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Components\PivotTable.ts" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\ReactChart.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Rule.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Stratify.ts" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\TextEllipsis.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Ticks.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\ReactChartBase.tsx" />

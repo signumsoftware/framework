@@ -2,7 +2,8 @@ import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, Folder, Root, isFolder } from './Components/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
+import { Folder, isFolder, Root, isRoot, stratifyTokens } from './Components/Stratify';
 import { ChartRow } from '../ChartClient';
 import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
@@ -47,7 +48,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
     folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
   }
 
-  var root = ChartUtils.stratifyTokens(data, keyColumn, parentColumn);
+  var root = stratifyTokens(data, keyColumn, parentColumn);
 
   var size = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, 1, parameters["Scale"]);
 
