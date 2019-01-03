@@ -76,7 +76,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
 
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]))).domain(columnsInOrder.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key));
 
 
   return (

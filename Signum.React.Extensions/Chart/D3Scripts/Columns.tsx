@@ -59,8 +59,7 @@ export default function renderColumns({ data, width, height, parameters, loading
   var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["Scale"]);
   
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]!)))
-    .domain(orderedRows.map(r => keyColumn.getValueKey(r)!));
+  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!));
 
   var size = yRule.size('content');
   var labelMargin = 10;

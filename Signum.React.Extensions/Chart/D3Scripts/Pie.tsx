@@ -28,8 +28,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var outerRadious = d3.min([width / 2, height])! / 3;
   var rInner = outerRadious * parseFloat(pInnerRadius);
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"])))
-    .domain(data.rows.map(r => keyColumn.getValueKey(r)));
+  var color = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
 
 
   var pie = d3.pie<ChartRow>()

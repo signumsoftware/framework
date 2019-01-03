@@ -47,8 +47,9 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     else {
       if (this.state.chartScript) {
         var newParams = ChartClient.API.getParameterWithDefault(newProps.chartRequest, this.state.chartScript);
-        if (!Dic.equals(this.state.parameters, newParams, false))
-          this.setState({ parameters: newParams });
+        var cleanParams = this.state.parameters && Dic.except(this.state.parameters, Dic.getKeys(this.state.parameters).filter(a => a.startsWith("_")));
+        if (!Dic.equals(cleanParams, newParams, false))
+          this.setState({ parameters: newParams, });
       }
     }
   }

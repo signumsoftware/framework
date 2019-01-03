@@ -348,7 +348,39 @@ export function getColorScheme(schemeName: string | null | undefined, k: number 
   return undefined;
 }
 
+interface CachedColorOrdinal {
+  category: string;
+  categorySteps: number;
+  scale: d3.ScaleOrdinal<string, string>;
+}
 
+export function colorCategory(parameters: { [name: string]: string }, domain: string[]): d3.ScaleOrdinal<string, string> {
+
+  const cacheKey = "_cachedColorOrdinal_"; 
+
+  var category = parameters["ColorCategory"];
+  var categorySteps = parseInt(parameters["ColorCategorySteps"]);
+  if (parameters[cacheKey]) {
+    const cached = parameters[cacheKey] as any as CachedColorOrdinal;
+
+    if (cached.category == category && cached.categorySteps == categorySteps) {
+      domain.forEach(a => cached.scale(a));
+      return cached.scale;
+    }
+  }
+
+  var scheme = getColorScheme(category, categorySteps);
+
+  const newCached: CachedColorOrdinal = {
+    category: category,
+    categorySteps: categorySteps,
+    scale: d3.scaleOrdinal(scheme).domain(domain),
+  };
+
+  parameters[cacheKey] = newCached as any;
+
+  return newCached.scale;
+}
 
 
 

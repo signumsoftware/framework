@@ -92,7 +92,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
     .domain([min, max])
     .range([0, yRule.size('content')]);
 
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key));
 
   var pInterpolate = parameters["Interpolate"];
 

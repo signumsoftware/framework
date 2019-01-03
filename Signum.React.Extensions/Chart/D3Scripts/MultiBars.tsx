@@ -71,7 +71,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]))).domain(columnsInOrder.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key));
 
   var ySubscale = d3.scaleBand()
     .domain(pivot.columns.map(s => s.key))

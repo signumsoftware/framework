@@ -87,7 +87,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
     .range([0, xRule.size('content')]);
 
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key));
 
   var format = pStack == "expand" ? d3.format(".0%") :
     pStack == "zero" ? d3.format("") :
