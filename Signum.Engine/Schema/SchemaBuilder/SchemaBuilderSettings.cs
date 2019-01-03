@@ -148,12 +148,20 @@ namespace Signum.Engine.Maps
         }
 
 
-        public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext) where T : Entity
+        public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext, string solution = "by using SchemaBuilderSettings.FieldAttributes to remove IgnoreAttribute") where T : Entity
         {
             var pr = PropertyRoute.Construct<T, S>(propertyRoute);
 
             if (FieldAttribute<IgnoreAttribute>(pr) != null)
-                throw new InvalidOperationException("In order to {0} you need to override the attributes for {1} by using SchemaBuilderSettings.FieldAttributes to remove IgnoreAttribute".FormatWith(errorContext, pr));
+                throw new InvalidOperationException($"In order to {errorContext} you need to override the attributes for {pr} {solution}");
+        }
+
+        public void AssertIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext, string solution = "by using SchemaBuilderSettings.FieldAttributes to add IgnoreAttribute") where T : Entity
+        {
+            var pr = PropertyRoute.Construct<T, S>(propertyRoute);
+
+            if (FieldAttribute<IgnoreAttribute>(pr) == null)
+                throw new InvalidOperationException($"In order to {errorContext} you need to override the attributes for {pr} {solution}");
         }
 
         public A FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute

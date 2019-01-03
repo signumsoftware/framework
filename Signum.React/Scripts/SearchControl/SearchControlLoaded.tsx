@@ -52,7 +52,7 @@ export interface SearchControlLoadedProps {
   showSelectedButton: boolean;
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
-  showHeader: boolean;
+  showHeader: boolean | "PinnedFilters";
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters: boolean;
@@ -400,7 +400,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       <div className="sf-search-control SF-control-container" ref="container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
-        {p.showHeader &&
+        {p.showHeader == true && 
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
             this.state.showFilters ? <FilterBuilder
@@ -421,10 +421,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             }
           </div>
         }
-        {p.showHeader && this.renderToolBar()}
-        {p.showHeader && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
+        {p.showHeader == "PinnedFilters" && <PinnedFilterBuilder
+          filterOptions={fo.filterOptions}
+          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />}
+        {p.showHeader == true && this.renderToolBar()}
+        {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
+        {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+        {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
         {this.state.editingColumn && <ColumnEditor
           columnOption={this.state.editingColumn}
           onChange={this.handleColumnChanged}
@@ -524,6 +527,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const isAll = p.findOptions.pagination.mode == "All";
 
+    const isSearch = isAll || this.state.showFilters ||
+      this.state.resultTable == null && !this.props.searchOnLoad ||
+      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey));
+
     var leftButtons = [
 
       p.showFilterButton && OrderUtils.setOrder(-5, <button
@@ -548,8 +555,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <FontAwesomeIcon icon="history" />
       </button>),
 
-      (isAll || this.state.showFilters) && OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>
-        <FontAwesomeIcon icon={"search"} />&nbsp;{SearchMessage.Search.niceToString()}
+      OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick}>
+        <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
       </button>),
 
       this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
@@ -845,7 +852,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (!this.state.resultTable)
       return;
 
-    this.setState({ selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [] }, () => {
+    this.setState({
+      selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [],
+      currentMenuItems: undefined,
+    }, () => {
       this.notifySelectedRowsChanged()
     });
   }
@@ -875,7 +885,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.forceUpdate();
 
-    if (fo.pagination.mode != "All" || !this.props.showHeader)
+    if (fo.pagination.mode != "All" || this.props.showHeader != true)
       this.doSearchPage1();
   }
 

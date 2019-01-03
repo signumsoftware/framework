@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import { JavascriptMessage } from '../Signum.Entities'
 import { Transition } from 'react-transition-group'
@@ -21,6 +21,7 @@ interface NotifyState {
 export default class Notify extends React.Component<{}, NotifyState>{
 
   static singleton: Notify;
+  static lockScreenOnNotify: boolean = false;
 
   constructor(props: {}) {
     super(props);
@@ -102,11 +103,16 @@ export default class Notify extends React.Component<{}, NotifyState>{
   }
 
   render() {
+    const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnNotify && this.state.type === "loading") ?
+      { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined;
+
     return (
-      <div id="sfNotify">
-        <Transition in={this.state.text != undefined} timeout={200}>
-          {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}&nbsp;{this.state.text}</span>}
-        </Transition>
+      <div style={styleLock}>
+        <div id="sfNotify" >
+          <Transition in={this.state.text != undefined} timeout={200}>
+            {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}&nbsp;{this.state.text}</span>}
+          </Transition>
+        </div>
       </div>
     );
   }

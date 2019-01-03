@@ -424,12 +424,32 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
     var defaultFilters = getDefaultFilter(qd, qs);
 
     if (defaultFilters && defaultFilters.length == findOptions.filterOptions.length) {
-      if (JSON.stringify(defaultFilters) == JSON.stringify(findOptions.filterOptions))
-        findOptions.filterOptions = []; 
+      if (isEqual(defaultFilters, findOptions.filterOptions))
+        findOptions.filterOptions = [];
     }
   }
 
   return findOptions;
+}
+
+function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined): boolean {
+
+  if (as == undefined && bs == undefined)
+    return true;
+  
+  if (as == undefined || bs == undefined)
+    return true;
+
+  return as.length == bs.length && as.every((a, i) => {
+    var b = bs![i];
+
+    return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
+      (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
+      (a as FilterConditionOption).operation == (b as FilterConditionOption).operation &&
+      JSON.stringify(a.value) == JSON.stringify(b.value) &&
+      JSON.stringify(a.pinned) == JSON.stringify(b.pinned) &&
+      isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
+  });
 }
 
 export const defaultOrderColumn: string = "Id";
@@ -452,7 +472,7 @@ export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undef
     return undefined;
 
   if (qs && qs.defaultFilters)
-    return JSON.parse(JSON.stringify(qs.defaultFilters));
+    return qs.defaultFilters;
 
   if (qd.columns["Entity"]) {
     return [{
@@ -480,8 +500,9 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
       return ({
         token: fop.token && fop.token.fullKey,
         groupOperation: fop.groupOperation,
-        filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
+        value: fop.value,
         pinned: pinned,
+        filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
     else {
       if (fop.token == null)
@@ -802,8 +823,9 @@ export class TokenCompleter {
       return ({
         token: fo.token && this.get(fo.token.toString()),
         groupOperation: fo.groupOperation,
-        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
+        value: fo.value,
         pinned: fo.pinned && { ...fo.pinned },
+        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
       } as FilterGroupOptionParsed);
     else
       return ({
