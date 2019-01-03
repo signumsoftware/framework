@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Entities;
@@ -16,7 +16,7 @@ using Signum.React.Filters;
 namespace Signum.React.Excel
 {
     [ValidateModelFilter]
-    public class MachineLearningController : ControllerBase
+    public class ExcelController : ControllerBase
     {
         [HttpPost("api/excel/plain")]
         public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, CancellationToken token)

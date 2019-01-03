@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
@@ -17,6 +18,14 @@ namespace Signum.Entities.Dynamic
 
         [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string ViewContent { get; set; }
+
+
+        static Expression<Func<DynamicViewEntity, string>> ToStringExpression = @this => @this.ViewName + ": " + @this.EntityType;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     [AutoInit]

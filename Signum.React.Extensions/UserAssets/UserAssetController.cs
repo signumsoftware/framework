@@ -135,7 +135,7 @@ namespace Signum.React.UserAssets
                     groupOperation = filter.groupOperation,
                     token = token == null ? null : new QueryTokenTS(token, true),
                     indentation = ident,
-                    valueString = filter.value != null ? FilterValueConverter.ToString(filter.value, token.Type) : null,
+                    valueString = filter.value != null ? FilterValueConverter.ToString(filter.value, typeof(string)) : null,
                     pinned = filter.pinned,
                 };
 

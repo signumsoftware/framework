@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
@@ -15,7 +15,7 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicCSSOverrideEntity, string>> ToStringExpression = @this => "DynamicCSSOverride " + @this.Name;
+        static Expression<Func<DynamicCSSOverrideEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
         public override string ToString()
         {

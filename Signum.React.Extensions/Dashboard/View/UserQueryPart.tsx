@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
@@ -61,7 +61,7 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
     return (
       <SearchControl
         findOptions={this.state.fo}
-        showHeader={false}
+        showHeader={"PinnedFilters"}
         showFooter={false}
         allowSelection={this.props.part.renderMode == "SearchControl"} />
     );
