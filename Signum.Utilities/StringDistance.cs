@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,12 +10,12 @@ namespace Signum.Utilities
     {
         int[,] num;
 
-        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null, bool allowTransposition = false)
+        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int>? weight = null, bool allowTransposition = false)
         {
             return LevenshteinDistance<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight, allowTransposition);
         }
 
-        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null, bool allowTransposition = false)
+        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int>? weight = null, bool allowTransposition = false)
         {
             int M1 = strOld.Length + 1;
             int M2 = strNew.Length + 1;
@@ -68,16 +68,16 @@ namespace Signum.Utilities
             Transpose,
         }
 
-        public struct Choice<T>
+        public struct Choice<T> where T: object
         {
             public readonly ChoiceType Type;
-            public readonly T Removed;
-            public readonly T Added;
+            public readonly T? Removed;
+            public readonly T? Added;
 
             public bool HasRemoved { get { return Type != ChoiceType.Add; } }
             public bool HasAdded { get { return Type != ChoiceType.Remove; } }
 
-            internal Choice( ChoiceType type, T removed, T added)
+            internal Choice( ChoiceType type, T? removed, T? added)
             {
                 this.Type = type;
                 this.Removed = removed;
@@ -110,7 +110,7 @@ namespace Signum.Utilities
             }
 
 
-            public override string ToString()
+            public override string? ToString()
             {
                 switch (Type)
                 {
@@ -221,7 +221,7 @@ namespace Signum.Utilities
             return LongestCommonSubstring<char>(str1.ToCharArray(), str2.ToCharArray(), out startPos1, out startPos2);
         }
 
-        public int LongestCommonSubstring<T>(T[] str1, T[] str2, out int startPos1, out int startPos2, IEqualityComparer<T> comparer = null)
+        public int LongestCommonSubstring<T>(T[] str1, T[] str2, out int startPos1, out int startPos2, IEqualityComparer<T>? comparer = null)
         {
             if (str1 == null)
                 throw new ArgumentNullException("str1");
@@ -233,7 +233,7 @@ namespace Signum.Utilities
         }
 
         //http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring
-        public int LongestCommonSubstring<T>(Slice<T> str1, Slice<T> str2, out int startPos1, out int startPos2, IEqualityComparer<T> comparer = null)
+        public int LongestCommonSubstring<T>(Slice<T> str1, Slice<T> str2, out int startPos1, out int startPos2, IEqualityComparer<T>? comparer = null)
         {
             startPos1 = 0;
             startPos2 = 0;
@@ -429,14 +429,14 @@ namespace Signum.Utilities
             return Diff(wordsOld, wordsNew);
         }
 
-        public List<DiffPair<T>> Diff<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null)
+        public List<DiffPair<T>> Diff<T>(T[] strOld, T[] strNew, IEqualityComparer<T>? comparer = null)
         {
             var result = new List<DiffPair<T>>();
             DiffPrivate<T>(new Slice<T>(strOld), new Slice<T>(strNew), comparer, result);
             return result;
         }
 
-        void DiffPrivate<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
+        void DiffPrivate<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T>? comparer, List<DiffPair<T>> result)
         {
             int length = LongestCommonSubstring<T>(sliceOld, sliceNew, out int posOld, out int posNew, comparer);
 
@@ -461,7 +461,7 @@ namespace Signum.Utilities
                 list.Add(new DiffPair<T>(action, slice[i]));
         }
 
-        void TryDiff<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
+        void TryDiff<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T>? comparer, List<DiffPair<T>> result)
         {
             if (sliceOld.Length > 0 && sliceOld.Length > 0)
             {

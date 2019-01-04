@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,8 +15,8 @@ namespace Signum.Utilities
         public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
         public static CultureInfo Culture = CultureInfo.InvariantCulture;
 
-        public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding encoding = null, bool autoFlush = false, bool append = false,
-            Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
+        public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding? encoding = null, bool autoFlush = false, bool append = false,
+            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
 
@@ -40,8 +40,8 @@ namespace Signum.Utilities
             return fileName;
         }
 
-        public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
-            Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
+        public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
+            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
                 ToTsv<T>(collection, fs, encoding, writeHeaders, autoFlush, toStringFactory);
@@ -49,8 +49,8 @@ namespace Signum.Utilities
             return fileName;
         }
 
-        public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
+        public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding? encoding = null, bool writeHeaders = true, bool autoFlush = false,
+            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -61,8 +61,8 @@ namespace Signum.Utilities
 
         private const string tab = "\t";
 
-        public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
+        public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding? encoding = null, bool writeHeaders = true, bool autoFlush = false,
+            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
 
@@ -117,7 +117,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory)
+        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory)
         {
             if (toStringFactory != null)
             {
@@ -244,7 +244,7 @@ namespace Signum.Utilities
             T t = new T();
             for (int i = 0; i < members.Count; i++)
             {
-                string str = null;
+                string? str = null;
                 try
                 {
                     str = vals[i];
@@ -270,7 +270,7 @@ namespace Signum.Utilities
                 .Select((me, i) => new TsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
         }
 
-        static object ConvertTo(string s, Type type, string format)
+        static object? ConvertTo(string s, Type type, string format)
         {
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
@@ -296,8 +296,8 @@ namespace Signum.Utilities
 
     public class TsvReadOptions<T> where T : class
     {
-        public Func<TsvColumnInfo<T>, Func<string, object>> ParserFactory;
-        public Func<Exception, string, bool> SkipError;
+        public Func<TsvColumnInfo<T>, Func<string, object>>? ParserFactory;
+        public Func<Exception, string, bool>? SkipError;
     }
 
 
@@ -325,8 +325,8 @@ namespace Signum.Utilities
     public class ParseTsvException : Exception
     {
         public int? Row { get; set; }
-        public string Member { get; set; }
-        public string Value { get; set; }
+        public string? Member { get; set; }
+        public string? Value { get; set; }
 
         public ParseTsvException() { }
         public ParseTsvException(Exception inner) : base(inner.Message, inner)

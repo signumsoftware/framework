@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
@@ -15,6 +15,11 @@ namespace Signum.Utilities
 
     public class ResetLazyStats
     {
+        public ResetLazyStats(Type type)
+        {
+            this.Type = type;
+        }
+
         public Type Type;
         public int Loads;
         public int Invalidations;
@@ -36,7 +41,7 @@ namespace Signum.Utilities
             public readonly T Value;
         }
 
-        public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly, Type declaringType = null)
+        public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly, Type? declaringType = null)
         {
             if (valueFactory == null)
                 throw new ArgumentNullException("valueFactory");
@@ -56,7 +61,7 @@ namespace Signum.Utilities
 
         object syncLock = new object();
 
-        Box box;
+        Box? box;
 
         Type declaringType; 
         public Type DeclaringType
@@ -155,13 +160,12 @@ namespace Signum.Utilities
 
         ResetLazyStats IResetLazy.Stats()
         {
-            return new ResetLazyStats
+            return new ResetLazyStats(typeof(T))
             {
                 SumLoadTime = this.SumLoadtime,
                 Hits = this.Hits,
                 Loads = this.Loads,
                 Invalidations = this.Invalidations,
-                Type = typeof(T)
             };
         }
 

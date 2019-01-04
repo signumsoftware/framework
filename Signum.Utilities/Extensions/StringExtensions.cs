@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -147,7 +147,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the first occurence of the separator or null if not found</returns>
-        public static string TryBefore(this string str, char separator)
+        public static string? TryBefore(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -166,7 +166,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the first occurence of the separator or null if not found</returns>
-        public static string TryBefore(this string str, string separator)
+        public static string? TryBefore(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -184,7 +184,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the first occurence of the separator or null if not found</returns>
-        public static string TryAfter(this string str, char separator)
+        public static string? TryAfter(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -202,7 +202,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the first occurence of the separator or null if not found</returns>
-        public static string TryAfter(this string str, string separator)
+        public static string? TryAfter(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -288,7 +288,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the last occurence of the separator or null if not found</returns>
-        public static string TryBeforeLast(this string str, char separator)
+        public static string? TryBeforeLast(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -307,7 +307,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the last occurence of the separator or null if not found</returns>
-        public static string TryBeforeLast(this string str, string separator)
+        public static string? TryBeforeLast(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -325,7 +325,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the last occurence of the separator or null if not found</returns>
-        public static string TryAfterLast(this string str, char separator)
+        public static string? TryAfterLast(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -343,7 +343,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the last occurence of the separator or null if not found</returns>
-        public static string TryAfterLast(this string str, string separator)
+        public static string? TryAfterLast(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -355,7 +355,7 @@ namespace Signum.Utilities
             return str.Substring(index + separator.Length);
         }
 
-        public static string Between(this string str, string firstSeparator, string secondSeparator = null)
+        public static string Between(this string str, string firstSeparator, string? secondSeparator = null)
         {
             if (secondSeparator == null)
                 secondSeparator = firstSeparator;
@@ -391,10 +391,10 @@ namespace Signum.Utilities
             return str.Substring(start, end - start);
         }
 
-        public static string TryBetween(this string str, string firstSeparator, string secondSeparator = null)
+        public static string? TryBetween(this string? str, string firstSeparator, string? secondSeparator = null)
         {
-            if (secondSeparator == null)
-                secondSeparator = firstSeparator;
+            if (str == null)
+                return null;
 
             int start = str.IndexOf(firstSeparator);
             if (start == -1)
@@ -402,17 +402,17 @@ namespace Signum.Utilities
 
             start = start + 1;
 
-            int end = str.IndexOf(secondSeparator, start);
+            int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
             if (start == -1)
                 return null;
 
             return str.Substring(start, end - start);
         }
 
-        public static string TryBetween(this string str, char firstSeparator, char secondSeparator = (char)0)
+        public static string? TryBetween(this string? str, char firstSeparator, char? secondSeparator = null)
         {
-            if (secondSeparator == 0)
-                secondSeparator = firstSeparator;
+            if (str == null)
+                return null;
 
             int start = str.IndexOf(firstSeparator);
             if (start == -1)
@@ -420,7 +420,7 @@ namespace Signum.Utilities
 
             start = start + 1;
 
-            int end = str.IndexOf(secondSeparator, start);
+            int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
             if (start == -1)
                 return null;
 
@@ -435,7 +435,7 @@ namespace Signum.Utilities
             return str.Substring(0, numChars);
         }
 
-        public static string TryStart(this string str, int numChars)
+        public static string? TryStart(this string? str, int numChars)
         {
             if (str == null)
                 return null;
@@ -454,7 +454,7 @@ namespace Signum.Utilities
             return str.Substring(str.Length - numChars, numChars);
         }
 
-        public static string TryEnd(this string str, int numChars)
+        public static string? TryEnd(this string? str, int numChars)
         {
             if (str == null)
                 return null;
@@ -530,7 +530,7 @@ namespace Signum.Utilities
             return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length);
         }
 
-        public static string FirstNonEmptyLine(this string str)
+        public static string? FirstNonEmptyLine(this string? str)
         {
             if (str == null)
                 return null;
@@ -598,7 +598,7 @@ namespace Signum.Utilities
             return sb.ToString();
         }
 
-        public static string FormatWith(this string format, object arg0)
+        public static string FormatWith(this string format, object? arg0)
         {
             return string.Format(format, arg0);
         }
@@ -630,7 +630,7 @@ namespace Signum.Utilities
 
         public static string Replace(this string str, Dictionary<char, char> replacements)
         {
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
             for (int i = 0; i < str.Length; i++)
             {
                 char c = str[i];
@@ -763,7 +763,7 @@ namespace Signum.Utilities
 
         public static string Combine(this string separator, params object[] elements)
         {
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
             foreach (var item in elements)
             {
                 if (item != null)
@@ -782,7 +782,7 @@ namespace Signum.Utilities
 
         public static string CombineIfNotEmpty(this string separator, params object[] elements)
         {
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
             foreach (var item in elements)
             {
                 string str;

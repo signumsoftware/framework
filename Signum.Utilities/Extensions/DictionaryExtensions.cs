@@ -1,4 +1,4 @@
-﻿using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace Signum.Utilities
             return defaultValue;
         }
 
-        public static V TryGetC<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : class
+        public static V? TryGetC<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : class
         {
             if (dictionary.TryGetValue(key, out V result))
                 return result;

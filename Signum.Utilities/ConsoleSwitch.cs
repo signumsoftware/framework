@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
@@ -274,21 +274,21 @@ namespace Signum.Utilities
 
     public static class ConsoleSwitchExtensions
     {
-        public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class        {
+        public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string>? getString = null, string? message = null) where T : class        {
       
             var cs = new ConsoleSwitch<int, T>(message ?? ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString());
             cs.Load(collection.ToList(), getString);
             return cs.Choose();
         }
 
-        public static T[] ChooseConsoleMultiple<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class
+        public static T[] ChooseConsoleMultiple<T>(this IEnumerable<T> collection, Func<T, string>? getString = null, string? message = null) where T : class
         {
             var cs = new ConsoleSwitch<int, T>(message ?? ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString());
             cs.Load(collection.ToList(), getString);
             return cs.ChooseMultiple();
         }
 
-        public static ConsoleSwitch<int, T> Load<T>(this ConsoleSwitch<int, T> cs, List<T> collection, Func<T, string> getString = null) where T : class
+        public static ConsoleSwitch<int, T> Load<T>(this ConsoleSwitch<int, T> cs, List<T> collection, Func<T, string>? getString = null) where T : class
         {
             for (int i = 0; i < collection.Count; i++)
             {

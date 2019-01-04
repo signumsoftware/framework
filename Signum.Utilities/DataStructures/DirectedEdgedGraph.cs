@@ -388,7 +388,7 @@ namespace Signum.Utilities.DataStructures
                 e => e.ToString() ?? "[null]");
         }
 
-        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string> getEdgeLabel = null)
+        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string>? getEdgeLabel = null)
         {
             return ToDGML(n => new[]
             {
