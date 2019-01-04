@@ -57,7 +57,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Format
         {
-            get { return Reflector.FormatString(typeof(DateTime)); }
+            get { return "s"; }
         }
 
         public override string Unit

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -78,7 +78,13 @@ namespace Signum.Engine.Maps
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
             if (includeFields != null)
+            {
                 index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+                if (table.SystemVersioned != null)
+                {
+                    index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
+                }
+            }
 
             return index;
         }
@@ -95,7 +101,13 @@ namespace Signum.Engine.Maps
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
             if (includeFields != null)
+            {
                 index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+                if (table.SystemVersioned != null)
+                {
+                    index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
+                }
+            }
 
             AddIndex(index);
 
@@ -118,7 +130,16 @@ namespace Signum.Engine.Maps
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
             if (includeFields != null)
+            {
                 index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+                if (table.SystemVersioned != null)
+                {
+                    index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
+                }
+            }
+
+
+
 
             return index;
         }
@@ -139,7 +160,13 @@ namespace Signum.Engine.Maps
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
             if (includeFields != null)
+            {
                 index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+                if (table.SystemVersioned != null)
+                {
+                    index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
+                }
+            }
 
             return index;
         }

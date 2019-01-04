@@ -197,8 +197,8 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
   if (a.id != undefined || b.id != undefined)
     return a.id == b.id && (!compareTicks || (a as T).ticks == (b as T).ticks);
 
-  const aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
-  const bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
+  const aEntity = isEntity(a) ? a as unknown as T: a.entity;
+  const bEntity = isEntity(b) ? b as unknown as T : b.entity;
 
   return aEntity == bEntity;
 }
@@ -436,6 +436,7 @@ export module SearchMessage {
   export const First0Results_N = new MessageKey("SearchMessage", "First0Results_N");
   export const _01of2Results_N = new MessageKey("SearchMessage", "_01of2Results_N");
   export const Search = new MessageKey("SearchMessage", "Search");
+  export const Refresh = new MessageKey("SearchMessage", "Refresh");
   export const Create = new MessageKey("SearchMessage", "Create");
   export const CreateNew0_G = new MessageKey("SearchMessage", "CreateNew0_G");
   export const SearchControl_Pagination_All = new MessageKey("SearchMessage", "SearchControl_Pagination_All");
@@ -446,6 +447,15 @@ export module SearchMessage {
   export const Operations = new MessageKey("SearchMessage", "Operations");
   export const NoResultsFound = new MessageKey("SearchMessage", "NoResultsFound");
   export const Explore = new MessageKey("SearchMessage", "Explore");
+  export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
+  export const Label = new MessageKey("SearchMessage", "Label");
+  export const Column = new MessageKey("SearchMessage", "Column");
+  export const Row = new MessageKey("SearchMessage", "Row");
+  export const DisableOnNull = new MessageKey("SearchMessage", "DisableOnNull");
+  export const SplitText = new MessageKey("SearchMessage", "SplitText");
+  export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
+  export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
+  export const ParentValue = new MessageKey("SearchMessage", "ParentValue");
 }
 
 export module SelectorMessage {

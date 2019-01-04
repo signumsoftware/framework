@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'
@@ -109,7 +109,8 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { subTo
   componentWillReceiveProps(newProps: QueryTokenPartProps) {
     if ((newProps.readOnly == false && this.props.readOnly == true) ||
       !newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) ||
-        this.props.subTokenOptions != newProps.subTokenOptions)) {
+        this.props.subTokenOptions != newProps.subTokenOptions ||
+        this.props.queryKey != newProps.queryKey)) {
       this.setState({ subTokens: undefined });
       this.requestSubTokens(newProps);
     }

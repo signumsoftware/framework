@@ -224,7 +224,7 @@
     <Member Name="Loading0" Description="{0} läd gerade..." />
     <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen diese Änderungen verloren gehen?" />
     <Member Name="Message" Description="Nachricht" />
-    <Member Name="New0_G" Description="Neue {0}" />
+    <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="NoDirectErrors" Description="Keine direkten Fehler" />
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Neu laden" />

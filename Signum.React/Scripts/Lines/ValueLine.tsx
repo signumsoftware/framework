@@ -1,4 +1,4 @@
-﻿/// <reference path="../ConfigureReactWidgets.ts" />
+/// <reference path="../ConfigureReactWidgets.ts" />
 import * as React from 'react'
 import * as moment from 'moment'
 import * as numbro from 'numbro'
@@ -196,7 +196,7 @@ ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
         <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-          className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} disabled={s.ctx.readOnly} />
+          className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} disabled={s.ctx.readOnly} />
       </FormGroup>
     );
   }
@@ -287,7 +287,7 @@ function internalComboBox(vl: ValueLine) {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
-        <select {...vl.state.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} onChange={handleEnumOnChange} >
+        <select {...vl.state.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
           {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
         </select>)
       }
@@ -330,7 +330,7 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
         <input type="text" {...vl.state.valueHtmlAttributes}
-          className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)}
+          className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
           value={s.ctx.value || ""}
           onBlur={handleBlur}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
@@ -360,7 +360,7 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
+        <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           disabled />
       </FormGroup>
     );
@@ -385,7 +385,7 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
+      <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
         onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
         onInput={isIE11() ? handleTextOnChange : undefined}
         onBlur={handleBlur}
@@ -434,7 +434,7 @@ function numericTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>
           htmlAttributes={htmlAttributes}
           value={s.ctx.value}
           onChange={handleOnChange}
-          formControlClass={s.ctx.formControlClass}
+          formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           validateKey={validateKey}
           format={numbroFormat}
         />
@@ -514,7 +514,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
       </FormGroup>
     );
 
@@ -528,12 +528,17 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   if (!showTime)
     currentDate = currentDate.startOf("day");
 
+  const htmlAttributes = {
+    placeholder: getPlaceholder(vl),
+    ...vl.state.valueHtmlAttributes,
+  } as React.AllHTMLAttributes<any>;
+
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
-        <div className={s.ctx.rwWidgetClass}>
+        <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
           <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
-            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
+            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
       )}
     </FormGroup>
@@ -582,7 +587,7 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
           value={s.ctx.value}
           onChange={handleOnChange}
           validateKey={validateKey}
-          formControlClass={s.ctx.formControlClass}
+          formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           format={durationFormat} />
       )}
     </FormGroup>

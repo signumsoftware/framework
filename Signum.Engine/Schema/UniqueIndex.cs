@@ -1,10 +1,14 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
+using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -118,10 +122,14 @@ namespace Signum.Engine.Maps
 
             if (columns.Body.NodeType == ExpressionType.New)
             {
-                return (from a in ((NewExpression)columns.Body).Arguments
-                        from c in GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters))
-                        select c).ToArray();
+                var resultColumns = (from a in ((NewExpression)columns.Body).Arguments
+                    from c in GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters))
+                    select c);
+                
+                return resultColumns.ToArray();
             }
+
+
 
             return GetColumns(finder, columns);
         }
@@ -130,9 +138,13 @@ namespace Signum.Engine.Maps
 
         static IColumn[] GetColumns(IFieldFinder finder, LambdaExpression field)
         {
-            Type type = RemoveCasting(ref field);
+            var body = field.Body;
 
-            var members = Reflector.GetMemberListUntyped(field);
+            Type type = RemoveCasting(ref body);
+
+            body = IndexWhereExpressionVisitor.RemoveLiteEntity(body);
+
+            var members = Reflector.GetMemberListBase(body);
             if (members.Any(a => ignoreMembers.Contains(a.Name)))
                 members = members.Where(a => !ignoreMembers.Contains(a.Name)).ToArray();
 
@@ -152,10 +164,8 @@ namespace Signum.Engine.Maps
             return Index.GetColumnsFromFields(f);
         }
 
-        static Type RemoveCasting(ref LambdaExpression field)
+        static Type RemoveCasting(ref Expression body)
         {
-            var body = field.Body;
-
             if (body.NodeType == ExpressionType.Convert && body.Type == typeof(object))
                 body = ((UnaryExpression)body).Operand;
 
@@ -166,8 +176,7 @@ namespace Signum.Engine.Maps
                 type = body.Type;
                 body = ((UnaryExpression)body).Operand;
             }
-
-            field = Expression.Lambda(Expression.Convert(body, typeof(object)), field.Parameters);
+            
             return type;
         }
     }
@@ -224,14 +233,14 @@ namespace Signum.Engine.Maps
 
         protected override Expression VisitTypeBinary(TypeBinaryExpression b)
         {
-            var f = GetField(b.Expression);
+            var exp = RemoveLiteEntity(b.Expression);
+
+            var f = GetField(exp);
 
             if (f is FieldReference fr)
             {
                 if (b.TypeOperand.IsAssignableFrom(fr.FieldType))
-                {
                     sb.Append(fr.Name.SqlEscape() + " IS NOT NULL");
-                }
                 else
                     throw new InvalidOperationException("A {0} will never be {1}".FormatWith(fr.FieldType.TypeName(), b.TypeOperand.TypeName()));
 
@@ -240,7 +249,9 @@ namespace Signum.Engine.Maps
 
             if (f is FieldImplementedBy fib)
             {
-                var imp = fib.ImplementationColumns.Where(kvp => b.TypeOperand.IsAssignableFrom(kvp.Key));
+                var typeOperant = b.TypeOperand.CleanType();
+
+                var imp = fib.ImplementationColumns.Where(kvp => typeOperant.IsAssignableFrom(kvp.Key));
 
                 if (imp.Any())
                     sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlEscape() + " IS NOT NULL", " OR "));
@@ -251,6 +262,14 @@ namespace Signum.Engine.Maps
             }
 
             throw new NotSupportedException("'is' only works with ImplementedBy or Reference fields");
+        }
+
+        public static Expression RemoveLiteEntity(Expression exp)
+        {
+            if (exp is MemberExpression m && m.Member is PropertyInfo pi && m.Expression.Type.IsInstantiationOf(typeof(Lite<>)) &&
+                (pi.Name == nameof(Lite<Entity>.Entity) || pi.Name == nameof(Lite<Entity>.EntityOrNull)))
+                return m.Expression;
+            return exp;
         }
 
         protected override Expression VisitMember(MemberExpression m)

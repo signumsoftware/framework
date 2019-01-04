@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -217,6 +217,7 @@ namespace Signum.Engine.Linq
 
                 return base.VisitUnary(u);
             }
+
 
             bool DiffersInNullability(Type a, Type b)
             {
@@ -546,6 +547,13 @@ namespace Signum.Engine.Linq
                     return null;
 
                 return PrimaryKey.Parse(id, type);
+            }
+
+            protected internal override Expression VisitToDayOfWeek(ToDayOfWeekExpression toDayOfWeek)
+            {
+                var result = this.Visit(toDayOfWeek.Expression);
+
+                return Expression.Call(ToDayOfWeekExpression.miToDayOfWeek, result, Expression.Constant(ToDayOfWeekExpression.DateFirst.Value.Item1, typeof(byte)));
             }
 
             protected override Expression VisitNew(NewExpression node)

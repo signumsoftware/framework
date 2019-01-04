@@ -1,14 +1,17 @@
+using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 
@@ -64,6 +67,7 @@ namespace Signum.Engine.Linq
         AdditionalField,
         PrimaryKey,
         PrimaryKeyString,
+        ToDayOfWeek,
     }
 
 
@@ -641,6 +645,44 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitSqlEnum(this);
+        }
+    }
+
+    internal class ToDayOfWeekExpression : DbExpression
+    {
+        public readonly Expression Expression;
+        public ToDayOfWeekExpression(Expression expression)
+            : base(DbExpressionType.ToDayOfWeek, typeof(DayOfWeek?))
+        {
+            if (expression.Type != typeof(int?))
+                throw new InvalidOperationException("int? expected");
+
+            this.Expression = expression;
+        }
+        public override string ToString()
+        {
+            return "ToDayOfWeek(" + Expression.ToString() + ")";
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitToDayOfWeek(this);
+        }
+
+        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
+
+        internal static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
+        public static DayOfWeek? ToDayOfWeek(int? sqlServerWeekDay, byte dateFirst)
+        {
+            if (sqlServerWeekDay == null)
+                return null;
+
+            return (DayOfWeek)((dateFirst + sqlServerWeekDay.Value - 1) % 7);
+        }
+
+        public static int ToSqlWeekDay(DayOfWeek dayOfWeek, byte dateFirst /*keep parameter here to evaluate now*/)
+        {
+            return (((int)dayOfWeek - dateFirst + 7) % 7) + 1;
         }
     }
 

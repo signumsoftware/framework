@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -427,21 +427,21 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");
-            sb.AppendLine("    render() {");
-            sb.AppendLine("        var ctx = this.props.ctx;");
-            sb.AppendLine("        return (");
-            sb.AppendLine("            <div>");
+            sb.AppendLine("  render() {");
+            sb.AppendLine("    var ctx = this.props.ctx;");
+            sb.AppendLine("    return (");
+            sb.AppendLine("      <div>");
 
             foreach (var pi in GetProperties(type))
             {
                 string prop = WriteProperty(pi, v);
                 if (prop != null)
-                    sb.AppendLine(prop.Indent(16));
+                    sb.AppendLine(prop.Indent(8));
             }
 
-            sb.AppendLine("            </div>");
-            sb.AppendLine("        );");
-            sb.AppendLine("    }");
+            sb.AppendLine("       </div>");
+            sb.AppendLine("    );");
+            sb.AppendLine("  }");
             sb.AppendLine("}");
 
             return sb.ToString();

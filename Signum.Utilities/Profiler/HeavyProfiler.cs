@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
@@ -277,7 +277,7 @@ namespace Signum.Utilities
 
         public static HeavyProfilerEntry Find(string fullIndex)
         {
-            var array = fullIndex.Split('.').Select(a => int.Parse(a)).ToArray();
+            var array = fullIndex.Split('-').Select(a => int.Parse(a)).ToArray();
 
             HeavyProfilerEntry entry = null;
 
@@ -312,7 +312,7 @@ namespace Signum.Utilities
 
         public string FullIndex()
         {
-            return this.Follow(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
+            return this.Follow(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), "-");
         }
 
         public string AdditionalData;

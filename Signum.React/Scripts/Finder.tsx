@@ -3,7 +3,7 @@ import * as moment from "moment"
 import * as numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
-import { Dic } from './Globals'
+import { Dic, classes } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -11,12 +11,12 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -31,6 +31,7 @@ import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import ButtonBar from "./Frames/ButtonBar";
+import { json } from "d3";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -245,6 +246,10 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
       return columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption)
         .concat(columnOptions);
 
+    case "InsertStart":
+      return columnOptions
+        .concat(columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption));
+
     case "Remove":
       return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.token == cd.name))
         .map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
@@ -323,11 +328,11 @@ export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boo
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-  orderOptions.forEach(a => completer.request(a.token, sto));
+  orderOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
     .then(() => orderOptions.map(oo => ({
-      token: completer.get(oo.token),
+      token: completer.get(oo.token.toString()),
       orderType: oo.orderType || "Ascending",
     }) as OrderOptionParsed));
 }
@@ -336,12 +341,12 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-  columnOptions.forEach(a => completer.request(a.token, sto));
+  columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
     .then(() => columnOptions.map(co => ({
-      token: completer.get(co.token),
-      displayName: co.displayName || completer.get(co.token).niceName,
+      token: completer.get(co.token.toString()),
+      displayName: co.displayName || completer.get(co.token.toString()).niceName,
     }) as ColumnOptionParsed));
 }
 
@@ -415,12 +420,41 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
       findOptions.orderOptions.remove(onlyOrder);
   }
 
+  if (findOptions.filterOptions) {
+    var defaultFilters = getDefaultFilter(qd, qs);
+
+    if (defaultFilters && defaultFilters.length == findOptions.filterOptions.length) {
+      if (isEqual(defaultFilters, findOptions.filterOptions))
+        findOptions.filterOptions = [];
+    }
+  }
+
   return findOptions;
+}
+
+function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined): boolean {
+
+  if (as == undefined && bs == undefined)
+    return true;
+  
+  if (as == undefined || bs == undefined)
+    return true;
+
+  return as.length == bs.length && as.every((a, i) => {
+    var b = bs![i];
+
+    return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
+      (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
+      (a as FilterConditionOption).operation == (b as FilterConditionOption).operation &&
+      JSON.stringify(a.value) == JSON.stringify(b.value) &&
+      JSON.stringify(a.pinned) == JSON.stringify(b.pinned) &&
+      isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
+  });
 }
 
 export const defaultOrderColumn: string = "Id";
 
-export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderOption | undefined {
+export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefined): OrderOption | undefined {
   const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
@@ -433,6 +467,23 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
   } as OrderOption;
 }
 
+export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undefined): FilterOption[] | undefined {
+  if (qs && qs.simpleFilterBuilder)
+    return undefined;
+
+  if (qs && qs.defaultFilters)
+    return qs.defaultFilters;
+
+  if (qd.columns["Entity"]) {
+    return [{
+      token: "Entity.ToString",
+      operation: "Contains",
+      value: "",
+      pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
+    }];
+  }
+}
+
 export function isAggregate(fop: FilterOptionParsed): boolean {
   if (isFilterGroupOptionParsed(fop))
     return fop.filters.some(f => isAggregate(f));
@@ -443,11 +494,15 @@ export function isAggregate(fop: FilterOptionParsed): boolean {
 export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): FilterOption[] {
 
   function toFilterOption(fop: FilterOptionParsed): FilterOption | null {
+
+    var pinned = fop.pinned && { ...fop.pinned } as PinnedFilter;
     if (isFilterGroupOptionParsed(fop))
       return ({
         token: fop.token && fop.token.fullKey,
         groupOperation: fop.groupOperation,
-        filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo)
+        value: fop.value,
+        pinned: pinned,
+        filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
     else {
       if (fop.token == null)
@@ -457,7 +512,8 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
         token: fop.token && fop.token.fullKey,
         operation: fop.operation,
         value: fop.value,
-        frozen: fop.frozen,
+        frozen: fop.frozen ? true : undefined,
+        pinned: pinned
       }) as FilterConditionOption;
     }
   }
@@ -473,7 +529,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode || "Add", fo.columnOptions || []);
 
-  var qs = querySettings[qd.queryKey];
+  var qs: QuerySettings | undefined = querySettings[qd.queryKey];
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
 
@@ -484,6 +540,13 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
       fo.orderOptions = [defaultOrder];
   }
 
+  if (!fo.filterOptions || fo.filterOptions.length == 0) {
+    var defaultFilters = getDefaultFilter(qd, qs);
+
+    if (defaultFilters)
+      fo.filterOptions = defaultFilters;
+  }
+
   var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
   const completer = new TokenCompleter(qd);
 
@@ -492,10 +555,10 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     fo.filterOptions.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
   if (fo.orderOptions)
-    fo.orderOptions.forEach(oo => completer.request(oo.token, SubTokensOptions.CanElement | canAggregate));
+    fo.orderOptions.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions)
-    fo.columnOptions.forEach(co => completer.request(co.token, SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   return completer.finished().then(() => {
 
@@ -506,12 +569,12 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
       systemTime: fo.systemTime,
 
       columnOptions: (fo.columnOptions || []).map(co => ({
-        token: completer.get(co.token),
-        displayName: co.displayName || completer.get(co.token).niceName
+        token: completer.get(co.token.toString()),
+        displayName: co.displayName || completer.get(co.token.toString()).niceName
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions || []).map(oo => ({
-        token: completer.get(oo.token),
+        token: completer.get(oo.token.toString()),
         orderType: oo.orderType,
       }) as OrderOptionParsed),
 
@@ -580,25 +643,52 @@ export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: F
   });
 }
 
-export function toFilterRequests(fops: FilterOptionParsed[]): FilterRequest[] {
-  return fops.map(fop => toFilterRequest(fop)).filter(a => a != null) as FilterRequest[];
+export function toFilterRequests(fops: FilterOptionParsed[], overridenValue?: OverridenValue): FilterRequest[] {
+  return fops.map(fop => toFilterRequest(fop, overridenValue)).filter(a => a != null) as FilterRequest[];
 }
 
-export function toFilterRequest(fop: FilterOptionParsed): FilterRequest | undefined {
+interface OverridenValue {
+  value: any;
+}
+
+export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
+  if (fop.pinned && overridenValue == null) {
+    if (fop.pinned.splitText && fop.value != null && typeof fop.value == "string") {
+      var parts = fop.value.split(/\s+/);
+      
+      return ({
+        groupOperation: "And",
+        token: fop.token && fop.token.fullKey,
+        filters: parts.filter(a => a.length > 0).map(part => toFilterRequest(fop, { value: part })),
+      }) as FilterGroupRequest;
+    }
+    else if (isFilterGroupOptionParsed(fop)) {
+
+      if (fop.pinned!.disableOnNull && fop.value == null) {
+        return undefined;
+      }
+
+      return toFilterRequest(fop, { value: fop.value });
+    }
+  }
+
   if (isFilterGroupOptionParsed(fop))
     return ({
       groupOperation: fop.groupOperation,
       token: fop.token && fop.token.fullKey,
-      filters: toFilterRequests(fop.filters)
+      filters: toFilterRequests(fop.filters, overridenValue)
     } as FilterGroupRequest);
   else {
     if (fop.token == null || fop.token.filterType == null || fop.operation == null)
       return undefined;
 
+    if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value == "")) 
+      return undefined;
+
     return fop.token && ({
       token: fop.token.fullKey,
       operation: fop.operation,
-      value: fop.value,
+      value: overridenValue ? overridenValue.value : fop.value,
     } as FilterConditionRequest);
   }
 }
@@ -638,7 +728,7 @@ export function expandParentColumn(fo: FindOptions): FindOptions {
     ...(fo.filterOptions || [])
   ];
 
-  if (!fo.parentToken.contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
+  if (!fo.parentToken.toString().contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
     fo.columnOptions = [
       { token: fo.parentToken },
       ...(fo.columnOptions || [])
@@ -676,12 +766,12 @@ export class TokenCompleter {
   requestFilter(fo: FilterOption, options: SubTokensOptions) {
 
     if (isFilterGroupOption(fo)) {
-      fo.token && this.request(fo.token, options);
+      fo.token && this.request(fo.token.toString(), options);
 
       fo.filters.forEach(f => this.requestFilter(f, options));
     } else {
 
-      this.request(fo.token, options);
+      this.request(fo.token.toString(), options);
     }
   }
 
@@ -731,16 +821,19 @@ export class TokenCompleter {
   toFilterOptionParsed(fo: FilterOption): FilterOptionParsed {
     if (isFilterGroupOption(fo))
       return ({
-        token: fo.token && this.get(fo.token),
+        token: fo.token && this.get(fo.token.toString()),
         groupOperation: fo.groupOperation,
-        filters: fo.filters.map(f => this.toFilterOptionParsed(f))
+        value: fo.value,
+        pinned: fo.pinned && { ...fo.pinned },
+        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
       } as FilterGroupOptionParsed);
     else
       return ({
-        token: this.get(fo.token),
+        token: this.get(fo.token.toString()),
         operation: fo.operation || "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,
+        pinned: fo.pinned && { ...fo.pinned },
       } as FilterConditionOptionParsed);
   }
 }
@@ -927,25 +1020,38 @@ export module API {
 
 export module Encoder {
 
+
+
   export function encodeFilters(query: any, filterOptions?: FilterOption[]) {
 
     var i: number = 0;
 
-    function encodeFilter(fo: FilterOption, identation: number) {
-
+    function encodeFilter(fo: FilterOption, identation: number, ignoreValues: boolean) {
       var identSuffix = identation == 0 ? "" : ("_" + identation);
 
-      if (isFilterGroupOption(fo)) {
-        query["filter" + (i++) + identSuffix] = (fo.token || "") + "~" + (fo.groupOperation);
+      var index = i++;
 
-        fo.filters.forEach(f => encodeFilter(f, identation + 1));
-      } else {
-        query["filter" + (i++) + identSuffix] = fo.token + "~" + (fo.operation || "EqualTo") + "~" + stringValue(fo.value);
+      if (fo.pinned) {
+        var p = fo.pinned;
+        query["filterPinned" + index + identSuffix] = scapeTilde(p.label || "") +
+          "~" + (p.column == null ? "" : p.column) +
+          "~" + (p.row == null ? "" : p.row) +
+          "~" + ((p.splitText ? 2 : 0) | (p.disableOnNull ? 1 : 0)).toString();
       }
+
+
+      if (isFilterGroupOption(fo)) {
+        query["filter" + index + identSuffix] = (fo.token || "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
+
+        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || Boolean(fo.pinned)));
+      } else {
+        query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation || "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
+      }
+
     }
 
     if (filterOptions)
-      filterOptions.forEach(fo => encodeFilter(fo, 0));
+      filterOptions.forEach(fo => encodeFilter(fo, 0, false));
   }
 
   export function encodeOrders(query: any, orderOptions?: OrderOption[]) {
@@ -1005,29 +1111,53 @@ export module Decoder {
 
   export function decodeFilters(query: any): FilterOption[] {
 
-    function toFilterList(filters: FilterPart[], identation: number): FilterOption[] {
+    function parsePinnedFilter(str: string): PinnedFilter {
+      var parts = str.split("~");
+      var flags = parseInt(parts[3]);
+      return ({
+        label: unscapeTildes(parts[0]),
+        column: parts[1].length ? parseInt(parts[1]) : undefined,
+        row: parts[2].length ? parseInt(parts[2]) : undefined,
+        splitText: Boolean(flags & 2),
+        disableOnNull: Boolean(flags & 1),
+      });
+    }
+
+
+    function toFilterList(filters: FilterPart[], identation: number, ignoreValues: boolean): FilterOption[] {
 
       return filters.groupWhen(a => a.identation == identation).map(gr => {
-        const parts = gr.key.value.split("~");
 
+        var identSuffix = identation == 0 ? "" : ("_" + identation);
+
+        var pinnedText = query["filterPinned" + gr.key.order + identSuffix] as string;
+
+        var pinned = pinnedText == undefined ? null : parsePinnedFilter(pinnedText);
+
+        const parts = gr.key.value.split("~");
+        
         if (FilterOperation.isDefined(parts[1])) {
           return ({
             token: parts[0],
             operation: FilterOperation.assertDefined(parts[1]),
-            value: parts.length == 3 ? unscapeTildes(parts[2]) :
-              parts.slice(2).map(a => unscapeTildes(a))
+            value: ignoreValues ? null :
+              parts.length == 3 ? unscapeTildes(parts[2]) :
+              parts.slice(2).map(a => unscapeTildes(a)),
+            pinned: pinned,
           }) as FilterConditionOption
         } else {
           return ({
             token: parts[0] || null,
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
-            filters: toFilterList(gr.elements, identation + 1),
+            value: ignoreValues ? null : unscapeTildes(parts[2]),
+            pinned: pinned,
+            filters: toFilterList(gr.elements, identation + 1, ignoreValues || Boolean(pinned)),
           }) as FilterGroupOption;
         }
       });
     }
 
-    return toFilterList(filterInOrder(query, "filter"), 0)
+    return toFilterList(filterInOrder(query, "filter"), 0, false)
   }
 
   export function unscapeTildes(str: string | undefined): string | undefined {
@@ -1095,6 +1225,7 @@ export interface QuerySettings {
   allowSystemTime?: boolean;
   defaultOrderColumn?: string;
   defaultOrderType?: OrderType;
+  defaultFilters?: FilterOption[];
   hiddenColumns?: ColumnOption[];
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -1121,6 +1252,7 @@ export class CellFormatter {
 
 export interface CellFormatterContext {
   refresh?: () => void;
+  systemTime?: SystemTime;
 }
 
 
@@ -1179,11 +1311,43 @@ export const formatRules: FormatRule[] = [
     formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
-    name: "DateTime",
+    name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
       const momentFormat = toMomentFormat(col.token!.format);
-      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi>{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+    }
+  },
+  {
+    name: "SystemValidFrom",
+    isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
+    formatter: col => {
+      return new CellFormatter((cell: string, ctx) => {
+        if (cell == undefined || cell == "")
+          return "";
+
+        var className = cell.startsWith("0001-") ? "date-start" :
+          ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+            undefined;
+
+        return <bdi className={classes("date", className)}>{moment(cell).format("YYYY-MM-DDTHH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+      });
+    }
+  },
+  {
+    name: "SystemValidTo",
+    isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidTo",
+    formatter: col => {
+      return new CellFormatter((cell: string, ctx) => {
+        if (cell == undefined || cell == "")
+          return "";
+
+        var className = cell.startsWith("9999-") ? "date-end" :
+          ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+            undefined;
+
+        return <bdi className={classes("date", className)}>{moment(cell).format("YYYY-MM-DDTHH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+      });
     }
   },
   {
