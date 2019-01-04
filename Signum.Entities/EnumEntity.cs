@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), InTypeScript(false)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), InTypeScript(false), PrimaryKey(typeof(int), Identity = false, IdentityBehaviour = false)]
     [TicksColumn(false)]
     public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
         where T : struct
