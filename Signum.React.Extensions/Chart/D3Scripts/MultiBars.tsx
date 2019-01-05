@@ -117,7 +117,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
               dominantBaseline="middle"
               textAnchor="middle"
               fontWeight="bold">
-              {r.values[s.key].value}
+              {r.values[s.key].valueNiceName}
               <title>
                 {r.values[s.key].valueTitle}
               </title>

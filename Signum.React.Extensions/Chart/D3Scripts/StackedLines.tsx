@@ -154,7 +154,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
               opacity={parameters["NumberOpacity"]}
               textAnchor="middle"
               fontWeight="bold">
-              {rowsByKey[keyColumn.getKey(v.data)].values[s.key].value}
+              {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueNiceName}
               <title>
                 {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle}
               </title>

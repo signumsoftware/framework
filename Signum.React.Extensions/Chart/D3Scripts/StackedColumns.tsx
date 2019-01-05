@@ -131,7 +131,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
               opacity={parameters["NumberOpacity"]}
               textAnchor="middle"
               fontWeight="bold">
-              {valueColumn0.getNiceName(r.data.values[s.key].value)}
+              {r.data.values[s.key].valueNiceName}
               <title>
                 {r.data.values[s.key].valueTitle}
               </title>

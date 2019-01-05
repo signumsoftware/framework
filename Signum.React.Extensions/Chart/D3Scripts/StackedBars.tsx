@@ -134,7 +134,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
               opacity={parameters["NumberOpacity"]}
               textAnchor="middle"
               fontWeight="bold">
-              {r.data.values[s.key].value}
+              {r.data.values[s.key].valueNiceName}
               <title>
                 {r.data.values[s.key].valueTitle}
               </title>

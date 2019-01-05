@@ -110,7 +110,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               onClick={e => onDrillDown(r.values[s.key].rowClick)}
               cursor="pointer">
               <title>
-                {r.values[s.key].value}
+                {r.values[s.key].valueNiceName}
               </title>
             </circle>)}
           {rowsInOrder
@@ -138,7 +138,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                 onClick={e => onDrillDown(r.values[s.key].rowClick)}
                 cursor="pointer"
                 shapeRendering="initial">
-                {r.values[s.key].value}
+                {r.values[s.key].valueNiceName}
               </text>)
           }
         </g>)}

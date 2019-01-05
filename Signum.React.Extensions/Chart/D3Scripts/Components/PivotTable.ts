@@ -11,6 +11,7 @@ export function toPivotTable(data: ChartTable,
       values: usedCols.toObject(cn => cn.name, (cn): PivotValue => ({
         rowClick: r,
         value: cn.getValue(r),
+        valueNiceName: cn.getValueNiceName(r),
         valueTitle: `${col0.getValueNiceName(r)}, ${cn.title}: ${cn.getValueNiceName(r)}`
       }))
     } as PivotRow));
@@ -48,8 +49,9 @@ export function groupedPivotTable(data: ChartTable,
         values: gr.elements.toObject(
           r => colSplit.getValueKey(r),
           (r): PivotValue => ({
-            value: colValue.getValue(r),
             rowClick: r,
+            value: colValue.getValue(r),
+            valueNiceName: colValue.getValueNiceName(r),
             valueTitle: `${col0.getNiceName(rowValue)}, ${colSplit.getValueNiceName(r)}: ${colValue.getValueNiceName(r)}`
           })),
       } as PivotRow;
@@ -84,5 +86,6 @@ export interface PivotRow {
 export interface PivotValue {
   rowClick: ChartRow;
   value: number;
+  valueNiceName: string;
   valueTitle: string;
 }
