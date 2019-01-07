@@ -70,16 +70,16 @@ namespace Signum.Utilities
             {
                 using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
                 {
-                    foreach (IList row in collection)
+                    foreach (IList? row in collection)
                     {
-                        for (int i = 0; i < row.Count; i++)
+                        for (int i = 0; i < row!.Count; i++)
                         {
-                            var obj = row[i];
+                            var obj = row![i];
 
                             var str = ConvertToString(obj);
 
                             sw.Write(str);
-                            if (i < row.Count - 1)
+                            if (i < row!.Count - 1)
                                 sw.Write(tab);
                             else
                                 sw.WriteLine();
@@ -130,7 +130,7 @@ namespace Signum.Utilities
             return ConvertToString;
         }
 
-        static string ConvertToString(object obj)
+        static string ConvertToString(object? obj)
         {
             if (obj == null)
                 return "";
@@ -139,7 +139,7 @@ namespace Signum.Utilities
                 return f.ToString(null, Culture);
             else
             {
-                var p = obj.ToString();
+                var p = obj!.ToString();
                 if (p != null && p.Contains(tab))
                     throw new InvalidDataException("TSV fields can't contain the tab character, found one in value: " + p);
                 return p;
@@ -151,7 +151,7 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, int skipLines = 1, TsvReadOptions<T> options = null) where T : class, new()
+        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, int skipLines = 1, TsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
 
@@ -159,21 +159,20 @@ namespace Signum.Utilities
                 return ReadStream<T>(fs, encoding, skipLines, options).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, int skipLines = 1, TsvReadOptions<T> options = null) where T : class, new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, int skipLines = 1, TsvReadOptions<T>? options = null) where T : class, new()
         {
             using (MemoryStream ms = new MemoryStream(data))
                 return ReadStream<T>(ms, encoding, skipLines, options).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, int skipLines = 1, TsvReadOptions<T> options = null) where T : class, new()
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, int skipLines = 1, TsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
-            if (options == null)
-                options = new TsvReadOptions<T>();
+            var defOptions = options ?? new TsvReadOptions<T>();
 
             var columns = ColumnInfoCache<T>.Columns;
             var members = columns.Select(c => c.MemberEntry).ToList();
-            var parsers = columns.Select(c => GetParser(c, options.ParserFactory)).ToList();
+            var parsers = columns.Select(c => GetParser(c, defOptions.ParserFactory)).ToList();
 
 
             using (StreamReader sr = new StreamReader(stream, encoding))
@@ -189,7 +188,7 @@ namespace Signum.Utilities
                     if (tsvLine == null)
                         yield break;
 
-                    T t = null;
+                    T? t = null;
                     try
                     {
                         t = ReadObject<T>(tsvLine, members, parsers);
@@ -198,7 +197,7 @@ namespace Signum.Utilities
                     {
                         e.Data["row"] = line;
 
-                        if (options.SkipError == null || !options.SkipError(e, tsvLine))
+                        if (defOptions.SkipError == null || !options.SkipError(e, tsvLine))
                             throw new ParseCsvException(e);
                     }
 
@@ -208,20 +207,19 @@ namespace Signum.Utilities
             }
         }
 
-        public static T ReadLine<T>(string tsvLine, TsvReadOptions<T> options = null)
+        public static T ReadLine<T>(string tsvLine, TsvReadOptions<T>? options = null)
             where T : class, new()
         {
-            if (options == null)
-                options = new TsvReadOptions<T>();
+            var defOptions = options ?? new TsvReadOptions<T>();
 
             var columns = ColumnInfoCache<T>.Columns;
 
             return ReadObject<T>(tsvLine,
                 columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(c, options.ParserFactory)).ToList());
+                columns.Select(c => GetParser(c, defOptions.ParserFactory)).ToList());
         }
 
-        private static Func<string, object> GetParser<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<string, object>> parserFactory)
+        private static Func<string, object?> GetParser<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<string, object>>? parserFactory)
         {
             if (parserFactory != null)
             {
@@ -234,7 +232,7 @@ namespace Signum.Utilities
             return str => ConvertTo(str, column.MemberInfo.ReturningType(), column.Format);
         }
 
-        static T ReadObject<T>(string line, List<MemberEntry<T>> members, List<Func<string, object>> parsers) where T : new()
+        static T ReadObject<T>(string line, List<MemberEntry<T>> members, List<Func<string, object?>> parsers) where T : new()
         {
             var vals = line.Split(new[] { tab }, StringSplitOptions.None).ToList();
 
@@ -248,7 +246,7 @@ namespace Signum.Utilities
                 try
                 {
                     str = vals[i];
-                    object val = parsers[i](str);
+                    object? val = parsers[i](str);
                     members[i].Setter(t, val);
                 }
                 catch (Exception e)
@@ -299,7 +297,6 @@ namespace Signum.Utilities
         public Func<TsvColumnInfo<T>, Func<string, object>>? ParserFactory;
         public Func<Exception, string, bool>? SkipError;
     }
-
 
     public class TsvColumnInfo<T>
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,7 @@ namespace Signum.Utilities
     public static class Extensions
     {
         #region Parse Number
-        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
+        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo? ci = null)
         {
             if (int.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out int result))
                 return result;
@@ -21,7 +21,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
+        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo? ci = null)
         {
             if (long.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out long result))
                 return result;
@@ -29,7 +29,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
+        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo? ci = null)
         {
             if (short.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out short result))
                 return result;
@@ -37,7 +37,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
+        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo? ci = null)
         {
             if (float.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out float result))
                 return result;
@@ -45,7 +45,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
+        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo? ci = null)
         {
             if (double.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out double result))
                 return result;
@@ -53,7 +53,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number, CultureInfo ci = null)
+        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number, CultureInfo? ci = null)
         {
             if (decimal.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out decimal result))
                 return result;
@@ -225,7 +225,7 @@ namespace Signum.Utilities
 
         #region DateTime
 
-        public static DateTime? ToDateTimeExact(this string date, string format, IFormatProvider formatProvider = null,
+        public static DateTime? ToDateTimeExact(this string date, string format, IFormatProvider? formatProvider = null,
             DateTimeStyles? styles = null)
         {
             if (DateTime.TryParseExact(date, format,
