@@ -51,7 +51,7 @@ namespace Signum.Engine.Mailing
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
-                EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException("getSmtpClient");
+                EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException(nameof(getSmtpClient));
                 EmailTemplateLogic.Start(sb, getSmtpConfiguration);
                 if (attachment != null)
                     FileTypeLogic.Register(EmailFileType.Attachment, attachment);

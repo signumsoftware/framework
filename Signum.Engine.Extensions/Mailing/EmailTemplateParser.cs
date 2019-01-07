@@ -49,7 +49,7 @@ namespace Signum.Engine.Mailing
             public TemplateWalker(string text, QueryDescription qd, Type modelType)
             {
                 if (qd == null)
-                    throw new ArgumentNullException("qd");
+                    throw new ArgumentNullException(nameof(qd));
 
                 this.text = text ?? "";
                 this.QueryDescription = qd;

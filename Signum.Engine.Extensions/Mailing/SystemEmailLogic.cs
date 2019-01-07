@@ -224,7 +224,7 @@ namespace Signum.Engine.Mailing
         public static void RegisterSystemEmail(Type model, Func<EmailTemplateEntity> defaultTemplateConstructor, object queryName = null)
         {
             if (defaultTemplateConstructor == null)
-                throw new ArgumentNullException("defaultTemplateConstructor");
+                throw new ArgumentNullException(nameof(defaultTemplateConstructor));
 
             systemEmails[model] = new SystemEmailInfo
             {
