@@ -15,10 +15,10 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             if (parent == null)
-                throw new ArgumentNullException("parent");
+                throw new ArgumentNullException(nameof(parent));
 
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             this.entityType = type;
 
