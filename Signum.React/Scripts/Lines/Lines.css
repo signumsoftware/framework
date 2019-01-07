@@ -423,7 +423,12 @@ table.sf-multi-value {
     background-color: #efefef;
 }
 
-.sf-mandatory,
-.sf-mandatory-widget .rw-input {
+body.rtl .sf-mandatory,
+body.rtl .sf-mandatory-widget .rw-input {
+    border-right: 2px solid red;
+}
+
+body:not(.rtl) .sf-mandatory,
+body:not(.rtl) .sf-mandatory-widget .rw-input {
     border-left: 2px solid red;
 }
