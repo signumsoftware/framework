@@ -23,7 +23,8 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-       
+        public static Action<ScheduledTaskLogEntity> OnFinally;
+        
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
         [ExpressionField]
@@ -478,6 +479,7 @@ namespace Signum.Engine.Scheduler
                 finally
                 {
                     RunningTasks.TryRemove(stl, out var ctx);
+                    OnFinally?.Invoke(stl);
                 }
 
                 return stl;

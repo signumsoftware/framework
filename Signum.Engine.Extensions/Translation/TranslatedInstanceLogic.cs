@@ -44,7 +44,7 @@ namespace Signum.Engine.Translation
                         e.TranslatedText,
                         e.OriginalText,
                     });
-                TranslatedInstanceLogic.getDefaultCulture = defaultCulture ?? throw new ArgumentNullException("defaultCulture");
+                TranslatedInstanceLogic.getDefaultCulture = defaultCulture ?? throw new ArgumentNullException(nameof(defaultCulture));
 
                 LocalizationCache = sb.GlobalLazy(() =>
                     Database.Query<TranslatedInstanceEntity>()
@@ -665,7 +665,7 @@ namespace Signum.Engine.Translation
 
         public LocalizedInstanceKey(PropertyRoute route, Lite<Entity> instance, PrimaryKey? rowId)
         {
-            this.Route = route ?? throw new ArgumentNullException("route");
+            this.Route = route ?? throw new ArgumentNullException(nameof(route));
             this.Instance = instance ?? throw new ArgumentNullException("entity");
             this.RowId = rowId;
         }
