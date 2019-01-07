@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
@@ -164,7 +164,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
     }
 
     handleOnView = (exampleEntity: ModifiableEntity | Lite<Entity>) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
     }
 
     renderMessage(res: DynamicExpressionTestResponse) {
