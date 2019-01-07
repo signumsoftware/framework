@@ -5,14 +5,14 @@ import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumbroFormat, toMomentFormat, getEnumInfo } from '../Reflection'
+import { getQueryKey, toNumbroFormat, toMomentFormat, getEnumInfo, QueryTokenString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { toFilterRequests } from '../Finder';
 
 export interface ValueSearchControlProps extends React.Props<ValueSearchControl> {
-  valueToken?: string;
+  valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -53,7 +53,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     return {
       queryKey: fo.queryKey,
       filters: toFilterRequests(fo.filterOptions),
-      valueToken: this.props.valueToken
+      valueToken: this.props.valueToken && this.props.valueToken.toString(),
+      systemTime: fo.systemTime && { ...fo.systemTime }
     };
   }
 
@@ -86,7 +87,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     this.setState({ token: undefined, value: undefined });
     if (props.valueToken)
-      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken, SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll)
+      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll)
         .then(st => {
           this.setState({ token: st });
           this.props.onTokenLoaded && this.props.onTokenLoaded();

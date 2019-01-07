@@ -49,7 +49,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
           (
             <div className={this.props.ctx.valueColumnsCss} >
               {this.props.children}
-              {this.props.helpText && ctx.formGroupStyle == "LabelColumns" && <span className="form-text text-muted">{this.props.helpText}</span>}
+              {this.props.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text text-muted">{this.props.helpText}</small>}
             </div>
           )
       }

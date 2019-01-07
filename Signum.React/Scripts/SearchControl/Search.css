@@ -61,12 +61,16 @@ table.sf-search-results > tbody > tr > td {
 }
 
 .sf-search-results > thead > tr > th {
-    text-align: center;
+   
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     cursor: pointer;
     background-color: #f8f8f8;
 }
+
+    .sf-search-results > thead > tr > th.sf-th-selection {
+        text-align: center;
+    }
 
     .sf-search-results > thead > tr > th.noOrder {
         cursor: default;
@@ -258,8 +262,23 @@ span.guid {
     white-space: nowrap;
 }
 
-/* sf-entity-ctxmenu-success */
+bdi.date {
+    white-space: nowrap;
+}
 
+    bdi.date.date-start,
+    bdi.date.date-end {
+        color: gray;
+    }
+
+    bdi.date.date-created {
+        color: #22BA00;
+    }
+
+    bdi.date.date-removed {
+        color: #CF0000;
+    }
+/* sf-entity-ctxmenu-success */
 tr.sf-entity-ctxmenu-success {
     opacity: .5;
 }

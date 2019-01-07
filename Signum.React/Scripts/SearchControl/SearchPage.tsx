@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
+import { FindOptions, FilterOption, isFilterGroupOption } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControl from './SearchControl'
@@ -19,7 +19,7 @@ interface SearchPageState {
 export default class SearchPage extends React.Component<SearchPageProps, SearchPageState> {
   static marginDown = 130;
   static minHeight = 600;
-  static showFilters = true;
+  static showFilters = (fo: FindOptions) => !(fo.filterOptions == undefined || fo.filterOptions.length == 0 || anyPinned(fo.filterOptions));
 
   constructor(props: SearchPageProps) {
     super(props);
@@ -105,7 +105,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
           showBarExtension={true}
           hideFullScreenButton={true}
           largeToolbarButtons={true}
-          showFilters={SearchPage.showFilters}
+          showFilters={SearchPage.showFilters(fo)}
           showGroupButton={true}
           avoidChangeUrl={false}
           maxResultsHeight={"none"}
@@ -115,4 +115,12 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
       </div>
     );
   }
+}
+
+
+function anyPinned(filterOptions?: FilterOption[]): boolean {
+  if (filterOptions == null)
+    return false;
+
+  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOption(a) && anyPinned(a.filters));
 }

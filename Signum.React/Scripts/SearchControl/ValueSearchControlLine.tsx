@@ -3,7 +3,7 @@ import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
-import { getQueryKey, getQueryNiceName } from '../Reflection'
+import { getQueryKey, getQueryNiceName, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../Typecontext'
 import ValueSearchControl from './ValueSearchControl'
@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
   ctx: StyleContext;
   findOptions?: FindOptions;
-  valueToken?: string;
+  valueToken?: string | QueryTokenString<any>;
   labelText?: React.ReactChild;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
@@ -57,7 +57,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     if (isEntity(ctx.value))
       return {
         queryName: ctx.value.Type,
-        parentToken: "Entity",
+        parentToken: new QueryTokenString("").entity(),
         parentValue: ctx.value
       };
 

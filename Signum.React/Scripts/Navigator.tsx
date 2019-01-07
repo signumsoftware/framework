@@ -1,7 +1,7 @@
 import * as React from "react"
 import * as H from "history"
 import { Route, Switch } from "react-router"
-import { Dic, } from './Globals';
+import { Dic, classes, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
@@ -17,6 +17,8 @@ import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
 import ButtonBar from "./Frames/ButtonBar";
+import { clearWidgets } from "./Frames/Widgets";
+import { clearContextualItems } from "./SearchControl/ContextualItems";
 
 Dic.skipClasses.push(React.Component);
 
@@ -89,10 +91,15 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
     if (entity.isNew)
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return NormalWindowMessage.Type0Id1.niceToString().formatWith(typeInfo.niceName, (entity as Entity).id);
+    return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
   }
 }
 
+let renderId = (entity: Entity): React.ReactChild => <span className={classes(getTypeInfo(entity.Type).members["Id"].type!.name == "Guid" ? "sf-guid-id" : "")}>{entity.id}</span>;
+
+export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
+  renderId = newFunction;
+}
 
 export function navigateRoute(entity: Entity): string;
 export function navigateRoute(lite: Lite<Entity>): string;
@@ -135,6 +142,8 @@ export const clearSettingsActions: Array<() => void> = [
   Finder.ButtonBarQuery.clearButtonBarElements,
   ButtonBar.clearButtonBarRenderer,
   Operations.clearOperationSettings,
+  clearWidgets,
+  clearContextualItems
 ];
 
 export function clearAllSettings() {

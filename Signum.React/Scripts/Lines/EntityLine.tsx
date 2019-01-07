@@ -89,11 +89,11 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
-
     var entity = this.state.autocomplete!.getEntityFromItem(item);
 
     this.convert(entity)
       .then(entity => {
+        this.focusNext = true;
         this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
         this.setValue(entity);
       })
@@ -172,6 +172,15 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     );
   }
 
+  focusNext?: boolean;
+
+  setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
+    if (this.focusNext && linkOrSpan != null) {
+      linkOrSpan.focus();
+    }
+    this.focusNext = undefined;
+  }
+
   renderLink() {
 
     const s = this.state;
@@ -188,7 +197,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     if (s.navigate && s.view) {
       return (
-        <a href="#" onClick={this.handleViewClick}
+        <a ref={e => this.setLinkOrSpan(e)}
+          href="#" onClick={this.handleViewClick}
           className={classes(s.ctx.formControlClass, "sf-entity-line-entity")}
           title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlAttributes}>
           {str}
@@ -196,7 +206,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
       );
     } else {
       return (
-        <span className={classes(s.ctx.formControlClass, "sf-entity-line-entity")} {...s.itemHtmlAttributes} >
+        <span tabIndex={0} ref={e => this.setLinkOrSpan(e)} className={classes(s.ctx.formControlClass, "sf-entity-line-entity")} {...s.itemHtmlAttributes}>
           {str}
         </span>
       );

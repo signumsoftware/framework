@@ -1,4 +1,4 @@
-﻿import * as moment from 'moment'
+import * as moment from 'moment'
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { classes } from '../Globals';
@@ -6,6 +6,9 @@ import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
 import { SystemTimeMode } from '../Signum.Entities.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
 import { DateTimePicker } from 'react-widgets';
+import { QueryTokenString } from '../Reflection';
+import QueryTokenBuilder from './QueryTokenBuilder';
+import { OperationLogEntity } from '../Signum.Entities.Basics';
 
 interface SystemTimeEditorProps extends React.Props<SystemTime> {
   findOptions: FindOptionsParsed;
@@ -33,15 +36,15 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     var fop = this.props.findOptions;
     if (this.isPeriodChecked()) {
       fop.columnOptions.extract(a => a.token != null && (
-        a.token.fullKey.startsWith("Entity.SystemValidFrom") ||
-        a.token.fullKey.startsWith("Entity.SystemValidTo")));
+        a.token.fullKey.startsWith(QueryTokenString.entity().systemValidFrom().toString()) ||
+        a.token.fullKey.startsWith(QueryTokenString.entity().systemValidTo().toString())));
       this.props.onChanged();
     }
     else {
 
       Finder.parseColumnOptions([
-        { token: "Entity.SystemValidFrom" },
-        { token: "Entity.SystemValidTo" }
+        { token: QueryTokenString.entity().systemValidFrom() },
+        { token: QueryTokenString.entity().systemValidTo() }
       ], fop.groupResults, this.props.queryDescription).then(cops => {
         fop.columnOptions = [...cops, ...fop.columnOptions];
         this.props.onChanged();
@@ -53,8 +56,8 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     var cos = this.props.findOptions.columnOptions;
 
     return cos.some(a => a.token != null && (
-      a.token.fullKey.startsWith("Entity.SystemValidFrom") ||
-      a.token.fullKey.startsWith("Entity.SystemValidTo"))
+      a.token.fullKey.startsWith(QueryTokenString.entity().systemValidFrom().toString()) ||
+      a.token.fullKey.startsWith(QueryTokenString.entity().systemValidTo().toString()))
     );
   }
 
@@ -70,23 +73,25 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
   }
 
   handlePreviousOperationClicked = () => {
+
+    var prevLogToken = QueryTokenString.entity().expression<OperationLogEntity>("PreviousOperationLog");
+
     var fop = this.props.findOptions;
     if (this.isPreviousOperationChecked()) {
-      fop.columnOptions.extract(a => a.token != null && a.token.fullKey.startsWith("Entity.PreviousOperationLog"));
+      fop.columnOptions.extract(a => a.token != null && a.token.fullKey.startsWith(prevLogToken.toString()));
       this.props.onChanged();
     }
     else {
 
       Finder.parseColumnOptions([
-        { token: "Entity.PreviousOperationLog.Start" },
-        { token: "Entity.PreviousOperationLog.User" },
-        { token: "Entity.PreviousOperationLog.Operation" },
+        { token: prevLogToken.append(a => a.start) },
+        { token: prevLogToken.append(a => a.user) },
+        { token: prevLogToken.append(a => a.operation) },
       ], fop.groupResults, this.props.queryDescription).then(cops => {
         fop.columnOptions = [...cops, ...fop.columnOptions];
         this.props.onChanged();
       }).done();
     }
-
   }
 
   isPreviousOperationChecked() {
