@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
 import { PropertyRoute, Binding } from '@framework/Reflection'
@@ -121,7 +121,7 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
     }
 
     handleOnView = (exampleEntity: Entity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
     }
 
     renderMessage(res: DynamicTypeConditionTestResponse) {
