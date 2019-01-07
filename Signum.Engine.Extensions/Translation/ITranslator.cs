@@ -52,7 +52,7 @@ namespace Signum.Engine.Translation
         public AlreadyTranslatedTranslator(ITranslator inner)
         {
             if (inner == null)
-                throw new ArgumentNullException("inner");
+                throw new ArgumentNullException(nameof(inner));
 
             this.Inner = inner;
         }
@@ -124,7 +124,7 @@ namespace Signum.Engine.Translation
         public ReplacerTranslator(ITranslator inner)
         {
             if (inner == null)
-                throw new ArgumentNullException("inner");
+                throw new ArgumentNullException(nameof(inner));
 
             this.Inner = inner;
         }
