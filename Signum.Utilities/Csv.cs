@@ -84,7 +84,7 @@ namespace Signum.Utilities
                     {
                         for (int i = 0; i < members.Count; i++)
                         {
-                            var obj = members[i].Getter(item);
+                            var obj = members[i].Getter!(item);
 
                             var str = EncodeCsv(toString[i](obj), defCulture);
 
@@ -245,15 +245,14 @@ namespace Signum.Utilities
             }
         }
 
-        public static T ReadLine<T>(string csvLine, CultureInfo? culture = null, CsvReadOptions<T> options = null)
+        public static T ReadLine<T>(string csvLine, CultureInfo? culture = null, CsvReadOptions<T>? options = null)
             where T : class, new()
         {
-            if (options == null)
-                options = new CsvReadOptions<T>();
+            var defOptions = options ?? new CsvReadOptions<T>();
 
-            culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
+            var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
-            Regex regex = GetRegex(culture, options.RegexTimeout);
+            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout);
 
             Match m = regex.Match(csvLine);
 
@@ -261,10 +260,10 @@ namespace Signum.Utilities
 
             return ReadObject<T>(m,
                 columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(culture, c, options.ParserFactory)).ToList());
+                columns.Select(c => GetParser(defCulture, c, defOptions.ParserFactory)).ToList());
         }
 
-        private static Func<string, object> GetParser<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>>? parserFactory)
+        private static Func<string, object?> GetParser<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object?>>? parserFactory)
         {
             if (parserFactory != null)
             {
@@ -277,7 +276,7 @@ namespace Signum.Utilities
             return str => ConvertTo(str, column.MemberInfo.ReturningType(), culture, column.Format);
         }
 
-        static T ReadObject<T>(Match m, List<MemberEntry<T>> members, List<Func<string, object>> parsers) where T : new()
+        static T ReadObject<T>(Match m, List<MemberEntry<T>> members, List<Func<string, object?>> parsers) where T : new()
         {
             var vals = m.Groups["val"].Captures;
 
@@ -287,14 +286,14 @@ namespace Signum.Utilities
             T t = new T();
             for (int i = 0; i < members.Count; i++)
             {
-                string str = null; 
+                string? str = null; 
                 try
                 {
                     str = DecodeCsv(vals[i].Value);
 
-                    object val = parsers[i](str);
+                    object? val = parsers[i](str);
 
-                    members[i].Setter(t, val);
+                    members[i].Setter!(t, val);
                 }
                 catch (Exception e)
                 {
@@ -336,7 +335,7 @@ namespace Signum.Utilities
             return s;
         }
 
-        static object ConvertTo(string s, Type type, CultureInfo culture, string format)
+        static object? ConvertTo(string s, Type type, CultureInfo culture, string format)
         {
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
@@ -362,9 +361,9 @@ namespace Signum.Utilities
 
     public class CsvReadOptions<T> where T: class
     {
-        public Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> ParserFactory;
+        public Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>>? ParserFactory;
         public bool AsumeSingleLine = false;
-        public Func<Exception, Match, bool> SkipError;
+        public Func<Exception, Match?, bool>? SkipError;
         public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     }
 
@@ -395,7 +394,7 @@ namespace Signum.Utilities
         public int? Row { get; set; }
         public string Member { get; set; }
         public string Value { get; set; }
-
+        
         public ParseCsvException() { }
         public ParseCsvException(Exception inner) : base(inner.Message, inner)
         {

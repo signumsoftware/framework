@@ -13,25 +13,25 @@ namespace Signum.Utilities
     {
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
         [ExpressionField("HasTextExpression")]
-        public static bool HasText(this string str)
+        public static bool HasText(this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }
 
         static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
         [ExpressionField("DefaultTextExpression")]
-        public static string DefaultText(this string str, string defaultText)
+        public static string DefaultText(this string? str, string defaultText)
         {
             if (str.HasText())
-                return str;
+                return str!;
             else
                 return defaultText;
         }
 
-        public static string AssertHasText(this string str, string errorMessage)
+        public static string AssertHasText(this string? str, string errorMessage)
         {
             if (str.HasText())
-                return str;
+                return str!;
             else
                 throw new ArgumentException(errorMessage);
         }
@@ -41,7 +41,7 @@ namespace Signum.Utilities
             return source.IndexOf(toCheck, comp) >= 0;
         }
 
-        public static string Add(this string str, string separator, string part)
+        public static string? Add(this string? str, string separator, string? part)
         {
             if (str.HasText())
             {
@@ -54,7 +54,7 @@ namespace Signum.Utilities
                 return part;
         }
 
-        public static string AddLine(this string str, string part)
+        public static string? AddLine(this string? str, string part)
         {
             return Add(str, "\r\n", part);
         }

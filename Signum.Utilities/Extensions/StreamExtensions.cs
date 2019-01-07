@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.IO;
 using System.Resources;
@@ -36,7 +36,7 @@ namespace Signum.Utilities
             str.Write(data, 0, data.Length);
         }
 
-        public static string ReadResourceStream(this Assembly assembly, string name, Encoding encoding = null)
+        public static string ReadResourceStream(this Assembly assembly, string name, Encoding? encoding = null)
         {
             using (Stream stream = assembly.GetManifestResourceStream(name))
             {
