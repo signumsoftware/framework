@@ -16,7 +16,7 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             if (parent == null)
-                throw new ArgumentNullException("parent");
+                throw new ArgumentNullException(nameof(parent));
 
         }
 

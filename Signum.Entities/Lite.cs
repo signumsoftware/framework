@@ -81,7 +81,7 @@ namespace Signum.Entities
                     throw new InvalidOperationException(typeof(T).Name + " is abstract");
 
                 if (entity.GetType() != typeof(T))
-                    throw new ArgumentNullException("entity");
+                    throw new ArgumentNullException(nameof(entity));
 
                 this.entityOrNull = entity;
                 this.id = entity.IdOrNull;
