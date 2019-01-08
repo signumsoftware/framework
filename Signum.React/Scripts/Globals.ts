@@ -772,6 +772,17 @@ export module Dic {
     }
   }
 
+  export function except(obj: { [key: string]: any }, keys: string[]): { [key: string]: any } {
+    var result : { [key: string]: any } = {};
+    for (const name in obj) {
+      if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
+        if (!keys.contains(name))
+          result[name] = obj[name];
+      }
+    }
+    return result; 
+  }
+
   export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): R[] {
     let index = 0;
     const result: R[] = [];

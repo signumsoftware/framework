@@ -26,7 +26,7 @@ namespace Signum.Entities.DynamicQuery
             if (function != AggregateFunction.Count)
                 throw new ArgumentException("function should be Count for this overload");
 
-            this.queryName = queryName ?? throw new ArgumentNullException("queryName");
+            this.queryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
             this.AggregateFunction = function;
         }
 
@@ -34,7 +34,7 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             if (parent == null)
-                throw new ArgumentNullException("parent");
+                throw new ArgumentNullException(nameof(parent));
 
             this.AggregateFunction = function;
 
