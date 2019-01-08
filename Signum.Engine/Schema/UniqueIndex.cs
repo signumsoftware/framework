@@ -34,10 +34,10 @@ namespace Signum.Engine.Maps
         public Index(ITable table, params IColumn[] columns)
         {
             if (table == null)
-                throw new ArgumentNullException("table");
+                throw new ArgumentNullException(nameof(table));
 
             if (columns == null || columns.IsEmpty())
-                throw new ArgumentNullException("columns");
+                throw new ArgumentNullException(nameof(columns));
 
             this.Table = table;
             this.Columns = columns;
@@ -118,7 +118,7 @@ namespace Signum.Engine.Maps
         public static IColumn[] Split(IFieldFinder finder, LambdaExpression columns)
         {
             if (columns == null)
-                throw new ArgumentNullException("columns");
+                throw new ArgumentNullException(nameof(columns));
 
             if (columns.Body.NodeType == ExpressionType.New)
             {

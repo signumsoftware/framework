@@ -15,7 +15,7 @@ namespace Signum.Entities.Reflection
         public static void PropagateModifications(DirectedGraph<Modifiable> inverseGraph)
         {
             if (inverseGraph == null)
-                throw new ArgumentNullException("inverseGraph");
+                throw new ArgumentNullException(nameof(inverseGraph));
 
             foreach (Modifiable item in inverseGraph)
                 if (item.Modified == ModifiedState.SelfModified)

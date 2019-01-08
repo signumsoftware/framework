@@ -51,7 +51,7 @@ namespace Signum.Engine
             where T : class, IEntity
         {
             if (entity == null)
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
 
             try
             {
@@ -80,7 +80,7 @@ namespace Signum.Engine
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             if (lite.EntityOrNull == null)
                 lite.SetEntity(Retrieve(lite.EntityType, lite.Id));
@@ -91,7 +91,7 @@ namespace Signum.Engine
         public static async Task<T> RetrieveAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             if (lite.EntityOrNull == null)
                 lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token));
@@ -103,7 +103,7 @@ namespace Signum.Engine
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             return (T)(object)Retrieve(lite.EntityType, lite.Id);
         }
@@ -111,7 +111,7 @@ namespace Signum.Engine
         public static async Task<T> RetrieveAndForgetAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
         }
@@ -541,7 +541,7 @@ namespace Signum.Engine
         public static List<Entity> RetrieveAll(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = giRetrieveAll.GetInvoker(type)();
             return list.Cast<Entity>().ToList();
@@ -553,7 +553,7 @@ namespace Signum.Engine
         public static async Task<List<Entity>> RetrieveAllAsync(Type type, CancellationToken token)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = await giRetrieveAllAsyncIList.GetInvoker(type)(token);
             return list.Cast<Entity>().ToList();
@@ -613,7 +613,7 @@ namespace Signum.Engine
         public static List<Lite<Entity>> RetrieveAllLite(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = giRetrieveAllLite.GetInvoker(type)();
             return list.Cast<Lite<Entity>>().ToList();
@@ -622,7 +622,7 @@ namespace Signum.Engine
         public static async Task<List<Lite<Entity>>> RetrieveAllLiteAsync(Type type, CancellationToken token)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = await giRetrieveAllLiteAsync.GetInvoker(type)(token);
             return list.Cast<Lite<Entity>>().ToList();
@@ -637,7 +637,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 if (ids == null)
-                    throw new ArgumentNullException("ids");
+                    throw new ArgumentNullException(nameof(ids));
                 List<PrimaryKey> remainingIds;
                 Dictionary<PrimaryKey, T> result = null;
                 if (EntityCache.Created)
@@ -731,7 +731,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 if (ids == null)
-                    throw new ArgumentNullException("ids");
+                    throw new ArgumentNullException(nameof(ids));
                 List<PrimaryKey> remainingIds;
                 Dictionary<PrimaryKey, T> result = null;
                 if (EntityCache.Created)
@@ -808,7 +808,7 @@ namespace Signum.Engine
         public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids, string message = null)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = giRetrieveList.GetInvoker(type)(ids, message);
             return list.Cast<Entity>().ToList();
@@ -817,7 +817,7 @@ namespace Signum.Engine
         public static async Task<List<Entity>> RetrieveListAsync(Type type, List<PrimaryKey> ids, CancellationToken token)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = await giRetrieveListAsync.GetInvoker(type)(ids, token);
             return list.Cast<Entity>().ToList();
@@ -831,7 +831,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".FormatWith(typeof(T).TypeName())))
             {
                 if (ids == null)
-                    throw new ArgumentNullException("ids");
+                    throw new ArgumentNullException(nameof(ids));
 
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
@@ -859,7 +859,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".FormatWith(typeof(T).TypeName())))
             {
                 if (ids == null)
-                    throw new ArgumentNullException("ids");
+                    throw new ArgumentNullException(nameof(ids));
 
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
@@ -887,7 +887,7 @@ namespace Signum.Engine
         public static List<Lite<Entity>> RetrieveListLite(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = giRetrieveListLite.GetInvoker(type).Invoke(ids);
             return list.Cast<Lite<Entity>>().ToList();
@@ -896,7 +896,7 @@ namespace Signum.Engine
         public static async Task<List<Lite<Entity>>> RetrieveListLite(Type type, List<PrimaryKey> ids, CancellationToken token)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             IList list = await giRetrieveListLiteAsync.GetInvoker(type).Invoke(ids, token);
             return list.Cast<Lite<Entity>>().ToList();
@@ -906,7 +906,7 @@ namespace Signum.Engine
             where T : class, IEntity
         {
             if (lites == null)
-                throw new ArgumentNullException("lites");
+                throw new ArgumentNullException(nameof(lites));
 
             if (lites.IsEmpty())
                 return new List<T>();
@@ -926,7 +926,7 @@ namespace Signum.Engine
            where T : class, IEntity
         {
             if (lites == null)
-                throw new ArgumentNullException("lites");
+                throw new ArgumentNullException(nameof(lites));
 
             if (lites.IsEmpty())
                 return new List<T>();
@@ -952,7 +952,7 @@ namespace Signum.Engine
         public static void Delete(Type type, PrimaryKey id)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             giDeleteId.GetInvoker(type)(id);
         }
@@ -961,7 +961,7 @@ namespace Signum.Engine
             where T : class, IEntity
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             if (lite.IsNew)
                 throw new ArgumentNullException("lite is New");
@@ -973,7 +973,7 @@ namespace Signum.Engine
             where T : class, IEntity
         {
             if (ident == null)
-                throw new ArgumentNullException("ident");
+                throw new ArgumentNullException(nameof(ident));
 
             if (ident.IsNew)
                 throw new ArgumentNullException("ident is New");
@@ -998,7 +998,7 @@ namespace Signum.Engine
             where T : IEntity
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             if (collection.IsEmpty()) return;
 
@@ -1019,7 +1019,7 @@ namespace Signum.Engine
             where T : class, IEntity
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             if (collection.IsEmpty()) return;
 
@@ -1045,7 +1045,7 @@ namespace Signum.Engine
         public static void DeleteList(Type type, IList<PrimaryKey> ids)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             giDeleteList.GetInvoker(type)(ids);
         }
@@ -1055,7 +1055,7 @@ namespace Signum.Engine
             where T : Entity
         {
             if (ids == null)
-                throw new ArgumentNullException("ids");
+                throw new ArgumentNullException(nameof(ids));
 
             using (HeavyProfiler.Log("DBDelete", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
             {
@@ -1171,7 +1171,7 @@ namespace Signum.Engine
             where RT : Entity, S
         {
             if (entity == null)
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
 
             if (entity.IsNew)
                 throw new ArgumentException("entity is new");
@@ -1188,7 +1188,7 @@ namespace Signum.Engine
            where E : class, IEntity
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.EntityType).Invoke(lite);
         }
@@ -1206,7 +1206,7 @@ namespace Signum.Engine
             where RT : Entity, S
         {
             if (lite == null)
-                throw new ArgumentNullException("lite");
+                throw new ArgumentNullException(nameof(lite));
 
             var result = Database.Query<RT>().Where(rt => rt.ToLite() == lite);
 
@@ -1273,7 +1273,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
                 if (query == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(query));
 
                 using (Transaction tr = new Transaction())
                 {
@@ -1320,7 +1320,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
                 if (query == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(query));
 
                 using (Transaction tr = new Transaction())
                 {
@@ -1418,7 +1418,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBUnsafeUpdate", () => update.EntityType.TypeName()))
             {
                 if (update == null)
-                    throw new ArgumentNullException("update");
+                    throw new ArgumentNullException(nameof(update));
 
                 using (Transaction tr = new Transaction())
                 {
@@ -1469,10 +1469,10 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
                 if (query == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(query));
 
                 if (constructor == null)
-                    throw new ArgumentNullException("constructor");
+                    throw new ArgumentNullException(nameof(constructor));
 
                 using (Transaction tr = new Transaction())
                 {
@@ -1502,10 +1502,10 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("UnsafeInsertMList", () => typeof(E).TypeName()))
             {
                 if (query == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(query));
 
                 if (constructor == null)
-                    throw new ArgumentNullException("constructor");
+                    throw new ArgumentNullException(nameof(constructor));
 
                 using (Transaction tr = new Transaction())
                 {
@@ -1528,10 +1528,10 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("UnsafeInsertView", () => typeof(E).TypeName()))
             {
                 if (query == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(query));
 
                 if (constructor == null)
-                    throw new ArgumentNullException("constructor");
+                    throw new ArgumentNullException(nameof(constructor));
 
                 using (Transaction tr = new Transaction())
                 {
@@ -1760,8 +1760,8 @@ namespace Signum.Engine
 
         public SetterExpressions(LambdaExpression propertyExpression, LambdaExpression valueExpression)
         {
-            this.PropertyExpression = propertyExpression ?? throw new ArgumentNullException("propertyExpression");
-            this.ValueExpression = valueExpression ?? throw new ArgumentNullException("valueExpression");
+            this.PropertyExpression = propertyExpression ?? throw new ArgumentNullException(nameof(propertyExpression));
+            this.ValueExpression = valueExpression ?? throw new ArgumentNullException(nameof(valueExpression));
         }
     }
 

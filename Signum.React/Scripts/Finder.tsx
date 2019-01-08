@@ -11,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
@@ -22,7 +22,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute
+  TypeInfo, PropertyRoute, QueryTokenString
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -48,6 +48,14 @@ export function start(options: { routes: JSX.Element[] }) {
 export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
+
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => QueryTokenString<any>)[]): FilterGroupOption {
+  return {
+    groupOperation: "Or",
+    pinned: { splitText: true },
+    filters: tokens.map(t => ({ token: t(type.token()), operation: "Contains" } as FilterConditionOption))
+  };
+} 
 
 export function getSettings(queryName: PseudoType | QueryKey): QuerySettings {
   return querySettings[getQueryKey(queryName)];
@@ -653,9 +661,16 @@ interface OverridenValue {
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
   if (fop.pinned && overridenValue == null) {
-    if (fop.pinned.splitText && fop.value != null && typeof fop.value == "string") {
+    if (fop.pinned.splitText) {
+
+      if (!fop.value)
+        return undefined;
+
+      if (typeof fop.value != "string")
+        throw new Error("Split text only works with string");
+
       var parts = fop.value.split(/\s+/);
-      
+
       return ({
         groupOperation: "And",
         token: fop.token && fop.token.fullKey,

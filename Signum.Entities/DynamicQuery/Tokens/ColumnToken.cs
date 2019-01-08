@@ -23,10 +23,10 @@ namespace Signum.Entities.DynamicQuery
             : base(null)
         {
             if (column == null)
-                throw new ArgumentNullException("column");
+                throw new ArgumentNullException(nameof(column));
 
             if (queryName == null)
-                throw new ArgumentNullException("queryName");
+                throw new ArgumentNullException(nameof(queryName));
 
             this.column = column;
             this.queryName = queryName;

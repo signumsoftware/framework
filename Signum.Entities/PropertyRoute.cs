@@ -135,9 +135,9 @@ namespace Signum.Entities
         void SetParentAndProperty(PropertyRoute parent, MemberInfo fieldOrProperty)
         {
             if (fieldOrProperty == null)
-                throw new ArgumentNullException("fieldOrProperty");
+                throw new ArgumentNullException(nameof(fieldOrProperty));
 
-            this.Parent = parent ?? throw new ArgumentNullException("parent");
+            this.Parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
             if (parent.Type.IsIEntity() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
@@ -219,7 +219,7 @@ namespace Signum.Entities
         void SetRootType(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             if (!typeof(IRootEntity).IsAssignableFrom(type))
                 throw new ArgumentException("Type must implement IPropertyRouteRoot");
