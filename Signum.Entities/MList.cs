@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
@@ -542,7 +542,7 @@ namespace Signum.Entities
         public void ForEach(Action<T> action)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
 
             int count = innerList.Count;
             for (int i = 0; i < count; i++)
@@ -554,7 +554,7 @@ namespace Signum.Entities
         public void ForEach(Action<T, int> action)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
 
             int count = innerList.Count;
             for (int i = 0; i < count; i++)

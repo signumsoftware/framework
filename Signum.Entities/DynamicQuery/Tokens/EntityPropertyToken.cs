@@ -27,7 +27,7 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             if (pi == null)
-                throw new ArgumentNullException("pi");
+                throw new ArgumentNullException(nameof(pi));
 
             this.PropertyInfo = pi;
             this.PropertyRoute = pr;

@@ -230,8 +230,8 @@ namespace Signum.Engine.Linq
             if (type.UnNullify() == typeof(PrimaryKey))
                 throw new ArgumentException("type should not be PrimaryKey");
 
-            this.Alias = alias ?? throw new ArgumentNullException("alias");
-            this.Name = name ?? throw new ArgumentNullException("name");
+            this.Alias = alias ?? throw new ArgumentNullException(nameof(alias));
+            this.Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         public override string ToString()
@@ -267,7 +267,7 @@ namespace Signum.Engine.Linq
         internal ColumnDeclaration(string name, Expression expression)
         {
             this.Name = name;
-            this.Expression = expression ?? throw new ArgumentNullException("expression");
+            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public override string ToString()
@@ -304,7 +304,7 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.Aggregate, type)
         {
             if (aggregateFunction != AggregateSqlFunction.Count && expression == null )
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
 
             if (distinct && (aggregateFunction != AggregateSqlFunction.Count || expression == null))
                 throw new ArgumentException("Distinct only allowed for Count with expression");
@@ -333,7 +333,7 @@ namespace Signum.Engine.Linq
         internal OrderExpression(OrderType orderType, Expression expression)
         {
             this.OrderType = orderType;
-            this.Expression = expression ?? throw new ArgumentNullException("expression");
+            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public override string ToString()
@@ -503,11 +503,11 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.Join)
         {
             if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.OuterApply && joinType != JoinType.CrossJoin)
-                throw new ArgumentNullException("condition");
+                throw new ArgumentNullException(nameof(condition));
 
             this.JoinType = joinType;
-            this.Left = left ?? throw new ArgumentNullException("left");
-            this.Right = right ?? throw new ArgumentNullException("right");
+            this.Left = left ?? throw new ArgumentNullException(nameof(left));
+            this.Right = right ?? throw new ArgumentNullException(nameof(right));
             this.Condition = condition;
         }
 
@@ -545,8 +545,8 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.SetOperator, alias)
         {
             this.Operator = @operator;
-            this.Left = left ?? throw new ArgumentNullException("left");
-            this.Right = right ?? throw new ArgumentNullException("right");
+            this.Left = left ?? throw new ArgumentNullException(nameof(left));
+            this.Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
         public override string ToString()
@@ -797,13 +797,13 @@ namespace Signum.Engine.Linq
         public When(Expression condition, Expression value)
         {
             if (condition == null)
-                throw new ArgumentNullException("condition");
+                throw new ArgumentNullException(nameof(condition));
 
             if (condition.Type.UnNullify() != typeof(bool))
                 throw new ArgumentException("condition");
 
             this.Condition = condition;
-            this.Value = value ?? throw new ArgumentNullException("value");
+            this.Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override string ToString()
@@ -860,7 +860,7 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.Case, GetType(whens, defaultValue))
         {
             if (whens.IsEmpty())
-                throw new ArgumentNullException("whens");
+                throw new ArgumentNullException(nameof(whens));
 
             Type refType = this.Type.UnNullify();
 
@@ -1028,15 +1028,15 @@ namespace Signum.Engine.Linq
         public InExpression(Expression expression, SelectExpression select)
             : base(DbExpressionType.In, typeof(bool), select)
         {
-            if (select == null) throw new ArgumentNullException("select");
+            if (select == null) throw new ArgumentNullException(nameof(@select));
 
-            this.Expression = expression ?? throw new ArgumentNullException("expression");
+            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public static Expression FromValues(Expression expression, object[] values)
         {
-            if (expression == null) throw new ArgumentNullException("expression");
-            if (values == null) throw new ArgumentNullException("values");
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (values == null) throw new ArgumentNullException(nameof(values));
 
             if (values.Length == 0)
                 return Expression.Constant(false);
@@ -1047,8 +1047,8 @@ namespace Signum.Engine.Linq
         InExpression(Expression expression, object[] values)
             : base(DbExpressionType.In, typeof(bool), null)
         {
-            this.Expression = expression ?? throw new ArgumentNullException("expression");
-            this.Values = values ?? throw new ArgumentNullException("values");
+            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            this.Values = values ?? throw new ArgumentNullException(nameof(values));
         }
 
         public override string ToString()
@@ -1130,7 +1130,7 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.Projection, resultType)
         {
             if (projector == null)
-                throw new ArgumentNullException("projector");
+                throw new ArgumentNullException(nameof(projector));
 
             var elementType = uniqueFunction == null ? resultType.ElementType() : resultType;
             if (!elementType.IsAssignableFrom(projector.Type))
@@ -1138,7 +1138,7 @@ namespace Signum.Engine.Linq
                     projector.Type.TypeName(),
                     elementType.TypeName()));
 
-            this.Select = select ?? throw new ArgumentNullException("select");
+            this.Select = select ?? throw new ArgumentNullException(nameof(@select));
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
         }
