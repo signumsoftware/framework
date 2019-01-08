@@ -43,13 +43,13 @@ namespace Signum.Entities
 
         public PrimaryKey(IComparable obj)
         {
-            this.Object = obj ?? throw new ArgumentNullException("obj");
+            this.Object = obj ?? throw new ArgumentNullException(nameof(obj));
             this.VariableName = null;
         }
 
         public PrimaryKey(IComparable obj, string variableName)
         {
-            this.Object = obj ?? throw new ArgumentNullException("obj");
+            this.Object = obj ?? throw new ArgumentNullException(nameof(obj));
             this.VariableName = variableName;
         }
 

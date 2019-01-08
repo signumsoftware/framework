@@ -22,7 +22,7 @@ namespace Signum.Engine.Maps
         public ServerName(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             this.Name = name;
         }
@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
         public DatabaseName(ServerName server, string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             this.Name = name;
             this.Server = server;
@@ -139,7 +139,7 @@ namespace Signum.Engine.Maps
         public SchemaName(DatabaseName database, string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             this.Name = name;
             this.database = database;
@@ -192,8 +192,8 @@ namespace Signum.Engine.Maps
 
         public ObjectName(SchemaName schema, string name)
         {
-            this.Name = name.HasText() ? name : throw new ArgumentNullException("name");
-            this.Schema = schema ?? throw new ArgumentNullException("schema");
+            this.Name = name.HasText() ? name : throw new ArgumentNullException(nameof(name));
+            this.Schema = schema ?? throw new ArgumentNullException(nameof(schema));
         }
 
         public override string ToString()
@@ -221,7 +221,7 @@ namespace Signum.Engine.Maps
         public static ObjectName Parse(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             var tuple = SplitLast(name);
 

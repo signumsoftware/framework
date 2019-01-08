@@ -48,13 +48,13 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[sb.Include<$entityName$Entity>()
-              .WithSave($entityName$Operation.Save)
-              .WithQuery(() => $entityParam$ => new
-              {
-                  Entity = $entityParam$,
-                  $entityParam$.Id,
-                  $entityParam$.$end$
-              });]]>
+                  .WithSave($entityName$Operation.Save)
+                  .WithQuery(() => $entityParam$ => new
+                  {
+                      Entity = $entityParam$,
+                      $entityParam$.Id,
+                      $entityParam$.$end$
+                  });]]>
       </Code>
     </Snippet>
   </CodeSnippet>
