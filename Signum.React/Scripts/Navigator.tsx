@@ -596,10 +596,6 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
     return ViewDefaultManager.viewDefault(entityOrPack, viewOptions);
 }
 
-//export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-//  return import("./Frames/FrameModal")
-//    .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
-//}
 
 export namespace ViewDefaultManager {
   export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
@@ -635,10 +631,6 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
     return ViewDefaultManager.navigateDefault(entityOrPack, navigateOptions);
 }
 
-//export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-//  return import("./Frames/FrameModal")
-//    .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
-//}
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var url = createRoute(pack.entity.Type) + "?waitData=true";
