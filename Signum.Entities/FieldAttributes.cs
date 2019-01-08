@@ -26,7 +26,7 @@ namespace Signum.Entities
     [Serializable]
     public struct Implementations : IEquatable<Implementations>, ISerializable
     {
-        object arrayOrType;
+        object? arrayOrType;
 
         public bool IsByAll { get { return arrayOrType == null; } }
         public IEnumerable<Type> Types
@@ -46,11 +46,13 @@ namespace Signum.Entities
             {
                 yield return t;
             }
-            else
+            else if (arrayOrType is Type[] ts)
             {
-                foreach (var item in ((Type[])arrayOrType))
+                foreach (var item in ts)
                     yield return item;
             }
+            else
+                throw new InvalidOperationException("IsByAll");
         }
 
         public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
@@ -121,7 +123,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             return new Implementations { arrayOrType = types.OrderBy(a => a.FullName).ToArray() };
         }
 
-        static string Error(Type type)
+        static string? Error(Type type)
         {
             if (type.IsInterface)
                 return "{0} is an interface".FormatWith(type.Name);
@@ -183,8 +185,8 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("arrayOrType", arrayOrType == null ? "ALL" :
-                arrayOrType is Type ? ((Type)arrayOrType).AssemblyQualifiedName :
-                arrayOrType is Type[] ? ((Type[])arrayOrType).ToString(a => a.AssemblyQualifiedName, "|") : null);
+                arrayOrType is Type t ? t.AssemblyQualifiedName :
+                arrayOrType is Type[] ts ? ts.ToString(a => a.AssemblyQualifiedName, "|") : null);
         }
     }
 
@@ -279,11 +281,11 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             get { return scale.HasValue; }
         }
 
-        public string UserDefinedTypeName { get; set; }
+        public string? UserDefinedTypeName { get; set; }
 
-        public string Default { get; set; }
+        public string? Default { get; set; }
 
-        public string Collation { get; set; }
+        public string? Collation { get; set; }
 
         public const string NewId = "NEWID()";
         public const string NewSequentialId = "NEWSEQUENTIALID()";
@@ -371,9 +373,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     {
         public bool HasTicks { get; private set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public Type Type { get; set; }
+        public Type? Type { get; set; }
 
         public TicksColumnAttribute(bool hasTicks = true)
         {
@@ -387,7 +389,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class SystemVersionedAttribute : Attribute
     {
-        public string TemporalTableName { get; set; }
+        public string? TemporalTableName { get; set; }
         public string StartDateColumnName { get; set; } = "SysStartDate";
         public string EndDateColumnName { get; set; } = "SysEndDate";
     }

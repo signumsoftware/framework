@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.Reflection;
@@ -92,7 +92,7 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract PropertyRoute GetPropertyRoute();
 
-        internal PropertyRoute AddPropertyRoute(PropertyInfo pi)
+        internal PropertyRoute? AddPropertyRoute(PropertyInfo pi)
         {
             if (typeof(ModelEntity).IsAssignableFrom(Type))
                 return PropertyRoute.Root(Type).Add(pi);

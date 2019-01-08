@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using Signum.Utilities;
 
@@ -16,12 +16,12 @@ namespace Signum.Entities
             set { allowTemporaly = value; Notify(() => AllowChange); }
         }
 
-        protected override bool Set<T>(ref T variable, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        protected override bool Set<T>(ref T variable, T value, [CallerMemberName]string? automaticPropertyName = null)
         {
             if (AllowChange)
-                return base.Set(ref variable, value, automaticPropertyName);
+                return base.Set(ref variable, value, automaticPropertyName!);
             else
-                return base.SetIfNew(ref variable, value, automaticPropertyName);
+                return base.SetIfNew(ref variable, value, automaticPropertyName!);
         }
 
         protected internal override void PreSaving(PreSavingContext ctx)

@@ -13,7 +13,7 @@ namespace Signum.Utilities
     {
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
         [ExpressionField("HasTextExpression")]
-        public static bool HasText(this string str)
+        public static bool HasText(this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }
@@ -603,7 +603,7 @@ namespace Signum.Utilities
             return string.Format(format, arg0);
         }
 
-        public static string FormatWith(this string format, object arg0, object arg1)
+        public static string FormatWith(this string format, object? arg0, object arg1)
         {
             return string.Format(format, arg0, arg1);
         }
@@ -780,7 +780,7 @@ namespace Signum.Utilities
             return sb == null ? "" : sb.ToString();  // Remove at the end is faster
         }
 
-        public static string CombineIfNotEmpty(this string separator, params object[] elements)
+        public static string CombineIfNotEmpty(this string separator, params object?[] elements)
         {
             StringBuilder? sb = null;
             foreach (var item in elements)
