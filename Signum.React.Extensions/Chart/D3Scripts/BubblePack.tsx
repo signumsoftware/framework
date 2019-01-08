@@ -2,7 +2,8 @@ import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, Folder, isFolder, Root, isRoot } from './Components/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
+import { Folder, isFolder, Root, isRoot, stratifyTokens } from './Components/Stratify';
 import { ChartRow, ChartTable } from '../ChartClient';
 import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
@@ -31,26 +32,23 @@ export default function renderBubblePack({ data, width, height, parameters, load
     color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r)));
   }
   else if (colorSchemeColumn) {
-    var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
-    var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
     color = r => colorSchemeColumn!.getColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
   }
   else {
-    var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
-    var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => keyColumn.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
     color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
   }
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
-    var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
-    var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => parentColumn!.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)));
     folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
   }
 
   var format = d3.format(",d");
 
-  var root = ChartUtils.stratifyTokens(data, keyColumn, parentColumn);
+  var root = stratifyTokens(data, keyColumn, parentColumn);
 
   var size = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, 1, parameters["Scale"]);
 

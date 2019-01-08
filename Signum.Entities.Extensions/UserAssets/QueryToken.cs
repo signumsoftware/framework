@@ -15,7 +15,7 @@ namespace Signum.Entities.UserAssets
         public QueryTokenEmbedded(QueryToken token)
         {
             if (token == null)
-                throw new ArgumentNullException("token");
+                throw new ArgumentNullException(nameof(token));
 
             this.token = token;
         }
@@ -23,7 +23,7 @@ namespace Signum.Entities.UserAssets
         public QueryTokenEmbedded(string tokenString)
         {
             if (string.IsNullOrEmpty(tokenString))
-                throw new ArgumentNullException("tokenString");
+                throw new ArgumentNullException(nameof(tokenString));
 
             this.TokenString = tokenString;
         }

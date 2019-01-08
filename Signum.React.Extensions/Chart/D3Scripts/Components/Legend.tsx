@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartUtils from '.././Components/ChartUtils';
-import { translate } from '.././Components/ChartUtils';
+import { translate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';
 import { Rule } from './Rule';
+import { PivotTable } from './PivotTable';
 
 interface LegendProps {
-  pivot: ChartUtils.PivotTable;
+  pivot: PivotTable;
   xRule: Rule;
   yRule: Rule;
   color: d3.ScaleOrdinal<string, string>;
