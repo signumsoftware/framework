@@ -593,13 +593,27 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
   if (es && es.onView)
     return es.onView(entityOrPack, viewOptions);
   else
-    return viewDefault(entityOrPack, viewOptions);
+    return ViewDefaultManager.viewDefault(entityOrPack, viewOptions);
 }
 
-export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-  return import("./Frames/FrameModal")
-    .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
+//export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
+//  return import("./Frames/FrameModal")
+//    .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
+//}
+
+export namespace ViewDefaultManager {
+  export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
+    return import("./Frames/FrameModal")
+      .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
+  }
+
+  export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
+    return import("./Frames/FrameModal")
+      .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
+  }
 }
+
+
 
 export interface NavigateOptions {
   readOnly?: boolean;
@@ -618,13 +632,13 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
   if (es && es.onNavigate)
     return es.onNavigate(entityOrPack, navigateOptions);
   else
-    return navigateDefault(entityOrPack, navigateOptions);
+    return ViewDefaultManager.navigateDefault(entityOrPack, navigateOptions);
 }
 
-export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-  return import("./Frames/FrameModal")
-    .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
-}
+//export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
+//  return import("./Frames/FrameModal")
+//    .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
+//}
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var url = createRoute(pack.entity.Type) + "?waitData=true";
