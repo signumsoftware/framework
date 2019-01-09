@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -22,7 +22,7 @@ namespace Signum.Utilities
             if (needToClear)
                 str = str.PadChopRight(Console.BufferWidth - 1);
             else
-                str = str.TryStart(Console.BufferWidth - 1);
+                str = str.TryStart(Console.BufferWidth - 1)!;
 
             Console.WriteLine(str);
 
@@ -78,14 +78,14 @@ namespace Signum.Utilities
             Console.ForegroundColor = old;
         }
 
-        public static string AskString(string question, Func<string, string> stringValidator = null)
+        public static string AskString(string question, Func<string, string?>? stringValidator = null)
         {
             Console.Write(question);
             do
             {
                 var userAnswer = Console.ReadLine();
 
-                string error = stringValidator == null ? null : stringValidator(userAnswer);
+                string? error = stringValidator == null ? null : stringValidator(userAnswer);
                 if (error == null)
                     return userAnswer;
 
@@ -112,7 +112,7 @@ namespace Signum.Utilities
             } while (true);
         }
 
-        public static string AskMultiLine(string question, params string[] answers)
+        public static string? AskMultiLine(string question, params string[] answers)
         {
             Console.WriteLine(question);
 
@@ -147,7 +147,7 @@ namespace Signum.Utilities
             if (rememberedAnswer != null)
                 return rememberedAnswer.Value;
 
-            string answerString = null;
+            string? answerString = null;
 
             string result = Ask(ref answerString, question, "yes", "no");
 
@@ -157,7 +157,7 @@ namespace Signum.Utilities
             return result == "yes";
         }
 
-        public static string Ask(ref string rememberedAnswer, string question, params string[] answers)
+        public static string Ask(ref string? rememberedAnswer, string question, params string[] answers)
         {
             if (rememberedAnswer != null)
                 return rememberedAnswer;
@@ -186,7 +186,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static string AskSwitch(string question, List<string> options)
+        public static string? AskSwitch(string question, List<string> options)
         {
             var cs = new ConsoleSwitch<int, string>(question);
 
@@ -215,7 +215,7 @@ namespace Signum.Utilities
 
         public static T WaitQuery<T>(string startingText, Func<T> query)
         {
-            T result = default(T);
+            T result = default(T)!;
             SafeConsole.WriteColor(ConsoleColor.Yellow, startingText);
             WaitExecute(() => { result = query(); Console.WriteLine(); });
             return result;

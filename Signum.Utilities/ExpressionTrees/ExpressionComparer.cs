@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,7 +10,7 @@ namespace Signum.Utilities.ExpressionTrees
 {
     public class ExpressionComparer
     {
-        internal ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope;
+        internal ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope;
         bool checkParameterNames = false;
 
         protected IDisposable ParameterScope()
@@ -20,13 +20,13 @@ namespace Signum.Utilities.ExpressionTrees
             return new Disposable(() => parameterScope = saved);
         }
 
-        protected ExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, bool checkParameterNames)
+        protected ExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope, bool checkParameterNames)
         {
             this.parameterScope = parameterScope;
             this.checkParameterNames = checkParameterNames;
         }
 
-        public static bool AreEqual( Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope = null, bool checkParameterNames = false)
+        public static bool AreEqual( Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope = null, bool checkParameterNames = false)
         {
             return new ExpressionComparer(parameterScope, checkParameterNames).Compare(a, b);
         }
@@ -187,7 +187,7 @@ namespace Signum.Utilities.ExpressionTrees
             using (ParameterScope())
             {
                 for (int i = 0; i < n; i++)
-                    parameterScope.Add(a.Parameters[i], b.Parameters[i]);
+                    parameterScope!.Add(a.Parameters[i], b.Parameters[i]);
 
                 return Compare(a.Body, b.Body);
             }

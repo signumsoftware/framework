@@ -20,18 +20,18 @@ namespace Signum.Utilities
 
         static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
         [ExpressionField("DefaultTextExpression")]
-        public static string DefaultText(this string str, string defaultText)
+        public static string DefaultText(this string? str, string defaultText)
         {
             if (str.HasText())
-                return str;
+                return str!;
             else
                 return defaultText;
         }
 
-        public static string AssertHasText(this string str, string errorMessage)
+        public static string AssertHasText(this string? str, string errorMessage)
         {
             if (str.HasText())
-                return str;
+                return str!;
             else
                 throw new ArgumentException(errorMessage);
         }
@@ -41,7 +41,7 @@ namespace Signum.Utilities
             return source.IndexOf(toCheck, comp) >= 0;
         }
 
-        public static string Add(this string str, string separator, string part)
+        public static string? Add(this string? str, string separator, string? part)
         {
             if (str.HasText())
             {
@@ -54,7 +54,7 @@ namespace Signum.Utilities
                 return part;
         }
 
-        public static string AddLine(this string str, string part)
+        public static string? AddLine(this string? str, string part)
         {
             return Add(str, "\r\n", part);
         }
@@ -603,22 +603,22 @@ namespace Signum.Utilities
             return string.Format(format, arg0);
         }
 
-        public static string FormatWith(this string format, object? arg0, object arg1)
+        public static string FormatWith(this string format, object? arg0, object? arg1)
         {
             return string.Format(format, arg0, arg1);
         }
 
-        public static string FormatWith(this string format, object arg0, object arg1, object arg2)
+        public static string FormatWith(this string format, object? arg0, object? arg1, object? arg2)
         {
             return string.Format(format, arg0, arg1, arg2);
         }
 
-        public static string FormatWith(this string pattern, params object[] parameters)
+        public static string FormatWith(this string pattern, params object?[] parameters)
         {
             return string.Format(pattern, parameters);
         }
 
-        public static string FormatWith(this string format, IFormatProvider provider, params object[] args)
+        public static string FormatWith(this string format, IFormatProvider provider, params object?[] args)
         {
             return string.Format(provider, format, args);
         }

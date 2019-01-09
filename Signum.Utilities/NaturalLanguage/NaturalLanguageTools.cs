@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Globalization;
@@ -28,12 +28,11 @@ namespace Signum.Utilities
             {"es", new SpanishNumberWriter()},
         };
 
-        public static char? GetGender(string name, CultureInfo culture = null)
+        public static char? GetGender(string name, CultureInfo? culture = null)
         {
-            if (culture == null)
-                culture = CultureInfo.CurrentUICulture;
+            var defCulture = culture ?? CultureInfo.CurrentUICulture;
 
-            IGenderDetector detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
+            var detector = GenderDetectors.TryGetC(defCulture.TwoLetterISOLanguageName);
 
             if (detector == null)
                 return null;
@@ -43,7 +42,7 @@ namespace Signum.Utilities
 
         public static bool HasGenders(CultureInfo cultureInfo)
         {
-            IGenderDetector detector = GenderDetectors.TryGetC(cultureInfo.TwoLetterISOLanguageName);
+            var detector = GenderDetectors.TryGetC(cultureInfo.TwoLetterISOLanguageName);
 
             if (detector == null)
                 return false;
@@ -51,12 +50,12 @@ namespace Signum.Utilities
             return !detector.Pronoms.IsNullOrEmpty();
         }
 
-        public static string GetPronom(char gender, bool plural, CultureInfo culture = null)
+        public static string? GetPronom(char gender, bool plural, CultureInfo? culture = null)
         {
             if (culture == null)
                 culture = CultureInfo.CurrentUICulture;
 
-            IGenderDetector detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
+            var detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
             if (detector == null)
                 return null;
 
@@ -68,12 +67,12 @@ namespace Signum.Utilities
             return plural ? pro.Plural : pro.Singular;
         }
 
-        public static string Pluralize(string singularName, CultureInfo culture = null)
+        public static string Pluralize(string singularName, CultureInfo? culture = null)
         {
             if (culture == null)
                 culture = CultureInfo.CurrentUICulture;
 
-            IPluralizer pluralizer = Pluralizers.TryGetC(culture.TwoLetterISOLanguageName);
+            var pluralizer = Pluralizers.TryGetC(culture.TwoLetterISOLanguageName);
             if (pluralizer == null)
                 return singularName;
 
@@ -88,10 +87,9 @@ namespace Signum.Utilities
               memberName.SpacePascal();
         }
 
-        public static string SpacePascal(this string pascalStr, CultureInfo culture = null)
+        public static string SpacePascal(this string pascalStr, CultureInfo? culture = null)
         {
-            if (culture == null)
-                culture = CultureInfo.CurrentUICulture;
+            var defCulture = culture ?? CultureInfo.CurrentUICulture;
 
             return SpacePascal(pascalStr, false);
         }
@@ -271,7 +269,9 @@ namespace Signum.Utilities
         public string Singular { get; private set; }
         public string Plural { get; private set; }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public PronomInfo() { }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public PronomInfo(char gender, string singular, string plural)
         {

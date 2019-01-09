@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
@@ -9,12 +9,12 @@ namespace Signum.Utilities
 {
     public static class PolymorphicMerger
     {
-        public static T Inheritance<T>(KeyValuePair<Type, T> currentValue, KeyValuePair<Type, T> baseValue, List<KeyValuePair<Type, T>> newInterfacesValues) where T : class
+        public static T? Inheritance<T>(KeyValuePair<Type, T?> currentValue, KeyValuePair<Type, T?> baseValue, List<KeyValuePair<Type, T?>> newInterfacesValues) where T : class
         {
             return currentValue.Value ?? baseValue.Value;
         }
 
-        public static T InheritanceAndInterfaces<T>(KeyValuePair<Type, T> currentValue, KeyValuePair<Type, T> baseValue, List<KeyValuePair<Type, T>> newInterfacesValues) where T : class
+        public static T? InheritanceAndInterfaces<T>(KeyValuePair<Type, T?> currentValue, KeyValuePair<Type, T?> baseValue, List<KeyValuePair<Type, T?>> newInterfacesValues) where T : class
         {
             var result = currentValue.Value ?? baseValue.Value;
 
@@ -29,7 +29,7 @@ namespace Signum.Utilities
             return conflicts.Select(a => a.Value).SingleOrDefaultEx();
         }
 
-        public static Dictionary<K, V> InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>> currentValue, KeyValuePair<Type, Dictionary<K, V>> baseValue, List<KeyValuePair<Type, Dictionary<K, V>>> newInterfacesValues)
+        public static Dictionary<K, V>? InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>?> currentValue, KeyValuePair<Type, Dictionary<K, V>?> baseValue, List<KeyValuePair<Type, Dictionary<K, V>?>> newInterfacesValues)
         {
             if (currentValue.Value == null && baseValue.Value == null)
                 return null;
@@ -37,15 +37,16 @@ namespace Signum.Utilities
             Dictionary<K, V> newDictionary = new Dictionary<K, V>();
 
             if (baseValue.Value != null)
-                newDictionary.AddRange(baseValue.Value);
+                newDictionary.AddRange(baseValue.Value!);
 
             if (currentValue.Value != null)
-                newDictionary.SetRange(currentValue.Value);
+                newDictionary.SetRange(currentValue.Value!);
 
             return newDictionary;
         }
 
-        public static Dictionary<K, V> InheritDictionaryInterfaces<K, V>(KeyValuePair<Type, Dictionary<K, V>> currentValue, KeyValuePair<Type, Dictionary<K, V>> baseValue, List<KeyValuePair<Type, Dictionary<K, V>>> newInterfacesValues)
+        public static Dictionary<K, V>? InheritDictionaryInterfaces<K, V>(KeyValuePair<Type, Dictionary<K, V>?> currentValue, KeyValuePair<Type, Dictionary<K, V>?> baseValue, List<KeyValuePair<Type, Dictionary<K, V>?>> newInterfacesValues)
+            where K : Object
         {
             if (currentValue.Value == null && baseValue.Value == null && newInterfacesValues.All(a => a.Value == null))
                 return null;
@@ -53,22 +54,22 @@ namespace Signum.Utilities
             Dictionary<K, V> newDictionary = new Dictionary<K, V>();
 
             if (baseValue.Value != null)
-                newDictionary.AddRange(baseValue.Value);
+                newDictionary.AddRange(baseValue.Value!);
 
             if (currentValue.Value != null)
-                newDictionary.SetRange(currentValue.Value);
+                newDictionary.SetRange(currentValue.Value!);
 
-            var interfaces = newInterfacesValues.Where(a => a.Value != null);
+            var interfaces = newInterfacesValues.Where(a => a.Value != null) as IEnumerable<KeyValuePair<Type, Dictionary<K, V>>>;
 
             var keys = interfaces.SelectMany(inter => inter.Value.Keys).Distinct().Except(newDictionary.Keys);
 
             foreach (var item in keys)
             {
-                var types = interfaces.Where(a => a.Value.ContainsKey(item)).Select(a => new { a.Key, Value = a.Value[item] }).ToList();
+                var types = interfaces.Where(a => a.Value!.ContainsKey(item)).Select(a => new { a.Key, Value = a.Value![item] }).ToList();
 
                 var groups = types.GroupBy(t => t.Value);
                 if (groups.Count() > 1)
-                    throw new InvalidOperationException("Ambiguity for key {0} in type {0} between interfaces {1}".FormatWith(item, currentValue.Key.Name, types.CommaAnd(t => t.Key.Name)));
+                    throw new InvalidOperationException("Ambiguity for key {0} in type {0} between interfaces {1}".FormatWith(item, currentValue.Key.Name, types.CommaAnd(t => t.Key!.Name)));
 
                 newDictionary[item] = groups.Single().Key;
             }
@@ -77,15 +78,15 @@ namespace Signum.Utilities
         }
     }
 
-    public delegate T PolymorphicMerger<T>(KeyValuePair<Type, T> currentValue, KeyValuePair<Type, T> baseValue, List<KeyValuePair<Type, T>> newInterfacesValues) where T : class;
+    public delegate T? PolymorphicMerger<T>(KeyValuePair<Type, T?> currentValue, KeyValuePair<Type, T?> baseValue, List<KeyValuePair<Type, T?>> newInterfacesValues) where T : class;
 
     public class Polymorphic<T> where T : class
     {
         Dictionary<Type, T> definitions = new Dictionary<Type, T>();
-        ConcurrentDictionary<Type, T> cached = new ConcurrentDictionary<Type, T>();
+        ConcurrentDictionary<Type, T?> cached = new ConcurrentDictionary<Type, T?>();
 
         PolymorphicMerger<T> merger;
-        Type minimumType;
+        Type? minimumType;
 
 
        public bool ContainsKey(Type type)
@@ -102,16 +103,16 @@ namespace Signum.Utilities
         void AssertAllowed(Type type)
         {
             if (!IsAllowed(type))
-                throw new InvalidOperationException("{0} is not a {1}".FormatWith(type.Name, minimumType.Name));
+                throw new InvalidOperationException("{0} is not a {1}".FormatWith(type.Name, minimumType!.Name));
         }
 
-        public Polymorphic(PolymorphicMerger<T> merger = null, Type minimumType = null)
+        public Polymorphic(PolymorphicMerger<T>? merger = null, Type? minimumType = null)
         {
             this.merger = merger ?? PolymorphicMerger.Inheritance<T>;
             this.minimumType = minimumType ?? GetDefaultType(typeof(T));
         }
 
-        private static Type GetDefaultType(Type type)
+        private static Type? GetDefaultType(Type type)
         {
             if (!typeof(Delegate).IsAssignableFrom(type))
                 return null;
@@ -136,23 +137,23 @@ namespace Signum.Utilities
             return result;
         }
 
-        public T TryGetValue(Type type)
+        public T? TryGetValue(Type type)
         {
             AssertAllowed(type);
 
             return cached.GetOrAdd(type, TryGetValueInternal);
         }
 
-        public T GetDefinition(Type type)
+        public T? GetDefinition(Type type)
         {
             AssertAllowed(type);
 
             return definitions.TryGetC(type);
         }
 
-        T TryGetValueInternal(Type type)
+        T? TryGetValueInternal(Type type)
         {
-            if (cached.TryGetValue(type, out T result))
+            if (cached.TryGetValue(type, out T? result))
                 return result;
 
             var baseValue = type.BaseType == null || !IsAllowed(type.BaseType) ? null : TryGetValue(type.BaseType);
@@ -160,7 +161,7 @@ namespace Signum.Utilities
             var currentValue = definitions.TryGetC(type);
 
             if (minimumType != null && !minimumType.IsInterface)
-                return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), null);
+                return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), new List<KeyValuePair<Type, T?>>());
 
             IEnumerable<Type> interfaces = type.GetInterfaces().Where(IsAllowed);
 
@@ -211,7 +212,7 @@ namespace Signum.Utilities
     {
         public static T GetOrAddDefinition<T>(this Polymorphic<T> polymorphic, Type type) where T : class, new()
         {
-            T value = polymorphic.GetDefinition(type);
+            T? value = polymorphic.GetDefinition(type);
 
             if (value != null)
                 return value;
@@ -276,31 +277,31 @@ namespace Signum.Utilities
         }
 
 
-        public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance)
+        public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance) where T : object
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance);
         }
 
-        public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0)
+        public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0) where T : object
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0);
         }
 
-        public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1)
+        public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1) where T : object
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1);
         }
 
-        public static void Invoke<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
+        public static void Invoke<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2) where T : object
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1, p2);
         }
 
-        public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
+        public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3) where T : object
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1, p2, p3);
@@ -308,31 +309,31 @@ namespace Signum.Utilities
 
 
 
-        public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance)
+        public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance) where T : object
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance);
         }
 
-        public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0)
+        public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0) where T : object
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0);
         }
 
-        public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1)
+        public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1) where T : object
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0, p1);
         }
 
-        public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
+        public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2) where T : object
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0, p1, p2);
         }
 
-        public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
+        public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3) where T : object
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0, p1, p2, p3);
