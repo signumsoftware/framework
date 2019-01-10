@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
@@ -316,7 +316,7 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        [NotNullValidator(DisabledInModelBinder = true)]
+        [NotNullable]
         public Lite<PredictorEntity> Predictor { get; set; }
 
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
