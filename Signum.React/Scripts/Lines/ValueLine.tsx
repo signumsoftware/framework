@@ -519,9 +519,10 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     );
 
   const handleDatePickerOnChange = (date?: Date, str?: string) => {
-
-    const m = showTime ? moment(date) : moment(date).startOf("day");
-    vl.setValue(m.isValid() ? m.format() : null);
+    const m = moment(date);
+    vl.setValue(!m.isValid() ? null  :
+      !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
+        m.format());
   };
 
   let currentDate = moment();

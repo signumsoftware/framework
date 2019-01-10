@@ -931,7 +931,12 @@ export class QueryTokenString<T> {
   }
 
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + "." + getLambdaMembers(lambdaToProperty).map(a => a.name.firstUpper()).join("."));
+    var suffix = getLambdaMembers(lambdaToProperty).map(a => a.name.firstUpper()).join(".");
+
+    if (this.token)
+      return new QueryTokenString<S>(this.token + "." + suffix);
+    else
+      return new QueryTokenString<S>(suffix);
   }
 
   mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
