@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Signum.Entities;
 using Signum.Utilities;
 using System;
@@ -17,6 +17,9 @@ namespace Signum.React.Json
                 if (conv != null)
                     return conv.ReadJson(reader, valueType, oldValue, serializer);
             }
+
+            if (valueType == typeof(string)) // string with valid iso datetime get converted otherwise
+                return reader.Value;
 
             return serializer.Deserialize(reader, valueType);
         }
