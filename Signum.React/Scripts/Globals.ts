@@ -3,7 +3,7 @@ Array.prototype.clear = function (): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string): { key: string; elements: any[] }[] {
+Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string): { key: any /*string*/; elements: any[] }[] {
   const result: { key: string; elements: any[] }[] = [];
   const objectGrouped = this.groupToObject(keySelector);
   for (const prop in objectGrouped) {
@@ -52,7 +52,7 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
   return result;
 };
 
-Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): { key: string, elements: any[] }[] {
+Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): { key: any /*string*/, elements: any[] }[] {
   const result: { key: any, elements: any[] }[] = [];
 
   let current: { key: string, elements: any[] } | undefined = undefined;
