@@ -89,7 +89,7 @@ namespace Signum.Entities
             private RowIdElement(SerializationInfo info, StreamingContext ctxt)
             {
                 this.RowId = null;
-                this.Element = default(T);
+                this.Element = default(T)!;
                 this.OldIndex = null;
                 foreach (SerializationEntry item in info)
                 {
@@ -117,10 +117,10 @@ namespace Signum.Entities
 
 
         [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [NonSerialized]
-        NotifyCollectionChangedEventHandler collectionChanged;
+        NotifyCollectionChangedEventHandler? collectionChanged;
         event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
         {
             add { collectionChanged += value; }
@@ -611,7 +611,7 @@ namespace Signum.Entities
             this.Remove((T)value);
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get { return this[index]; }
             set { this[index] = (T)value; }
@@ -850,13 +850,13 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class PreserveOrderAttribute : SqlDbTypeAttribute
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public PreserveOrderAttribute()
         {
         }
 
-        public PreserveOrderAttribute(string name)
+        public PreserveOrderAttribute(string? name)
         {
             this.Name = name;
         }

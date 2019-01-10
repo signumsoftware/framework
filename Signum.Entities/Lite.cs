@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -22,7 +22,7 @@ namespace Signum.Entities
         where T : class, IEntity
     {
         T Entity { get; }
-        T EntityOrNull { get; }
+        T? EntityOrNull { get; }
 
         PrimaryKey Id { get; }
         bool IsNew { get;  }
@@ -52,16 +52,16 @@ namespace Signum.Entities
         public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
             where T : Entity
         {
-            T entityOrNull;
+            T? entityOrNull;
             PrimaryKey? id;
-            string toStr;
+            string? toStr;
 
             // Methods
             private LiteImp()
             {
             }
 
-            public LiteImp(PrimaryKey id, string toStr)
+            public LiteImp(PrimaryKey id, string? toStr)
             {
                 if (typeof(T).IsAbstract)
                     throw new InvalidOperationException(typeof(T).Name + " is abstract");
@@ -88,12 +88,12 @@ namespace Signum.Entities
                 this.toStr = toStr;
             }
 
-            public Entity UntypedEntityOrNull
+            public Entity? UntypedEntityOrNull
             {
-                get { return (Entity)(object)entityOrNull; }
+                get { return (Entity?)(object?)entityOrNull; }
             }
 
-            public T EntityOrNull
+            public T? EntityOrNull
             {
                 get { return entityOrNull; }
             }
@@ -157,7 +157,7 @@ namespace Signum.Entities
 
             public void RefreshId()
             {
-                id = entityOrNull.Id;
+                id = entityOrNull?.Id;
             }
 
             protected internal override void PreSaving(PreSavingContext ctx)
@@ -168,7 +168,7 @@ namespace Signum.Entities
                 }
             }
 
-            public override string ToString()
+            public override string? ToString()
             {
                 if (this.entityOrNull != null)
                     return this.entityOrNull.ToString();
@@ -197,8 +197,7 @@ namespace Signum.Entities
             const int MagicMask = 123456853;
             public override int GetHashCode()
             {
-                return this.id == null ?
-                    entityOrNull.GetHashCode() ^ MagicMask :
+                return this.id == null ? entityOrNull!.GetHashCode() ^ MagicMask :
                     this.EntityType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
             }
 
@@ -214,7 +213,7 @@ namespace Signum.Entities
 
             public int CompareTo(Lite<Entity> other)
             {
-                return ToString().CompareTo(other.ToString());
+                return ToString()!.CompareTo(other.ToString());
             }
 
             public int CompareTo(object obj)
@@ -276,21 +275,22 @@ namespace Signum.Entities
     {
         public static Type BaseImplementationType = typeof(LiteImp);
 
-        static GenericInvoker<Func<PrimaryKey, string, Lite<Entity>>> giNewLite =
-            new GenericInvoker<Func<PrimaryKey, string, Lite<Entity>>>((id, str) => new LiteImp<Entity>(id, str));
+        static GenericInvoker<Func<PrimaryKey, string?, Lite<Entity>>> giNewLite =
+            new GenericInvoker<Func<PrimaryKey, string?, Lite<Entity>>>((id, str) => new LiteImp<Entity>(id, str));
 
-        static GenericInvoker<Func<Entity, string, Lite<Entity>>> giNewLiteFat =
-            new GenericInvoker<Func<Entity, string, Lite<Entity>>>((entity, str) => new LiteImp<Entity>(entity, str));
+        static GenericInvoker<Func<Entity, string?, Lite<Entity>>> giNewLiteFat =
+            new GenericInvoker<Func<Entity, string?, Lite<Entity>>>((entity, str) => new LiteImp<Entity>(entity, str));
 
         public static Type Generate(Type identificableType)
         {
             return typeof(Lite<>).MakeGenericType(identificableType);
         }
 
-        public static Type Extract(Type liteType)
+        public static Type? Extract(Type liteType)
         {
             if (liteType.IsInstantiationOf(typeof(Lite<>)) || typeof(LiteImp).IsAssignableFrom(liteType))
                 return liteType.GetGenericArguments()[0];
+
             return null;
         }
 
@@ -298,9 +298,9 @@ namespace Signum.Entities
 
         public static Lite<Entity> Parse(string liteKey)
         {
-            string error = TryParseLite(liteKey, out Lite<Entity> result);
+            string? error = TryParseLite(liteKey, out Lite<Entity>? result);
             if (error == null)
-                return result;
+                return result!;
             else
                 throw new FormatException(error);
         }
@@ -310,7 +310,7 @@ namespace Signum.Entities
             return (Lite<T>)Lite.Parse(liteKey);
         }
 
-        public static string TryParseLite(string liteKey, out Lite<Entity> result)
+        public static string? TryParseLite(string liteKey, out Lite<Entity>? result)
         {
             result = null;
             if (string.IsNullOrEmpty(liteKey))
@@ -327,16 +327,16 @@ namespace Signum.Entities
             if (!PrimaryKey.TryParse(match.Groups["id"].Value, type, out PrimaryKey id))
                 return LiteMessage.IdNotValid.NiceToString();
 
-            string toStr = match.Groups["toStr"].Value.DefaultText(null); //maybe null
+            string? toStr = match.Groups["toStr"].Value.DefaultText(null!); //maybe null
 
             result = giNewLite.GetInvoker(type)(id, toStr);
             return null;
         }
 
-        public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IEntity
+        public static string? TryParse<T>(string liteKey, out Lite<T>? lite) where T : class, IEntity
         {
-            var result = Lite.TryParseLite(liteKey, out Lite<Entity> untypedLite);
-            lite = (Lite<T>)untypedLite;
+            var result = Lite.TryParseLite(liteKey, out Lite<Entity>? untypedLite);
+            lite = (Lite<T>?)untypedLite;
             return result;
         }
 
@@ -568,7 +568,7 @@ namespace Signum.Entities
         }
 
 
-        static Lite<T> ToLiteFatInternal<T>(this T entity, string toStr)
+        static Lite<T>? ToLiteFatInternal<T>(this T? entity, string? toStr)
             where T : class, IEntity
         {
             if (entity == null)

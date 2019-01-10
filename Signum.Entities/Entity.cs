@@ -97,7 +97,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck()
+        public virtual Dictionary<Guid, IntegrityCheck>? EntityIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
@@ -105,7 +105,7 @@ namespace Signum.Entities
             }
         }
 
-        internal virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheckBase()
+        internal virtual Dictionary<Guid, IntegrityCheck>? EntityIntegrityCheckBase()
         {
             using (HeavyProfiler.LogNoStackTrace("EntityIntegrityCheckBase", () => GetType().Name))
                 return GraphExplorer.EntityIntegrityCheck(GraphExplorer.FromRootEntity(this));
@@ -124,7 +124,7 @@ namespace Signum.Entities
         }
 
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        readonly MixinEntity mixin;
+        readonly MixinEntity? mixin;
         public M Mixin<M>() where M : MixinEntity
         {
             var result = TryMixin<M>();

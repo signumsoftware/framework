@@ -12,11 +12,13 @@ namespace Signum.Entities.DynamicQuery
     public class DatePartStartToken : QueryToken
     {
         public QueryTokenMessage Name { get; private set; }
-
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+        
         internal DatePartStartToken(QueryToken parent, QueryTokenMessage name)
-            : base(parent)
         {
             this.Name = name;
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
         private static MethodInfo GetMethodInfo(QueryTokenMessage name)
@@ -38,10 +40,10 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return this.Name.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return this.Name.NiceToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
         }
 
-        public override string Format
+        public override string? Format
         {
             get
             {
@@ -56,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
@@ -85,14 +87,14 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(context);
+            var exp = parent.BuildExpression(context);
             var mi = GetMethodInfo(this.Name);
             return Expression.Call(mi, exp.UnNullify()).Nullify();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            return Parent.GetPropertyRoute();
+            return parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
@@ -100,14 +102,14 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
         public override QueryToken Clone()
         {
-            return new DatePartStartToken(Parent.Clone(), this.Name);
+            return new DatePartStartToken(parent.Clone(), this.Name);
         }
 
         public override bool IsGroupable

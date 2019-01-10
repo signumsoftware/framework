@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Collections;
@@ -58,7 +58,7 @@ namespace Signum.Entities.Reflection
                 Type t = obj.GetType().ElementType();
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
-                    IEnumerable col = obj as IEnumerable;
+                    IEnumerable col = (IEnumerable)obj;
                     foreach (Modifiable item in col)
                         if (item != null)
                             yield return item;
@@ -96,8 +96,8 @@ namespace Signum.Entities.Reflection
                 Type t = obj.GetType().ElementType();
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
-                    IEnumerable col = obj as IEnumerable;
-                    foreach (Modifiable item in col)
+                    IEnumerable col = (IEnumerable)obj;
+                    foreach (Modifiable item in col!)
                         if (item != null)
                             yield return item;
                 }
@@ -135,7 +135,7 @@ namespace Signum.Entities.Reflection
 
                 if (t.IsModifiable() && !t.IsEntity())
                 {
-                    IEnumerable col = obj as IEnumerable;
+                    IEnumerable col = (IEnumerable)obj;
                     foreach (Modifiable item in col)
                         if (item != null)
                             yield return item;

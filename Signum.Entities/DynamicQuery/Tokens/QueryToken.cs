@@ -19,8 +19,8 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract override string ToString();
         public abstract string NiceName();
-        public abstract string Format { get; }
-        public abstract string Unit { get; }
+        public abstract string? Format { get; }
+        public abstract string? Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
 
@@ -45,7 +45,7 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.DateTime:
                         {
 
-                            PropertyRoute route = this.GetPropertyRoute();
+                            PropertyRoute? route = this.GetPropertyRoute();
 
                             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                             {
@@ -70,10 +70,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected abstract List<QueryToken> SubTokensOverride(SubTokensOptions options);
 
-        public virtual object QueryName
-        {
-            get { return this.parent.QueryName; }
-        }
+        public virtual object QueryName => this.Parent!.QueryName;
 
         public Func<object, T> GetAccessor<T>(BuildExpressionContext context)
         {
@@ -90,18 +87,18 @@ namespace Signum.Entities.DynamicQuery
 
         protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
-        public abstract PropertyRoute GetPropertyRoute();
+        public abstract PropertyRoute? GetPropertyRoute();
 
         internal PropertyRoute? AddPropertyRoute(PropertyInfo pi)
         {
             if (typeof(ModelEntity).IsAssignableFrom(Type))
                 return PropertyRoute.Root(Type).Add(pi);
 
-            Type type = Lite.Extract(Type); //Because Add doesn't work with lites
+            Type? type = Lite.Extract(Type); //Because Add doesn't work with lites
             if (type != null)
                 return PropertyRoute.Root(type).Add(pi);
 
-            PropertyRoute pr = GetPropertyRoute();
+            PropertyRoute? pr = GetPropertyRoute();
             if (pr == null)
                 return null;
 
@@ -109,32 +106,27 @@ namespace Signum.Entities.DynamicQuery
         }
 
         public abstract Implementations? GetImplementations();
-        public abstract string IsAllowed();
+        public abstract string? IsAllowed();
 
         public abstract QueryToken Clone();
 
-        QueryToken parent;
-        public QueryToken Parent
-        {
-            get { return parent; }
-        }
+        public abstract QueryToken? Parent { get; }
 
-        public QueryToken(QueryToken parent)
+        public QueryToken()
         {
-            this.parent = parent;
         }
 
         static ConcurrentDictionary<(QueryToken, SubTokensOptions), Dictionary<string, QueryToken>> subTokensOverrideCache =
             new ConcurrentDictionary<(QueryToken, SubTokensOptions), Dictionary<string, QueryToken>>();
 
-        public QueryToken SubTokenInternal(string key, SubTokensOptions options)
+        public QueryToken? SubTokenInternal(string key, SubTokensOptions options)
         {
             var result = CachedSubTokensOverride(options).TryGetC(key) ?? OnEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
 
             if (result == null)
                 return null;
 
-            string allowed = result.IsAllowed();
+            string? allowed = result.IsAllowed();
             if (allowed != null)
                 throw new UnauthorizedAccessException($"Access to token '{this.FullKey()}.{key}' in query '{QueryUtils.GetKey(this.QueryName)}' is not allowed because: {allowed}");
 
@@ -232,7 +224,7 @@ namespace Signum.Entities.DynamicQuery
         {
             string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
 
-            return new List<QueryToken>
+            return new List<QueryToken?>
             {
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
                 new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateTime dt ) => dt.Quarter()), ()=> utc + QueryTokenMessage.Quarter.NiceToString()),
@@ -257,7 +249,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static List<QueryToken> StepTokens(QueryToken parent, int decimals)
         {
-            return new List<QueryToken>
+            return new List<QueryToken?>
             {
                 decimals >= 4? new StepToken(parent, 0.0001m): null,
                 decimals >= 3? new StepToken(parent, 0.001m) : null,
@@ -303,7 +295,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var result = from p in Reflector.PublicInstancePropertiesInOrder(type)
                          where Reflector.QueryableProperty(type, p)
-                         select (QueryToken)new EntityPropertyToken(this, p, this.AddPropertyRoute(p));
+                         select (QueryToken)new EntityPropertyToken(this, p, this.AddPropertyRoute(p)!);
 
             if (!type.IsEntity())
                 return result;
@@ -427,6 +419,7 @@ namespace Signum.Entities.DynamicQuery
     {
         public BuildExpressionContext(Type tupleType, ParameterExpression parameter, Dictionary<QueryToken, Expression> replacemens)
         {
+            this.TupleType = tupleType;
             this.Parameter = parameter;
             this.Replacemens = replacemens;
         }

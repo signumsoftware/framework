@@ -409,7 +409,7 @@ namespace Signum.Utilities
             return collection != null && collection.Any();
         }
 
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : class
         {
             foreach (var item in collection)
             {

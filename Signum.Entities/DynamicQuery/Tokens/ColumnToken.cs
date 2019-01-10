@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -19,17 +19,12 @@ namespace Signum.Entities.DynamicQuery
             get { return queryName; }
         }
 
+        public override QueryToken? Parent => null;
+
         public ColumnToken(ColumnDescription column, object queryName)
-            : base(null)
         {
-            if (column == null)
-                throw new ArgumentNullException(nameof(column));
-
-            if (queryName == null)
-                throw new ArgumentNullException(nameof(queryName));
-
-            this.column = column;
-            this.queryName = queryName;
+            this.column = column ?? throw new ArgumentNullException(nameof(column));
+            this.queryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
         }
 
         public override string Key
@@ -47,12 +42,12 @@ namespace Signum.Entities.DynamicQuery
             get { return Column.Type; }
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return Column.Format; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return Column.Unit; }
         }
@@ -69,10 +64,11 @@ namespace Signum.Entities.DynamicQuery
                 if (Column.PropertyRoutes != null)
                 {
                     DateTimePrecision? precision =
-                        Column.PropertyRoutes.Select(pr => 
-                        Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)?.Validators
-                        .OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx())
-                        .Select(dtp => dtp?.Precision).Distinct().Only();
+                        Column.PropertyRoutes
+                        .Select(pr => Validator.TryGetPropertyValidator(pr.Parent!.Type, pr.PropertyInfo!.Name)?.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx())
+                        .Select(dtp => dtp?.Precision)
+                        .Distinct()
+                        .Only();
 
                     if (precision != null)
                         return DateTimeProperties(this, precision.Value).AndHasValue(this);
@@ -89,10 +85,11 @@ namespace Signum.Entities.DynamicQuery
                 if (Column.PropertyRoutes != null)
                 {
                     int? decimalPlaces=
-                        Column.PropertyRoutes.Select(pr => 
-                        Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)?.Validators
-                        .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx())
-                        .Select(dtp => dtp?.DecimalPlaces).Distinct().Only();
+                        Column.PropertyRoutes
+                        .Select(pr => Validator.TryGetPropertyValidator(pr.Parent!.Type, pr.PropertyInfo!.Name)?.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx())
+                        .Select(dtp => dtp?.DecimalPlaces)
+                        .Distinct()
+                        .Only();
 
                     if (decimalPlaces != null)
                         return StepTokens(this, decimalPlaces.Value).AndHasValue(this);
@@ -110,12 +107,12 @@ namespace Signum.Entities.DynamicQuery
             return Column.Implementations;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return null;  //If it wasn't, sould be filtered before
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             if (Column.PropertyRoutes != null)
                 return Column.PropertyRoutes[0]; //HACK: compatibility with IU entitiy elements

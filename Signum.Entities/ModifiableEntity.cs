@@ -383,7 +383,7 @@ namespace Signum.Entities
 
         [Ignore]
         internal Dictionary<string, string>? temporalErrors;
-        internal void SetTemporalErrors(Dictionary<string, string> errors)
+        internal void SetTemporalErrors(Dictionary<string, string>? errors)
         {
             NotifyTemporalErrors();
 

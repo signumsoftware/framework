@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -9,33 +9,33 @@ namespace Signum.Entities.DynamicQuery
     public class AggregateToken : QueryToken
     {
         public AggregateFunction AggregateFunction { get; private set; }
-        public object Value { get; private set; }
+        public object? Value { get; private set; }
         public FilterOperation? FilterOperation { get; private set; }
         public bool Distinct { get; private set; }
 
 
-        object queryName;
+        object? queryName;
         public override object QueryName
         {
             get { return  queryName ?? base.QueryName; }
         }
 
+        QueryToken? parent;
+        public override QueryToken? Parent => parent;
+
         public AggregateToken(AggregateFunction function, object queryName)
-            : base(null)
         {
             if (function != AggregateFunction.Count)
                 throw new ArgumentException("function should be Count for this overload");
 
-            this.queryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
+            this.parent = null;
+            this.queryName = queryName ?? throw new ArgumentNullException("queryName");
             this.AggregateFunction = function;
         }
 
-        public AggregateToken(AggregateFunction function, QueryToken parent, FilterOperation? filterOperation = null, object value = null, bool distinct = false)
-            : base(parent)
+        public AggregateToken(AggregateFunction function, QueryToken parent, FilterOperation? filterOperation = null, object? value = null, bool distinct = false)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
-
+            this.parent = parent ?? throw new ArgumentNullException("parent");
             this.AggregateFunction = function;
 
             if (function == AggregateFunction.Count)
@@ -60,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            string suffix = GetNiceOperation();
+            string? suffix = GetNiceOperation();
 
             return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue());
         }
@@ -73,48 +73,48 @@ namespace Signum.Entities.DynamicQuery
             return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), "of", Parent);
         }
 
-        string GetNiceOperation()
+        string? GetNiceOperation()
         {
             return this.FilterOperation == null || this.FilterOperation == DynamicQuery.FilterOperation.EqualTo ? null :
                 this.FilterOperation == DynamicQuery.FilterOperation.DistinctTo ? QueryTokenMessage.Not.NiceToString() :
-                this.FilterOperation.NiceToString();
+                this.FilterOperation.Value.NiceToString();
         }
 
-        string GetNiceValue()
+        string? GetNiceValue()
         {
             return this.FilterOperation == null ? null :
                Value == null ? QueryTokenMessage.Null.NiceToString() :
                Value is Enum e ? e.NiceToString() :
-               Value.ToString();
+               Value!.ToString();
         }
 
-        string GeNiceDistinct()
+        string? GeNiceDistinct()
         {
             return this.Distinct ? QueryTokenMessage.Distinct.NiceToString() : null;
         }
 
-        public override string Format
+        public override string? Format
         {
             get
             {
                 if (AggregateFunction == AggregateFunction.Count)
                     return null;
 
-                if (AggregateFunction == AggregateFunction.Average && Parent.Format == "D")
+                if (AggregateFunction == AggregateFunction.Average && parent!.Format == "D")
                     return "N2";
 
-                return Parent.Format;
+                return this.parent!.Format;
             }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get
             {
                 if (AggregateFunction == AggregateFunction.Count)
                     return null;
 
-                return Parent.Unit;
+                return parent!.Unit;
             }
         }
 
@@ -125,19 +125,21 @@ namespace Signum.Entities.DynamicQuery
                 if (AggregateFunction == AggregateFunction.Count)
                     return typeof(int);
 
-                var pu = Parent.Type.UnNullify();
+                var pt = parent!.Type;
 
-                if (AggregateFunction == AggregateFunction.Average && (pu != typeof(float) || pu != typeof(double) || pu == typeof(decimal)))
-                    return Parent.Type.IsNullable() ? typeof(double?) : typeof(double);
+                var ptu = pt.UnNullify();
 
-                if (pu == typeof(bool) ||
-                    pu == typeof(byte) || pu == typeof(sbyte) ||
-                    pu == typeof(short) || pu == typeof(ushort) ||
-                    pu == typeof(uint) ||
-                    pu == typeof(ulong))
-                    return Parent.Type.IsNullable() ? typeof(int?) : typeof(int);
+                if (AggregateFunction == AggregateFunction.Average && (ptu != typeof(float) || ptu != typeof(double) || ptu == typeof(decimal)))
+                    return pt.IsNullable() ? typeof(double?) : typeof(double);
 
-                return Parent.Type;
+                if (ptu == typeof(bool) ||
+                    ptu == typeof(byte) || ptu == typeof(sbyte) ||
+                    ptu == typeof(short) || ptu == typeof(ushort) ||
+                    ptu == typeof(uint) ||
+                    ptu == typeof(ulong))
+                    return pt.IsNullable() ? typeof(int?) : typeof(int);
+
+                return pt;
             }
         }
 
@@ -172,7 +174,7 @@ namespace Signum.Entities.DynamicQuery
             throw new InvalidOperationException("AggregateToken should have a replacement at this stage");
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             if (Parent == null)
                 return null;
@@ -185,7 +187,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             if (Parent == null)
                 return null;
@@ -196,7 +198,7 @@ namespace Signum.Entities.DynamicQuery
         public override QueryToken Clone()
         {
             if (Parent == null)
-                return new AggregateToken(AggregateFunction, this.queryName);
+                return new AggregateToken(AggregateFunction, this.queryName!);
             else
                 return new AggregateToken(AggregateFunction, Parent.Clone(), this.FilterOperation, this.Value, this.Distinct);
         }

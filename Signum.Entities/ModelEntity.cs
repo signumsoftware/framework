@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Signum.Utilities;
 
@@ -29,10 +29,10 @@ namespace Signum.Entities
 
             PropertyRoute fieldRoute = route;
             if (fieldRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
-                fieldRoute = fieldRoute.Parent;
+                fieldRoute = fieldRoute.Parent!;
 
             if (fieldRoute.PropertyRouteType == PropertyRouteType.MListItems)
-                fieldRoute = fieldRoute.Parent;
+                fieldRoute = fieldRoute.Parent!;
 
             return Implementations.FromAttributes(
                 route.Type.CleanType(),

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -10,17 +10,14 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class AsTypeToken : QueryToken
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+
         Type entityType;
         internal AsTypeToken(QueryToken parent, Type type)
-            : base(parent)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
-
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            this.entityType = type;
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            this.entityType = type ?? throw new ArgumentNullException(nameof(type));
 
             this.Priority = 8;
         }
@@ -43,7 +40,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            Expression baseExpression = Parent.BuildExpression(context);
+            Expression baseExpression = parent.BuildExpression(context);
 
             Expression result = Expression.TypeAs(baseExpression.ExtractEntity(false), entityType);
 
@@ -55,12 +52,12 @@ namespace Signum.Entities.DynamicQuery
             return SubTokensBase(entityType, options, GetImplementations());
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
@@ -70,18 +67,18 @@ namespace Signum.Entities.DynamicQuery
             return Implementations.By(entityType);
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            var parent = Parent.IsAllowed();
-            var routes = GetPropertyRoute().IsAllowed();
+            var parent = parent.IsAllowed();
+            var routes = GetPropertyRoute()!.IsAllowed();
 
             if (parent.HasText() && routes.HasText())
-                QueryTokenMessage.And.NiceToString().Combine(parent, routes);
+                QueryTokenMessage.And.NiceToString().CombineIfNotEmpty(parent, routes);
 
             return parent ?? routes;
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             return PropertyRoute.Root(entityType);
         }
@@ -89,12 +86,12 @@ namespace Signum.Entities.DynamicQuery
         public override string NiceName()
         {
             var cleanType = EnumEntity.Extract(entityType) ?? entityType;
-            return QueryTokenMessage._0As1.NiceToString().FormatWith(Parent.ToString(), cleanType.NiceName());
+            return QueryTokenMessage._0As1.NiceToString().FormatWith(parent.ToString(), cleanType.NiceName());
         }
 
         public override QueryToken Clone()
         {
-            return new AsTypeToken(Parent.Clone(), entityType);
+            return new AsTypeToken(parent.Clone(), entityType);
         }
     }
 

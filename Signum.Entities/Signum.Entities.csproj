@@ -5,7 +5,7 @@
     <LangVersion>8.0</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <NullableReferenceTypes>true</NullableReferenceTypes>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
     <Platforms>x64</Platforms>
   </PropertyGroup>
 

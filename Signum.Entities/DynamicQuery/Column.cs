@@ -32,8 +32,8 @@ namespace Signum.Entities.DynamicQuery
         public string Name { get { return Token.FullKey(); } }
         public virtual Type Type { get { return Token.Type; } }
         public Implementations? Implementations { get { return Token.GetImplementations(); } }
-        public string Format { get { return Token.Format; } }
-        public string Unit { get { return Token.Unit; } }
+        public string? Format { get { return Token.Format; } }
+        public string? Unit { get { return Token.Unit; } }
 
         public override string ToString()
         {
@@ -55,7 +55,7 @@ namespace Signum.Entities.DynamicQuery
     internal class _EntityColumn : Column
     {
         public _EntityColumn(ColumnDescription entityColumn, object queryName)
-            : base(new ColumnToken(entityColumn, queryName), null)
+            : base(new ColumnToken(entityColumn, queryName), null!)
         {
             if (!entityColumn.IsEntity)
                 throw new ArgumentException("entityColumn");

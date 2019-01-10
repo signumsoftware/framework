@@ -225,10 +225,9 @@ namespace Signum.Engine.DynamicQuery
                 unit: info.Unit,
                 format: info.Format,
                 implementations: info.Implementations,
-                propertyRoute: info.PropertyRoute)
-            {
-                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))),
-            });
+                propertyRoute: info.PropertyRoute,
+                lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+            ));
         }
     }
 
@@ -295,7 +294,7 @@ namespace Signum.Engine.DynamicQuery
                     result.Format = ColumnDescriptionFactory.GetFormat(cleanMeta.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cleanMeta.PropertyRoutes);
                 }
-                else if(me?.Meta is DirtyMeta dirtyMeta)
+                else if (me?.Meta is DirtyMeta dirtyMeta)
                 {
                     result.PropertyRoute = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Only()).Distinct().Only();
                     result.Implementations = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
@@ -323,10 +322,8 @@ namespace Signum.Engine.DynamicQuery
                 return result;
             });
 
-            return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format, info.Implementations, info.IsAllowed(), info.PropertyRoute)
-            {
-                DisplayName = NiceName()
-            };
+            return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format,
+                info.Implementations, info.IsAllowed(), info.PropertyRoute, displayName: NiceName());
         }
     }
 

@@ -12,12 +12,15 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class SystemTimeToken : QueryToken
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+        
         SystemTimeProperty property;
         internal SystemTimeToken(QueryToken parent, SystemTimeProperty property)
-            : base(parent)
         {
             Priority = 8;
             this.property = property;
+            this.parent = parent;
         }
 
         public override Type Type
@@ -38,7 +41,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var result = Parent.BuildExpression(context).ExtractEntity(false);
+            var result = parent.BuildExpression(context).ExtractEntity(false);
 
             var period = Expression.Call(miSystemPeriod, result.UnNullify());
 
@@ -55,22 +58,22 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return "s"; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             return null;
         }
@@ -82,7 +85,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new SystemTimeToken(Parent.Clone(), this.property);
+            return new SystemTimeToken(parent.Clone(), this.property);
         }
     }
 }

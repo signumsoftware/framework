@@ -23,19 +23,19 @@ namespace Signum.Entities.DynamicQuery
             return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId)) { Priority = 10 };
         }
 
-        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
-            : base(parent)
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+       
+       internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
-
-            this.PropertyInfo = pi;
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            this.PropertyInfo = pi ?? throw new ArgumentNullException(nameof(pi));
             this.PropertyRoute = pr;
         }
 
         public override Type Type
         {
-            get { return PropertyInfo.PropertyType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
+            get { return PropertyInfo.PropertyType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
         }
 
         public override string ToString()
@@ -50,7 +50,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var baseExpression = Parent.BuildExpression(context);
+            var baseExpression = parent.BuildExpression(context);
 
             if (PropertyInfo.Name == nameof(Entity.Id) ||
                 PropertyInfo.Name == nameof(Entity.ToStringProperty))
@@ -78,12 +78,11 @@ namespace Signum.Entities.DynamicQuery
 
             if (type.UnNullify() == typeof(DateTime))
             {
-                PropertyRoute route = this.GetPropertyRoute();
+                PropertyRoute? route = this.GetPropertyRoute();
 
                 if (route != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Validators
-                        .OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                    var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
                     if (att != null)
                     {
                         return DateTimeProperties(this, att.Precision).AndHasValue(this);
@@ -95,11 +94,11 @@ namespace Signum.Entities.DynamicQuery
                 type.UnNullify() == typeof(float) ||
                 type.UnNullify() == typeof(decimal))
             {
-                PropertyRoute route = this.GetPropertyRoute();
+                PropertyRoute? route = this.GetPropertyRoute();
 
                 if (route != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Validators
+                    var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators
                         .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                     if (att != null)
                     {
@@ -117,34 +116,32 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
-            return GetPropertyRoute().TryGetImplementations();
+            return GetPropertyRoute()!.TryGetImplementations();
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return Reflector.FormatString(this.GetPropertyRoute()); }
+            get { return Reflector.FormatString(this.GetPropertyRoute()!); }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName; }
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            PropertyRoute pr = GetPropertyRoute();
+            string? parent = this.parent.IsAllowed();
 
-            string parent = Parent.IsAllowed();
-
-            string route = pr?.IsAllowed();
+            string? route = GetPropertyRoute()?.IsAllowed();
 
             if (parent.HasText() && route.HasText())
-                return QueryTokenMessage.And.NiceToString().Combine(parent, route);
+                return QueryTokenMessage.And.NiceToString().Combine(parent!, route!);
 
             return parent ?? route;
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             return PropertyRoute;
         }
@@ -156,7 +153,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new EntityPropertyToken(Parent.Clone(), PropertyInfo, PropertyRoute);
+            return new EntityPropertyToken(parent.Clone(), PropertyInfo, PropertyRoute);
         }
     }
 }

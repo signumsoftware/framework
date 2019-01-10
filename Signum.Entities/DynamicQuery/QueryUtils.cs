@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -21,13 +21,8 @@ namespace Signum.Entities.DynamicQuery
 
             return (queryName is Type ? Reflector.CleanTypeName((Type) queryName) : queryName.ToString());
         }
-
+        
         public static string GetNiceName(object queryName)
-        {
-            return GetNiceName(queryName, null);
-        }
-
-        public static string GetNiceName(object queryName, CultureInfo ci)
         {
             if (queryName is Type)
                 queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
@@ -209,7 +204,7 @@ namespace Signum.Entities.DynamicQuery
         };
 
 
-        public static QueryToken SubToken(QueryToken token, QueryDescription qd, SubTokensOptions options, string key)
+        public static QueryToken? SubToken(QueryToken? token, QueryDescription qd, SubTokensOptions options, string key)
         {
             var result = SubTokenBasic(token, qd, options, key);
 
@@ -233,7 +228,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        private static IEnumerable<QueryToken> AggregateTokens(QueryToken token, QueryDescription qd)
+        private static IEnumerable<QueryToken> AggregateTokens(QueryToken? token, QueryDescription qd)
         {
             if (token == null)
             {
@@ -286,7 +281,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        static QueryToken SubTokenBasic(QueryToken token, QueryDescription qd, SubTokensOptions options, string key)
+        static QueryToken? SubTokenBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options, string key)
         {
             if (token == null)
             {
@@ -347,7 +342,7 @@ namespace Signum.Entities.DynamicQuery
 
             string firstPart = parts.FirstEx();
 
-            QueryToken result = SubToken(null, qd, options, firstPart);
+            QueryToken? result = SubToken(null, qd, options, firstPart);
 
             if (result == null)
                 throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
@@ -361,7 +356,7 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-        public static string CanFilter(QueryToken token)
+        public static string? CanFilter(QueryToken token)
         {
             if (token == null)
                 return "No column selected";
@@ -372,7 +367,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public static string CanColumn(QueryToken token)
+        public static string? CanColumn(QueryToken token)
         {
             if (token == null)
                 return "No column selected";
@@ -402,7 +397,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Lambda(body, ctx.Parameter);
         }
 
-        public static string CanOrder(QueryToken token)
+        public static string? CanOrder(QueryToken token)
         {
             if (token == null)
                 return "No column selected";

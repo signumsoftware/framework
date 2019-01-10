@@ -10,11 +10,13 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class EntityToStringToken : QueryToken
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+
         internal EntityToStringToken(QueryToken parent)
-            : base(parent)
         {
             Priority = 9;
-
+            this.parent = parent;
         }
 
         public override Type Type
@@ -37,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var baseExpression = Parent.BuildExpression(context);
+            var baseExpression = parent.BuildExpression(context);
 
             return Expression.Call(baseExpression, miToString);
         }
@@ -52,35 +54,33 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            PropertyRoute route = GetPropertyRoute();
-
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            PropertyRoute parent = Parent.GetPropertyRoute();
-            if (parent == null)
+            PropertyRoute? pr = parent.GetPropertyRoute();
+            if (pr == null)
             {
-                Type type = Lite.Extract(Parent.Type); //Because Parent.Type is always a lite
+                Type? type = Lite.Extract(pr.Type); //Because Parent.Type is always a lite
                 if (type != null)
                     return PropertyRoute.Root(type).Add(miToStringProperty);
             }
             else
             {
-                Type type = Lite.Extract(parent.Type); //Because Add doesn't work with lites
+                Type? type = Lite.Extract(pr.Type); //Because Add doesn't work with lites
                 if (type != null)
                     return PropertyRoute.Root(type).Add(miToStringProperty);
             }
@@ -90,12 +90,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return LiteMessage.ToStr.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return LiteMessage.ToStr.NiceToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
         }
 
         public override QueryToken Clone()
         {
-            return new EntityToStringToken(Parent.Clone());
+            return new EntityToStringToken(parent.Clone());
         }
     }
 }

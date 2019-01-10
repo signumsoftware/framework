@@ -11,9 +11,12 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class DateToken : QueryToken
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+        
         internal DateToken(QueryToken parent)
-            : base(parent)
         {
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
         public override string ToString()
@@ -23,15 +26,15 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage.Date.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return QueryTokenMessage.Date.NiceToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return "d"; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
@@ -55,14 +58,14 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(context);
+            var exp = parent.BuildExpression(context);
 
             return Expression.Property(exp.UnNullify(), miDate).Nullify();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            return Parent.GetPropertyRoute();
+            return parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
@@ -70,14 +73,14 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
         public override QueryToken Clone()
         {
-            return new DateToken(Parent.Clone());
+            return new DateToken(parent.Clone());
         }
 
         public override bool IsGroupable

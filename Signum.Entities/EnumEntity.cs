@@ -69,8 +69,6 @@ namespace Signum.Entities
     {
         public static Entity FromEnumUntyped(Enum value)
         {
-            if (value == null) return null;
-
             Entity ident = (Entity)Activator.CreateInstance(Generate(value.GetType()));
             ident.Id = new PrimaryKey(EnumExtensions.GetUnderlyingValue(value));
 
@@ -79,9 +77,7 @@ namespace Signum.Entities
 
         public static Enum ToEnum(Entity ident)
         {
-            if (ident == null) return null;
-
-            Type enumType = Extract(ident.GetType());
+            Type enumType = Extract(ident.GetType())!;
 
             return (Enum)Enum.ToObject(enumType, ident.id);
         }
@@ -111,7 +107,7 @@ namespace Signum.Entities
             return typeof(EnumEntity<>).MakeGenericType(enumType);
         }
 
-        public static Type Extract(Type enumEntityType)
+        public static Type? Extract(Type enumEntityType)
         {
             if (enumEntityType.IsGenericType && enumEntityType.GetGenericTypeDefinition() == typeof(EnumEntity<>))
                 return enumEntityType.GetGenericArguments()[0];

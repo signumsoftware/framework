@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace Signum.Entities
 
         public static ConcurrentDictionary<Type, HashSet<Type>> Declarations = new ConcurrentDictionary<Type, HashSet<Type>>();
 
-        public static ConcurrentDictionary<Type, Func<Entity, MixinEntity, MixinEntity>> Constructors = new ConcurrentDictionary<Type, Func<Entity, MixinEntity, MixinEntity>>();
+        public static ConcurrentDictionary<Type, Func<Entity, MixinEntity?, MixinEntity>> Constructors = new ConcurrentDictionary<Type, Func<Entity, MixinEntity?, MixinEntity>>();
 
         public static Action<Type> AssertNotIncluded = t => { throw new NotImplementedException("Call MixinDeclarations.Register in the server, after the Connector is created."); };
 
@@ -102,7 +102,7 @@ namespace Signum.Entities
                 if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(Entity) || pi[1].ParameterType != typeof(MixinEntity))
                     throw new InvalidOperationException("{0} does not have a non-public construtor with parameters (Entity mainEntity, MixinEntity next)");
 
-                return (Func<Entity, MixinEntity, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
+                return (Func<Entity, MixinEntity?, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
             });
         }
 
@@ -135,11 +135,11 @@ namespace Signum.Entities
                 throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".FormatWith(mixinType.TypeName(), mainEntity.TypeName()));
         }
 
-        internal static MixinEntity CreateMixins(Entity mainEntity)
+        internal static MixinEntity? CreateMixins(Entity mainEntity)
         {
             var types = GetMixinDeclarations(mainEntity.GetType());
 
-            MixinEntity result = null;
+            MixinEntity? result = null;
             foreach (var t in types)
                 result = Constructors[t](mainEntity, result);
 

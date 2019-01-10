@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,20 +14,24 @@ namespace Signum.Entities.DynamicQuery
     {
         public CollectionElementType CollectionElementType { get; private set; }
 
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+
+
         Type elementType;
         internal CollectionElementToken(QueryToken parent, CollectionElementType type)
-            : base(parent)
         {
             elementType = parent.Type.ElementType();
             if (elementType == null)
                 throw new InvalidOperationException("not a collection");
 
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
             this.CollectionElementType = type;
         }
 
         public override Type Type
         {
-            get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
+            get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
         }
 
         public override string ToString()
@@ -47,10 +51,10 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
-            return Parent.GetElementImplementations();
+            return parent.GetElementImplementations();
         }
 
-        public override string Format
+        public override string? Format
         {
             get
             {
@@ -58,11 +62,11 @@ namespace Signum.Entities.DynamicQuery
                 if (Parent is ExtensionToken et && et.IsProjection)
                     return et.ElementFormat;
 
-                return Parent.Format;
+                return parent.Format;
             }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get
             {
@@ -70,13 +74,13 @@ namespace Signum.Entities.DynamicQuery
                 if (Parent is ExtensionToken et && et.IsProjection)
                     return et.ElementUnit;
 
-                return Parent.Unit;
+                return parent.Unit;
             }
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
         public override bool HasAllOrAny()
@@ -95,16 +99,16 @@ namespace Signum.Entities.DynamicQuery
                 CollectionElementType == CollectionElementType.Element3;
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            if (Parent is ExtensionToken et && et.IsProjection)
+            if (parent is ExtensionToken et && et.IsProjection)
                 return et.GetElementPropertyRoute();
 
-            PropertyRoute parent = Parent.GetPropertyRoute();
-            if (parent != null && parent.Type.ElementType() != null)
-                return parent.Add("Item");
+            PropertyRoute? pr = this.parent.GetPropertyRoute();
+            if (pr != null && pr.Type.ElementType() != null)
+                return pr.Add("Item");
 
-            return parent;
+            return pr;
         }
 
         public override string NiceName()
@@ -114,12 +118,12 @@ namespace Signum.Entities.DynamicQuery
             if (parentElement.IsModifiableEntity())
                 return parentElement.NiceName();
 
-            return "Element of " + Parent.NiceName();
+            return "Element of " + Parent?.NiceName();
         }
 
         public override QueryToken Clone()
         {
-            return new CollectionElementToken(Parent.Clone(), CollectionElementType);
+            return new CollectionElementToken(parent.Clone(), CollectionElementType);
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
@@ -148,12 +152,12 @@ namespace Signum.Entities.DynamicQuery
                 .ToList();
         }
 
-        public static string MultipliedMessage(List<CollectionElementToken> elements, Type entityType)
+        public static string? MultipliedMessage(List<CollectionElementToken> elements, Type entityType)
         {
             if (elements.IsEmpty())
                 return null;
 
-            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().FormatWith(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().FormatWith(entityType.NiceName(), elements.CommaAnd(a => a.parent.ToString()));
         }
 
         public override string TypeColor

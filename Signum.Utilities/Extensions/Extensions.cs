@@ -350,9 +350,9 @@ namespace Signum.Utilities
         public delegate R FuncCC<in T, R>(T input)
             where T : class
             where R : class;
-        public static IEnumerable<T> Follow<T>(this T start, FuncCC<T, T> next) where T : class
+        public static IEnumerable<T> Follow<T>(this T start, FuncCC<T, T?> next) where T : class
         {
-            for (T i = start; i != null; i = next(i))
+            for (T? i = start; i != null; i = next(i))
                 yield return i;
         }
 

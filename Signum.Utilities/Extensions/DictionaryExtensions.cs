@@ -96,7 +96,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key)
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key) where K : object
         {
             if (!dictionary.TryGetValue(key, out V result))
                 throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
@@ -133,7 +133,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string errorContext = null)
+        public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string? errorContext = null)
         {
             var result = new Dictionary<K, V>();
             result.AddRange<K, V>(collection, errorContext ?? typeof(K).TypeName());
@@ -147,7 +147,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string errorContext = null)
+        public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string? errorContext = null)
         {
             var result = new Dictionary<K, V>(comparer);
             result.AddRange<K, V>(collection, errorContext ?? typeof(K).TypeName());
@@ -155,28 +155,28 @@ namespace Signum.Utilities
         }
 
 
-        public static Dictionary<K, T> ToDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string errorContext = null)
+        public static Dictionary<K, T> ToDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string? errorContext = null)
         {
             Dictionary<K, T> result = new Dictionary<K, T>();
             result.AddRange(source, keySelector, v => v, errorContext ?? typeof(K).TypeName());
             return result;
         }
 
-        public static Dictionary<K, V> ToDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string errorContext = null)
+        public static Dictionary<K, V> ToDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string? errorContext = null)
         {
             Dictionary<K, V> result = new Dictionary<K, V>();
             result.AddRange(source, keySelector, elementSelector, errorContext ?? typeof(K).TypeName());
             return result;
         }
 
-        public static Dictionary<K, T> ToDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string errorContext = null)
+        public static Dictionary<K, T> ToDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string? errorContext = null)
         {
             Dictionary<K, T> result = new Dictionary<K, T>(comparer);
             result.AddRange(source, keySelector, v => v, errorContext ?? typeof(K).TypeName());
             return result;
         }
 
-        public static Dictionary<K, V> ToDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string errorContext = null)
+        public static Dictionary<K, V> ToDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string? errorContext = null)
         {
             Dictionary<K, V> result = new Dictionary<K, V>(comparer);
             result.AddRange(source, keySelector, elementSelector, errorContext ?? typeof(K).TypeName());
@@ -252,7 +252,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static Dictionary<K, R> OuterJoinDictionaryCC<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1, V2, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCC<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : class
             where V2 : class
         {
@@ -263,7 +263,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionarySC<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySC<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : struct
             where V2 : class
         {
@@ -274,7 +274,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionarySC<K, V1, V2, V3>(this IReadOnlyDictionary<K, V1?> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2, V3> mixer)
+        public static Dictionary<K, V3> OuterJoinDictionarySC<K, V1, V2, V3>(this IReadOnlyDictionary<K, V1?> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2?, V3> mixer)
             where V1 : struct
             where V2 : class
         {
@@ -285,7 +285,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1, V2?, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : class
             where V2 : struct
         {
@@ -296,7 +296,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2?> dic2, Func<K, V1, V2?, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2?> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : class
             where V2 : struct
         {
