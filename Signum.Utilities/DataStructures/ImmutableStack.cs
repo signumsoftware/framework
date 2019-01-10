@@ -1,18 +1,21 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Threading;
 
 namespace Signum.Utilities.DataStructures
 {
-    public class ImmutableStack<T>:IEnumerable<T>
+   
+
+    public class ImmutableStack<T> : IEnumerable<T> 
+        where T : object
     {
-        private class ImmutableFullStack : ImmutableStack<T>
+        class ImmutableFullStack : ImmutableStack<T>
         {
             readonly T head;
             readonly ImmutableStack<T> tail;
 
-            public ImmutableFullStack(T head, ImmutableStack<T> tail)
+            internal ImmutableFullStack(T head, ImmutableStack<T> tail)
             {
                 this.head = head;
                 this.tail = tail;
@@ -33,12 +36,11 @@ namespace Signum.Utilities.DataStructures
             {
                 return "[" + this.ToString(", ") + "]";
             }
-
         }
 
         public static readonly ImmutableStack<T> Empty = new ImmutableStack<T>();
 
-        private ImmutableStack(){}
+        internal ImmutableStack() { }
 
         public virtual bool IsEmpty { get { return true; } }
         public virtual T Peek() { throw new InvalidOperationException("Empty Stack"); }
@@ -52,12 +54,12 @@ namespace Signum.Utilities.DataStructures
 
     public static class ImmutableStackExtensions
     {
-        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack)
+        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack) where T : object
         {
             return Reverse(stack, ImmutableStack<T>.Empty);
         }
 
-        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack, ImmutableStack<T> initial)
+        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack, ImmutableStack<T> initial) where T : object
         {
             ImmutableStack<T> r = initial;
             for (ImmutableStack<T> f = stack; !f.IsEmpty; f = f.Pop())

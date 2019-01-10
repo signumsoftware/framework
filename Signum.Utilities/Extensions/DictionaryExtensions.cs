@@ -89,7 +89,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) where K : object
         {
             if (!dictionary.TryGetValue(key, out V result))
                 throw new KeyNotFoundException(messageWithFormat.FormatWith(key));
@@ -103,7 +103,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat)
+        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat) where K : object
         {
             if (dictionary.ContainsKey(key))
                 throw new ArgumentException(messageWithFormat.FormatWith(key));
@@ -462,14 +462,14 @@ namespace Signum.Utilities
         }
 
 
-        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key)
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key) where K : object
         {
             V value = dictionary.GetOrThrow(key);
             dictionary.Remove(key);
             return value;
         }
 
-        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) where K : object
         {
             V value = dictionary.GetOrThrow(key, messageWithFormat);
             dictionary.Remove(key);
@@ -524,17 +524,17 @@ namespace Signum.Utilities
                 dic[key] = count + 1;
         }
 
-        public static NameValueCollection ToNameValueCollection<K, V>(this IDictionary<K, V> dic)
+        public static NameValueCollection ToNameValueCollection<K, V>(this IDictionary<K, V> dic) 
         {
             var collection = new NameValueCollection();
 
             foreach (var kvp in dic)
             {
-                string value = null;
+                string? value = null;
                 if (kvp.Value != null)
-                    value = kvp.Value.ToString();
+                    value = kvp.Value!.ToString();
 
-                collection.Add(kvp.Key.ToString(), value);
+                collection.Add(kvp.Key!.ToString(), value);
             }
 
             return collection;

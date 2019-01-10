@@ -8,14 +8,14 @@ namespace Signum.Utilities
 {
     public class StringDistance
     {
-        int[,] num;
+        int[,]? _cachedNum;
 
-        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int>? weight = null, bool allowTransposition = false)
+        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char>? comparer = null, Func<Choice<char>, int>? weight = null, bool allowTransposition = false)
         {
             return LevenshteinDistance<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight, allowTransposition);
         }
 
-        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int>? weight = null, bool allowTransposition = false)
+        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T>? comparer = null, Func<Choice<T>, int>? weight = null, bool allowTransposition = false)
         {
             int M1 = strOld.Length + 1;
             int M2 = strNew.Length + 1;
@@ -26,7 +26,7 @@ namespace Signum.Utilities
             if (weight == null)
                 weight = c => 1;
 
-            ResizeArray(M1, M2);
+            var num = ResizeArray(M1, M2);
 
             num[0, 0] = 0;
 
@@ -68,16 +68,16 @@ namespace Signum.Utilities
             Transpose,
         }
 
-        public struct Choice<T> where T: object
+        public struct Choice<T>
         {
             public readonly ChoiceType Type;
-            public readonly T? Removed;
-            public readonly T? Added;
+            public readonly T Removed;
+            public readonly T Added;
 
             public bool HasRemoved { get { return Type != ChoiceType.Add; } }
             public bool HasAdded { get { return Type != ChoiceType.Remove; } }
 
-            internal Choice( ChoiceType type, T? removed, T? added)
+            internal Choice( ChoiceType type, T removed, T added)
             {
                 this.Type = type;
                 this.Removed = removed;
@@ -86,12 +86,12 @@ namespace Signum.Utilities
 
             public static Choice<T> Add(T value)
             {
-                return new Choice<T>(ChoiceType.Add, default(T), value);
+                return new Choice<T>(ChoiceType.Add, default(T)!, value);
             }
 
             public static Choice<T> Remove(T value)
             {
-                return new Choice<T>(ChoiceType.Remove, value, default(T));
+                return new Choice<T>(ChoiceType.Remove, value, default(T)!);
             }
 
             public static Choice<T> Equal(T value)
@@ -125,12 +125,12 @@ namespace Signum.Utilities
             
         }
 
-        public List<Choice<char>> LevenshteinChoices(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
+        public List<Choice<char>> LevenshteinChoices(string strOld, string strNew, IEqualityComparer<char>? comparer = null, Func<Choice<char>, int>? weight = null)
         {
             return LevenshteinChoices<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight);
         }
 
-        public List<Choice<T>> LevenshteinChoices<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
+        public List<Choice<T>> LevenshteinChoices<T>(T[] strOld, T[] strNew, IEqualityComparer<T>? comparer = null, Func<Choice<T>, int>? weight = null)
         {
             if (comparer == null)
                 comparer = EqualityComparer<T>.Default;
@@ -158,6 +158,8 @@ namespace Signum.Utilities
                     var cRemove = Choice<T>.Remove(strOld[i - 1]);
                     var cAdd = Choice<T>.Add(strNew[j - 1]);
                     var cSubstitute = Choice<T>.Substitute(strOld[i - 1], strNew[j - 1]);
+
+                    var num = _cachedNum!; 
 
                     var remove = num[i - 1, j] + weight(cRemove);
                     var add = num[i, j - 1] + weight(cAdd);
@@ -244,7 +246,7 @@ namespace Signum.Utilities
             if (comparer == null)
                 comparer = EqualityComparer<T>.Default;
 
-            ResizeArray(str1.Length, str2.Length);
+            var num = ResizeArray(str1.Length, str2.Length);
 
             int maxlen = 0;
 
@@ -275,7 +277,10 @@ namespace Signum.Utilities
 
         string DebugTable()
         {
-            return num.SelectArray(a => a.ToString()).FormatTable();
+            if (_cachedNum == null)
+                throw new InvalidOperationException("Not initialized");
+
+            return _cachedNum.SelectArray(a => a.ToString()).FormatTable();
         }
 
         public int LongestCommonSubsequence(string str1, string str2)
@@ -290,7 +295,7 @@ namespace Signum.Utilities
         /// <summary>
         /// ACE is a subsequence of ABCDE
         /// </summary>
-        public int LongestCommonSubsequence<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null)
+        public int LongestCommonSubsequence<T>(T[] str1, T[] str2, IEqualityComparer<T>? comparer = null)
         {
             if (str1 == null)
                 throw new ArgumentNullException("str1");
@@ -307,7 +312,7 @@ namespace Signum.Utilities
             int M1 = str1.Length + 1;
             int M2 = str2.Length + 1;
 
-            ResizeArray(M1, M2);
+            var num = ResizeArray(M1, M2);
 
             for (int i = 0; i < M1; i++)
                 num[i, 0] = 0;
@@ -333,12 +338,14 @@ namespace Signum.Utilities
             return num[str1.Length, str2.Length];
         }
 
-        private void ResizeArray(int M1, int M2)
+        private int [,] ResizeArray(int M1, int M2)
         {
-            if (num == null || M1 > num.GetLength(0) || M2 > num.GetLength(1))
+            if (_cachedNum == null || M1 > _cachedNum.GetLength(0) || M2 > _cachedNum.GetLength(1))
             {
-                num = new int[M1, M2];
+                _cachedNum = new int[M1, M2];
             }
+
+            return _cachedNum;
         }
 
 
