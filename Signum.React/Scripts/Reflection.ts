@@ -875,10 +875,9 @@ export class Type<T extends ModifiableEntity> implements IType {
     if (lambdaToColumn == null)
       return new QueryTokenString("");
     else
-      return new QueryTokenString(getLambdaMembers(lambdaToColumn).map(a => a.name.firstUpper()).join("."));
+      return new QueryTokenString(tokenSequence(lambdaToColumn));
   }
 }
-
 
 /*  Some examples being in ExceptionEntity:
  *  "User" -> ExceptionEntity.token().append(a => a.user) 
@@ -923,7 +922,7 @@ export class QueryTokenString<T> {
     if (lambdaToProperty == null)
       return new QueryTokenString("Entity")
     else
-      return new QueryTokenString("Entity." + getLambdaMembers(lambdaToProperty).map(a => a.name.firstUpper()).join("."));
+      return new QueryTokenString("Entity." + tokenSequence(lambdaToProperty));
   }
 
   cast<R extends Entity>(t: Type<R>): QueryTokenString<R> {
@@ -931,25 +930,23 @@ export class QueryTokenString<T> {
   }
 
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    var suffix = getLambdaMembers(lambdaToProperty).map(a => a.name.firstUpper()).join(".");
-
-    if (this.token)
-      return new QueryTokenString<S>(this.token + "." + suffix);
-    else
-      return new QueryTokenString<S>(suffix);
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty));
   }
 
   mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
     return new QueryTokenString<M>(this.token);
   }
 
-  implicit<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token);
-  }
-
   expression<S>(expressionName: string): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + "." + expressionName);
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + expressionName);
   }
+}
+
+function tokenSequence(lambdaToProperty: Function) {
+  return getLambdaMembers(lambdaToProperty)
+    .filter(a => a.name != "entity") //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
+    .map(a => a.name.firstUpper())
+    .join(".");
 }
 
 export class EnumType<T extends string> {
@@ -1026,6 +1023,8 @@ export interface ISymbol {
 }
 
 let missingSymbols: ISymbol[] = [];
+
+
 
 function getMember(key: string): MemberInfo | undefined {
 
