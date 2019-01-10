@@ -61,9 +61,10 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
   inputElement?: HTMLElement | null;
 
   componentDidMount() {
+    if(this.props.initiallyFocused)
     setTimeout(() => {
       let element = this.inputElement;
-      if (this.props.initiallyFocused && element) {
+      if (element) {
         if (element instanceof HTMLInputElement)
           element.setSelectionRange(0, element.value.length);
         else if (element instanceof HTMLTextAreaElement)
@@ -437,6 +438,7 @@ function numericTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           validateKey={validateKey}
           format={numbroFormat}
+          innerRef={elment => vl.inputElement = elment}
         />
       )}
     </FormGroup>
@@ -450,6 +452,7 @@ export interface NumericTextBoxProps {
   format?: string;
   formControlClass?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  innerRef?: (ta: HTMLInputElement | null) => void;
 }
 
 export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {
@@ -458,14 +461,14 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
     super(props);
     this.state = { text: undefined };
   }
-
+  
   render() {
 
     const value = this.state.text != undefined ? this.state.text :
       this.props.value != undefined ? numbro(this.props.value).format(this.props.format) :
         "";
 
-    return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
+    return <input ref={this.props.innerRef} {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
       onBlur={this.handleOnBlur}
       onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
       onInput={isIE11() ? this.handleOnChange : undefined}
@@ -589,7 +592,8 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
           onChange={handleOnChange}
           validateKey={validateKey}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
-          format={durationFormat} />
+          format={durationFormat}
+          innerRef={elment => vl.inputElement = elment} />
       )}
     </FormGroup>
   );
@@ -602,6 +606,7 @@ export interface DurationTextBoxProps {
   formControlClass?: string;
   format?: string;
   htmlAttributes: React.HTMLAttributes<HTMLInputElement>;
+  innerRef?: (ta: HTMLInputElement | null) => void;
 }
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
@@ -617,7 +622,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
       this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
         "";
 
-    return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
+    return <input ref={this.props.innerRef} {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
       onBlur={this.handleOnBlur}
       onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
       onInput={isIE11() ? this.handleOnChange : undefined}
