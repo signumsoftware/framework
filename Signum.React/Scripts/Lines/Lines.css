@@ -252,7 +252,7 @@ body.rtl .form-group.row > label {
 /* Emulating Bootstrap 3 Validation*/
 .has-error,
 .has-error div.rw-widget-picker.rw-widget-container {
-    border-color: #a94442;
+    border-color: #a94442 !important;
 }
 
     .has-error label {

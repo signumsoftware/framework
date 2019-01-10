@@ -28,7 +28,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+        <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
           {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
           {this.renderButtons()}
           {this.renderElements()}

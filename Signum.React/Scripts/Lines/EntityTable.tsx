@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { ModifiableEntity, MList, EntityControlMessage } from '../Signum.Entities'
@@ -18,6 +18,7 @@ export interface EntityTableProps extends EntityListBaseProps {
   avoidEmptyTable?: boolean;
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   scrollable?: boolean;
+  isRowVisible?: (ctx: TypeContext<any /*T*/>) => boolean;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -73,7 +74,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
           {this.renderButtons()}
           {this.renderTable(ctx)}
         </div>
@@ -94,7 +95,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
   renderButtons() {
     const buttons = (
-      <span className="float-right">
+      <span className="ml-2">
         {this.state.createAsLink == false && this.renderCreateButton(false)}
         {this.renderFindButton(false)}
       </span>
@@ -139,7 +140,9 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           }
           <tbody>
             {
-              mlistItemContext(ctx).map((mlec, i) =>
+              mlistItemContext(ctx)
+                .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a))
+                .map((mlec, i) =>
                 (<EntityTableRow key={i}
                   index={i}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
