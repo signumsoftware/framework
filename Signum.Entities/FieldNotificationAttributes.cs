@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,9 +26,9 @@ namespace Signum.Entities
         where T : Attribute
     {
         //Consider using ImmutableAVLTree instead
-        readonly static Dictionary<Type, TypeAttributePack> fieldAndProperties = new Dictionary<Type, TypeAttributePack>();
+        readonly static Dictionary<Type, TypeAttributePack?> fieldAndProperties = new Dictionary<Type, TypeAttributePack>();
 
-        static TypeAttributePack GetFieldsAndProperties(Type type)
+        static TypeAttributePack? GetFieldsAndProperties(Type type)
         {
             lock (fieldAndProperties)
             {
@@ -39,18 +39,17 @@ namespace Signum.Entities
                     if (list.Count == 0)
                         return null;
 
-                    return new TypeAttributePack
-                    {
-                        Fields = list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray(),
-                        PropertyNames = list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToArray()
-                    };
+                    return new TypeAttributePack(
+                        fields: list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray(),
+                        propertyNames: list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToArray()
+                    );
                 });
             }
         }
 
         public static bool FieldContainsAttribute(Type type, PropertyInfo pi)
         {
-            TypeAttributePack pack = GetFieldsAndProperties(type);
+            TypeAttributePack? pack = GetFieldsAndProperties(type);
 
             if (pack == null)
                 return false;
@@ -62,7 +61,7 @@ namespace Signum.Entities
 
         public static object[] FieldsWithAttribute(ModifiableEntity entity)
         {
-            TypeAttributePack pack = GetFieldsAndProperties(entity.GetType());
+            TypeAttributePack? pack = GetFieldsAndProperties(entity.GetType());
 
             if (pack == null)
                 return EmptyArray;
@@ -70,9 +69,9 @@ namespace Signum.Entities
             return pack.Fields.Select(f => f(entity)).ToArray();
         }
 
-        public static string FindPropertyName(ModifiableEntity entity, object fieldValue)
+        public static string? FindPropertyName(ModifiableEntity entity, object fieldValue)
         {
-            TypeAttributePack pack = GetFieldsAndProperties(entity.GetType());
+            TypeAttributePack? pack = GetFieldsAndProperties(entity.GetType());
 
             if (pack == null)
                 return null;
@@ -90,5 +89,11 @@ namespace Signum.Entities
     {
         public Func<object, object>[] Fields;
         public string[] PropertyNames;
+
+        public TypeAttributePack(Func<object, object>[] fields, string[] propertyNames)
+        {
+            Fields = fields;
+            PropertyNames = propertyNames;
+        }
     }
 }

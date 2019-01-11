@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System;
@@ -111,7 +111,7 @@ namespace Signum.Entities
 
 
         static MethodInfo miOverlaps = ReflectionTools.GetMethodInfo((Interval<DateTime> pair) => pair.Overlaps(new Interval<DateTime>()));
-        internal static Expression Overlaps(this NewExpression interval1, NewExpression interval2)
+        internal static Expression? Overlaps(this NewExpression interval1, NewExpression interval2)
         {
             if (interval1 == null)
                 return null;

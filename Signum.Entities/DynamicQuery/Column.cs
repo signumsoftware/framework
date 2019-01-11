@@ -6,22 +6,17 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Column
     {
-        string displayName;
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { displayName = value; }
-        }
+        public string? DisplayName { get; set; }
 
         QueryToken token;
         public QueryToken Token { get { return token; } }
 
         public bool IsVisible = true;
 
-        public Column(QueryToken token, string displayName)
+        public Column(QueryToken token, string? displayName)
         {
             this.token = token;
-            this.displayName = displayName;
+            this.DisplayName = displayName;
         }
 
         public Column(ColumnDescription cd, object queryName)

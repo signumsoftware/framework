@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -8,85 +8,33 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryDescription
     {
-        object queryName;
-        public object QueryName
-        {
-            get { return queryName; }
-        }
-
-        List<ColumnDescription> columns;
-        public List<ColumnDescription> Columns
-        {
-            get { return columns; }
-        }
-
-        public QueryDescription() { }
-
+        public object QueryName { get; private set; }
+        public List<ColumnDescription> Columns { get; private set; }
+        
         public QueryDescription(object queryName, List<ColumnDescription> columns)
         {
-            this.queryName = queryName;
-            this.columns = columns;
+            this.QueryName = queryName;
+            this.Columns = columns;
         }
     }
 
     [Serializable]
-    public class ColumnDescription :ISerializable
+    public class ColumnDescription
     {
         public const string Entity = "Entity";
+        public string Name { get; internal set; }
+        public Type Type { get; internal set; }
+        public string? Unit { get; internal set; }
+        public string? Format { get; internal set; }
+        public Implementations? Implementations { get; internal set; }
+        public PropertyRoute[]? PropertyRoutes { get; internal set; }
+        public string DisplayName { get; internal set; }
 
-        string name;
-        public string Name
-        {
-            get { return name; }
-            internal set { name = value; }
-        }
-
-        Type type;
-        public Type Type
-        {
-            get { return type; }
-            internal set { type = value; }
-        }
-
-        string unit;
-        public string Unit
-        {
-            get { return unit; }
-            internal set { unit = value; }
-        }
-
-        string format;
-        public string Format
-        {
-            get { return format; }
-            internal set { format = value; }
-        }
-
-        Implementations? implementations;
-        public Implementations? Implementations
-        {
-            get { return implementations; }
-            internal set { implementations = value; }
-        }
-
-        PropertyRoute[] propertyRoutes;
-        public PropertyRoute[] PropertyRoutes
-        {
-            get { return propertyRoutes; }
-            internal set { propertyRoutes = value; }
-        }
-
-        string displayName;
-        public string DisplayName
-        {
-            get { return displayName; }
-            internal set { displayName = value; }
-        }
-
-        public ColumnDescription(string name, Type type)
+        public ColumnDescription(string name, Type type, string displayName)
         {
             this.Name = name;
             this.Type = type;
+            this.DisplayName = displayName;
         }
 
         public bool IsEntity
@@ -96,52 +44,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return DisplayName;
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("name", name);
-            info.AddValue("type", type.AssemblyQualifiedName);
-
-            if (unit != null)
-                info.AddValue("unit", unit);
-
-            if (format != null)
-                info.AddValue("format", format);
-
-            if (implementations != null)
-                info.AddValue("implementations", implementations);
-
-            if (propertyRoutes != null)
-            {
-                if (propertyRoutes.Length == 1)
-                    info.AddValue("propertyRoute", propertyRoutes.Single());
-                else
-                    info.AddValue("propertyRoutes", propertyRoutes);
-            }
-
-            if (displayName != null)
-                info.AddValue("displayName", displayName);
-        }
-
-
-        ColumnDescription(SerializationInfo info, StreamingContext context)
-        {
-            foreach (SerializationEntry entry in info)
-            {
-                switch (entry.Name)
-                {
-                    case "name": name = (string)entry.Value; break;
-                    case "type": type = Type.GetType((string)entry.Value); break;
-                    case "unit": unit = (string)entry.Value; break;
-                    case "format": format = (string)entry.Value; break;
-                    case "implementations": implementations = (Implementations)entry.Value; break;
-                    case "propertyRoutes": propertyRoutes = (PropertyRoute[])entry.Value; break;
-                    case "propertyRoute": propertyRoutes = new[] { (PropertyRoute)entry.Value }; break;
-                    case "displayName": displayName = (string)entry.Value; break;
-                }
-            }
+            return DisplayName!;
         }
     }
 }

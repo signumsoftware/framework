@@ -174,7 +174,7 @@ namespace Signum.Entities
 
         protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            string propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
+            string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
             if (propertyName != null)
                 NotifyPrivate(propertyName);
 
@@ -327,7 +327,7 @@ namespace Signum.Entities
 
         public string? PropertyCheck(string propertyName)
         {
-            IPropertyValidator pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
+            IPropertyValidator? pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
 
             if (pp == null)
                 return null; //Hidden properties
@@ -345,7 +345,7 @@ namespace Signum.Entities
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
-        public Dictionary<Guid, IntegrityCheck> FullIntegrityCheck()
+        public Dictionary<Guid, IntegrityCheck>? FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
             return GraphExplorer.FullIntegrityCheck(graph);
@@ -450,10 +450,11 @@ namespace Signum.Entities
 
         public override string ToString()
         {
+            var validators = Validator.GetPropertyValidators(Entity.GetType());
             return $"{IntegrityCheck.Errors.Count} errors in {" ".CombineIfNotEmpty(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
                   + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
-                      kvp.Key, 
-                      Validator.TryGetPropertyValidator(Entity.GetType(), kvp.Key).GetValueUntyped(Entity), 
+                      kvp.Key,
+                      validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity), 
                       kvp.Value), 
                       "\r\n");
         }

@@ -109,12 +109,12 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
         string? isAllowed;
         public override string? IsAllowed()
         {
-            string? parent = parent.IsAllowed();
+            string? parentAllowed = this.parent.IsAllowed();
 
-            if (isAllowed.HasText() && parent.HasText())
-                return QueryTokenMessage.And.NiceToString().Combine(isAllowed!, parent!);
+            if (isAllowed.HasText() && parentAllowed.HasText())
+                return QueryTokenMessage.And.NiceToString().Combine(isAllowed!, parentAllowed!);
 
-            return isAllowed ?? parent;
+            return isAllowed ?? parentAllowed;
         }
 
         public override QueryToken Clone()

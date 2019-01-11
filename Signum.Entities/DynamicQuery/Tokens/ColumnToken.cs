@@ -117,7 +117,7 @@ namespace Signum.Entities.DynamicQuery
             if (Column.PropertyRoutes != null)
                 return Column.PropertyRoutes[0]; //HACK: compatibility with IU entitiy elements
 
-            Type type = Lite.Extract(Type); // Useful?
+            Type? type = Lite.Extract(Type); // Useful?
             if (type != null && type.IsIEntity())
             {
                 var implementations = Column.Implementations;

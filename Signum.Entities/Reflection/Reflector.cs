@@ -209,7 +209,7 @@ namespace Signum.Entities.Reflection
             if (e is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = GetMemberListBase(e);
+            MemberInfo[] result = GetMemberListBase(e! /*CSBUG*/);
 
             return result;
         }
@@ -219,7 +219,7 @@ namespace Signum.Entities.Reflection
             return e.Follow(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
         }
 
-        static Expression NextExpression(Expression e)
+        static Expression? NextExpression(Expression e)
         {
             switch (e.NodeType)
             {
@@ -244,7 +244,7 @@ namespace Signum.Entities.Reflection
 
         static readonly string[] collectionMethods = new[] { "Element" };
 
-        static MemberInfo GetMember(Expression e)
+        static MemberInfo? GetMember(Expression e)
         {
             switch (e.NodeType)
             {
@@ -284,11 +284,11 @@ namespace Signum.Entities.Reflection
         }
 
         static readonly BindingFlags privateFlags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic;
-        public static FieldInfo TryFindFieldInfo(Type type, PropertyInfo pi)
+        public static FieldInfo? TryFindFieldInfo(Type type, PropertyInfo pi)
         {
-            string prefix = pi.DeclaringType != type && pi.DeclaringType.IsInterface ? pi.DeclaringType.FullName + "." : null;
+            string? prefix = pi.DeclaringType != type && pi.DeclaringType.IsInterface ? pi.DeclaringType.FullName + "." : null;
 
-            FieldInfo fi = null;
+            FieldInfo? fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
                 fi = tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags) ??
@@ -323,13 +323,13 @@ namespace Signum.Entities.Reflection
             return pi;
         }
 
-        public static PropertyInfo TryFindPropertyInfo(FieldInfo fi)
+        public static PropertyInfo? TryFindPropertyInfo(FieldInfo fi)
         {
             using (HeavyProfiler.LogNoStackTrace("TryFindPropertyInfo", () => fi.Name))
             {
                 const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-                string propertyName = null;
+                string? propertyName = null;
                 if (fi.Name.StartsWith("<"))
                 {
                     CheckSignumProcessed(fi);
@@ -358,11 +358,11 @@ namespace Signum.Entities.Reflection
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {
-            QueryablePropertyAttribute spa = pi.GetCustomAttribute<QueryablePropertyAttribute>();
+            QueryablePropertyAttribute? spa = pi.GetCustomAttribute<QueryablePropertyAttribute>();
             if (spa != null)
                 return spa.AvailableForQueries;
 
-            FieldInfo fi = TryFindFieldInfo(type, pi);
+            FieldInfo? fi = TryFindFieldInfo(type, pi);
             if (fi != null && !fi.HasAttribute<IgnoreAttribute>() && !pi.HasAttribute<IgnoreAttribute>())
                 return true;
 
@@ -372,7 +372,7 @@ namespace Signum.Entities.Reflection
             return false;
         }
 
-        public static Func<IFormattable, string> GetPropertyFormatter(string format, string unitName)
+        public static Func<IFormattable?, string?> GetPropertyFormatter(string format, string unitName)
         {
             if (format != null)
             {
@@ -390,7 +390,7 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        public static string FormatString(PropertyRoute route)
+        public static string? FormatString(PropertyRoute route)
         {
             PropertyRoute simpleRoute = route.SimplifyToProperty();
 
@@ -424,7 +424,7 @@ namespace Signum.Entities.Reflection
             return FormatString(route.Type);
         }
 
-        public static string FormatString(Type type)
+        public static string? FormatString(Type type)
         {
             type = type.UnNullify();
             if (type.IsEnum)
@@ -450,11 +450,7 @@ namespace Signum.Entities.Reflection
             }
             return null;
         }
-
-
-
-
-
+        
         public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);

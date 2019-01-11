@@ -1,22 +1,23 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public class TypeEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Max = 200), UniqueIndex]
+        [StringLengthValidator(Max = 200), UniqueIndex]
         public string TableName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200), UniqueIndex]
+        [StringLengthValidator(Max = 200), UniqueIndex]
         public string CleanName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string Namespace { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string ClassName { get; set; }
 
         static Expression<Func<TypeEntity, string>> FullClassNameExpression =

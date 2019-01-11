@@ -205,6 +205,13 @@ namespace Signum.Entities
     [Serializable]
     public class OperationInfo
     {
+        public OperationInfo(OperationSymbol symbol, OperationType type)
+        {
+            this.OperationSymbol = symbol;
+            this.OperationType = type;
+        }
+
+
         public OperationSymbol OperationSymbol { get; internal set; }
         public OperationType OperationType { get; internal set; }
 
@@ -214,8 +221,8 @@ namespace Signum.Entities
         public bool? HasCanExecute { get; internal set; }
 
         public bool Returns { get; internal set; }
-        public Type ReturnType { get; internal set; }
-        public Type BaseType { get; internal set; }
+        public Type? ReturnType { get; internal set; }
+        public Type? BaseType { get; internal set; }
 
         public override string ToString()
         {

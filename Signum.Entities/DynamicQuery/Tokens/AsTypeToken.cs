@@ -69,13 +69,13 @@ namespace Signum.Entities.DynamicQuery
 
         public override string? IsAllowed()
         {
-            var parent = parent.IsAllowed();
-            var routes = GetPropertyRoute()!.IsAllowed();
+            var parentAllowed = this.parent.IsAllowed();
+            var routeAllowed = GetPropertyRoute()!.IsAllowed();
 
-            if (parent.HasText() && routes.HasText())
-                QueryTokenMessage.And.NiceToString().CombineIfNotEmpty(parent, routes);
+            if (parentAllowed.HasText() && routeAllowed.HasText())
+                QueryTokenMessage.And.NiceToString().CombineIfNotEmpty(parentAllowed, routeAllowed);
 
-            return parent ?? routes;
+            return parentAllowed ?? routeAllowed;
         }
 
         public override PropertyRoute? GetPropertyRoute()

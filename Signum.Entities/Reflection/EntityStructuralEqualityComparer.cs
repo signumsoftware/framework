@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,32 +11,32 @@ namespace Signum.Entities.Reflection
 
     public interface IEqualityComparerResolver
     {
-        IEqualityComparer GetEqualityComparer(Type type, PropertyInfo pi);
+        IEqualityComparer GetEqualityComparer(Type type, PropertyInfo? pi);
     }
 
     public interface ICompletableComparer
     {
-        void Complete(IEqualityComparerResolver resolver, PropertyInfo pi);
+        void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi);
     }
 
     public class EntityStructuralEqualityComparer<T> : EqualityComparer<T>, ICompletableComparer
         where T : ModifiableEntity
     {
         public Dictionary<string, PropertyComparer<T>> Properties;
-        public Dictionary<Type, IEqualityComparer> Mixins;
+        public Dictionary<Type, IEqualityComparer>? Mixins;
 
         public EntityStructuralEqualityComparer()
         {
+            this.Properties = null!;
         }
 
-        public void Complete(IEqualityComparerResolver resolver, PropertyInfo pi)
+        public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
             Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
                 .Where(p => !((PropertyInfo)p.MemberInfo).HasAttribute<HiddenPropertyAttribute>())
-               .ToDictionary(a => a.Name, a => new PropertyComparer<T>((PropertyInfo)a.MemberInfo, a.Getter)
-               {
-                   Comparer = resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, ((PropertyInfo)a.MemberInfo))
-               });
+               .ToDictionary(a => a.Name, a => new PropertyComparer<T>(
+                   propertyInfo: (PropertyInfo)a.MemberInfo, a.Getter!, 
+               comparer: resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, (PropertyInfo)a.MemberInfo)));
 
             Mixins = !typeof(Entity).IsAssignableFrom(typeof(T)) ? null :
                 MixinDeclarations.GetMixinDeclarations(typeof(T)).ToDictionary(t => t, t => resolver.GetEqualityComparer(t, null));
@@ -97,20 +97,22 @@ namespace Signum.Entities.Reflection
     }
 
     public class ClassStructuralEqualityComparer<T> : EqualityComparer<T>, ICompletableComparer
+        where T: object
     {
         public Dictionary<string, PropertyComparer<T>> Properties;
 
         public ClassStructuralEqualityComparer()
         {
+            this.Properties = null!;
         }
 
-        public void Complete(IEqualityComparerResolver resolver, PropertyInfo pi)
+        public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
             Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
-              .ToDictionary(a => a.Name, a => new PropertyComparer<T>((PropertyInfo)a.MemberInfo, a.Getter)
-              {
-                  Comparer = resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, ((PropertyInfo)a.MemberInfo))
-              }); ;
+              .ToDictionary(a => a.Name, a => new PropertyComparer<T>(
+                  propertyInfo: (PropertyInfo)a.MemberInfo,
+                  getter: a.Getter!,
+                  comparer: resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, (PropertyInfo)a.MemberInfo)));
         }
 
         public override bool Equals(T x, T y)
@@ -144,23 +146,22 @@ namespace Signum.Entities.Reflection
 
             return result;
         }
-
-
     }
 
     public class PropertyComparer<T>
     {
-        public PropertyInfo MemberInfo { get; set; }
-        public Func<T, object> Getter { get; set; }
+        public PropertyInfo PropertyInfo { get; set; }
+        public Func<T, object?> Getter { get; set; }
         public IEqualityComparer Comparer { get; set; }
 
-        public PropertyComparer(PropertyInfo memberInfo, Func<T, object> getter)
+        public PropertyComparer(PropertyInfo propertyInfo, Func<T, object?> getter, IEqualityComparer comparer)
         {
+            this.PropertyInfo = propertyInfo;
             this.Getter = getter;
-            this.MemberInfo = memberInfo;
+            this.Comparer = comparer;
         }
 
-        public override string ToString() => $"{MemberInfo} -> {Comparer}";
+        public override string ToString() => $"{PropertyInfo} -> {Comparer}";
     }
 
     public class SortedListEqualityComparer<T> : EqualityComparer<IList<T>>, ICompletableComparer
@@ -169,9 +170,10 @@ namespace Signum.Entities.Reflection
 
         public SortedListEqualityComparer()
         {
+            this.ElementComparer = null!;
         }
 
-        public void Complete(IEqualityComparerResolver resolver, PropertyInfo pi)
+        public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
         }
@@ -214,9 +216,10 @@ namespace Signum.Entities.Reflection
 
         public UnsortedListEqualityComparer()
         {
+            this.ElementComparer = null!;
         }
 
-        public void Complete(IEqualityComparerResolver resolver, PropertyInfo pi)
+        public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
         }
@@ -264,8 +267,8 @@ namespace Signum.Entities.Reflection
 
     public abstract class EqualityComparerResolverWithCache : IEqualityComparerResolver
     {
-        Dictionary<(Type, PropertyInfo), IEqualityComparer> cache = new Dictionary<(Type, PropertyInfo), IEqualityComparer>();
-        public virtual IEqualityComparer GetEqualityComparer(Type type, PropertyInfo pi)
+        Dictionary<(Type, PropertyInfo?), IEqualityComparer> cache = new Dictionary<(Type, PropertyInfo?), IEqualityComparer>();
+        public virtual IEqualityComparer GetEqualityComparer(Type type, PropertyInfo? pi)
         {
             if (cache.TryGetValue((type, pi), out var comparer))
                 return comparer;
@@ -277,16 +280,16 @@ namespace Signum.Entities.Reflection
                 if (comp is ICompletableComparer cc)
                     cc.Complete(this, pi);
 
-                return comp;
+                return comp! /*CSBUG*/;
             }
         }
 
-        protected abstract IEqualityComparer GetEqualityComparerInternal(Type type, PropertyInfo pi);
+        protected abstract IEqualityComparer GetEqualityComparerInternal(Type type, PropertyInfo? pi);
     }
 
     public class DefaultEqualityComparerResolver : EqualityComparerResolverWithCache
     {
-        protected override IEqualityComparer GetEqualityComparerInternal(Type type, PropertyInfo pi)
+        protected override IEqualityComparer GetEqualityComparerInternal(Type type, PropertyInfo? pi)
         {
             if (typeof(ModifiableEntity).IsAssignableFrom(type))
             {

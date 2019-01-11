@@ -780,6 +780,7 @@ namespace Signum.Entities
     }
 
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MListElement<E, V> where E : Entity
     {
         public PrimaryKey RowId { get; set; }
@@ -792,6 +793,7 @@ namespace Signum.Entities
             return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
         }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public interface IMListPrivate
     {
