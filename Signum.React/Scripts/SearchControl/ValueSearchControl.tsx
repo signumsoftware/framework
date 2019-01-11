@@ -29,6 +29,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   avoidNotifyPendingRequest?: boolean;
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
+  onRender?: (value?: any, vsc: ValueSearchControl) => React.ReactNode;
 }
 
 export interface ValueSearchControlState {
@@ -147,6 +148,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         </div>
       );
     }
+
+    if (this.props.onRender)
+      return this.props.onRender(this.state.value, this);
 
     let className = classes(
       p.valueToken == undefined && "count-search",
