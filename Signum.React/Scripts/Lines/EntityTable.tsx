@@ -120,13 +120,15 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
     const readOnly = ctx.readOnly;
     const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
 
+    var isEmpty = this.props.avoidEmptyTable && ctx.value.length == 0;
+
     return (
       <div ref={d => this.containerDiv = d}
         className={this.props.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
         style={{ maxHeight: this.props.scrollable ? this.props.maxResultsHeight : undefined }}>
         <table className="table table-sm sf-table">
           {
-            (!this.props.avoidEmptyTable || ctx.value.length > 0) &&
+            !isEmpty &&
             <thead ref={th => this.thead = th}>
               <tr className="bg-light">
                 <th></th>
@@ -155,7 +157,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             {
               this.state.createAsLink && this.state.create && !readOnly &&
               <tr>
-                <td colSpan={1 + this.state.columns!.length}>
+                <td colSpan={1 + this.state.columns!.length} className={isEmpty ? "border-0" : undefined}>
                   {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
                     <a href="#" title={EntityControlMessage.Create.niceToString()}
                       className="sf-line-button sf-create"
