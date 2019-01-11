@@ -1,4 +1,4 @@
-﻿declare function require<T>(path: string): T;
+declare function require<T>(path: string): T;
 declare function require<T>(paths: string[], callback: (...modules: any[]) => void): void;
 
 declare interface Promise<T> {
@@ -11,10 +11,10 @@ declare interface Window {
 }
 
 interface Array<T> {
-  groupBy(this: Array<T>, keySelector: (element: T) => string): { key: string; elements: T[] }[];
+  groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
   groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
   groupWhen(this: Array<T>, condition: (element: T) => boolean): { key: T, elements: T[] }[];
-  groupWhenChange(this: Array<T>, keySelector: (element: T) => string): { key: string, elements: T[] }[];
+  groupWhenChange<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
   orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
   orderByDescending<V>(this: Array<T>, keySelector: (element: T) => V): T[];
   withMin<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
