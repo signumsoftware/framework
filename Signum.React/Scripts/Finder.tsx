@@ -31,7 +31,7 @@ import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import ButtonBar from "./Frames/ButtonBar";
-import { json } from "d3";
+import { json, namespace } from "d3";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -42,7 +42,7 @@ export function clearQuerySettings() {
 
 
 export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => import("./SearchControl/SearchPage")} />);
+  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => FinderFindManager.getSearchPage()} />);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -87,7 +87,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
-  let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => import("./SearchControl/SearchModal")
+  let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
     .then(rr => rr && rr.entity);
 
@@ -103,11 +103,20 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   return getPromiseSearchModal();
 }
 
+export namespace FinderFindManager {
+  export function getSearchPage() {
+    return import("./SearchControl/SearchPage");
+  }
+  export function getSearchModal() {
+    return import("./SearchControl/SearchModal");
+  }
+}
+
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
 
   var qs = getSettings(fo.queryName);
 
-  return import("./SearchControl/SearchModal")
+  return FinderFindManager.getSearchModal()
     .then(a => a.default.open(fo, modalOptions));
 }
 
@@ -126,7 +135,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
-  let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => import("./SearchControl/SearchModal")
+  let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
     .then(rows => rows && rows.map(a => a.entity!));
 
@@ -146,7 +155,7 @@ export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): 
 
   var qs = getSettings(fo.queryName);
 
-  return import("./SearchControl/SearchModal")
+  return FinderFindManager.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions));
 }
 
@@ -164,7 +173,7 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
   if (qs && qs.onExplore && !(modalOptions && modalOptions.useDefaultBehaviour))
     return qs.onExplore(findOptions, modalOptions);
 
-  return import("./SearchControl/SearchModal")
+  return FinderFindManager.getSearchModal()
     .then(a => a.default.explore(findOptions, modalOptions));
 }
 
