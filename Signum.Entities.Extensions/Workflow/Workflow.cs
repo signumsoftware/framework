@@ -23,7 +23,7 @@ namespace Signum.Entities.Workflow
         /// <summary>
         /// REDUNDANT! Only for diff logging
         /// </summary>
-        [InTypeScript(false)]
+        [InTypeScript(false), AvoidDump]
         public WorkflowXmlEmbedded FullDiagramXml { get; set; }
 
         static Expression<Func<WorkflowEntity, string>> ToStringExpression = @this => @this.Name;

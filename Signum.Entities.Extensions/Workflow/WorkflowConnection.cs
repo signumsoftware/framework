@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
@@ -31,7 +31,7 @@ namespace Signum.Entities.Workflow
 
         public int? Order { get; set; }
 
-        [NotNullValidator]
+        [NotNullValidator, AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         public ModelEntity GetModel()
