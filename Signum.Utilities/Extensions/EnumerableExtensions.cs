@@ -372,7 +372,7 @@ namespace Signum.Utilities
 
     public static class EnumerableExtensions
     {
-        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? collection)
         {
             if (collection == null)
                 return Enumerable.Empty<T>();
@@ -399,12 +399,12 @@ namespace Signum.Utilities
             }
         }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T>? collection)
         {
             return collection == null || collection.IsEmpty();
         }
 
-        public static bool HasItems<T>(this IEnumerable<T> collection)
+        public static bool HasItems<T>(this IEnumerable<T>? collection)
         {
             return collection != null && collection.Any();
         }
@@ -1117,7 +1117,7 @@ namespace Signum.Utilities
 
         #region Conversions
 
-        public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)
+        public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T>? collection)
         {
             return collection == null ? EmptyReadOnlyCollection<T>.Instance :
                 collection as ReadOnlyCollection<T> ??

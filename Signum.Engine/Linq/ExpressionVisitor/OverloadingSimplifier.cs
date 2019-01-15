@@ -91,7 +91,7 @@ namespace Signum.Engine.Linq
 
         static int i = 0;
 
-        public static Expression Simplify(Expression expression)
+        public static Expression? Simplify(Expression? expression)
         {
             return new OverloadingSimplifier().Visit(expression);
         }
@@ -471,14 +471,14 @@ namespace Signum.Engine.Linq
             var visitedToStrExp = Visit(toStrExp);
 
             return Expression.Condition(
-                Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),
+                Expression.Equal(expression, Expression.Constant(null, expression!/*CSBUG*/.Type.Nullify())),
                 Expression.Constant(null, typeof(string)),
                 Visit(visitedToStrExp));
         }
 
         public static bool ExtractDefaultIfEmpty(ref Expression expression)
         {
-            MethodCallExpression mce = expression as MethodCallExpression;
+            MethodCallExpression? mce = expression as MethodCallExpression;
 
             if (mce == null || !mce.Method.IsGenericMethod)
                 return false;

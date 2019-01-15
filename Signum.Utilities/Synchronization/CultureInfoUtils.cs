@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Globalization;
 
@@ -6,7 +6,7 @@ namespace Signum.Utilities
 {
     public static class CultureInfoUtils
     {
-        public static IDisposable ChangeBothCultures(string cultureName)
+        public static IDisposable? ChangeBothCultures(string cultureName)
         {
             if (string.IsNullOrEmpty(cultureName))
                 return null;
@@ -14,7 +14,7 @@ namespace Signum.Utilities
             return ChangeBothCultures(CultureInfo.GetCultureInfo(cultureName));
         }
 
-        public static IDisposable ChangeBothCultures(CultureInfo ci)
+        public static IDisposable? ChangeBothCultures(CultureInfo? ci)
         {
             if (ci == null)
                 return null;
@@ -31,7 +31,7 @@ namespace Signum.Utilities
             });
         }
 
-        public static IDisposable ChangeCulture(string cultureName)
+        public static IDisposable? ChangeCulture(string cultureName)
         {
             if (string.IsNullOrEmpty(cultureName))
                 return null;
@@ -39,7 +39,7 @@ namespace Signum.Utilities
             return ChangeCulture(CultureInfo.GetCultureInfo(cultureName));
         }
 
-        public static IDisposable ChangeCulture(CultureInfo ci)
+        public static IDisposable? ChangeCulture(CultureInfo ci)
         {
             if (ci == null)
                 return null;
@@ -50,7 +50,7 @@ namespace Signum.Utilities
             return new Disposable(() => t.CurrentCulture = old);
         }
 
-        public static IDisposable ChangeCultureUI(string cultureName)
+        public static IDisposable? ChangeCultureUI(string cultureName)
         {
             if (string.IsNullOrEmpty(cultureName))
                 return null;
@@ -58,7 +58,7 @@ namespace Signum.Utilities
             return ChangeCultureUI(CultureInfo.GetCultureInfo(cultureName));
         }
 
-        public static IDisposable ChangeCultureUI(CultureInfo ci)
+        public static IDisposable? ChangeCultureUI(CultureInfo? ci)
         {
             if (ci == null)
                 return null;

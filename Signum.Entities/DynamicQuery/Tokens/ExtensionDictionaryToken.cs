@@ -8,15 +8,16 @@ namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
     public class ExtensionDictionaryToken<T, K, V> : QueryToken
-        where K : Object
+        where K : object
     {
         QueryToken parent;
         public override QueryToken? Parent => parent;
 
         public ExtensionDictionaryToken(QueryToken parent, K key,
-            string unit, string format,
+            string? unit, 
+            string? format,
             Implementations? implementations,
-            PropertyRoute propertyRoute, 
+            PropertyRoute? propertyRoute, 
             Expression<Func<T, V>> lambda)
         {
             this.keyValue= key;
@@ -44,10 +45,10 @@ namespace Signum.Entities.DynamicQuery
         K keyValue;
         public override string Key => "[" + keyValue.ToString() + "]";
 
-        string format;
+        string? format;
         public override string? Format => format;
 
-        string unit;
+        string? unit;
         public override string? Unit => unit;
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -63,10 +64,10 @@ namespace Signum.Entities.DynamicQuery
 
             var result = Expression.Invoke(Lambda, parentExpression);
 
-            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute });
+            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
         }
 
-        public PropertyRoute propertyRoute;
+        public PropertyRoute? propertyRoute;
         public override PropertyRoute? GetPropertyRoute() => this.propertyRoute;
 
         public Implementations? implementations;

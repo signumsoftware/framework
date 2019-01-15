@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("LINQ", () => expression.ToString()))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                Expression cleaned = Clean(expression, true, log);
+                Expression cleaned = Clean(expression, true, log)!;
                 var binder = new QueryBinder(aliasGenerator);
                 log.Switch("Bind");
                 ProjectionExpression binded = (ProjectionExpression)binder.BindQuery(cleaned);
@@ -71,17 +71,17 @@ namespace Signum.Engine.Linq
 
         }
 
-        public static Expression Clean(Expression expression, bool filter, HeavyProfiler.Tracer log)
+        public static Expression? Clean(Expression? expression, bool filter, HeavyProfiler.Tracer? log)
         {
-            Expression clean = ExpressionCleaner.Clean(expression);
+            Expression? clean = ExpressionCleaner.Clean(expression);
             log.Switch("OvrLdSmp");
-            Expression simplified = OverloadingSimplifier.Simplify(clean);
+            Expression? simplified = OverloadingSimplifier.Simplify(clean);
             log.Switch("QrFlr");
-            Expression filtered = QueryFilterer.Filter(simplified, filter);
+            Expression? filtered = QueryFilterer.Filter(simplified, filter);
             return filtered;
         }
 
-        internal static Expression Optimize(Expression binded, QueryBinder binder, AliasGenerator aliasGenerator, HeavyProfiler.Tracer log)
+        internal static Expression Optimize(Expression binded, QueryBinder binder, AliasGenerator aliasGenerator, HeavyProfiler.Tracer? log)
         {
             log.Switch("Aggregate");
             Expression rewrited = AggregateRewriter.Rewrite(binded);
@@ -112,7 +112,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                Expression cleaned = Clean(query.Expression, true, log);
+                Expression cleaned = Clean(query.Expression, true, log)!;
 
                 log.Switch("Bind");
                 var binder = new QueryBinder(aliasGenerator);
@@ -133,7 +133,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                Expression cleaned = Clean(updateable.Query.Expression, true, log);
+                Expression cleaned = Clean(updateable.Query.Expression, true, log)!;
 
                 var binder = new QueryBinder(aliasGenerator);
                 log.Switch("Bind");
@@ -154,7 +154,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                Expression cleaned = Clean(query.Expression, true, log);
+                Expression cleaned = Clean(query.Expression, true, log)!;
                 var binder = new QueryBinder(aliasGenerator);
                 log.Switch("Bind");
                 CommandExpression insert = binder.BindInsert(cleaned, constructor, table);

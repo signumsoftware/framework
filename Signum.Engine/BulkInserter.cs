@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -22,7 +22,7 @@ namespace Signum.Engine
             bool validateFirst = true,
             bool disableIdentity = false,
             int? timeout = null,
-            string message = null)
+            string? message = null)
             where T : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsert), () => typeof(T).TypeName()))
@@ -52,13 +52,14 @@ namespace Signum.Engine
         /// <param name="isNewPredicate">Optional filter to query only the recently inseted entities</param>
         public static int BulkInsertQueryIds<T, K>(this IEnumerable<T> entities,
             Expression<Func<T, K>> keySelector,
-            Expression<Func<T, bool>> isNewPredicate = null,
+            Expression<Func<T, bool>>? isNewPredicate = null,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             bool preSaving = true,
             bool validateFirst = true,
             int? timeout = null,
-            string message = null)
+            string? message = null)
             where T : Entity
+            where K : object
         {
             using (HeavyProfiler.Log(nameof(BulkInsertQueryIds), () => typeof(T).TypeName()))
             using (Transaction tr = new Transaction())
@@ -90,7 +91,7 @@ namespace Signum.Engine
             }
         }
 
-        static void BulkInsertMLists<T>(List<T> list, SqlBulkCopyOptions options, int? timeout, string message) where T : Entity
+        static void BulkInsertMLists<T>(List<T> list, SqlBulkCopyOptions options, int? timeout, string? message) where T : Entity
         {
             var mlistPrs = PropertyRoute.GenerateRoutes(typeof(T), includeIgnored: false).Where(a => a.PropertyRouteType == PropertyRouteType.FieldOrProperty && a.Type.IsMList()).ToList();
             foreach (var pr in mlistPrs)
@@ -124,7 +125,7 @@ namespace Signum.Engine
             bool validateFirst = true,
             bool disableIdentity = false,
             int? timeout = null,
-            string message = null)
+            string? message = null)
             where T : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsertTable), () => typeof(T).TypeName()))
@@ -201,11 +202,11 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string, int>> giBulkInsertMListFromEntities =
-            new GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string, int>>((entities, propertyRoute, options, timeout, message) =>
+        static GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>> giBulkInsertMListFromEntities =
+            new GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>>((entities, propertyRoute, options, timeout, message) =>
             BulkInsertMListTablePropertyRoute<Entity, string>((List<Entity>)entities, propertyRoute, options, timeout, message));
 
-        static int BulkInsertMListTablePropertyRoute<E, V>(List<E> entities, PropertyRoute route, SqlBulkCopyOptions copyOptions, int? timeout, string message)
+        static int BulkInsertMListTablePropertyRoute<E, V>(List<E> entities, PropertyRoute route, SqlBulkCopyOptions copyOptions, int? timeout, string? message)
              where E : Entity
         {
             return BulkInsertMListTable<E, V>(entities, route.GetLambdaExpression<E, MList<V>>(safeNullAccess: false), copyOptions, timeout, message);
@@ -216,7 +217,7 @@ namespace Signum.Engine
             Expression<Func<E, MList<V>>> mListProperty,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             int? timeout = null,
-            string message = null)
+            string? message = null)
             where E : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsertMListTable), () => $"{mListProperty} ({typeof(E).TypeName()})"))
@@ -251,7 +252,7 @@ namespace Signum.Engine
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             int? timeout = null,
             bool? updateParentTicks = null, /*Needed for concurrency and Temporal tables*/
-            string message = null)
+            string? message = null)
             where E : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsertMListTable), () => $"{mListProperty} ({typeof(MListElement<E, V>).TypeName()})"))
@@ -310,7 +311,7 @@ namespace Signum.Engine
         public static int BulkInsertView<T>(this IEnumerable<T> entities,
           SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
           int? timeout = null,
-          string message = null)
+          string? message = null)
           where T : IView
         {
             using (HeavyProfiler.Log(nameof(BulkInsertView), () => typeof(T).Name))

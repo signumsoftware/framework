@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -52,7 +52,7 @@ namespace Signum.Engine
             return this.PlainSql();
         }
 
-        public static SqlPreCommand Combine(Spacing spacing, params SqlPreCommand[] sentences)
+        public static SqlPreCommand? Combine(Spacing spacing, params SqlPreCommand?[] sentences)
         {
             if (sentences.Contains(null))
                 sentences = sentences.NotNull().ToArray();
@@ -63,7 +63,7 @@ namespace Signum.Engine
             if (sentences.Length == 1)
                 return sentences[0];
 
-            return new SqlPreCommandConcat(spacing, sentences);
+            return new SqlPreCommandConcat(spacing, sentences as SqlPreCommand[]);
         }
 
 
@@ -71,19 +71,16 @@ namespace Signum.Engine
 
     public static class SqlPreCommandExtensions
     {
-        public static SqlPreCommand Combine(this IEnumerable<SqlPreCommand> preCommands, Spacing spacing)
+        public static SqlPreCommand? Combine(this IEnumerable<SqlPreCommand?> preCommands, Spacing spacing)
         {
             return SqlPreCommand.Combine(spacing, preCommands.ToArray());
         }
 
         public static SqlPreCommand PlainSqlCommand(this SqlPreCommand command)
         {
-            if (command == null)
-                return null;
-
             return command.PlainSql().SplitNoEmpty("GO\r\n" )
                 .Select(s => new SqlPreCommandSimple(s))
-                .Combine(Spacing.Simple);
+                .Combine(Spacing.Simple)!;
         }
 
         public static bool AvoidOpenOpenSqlFileRetry = true;
@@ -132,14 +129,14 @@ namespace Signum.Engine
         public override bool GoAfter { get; set; }
 
         public string Sql { get; private set; }
-        public List<DbParameter> Parameters { get; private set; }
+        public List<DbParameter>? Parameters { get; private set; }
 
         public SqlPreCommandSimple(string sql)
         {
             this.Sql = sql;
         }
 
-        public SqlPreCommandSimple(string sql, List<DbParameter> parameters)
+        public SqlPreCommandSimple(string sql, List<DbParameter>? parameters)
         {
             this.Sql = sql;
             this.Parameters = parameters;
@@ -182,16 +179,16 @@ namespace Signum.Engine
             if (value is bool b)
                 return (b ? 1 : 0).ToString();
 
-            if (Schema.Current.Settings.UdtSqlName.TryGetValue(value.GetType(), out var name))
+            if (Schema.Current.Settings.UdtSqlName.TryGetValue(value!.GetType() /*CSBUG*/, out var name))
                 return "CAST('{0}' AS {1})".FormatWith(value, name);
 
-            if (value.GetType().IsEnum)
+            if (value!.GetType().IsEnum /*CSBUG*/)
                 return Convert.ToInt32(value).ToString();
 
             if (value is byte[] bytes)
                 return "0x" + BitConverter.ToString(bytes).Replace("-", "");
 
-            return value.ToString();
+            return value!.ToString(); /*CSBUG*/
         }
 
         protected internal override void PlainSql(StringBuilder sb)
@@ -218,11 +215,10 @@ namespace Signum.Engine
 
         public override SqlPreCommand Clone()
         {
-            return new SqlPreCommandSimple(Sql, Parameters?.Select(p => Connector.Current.CloneParameter(p))
-                .ToList());
+            return new SqlPreCommandSimple(Sql, Parameters?.Select(p => Connector.Current.CloneParameter(p)).ToList());
         }
 
-        public SqlPreCommandSimple AddComment(string comment)
+        public SqlPreCommandSimple AddComment(string? comment)
         {
             if (comment.HasText())
             {
@@ -236,14 +232,14 @@ namespace Signum.Engine
             return this;
         }
 
-        public SqlPreCommandSimple ReplaceFirstParameter(string variableName)
+        public SqlPreCommandSimple ReplaceFirstParameter(string? variableName)
         {
             if (variableName == null)
                 return this;
 
-            var first = Parameters.FirstEx();
+            var first = Parameters!.FirstEx();
             Sql = Regex.Replace(Sql, $@"(?<toReplace>{first.ParameterName})(\b|$)", variableName); //HACK
-            Parameters.Remove(first);
+            Parameters!.Remove(first);
             return this;
         }
     }

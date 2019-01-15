@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
@@ -95,7 +95,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        internal static Expression Filter(Expression expression, bool filter)
+        internal static Expression? Filter(Expression? expression, bool filter)
         {
             return new QueryFilterer { filter = filter }.Visit(expression);
         }

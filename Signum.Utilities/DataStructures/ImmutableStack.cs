@@ -8,7 +8,7 @@ namespace Signum.Utilities.DataStructures
    
 
     public class ImmutableStack<T> : IEnumerable<T> 
-        where T : object
+        where T : object /*CSBUG*/
     {
         class ImmutableFullStack : ImmutableStack<T>
         {

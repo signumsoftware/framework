@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
@@ -82,7 +82,7 @@ namespace Signum.Engine
 
         public abstract SqlDbType GetSqlDbType(DbParameter p);
 
-        protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
+        protected internal abstract object? ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
         protected internal abstract DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
@@ -108,7 +108,7 @@ namespace Signum.Engine
 
         public abstract ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public abstract void CleanDatabase(DatabaseName database);
+        public abstract void CleanDatabase(DatabaseName? database);
 
         public abstract bool AllowsMultipleQueries { get; }
 
@@ -116,11 +116,11 @@ namespace Signum.Engine
         public abstract bool SupportsScalarSubqueryInAggregates { get; }
 
 
-        public static string TryExtractDatabaseNameWithPostfix(ref string connectionString, string catalogPostfix)
+        public static string? TryExtractDatabaseNameWithPostfix(ref string connectionString, string catalogPostfix)
         {
             string toFind = "+" + catalogPostfix;
 
-            string result = connectionString.TryBefore(toFind).TryAfterLast("=");
+            string? result = connectionString.TryBefore(toFind).TryAfterLast("=");
             if (result == null)
                 return null;
 
@@ -168,7 +168,7 @@ namespace Signum.Engine
 
         public DbParameter CreateReferenceParameter(string parameterName, PrimaryKey? id, IColumn column)
         {
-            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable.ToBool(), id == null ? (object)null : id.Value.Object);
+            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable.ToBool(), id == null ? null : id.Value.Object);
         }
 
         public DbParameter CreateParameter(string parameterName, object value, Type type)
@@ -178,8 +178,8 @@ namespace Signum.Engine
             return CreateParameter(parameterName, pair.SqlDbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), value);
         }
 
-        public abstract DbParameter CreateParameter(string parameterName, SqlDbType type, string udtTypeName, bool nullable, object value);
-        public abstract MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType type, string udtTypeName, bool nullable, Expression value);
+        public abstract DbParameter CreateParameter(string parameterName, SqlDbType type, string? udtTypeName, bool nullable, object? value);
+        public abstract MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType type, string? udtTypeName, bool nullable, Expression value);
 
         protected static bool IsDate(SqlDbType type)
         {

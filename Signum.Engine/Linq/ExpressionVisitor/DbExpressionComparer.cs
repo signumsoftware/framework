@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.ExpressionTrees;
@@ -14,7 +14,7 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionComparer : ExpressionComparer
     {
-        ScopedDictionary<Alias, Alias> aliasMap;
+        ScopedDictionary<Alias, Alias>? aliasMap;
 
         protected IDisposable AliasScope()
         {
@@ -23,13 +23,13 @@ namespace Signum.Engine.Linq
             return new Disposable(() => aliasMap = saved);
         }
 
-        protected DbExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope, bool checkParameterNames)
+        protected DbExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope, ScopedDictionary<Alias, Alias>? aliasScope, bool checkParameterNames)
             : base(parameterScope, checkParameterNames)
         {
             this.aliasMap = aliasScope;
         }
 
-        public static bool AreEqual(Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope = null, ScopedDictionary<Alias, Alias> aliasScope = null, bool checkParameterNames = false)
+        public static bool AreEqual(Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope = null, ScopedDictionary<Alias, Alias>? aliasScope = null, bool checkParameterNames = false)
         {
             return new DbExpressionComparer(parameterScope, aliasScope, checkParameterNames ).Compare(a, b);
         }
@@ -195,7 +195,7 @@ namespace Signum.Engine.Linq
         {
             for (int i = 0, n = sourceA.KnownAliases.Length; i < n; i++)
             {
-                aliasMap.Add(sourceA.KnownAliases[i], sourceB.KnownAliases[i]);
+                aliasMap!.Add(sourceA.KnownAliases[i], sourceB.KnownAliases[i]);
             }
         }
 

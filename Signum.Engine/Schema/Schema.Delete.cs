@@ -9,7 +9,7 @@ namespace Signum.Engine.Maps
 {
     public partial class Table
     {
-        public SqlPreCommand DeleteSqlSync<T>(T entity, Expression<Func<T, bool>> where, string comment = null)
+        public SqlPreCommand DeleteSqlSync<T>(T entity, Expression<Func<T, bool>>? where, string? comment = null)
             where T : Entity
         {
             if (typeof(T) != Type && where != null)

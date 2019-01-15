@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -22,7 +22,7 @@ namespace Signum.Engine
         public static bool ShouldAvoidMListType(Type elementType)
         {
             var stack = avoidTypes.Value;
-            return (stack != null && (stack.Contains(elementType) || stack.Contains(null)));
+            return (stack != null && (stack.Contains(elementType) || stack.Contains(typeof(object))));
         }
 
         public static bool IsVirtualMList(this PropertyRoute pr)
@@ -43,7 +43,7 @@ namespace Signum.Engine
         public static bool ShouldConsiderNew(Type parentType)
         {
             var stack = considerNewTypes.Value;
-            return (stack != null && (stack.Contains(parentType) || stack.Contains(null)));
+            return (stack != null && (stack.Contains(parentType) || stack.Contains(typeof(object))));
         }
 
         /// <param name="parentType">Use null for every type</param>
@@ -77,8 +77,8 @@ namespace Signum.Engine
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> backReference,
-            Action<L, T> onSave = null,
-            Action<L, T> onRemove = null,
+            Action<L, T>? onSave = null,
+            Action<L, T>? onRemove = null,
             bool? lazyRetrieve = null,
             bool? lazyDelete = null) //To avoid StackOverflows
             where T : Entity
@@ -94,7 +94,7 @@ namespace Signum.Engine
                 lazyDelete = (typeof(L) == typeof(T));
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
-            Action<L, Lite<T>> setter = null;
+            Action<L, Lite<T>>? setter = null;
             bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)
                 .OfType<PreserveOrderAttribute>()
                 .Any();
@@ -204,7 +204,7 @@ namespace Signum.Engine
                     if(onRemove == null)
                         query.Where(p => !oldElements.Contains(p)).UnsafeDelete();
                     else
-                        query.Where(p => !oldElements.Contains(p)).ToList().ForEach(line => onRemove(line, e));
+                        query.Where(p => !oldElements.Contains(p)).ToList().ForEach(line => onRemove!(line, e));
                 }
 
                 if (mlist != null)
@@ -218,7 +218,7 @@ namespace Signum.Engine
                         if (onSave == null)
                             mlist.SaveList();
                         else
-                            mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
+                            mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave!(line, e); });
 
                         var priv = (IMListPrivate)mlist;
                         for (int i = 0; i < mlist.Count; i++)
@@ -257,12 +257,12 @@ namespace Signum.Engine
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> backReference,
-            Action<L, T> onSave = null)
+            Action<L, T>? onSave = null)
             where T : Entity
             where L : Entity
         {
             Func<T, MList<L>> getMList = GetAccessor(mListField);
-            Action<L, Lite<T>> setter = null;
+            Action<L, Lite<T>>? setter = null;
             var sb = fi.SchemaBuilder;
 
             sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
@@ -302,7 +302,11 @@ namespace Signum.Engine
                 if (onSave == null)
                     mlist.SaveList();
                 else
-                    mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
+                    mlist.ForEach(line =>
+                    {
+                        if (GraphExplorer.IsGraphModified(line))
+                            onSave!(line, e);
+                    });
                 var priv = (IMListPrivate)mlist;
                 for (int i = 0; i < mlist.Count; i++)
                 {
@@ -338,7 +342,7 @@ namespace Signum.Engine
                 );
         }
 
-        public static Action<L, Lite<T>> CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
+        public static Action<L, Lite<T>>? CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
             where T : Entity
             where L : Entity
         {

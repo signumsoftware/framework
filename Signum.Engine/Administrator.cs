@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Linq;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
@@ -21,7 +21,7 @@ namespace Signum.Engine
             foreach (var db in Schema.Current.DatabaseNames())
                 Connector.Current.CleanDatabase(db);
 
-            SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt();
+            SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
             foreach (SqlPreCommand command in totalScript.Commands)
             {
                 command.ExecuteLeaves();
@@ -72,12 +72,12 @@ namespace Signum.Engine
             return sb.ToString();
         }
 
-        public static SqlPreCommand TotalGenerationScript()
+        public static SqlPreCommand? TotalGenerationScript()
         {
             return Schema.Current.GenerationScipt();
         }
 
-        public static SqlPreCommand TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
+        public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
         {
             var command = Schema.Current.SynchronizationScript(interactive, schemaOnly);
 
@@ -120,8 +120,8 @@ namespace Signum.Engine
             SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
 
-        internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
-        public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)
+        internal static readonly ThreadVariable<DatabaseName?> sysViewDatabase = Statics.ThreadVariable<DatabaseName?>("viewDatabase");
+        public static IDisposable OverrideDatabaseInSysViews(DatabaseName? database)
         {
             var old = sysViewDatabase.Value;
             sysViewDatabase.Value = database;
@@ -143,10 +143,10 @@ namespace Signum.Engine
         {
             SchemaName schema = table.Name.Schema;
 
-            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
+            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database!.Server!.Name))
                 return false;
 
-            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
+            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database!.Name))
                 return false;
 
             using (schema.Database == null ? null : Administrator.OverrideDatabaseInSysViews(schema.Database))
@@ -244,7 +244,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteDuplicates<E, K>(this IQueryable<E> query, Expression<Func<E, K>> key, string message = null)
+        public static int UnsafeDeleteDuplicates<E, K>(this IQueryable<E> query, Expression<Func<E, K>> key, string? message = null)
            where E : Entity
         {
             return (from e in query
@@ -252,7 +252,7 @@ namespace Signum.Engine
                     select e).UnsafeDelete(message);
         }
 
-        public static int UnsafeDeleteMListDuplicates<E, V, K>(this IQueryable<MListElement<E,V>> query, Expression<Func<MListElement<E, V>, K>> key, string message = null)
+        public static int UnsafeDeleteMListDuplicates<E, V, K>(this IQueryable<MListElement<E,V>> query, Expression<Func<MListElement<E, V>, K>> key, string? message = null)
             where E : Entity
         {
             return (from e in query
@@ -267,7 +267,7 @@ namespace Signum.Engine
             return prov.Translate(query.Expression, tr => tr.MainCommand);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
+        public static SqlPreCommandSimple? UnsafeDeletePreCommand<T>(IQueryable<T> query)
             where T : Entity
         {
             if (!Administrator.ExistsTable<T>() || !query.Any())
@@ -278,7 +278,7 @@ namespace Signum.Engine
                 return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommandMList<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
+        public static SqlPreCommandSimple? UnsafeDeletePreCommandMList<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
             where E : Entity
         {
             if (!Administrator.ExistsTable(Schema.Current.TableMList(mListProperty)) || !query.Any())
@@ -322,12 +322,12 @@ namespace Signum.Engine
             });
         }
 
-        public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : Entity, new()
+        public static void UpdateToStrings<T>(Expression<Func<T, string?>> expression) where T : Entity, new()
         {
             UpdateToStrings(Database.Query<T>(), expression);
         }
 
-        public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : Entity, new()
+        public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string?>> expression) where T : Entity, new()
         {
             SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".FormatWith(typeof(T).TypeName()), () =>
                 query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
@@ -340,7 +340,7 @@ namespace Signum.Engine
                 .Execute();
         }
 
-        public static void UpdateToString<T>(T entity, Expression<Func<T, string>> expression) where T : Entity, new()
+        public static void UpdateToString<T>(T entity, Expression<Func<T, string?>> expression) where T : Entity, new()
         {
             entity.InDB().UnsafeUpdate()
                 .Set(e => e.toStr, expression)
@@ -393,13 +393,13 @@ namespace Signum.Engine
                 if (multiIndexes.Any())
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
-                    multiIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
+                    multiIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(i, table.Name), "\r\n"));
 
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
-                        multiIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
+                        multiIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     };
                 }
             }
@@ -411,11 +411,11 @@ namespace Signum.Engine
                 if (uniqueIndexes.Any())
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
-                    uniqueIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
+                    uniqueIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
-                        uniqueIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
+                        uniqueIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     };
                 }
             }
@@ -452,11 +452,11 @@ namespace Signum.Engine
                  ParentColumn = parentTable.Columns().SingleEx(c => c.column_id == ifk.ForeignKeyColumns().SingleEx().parent_column_id).name,
              }).ToList());
 
-            foreignKeys.ForEach(fk => SqlBuilder.AlterTableDropConstraint(fk.ParentTable, fk.Name).ExecuteLeaves());
+            foreignKeys.ForEach(fk => SqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name! /*CSBUG*/).ExecuteLeaves());
 
             return new Disposable(() =>
             {
-                foreignKeys.ToList().ForEach(fk => SqlBuilder.AlterTableAddConstraintForeignKey(fk.ParentTable, fk.ParentColumn, table.Name, table.PrimaryKey.Name).ExecuteLeaves());
+                foreignKeys.ToList().ForEach(fk => SqlBuilder.AlterTableAddConstraintForeignKey(fk.ParentTable!, fk.ParentColumn!, table.Name, table.PrimaryKey.Name)!.ExecuteLeaves());
             });
         }
 
@@ -491,27 +491,27 @@ namespace Signum.Engine
             var indexesNames = Administrator.GetIndixesNames(table, unique: true);
 
             if (indexesNames.HasItems())
-                indexesNames.Select(n => SqlBuilder.DropIndex(table.Name, n)).Combine(Spacing.Simple).ExecuteLeaves();
+                indexesNames.Select(n => SqlBuilder.DropIndex(table.Name, n)).Combine(Spacing.Simple)!.ExecuteLeaves();
         }
 
 
-        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
+        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool>? shouldMove = null)
         where T : Entity
         {
             using (Transaction tr = new Transaction())
             {
-                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
+                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double)!.ExecuteLeaves();
                 tr.Commit();
             }
         }
 
-        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
+        public static SqlPreCommand? MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool>? shouldMove = null)
         where T : Entity
         {
             return MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double);
         }
 
-        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
+        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool>? shouldMove = null)
             where T : Entity
         {
             var tuples = MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove);
@@ -525,9 +525,15 @@ namespace Signum.Engine
         {
             public ColumnTable ColumnTable;
             public SqlPreCommandSimple UpdateScript;
+
+            public ColumnTableScript(ColumnTable columnTable, SqlPreCommandSimple updateScript)
+            {
+                ColumnTable = columnTable;
+                UpdateScript = updateScript;
+            }
         }
 
-        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove)
+        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool>? shouldMove)
         where T : Entity
         {
             if (fromEntity.GetType() != toEntity.GetType())
@@ -542,24 +548,26 @@ namespace Signum.Engine
 
             List<ColumnTable> columns = GetColumnTables(s, refTable);
             if (shouldMove != null)
-                columns = columns.Where(p => shouldMove(p.Table, p.Column)).ToList();
+                columns = columns.Where(p => shouldMove!(p.Table, p.Column)).ToList();
 
             var pb = Connector.Current.ParameterBuilder;
-            return columns.Select(ct => new ColumnTableScript
-            {
-                ColumnTable = ct,
-                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
+            return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
                 {
                     pb.CreateReferenceParameter("@fromEntity", fromEntity.Id, ct.Column),
                     pb.CreateReferenceParameter("@toEntity", toEntity.Id, ct.Column),
-                })
-            }).ToList();
+                }))).ToList();
         }
 
         class ColumnTable
         {
             public ITable Table;
             public IColumn Column;
+
+            public ColumnTable(ITable table, IColumn column)
+            {
+                Table = table;
+                Column = column;
+            }
         }
 
         static ConcurrentDictionary<Table, List<ColumnTable>> columns = new ConcurrentDictionary<Table, List<ColumnTable>>();
@@ -571,11 +579,8 @@ namespace Signum.Engine
                 return (from t in schema.GetDatabaseTables()
                         from c in t.Columns.Values
                         where c.ReferenceTable == rt
-                        select new ColumnTable
-                        {
-                            Table = t,
-                            Column = c,
-                        }).ToList();
+                        select new ColumnTable(t,c))
+                        .ToList();
             });
         }
 

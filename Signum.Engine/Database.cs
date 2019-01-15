@@ -85,7 +85,7 @@ namespace Signum.Engine
             if (lite.EntityOrNull == null)
                 lite.SetEntity(Retrieve(lite.EntityType, lite.Id));
 
-            return lite.EntityOrNull;
+            return lite.EntityOrNull!;
         }
 
         public static async Task<T> RetrieveAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
@@ -96,7 +96,7 @@ namespace Signum.Engine
             if (lite.EntityOrNull == null)
                 lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token));
 
-            return lite.EntityOrNull;
+            return lite.EntityOrNull!;
         }
 
 
@@ -212,7 +212,7 @@ namespace Signum.Engine
             }
         }
 
-        static CacheControllerBase<T> GetCacheController<T>() where T : Entity
+        static CacheControllerBase<T>? GetCacheController<T>() where T : Entity
         {
             CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
 
@@ -224,7 +224,7 @@ namespace Signum.Engine
             return cc;
         }
 
-        static FilterQueryResult<T> GetFilterQuery<T>() where T : Entity
+        static FilterQueryResult<T>? GetFilterQuery<T>() where T : Entity
         {
             if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA?
                 return null;
@@ -314,7 +314,7 @@ namespace Signum.Engine
             }
         }
 
-        public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntity
+        public static Lite<T>? FillToString<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 return null;
@@ -326,9 +326,6 @@ namespace Signum.Engine
 
         public static async Task<Lite<T>> FillToStringAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
-            if (lite == null)
-                return null;
-
             lite.SetToString(await GetToStrAsync(lite.EntityType, lite.Id, token));
 
             return lite;
@@ -629,9 +626,9 @@ namespace Signum.Engine
         }
 
 
-        private static GenericInvoker<Func<List<PrimaryKey>, string, IList>> giRetrieveList =
-            new GenericInvoker<Func<List<PrimaryKey>, string, IList>>((ids, message) => RetrieveList<Entity>(ids, message));
-        public static List<T> RetrieveList<T>(List<PrimaryKey> ids, string message = null)
+        private static GenericInvoker<Func<List<PrimaryKey>, string?, IList>> giRetrieveList =
+            new GenericInvoker<Func<List<PrimaryKey>, string?, IList>>((ids, message) => RetrieveList<Entity>(ids, message));
+        public static List<T> RetrieveList<T>(List<PrimaryKey> ids, string? message = null)
             where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
@@ -639,7 +636,7 @@ namespace Signum.Engine
                 if (ids == null)
                     throw new ArgumentNullException(nameof(ids));
                 List<PrimaryKey> remainingIds;
-                Dictionary<PrimaryKey, T> result = null;
+                Dictionary<PrimaryKey, T>? result = null;
                 if (EntityCache.Created)
                 {
                     result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
@@ -677,7 +674,7 @@ namespace Signum.Engine
             }
         }
 
-        static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids, string message = null) where T : Entity
+        static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids, string? message = null) where T : Entity
         {
             var cc = GetCacheController<T>();
             if (cc != null)
@@ -733,7 +730,7 @@ namespace Signum.Engine
                 if (ids == null)
                     throw new ArgumentNullException(nameof(ids));
                 List<PrimaryKey> remainingIds;
-                Dictionary<PrimaryKey, T> result = null;
+                Dictionary<PrimaryKey, T>? result = null;
                 if (EntityCache.Created)
                 {
                     result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
@@ -805,7 +802,7 @@ namespace Signum.Engine
             return task.SelectMany(list => list).ToList();
         }
 
-        public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids, string message = null)
+        public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids, string? message = null)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -902,7 +899,7 @@ namespace Signum.Engine
             return list.Cast<Lite<Entity>>().ToList();
         }
 
-        public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites, string message = null)
+        public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites, string? message = null)
             where T : class, IEntity
         {
             if (lites == null)
@@ -1262,7 +1259,7 @@ namespace Signum.Engine
         #endregion
 
         #region UnsafeDelete
-        public static int UnsafeDelete<T>(this IQueryable<T> query, string message = null)
+        public static int UnsafeDelete<T>(this IQueryable<T> query, string? message = null)
             where T : Entity
         {
             if (message != null)
@@ -1286,7 +1283,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, string message = null)
+        public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, string? message = null)
             where E : Entity
         {
             if (message != null)
@@ -1309,7 +1306,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteView<T>(this IQueryable<T> query, string message = null)
+        public static int UnsafeDeleteView<T>(this IQueryable<T> query, string? message = null)
            where T : IView
         {
             if (message != null)
@@ -1409,7 +1406,7 @@ namespace Signum.Engine
             return new UpdateablePart<A, V>(query, partSelector, null);
         }
 
-        public static int Execute(this IUpdateable update, string message = null)
+        public static int Execute(this IUpdateable update, string? message = null)
         {
             if (message != null)
                 return SafeConsole.WaitRows(message == "auto" ? $"Updating { update.EntityType.TypeName()}" : message,
@@ -1453,13 +1450,13 @@ namespace Signum.Engine
 
         #region UnsafeInsert
 
-        public static int UnsafeInsert<E>(this IQueryable<E> query, string message = null)
+        public static int UnsafeInsert<E>(this IQueryable<E> query, string? message = null)
               where E : Entity
         {
             return query.UnsafeInsert(a => a, message);
         }
 
-        public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string message = null)
+        public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string? message = null)
             where E : Entity
         {
             if (message != null)
@@ -1485,13 +1482,13 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeInsertMList<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<E, MList<V>>> mListProperty, string message = null)
+        public static int UnsafeInsertMList<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<E, MList<V>>> mListProperty, string? message = null)
             where E : Entity
         {
             return query.UnsafeInsertMList(mListProperty, a => a, message);
         }
 
-        public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty, Expression<Func<T, MListElement<E, V>>> constructor, string message = null)
+        public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty, Expression<Func<T, MListElement<E, V>>> constructor, string? message = null)
                where E : Entity
         {
 
@@ -1518,7 +1515,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeInsertView<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string message = null)
+        public static int UnsafeInsertView<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string? message = null)
             where E : IView
         {
             if (message != null)
@@ -1546,7 +1543,7 @@ namespace Signum.Engine
 
         #endregion
 
-        public static void Merge<E, A>(string title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey, List<Expression<Func<E, object>>> toUpdate = null)
+        public static void Merge<E, A>(string? title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey, List<Expression<Func<E, object>>>? toUpdate = null)
             where E : Entity
             where A : class
         {
@@ -1560,12 +1557,12 @@ namespace Signum.Engine
             if (toUpdate != null)
             {
                 var updater = (from c in current
-                              join s in should on getKey.Evaluate(c) equals getKey.Evaluate(s)
-                              select new { c, s }).UnsafeUpdatePart(a => a.c);
+                               join s in should on getKey.Evaluate(c) equals getKey.Evaluate(s)
+                               select new { c, s }).UnsafeUpdatePart(a => a.c!); /*CSBUG*/
 
                 foreach (var prop in toUpdate)
                 {
-                    updater = updater.Set(prop, a => prop.Evaluate(a.s));
+                    updater = updater.Set(prop, a => prop.Evaluate(a.s!));/*CSBUG*/
                 }
 
                 updater.Execute(title != null ? "auto" : null);
@@ -1598,7 +1595,7 @@ namespace Signum.Engine
             return result;
         }
 
-        public static List<T> ToListWait<T>(this IQueryable<T> query, int timeoutSeconds, string message = null)
+        public static List<T> ToListWait<T>(this IQueryable<T> query, int timeoutSeconds, string? message = null)
         {
             using (Connector.CommandTimeoutScope(timeoutSeconds))
             {
@@ -1631,7 +1628,7 @@ namespace Signum.Engine
     public interface IUpdateable
     {
         IQueryable Query { get; }
-        LambdaExpression PartSelector { get; }
+        LambdaExpression? PartSelector { get; }
         IEnumerable<SetterExpressions> SetterExpressions { get; }
 
         Type EntityType { get; }
@@ -1657,7 +1654,7 @@ namespace Signum.Engine
         Expression<Func<A, T>> partSelector;
         ReadOnlyCollection<SetterExpressions> settersExpressions;
 
-        public UpdateablePart(IQueryable<A> query, Expression<Func<A, T>> partSelector, IEnumerable<SetterExpressions> setters)
+        public UpdateablePart(IQueryable<A> query, Expression<Func<A, T>> partSelector, IEnumerable<SetterExpressions>? setters)
         {
             this.query = query;
             this.partSelector = partSelector;
@@ -1666,7 +1663,7 @@ namespace Signum.Engine
 
         public IQueryable Query { get { return this.query; } }
 
-        public LambdaExpression PartSelector { get { return this.partSelector; } }
+        public LambdaExpression? PartSelector { get { return this.partSelector; } }
 
         public IEnumerable<SetterExpressions> SetterExpressions { get { return this.settersExpressions; } }
 
@@ -1722,7 +1719,7 @@ namespace Signum.Engine
         IQueryable<T> query;
         ReadOnlyCollection<SetterExpressions> settersExpressions;
 
-        public Updateable(IQueryable<T> query, IEnumerable<SetterExpressions> setters)
+        public Updateable(IQueryable<T> query, IEnumerable<SetterExpressions>? setters)
         {
             this.query = query;
             this.settersExpressions = (setters ?? Enumerable.Empty<SetterExpressions>()).ToReadOnly();
@@ -1730,7 +1727,7 @@ namespace Signum.Engine
 
         public IQueryable Query { get { return this.query; } }
 
-        public LambdaExpression PartSelector { get { return null; } }
+        public LambdaExpression? PartSelector { get { return null; } }
 
         public IEnumerable<SetterExpressions> SetterExpressions { get { return this.settersExpressions; } }
 

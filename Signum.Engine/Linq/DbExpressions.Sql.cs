@@ -177,18 +177,18 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
 
-        public ObjectName Name { get { return SystemTime is SystemTime.HistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+        public ObjectName Name { get { return SystemTime is SystemTime.HistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
 
-        public SystemTime SystemTime { get; private set; }
+        public SystemTime? SystemTime { get; private set; }
 
-        public readonly string WithHint;
+        public readonly string? WithHint;
 
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, ITable table, SystemTime systemTime, string withHint)
+        internal TableExpression(Alias alias, ITable table, SystemTime? systemTime, string? withHint)
             : base(DbExpressionType.Table, alias)
         {
             this.Table = table;
@@ -239,11 +239,7 @@ namespace Signum.Engine.Linq
             return "{0}.{1}".FormatWith(Alias, Name);
         }
 
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as ColumnExpression);
-        }
-
+        public override bool Equals(object obj) => obj is ColumnExpression ce && Equals(ce);
         public bool Equals(ColumnExpression other)
         {
             return other != null && other.Alias == Alias && other.Name == Name;
@@ -365,11 +361,11 @@ namespace Signum.Engine.Linq
     internal class SelectExpression : SourceWithAliasExpression
     {
         public readonly ReadOnlyCollection<ColumnDeclaration> Columns;
-        public readonly SourceExpression From;
-        public readonly Expression Where;
+        public readonly SourceExpression? From;
+        public readonly Expression? Where;
         public readonly ReadOnlyCollection<OrderExpression> OrderBy;
         public readonly ReadOnlyCollection<Expression> GroupBy;
-        public readonly Expression Top;
+        public readonly Expression? Top;
         public readonly bool IsDistinct;
         public readonly SelectOptions SelectOptions;
 
@@ -400,7 +396,7 @@ namespace Signum.Engine.Linq
             get { return knownAliases; }
         }
 
-        internal SelectExpression(Alias alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, SelectOptions options)
+        internal SelectExpression(Alias alias, bool distinct, Expression? top, IEnumerable<ColumnDeclaration>? columns, SourceExpression? from, Expression? where, IEnumerable<OrderExpression>? orderBy, IEnumerable<Expression>? groupBy, SelectOptions options)
             : base(DbExpressionType.Select, alias)
         {
             this.IsDistinct = distinct;
@@ -492,14 +488,14 @@ namespace Signum.Engine.Linq
         public readonly JoinType JoinType;
         public readonly SourceExpression Left;
         public readonly SourceExpression Right;
-        public new readonly Expression Condition;
+        public new readonly Expression? Condition;
 
         public override Alias[] KnownAliases
         {
             get { return Left.KnownAliases.Concat(Right.KnownAliases).ToArray(); }
         }
 
-        internal JoinExpression(JoinType joinType, SourceExpression left, SourceExpression right, Expression condition)
+        internal JoinExpression(JoinType joinType, SourceExpression left, SourceExpression right, Expression? condition)
             : base(DbExpressionType.Join)
         {
             if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.OuterApply && joinType != JoinType.CrossJoin)
@@ -716,11 +712,11 @@ namespace Signum.Engine.Linq
 
     internal class SqlFunctionExpression : DbExpression
     {
-        public readonly Expression Object;
+        public readonly Expression? Object;
         public readonly string SqlFunction;
         public readonly ReadOnlyCollection<Expression> Arguments;
 
-        public SqlFunctionExpression(Type type, Expression obj, string sqlFunction, IEnumerable<Expression> arguments)
+        public SqlFunctionExpression(Type type, Expression? obj, string sqlFunction, IEnumerable<Expression> arguments)
             : base(DbExpressionType.SqlFunction, type)
         {
             this.SqlFunction = sqlFunction;
@@ -744,14 +740,14 @@ namespace Signum.Engine.Linq
 
     internal class SqlConstantExpression : DbExpression
     {
-        public readonly object Value;
+        public readonly object? Value;
 
         public SqlConstantExpression(object value)
             : this(value, value.GetType())
         {
         }
 
-        public SqlConstantExpression(object value, Type type)
+        public SqlConstantExpression(object? value, Type type)
             : base(DbExpressionType.SqlConstant, type)
         {
             this.Value = value;
@@ -853,10 +849,9 @@ namespace Signum.Engine.Linq
     internal class CaseExpression : DbExpression
     {
         public readonly ReadOnlyCollection<When> Whens;
-        public readonly Expression DefaultValue;
-
-
-        public CaseExpression(IEnumerable<When> whens, Expression defaultValue)
+        public readonly Expression? DefaultValue;
+        
+        public CaseExpression(IEnumerable<When> whens, Expression? defaultValue)
             : base(DbExpressionType.Case, GetType(whens, defaultValue))
         {
             if (whens.IsEmpty())
@@ -871,7 +866,7 @@ namespace Signum.Engine.Linq
             this.DefaultValue = defaultValue;
         }
 
-        static Type GetType(IEnumerable<When> whens, Expression defaultValue)
+        static Type GetType(IEnumerable<When> whens, Expression? defaultValue)
         {
             var types = whens.Select(w => w.Value.Type).ToList();
             if (defaultValue != null)
@@ -933,8 +928,8 @@ namespace Signum.Engine.Linq
 
     internal abstract class SubqueryExpression : DbExpression
     {
-        public readonly SelectExpression Select;
-        protected SubqueryExpression(DbExpressionType nodeType, Type type, SelectExpression select)
+        public readonly SelectExpression? Select;
+        protected SubqueryExpression(DbExpressionType nodeType, Type type, SelectExpression? select)
             : base(nodeType, type)
         {
             System.Diagnostics.Debug.Assert(nodeType == DbExpressionType.Scalar || nodeType == DbExpressionType.Exists || nodeType == DbExpressionType.In);
@@ -951,7 +946,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "SCALAR({0})".FormatWith(Select.ToString());
+            return "SCALAR({0})".FormatWith(Select!.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1011,7 +1006,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "EXIST({0})".FormatWith(Select.ToString());
+            return "EXIST({0})".FormatWith(Select!.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1023,7 +1018,7 @@ namespace Signum.Engine.Linq
     internal class InExpression : SubqueryExpression
     {
         public readonly Expression Expression;
-        public readonly object[] Values;
+        public readonly object[]? Values;
 
         public InExpression(Expression expression, SelectExpression select)
             : base(DbExpressionType.In, typeof(bool), select)
@@ -1054,7 +1049,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             if (Values == null)
-                return "{0} IN ({1})".FormatWith(Expression.ToString(), Select.ToString());
+                return "{0} IN ({1})".FormatWith(Expression.ToString(), Select!.ToString());
             else
                 return "{0} IN ({1})".FormatWith(Expression.ToString(), Values.ToString(", "));
         }
@@ -1089,9 +1084,9 @@ namespace Signum.Engine.Linq
 
     internal class RowNumberExpression : DbExpression
     {
-        public readonly ReadOnlyCollection<OrderExpression> OrderBy;
+        public readonly ReadOnlyCollection<OrderExpression>? OrderBy;
 
-        public RowNumberExpression(IEnumerable<OrderExpression> orderBy)
+        public RowNumberExpression(IEnumerable<OrderExpression>? orderBy)
             : base(DbExpressionType.RowNumber, typeof(int))
         {
             this.OrderBy = orderBy.ToReadOnly();
@@ -1193,7 +1188,7 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
         public readonly bool UseHistoryTable;
-        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
 
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
@@ -1225,7 +1220,7 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
         public readonly bool UseHistoryTable;
-        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
 
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
@@ -1260,7 +1255,7 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
         public readonly bool UseHistoryTable;
-        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
 

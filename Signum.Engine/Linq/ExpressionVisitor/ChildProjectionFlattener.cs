@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -13,11 +13,11 @@ namespace Signum.Engine.Linq
 {
     internal class ChildProjectionFlattener : DbExpressionVisitor
     {
-        SelectExpression currentSource;
+        SelectExpression? currentSource;
         AliasGenerator aliasGenerator;
         private ChildProjectionFlattener(){}
 
-        public Type inMList = null;
+        public Type? inMList = null;
 
         protected internal override Expression VisitMListProjection(MListProjectionExpression mlp)
         {

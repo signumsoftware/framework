@@ -19,11 +19,11 @@ namespace Signum.Engine.Maps
 {
     public class Schema : IImplementationsFinder
     {
-        public CultureInfo ForceCultureInfo { get; set; }
+        public CultureInfo? ForceCultureInfo { get; set; }
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
-        Version version;
+        Version? version;
         public Version Version
         {
             get
@@ -42,7 +42,7 @@ namespace Signum.Engine.Maps
             this.OnMetadataInvalidated?.Invoke();
         }
 
-        string applicationName;
+        string? applicationName;
         public string ApplicationName
         {
             get { return applicationName ?? (applicationName = AppDomain.CurrentDomain.FriendlyName); }
@@ -68,7 +68,7 @@ namespace Signum.Engine.Maps
 
         public event Func<Type, bool, string> IsAllowedCallback;
 
-        public string IsAllowed(Type type, bool inUserInterface)
+        public string? IsAllowed(Type type, bool inUserInterface)
         {
             foreach (var f in IsAllowedCallback.GetInvocationListTyped())
             {
@@ -88,7 +88,7 @@ namespace Signum.Engine.Maps
 
         public void AssertAllowed(Type type, bool inUserInterface)
         {
-            string error = IsAllowed(type, inUserInterface);
+            string? error = IsAllowed(type, inUserInterface);
 
             if (error != null)
                 throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().FormatWith(type.NiceName(), error));
@@ -112,7 +112,7 @@ namespace Signum.Engine.Maps
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
-            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
                 ee.OnPreSaving(entity, ctx);
@@ -120,11 +120,11 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnPreSaving(entity, ctx);
         }
 
-        internal Entity OnAlternativeRetriving(Type entityType, PrimaryKey id)
+        internal Entity? OnAlternativeRetriving(Type entityType, PrimaryKey id)
         {
             AssertAllowed(entityType, inUserInterface: false);
 
-            IEntityEvents ee = entityEvents.TryGetC(entityType);
+            IEntityEvents? ee = entityEvents.TryGetC(entityType);
 
             if (ee == null)
                 return null;
@@ -136,7 +136,7 @@ namespace Signum.Engine.Maps
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
-            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
                 ee.OnSaving(entity);
@@ -149,7 +149,7 @@ namespace Signum.Engine.Maps
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
-            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
                 ee.OnSaved(entity, args);
@@ -161,7 +161,7 @@ namespace Signum.Engine.Maps
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
-            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
                 ee.OnRetrieved(entity);
@@ -169,11 +169,11 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnRetrieved(entity);
         }
 
-        internal IDisposable OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
+        internal IDisposable? OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
         {
             AssertAllowed(typeof(T), inUserInterface: false);
 
-            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
 
             if (ee == null)
                 return null;
@@ -181,11 +181,11 @@ namespace Signum.Engine.Maps
             return ee.OnPreUnsafeDelete(entityQuery);
         }
 
-        internal IDisposable OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
+        internal IDisposable? OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
         {
             AssertAllowed(typeof(T), inUserInterface: false);
 
-            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
 
             if (ee == null)
                 return null;
@@ -193,7 +193,7 @@ namespace Signum.Engine.Maps
             return ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
         }
 
-        internal IDisposable OnPreUnsafeUpdate(IUpdateable update)
+        internal IDisposable? OnPreUnsafeUpdate(IUpdateable update)
         {
             var type = update.EntityType;
             if (type.IsInstantiationOf(typeof(MListElement<,>)))
@@ -231,9 +231,9 @@ namespace Signum.Engine.Maps
                 ee.OnPreBulkInsert(inMListTable);
         }
 
-        public ICacheController CacheController(Type type)
+        public ICacheController? CacheController(Type type)
         {
-            IEntityEvents ee = entityEvents.TryGetC(type);
+            IEntityEvents? ee = entityEvents.TryGetC(type);
 
             if (ee == null)
                 return null;
@@ -250,12 +250,12 @@ namespace Signum.Engine.Maps
                 return Enumerable.Empty<FieldBinding>();
 
             return ee.AdditionalBindings
-                .Where(kvp => kvp.Key.Parent.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, period, kvp.Key)))
+                .Where(kvp => kvp.Key.Parent!.Equals(parent))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, id, period, kvp.Key)))
                 .ToList();
         }
 
-        public List<IAdditionalBinding> GetAdditionalBindings(Type rootType)
+        public List<IAdditionalBinding>? GetAdditionalBindings(Type rootType)
         {
             var ee = entityEvents.TryGetC(rootType);
             if (ee == null || ee.AdditionalBindings == null)
@@ -264,13 +264,13 @@ namespace Signum.Engine.Maps
             return ee.AdditionalBindings.Values.ToList();
         }
 
-        internal LambdaExpression GetAdditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
+        internal LambdaExpression? GetAdditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
         {
             //AssertAllowed(pr.Type, inUserInterface: false);
 
             var ee = entityEvents.GetOrThrow(pr.RootType);
 
-            var ab = ee.AdditionalBindings.GetOrThrow(pr);
+            var ab = ee.AdditionalBindings!.GetOrThrow(pr);
 
             if (entityCompleter && !ab.ShouldSet())
                 return null;
@@ -278,9 +278,9 @@ namespace Signum.Engine.Maps
             return ab.ValueExpression;
         }
 
-        internal CacheControllerBase<T> CacheController<T>() where T : Entity
+        internal CacheControllerBase<T>? CacheController<T>() where T : Entity
         {
-            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
 
             if (ee == null)
                 return null;
@@ -288,16 +288,16 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal FilterQueryResult<T> OnFilterQuery<T>()
+        internal FilterQueryResult<T>? OnFilterQuery<T>()
             where T : Entity
         {
             AssertAllowed(typeof(T), inUserInterface: false);
 
-            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
             if (ee == null)
                 return null;
 
-            FilterQueryResult<T> result = null;
+            FilterQueryResult<T>? result = null;
             foreach (var item in ee.OnFilterQuery())
                 result = CombineFilterResult(result, item);
 
@@ -306,21 +306,18 @@ namespace Signum.Engine.Maps
 
 
 
-        FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression)
+        FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
             where T : Entity
         {
-            if (result == null)
-                return expression;
+            if (one == null)
+                return two;
 
-            if (expression == null)
-                return result;
-
-            if (result.InMemoryFunction == null || expression.InMemoryFunction == null)
-                return new FilterQueryResult<T>(a => result.InDatabaseExpresson.Evaluate(a) && expression.InDatabaseExpresson.Evaluate(a), null);
-
+            if (two == null)
+                return one;
+            
             return new FilterQueryResult<T>(
-                a => result.InDatabaseExpresson.Evaluate(a) && expression.InDatabaseExpresson.Evaluate(a),
-                a => result.InMemoryFunction(a) && expression.InMemoryFunction(a));
+                a => one!.InDatabaseExpresson.Evaluate(a) && two.InDatabaseExpresson.Evaluate(a),
+                a => one!.InMemoryFunction(a) && two!.InMemoryFunction(a));
         }
 
         public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
@@ -328,11 +325,11 @@ namespace Signum.Engine.Maps
         {
             using (userInterface ? ExecutionMode.UserInterface() : null)
             {
-                EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+                EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
                 if (ee == null)
                     return a => true;
 
-                Func<T, bool> result = null;
+                Func<T, bool>? result = null;
                 foreach (var item in ee.OnFilterQuery().NotNull())
                 {
                     if (item.InMemoryFunction == null)
@@ -349,25 +346,25 @@ namespace Signum.Engine.Maps
             }
         }
 
-        private Func<T, bool> CombineFunc<T>(Func<T, bool> result, Func<T, bool> func) where T : Entity
+        private Func<T, bool>? CombineFunc<T>(Func<T, bool>? one, Func<T, bool>? two) where T : Entity
         {
-            if (result == null)
-                return func;
+            if (one == null)
+                return two;
 
-            if (func == null)
-                return result;
+            if (two == null)
+                return one;
 
-            return a => result(a) && func(a);
+            return a => one!(a) && two!(a);
         }
 
-        public Expression<Func<T, bool>> GetInDatabaseFilter<T>()
+        public Expression<Func<T, bool>>? GetInDatabaseFilter<T>()
            where T : Entity
         {
-            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
             if (ee == null)
                 return null;
 
-            Expression<Func<T, bool>> result = null;
+            Expression<Func<T, bool>>? result = null;
             foreach (var item in ee.OnFilterQuery().NotNull())
             {
                 result = CombineExpr(result, item.InDatabaseExpresson);
@@ -379,19 +376,19 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        private Expression<Func<T, bool>> CombineExpr<T>(Expression<Func<T, bool>> result, Expression<Func<T, bool>> func) where T : Entity
+        private Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
         {
-            if (result == null)
-                return func;
+            if (one == null)
+                return two;
 
-            if (func == null)
-                return result;
+            if (two == null)
+                return one;
 
-            return a => result.Evaluate(a) && func.Evaluate(a);
+            return a => one!.Evaluate(a) && two!.Evaluate(a);
         }
 
-        public event Func<Replacements, SqlPreCommand> Synchronizing;
-        public SqlPreCommand SynchronizationScript(bool interactive = true, bool schemaOnly = false, string replaceDatabaseName = null)
+        public event Func<Replacements, SqlPreCommand?> Synchronizing;
+        public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null)
         {
             OnBeforeDatabaseAccess();
 
@@ -401,8 +398,13 @@ namespace Signum.Engine.Maps
             using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
-                Replacements replacements = new Replacements() { Interactive = interactive, ReplaceDatabaseName = replaceDatabaseName, SchemaOnly = schemaOnly };
-                SqlPreCommand command = Synchronizing
+                Replacements replacements = new Replacements()
+                {
+                    Interactive = interactive,
+                    ReplaceDatabaseName = replaceDatabaseName,
+                    SchemaOnly = schemaOnly
+                };
+                SqlPreCommand? command = Synchronizing
                     .GetInvocationListTyped()
                     .Select(e =>
                     {
@@ -453,8 +455,8 @@ namespace Signum.Engine.Maps
             return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
         }
 
-        public event Func<SqlPreCommand> Generating;
-        internal SqlPreCommand GenerationScipt()
+        public event Func<SqlPreCommand?> Generating;
+        internal SqlPreCommand? GenerationScipt()
         {
             OnBeforeDatabaseAccess();
 
@@ -473,7 +475,7 @@ namespace Signum.Engine.Maps
 
 
 
-        public event Action SchemaCompleted;
+        public event Action? SchemaCompleted;
 
         public void OnSchemaCompleted()
         {
@@ -496,7 +498,7 @@ namespace Signum.Engine.Maps
             };
         }
 
-        public event Action BeforeDatabaseAccess;
+        public event Action? BeforeDatabaseAccess;
 
         public void OnBeforeDatabaseAccess()
         {
@@ -513,7 +515,7 @@ namespace Signum.Engine.Maps
             BeforeDatabaseAccess = null;
         }
 
-        public event Action Initializing;
+        public event Action? Initializing;
 
         public void Initialize()
         {
@@ -540,6 +542,7 @@ namespace Signum.Engine.Maps
 
         internal Schema(SchemaSettings settings)
         {
+            this.typeCachesLazy = null!;
             this.Settings = settings;
             this.Assets = new SchemaAssets();
             this.ViewBuilder = new Maps.ViewBuilder(this);
@@ -584,8 +587,8 @@ namespace Signum.Engine.Maps
 
         internal static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members)
         {
-            IFieldFinder current = fieldFinder;
-            Field result = null;
+            IFieldFinder? current = fieldFinder;
+            Field? result = null;
             foreach (var mi in members)
             {
                 if (current == null)
@@ -596,13 +599,13 @@ namespace Signum.Engine.Maps
                 current = result as IFieldFinder;
             }
 
-            return result;
+            return result!;
         }
 
-        internal static Field TryFindField(IFieldFinder fieldFinder, MemberInfo[] members)
+        internal static Field? TryFindField(IFieldFinder fieldFinder, MemberInfo[] members)
         {
-            IFieldFinder current = fieldFinder;
-            Field result = null;
+            IFieldFinder? current = fieldFinder;
+            Field? result = null;
             foreach (var mi in members)
             {
                 if (current == null)
@@ -619,7 +622,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
+        public Dictionary<PropertyRoute, Implementations>? FindAllImplementations(Type root)
         {
             try
             {
@@ -643,14 +646,14 @@ namespace Signum.Engine.Maps
         public Implementations FindImplementations(PropertyRoute route)
         {
             if (route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                route = route.Parent;
+                route = route.Parent!;
 
             Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))
                 return Schema.Current.Settings.GetImplementations(route);
 
-            Field field = TryFindField(Table(type), route.Members);
+            Field? field = TryFindField(Table(type), route.Members);
             //if (field == null)
             //    return Implementations.ByAll;
 
@@ -687,13 +690,13 @@ namespace Signum.Engine.Maps
             if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 return null;
 
-            var lambda = ExpressionCleaner.GetFieldExpansion(route.Parent.Type, route.PropertyInfo);
+            var lambda = ExpressionCleaner.GetFieldExpansion(route.Parent!.Type, route.PropertyInfo!);
             if (lambda == null)
                 return null;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(route.Parent.TryGetImplementations(), new[] { route.Parent })));
+            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent!.Type, new CleanMeta(route.Parent!.TryGetImplementations(), new[] { route.Parent! })));
 
-            MetaExpression me = e as MetaExpression;
+            MetaExpression? me = e as MetaExpression;
             if (me == null)
                 return null;
 
@@ -714,7 +717,7 @@ namespace Signum.Engine.Maps
             return FindField(Table(route.RootType), route.Members);
         }
 
-        public Field TryField(PropertyRoute route)
+        public Field? TryField(PropertyRoute route)
         {
             return TryFindField(Table(route.RootType), route.Members);
         }
@@ -738,9 +741,9 @@ namespace Signum.Engine.Maps
 
             ITable table = mlistPr == null ?
                 (ITable)Table(route.RootType) :
-                (ITable)((FieldMList)Field(mlistPr.Parent)).TableMList;
+                (ITable)((FieldMList)Field(mlistPr.Parent!)).TableMList;
 
-            return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(cols.Contains));
+            return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
         }
 
         public override string ToString()
@@ -759,9 +762,9 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public Func<DatabaseName, bool> IsExternalDatabase = db => false;
+        public Func<DatabaseName?, bool> IsExternalDatabase = db => false;
 
-        public List<DatabaseName> DatabaseNames()
+        public List<DatabaseName?> DatabaseNames()
         {
             return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Where(a => !IsExternalDatabase(a)).Distinct().ToList();
         }

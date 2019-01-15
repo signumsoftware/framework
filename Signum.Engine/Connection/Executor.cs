@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -10,7 +10,7 @@ namespace Signum.Engine
 {
     public static class Executor
     {
-        public static object ExecuteScalar(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
+        public static object ExecuteScalar(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteScalar(new SqlPreCommandSimple(sql, parameters), commandType);
         }
@@ -21,7 +21,7 @@ namespace Signum.Engine
         }
 
 
-        public static int ExecuteNonQuery(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
+        public static int ExecuteNonQuery(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteNonQuery(new SqlPreCommandSimple(sql, parameters), commandType);
         }
@@ -32,7 +32,7 @@ namespace Signum.Engine
         }
 
 
-        public static DbDataReaderWithCommand UnsafeExecuteDataReader(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
+        public static DbDataReaderWithCommand UnsafeExecuteDataReader(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters), commandType);
         }
@@ -42,7 +42,7 @@ namespace Signum.Engine
             return Connector.Current.UnsafeExecuteDataReader(preCommand, commandType);
         }
 
-        public static Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text, CancellationToken token = default(CancellationToken))
+        public static Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text, CancellationToken token = default(CancellationToken))
         {
             return Connector.Current.UnsafeExecuteDataReaderAsync(new SqlPreCommandSimple(sql, parameters), commandType, token);
         }
@@ -52,7 +52,7 @@ namespace Signum.Engine
             return Connector.Current.UnsafeExecuteDataReaderAsync(preCommand, commandType, token);
         }
 
-        public static DataTable ExecuteDataTable(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
+        public static DataTable ExecuteDataTable(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql, parameters), commandType);
         }
@@ -63,7 +63,7 @@ namespace Signum.Engine
         }
 
 
-        public static DataSet ExecuteDataSet(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
+        public static DataSet ExecuteDataSet(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteDataSet(new SqlPreCommandSimple(sql, parameters), commandType);
         }

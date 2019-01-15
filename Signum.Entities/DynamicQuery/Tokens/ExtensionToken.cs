@@ -15,7 +15,7 @@ namespace Signum.Entities.DynamicQuery
 
         public ExtensionToken(QueryToken parent, string key, Type type, bool isProjection,
             string? unit, string? format, Implementations? implementations,
-            string? isAllowed, PropertyRoute propertyRoute, string displayName)
+            string? isAllowed, PropertyRoute? propertyRoute, string displayName)
         {
             this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -81,10 +81,10 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
 
             var result = BuildExtension(parent.Type.CleanType().UnNullify(), Key, parentExpression);
 
-            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute });
+            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
         }
 
-        public PropertyRoute propertyRoute;
+        public PropertyRoute? propertyRoute;
         public override PropertyRoute? GetPropertyRoute()
         {
             return isProjection ? null : propertyRoute;

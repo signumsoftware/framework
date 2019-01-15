@@ -111,7 +111,7 @@ namespace Signum.Entities
 
 
         static MethodInfo miOverlaps = ReflectionTools.GetMethodInfo((Interval<DateTime> pair) => pair.Overlaps(new Interval<DateTime>()));
-        internal static Expression? Overlaps(this NewExpression interval1, NewExpression interval2)
+        internal static Expression? Overlaps(this NewExpression? interval1, NewExpression? interval2)
         {
             if (interval1 == null)
                 return null;
@@ -133,7 +133,7 @@ namespace Signum.Entities
 
 
         static ConstructorInfo ciInterval = ReflectionTools.GetConstuctorInfo(() => new Interval<DateTime>(new DateTime(), new DateTime()));
-        internal static Expression Intesection(this NewExpression interval1, NewExpression interval2)
+        internal static Expression Intesection(this NewExpression? interval1, NewExpression? interval2)
         {
             if (interval1 == null)
                 return interval2;
@@ -151,7 +151,7 @@ namespace Signum.Entities
                   Expression.Condition(Expression.GreaterThan(max1, max2), max1, max2));
         }
 
-        public static Expression And(this Expression expression, Expression other)
+        public static Expression And(this Expression expression, Expression? other)
         {
             if (other == null)
                 return expression;

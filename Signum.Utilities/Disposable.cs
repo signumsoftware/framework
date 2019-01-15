@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 
 namespace Signum.Utilities
@@ -19,7 +19,7 @@ namespace Signum.Utilities
             action?.Invoke();
         }
 
-        public static IDisposable Combine(IDisposable first, IDisposable second)
+        public static IDisposable? Combine(IDisposable? first, IDisposable? second)
         {
             if (first == null || second == null)
                 return first ?? second;

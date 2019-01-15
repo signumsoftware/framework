@@ -43,13 +43,13 @@ namespace Signum.Entities.Basics
             return ClassName == type.Name && Namespace == type.Namespace;
         }
 
-        public static Func<Type, TypeEntity> ToTypeEntityFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };
-        public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("Lite.ToTypeFunc is not set"); };
-        public static Func<string, Type> TryGetType = s => { throw new InvalidOperationException("Lite.TryGetType is not set"); };
-        public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("Lite.GetCleanName is not set"); };
+        public static Func<Type, TypeEntity> ToTypeEntityFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeEntityFunc is not set"); };
+        public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeFunc is not set"); };
+        public static Func<string, Type?> TryGetType = s => { throw new InvalidOperationException("TypeEntity.TryGetType is not set"); };
+        public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("TypeEntity.GetCleanName is not set"); };
 
         public static bool AlreadySet { get; private set; }
-        public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type> tryGetType)
+        public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type?> tryGetType)
         {
             TypeEntity.GetCleanName = getCleanName;
             TypeEntity.TryGetType = tryGetType;

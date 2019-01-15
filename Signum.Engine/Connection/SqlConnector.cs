@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data.SqlClient;
@@ -112,7 +112,7 @@ namespace Signum.Engine
         public override bool SupportsScalarSubquery { get { return true; } }
         public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
-        SqlConnection EnsureConnection()
+        SqlConnection? EnsureConnection()
         {
             if (Transaction.HasTransaction)
                 return null;
@@ -122,7 +122,7 @@ namespace Signum.Engine
             return result;
         }
 
-        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection, CommandType commandType)
+        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection? overridenConnection, CommandType commandType)
         {
             SqlCommand cmd = new SqlCommand { CommandType = commandType };
 
@@ -153,9 +153,9 @@ namespace Signum.Engine
             return cmd;
         }
 
-        protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
+        protected internal override object? ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection con = EnsureConnection())
+            using (SqlConnection? con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
@@ -181,7 +181,7 @@ namespace Signum.Engine
 
         protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection con = EnsureConnection())
+            using (SqlConnection? con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
@@ -207,7 +207,7 @@ namespace Signum.Engine
             retry:
             try
             {
-                using (SqlConnection con = EnsureConnection())
+                using (SqlConnection? con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
                 using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
@@ -308,7 +308,7 @@ namespace Signum.Engine
 
         protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection con = EnsureConnection())
+            using (SqlConnection? con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
@@ -333,7 +333,7 @@ namespace Signum.Engine
 
         protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection con = EnsureConnection())
+            using (SqlConnection? con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
@@ -387,13 +387,12 @@ namespace Signum.Engine
                 }
             }
 
-            return ex;
-
+            return ex! /*CSBUG*/;
         }
 
         protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
         {
-            using (SqlConnection con = EnsureConnection())
+            using (SqlConnection? con = EnsureConnection())
             using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
                 options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection,
                 options,
@@ -448,7 +447,7 @@ namespace Signum.Engine
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public override void CleanDatabase(DatabaseName databaseName)
+        public override void CleanDatabase(DatabaseName? databaseName)
         {
             SqlConnectorScripts.RemoveAllScript(databaseName).ExecuteLeaves();
             SqlConnectorScripts.ShrinkDatabase(DatabaseName());
@@ -498,11 +497,11 @@ namespace Signum.Engine
                             new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
                             new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
                             new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
-                        }.Combine(Spacing.Simple).PlainSqlCommand(),
+                        }.Combine(Spacing.Simple)!.PlainSqlCommand(),
                         new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(schemaName)),
                     }.Combine(Spacing.Simple),
                 new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(schemaName))
-            }.Combine(Spacing.Simple);
+            }.Combine(Spacing.Simple)!;
         }
 
         public override bool AllowsConvertToDate
@@ -535,7 +534,7 @@ namespace Signum.Engine
 
     public class SqlParameterBuilder : ParameterBuilder
     {
-        public override DbParameter CreateParameter(string parameterName, SqlDbType sqlType, string udtTypeName, bool nullable, object value)
+        public override DbParameter CreateParameter(string parameterName, SqlDbType sqlType, string? udtTypeName, bool nullable, object? value)
         {
             if (IsDate(sqlType))
                 AssertDateTime((DateTime?)value);
@@ -554,7 +553,7 @@ namespace Signum.Engine
             return result;
         }
 
-        public override MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType sqlType, string udtTypeName, bool nullable, Expression value)
+        public override MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType sqlType, string? udtTypeName, bool nullable, Expression value)
         {
             Expression valueExpr = Expression.Convert(IsDate(sqlType) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) : value, typeof(object));
 
@@ -692,7 +691,7 @@ open cur
 close cur
 deallocate cur";
 
-        public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
+        public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
         {
             var schemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
 
@@ -703,10 +702,10 @@ deallocate cur";
                 Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(schemas)))
-                );
+                )!;
         }
 
-        static string Use(DatabaseName databaseName, string script)
+        static string Use(DatabaseName? databaseName, string script)
         {
             if (databaseName == null)
                 return script;

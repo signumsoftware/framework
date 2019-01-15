@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -22,19 +22,24 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly PrimaryKeyExpression ExternalId;
-        public readonly NewExpression ExternalPeriod;
+        public readonly NewExpression? ExternalPeriod;
 
         //Optional
-        public readonly Alias TableAlias;
-        public readonly ReadOnlyCollection<FieldBinding> Bindings;
-        public readonly ReadOnlyCollection<MixinEntityExpression> Mixins;
+        public readonly Alias? TableAlias;
+        public readonly ReadOnlyCollection<FieldBinding>? Bindings;
+        public readonly ReadOnlyCollection<MixinEntityExpression>? Mixins;
 
         public readonly bool AvoidExpandOnRetrieving;
 
-        public readonly NewExpression TablePeriod;
+        public readonly NewExpression? TablePeriod;
 
 
-        public EntityExpression(Type type, PrimaryKeyExpression externalId, NewExpression externalPeriod, Alias tableAlias, IEnumerable<FieldBinding> bindings, IEnumerable<MixinEntityExpression> mixins, NewExpression tablePeriod, bool avoidExpandOnRetrieving)
+        public EntityExpression(Type type, PrimaryKeyExpression externalId, 
+            NewExpression? externalPeriod, 
+            Alias? tableAlias, 
+            IEnumerable<FieldBinding>? bindings, 
+            IEnumerable<MixinEntityExpression>? mixins, 
+            NewExpression? tablePeriod, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)
         {
             if (type == null)
@@ -101,10 +106,10 @@ namespace Signum.Engine.Linq
 
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
-        public readonly FieldEmbedded FieldEmbedded; //used for updates
-        public readonly Table ViewTable; //used for updates
+        public readonly FieldEmbedded? FieldEmbedded; //used for updates
+        public readonly Table? ViewTable; //used for updates
 
-        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded fieldEmbedded, Table viewTable)
+        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded? fieldEmbedded, Table? viewTable)
             : base(DbExpressionType.EmbeddedInit, type)
         {
             if (bindings == null)
@@ -144,7 +149,7 @@ namespace Signum.Engine.Linq
 
         public Expression GetViewId()
         {
-            var field = ViewTable.GetViewPrimaryKey();
+            var field = ViewTable!.GetViewPrimaryKey();
 
             return this.Bindings.SingleEx(b => ReflectionTools.FieldEquals(b.FieldInfo, field.FieldInfo)).Binding;
         }
@@ -154,11 +159,11 @@ namespace Signum.Engine.Linq
     {
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
-        public readonly FieldMixin FieldMixin; //used for updates
+        public readonly FieldMixin? FieldMixin; //used for updates
 
-        public readonly Alias MainEntityAlias;
+        public readonly Alias? MainEntityAlias;
 
-        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias mainEntityAlias, FieldMixin fieldMixin)
+        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias? mainEntityAlias, FieldMixin? fieldMixin)
             : base(DbExpressionType.MixinInit, type)
         {
             if (bindings == null)
@@ -249,10 +254,10 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression Id;
         public readonly TypeImplementedByAllExpression TypeId;
-        public readonly NewExpression ExternalPeriod;
+        public readonly NewExpression? ExternalPeriod;
 
 
-        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, NewExpression externalPeriod)
+        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, NewExpression? externalPeriod)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             if (id == null)
@@ -281,12 +286,12 @@ namespace Signum.Engine.Linq
         public bool LazyToStr;
         public bool EagerEntity;
         public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
-        public readonly Expression CustomToStr; //Not readonly
+        public readonly Expression? CustomToStr; //Not readonly
 
-        public LiteReferenceExpression(Type type, Expression reference, Expression customToStr, bool lazyToStr, bool eagerEntity) :
+        public LiteReferenceExpression(Type type, Expression reference, Expression? customToStr, bool lazyToStr, bool eagerEntity) :
             base(DbExpressionType.LiteReference, type)
         {
-            Type cleanType = Lite.Extract(type);
+            Type? cleanType = Lite.Extract(type);
 
             if (cleanType != reference.Type)
                 throw new ArgumentException("The type {0} is not the Lite version of {1}".FormatWith(type.TypeName(), reference.Type.TypeName()));

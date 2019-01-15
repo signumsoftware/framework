@@ -17,7 +17,7 @@ namespace Signum.Engine
 
         public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables;
 
-        public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
+        public static SqlPreCommand? SynchronizeTablesScript(Replacements replacements)
         {
             Schema s = Schema.Current;
 
@@ -127,7 +127,7 @@ namespace Signum.Engine
 
 
 
-            Func<ObjectName, SqlPreCommand> DeleteAllForeignKey = tableName =>
+            Func<ObjectName, SqlPreCommand?> DeleteAllForeignKey = tableName =>
             {
                 var dropFks = (from t in databaseTables.Values
                                from c in t.Columns.Values
@@ -142,12 +142,12 @@ namespace Signum.Engine
 
             using (replacements.WithReplacedDatabaseName())
             {
-                SqlPreCommand preRenameTables = preRenames.Select(a => SqlBuilder.RenameTable(a.Key, a.Value.Name)).Combine(Spacing.Double);
+                SqlPreCommand? preRenameTables = preRenames.Select(a => SqlBuilder.RenameTable(a.Key, a.Value.Name)).Combine(Spacing.Double);
 
                 if (preRenameTables != null)
                     preRenameTables.GoAfter = true;
 
-                SqlPreCommand createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
+                SqlPreCommand? createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                     modelSchemas.ToDictionary(a => a.ToString()),
                     databaseSchemas.ToDictionary(a => a.ToString()),
                     createNew: (_, newSN) => SqlBuilder.CreateSchema(newSN),
@@ -156,7 +156,7 @@ namespace Signum.Engine
                     );
 
                 //use database without replacements to just remove indexes
-                SqlPreCommand dropStatistics =
+                SqlPreCommand? dropStatistics =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
                     createNew:  null,
                     removeOld:  (tn, dif) => SqlBuilder.DropStatistics(tn, dif.Stats),
@@ -167,7 +167,7 @@ namespace Signum.Engine
                         return SqlBuilder.DropStatistics(tn, dif.Stats.Where(a => a.Columns.Any(removedColums.Contains)).ToList());
                     });
 
-                SqlPreCommand dropIndices =
+                SqlPreCommand? dropIndices =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
                     createNew: null,
                     removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !ix.IsPrimary).Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
@@ -186,7 +186,7 @@ namespace Signum.Engine
                         return changes;
                     });
 
-                SqlPreCommand dropIndicesHistory =
+                SqlPreCommand? dropIndicesHistory =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                     createNew: null,
                     removeOld: (tn, dif) => dif.Indices.Values.Where(ix => ix.Type != DiffIndexType.Clustered).Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
@@ -205,7 +205,7 @@ namespace Signum.Engine
                         return changes;
                     });
 
-                SqlPreCommand dropForeignKeys = Synchronizer.SynchronizeScript(
+                SqlPreCommand? dropForeignKeys = Synchronizer.SynchronizeScript(
                      Spacing.Double,
                      modelTables,
                      databaseTables,
@@ -226,9 +226,9 @@ namespace Signum.Engine
                         dif.MultiForeignKeys.Select(fk => SqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple))
                 );
 
-                SqlPreCommand preRenamePks = preRenames.Select(a => SqlBuilder.DropPrimaryKeyConstraint(a.Value)).Combine(Spacing.Double);
+                SqlPreCommand? preRenamePks = preRenames.Select(a => SqlBuilder.DropPrimaryKeyConstraint(a.Value)).Combine(Spacing.Double);
 
-                SqlPreCommand tables =
+                SqlPreCommand? tables =
                         Synchronizer.SynchronizeScript(
                         Spacing.Double,
                         modelTables,
@@ -243,7 +243,7 @@ namespace Signum.Engine
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && 
-                            (tab.SystemVersioned == null || !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString())) ?
+                            (tab.SystemVersioned == null || !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString())) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab.Name) : null);
 
                             var dropPeriod = (dif.Period != null &&
@@ -285,7 +285,7 @@ namespace Signum.Engine
 
                                         difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             difCol.DefaultConstraint != null ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
-                                            tabCol.Default != null ? SqlBuilder.AlterTableAddDefaultConstraint(tab.Name, SqlBuilder.GetDefaultConstaint(tab, tabCol)) : null),
+                                            tabCol.Default != null ? SqlBuilder.AlterTableAddDefaultConstraint(tab.Name, SqlBuilder.GetDefaultConstaint(tab, tabCol)!) : null),
 
                                         UpdateByFkChange(tn, difCol, tabCol, ChangeName, copyDataFrom)
                                     )
@@ -300,7 +300,7 @@ namespace Signum.Engine
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
 
 
-                            SqlPreCommand combinedAddPeriod = null;
+                            SqlPreCommand? combinedAddPeriod = null;
                             if(addPeriod != null && columns is SqlPreCommandConcat cols)
                             {
                                 var periodRows = cols.Leaves().Where(pcs => pcs.Sql.Contains(" ADD ") && pcs.Sql.Contains("GENERATED ALWAYS AS ROW")).ToList();
@@ -322,14 +322,14 @@ namespace Signum.Engine
                 if (tables != null)
                     tables.GoAfter = true;
 
-                SqlPreCommand historyTables = Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
+                SqlPreCommand? historyTables = Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                     createNew: null,
                     removeOld: (tn, dif) => SqlBuilder.DropTable(dif.Name),
                     mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned.TableName) ? SqlBuilder.RenameOrChangeSchema(dif.Name, tab.SystemVersioned.TableName) : null);
 
-                SqlPreCommand syncEnums = SynchronizeEnumsScript(replacements);
+                SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
-                SqlPreCommand addForeingKeys = Synchronizer.SynchronizeScript(
+                SqlPreCommand? addForeingKeys = Synchronizer.SynchronizeScript(
                      Spacing.Double,
                      modelTables,
                      databaseTables,
@@ -362,7 +362,7 @@ namespace Signum.Engine
 
                 bool? createMissingFreeIndexes = null;
 
-                SqlPreCommand addIndices =
+                SqlPreCommand? addIndices =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
                     createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(index => SqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
                     removeOld: null,
@@ -383,7 +383,7 @@ namespace Signum.Engine
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                     });
 
-                SqlPreCommand addIndicesHistory =
+                SqlPreCommand? addIndicesHistory =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                     createNew: (tn, tab) => modelIndices[tab].Values.Where(a => a.GetType() == typeof(Index)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple),
                     removeOld: null,
@@ -404,7 +404,7 @@ namespace Signum.Engine
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                     });
 
-                SqlPreCommand dropSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
+                SqlPreCommand? dropSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                     modelSchemas.ToDictionary(a => a.ToString()),
                     databaseSchemas.ToDictionary(a => a.ToString()),
                     createNew: null,
@@ -421,7 +421,7 @@ namespace Signum.Engine
             }
         }
 
-        private static SqlPreCommandSimple NotNullUpdate(ITable tab, IColumn tabCol, Replacements rep, bool goBefore)
+        private static SqlPreCommandSimple? NotNullUpdate(ITable tab, IColumn tabCol, Replacements rep, bool goBefore)
         {
             var defaultValue = GetDefaultValue(tab, tabCol, rep, forNewColumn: false);
 
@@ -453,7 +453,7 @@ namespace Signum.Engine
             return result;
         }
 
-        private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep, string forceDefaultValue)
+        private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep, string? forceDefaultValue)
         {
             if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
                 return SqlBuilder.AlterTableAddColumn(table, column);
@@ -475,19 +475,18 @@ namespace Signum.Engine
                     SqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
                     new SqlPreCommandSimple($@"UPDATE {table.Name} SET
     {column.Name} = {SqlBuilder.Quote(column.SqlDbType, defaultValue)}
-WHERE {where}"));
+WHERE {where}"))!;
             }
 
-            var tempDefault = new SqlBuilder.DefaultConstraint
-            {
-                ColumnName = column.Name,
-                Name = "DF_TEMP_" + column.Name,
-                QuotedDefinition = SqlBuilder.Quote(column.SqlDbType, defaultValue),
-            };
+            var tempDefault = new SqlBuilder.DefaultConstraint(
+                columnName: column.Name, 
+                name: "DF_TEMP_" + column.Name, 
+                quotedDefinition : SqlBuilder.Quote(column.SqlDbType, defaultValue)
+            );
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 SqlBuilder.AlterTableAddColumn(table, column, tempDefault),
-                SqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name));
+                SqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
         }
 
         internal static SqlPreCommand CopyData(ITable newTable, DiffTable oldTable, Replacements rep)
@@ -508,10 +507,10 @@ FROM {oldTable.Name}");
                 SqlBuilder.SetIdentityInsert(newTable.Name, true),
                 insertSelect,
                 SqlBuilder.SetIdentityInsert(newTable.Name, false)
-            );
+            )!;
         }
 
-        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn, string forceDefaultValue = null)
+        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn, string? forceDefaultValue = null)
         {
      		if(column is SystemVersionedInfo.Column svc)
             {
@@ -519,6 +518,8 @@ FROM {oldTable.Name}");
 
                 return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
+
+            column = column!; /*CSBUG*/
 
             string typeDefault = forceDefaultValue ??
                 (SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
@@ -595,7 +596,7 @@ FROM {oldTable.Name}");
             return diff.Indices.SelectDictionary(on => replacements.TryGetC(on) ?? on, dif => dif);
         }
 
-        private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, ObjectName> copyDataFrom)
+        private static SqlPreCommandSimple? UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, ObjectName> copyDataFrom)
         {
             if (difCol.ForeignKey == null || tabCol.ReferenceTable == null || tabCol.AvoidForeignKey)
                 return null;
@@ -776,7 +777,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
         }
 
 
-        static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
+        static SqlPreCommand? SynchronizeEnumsScript(Replacements replacements)
         {
             try
             {
@@ -786,7 +787,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
                 foreach (var table in schema.Tables.Values)
                 {
-                    Type enumType = EnumEntity.Extract(table.Type);
+                    Type? enumType = EnumEntity.Extract(table.Type);
                     if (enumType != null)
                     {
                         Console.Write(".");
@@ -795,7 +796,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                         Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 
                         List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
-                        Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr, table.Name.Name);
+                        Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr!, table.Name.Name);
 
                         string key = Replacements.KeyEnumsForTable(table.Name.Name);
 
@@ -803,7 +804,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
                         currentByName = replacements.ApplyReplacementsToOld(currentByName, key);
 
-                        var mix = shouldByName.JoinDictionary(currentByName, (n, s, c) => new { s, c }).Where(a => a.Value.s.id != a.Value.c.id).ToDictionary();
+                        var mix = shouldByName.JoinDictionary(currentByName, (n, s, c) => (s, c)).Where(a => a.Value.s.id != a.Value.c.id).ToDictionary();
 
                         HashSet<PrimaryKey> usedIds = current.Select(a => a.Id).ToHashSet();
 
@@ -888,7 +889,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
             return instance;
         }
 
-        public static SqlPreCommand SnapshotIsolation(Replacements replacements)
+        public static SqlPreCommand? SnapshotIsolation(Replacements replacements)
         {
             if (replacements.SchemaOnly)
                 return null;
@@ -907,9 +908,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
             var cmd = replacements.WithReplacedDatabaseName().Using(_ => results.Select((a, i) =>
                 SqlPreCommand.Combine(Spacing.Simple,
-                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? DisconnectUsers(a.name, "SPID" + i) : null,
-                !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name, true) : null,
-                !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double));
+                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? DisconnectUsers(a.name!/*CSBUG*/, "SPID" + i) : null,
+                !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name!/*CSBUG*/, true) : null,
+                !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name!/*CSBUG*/, true) : null)).Combine(Spacing.Double));
 
             if (cmd == null)
                 return null;
@@ -961,8 +962,8 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         }
 
         public SysTableTemporalType TemporalType;
-        public ObjectName TemporalTableName;
-        public DiffPeriod Period;
+        public ObjectName? TemporalTableName;
+        public DiffPeriod? Period;
 
         public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();
 
@@ -1102,9 +1103,9 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
     {
         public string Name;
         public SqlDbType SqlDbType;
-        public string UserTypeName;
+        public string? UserTypeName;
         public bool Nullable;
-        public string Collation;
+        public string? Collation;
         public int Length;
         public int Precision;
         public int Scale;
@@ -1113,7 +1114,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
         public DiffForeignKey ForeignKey;
 
-        public DiffDefaultConstraint DefaultConstraint;
+        public DiffDefaultConstraint? DefaultConstraint;
 
         public GeneratedAlwaysType GeneratedAlwaysType;
 

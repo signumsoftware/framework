@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -19,7 +19,7 @@ namespace Signum.Engine.Maps
         public event AlternativeRetriveEventHandler<T> AlternativeRetrive;
         public event RetrievedEventHandler<T> Retrieved;
 
-        public CacheControllerBase<T> CacheController { get; set; }
+        public CacheControllerBase<T>? CacheController { get; set; }
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
@@ -31,10 +31,10 @@ namespace Signum.Engine.Maps
         public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
         public event BulkInsetHandler<T> PreBulkInsert;
 
-        public Dictionary<PropertyRoute, IAdditionalBinding> AdditionalBindings { get; private set; }
+        public Dictionary<PropertyRoute, IAdditionalBinding>? AdditionalBindings { get; private set; }
 
         /// <param name="valueFunction">For Caching scenarios</param>
-        public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M> valueFunction = null)
+        public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M>? valueFunction = null)
         {
             if (AdditionalBindings == null)
                 AdditionalBindings = new Dictionary<PropertyRoute, IAdditionalBinding>();
@@ -43,13 +43,7 @@ namespace Signum.Engine.Maps
 
             var pr = PropertyRoute.Construct(field);
 
-            AdditionalBindings.Add(pr, new AdditionalBinding<T, M>
-            {
-                PropertyRoute = pr,
-                ShouldSet = shouldSet,
-                ValueExpression = valueExpression,
-                ValueFunction = valueFunction,
-            });
+            AdditionalBindings.Add(pr, new AdditionalBinding<T, M>(pr, shouldSet, valueExpression, valueFunction));
         }
 
 
@@ -62,9 +56,9 @@ namespace Signum.Engine.Maps
             return FilterQuery.GetInvocationListTyped().Select(f => f()).ToList();
         }
 
-        internal IDisposable OnPreUnsafeDelete(IQueryable<T> entityQuery)
+        internal IDisposable? OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
-            IDisposable result = null;
+            IDisposable? result = null;
             if (PreUnsafeDelete != null)
                 foreach (var action in PreUnsafeDelete.GetInvocationListTyped().Reverse())
                     result = Disposable.Combine(result, action(entityQuery));
@@ -72,9 +66,9 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        internal IDisposable OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
+        internal IDisposable? OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
         {
-            IDisposable result = null;
+            IDisposable? result = null;
             if (PreUnsafeMListDelete != null)
                 foreach (var action in PreUnsafeMListDelete.GetInvocationListTyped().Reverse())
                     result = Disposable.Combine(result, action(mlistQuery, entityQuery));
@@ -82,9 +76,9 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        IDisposable IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
+        IDisposable? IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
         {
-            IDisposable result = null;
+            IDisposable? result = null;
             if (PreUnsafeUpdate != null)
             {
                 var query = update.EntityQuery<T>();
@@ -133,7 +127,7 @@ namespace Signum.Engine.Maps
             Retrieved?.Invoke((T)entity);
         }
 
-        public Entity OnAlternativeRetriving(PrimaryKey id)
+        public Entity? OnAlternativeRetriving(PrimaryKey id)
         {
             if (AlternativeRetrive == null)
                 return null;
@@ -141,7 +135,6 @@ namespace Signum.Engine.Maps
             var args = new AlternativeRetrieveArgs<T>();
 
             AlternativeRetrive(id, args);
-
 
             if (args.Entity == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -158,7 +151,7 @@ namespace Signum.Engine.Maps
 
         }
 
-        ICacheController IEntityEvents.CacheController
+        ICacheController? IEntityEvents.CacheController
         {
             get { return CacheController; }
         }
@@ -178,10 +171,18 @@ namespace Signum.Engine.Maps
         public PropertyRoute PropertyRoute { get; set; }
         public Func<bool> ShouldSet { get; set; }
         public Expression<Func<T, M>> ValueExpression { get; set; }
-        public Func<T, IRetriever, M> ValueFunction { get; set; }
+        public Func<T, IRetriever, M>? ValueFunction { get; set; }
         LambdaExpression IAdditionalBinding.ValueExpression => ValueExpression;
 
-        Action<T, M, IRetriever> _setter;
+        Action<T, M, IRetriever>? _setter;
+
+        public AdditionalBinding(PropertyRoute propertyRoute, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M>? valueFunction)
+        {
+            PropertyRoute = propertyRoute;
+            ShouldSet = shouldSet;
+            ValueExpression = valueExpression;
+            ValueFunction = valueFunction;
+        }
 
         public void SetInMemory(Entity entity, IRetriever retriever) => SetInMemory((T)entity, retriever);
         void SetInMemory(T entity, IRetriever retriever)
@@ -217,17 +218,17 @@ namespace Signum.Engine.Maps
                     retriever.ModifiablePostRetrieving((Modifiable)(object)mlist);
                 };
             }
-            else if (PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Root)
+            else if (PropertyRoute.Parent!.PropertyRouteType == PropertyRouteType.Root)
             {
-                var setter = ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo);
+                var setter = ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo!);
 
                 return (e, value, retriever) => setter(e, value);
             }
             else
             {
-                var partGetter = PropertyRoute.Parent.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
+                var partGetter = PropertyRoute.Parent!.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
 
-                var setter = ReflectionTools.CreateSetter<ModifiableEntity, M>(PropertyRoute.PropertyInfo);
+                var setter = ReflectionTools.CreateSetter<ModifiableEntity, M>(PropertyRoute.PropertyInfo!);
 
                 return (e, value, retriever) =>
                 {
@@ -248,9 +249,9 @@ namespace Signum.Engine.Maps
     public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
     public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
-    public delegate IDisposable PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
-    public delegate IDisposable PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
-    public delegate IDisposable PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
+    public delegate IDisposable? PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
+    public delegate IDisposable? PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
+    public delegate IDisposable? PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
     public delegate void BulkInsetHandler<T>(bool inMListTable);
 
@@ -258,7 +259,7 @@ namespace Signum.Engine.Maps
     public class AlternativeRetrieveArgs<T> where T : Entity
     {
         public bool AvoidAccesVerify { get; set; }
-        public T Entity { get; set; }
+        public T? Entity { get; set; }
     }
 
     public class SavedEventArgs
@@ -289,19 +290,19 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
-        Entity OnAlternativeRetriving(PrimaryKey id);
+        Entity? OnAlternativeRetriving(PrimaryKey id);
         void OnPreSaving(Entity entity, PreSavingContext ctx);
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);
 
         void OnRetrieved(Entity entity);
 
-        IDisposable OnPreUnsafeUpdate(IUpdateable update);
+        IDisposable? OnPreUnsafeUpdate(IUpdateable update);
         LambdaExpression OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
         void OnPreBulkInsert(bool inMListTable);
 
-        ICacheController CacheController { get; }
+        ICacheController? CacheController { get; }
 
-        Dictionary<PropertyRoute, IAdditionalBinding> AdditionalBindings { get; }
+        Dictionary<PropertyRoute, IAdditionalBinding>? AdditionalBindings { get; }
     }
 }

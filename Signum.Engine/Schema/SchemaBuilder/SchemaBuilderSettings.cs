@@ -276,7 +276,7 @@ namespace Signum.Engine.Maps
             return GetSqlDbTypePair(type.UnNullify());
         }
 
-        internal int? GetSqlSize(SqlDbTypeAttribute att, PropertyRoute route, SqlDbType sqlDbType)
+        internal int? GetSqlSize(SqlDbTypeAttribute att, PropertyRoute? route, SqlDbType sqlDbType)
         {
             if (att != null && att.HasSize)
                 return att.Size;

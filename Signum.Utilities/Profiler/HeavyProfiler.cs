@@ -35,7 +35,7 @@ namespace Signum.Utilities
             }
         }
 
-        static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
+        static readonly Variable<HeavyProfilerEntry?> current = Statics.ThreadVariable<HeavyProfilerEntry?>("heavy"); 
 
         public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
@@ -180,12 +180,12 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Switch(this Tracer tracer, string role, Func<string>? additionalData = null)
+        public static void Switch(this Tracer? tracer, string role, Func<string>? additionalData = null)
         {
             if (tracer == null)
                 return;
 
-            bool hasStackTrace = current.Value.StackTrace != null;
+            bool hasStackTrace = current.Value!.StackTrace != null;
 
             tracer.Dispose();
 
@@ -261,7 +261,7 @@ namespace Signum.Utilities
 
         public static IOrderedEnumerable<SqlProfileResume> SqlStatistics()
         {
-            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AdditionalData).Select(gr =>
+            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => a.AdditionalData!).Select(gr =>
                         new SqlProfileResume
                         {
                             Query = gr.Key,
@@ -408,8 +408,8 @@ namespace Signum.Utilities
 
         private XElement StackTraceToXml(StackTrace stackTrace)
         {
-            var frames = (from i in 0.To(StackTrace.FrameCount)
-                          let sf = StackTrace.GetFrame(i)
+            var frames = (from i in 0.To(StackTrace!.FrameCount)
+                          let sf = StackTrace!.GetFrame(i)
                           let mi = sf.GetMethod()                          
                           select new XElement("StackFrame",
                               new XAttribute("Method", mi.DeclaringType?.FullName + "." + mi.Name),

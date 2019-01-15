@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Engine.Maps;
 using System.Threading;
@@ -25,10 +25,10 @@ namespace Signum.Engine
 
         public static List<R> ProgressSelect<T, R>(this IEnumerable<T> collection,
             Func<T, R> selector,
-            Func<T, string> elementID = null,
-            LogWriter writer = null,
+            Func<T, string>? elementID = null,
+            LogWriter? writer = null,
             bool showProgress = true,
-            ParallelOptions parallelOptions = null)
+            ParallelOptions? parallelOptions = null)
         {
             List<R> result = new List<R>();
 
@@ -47,20 +47,20 @@ namespace Signum.Engine
         /// Executes an action for each element in the collection transactionally and showing the progress in the Console
         /// </summary>
         public static void ProgressForeach<T>(this IEnumerable<T> collection,
-            Func<T, string> elementID = null,
-            Action<T> action = null,
+            Func<T, string>? elementID = null,
+            Action<T>? action = null,
             bool transactional = true,
             bool showProgress = true,
-            LogWriter writer = null,
-            ParallelOptions parallelOptions = null,
-            Type disableIdentityFor = null)
+            LogWriter? writer = null,
+            ParallelOptions? parallelOptions = null,
+            Type? disableIdentityFor = null)
         {
             if (action == null)
                 throw new InvalidOperationException("no action specified");
 
             if (elementID == null)
             {
-                elementID = e => e.ToString();
+                elementID = e => e!.ToString();
             }
             if (writer == null)
                 writer = GetConsoleWriter();
@@ -90,7 +90,7 @@ namespace Signum.Engine
                             using (table.PrimaryKey.Default != null
                                 ? null
                                 : Administrator.DisableIdentity(table.Name))
-                                action(item);
+                                action!(item);
                             tr.Commit();
                         }
                     });
@@ -105,7 +105,7 @@ namespace Signum.Engine
         private static void ProgressForeachInternal<T>(this IEnumerable<T> collection,
             Func<T, string> elementID,
             LogWriter writer,
-            ParallelOptions parallelOptions,
+            ParallelOptions? parallelOptions,
             bool transactional,
             bool showProgress,
             Action<T> action
@@ -187,7 +187,7 @@ namespace Signum.Engine
                     lock (SafeConsole.SyncKey)
                         SafeConsole.WriteSameLine(pi.ToString());
 
-                Exception stopException = null;
+                Exception? stopException = null;
 
                 using (ExecutionContext.SuppressFlow())
                     Parallel.ForEach(col,
@@ -242,7 +242,7 @@ namespace Signum.Engine
 
         public static string DefaultLogFolder = "Log";
 
-        public static StreamWriter TryOpenAutoFlush(string fileName)
+        public static StreamWriter? TryOpenAutoFlush(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return null;
