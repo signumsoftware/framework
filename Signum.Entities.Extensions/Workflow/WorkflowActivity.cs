@@ -43,7 +43,7 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowScriptPartEmbedded Script { get; set; }
 
-        [NotNullValidator]
+        [NotNullValidator, AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         [NotifyChildProperty]
