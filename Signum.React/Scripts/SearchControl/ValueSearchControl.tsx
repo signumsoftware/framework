@@ -29,7 +29,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   avoidNotifyPendingRequest?: boolean;
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
-  onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
+  onRender?: (value: any, vsc: ValueSearchControl) => React.ReactNode;
 }
 
 export interface ValueSearchControlState {
