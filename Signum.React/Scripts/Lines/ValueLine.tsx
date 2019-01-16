@@ -502,6 +502,10 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
   handleKeyDown = (e: React.KeyboardEvent<any>) => {
     if (!this.props.validateKey(e))
       e.preventDefault();
+    else {
+      var atts = this.props.htmlAttributes;
+      atts && atts.onKeyDown && atts.onKeyDown(e);
+    }
   }
 }
 
