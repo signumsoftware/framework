@@ -143,16 +143,16 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           <tbody>
             {
               mlistItemContext(ctx)
-                .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a))
-                .map((mlec, i) =>
-                (<EntityTableRow key={i}
-                  index={i}
+                .map((mlec, i) => ({ mlec, i }))
+                .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a.mlec))
+                .map(a => <EntityTableRow key={a.i}
+                  index={a.i}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}
-                  onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                  draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
+                  onRemove={this.canRemove(a.mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, a.i) : undefined}
+                  draggable={this.canMove(a.mlec.value) && !readOnly ? this.getDragConfig(a.i, "v") : undefined}
                   columns={this.state.columns!}
-                  ctx={mlec} />))
+                  ctx={a.mlec} />)
             }
             {
               this.state.createAsLink && this.state.create && !readOnly &&
