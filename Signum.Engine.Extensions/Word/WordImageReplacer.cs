@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
@@ -17,10 +17,10 @@ namespace Signum.Engine.Word
     {
         public static bool AvoidAdaptSize = false; //Jpeg compression creates different images in TeamCity
 
-        /// <param name="title">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
-        public static void ReplaceImage(WordprocessingDocument doc, string title, Bitmap bitmap, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
+        /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
+        public static void ReplaceImage(WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
         {
-            Blip blip = FindBlip(doc, title);
+            Blip blip = FindBlip(doc, titleOrDescription);
 
             if (adaptSize && !AvoidAdaptSize)
             {
@@ -82,13 +82,13 @@ namespace Signum.Engine.Word
             throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
         }
 
-        static Blip FindBlip(WordprocessingDocument doc, string alternativeTitle)
+        static Blip FindBlip(WordprocessingDocument doc, string titleOrDescription)
         {
             var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().SingleEx(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
 
-                return prop != null && prop.Title == alternativeTitle;
+                return prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
             });
 
             return drawing.Descendants<Blip>().SingleEx();
