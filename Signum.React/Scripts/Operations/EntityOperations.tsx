@@ -1,4 +1,5 @@
-﻿import * as React from "react"
+import * as React from "react"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
@@ -13,6 +14,7 @@ import {
   CreateGroup, API, isEntityOperation, autoColorFunction, isSave
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
+
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
   const ti = getTypeInfo(ctx.pack.entity.Type);
@@ -164,7 +166,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         {...props}
         key="button"
         innerRef={r => elem = r}
-        className={classes(disabled ? "disabled" : undefined, props && props.className)}
+        className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
         onClick={disabled ? undefined : this.handleOnClick}
         data-operation={eoc.operationInfo.key}>
         {this.renderChildren()}
@@ -194,15 +196,30 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     if (this.props.children)
       return this.props.children;
 
+    let text: string;
+
     const eoc = this.props.eoc;
     if (eoc.settings && eoc.settings.text)
-      return eoc.settings.text();
+      text = eoc.settings.text();
 
     const group = this.props.group;
     if (group && group.simplifyName)
-      return group.simplifyName(eoc.operationInfo.niceName);
+      text = group.simplifyName(eoc.operationInfo.niceName);
 
-    return eoc.operationInfo.niceName;
+    text = eoc.operationInfo.niceName;
+
+    if (eoc.settings && eoc.settings.icon) {
+      const icon = eoc.settings.icon;
+      switch (icon.align) {
+        case "left":
+          return (<span><FontAwesomeIcon icon={icon.icon} fixedWidth /> {text}</span>);
+        case "right":
+          return (<span>{text} <FontAwesomeIcon icon={icon.icon} fixedWidth /></span>);
+      }
+    }
+    else {
+      return text;
+    }
   }
 
   handleOnClick = (event: React.MouseEvent<any>) => {
