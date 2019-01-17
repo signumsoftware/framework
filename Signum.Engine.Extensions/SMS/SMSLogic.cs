@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -487,7 +487,8 @@ namespace Signum.Engine.SMS
             message.MessageID = Provider.SMSSendAndGetTicket(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
-            message.Save();
+            using (OperationLogic.AllowSave<SMSMessageEntity>())
+                message.Save();
         }
 
         public static void SendAsyncSMS(SMSMessageEntity message)
