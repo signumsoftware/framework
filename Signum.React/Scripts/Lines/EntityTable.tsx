@@ -19,6 +19,9 @@ export interface EntityTableProps extends EntityListBaseProps {
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   scrollable?: boolean;
   isRowVisible?: (ctx: TypeContext<any /*T*/>) => boolean;
+  tableClasses?: string;
+  theadClasses?: string;
+  createMessage?: string;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -96,7 +99,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
   renderButtons() {
     const buttons = (
       <span className="ml-2">
-        {this.state.createAsLink == false && this.renderCreateButton(false)}
+        {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
         {this.renderFindButton(false)}
       </span>
     );
@@ -126,11 +129,11 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
       <div ref={d => this.containerDiv = d}
         className={this.props.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
         style={{ maxHeight: this.props.scrollable ? this.props.maxResultsHeight : undefined }}>
-        <table className="table table-sm sf-table">
+        <table className={classes("table table-sm sf-table", this.props.tableClasses)} >
           {
             !isEmpty &&
             <thead ref={th => this.thead = th}>
-              <tr className="bg-light">
+              <tr className={this.props.theadClasses || "bg-light"}>
                 <th></th>
                 {
                   this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
@@ -162,7 +165,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                     <a href="#" title={EntityControlMessage.Create.niceToString()}
                       className="sf-line-button sf-create"
                       onClick={this.handleCreateClick}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
                     </a>}
                 </td>
               </tr>
