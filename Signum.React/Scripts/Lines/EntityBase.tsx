@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -230,14 +230,15 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }).done();
   };
 
-  renderCreateButton(btn: boolean) {
+  renderCreateButton(btn: boolean, createMessage?: string) {
     if (!this.state.create || this.state.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={EntityControlMessage.Create.niceToString()}>
+        title={createMessage || EntityControlMessage.Create.niceToString()
+  }>
         <FontAwesomeIcon icon="plus" className="sf-create" />
       </a>
     );
