@@ -12,6 +12,7 @@ import { getTypeInfos, getTypeInfo } from '../Reflection';
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
   avoidFieldSet?: boolean;
+  createMessage?: string;
 }
 
 export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRepeaterProps> {
@@ -52,7 +53,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
   renderButtons() {
     const buttons = (
       <span className="float-right">
-        {this.state.createAsLink == false && this.renderCreateButton(false)}
+        {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
         {this.renderFindButton(false)}
       </span>
     );
@@ -82,7 +83,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
             <a href="#" title={EntityControlMessage.Create.niceToString()}
               className="sf-line-button sf-create"
               onClick={this.handleCreateClick}>
-              <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+              <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
             </a>)
         }
       </div>
