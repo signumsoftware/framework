@@ -35,7 +35,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps>{
 
     return (
       <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
-        title={TitleManager.useTitle() && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
+        title={TitleManager.useTitle && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
         <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
         <div className="rw-widget-xs">
           <QueryTokenBuilder

@@ -94,7 +94,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 										{this.canRemove(mlec.value) && !readOnly &&
                     <span className={classes("sf-line-button", "sf-create")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
-                      title={TitleManager.useTitle() ? EntityControlMessage.Remove.niceToString() : undefined}>
+                      title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
                     </span>
                   }
@@ -103,7 +103,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                     draggable={true}
                     onDragStart={drag.onDragStart}
                     onDragEnd={drag.onDragEnd}
-                    title={TitleManager.useTitle() ? EntityControlMessage.Move.niceToString() : undefined}>
+                    title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
                     <FontAwesomeIcon icon="bars" />
                   </span>}
                 </div> as any

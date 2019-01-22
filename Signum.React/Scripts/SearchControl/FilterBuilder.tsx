@@ -104,12 +104,12 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
               {!this.props.readOnly &&
                 <tr >
                 <td colSpan={4}>
-                  <a href="#" title={TitleManager.useTitle() ? SearchMessage.AddFilter.niceToString() : undefined}
+                  <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={e => this.handlerNewFilter(e, false)}>
                       <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddFilter.niceToString()}
                   </a>
-                  <a href="#" title={TitleManager.useTitle() ? SearchMessage.AddGroup.niceToString() : undefined}
+                  <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
                       className="sf-line-button sf-create ml-3"
                       onClick={e => this.handlerNewFilter(e, true)}>
                       <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
@@ -215,7 +215,7 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
       <tr>
         <td style={{ verticalAlign: "top" }}>
           {!readOnly &&
-            <a href="#" title={TitleManager.useTitle() ? SearchMessage.DeleteFilter.niceToString() : undefined}
+            <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={this.handleDeleteFilter}>
               <FontAwesomeIcon icon="times" />
@@ -290,13 +290,13 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
                 {!this.props.readOnly &&
                   <tr >
                   <td colSpan={4}>
-                      <a href="#" title={TitleManager.useTitle() ? SearchMessage.AddFilter.niceToString() : undefined}
+                      <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
                         className="sf-line-button sf-create"
                         onClick={e => this.handlerNewFilter(e, false)}>
                         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
                       </a>
 
-                      <a href="#" title={TitleManager.useTitle() ? SearchMessage.AddGroup.niceToString() : undefined}
+                      <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
                         className="sf-line-button sf-create ml-3"
                         onClick={e => this.handlerNewFilter(e, true)}>
                         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
@@ -415,7 +415,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
         <tr>
           <td>
             {!readOnly &&
-              <a href="#" title={TitleManager.useTitle() ? SearchMessage.DeleteFilter.niceToString() : undefined}
+              <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
                 className="sf-line-button sf-remove"
                 onClick={this.handleDeleteFilter}>
                 <FontAwesomeIcon icon="times" />
@@ -526,7 +526,7 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
     return (
       <button type="button" className={classes("btn btn-light", binding.getValue() && "active")}
         onClick={e => { binding.setValue(!binding.getValue()); this.props.onChange(); }}
-        title={TitleManager.useTitle() ? title : undefined}>
+        title={TitleManager.useTitle ? title : undefined}>
         {label}
       </button>
     );
@@ -590,7 +590,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
               <tr key={i}>
                 <td>
                   {!this.props.readOnly &&
-                    <a href="#" title={TitleManager.useTitle() ? SearchMessage.DeleteFilter.niceToString() : undefined}
+                    <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
                       className="sf-line-button sf-remove"
                       onClick={e => this.handleDeleteValue(e, i)}>
                       <FontAwesomeIcon icon="times" />
@@ -611,7 +611,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
           <tr >
             <td colSpan={4}>
               {!this.props.readOnly &&
-                <a href="#" title={TitleManager.useTitle() ? SearchMessage.AddValue.niceToString() : undefined}
+                <a href="#" title={TitleManager.useTitle ? SearchMessage.AddValue.niceToString() : undefined}
                   className="sf-line-button sf-create"
                   onClick={this.handleAddValue}>
                   <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}

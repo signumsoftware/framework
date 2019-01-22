@@ -185,7 +185,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         <Button color={bsColor}
           className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
           onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
-          title={TitleManager.useTitle() ? NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName) : undefined}>
+          title={TitleManager.useTitle ? NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName) : undefined}>
           <span>&times;</span>
         </Button>
       </div>,

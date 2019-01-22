@@ -80,7 +80,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
         {
           this.state.createAsLink && this.state.create && !readOnly &&
           (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-            <a href="#" title={TitleManager.useTitle() ? EntityControlMessage.Create.niceToString() : undefined}
+            <a href="#" title={TitleManager.useTitle ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={this.handleCreateClick}>
               <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
@@ -117,7 +117,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
             <div className="item-group">
               {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={this.props.onRemove}
-                title={TitleManager.useTitle() ? EntityControlMessage.Remove.niceToString() : undefined}>
+                title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                 <FontAwesomeIcon icon="times" />
               </a>}
               &nbsp;
@@ -125,7 +125,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                 draggable={true}
                 onDragStart={drag.onDragStart}
                 onDragEnd={drag.onDragEnd}
-                title={TitleManager.useTitle() ? EntityControlMessage.Move.niceToString() : undefined}>
+                title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
                 <FontAwesomeIcon icon="bars" />
               </a>}
               {this.props.title && '\xa0'}

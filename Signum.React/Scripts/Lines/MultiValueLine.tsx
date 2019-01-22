@@ -76,7 +76,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
             <tr >
               <td colSpan={4}>
                 {!s.ctx.readOnly &&
-                  <a href="#" title={TitleManager.useTitle() ? this.props.addValueText || SearchMessage.AddValue.niceToString() : undefined}
+                  <a href="#" title={TitleManager.useTitle ? this.props.addValueText || SearchMessage.AddValue.niceToString() : undefined}
                     className="sf-line-button sf-create"
                     onClick={this.handleAddValue}>
                     <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
@@ -104,7 +104,7 @@ export class MultiValueLineElement extends React.Component<MultiValueLineElement
       <tr>
         <td>
           {!ctx.readOnly &&
-            <a href="#" title={TitleManager.useTitle() ? SearchMessage.DeleteFilter.niceToString() : undefined}
+            <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={this.props.onRemove}>
               <FontAwesomeIcon icon="times" />

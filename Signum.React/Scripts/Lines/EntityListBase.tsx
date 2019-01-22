@@ -48,7 +48,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     return (
       <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
-        title={TitleManager.useTitle() ? EntityControlMessage.MoveUp.niceToString() : undefined}>
+        title={TitleManager.useTitle ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-up" />
       </a>
     );
@@ -67,7 +67,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     return (
       <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
-        title={TitleManager.useTitle() ? EntityControlMessage.MoveUp.niceToString() : undefined}>
+        title={TitleManager.useTitle ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-down" />
       </a>);
   }

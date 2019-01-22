@@ -162,7 +162,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
               <tr>
                 <td colSpan={1 + this.state.columns!.length} className={isEmpty ? "border-0" : undefined}>
                   {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-                    <a href="#" title={TitleManager.useTitle() ? EntityControlMessage.Create.niceToString() : undefined}
+                    <a href="#" title={TitleManager.useTitle ? EntityControlMessage.Create.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={this.handleCreateClick}>
                       <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
@@ -214,7 +214,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
           <div className="item-group">
             {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={this.props.onRemove}
-              title={TitleManager.useTitle() ? EntityControlMessage.Remove.niceToString() : undefined}>
+              title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
               <FontAwesomeIcon icon="times" />
             </a>}
             &nbsp;
@@ -222,7 +222,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
-              title={TitleManager.useTitle() ? EntityControlMessage.Move.niceToString() : undefined}>
+              title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
               <FontAwesomeIcon icon="bars" />
             </a>}
           </div>

@@ -100,7 +100,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     let find = value != undefined && coallesce(this.props.findButton, isQuery) &&
       <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.valueSearchControl!.handleClick}
-        title={TitleManager.useTitle() ? EntityControlMessage.Find.niceToString() : undefined}>
+        title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
         <FontAwesomeIcon icon="search" />
       </a>;
 
@@ -108,7 +108,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     let view = value != undefined && coallesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
       <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.handleViewEntityClick}
-        title={TitleManager.useTitle() ? EntityControlMessage.View.niceToString() : undefined}>
+        title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
         <FontAwesomeIcon icon="arrow-right" />
       </a>
 

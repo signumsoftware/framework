@@ -200,7 +200,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         <a ref={e => this.setLinkOrSpan(e)}
           href="#" onClick={this.handleViewClick}
           className={classes(s.ctx.formControlClass, "sf-entity-line-entity")}
-          title={TitleManager.useTitle() ? JavascriptMessage.navigate.niceToString() : undefined} {...s.itemHtmlAttributes}>
+          title={TitleManager.useTitle ? JavascriptMessage.navigate.niceToString() : undefined} {...s.itemHtmlAttributes}>
           {str}
         </a>
       );

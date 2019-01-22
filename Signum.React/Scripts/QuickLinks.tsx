@@ -154,7 +154,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         <DropdownToggle tag="span" data-toggle="dropdown">
           <a
             className={classes("badge badge-secondary badge-pill", "sf-widgets-active", "sf-quicklinks")}
-            title={TitleManager.useTitle() ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
+            title={TitleManager.useTitle ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
             role="button"
             href="#"
             data-toggle="dropdown"

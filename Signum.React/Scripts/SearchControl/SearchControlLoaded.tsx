@@ -538,21 +538,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
         style={!s.showFilters && p.findOptions.filterOptions.length > 0 ? { border: "1px solid #b3b3b3" } : undefined}
         onClick={this.handleToggleFilters}
-        title={TitleManager.useTitle() ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
+        title={TitleManager.useTitle ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
         <FontAwesomeIcon icon="filter" />
       </button>),
 
       p.showGroupButton && OrderUtils.setOrder(-4, <button
         className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
         onClick={this.handleToggleGroupBy}
-        title={TitleManager.useTitle() ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
+        title={TitleManager.useTitle ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
         Ʃ
             </button>),
 
       p.showSystemTimeButton && OrderUtils.setOrder(-3.5, <button
         className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
         onClick={this.handleSystemTimeClick}
-        title={TitleManager.useTitle() ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
+        title={TitleManager.useTitle ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
         <FontAwesomeIcon icon="history" />
       </button>),
 
@@ -562,7 +562,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
-      p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-create ml-2" title={TitleManager.useTitle() ? this.createTitle() : undefined} onClick={this.handleCreate}>
+      p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-create ml-2" title={TitleManager.useTitle ? this.createTitle() : undefined} onClick={this.handleCreate}>
         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
       </button>),
 

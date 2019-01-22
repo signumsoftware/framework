@@ -269,7 +269,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
         <a className="sf-line-button sf-remove"
           onClick={this.props.onRemove}
           href="#"
-          title={TitleManager.useTitle() ? EntityControlMessage.Remove.niceToString() : undefined}>
+          title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
           <FontAwesomeIcon icon="times" />
         </a>
       </span>
@@ -281,7 +281,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
       draggable={true}
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
-      title={TitleManager.useTitle() ? EntityControlMessage.Move.niceToString() : undefined}>
+      title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
       <FontAwesomeIcon icon="bars" />
     </span>;
   }

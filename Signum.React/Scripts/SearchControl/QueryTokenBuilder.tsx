@@ -176,7 +176,7 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null }>
     return (
       <span
         style={{ color: item.typeColor }}
-        title={TitleManager.useTitle() ? item.niceTypeName : undefined}>
+        title={TitleManager.useTitle ? item.niceTypeName : undefined}>
         {item.toString}
       </span>
     );
@@ -202,7 +202,7 @@ export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken |
     return (
       <span data-token={item.key}
         style={{ color: item.typeColor }}
-        title={TitleManager.useTitle() ? item.niceTypeName : undefined}>
+        title={TitleManager.useTitle ? item.niceTypeName : undefined}>
         {((item.parent && !parentToken) ? " > " : "") + item.toString}
       </span>
     );

@@ -69,7 +69,7 @@ export default class ColumnsBuilder extends React.Component<ColumnsBuilderProps>
               {!this.props.readonly &&
                 <tr>
                   <td colSpan={4}>
-                    <a title={TitleManager.useTitle() ? SearchMessage.AddColumn.niceToString() : undefined}
+                    <a title={TitleManager.useTitle ? SearchMessage.AddColumn.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={this.handlerNewColumn}>
                       <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
@@ -125,7 +125,7 @@ export class ColumnComponent extends React.Component<ColumnComponentProps>{
       <tr>
         <td>
           {!readonly &&
-            <a title={TitleManager.useTitle() ? JavascriptMessage.removeColumn.niceToString() : undefined}
+            <a title={TitleManager.useTitle ? JavascriptMessage.removeColumn.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={this.handleDeleteColumn}>
               <FontAwesomeIcon icon="times" />
