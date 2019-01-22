@@ -6,6 +6,7 @@ import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../Find
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import * as DropdownList from 'react-widgets/lib/DropdownList'
+import { TitleManager } from '../../Scripts/Lines/EntityBase';
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
   prefixQueryToken?: QueryToken | undefined;
@@ -175,7 +176,7 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null }>
     return (
       <span
         style={{ color: item.typeColor }}
-        title={item.niceTypeName}>
+        title={TitleManager.useTitle() ? item.niceTypeName : undefined}>
         {item.toString}
       </span>
     );
@@ -201,7 +202,7 @@ export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken |
     return (
       <span data-token={item.key}
         style={{ color: item.typeColor }}
-        title={item.niceTypeName}>
+        title={TitleManager.useTitle() ? item.niceTypeName : undefined}>
         {((item.parent && !parentToken) ? " > " : "") + item.toString}
       </span>
     );

@@ -8,6 +8,7 @@ import { Tab, Tabs } from '../Components/Tabs';
 import { newMListElement } from '../Signum.Entities';
 import { isLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TitleManager } from './EntityBase';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean;
@@ -93,7 +94,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 										{this.canRemove(mlec.value) && !readOnly &&
                     <span className={classes("sf-line-button", "sf-create")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
-                      title={EntityControlMessage.Remove.niceToString()}>
+                      title={TitleManager.useTitle() ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
                     </span>
                   }
@@ -102,7 +103,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                     draggable={true}
                     onDragStart={drag.onDragStart}
                     onDragEnd={drag.onDragEnd}
-                    title={EntityControlMessage.Move.niceToString()}>
+                    title={TitleManager.useTitle() ? EntityControlMessage.Move.niceToString() : undefined}>
                     <FontAwesomeIcon icon="bars" />
                   </span>}
                 </div> as any

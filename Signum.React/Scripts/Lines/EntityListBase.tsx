@@ -1,10 +1,10 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { EntityBase, EntityBaseProps } from './EntityBase'
+import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityListBaseProps extends EntityBaseProps {
@@ -48,7 +48,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     return (
       <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
-        title={EntityControlMessage.MoveUp.niceToString()}>
+        title={TitleManager.useTitle() ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-up" />
       </a>
     );
@@ -67,7 +67,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     return (
       <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
-        title={EntityControlMessage.MoveUp.niceToString()}>
+        title={TitleManager.useTitle() ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-down" />
       </a>);
   }

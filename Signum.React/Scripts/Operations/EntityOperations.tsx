@@ -14,6 +14,7 @@ import {
   CreateGroup, API, isEntityOperation, autoColorFunction, isSave
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
+import { TitleManager } from "../../Scripts/Lines/EntityBase";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -184,7 +185,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         <Button color={bsColor}
           className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
           onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
-          title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
+          title={TitleManager.useTitle() ? NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName) : undefined}>
           <span>&times;</span>
         </Button>
       </div>,

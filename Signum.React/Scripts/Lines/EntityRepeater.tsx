@@ -3,7 +3,7 @@ import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.Entities'
-import { EntityBase } from './EntityBase'
+import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -80,7 +80,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
         {
           this.state.createAsLink && this.state.create && !readOnly &&
           (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-            <a href="#" title={EntityControlMessage.Create.niceToString()}
+            <a href="#" title={TitleManager.useTitle() ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={this.handleCreateClick}>
               <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
@@ -117,7 +117,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
             <div className="item-group">
               {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={this.props.onRemove}
-                title={EntityControlMessage.Remove.niceToString()}>
+                title={TitleManager.useTitle() ? EntityControlMessage.Remove.niceToString() : undefined}>
                 <FontAwesomeIcon icon="times" />
               </a>}
               &nbsp;
@@ -125,7 +125,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                 draggable={true}
                 onDragStart={drag.onDragStart}
                 onDragEnd={drag.onDragEnd}
-                title={EntityControlMessage.Move.niceToString()}>
+                title={TitleManager.useTitle() ? EntityControlMessage.Move.niceToString() : undefined}>
                 <FontAwesomeIcon icon="bars" />
               </a>}
               {this.props.title && '\xa0'}

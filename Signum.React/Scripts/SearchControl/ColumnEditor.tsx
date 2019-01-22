@@ -1,9 +1,10 @@
-﻿
+
 import * as React from 'react'
 import { classes } from '../Globals';
 import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
+import { TitleManager } from '../../Scripts/Lines/EntityBase';
 
 interface ColumnEditorProps extends React.Props<ColumnEditor> {
   columnOption: ColumnOptionParsed
@@ -34,7 +35,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps>{
 
     return (
       <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
-        title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
+        title={TitleManager.useTitle() && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
         <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
         <div className="rw-widget-xs">
           <QueryTokenBuilder

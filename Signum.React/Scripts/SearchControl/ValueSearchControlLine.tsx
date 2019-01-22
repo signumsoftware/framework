@@ -11,6 +11,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TitleManager } from '../../Scripts/Lines/EntityBase';
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
   ctx: StyleContext;
@@ -99,7 +100,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     let find = value != undefined && coallesce(this.props.findButton, isQuery) &&
       <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.valueSearchControl!.handleClick}
-        title={EntityControlMessage.Find.niceToString()}>
+        title={TitleManager.useTitle() ? EntityControlMessage.Find.niceToString() : undefined}>
         <FontAwesomeIcon icon="search" />
       </a>;
 
@@ -107,7 +108,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     let view = value != undefined && coallesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
       <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.handleViewEntityClick}
-        title={EntityControlMessage.View.niceToString()}>
+        title={TitleManager.useTitle() ? EntityControlMessage.View.niceToString() : undefined}>
         <FontAwesomeIcon icon="arrow-right" />
       </a>
 
