@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using OpenQA.Selenium.Remote;
 using Signum.Engine;
@@ -12,7 +12,7 @@ using OpenQA.Selenium;
 
 namespace Signum.React.Selenium
 {
-    public interface ILineContainer<T> : ILineContainer where T : ModifiableEntity
+    public interface ILineContainer<T> : ILineContainer where T : IModifiableEntity
     {
     }
 
@@ -37,7 +37,7 @@ namespace Signum.React.Selenium
             return selenium.IsElementPresent(By.CssSelector("#{0}.input-validation-error".FormatWith(elementId)));
         }
 
-        public static LineLocator<S> LineLocator<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property) where T : ModifiableEntity
+        public static LineLocator<S> LineLocator<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property) where T : IModifiableEntity
         {
             PropertyRoute route = lineContainer.Route ?? PropertyRoute.Root(typeof(T));
 
@@ -69,52 +69,55 @@ namespace Signum.React.Selenium
 
 
         public static bool IsVisible<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             return lineContainer.LineLocator(property).ElementLocator.IsVisible();
         }
 
         public static bool IsPresent<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             return lineContainer.LineLocator(property).ElementLocator.IsPresent();
         }
 
         public static void WaitVisible<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             lineContainer.LineLocator(property).ElementLocator.WaitVisible();
         }
 
         public static void WaitPresent<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             lineContainer.LineLocator(property).ElementLocator.WaitPresent();
         }
 
         public static void WaitNoVisible<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-       where T : ModifiableEntity
+       where T : IModifiableEntity
         {
             lineContainer.LineLocator(property).ElementLocator.WaitNoVisible();
         }
 
         public static void WaitNoPresent<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             lineContainer.LineLocator(property).ElementLocator.WaitNoPresent();
         }
 
         public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
-            where T : ModifiableEntity
-            where S : ModifiableEntity
+            where T : IModifiableEntity
+            where S : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
             return new LineContainer<S>(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
+     
+
+
         public static ValueLineProxy ValueLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -122,7 +125,7 @@ namespace Signum.React.Selenium
         }
 
         public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             var valueLine = lineContainer.ValueLine(property);
 
@@ -133,7 +136,7 @@ namespace Signum.React.Selenium
         }
 
         public static FileLineProxy FileLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-        where T : ModifiableEntity
+        where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -141,13 +144,13 @@ namespace Signum.React.Selenium
         }
 
         public static V ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             return (V)lineContainer.ValueLine(property).GetValue();
         }
 
         public static EntityLineProxy EntityLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-          where T : ModifiableEntity
+          where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -155,7 +158,7 @@ namespace Signum.React.Selenium
         }
 
         public static V EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-        where T : ModifiableEntity
+        where T : IModifiableEntity
         {
             var lite = lineContainer.EntityLine(property).GetLite();
 
@@ -163,13 +166,13 @@ namespace Signum.React.Selenium
         }
 
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             lineContainer.EntityLine(property).SetLite( value as Lite<IEntity> ?? ((IEntity)value)?.ToLite());
         }
 
         public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-          where T : ModifiableEntity
+          where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -177,7 +180,7 @@ namespace Signum.React.Selenium
         }
 
         public static V EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-        where T : ModifiableEntity
+        where T : IModifiableEntity
         {
             var lite = lineContainer.EntityCombo(property).LiteValue;
 
@@ -185,7 +188,7 @@ namespace Signum.React.Selenium
         }
 
         public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             var combo = lineContainer.EntityCombo(property);
 
@@ -196,7 +199,7 @@ namespace Signum.React.Selenium
         }
 
         public static EntityDetailProxy EntityDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-          where T : ModifiableEntity
+          where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -204,7 +207,7 @@ namespace Signum.React.Selenium
         }
 
         public static EntityRepeaterProxy EntityRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-          where T : ModifiableEntity
+          where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -212,7 +215,7 @@ namespace Signum.React.Selenium
         }
 
         public static EntityTabRepeaterProxy EntityTabRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-           where T : ModifiableEntity
+           where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -220,7 +223,7 @@ namespace Signum.React.Selenium
         }
 
         public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -228,7 +231,7 @@ namespace Signum.React.Selenium
         }
 
         public static EntityListProxy EntityList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-          where T : ModifiableEntity
+          where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -236,25 +239,16 @@ namespace Signum.React.Selenium
         }
 
         public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
             return new EntityListCheckBoxProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
-        public static bool IsImplementation(this PropertyRoute route, Type type)
-        {
-            if (!typeof(Entity).IsAssignableFrom(type))
-                return false;
-
-            var routeType = route.Type.CleanType();
-
-            return routeType.IsAssignableFrom(type);
-        }
 
         public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEmbedded>> property)
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
@@ -279,7 +273,7 @@ namespace Signum.React.Selenium
         }
     }
 
-    public class LineContainer<T> :ILineContainer<T> where T:ModifiableEntity
+    public class LineContainer<T> :ILineContainer<T> where T:IModifiableEntity
     {
         public IWebElement Element { get; private set; }
 
@@ -288,7 +282,13 @@ namespace Signum.React.Selenium
         public LineContainer(IWebElement element, PropertyRoute route = null)
         {
             this.Element = element;
-            this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
+            this.Route = route ?? PropertyRoute.Root(typeof(T));
         }
+
+        public LineContainer<S> As<S>() where S : T
+        {
+            return new LineContainer<S>(this.Element, PropertyRoute.Root(typeof(S)));
+        }
+
     }
 }
