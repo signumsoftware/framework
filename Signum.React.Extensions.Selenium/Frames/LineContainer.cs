@@ -246,15 +246,6 @@ namespace Signum.React.Selenium
             return new EntityListCheckBoxProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
-        public static bool IsImplementation(this PropertyRoute route, Type type)
-        {
-            if (!typeof(Entity).IsAssignableFrom(type))
-                return false;
-
-            var routeType = route.Type.CleanType();
-
-            return routeType.IsAssignableFrom(type);
-        }
 
         public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEmbedded>> property)
             where T : IModifiableEntity
@@ -291,7 +282,7 @@ namespace Signum.React.Selenium
         public LineContainer(IWebElement element, PropertyRoute route = null)
         {
             this.Element = element;
-            this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
+            this.Route = route ?? PropertyRoute.Root(typeof(T));
         }
 
         public LineContainer<S> As<S>() where S : T
