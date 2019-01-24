@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
 
         private MetadataVisitor() { }
 
-        static internal Dictionary<string, Meta?> GatherMetadata(Expression expression)
+        static internal Dictionary<string, Meta?>? GatherMetadata(Expression expression)
         {
             if (expression == null)
                 throw new ArgumentException("expression");
@@ -572,19 +572,16 @@ namespace Signum.Engine.Linq
         {
             var right = Visit(b.Right);
             var left = Visit(b.Left);
-
-            var mRight = right as MetaExpression;
-            var mLeft = left as MetaExpression;
-
+            
             Implementations? imps =
-                mRight != null && mRight.Meta.Implementations != null &&
-                mLeft != null && mLeft.Meta.Implementations != null ?
+                right is MetaExpression mRight && mRight.Meta.Implementations != null &&
+                left is MetaExpression mLeft && mLeft.Meta.Implementations != null ?
                 AggregateImplementations(new[] {
                     mRight.Meta.Implementations.Value,
                     mLeft.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
-            return MakeDirtyMeta(b.Type, imps, left, right);
+            return MakeDirtyMeta(b.Type, imps, left!, right!); /*CSBUG*/
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
@@ -592,18 +589,16 @@ namespace Signum.Engine.Linq
             var ifTrue = Visit(c.IfTrue);
             var ifFalse = Visit(c.IfFalse);
 
-            var mIfTrue = ifTrue as MetaExpression;
-            var mIfFalse = ifFalse as MetaExpression;
 
             Implementations? imps =
-                mIfTrue != null && mIfTrue.Meta.Implementations != null &&
-                mIfFalse != null && mIfFalse.Meta.Implementations != null ?
+                ifTrue is MetaExpression mIfTrue && mIfTrue.Meta.Implementations != null &&
+                ifFalse is MetaExpression mIfFalse && mIfFalse.Meta.Implementations != null ?
                 AggregateImplementations(new[] {
                     mIfTrue.Meta.Implementations.Value,
                     mIfFalse.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
-            return MakeDirtyMeta(c.Type, imps, Visit(c.Test), ifTrue, ifFalse);
+            return MakeDirtyMeta(c.Type, imps, Visit(c.Test), ifTrue!, ifFalse!); /*CSBUG*/
         }
     }
 }

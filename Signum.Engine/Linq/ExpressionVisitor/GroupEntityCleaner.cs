@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
@@ -14,7 +14,7 @@ namespace Signum.Engine.Linq
         public override Expression Visit(Expression exp)
         {
             if (exp == null)
-                return null;
+                return null!;
 
             if (exp.Type == typeof(Type))
                 return VisitType(exp);
@@ -59,7 +59,7 @@ namespace Signum.Engine.Linq
         public override Expression Visit(Expression exp)
         {
             if (exp == null)
-                return null;
+                return null!;
 
             if (exp.Type == typeof(Type))
                 return VisitType(exp);

@@ -424,7 +424,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             if (!pi.HasAttribute<IgnoreAttribute>())
                 return null;
 
-            var t = pi.PropertyType.ElementType();
+            var t = pi.PropertyType.ElementType()!;
 
             var backProperty = Reflector.PublicInstancePropertiesInOrder(t).SingleOrDefaultEx(bp => IsVirtualMListBackReference(bp, pi.DeclaringType));
 

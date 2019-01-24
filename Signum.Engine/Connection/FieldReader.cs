@@ -566,12 +566,11 @@ namespace Signum.Engine
 
         internal FieldReaderException CreateFieldReaderException(Exception ex)
         {
-            return new FieldReaderException(ex)
-            {
-                Ordinal = LastOrdinal,
-                ColumnName = reader.GetName(LastOrdinal),
-                ColumnType = reader.GetFieldType(LastOrdinal),
-            };
+            return new FieldReaderException(ex, 
+                ordinal:  LastOrdinal,
+                columnName: reader.GetName(LastOrdinal),
+                columnType: reader.GetFieldType(LastOrdinal)
+            );
         }
     }
 
@@ -584,7 +583,9 @@ namespace Signum.Engine
             this.ColumnName = columnName;
             this.ColumnType = columnType;
         }
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         protected FieldReaderException(
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
