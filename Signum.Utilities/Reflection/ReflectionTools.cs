@@ -103,8 +103,7 @@ namespace Signum.Utilities.Reflection
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
-            NewExpression? ex = body as NewExpression;
-            if (ex == null)
+            if (!(body is NewExpression ex))
                 throw new ArgumentException("The lambda 'constuctor' should be an expression constructing an object");
 
             return ex.Constructor;
@@ -288,9 +287,7 @@ namespace Signum.Utilities.Reflection
                 return (Action<T, object?>)exp.Compile();
             }
         }
-
-        static Module module = ((Expression<Func<int>>)(() => 2)).Compile().Method.Module;
-
+        
         public static Action<object, object?>? CreateSetterUntyped(Type type, MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateSetterUntyped"))
@@ -463,13 +460,13 @@ namespace Signum.Utilities.Reflection
                 return (T)Convert.ChangeType(value, utype, culture);
         }
 
-        public static object Parse(string value, Type type, CultureInfo culture)
+        public static object? Parse(string value, Type type, CultureInfo culture)
         {
             if (type == typeof(string))
-                return (object)value;
+                return value;
 
             if (value == null || value == "")
-                return (object?)null;
+                return null;
 
             Type utype = type.UnNullify();
             if (utype.IsEnum)
@@ -489,7 +486,7 @@ namespace Signum.Utilities.Reflection
             }
             else
             {
-                result = default(T);
+                result = default(T)!;
                 return false;
             }
         }
@@ -503,7 +500,7 @@ namespace Signum.Utilities.Reflection
             }
             else
             {
-                result = default(T);
+                result = default(T)!;
                 return false;
             }
         }

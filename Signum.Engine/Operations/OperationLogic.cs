@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -86,7 +86,7 @@ namespace Signum.Engine.Operations
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -221,12 +221,12 @@ Consider the following options:
         public static event SurroundOperationHandler SurroundOperation;
         public static event AllowOperationHandler AllowOperation;
 
-        internal static IDisposable OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity entity, object[] args)
+        internal static IDisposable? OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity? entity, object[]? args)
         {
-            return Disposable.Combine(SurroundOperation, f => f(operation, log, (Entity)entity, args));
+            return Disposable.Combine(SurroundOperation, f => f(operation, log, (Entity?)entity, args));
         }
 
-        internal static void SetExceptionData(Exception ex, OperationSymbol operationSymbol, IEntity entity, object[] args)
+        internal static void SetExceptionData(Exception ex, OperationSymbol operationSymbol, IEntity? entity, object[]? args)
         {
             ex.Data["operation"] = operationSymbol;
             ex.Data["entity"] = entity;
@@ -316,12 +316,10 @@ Consider the following options:
 
         private static OperationInfo ToOperationInfo(IOperation oper)
         {
-            return new OperationInfo
+            return new OperationInfo(oper.OperationSymbol, oper.OperationType)
             {
-                OperationSymbol = oper.OperationSymbol,
                 CanBeModified = (oper as IEntityOperation)?.CanBeModified,
                 Returns = oper.Returns,
-                OperationType = oper.OperationType,
                 ReturnType = oper.ReturnType,
                 HasStates = (oper as IGraphHasFromStatesOperation)?.HasFromStates,
                 HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
@@ -350,7 +348,7 @@ Consider the following options:
 
 
         #region Execute
-        public static T Execute<T>(this T entity, ExecuteSymbol<T> symbol, params object[] args)
+        public static T Execute<T>(this T entity, ExecuteSymbol<T> symbol, params object[]? args)
             where T : class, IEntity
         {
             var op = Find<IExecuteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((Entity)(IEntity)entity);
@@ -358,14 +356,14 @@ Consider the following options:
             return (T)(IEntity)entity;
         }
 
-        public static Entity ServiceExecute(IEntity entity, OperationSymbol operationSymbol, params object[] args)
+        public static Entity ServiceExecute(IEntity entity, OperationSymbol operationSymbol, params object[]? args)
         {
             var op = Find<IExecuteOperation>(entity.GetType(), operationSymbol).AssertEntity((Entity)(IEntity)entity);
             op.Execute(entity, args);
             return (Entity)(IEntity)entity;
         }
 
-        public static T ExecuteLite<T>(this Lite<T> lite, ExecuteSymbol<T> symbol, params object[] args)
+        public static T ExecuteLite<T>(this Lite<T> lite, ExecuteSymbol<T> symbol, params object[]? args)
             where T : class, IEntity
         {
             T entity = lite.RetrieveAndForget();
@@ -374,7 +372,7 @@ Consider the following options:
             return entity;
         }
 
-        public static Entity ServiceExecuteLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
+        public static Entity ServiceExecuteLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[]? args)
         {
             Entity entity = (Entity)lite.RetrieveAndForget();
             var op = Find<IExecuteOperation>(lite.EntityType, operationSymbol);
@@ -383,14 +381,14 @@ Consider the following options:
         }
 
 
-        public static string CanExecute<T>(this T entity, IEntityOperationSymbolContainer<T> symbol)
+        public static string? CanExecute<T>(this T entity, IEntityOperationSymbolContainer<T> symbol)
             where T : class, IEntity
         {
             var op = Find<IEntityOperation>(entity.GetType(), symbol.Symbol);
             return op.CanExecute(entity);
         }
 
-        public static string ServiceCanExecute(Entity entity, OperationSymbol operationSymbol)
+        public static string? ServiceCanExecute(Entity entity, OperationSymbol operationSymbol)
         {
             var op = Find<IEntityOperation>(entity.GetType(), operationSymbol);
             return op.CanExecute(entity);
@@ -399,7 +397,7 @@ Consider the following options:
 
         #region Delete
 
-        public static void DeleteLite<T>(this Lite<T> lite, DeleteSymbol<T> symbol, params object[] args)
+        public static void DeleteLite<T>(this Lite<T> lite, DeleteSymbol<T> symbol, params object[]? args)
             where T : class, IEntity
         {
             IEntity entity = lite.RetrieveAndForget();
@@ -407,21 +405,21 @@ Consider the following options:
             op.Delete(entity, args);
         }
 
-        public static void ServiceDelete(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
+        public static void ServiceDelete(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[]? args)
         {
             IEntity entity = lite.RetrieveAndForget();
             var op = Find<IDeleteOperation>(lite.EntityType, operationSymbol);
             op.Delete(entity, args);
         }
 
-        public static void Delete<T>(this T entity, DeleteSymbol<T> symbol, params object[] args)
+        public static void Delete<T>(this T entity, DeleteSymbol<T> symbol, params object[]? args)
             where T : class, IEntity
         {
             var op = Find<IDeleteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((Entity)(IEntity)entity);
             op.Delete(entity, args);
         }
 
-        public static void ServiceDelete(Entity entity, OperationSymbol operationSymbol, params object[] args)
+        public static void ServiceDelete(Entity entity, OperationSymbol operationSymbol, params object[]? args)
         {
             var op = Find<IDeleteOperation>(entity.GetType(), operationSymbol).AssertEntity((Entity)(IEntity)entity);
             op.Delete(entity, args);
@@ -429,13 +427,13 @@ Consider the following options:
         #endregion
 
         #region Construct
-        public static Entity ServiceConstruct(Type type, OperationSymbol operationSymbol, params object[] args)
+        public static Entity ServiceConstruct(Type type, OperationSymbol operationSymbol, params object[]? args)
         {
             var op = Find<IConstructOperation>(type, operationSymbol);
             return (Entity)op.Construct(args);
         }
 
-        public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[] args)
+        public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[]? args)
             where T : class, IEntity
         {
             var op = Find<IConstructOperation>(typeof(T), symbol.Symbol);
@@ -445,7 +443,7 @@ Consider the following options:
 
         #region ConstructFrom
 
-        public static T ConstructFrom<F, T>(this F entity, ConstructSymbol<T>.From<F> symbol, params object[] args)
+        public static T ConstructFrom<F, T>(this F entity, ConstructSymbol<T>.From<F> symbol, params object[]? args)
             where T : class, IEntity
             where F : class, IEntity
         {
@@ -453,13 +451,13 @@ Consider the following options:
             return (T)op.Construct(entity, args);
         }
 
-        public static Entity ServiceConstructFrom(IEntity entity, OperationSymbol operationSymbol, params object[] args)
+        public static Entity ServiceConstructFrom(IEntity entity, OperationSymbol operationSymbol, params object[]? args)
         {
             var op = Find<IConstructorFromOperation>(entity.GetType(), operationSymbol).AssertEntity((Entity)(object)entity);
             return (Entity)op.Construct(entity, args);
         }
 
-        public static T ConstructFromLite<F, T>(this Lite<F> lite, ConstructSymbol<T>.From<F> symbol, params object[] args)
+        public static T ConstructFromLite<F, T>(this Lite<F> lite, ConstructSymbol<T>.From<F> symbol, params object[]? args)
             where T : class, IEntity
             where F : class, IEntity
         {
@@ -467,7 +465,7 @@ Consider the following options:
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
         }
 
-        public static Entity ServiceConstructFromLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
+        public static Entity ServiceConstructFromLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[]? args)
         {
             var op = Find<IConstructorFromOperation>(lite.EntityType, operationSymbol);
             return (Entity)op.Construct(Database.RetrieveAndForget(lite), args);
@@ -475,14 +473,14 @@ Consider the following options:
         #endregion
 
         #region ConstructFromMany
-        public static Entity ServiceConstructFromMany(IEnumerable<Lite<IEntity>> lites, Type type, OperationSymbol operationSymbol, params object[] args)
+        public static Entity ServiceConstructFromMany(IEnumerable<Lite<IEntity>> lites, Type type, OperationSymbol operationSymbol, params object[]? args)
         {
             var onlyType = lites.Select(a => a.EntityType).Distinct().Only();
 
             return (Entity)Find<IConstructorFromManyOperation>(onlyType ?? type, operationSymbol).Construct(lites, args);
         }
 
-        public static T ConstructFromMany<F, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<F> symbol, params object[] args)
+        public static T ConstructFromMany<F, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<F> symbol, params object[]? args)
             where T : class, IEntity
             where F : class, IEntity
         {
@@ -510,13 +508,13 @@ Consider the following options:
 
         public static IOperation FindOperation(Type type, OperationSymbol operationSymbol)
         {
-            IOperation result = TryFindOperation(type, operationSymbol);
+            IOperation? result = TryFindOperation(type, operationSymbol);
             if (result == null)
                 throw new InvalidOperationException("Operation '{0}' not found for type {1}".FormatWith(operationSymbol, type));
             return result;
         }
 
-        public static IOperation TryFindOperation(Type type, OperationSymbol operationSymbol)
+        public static IOperation? TryFindOperation(Type type, OperationSymbol operationSymbol)
         {
             return operations.TryGetValue(type.CleanType())?.TryGetC(operationSymbol);
         }
@@ -603,7 +601,7 @@ Consider the following options:
             return typeOperations.Concat(returnTypeOperations);
         }
 
-        public static string InState<T>(this T state, params T[] fromStates) where T : struct
+        public static string? InState<T>(this T state, params T[] fromStates) where T : struct
         {
             if (!fromStates.Contains(state))
                 return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
@@ -637,9 +635,9 @@ Consider the following options:
             return FindOperation(type, operationSymbol).OperationType;
         }
 
-        public static Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IEntity>> lites, List<OperationSymbol> operationSymbols)
+        public static Dictionary<OperationSymbol, string>? GetContextualCanExecute(IEnumerable<Lite<IEntity>> lites, List<OperationSymbol> operationSymbols)
         {
-            Dictionary<OperationSymbol, string> result = null;
+            Dictionary<OperationSymbol, string>? result = null;
             using (ExecutionMode.Global())
             {
                 foreach (var grLites in lites.GroupBy(a => a.EntityType))
@@ -724,7 +722,7 @@ Consider the following options:
             return fi;
         }
 
-        public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.Simple construct, Func<object[], T> constructFunction)
+        public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.Simple construct, Func<object[]?, T> constructFunction)
                where T : Entity
         {
             new Graph<T>.Construct(construct)
@@ -751,25 +749,25 @@ Consider the following options:
         Type OverridenType { get; }
         OperationType OperationType { get; }
         bool Returns { get; }
-        Type ReturnType { get; }
+        Type? ReturnType { get; }
         void AssertIsValid();
 
-        IEnumerable<Enum> UntypedFromStates { get; }
-        IEnumerable<Enum> UntypedToStates { get; }
-        Type StateType { get; }
+        IEnumerable<Enum>? UntypedFromStates { get; }
+        IEnumerable<Enum>? UntypedToStates { get; }
+        Type? StateType { get; }
     }
 
     public interface IEntityOperation : IOperation
     {
         bool CanBeModified { get; }
         bool CanBeNew { get; }
-        string CanExecute(IEntity entity);
+        string? CanExecute(IEntity entity);
         bool HasCanExecute { get; }
         Type BaseType { get; }
     }
 
 
-    public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity entity, object[] args);
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity? entity, object[]? args);
     public delegate void OperationHandler(IOperation operation, Entity entity);
     public delegate void ErrorOperationHandler(IOperation operation, Entity entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface);

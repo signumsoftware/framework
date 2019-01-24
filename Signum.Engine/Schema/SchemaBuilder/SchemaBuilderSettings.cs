@@ -25,12 +25,12 @@ namespace Signum.Engine.Maps
         public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "ID");
         public int DefaultImplementedBySize = 40;
 
-        public Action<Type> AssertNotIncluded = null;
+        public Action<Type> AssertNotIncluded = null!;
 
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16;
 
-        public ConcurrentDictionary<PropertyRoute, AttributeCollection> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection>();
+        public ConcurrentDictionary<PropertyRoute, AttributeCollection?> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection?>();
         public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
@@ -62,7 +62,7 @@ namespace Signum.Engine.Maps
             {typeof(Guid), SqlDbType.UniqueIdentifier},
         };
 
-        internal Dictionary<Type, string> desambiguatedNames;
+        internal Dictionary<Type, string>? desambiguatedNames;
 
         Dictionary<SqlDbType, int> defaultSize = new Dictionary<SqlDbType, int>()
         {
@@ -83,10 +83,10 @@ namespace Signum.Engine.Maps
         public AttributeCollection FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute)
             where T : IRootEntity
         {
-            return FieldAttributes(PropertyRoute.Construct(propertyRoute));
+            return FieldAttributes(PropertyRoute.Construct(propertyRoute))!;
         }
 
-        public AttributeCollection FieldAttributes(PropertyRoute propertyRoute)
+        public AttributeCollection? FieldAttributes(PropertyRoute propertyRoute)
         {
             using (HeavyProfiler.LogNoStackTrace("FieldAttributes"))
             {
@@ -99,9 +99,9 @@ namespace Signum.Engine.Maps
                                 return null;
                             return CreateFieldAttributeCollection(propertyRoute);
                         case PropertyRouteType.MListItems:
-                            if (propertyRoute.Parent.FieldInfo == null)
+                            if (propertyRoute.Parent!.FieldInfo == null)
                                 return null;
-                            return CreateFieldAttributeCollection(propertyRoute.Parent);
+                            return CreateFieldAttributeCollection(propertyRoute.Parent!);
                         default:
                             throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
                     }
@@ -111,7 +111,7 @@ namespace Signum.Engine.Maps
 
         AttributeCollection CreateFieldAttributeCollection(PropertyRoute route)
         {
-            var fieldAttributes = route.FieldInfo.GetCustomAttributes(false).Cast<Attribute>();
+            var fieldAttributes = route.FieldInfo!.GetCustomAttributes(false).Cast<Attribute>();
             var fieldAttributesInProperty = route.PropertyInfo == null ? Enumerable.Empty<Attribute>() :
                route.PropertyInfo.GetCustomAttributes(false).Cast<Attribute>().Where(a => AttributeCollection.IsCompatibleWith(a, AttributeTargets.Field));
             return new AttributeCollection(AttributeTargets.Field, fieldAttributes.Concat(fieldAttributesInProperty).ToList(), () => AssertNotIncluded(route.RootType));
@@ -164,7 +164,7 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException($"In order to {errorContext} you need to override the attributes for {pr} {solution}");
         }
 
-        public A FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute
+        public A? FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute
         {
             using (HeavyProfiler.LogNoStackTrace("FieldAttribute"))
             {
@@ -175,13 +175,13 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public V ValidatorAttribute<V>(PropertyRoute propertyRoute) where V: ValidatorAttribute
+        public V? ValidatorAttribute<V>(PropertyRoute propertyRoute) where V: ValidatorAttribute
         {
             if (!typeof(ModifiableEntity).IsAssignableFrom(propertyRoute.RootType))
                 return null;
 
             if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
-                propertyRoute = propertyRoute.Parent;
+                propertyRoute = propertyRoute.Parent!;
 
             if (propertyRoute.PropertyInfo == null)
                 return null;
@@ -223,13 +223,13 @@ namespace Signum.Engine.Maps
             if (ValidatorAttribute<NotNullValidatorAttribute>(propertyRoute) != null)
                 return IsNullable.No;
 
-            if (propertyRoute.Type == typeof(string))
-            {
-                var slv = ValidatorAttribute<StringLengthValidatorAttribute>(propertyRoute);
+            //if (propertyRoute.Type == typeof(string))
+            //{
+            //    var slv = ValidatorAttribute<StringLengthValidatorAttribute>(propertyRoute);
 
-                if (slv != null)
-                    return slv.AllowNulls ? IsNullable.Yes : IsNullable.No;
-            }
+            //    if (slv != null)
+            //        return slv.AllowNulls ? IsNullable.Yes : IsNullable.No;
+            //}
 
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
         }
@@ -268,7 +268,7 @@ namespace Signum.Engine.Maps
                 FieldAttribute<ImplementedByAllAttribute>(propertyRoute));
         }
 
-        internal SqlDbTypePair GetSqlDbType(SqlDbTypeAttribute att, Type type)
+        internal SqlDbTypePair GetSqlDbType(SqlDbTypeAttribute? att, Type type)
         {
             if (att != null && att.HasSqlDbType)
                 return new SqlDbTypePair(att.SqlDbType, att.UserDefinedTypeName);
@@ -276,7 +276,15 @@ namespace Signum.Engine.Maps
             return GetSqlDbTypePair(type.UnNullify());
         }
 
-        internal int? GetSqlSize(SqlDbTypeAttribute att, PropertyRoute? route, SqlDbType sqlDbType)
+        internal SqlDbTypePair? TryGetSqlDbType(SqlDbTypeAttribute? att, Type type)
+        {
+            if (att != null && att.HasSqlDbType)
+                return new SqlDbTypePair(att.SqlDbType, att.UserDefinedTypeName);
+
+            return TryGetSqlDbTypePair(type.UnNullify());
+        }
+
+        internal int? GetSqlSize(SqlDbTypeAttribute? att, PropertyRoute? route, SqlDbType sqlDbType)
         {
             if (att != null && att.HasSize)
                 return att.Size;
@@ -291,7 +299,7 @@ namespace Signum.Engine.Maps
             return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(SqlDbTypeAttribute att, SqlDbType sqlDbType)
+        internal int? GetSqlScale(SqlDbTypeAttribute? att, SqlDbType sqlDbType)
         {
             if (att != null && att.HasScale)
             {
@@ -304,7 +312,7 @@ namespace Signum.Engine.Maps
             return defaultScale.TryGetS(sqlDbType);
         }
 
-        internal string GetCollate(SqlDbTypeAttribute att)
+        internal string? GetCollate(SqlDbTypeAttribute att)
         {
             if (att != null && att.Collation != null)
                 return att.Collation;
@@ -319,7 +327,7 @@ namespace Signum.Engine.Maps
 
         public void Desambiguate(Type type, string cleanName)
         {
-            if (desambiguatedNames != null)
+            if (desambiguatedNames == null)
                 desambiguatedNames = new Dictionary<Type, string>();
 
             desambiguatedNames[type] = cleanName;
@@ -327,17 +335,26 @@ namespace Signum.Engine.Maps
 
         public SqlDbTypePair GetSqlDbTypePair(Type type)
         {
+            var result = TryGetSqlDbTypePair(type);
+            if (result == null)
+                throw new ArgumentException($"Type {type.Name} has no DB representation");
+
+            return result;
+        }
+
+        public SqlDbTypePair? TryGetSqlDbTypePair(Type type)
+        {
             if (TypeValues.TryGetValue(type, out SqlDbType result))
                 return new SqlDbTypePair(result, null);
 
-            string udtTypeName = GetUdtName(type);
+            string? udtTypeName = GetUdtName(type);
             if (udtTypeName != null)
                 return new SqlDbTypePair(SqlDbType.Udt, udtTypeName);
 
             return null;
         }
 
-        public string GetUdtName(Type udtType)
+        public string? GetUdtName(Type udtType)
         {
             var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
 
@@ -357,11 +374,9 @@ namespace Signum.Engine.Maps
     public class SqlDbTypePair
     {
         public SqlDbType SqlDbType { get; private set; }
-        public string UserDefinedTypeName { get; private set; }
-
-        public SqlDbTypePair() { }
-
-        public SqlDbTypePair(SqlDbType type, string udtTypeName)
+        public string? UserDefinedTypeName { get; private set; }
+        
+        public SqlDbTypePair(SqlDbType type, string? udtTypeName)
         {
             this.SqlDbType = type;
             this.UserDefinedTypeName = udtTypeName;

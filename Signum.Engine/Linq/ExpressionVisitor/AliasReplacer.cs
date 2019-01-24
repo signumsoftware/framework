@@ -8,16 +8,18 @@ namespace Signum.Engine.Linq
 {
     internal class AliasReplacer : DbExpressionVisitor
     {
-        Dictionary<Alias, Alias> aliasMap;
+        readonly Dictionary<Alias, Alias> aliasMap;
 
-        private AliasReplacer() { }
+        private AliasReplacer(Dictionary<Alias, Alias> aliasMap)
+        {
+            this.aliasMap = aliasMap;
+        }
 
         public static Expression Replace(Expression source, AliasGenerator aliasGenerator)
         {
-            AliasReplacer ap = new AliasReplacer()
-            {
-                aliasMap = DeclaredAliasGatherer.GatherDeclared(source).Reverse().ToDictionary(a => a, aliasGenerator.CloneAlias)
-            };
+            var aliasMap = DeclaredAliasGatherer.GatherDeclared(source).Reverse().ToDictionary(a => a, aliasGenerator.CloneAlias);
+
+            AliasReplacer ap = new AliasReplacer(aliasMap);
 
             return ap.Visit(source);
         }
@@ -39,7 +41,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
-            SourceExpression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From!);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns =  Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);

@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ namespace Signum.Engine.Linq
 {
     public class AliasGenerator
     {
-        HashSet<string> usedAliases = new HashSet<string>();
+        readonly HashSet<string> usedAliases = new HashSet<string>();
 
         int selectAliasCount = 0;
         public Alias NextSelectAlias()
@@ -43,11 +43,11 @@ namespace Signum.Engine.Linq
 
         public Alias NextTableAlias(string tableName)
         {
-            string abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
+            string? abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
                 tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_' ).Select(s => s[0]).ToArray()) : null;
 
             if (string.IsNullOrEmpty(abv))
-                abv = tableName.TryStart(3);
+                abv = tableName.TryStart(3)!;
             else
                 abv = abv.ToLower();
 
@@ -68,8 +68,8 @@ namespace Signum.Engine.Linq
     {
         public static readonly Alias Unknown = new Alias("Unknown");
 
-        public readonly string Name; //Mutually exclusive
-        public readonly ObjectName ObjectName; //Mutually exclusive
+        public readonly string? Name; //Mutually exclusive
+        public readonly ObjectName? ObjectName; //Mutually exclusive
 
         internal Alias(string name)
         {
@@ -93,12 +93,12 @@ namespace Signum.Engine.Linq
 
         public override int GetHashCode()
         {
-            return this.Name == null? this.ObjectName.GetHashCode(): this.Name.GetHashCode();
+            return this.Name == null? this.ObjectName!.GetHashCode(): this.Name.GetHashCode();
         }
 
         public override string ToString()
         {
-            return Name?.SqlEscape() ?? ObjectName.ToString();
+            return Name?.SqlEscape() ?? ObjectName!.ToString();
         }
     }
 }

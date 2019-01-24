@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Utilities;
 
@@ -36,16 +36,18 @@ namespace Signum.Entities
 
         public static bool Strict { get { return !allowed.Value; } }
 
-        public static IDisposable AllowScope()
+        public static IDisposable? AllowScope()
         {
-            if (allowed.Value) return null;
+            if (allowed.Value)
+                return null;
             allowed.Value = true;
             return new Disposable(() => allowed.Value = false);
         }
 
-        public static IDisposable DenyScope()
+        public static IDisposable? DenyScope()
         {
-            if (!allowed.Value) return null;
+            if (!allowed.Value)
+                return null;
             allowed.Value = false;
             return new Disposable(() => allowed.Value = true);
         }

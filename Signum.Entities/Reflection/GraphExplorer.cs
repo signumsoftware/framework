@@ -110,7 +110,7 @@ namespace Signum.Entities.Reflection
 
             DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors.Values);
+            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).NotNull().SelectMany(errors => errors.Values);
 
             var modErros = graph.Except(identGraph).OfType<ModifiableEntity>()
                             .Select(a => a.IntegrityCheck())
@@ -324,7 +324,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
                new XAttribute("TypeName", list.GetType().TypeName()),
                new XAttribute("NodeRadius", 2),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType()!.FullName.GetHashCode())),
             };
         }
 

@@ -336,10 +336,10 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression TypeId;
         public readonly Expression Id;
-        public readonly Expression ToStr; //Not readonly
+        public readonly Expression? ToStr;
 
 
-        public LiteValueExpression(Type type, Expression typeId, Expression id, Expression toStr) :
+        public LiteValueExpression(Type type, Expression typeId, Expression id, Expression? toStr) :
             base(DbExpressionType.LiteValue, type)
         {
             this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
@@ -430,9 +430,9 @@ namespace Signum.Engine.Linq
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
         public readonly TableMList TableMList;
-        public readonly NewExpression ExternalPeriod;
+        public readonly NewExpression? ExternalPeriod;
 
-        public MListExpression(Type type, PrimaryKeyExpression backID, NewExpression externalPeriod, TableMList tr)
+        public MListExpression(Type type, PrimaryKeyExpression backID, NewExpression? externalPeriod, TableMList tr)
             : base(DbExpressionType.MList, type)
         {
             this.BackID = backID;
@@ -483,7 +483,7 @@ namespace Signum.Engine.Linq
         public MListProjectionExpression(Type type, ProjectionExpression projection)
             : base(DbExpressionType.MListProjection, type)
         {
-            if (!projection.Type.ElementType().IsInstantiationOf(typeof(MList<>.RowIdElement)))
+            if (!projection.Type.ElementType()!.IsInstantiationOf(typeof(MList<>.RowIdElement)))
                 throw new ArgumentException("projector should be collation of RowIdValue");
 
             this.Projection = projection;
@@ -504,16 +504,16 @@ namespace Signum.Engine.Linq
     {
         public readonly PrimaryKeyExpression RowId;
         public readonly EntityExpression Parent;
-        public readonly Expression Order;
+        public readonly Expression? Order;
         public readonly Expression Element;
 
         public readonly TableMList Table;
 
         public readonly Alias Alias;
 
-        public readonly NewExpression TablePeriod;
+        public readonly NewExpression? TablePeriod;
 
-        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression order, Expression element, NewExpression systemPeriod, TableMList table, Alias alias)
+        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression element, NewExpression? systemPeriod, TableMList table, Alias alias)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;
@@ -530,7 +530,7 @@ namespace Signum.Engine.Linq
             return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".FormatWith(
                 RowId.ToString(),
                 Parent.ToString(),
-                Order == null ? Order.ToString() : null,
+                Order?.ToString(),
                 Element.ToString());
         }
 

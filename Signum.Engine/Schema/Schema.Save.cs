@@ -24,7 +24,7 @@ namespace Signum.Engine.Maps
             this.set = set;
         }
 
-        public Forbidden(DirectedGraph<Entity> graph, Entity entity)
+        public Forbidden(DirectedGraph<Entity>? graph, Entity entity)
         {
             this.set = graph?.TryRelatedTo(entity);
         }
@@ -53,7 +53,7 @@ namespace Signum.Engine.Maps
             this.Forbidden = forbidden;
         }
 
-        public EntityForbidden(Entity entity, DirectedGraph<Entity> graph)
+        public EntityForbidden(Entity entity, DirectedGraph<Entity>? graph)
         {
             this.Entity = (Entity)entity;
             this.Forbidden = new Forbidden(graph, entity);
@@ -65,7 +65,7 @@ namespace Signum.Engine.Maps
         ResetLazy<InsertCacheIdentity> inserterIdentity;
         ResetLazy<InsertCacheDisableIdentity> inserterDisableIdentity;
 
-        internal void InsertMany(List<Entity> list, DirectedGraph<Entity> backEdges)
+        internal void InsertMany(List<Entity> list, DirectedGraph<Entity>? backEdges)
         {
             using (HeavyProfiler.LogNoStackTrace("InsertMany", () => this.Type.TypeName()))
             {
@@ -98,8 +98,8 @@ namespace Signum.Engine.Maps
             public Func<string, string> SqlInsertPattern;
             public Func<object /*Entity*/, Forbidden, string, List<DbParameter>> InsertParameters;
 
-            ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>> insertDisableIdentityCache =
-                new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>>();
+            ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>> insertDisableIdentityCache =
+                new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>>();
 
             public InsertCacheDisableIdentity(Table table, Func<string, string> sqlInsertPattern, Func<object, Forbidden, string, List<DbParameter>> insertParameters)
             {
@@ -108,13 +108,13 @@ namespace Signum.Engine.Maps
                 InsertParameters = insertParameters;
             }
 
-            internal Action<List<Entity>, DirectedGraph<Entity>> GetInserter(int numElements)
+            internal Action<List<Entity>, DirectedGraph<Entity>?> GetInserter(int numElements)
             {
                 return insertDisableIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertDisableIdentity() : GetInsertMultiDisableIdentity(num));
             }
 
 
-            Action<List<Entity>, DirectedGraph<Entity>> GetInsertDisableIdentity()
+            Action<List<Entity>, DirectedGraph<Entity>?> GetInsertDisableIdentity()
             {
                 string sqlSingle = SqlInsertPattern("");
 
@@ -140,7 +140,7 @@ namespace Signum.Engine.Maps
 
 
 
-            Action<List<Entity>, DirectedGraph<Entity>> GetInsertMultiDisableIdentity(int num)
+            Action<List<Entity>, DirectedGraph<Entity>?> GetInsertMultiDisableIdentity(int num)
             {
                 string sqlMulti = Enumerable.Range(0, num).ToString(i => SqlInsertPattern(i.ToString()), ";\r\n");
 
@@ -214,8 +214,8 @@ namespace Signum.Engine.Maps
             public Func<string, bool, string> SqlInsertPattern;
             public Func<Entity, Forbidden, string, List<DbParameter>> InsertParameters;
 
-            ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>> insertIdentityCache =
-               new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>>();
+            ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>> insertIdentityCache =
+               new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>>();
 
             public InsertCacheIdentity(Table table, Func<string, bool, string> sqlInsertPattern, Func<Entity, Forbidden, string, List<DbParameter>> insertParameters)
             {
@@ -224,12 +224,12 @@ namespace Signum.Engine.Maps
                 InsertParameters = insertParameters;
             }
 
-            internal Action<List<Entity>, DirectedGraph<Entity>> GetInserter(int numElements)
+            internal Action<List<Entity>, DirectedGraph<Entity>?> GetInserter(int numElements)
             {
                 return insertIdentityCache.GetOrAdd(numElements, (int num) => GetInsertMultiIdentity(num));
             }
 
-            Action<List<Entity>, DirectedGraph<Entity>> GetInsertMultiIdentity(int num)
+            Action<List<Entity>, DirectedGraph<Entity>?> GetInsertMultiIdentity(int num)
             {
                 string sqlMulti = new StringBuilder()
                     .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpperInvariant() + ");")
@@ -637,7 +637,7 @@ namespace Signum.Engine.Maps
             return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections)!;
         }
 
-        public SqlPreCommand? UpdateSqlSync<T>(T entity, Expression<Func<T, bool>> where, bool includeCollections = true, string? comment = null, string suffix = "")
+        public SqlPreCommand? UpdateSqlSync<T>(T entity, Expression<Func<T, bool>>? where, bool includeCollections = true, string? comment = null, string suffix = "")
             where T : Entity
         {
             if (typeof(T) != Type && where != null)

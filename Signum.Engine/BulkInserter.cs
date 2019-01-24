@@ -96,7 +96,7 @@ namespace Signum.Engine
             var mlistPrs = PropertyRoute.GenerateRoutes(typeof(T), includeIgnored: false).Where(a => a.PropertyRouteType == PropertyRouteType.FieldOrProperty && a.Type.IsMList()).ToList();
             foreach (var pr in mlistPrs)
             {
-                giBulkInsertMListFromEntities.GetInvoker(typeof(T), pr.Type.ElementType())(list, pr, options, timeout, message);
+                giBulkInsertMListFromEntities.GetInvoker(typeof(T), pr.Type.ElementType()!)(list, pr, options, timeout, message);
             }
         }
 
@@ -202,7 +202,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>> giBulkInsertMListFromEntities =
+        static readonly GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>> giBulkInsertMListFromEntities =
             new GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>>((entities, propertyRoute, options, timeout, message) =>
             BulkInsertMListTablePropertyRoute<Entity, string>((List<Entity>)entities, propertyRoute, options, timeout, message));
 

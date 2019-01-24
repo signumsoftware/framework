@@ -40,7 +40,7 @@ namespace Signum.Entities
                         return null;
 
                     return new TypeAttributePack(
-                        fields: list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray(),
+                        fields: list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)!).ToArray(),
                         propertyNames: list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToArray()
                     );
                 });
@@ -59,7 +59,7 @@ namespace Signum.Entities
 
         readonly static object[] EmptyArray = new object[0];
 
-        public static object[] FieldsWithAttribute(ModifiableEntity entity)
+        public static object?[] FieldsWithAttribute(ModifiableEntity entity)
         {
             TypeAttributePack? pack = GetFieldsAndProperties(entity.GetType());
 
@@ -87,10 +87,10 @@ namespace Signum.Entities
 
     internal class TypeAttributePack
     {
-        public Func<object, object>[] Fields;
+        public Func<object, object?>[] Fields;
         public string[] PropertyNames;
 
-        public TypeAttributePack(Func<object, object>[] fields, string[] propertyNames)
+        public TypeAttributePack(Func<object, object?>[] fields, string[] propertyNames)
         {
             Fields = fields;
             PropertyNames = propertyNames;

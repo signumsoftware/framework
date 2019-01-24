@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -35,8 +35,8 @@ namespace Signum.Engine.Operations
         public class Construct : Graph<T>.Construct, IGraphToStateOperation
         {
             public List<S> ToStates { get; private set; } = new List<S>();
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-            Type IOperation.StateType { get { return typeof(S); } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            Type? IOperation.StateType { get { return typeof(S); } }
 
             public Construct(ConstructSymbol<T>.Simple symbol)
                 : base(symbol)
@@ -90,8 +90,8 @@ namespace Signum.Engine.Operations
             where F : class, IEntity
         {
             public List<S> ToStates { get; private set; } = new List<S>();
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-            Type IOperation.StateType { get { return typeof(S); } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            Type? IOperation.StateType { get { return typeof(S); } }
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
                 : base(symbol)
@@ -135,8 +135,8 @@ namespace Signum.Engine.Operations
             where F : class, IEntity
         {
             public List<S> ToStates { get; private set; } = new List<S>();
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-            Type IOperation.StateType { get { return typeof(S); } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            Type? IOperation.StateType { get { return typeof(S); } }
 
             public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
                 : base(symbol)
@@ -182,9 +182,9 @@ namespace Signum.Engine.Operations
         {
             public List<S> FromStates { get; private set; }
             public List<S> ToStates { get; private set; }
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
-            Type IOperation.StateType { get { return typeof(S); } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
+            Type? IOperation.StateType { get { return typeof(S); } }
 
             bool IGraphHasFromStatesOperation.HasFromStates
             {
@@ -200,14 +200,14 @@ namespace Signum.Engine.Operations
 
             bool IEntityOperation.HasCanExecute { get { return true; } }
 
-            protected override string OnCanExecute(T entity)
+            protected override string? OnCanExecute(T entity)
             {
                 S state = Graph<T, S>.GetStateFunc(entity);
 
                 if (!FromStates.Contains(state))
                     return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                        FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
-                        ((Enum)(object)state).NiceToString());
+                        FromStates.CommaOr(v => ((Enum)(object)v!).NiceToString()),
+                        ((Enum)(object)state!).NiceToString());
 
                 return base.OnCanExecute(entity);
             }
@@ -233,8 +233,8 @@ namespace Signum.Engine.Operations
         public class Delete : Graph<T>.Delete, IGraphOperation, IGraphFromStatesOperation
         {
             public List<S> FromStates { get; private set; }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
-            Type IOperation.StateType { get { return typeof(S); } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
+            Type? IOperation.StateType { get { return typeof(S); } }
 
             bool IGraphHasFromStatesOperation.HasFromStates
             {
@@ -247,19 +247,19 @@ namespace Signum.Engine.Operations
                 FromStates = new List<S>();
             }
 
-            protected override string OnCanDelete(T entity)
+            protected override string? OnCanDelete(T entity)
             {
                 S state = Graph<T, S>.GetStateFunc(entity);
 
                 if (!FromStates.Contains(state))
                     return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                        FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
-                        ((Enum)(object)state).NiceToString());
+                        FromStates.CommaOr(v => ((Enum)(object)v!).NiceToString()),
+                        ((Enum)(object)state!).NiceToString());
 
                 return base.OnCanDelete(entity);
             }
 
-            protected override void OnDelete(T entity, object[] args)
+            protected override void OnDelete(T entity, object[]? args)
             {
                 AssertGetState();
                 S oldState = Graph<T, S>.GetStateFunc(entity);
@@ -309,14 +309,14 @@ namespace Signum.Engine.Operations
         {
             DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
 
-            Action<string, string, OperationSymbol> Add = (from, to, key) =>
-                {
-                    Dictionary<string, string> dic = result.TryRelatedTo(from);
-                    if (dic == null || !dic.ContainsKey(to))
-                        result.Add(from, to, key.ToString());
-                    else
-                        result.Add(from, to, dic[to] + ", " + key.ToString());
-                };
+            void Add(string from, string to, OperationSymbol key)
+            {
+                Dictionary<string, string> dic = result.TryRelatedTo(from);
+                if (dic == null || !dic.ContainsKey(to))
+                    result.Add(from, to, key.ToString());
+                else
+                    result.Add(from, to, dic[to] + ", " + key.ToString());
+            }
 
             foreach (var item in OperationLogic.GraphOperations<T, S>())
             {
@@ -328,7 +328,7 @@ namespace Signum.Engine.Operations
 
                             foreach (var f in gOp.FromStates)
                                 foreach (var t in gOp.ToStates)
-                                    Add(f.ToString(), t.ToString(), item.OperationSymbol);
+                                    Add(f!.ToString(), t!.ToString(), item.OperationSymbol);
 
 
                         } break;
@@ -336,7 +336,7 @@ namespace Signum.Engine.Operations
                         {
                             Delete dOp = (Delete)item;
                             foreach (var f in dOp.FromStates)
-                                Add(f.ToString(), "[Deleted]", item.OperationSymbol);
+                                Add(f!.ToString(), "[Deleted]", item.OperationSymbol);
 
 
                         } break;
@@ -350,7 +350,7 @@ namespace Signum.Engine.Operations
 
                             var dtoState = (IGraphToStateOperation)item;
                             foreach (var t in dtoState.ToStates)
-                                Add(from, t.ToString(), item.OperationSymbol);
+                                Add(from, t!.ToString(), item.OperationSymbol);
 
                         } break;
                 }

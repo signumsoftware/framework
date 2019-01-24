@@ -29,7 +29,7 @@ namespace Signum.Utilities.ExpressionTrees
 
 		public IQueryable<S> CreateQuery<S>(Expression expression)
 		{
-            Expression res = ExpressionCleaner.Clean(expression);
+            Expression res = ExpressionCleaner.Clean(expression)!;
 			return new ExpandableQueryProvider<S>(_item.Provider.CreateQuery<S>(res));
 		}
 
@@ -38,12 +38,12 @@ namespace Signum.Utilities.ExpressionTrees
 			return _item.Provider.Execute<S>(expression);
 		}
 
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return _item.GetEnumerator();
-		}
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _item.GetEnumerator();
+        }
 
-		public Type ElementType
+        public Type ElementType
 		{
 			get { return _item.ElementType; }
 		}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using Signum.Entities;
@@ -10,7 +10,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class DynamicQueryFluentInclude
     {
-        public static FluentInclude<T> WithQuery<T>(this FluentInclude<T> fi, Func<Expression<Func<T, object>>> lazyQuerySelector)
+        public static FluentInclude<T> WithQuery<T>(this FluentInclude<T> fi, Func<Expression<Func<T, object?>>> lazyQuerySelector)
             where T : Entity
         {
             QueryLogic.Queries.Register(typeof(T), new DynamicQueryBucket(typeof(T), () => DynamicQueryCore.FromSelectorUntyped(lazyQuerySelector()), Implementations.By(typeof(T))));

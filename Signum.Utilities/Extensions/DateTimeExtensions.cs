@@ -524,7 +524,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            string result = ", ".CombineIfNotEmpty(
+            string result = ", ".Combine(
                          Years == 0 ? null :
                          Years == 1 ? DateTimeMessage._0Year.NiceToString().FormatWith(Years) :
                                      DateTimeMessage._0Years.NiceToString().FormatWith(Years),

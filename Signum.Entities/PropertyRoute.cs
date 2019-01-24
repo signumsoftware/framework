@@ -382,7 +382,7 @@ namespace Signum.Entities
             return null;
         }
 
-        static PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
+        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
 
 
         public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true)
@@ -403,7 +403,7 @@ namespace Signum.Entities
 
                 if (Reflector.IsMList(pi.PropertyType))
                 {
-                    Type colType = pi.PropertyType.ElementType();
+                    Type colType = pi.PropertyType.ElementType()!;
                     if (Reflector.IsEmbeddedEntity(colType))
                         result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
                 }
@@ -432,7 +432,7 @@ namespace Signum.Entities
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
-                        Type colType = pi.PropertyType.ElementType();
+                        Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
                             result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
                     }
@@ -508,7 +508,9 @@ namespace Signum.Entities
             }
         }
 
-        private PropertyRoute(SerializationInfo info, StreamingContext ctxt)
+#pragma warning disable IDE0051 // Remove unused private members
+        PropertyRoute(SerializationInfo info, StreamingContext ctxt)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             string rootName = info.GetString("rootType");
 

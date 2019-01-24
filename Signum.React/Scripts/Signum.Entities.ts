@@ -471,7 +471,7 @@ export module SelectorMessage {
 }
 
 export interface Symbol extends Entity {
-  key: string;
+  key: string | null;
 }
 
 export module SynchronizerMessage {
@@ -549,6 +549,7 @@ export module ValidationMessage {
   export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
   export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
+  export const BeAString = new MessageKey("ValidationMessage", "BeAString");
 }
 
 export module VoidEnumMessage {

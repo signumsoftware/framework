@@ -1,11 +1,9 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 
 namespace Signum.Engine.Maps
 {
     public class NameSequence
     {
-        private NameSequence() { }
-
         public static readonly NameSequence Void = new VoidNameSequence();
 
         class VoidNameSequence : NameSequence
@@ -19,6 +17,7 @@ namespace Signum.Engine.Maps
         readonly string Value;
         readonly NameSequence PreSequence;
 
+        private NameSequence() : this(null!, null!) { }
         private NameSequence(string value, NameSequence preSequence)
         {
             this.Value = value;

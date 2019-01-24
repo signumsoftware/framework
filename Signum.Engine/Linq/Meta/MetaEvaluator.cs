@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.ExpressionTrees;
@@ -13,10 +13,10 @@ namespace Signum.Engine.Linq
     /// </summary>
     public class MetaEvaluator : ExpressionVisitor
     {
-        public static Expression Clean(Expression expression)
+        public static Expression? Clean(Expression expression)
         {
-            Expression expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval, false);
-            Expression simplified = OverloadingSimplifier.Simplify(expand);
+            Expression? expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval, false);
+            Expression? simplified = OverloadingSimplifier.Simplify(expand);
             return simplified;
         }
 
@@ -35,7 +35,7 @@ namespace Signum.Engine.Linq
             return new MetaEvaluator { candidates = ExpressionNominator.Nominate(exp) }.Visit(exp);
         }
 
-        public override Expression Visit(Expression exp)
+        public override Expression? Visit(Expression exp)
         {
             if (exp == null)
             {

@@ -11,14 +11,18 @@ namespace Signum.Utilities
 {
     public static class StringExtensions
     {
+#pragma warning disable IDE0052 // Remove unread private members
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
+#pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("HasTextExpression")]
         public static bool HasText(this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }
 
+#pragma warning disable IDE0052 // Remove unread private members
         static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
+#pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("DefaultTextExpression")]
         public static string DefaultText(this string? str, string defaultText)
         {
@@ -41,17 +45,17 @@ namespace Signum.Utilities
             return source.IndexOf(toCheck, comp) >= 0;
         }
 
-        public static string? Add(this string? str, string separator, string? part)
+        public static string Add(this string? str, string separator, string? part)
         {
             if (str.HasText())
             {
                 if (part.HasText())
                     return str + separator + part;
                 else
-                    return str;
+                    return str ?? "";
             }
             else
-                return part;
+                return part ?? "";
         }
 
         public static string? AddLine(this string? str, string part)
@@ -710,7 +714,7 @@ namespace Signum.Utilities
             return wildcards.Any(wc => fileName.Wildcards(wc));
         }
 
-        static Dictionary<string, string> wildcardsPatterns = new Dictionary<string, string>();
+        static readonly Dictionary<string, string> wildcardsPatterns = new Dictionary<string, string>();
         public static bool Wildcards(this string fileName, string wildcard)
         {
             var pattern = wildcardsPatterns.GetOrCreate(wildcard, wildcard.Replace(".", "[.]").Replace("*", ".*").Replace("?", "."));
@@ -749,8 +753,8 @@ namespace Signum.Utilities
             return ToComputerSize(value, false);
         }
 
-        static string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-        static string[] magnitudes = new[] { "Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" };
+        static readonly string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+        static readonly string[] magnitudes = new[] { "Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" };
         public static string ToComputerSize(this long value, bool useAbbreviations)
         {
             double valor = value;
@@ -760,27 +764,8 @@ namespace Signum.Utilities
 
             return "{0:#,###.00} {1}".FormatWith(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
-
-        public static string Combine(this string separator, params object[] elements)
-        {
-            StringBuilder? sb = null;
-            foreach (var item in elements)
-            {
-                if (item != null)
-                {
-                    if (sb == null)
-                        sb = new StringBuilder();
-                    else
-                        sb.Append(separator);
-
-                    sb.Append(item.ToString());
-                }
-            }
-
-            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
-        }
-
-        public static string CombineIfNotEmpty(this string separator, params object?[] elements)
+        
+        public static string Combine(this string separator, params object?[] elements)
         {
             StringBuilder? sb = null;
             foreach (var item in elements)

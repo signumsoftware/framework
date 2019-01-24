@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -90,7 +90,7 @@ namespace Signum.Utilities
         {
             if (!Enum.IsDefined(enumType, value) && !int.TryParse(value, out int rubish))
             {
-                result = null;
+                result = null!;
                 return false;
             }
             result = (Enum)Enum.Parse(enumType, value);

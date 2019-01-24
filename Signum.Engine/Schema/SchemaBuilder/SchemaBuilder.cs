@@ -496,7 +496,7 @@ namespace Signum.Engine.Maps
             if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiTicks))
                 return KindOfField.Ticks;
 
-            if (Settings.GetSqlDbType(Settings.FieldAttribute<SqlDbTypeAttribute>(route), route.Type) != null)
+            if (Settings.TryGetSqlDbType(Settings.FieldAttribute<SqlDbTypeAttribute>(route), route.Type) != null)
                 return KindOfField.Value;
 
             if (route.Type.UnNullify().IsEnum)
@@ -679,7 +679,7 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldMList GenerateFieldMList(Table table, PropertyRoute route, NameSequence name)
         {
-            Type elementType = route.Type.ElementType();
+            Type elementType = route.Type.ElementType()!;
 
             if (table.Ticks == null)
                 throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList requires concurrency control.".FormatWith(route.Parent!.Type.TypeName(), route.FieldInfo!.FieldName()));

@@ -86,7 +86,9 @@ namespace Signum.Entities
                 return "({0}) {1}".FormatWith(pre, Element);
             }
 
+#pragma warning disable IDE0051 // Remove unused private members
             private RowIdElement(SerializationInfo info, StreamingContext ctxt)
+#pragma warning restore IDE0051 // Remove unused private members
             {
                 this.RowId = null;
                 this.Element = default(T)!;
@@ -121,7 +123,7 @@ namespace Signum.Entities
 
         [NonSerialized]
         NotifyCollectionChangedEventHandler? collectionChanged;
-        event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
+        public event NotifyCollectionChangedEventHandler CollectionChanged
         {
             add { collectionChanged += value; }
             remove { collectionChanged -= value; }
@@ -639,7 +641,7 @@ namespace Signum.Entities
             get { return this.innerList; }
         }
 
-        void IMListPrivate.InnerListModified(IList newItems, IList oldItems)
+        void IMListPrivate.InnerListModified(IList? newItems, IList? oldItems)
         {
             this.SetSelfModified();
 
@@ -807,7 +809,7 @@ namespace Signum.Entities
         void SetRowId(int index, PrimaryKey rowId);
         void ForceRowId(int index, PrimaryKey rowId);
 
-        void InnerListModified(IList newItems, IList oldItems);
+        void InnerListModified(IList? newItems, IList? oldItems);
 
         void AssignAndPostRetrieving(IMListPrivate newList);
     }
@@ -822,7 +824,7 @@ namespace Signum.Entities
 
     internal sealed class MListDebugging<T>
     {
-        private ICollection<T> collection;
+        private readonly ICollection<T> collection;
 
         public MListDebugging(ICollection<T> collection)
         {

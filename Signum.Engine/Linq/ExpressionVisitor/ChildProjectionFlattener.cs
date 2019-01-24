@@ -14,36 +14,16 @@ namespace Signum.Engine.Linq
     internal class ChildProjectionFlattener : DbExpressionVisitor
     {
         SelectExpression? currentSource;
-        AliasGenerator aliasGenerator;
-        private ChildProjectionFlattener(){}
+        readonly AliasGenerator aliasGenerator;
 
-        public Type? inMList = null;
-
-        protected internal override Expression VisitMListProjection(MListProjectionExpression mlp)
+        private ChildProjectionFlattener(AliasGenerator aliasGenerator)
         {
-            var oldInEntity = inMList;
-            inMList = mlp.Type;
-            var result = VisitProjection(mlp.Projection);
-            inMList = oldInEntity;
-            return result;
-        }
-
-        private static PropertyInfo GetOrderColumn(Type type)
-        {
-            if (!typeof(ICanBeOrdered).IsAssignableFrom(type))
-                throw new InvalidOperationException($"Type '{type.Name}' should implement '{nameof(ICanBeOrdered)}'");
-
-            var pi = type.GetProperty(nameof(ICanBeOrdered.Order), BindingFlags.Instance | BindingFlags.Public);
-
-            if (pi == null)
-                throw new InvalidOperationException("Order Property not found");
-
-            return pi;
+            this.aliasGenerator = aliasGenerator;
         }
 
         static internal ProjectionExpression Flatten(ProjectionExpression proj, AliasGenerator aliasGenerator)
         {
-            var result = (ProjectionExpression)new ChildProjectionFlattener { aliasGenerator = aliasGenerator }.Visit(proj);
+            var result = (ProjectionExpression)new ChildProjectionFlattener(aliasGenerator).Visit(proj);
             if (result == proj)
                 return result;
 
@@ -53,6 +33,16 @@ namespace Signum.Engine.Linq
             return (ProjectionExpression)subqueryCleaned;
         }
 
+        public Type? inMList = null;
+        protected internal override Expression VisitMListProjection(MListProjectionExpression mlp)
+        {
+            var oldInEntity = inMList;
+            inMList = mlp.Type;
+            var result = VisitProjection(mlp.Projection);
+            inMList = oldInEntity;
+            return result;
+        }
+        
         protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             if (currentSource == null)
@@ -119,7 +109,7 @@ namespace Signum.Engine.Linq
                     List<ColumnDeclaration> columnsSMExternal = externalColumns.Select(ce => generatorSM.MapColumn(ce)).ToList();
                     List<ColumnDeclaration> columnsSMInternal = proj.Select.Columns.Select(cd => generatorSM.MapColumn(cd.GetReference(proj.Select.Alias))).ToList();
 
-                    SelectExpression @internal = ExtractOrders(proj.Select, out List<OrderExpression> innerOrders);
+                    SelectExpression @internal = ExtractOrders(proj.Select, out List<OrderExpression>? innerOrders);
 
                     Alias aliasSM = aliasGenerator.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, null, columnsSMExternal.Concat(columnsSMInternal),
@@ -162,7 +152,7 @@ namespace Signum.Engine.Linq
             return new SelectExpression(sel.Alias, sel.IsDistinct, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy, sel.SelectOptions);
         }
 
-        private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression> innerOrders)
+        private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression>? innerOrders)
         {
             if (sel.Top != null || (sel.OrderBy.Count == 0))
             {
@@ -258,7 +248,7 @@ namespace Signum.Engine.Linq
                 if (table.Table is Table t && t.IsView)
                     yield return new ColumnExpression(typeof(int), table.Alias, t.Columns.Values.Single(a => a.PrimaryKey).Name);
                 else
-                    yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name);
+                    yield return new ColumnExpression(typeof(int), table.Alias, table!.Table.PrimaryKey.Name); /*CSBUG*/
             }
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
@@ -266,7 +256,7 @@ namespace Signum.Engine.Linq
                 if (select.GroupBy.Any())
                     return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be improved*/)?.Let(cd => cd.GetReference(select.Alias))).ToList();
 
-                IEnumerable<ColumnExpression> inner = Keys(select.From);
+                IEnumerable<ColumnExpression> inner = Keys(select.From!);
 
                 var result = inner.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce))?.Let(cd => cd.GetReference(select.Alias))).ToList();
 
@@ -287,11 +277,16 @@ namespace Signum.Engine.Linq
 
         internal class ColumnReplacer : DbExpressionVisitor
         {
-            Dictionary<ColumnExpression, ColumnExpression> Replacements;
+            readonly Dictionary<ColumnExpression, ColumnExpression> Replacements;
+
+            public ColumnReplacer(Dictionary<ColumnExpression, ColumnExpression> replacements)
+            {
+                Replacements = replacements;
+            }
 
             public static Expression Replace(Expression expression, Dictionary<ColumnExpression, ColumnExpression> replacements)
             {
-                return new ColumnReplacer { Replacements = replacements }.Visit(expression);
+                return new ColumnReplacer(replacements).Visit(expression);
             }
 
             protected internal override Expression VisitColumn(ColumnExpression column)
@@ -307,18 +302,17 @@ namespace Signum.Engine.Linq
 
         internal class ExternalColumnGatherer : DbExpressionVisitor
         {
-            Alias externalAlias;
+            readonly Alias externalAlias;
+            readonly HashSet<ColumnExpression> columns = new HashSet<ColumnExpression>();
 
-            HashSet<ColumnExpression> columns = new HashSet<ColumnExpression>();
-
-            private ExternalColumnGatherer() { }
-
+            public ExternalColumnGatherer(Alias externalAlias)
+            {
+                this.externalAlias = externalAlias;
+            }
+            
             public static HashSet<ColumnExpression> Gatherer(Expression source, Alias externalAlias)
             {
-                ExternalColumnGatherer ap = new ExternalColumnGatherer()
-                {
-                    externalAlias = externalAlias
-                };
+                ExternalColumnGatherer ap = new ExternalColumnGatherer(externalAlias);
 
                 ap.Visit(source);
 

@@ -43,7 +43,7 @@ namespace Signum.Entities.Patterns
         protected override void ChildCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
         {
             if (this.locked)
-                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString(sender.GetType().ElementType().NicePluralName(), this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString(sender.GetType().ElementType()!.NicePluralName(), this.ToString()));
 
             base.ChildCollectionChanged(sender, args);
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.DynamicQuery;
@@ -66,8 +66,8 @@ namespace Signum.Engine.DynamicQuery
             return cols.ToResultTable(request);
         }
 
-        public override object ExecuteQueryValue(QueryValueRequest request) => Task.Run(() => ExecuteQueryValueAsync(request, CancellationToken.None));
-        public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken)
+        public override object? ExecuteQueryValue(QueryValueRequest request) => Task.Run(() => ExecuteQueryValueAsync(request, CancellationToken.None));
+        public override async Task<object?> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken)
         {
             var req = new QueryRequest
             {
@@ -88,7 +88,7 @@ namespace Signum.Engine.DynamicQuery
 
             else if (request.ValueToken is AggregateToken)
             {
-                var parent = request.ValueToken.Parent;
+                var parent = request.ValueToken.Parent!;
                 req.Columns.Add(new Column(parent, parent.NiceName()));
                 var result = await Execute(req, GetQueryDescription(), cancellationToken);
                 return result.SimpleAggregate((AggregateToken)request.ValueToken);
@@ -103,8 +103,8 @@ namespace Signum.Engine.DynamicQuery
 
 
 
-        public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request) => Task.Run(() => ExecuteUniqueEntityAsync(request, CancellationToken.None)).Result;
-        public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken)
+        public override Lite<Entity>? ExecuteUniqueEntity(UniqueEntityRequest request) => Task.Run(() => ExecuteUniqueEntityAsync(request, CancellationToken.None)).Result;
+        public override async Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken)
         {
             var req = new QueryRequest
             {

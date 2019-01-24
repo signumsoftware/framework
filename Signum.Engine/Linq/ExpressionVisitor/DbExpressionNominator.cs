@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
 
         bool innerProjection = false;
 
-        HashSet<Expression> candidates = new HashSet<Expression>();
+        readonly HashSet<Expression> candidates = new HashSet<Expression>();
 
         T Add<T>(T expression) where T : Expression?
         {
@@ -89,8 +89,7 @@ namespace Signum.Engine.Linq
 
         private bool IsExcluded(Expression exp)
         {
-            DbExpression? expDb = exp as DbExpression;
-            if (expDb == null)
+            if (!(exp is DbExpression expDb))
                 return false;
 
             switch (expDb.DbNodeType)
@@ -572,18 +571,7 @@ namespace Signum.Engine.Linq
 
             return Add(result);
         }
-
-        private Expression DateAdd(SqlEnums part, Expression dateExpression, Expression intExpression)
-        {
-            return new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.DATEADD.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression, intExpression });
-        }
-
-        private Expression MinusDatePart(SqlEnums part, Expression dateExpression)
-        {
-            return Expression.Negate(new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEPART.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression }));
-        }
-
-
+        
         protected override Expression VisitBinary(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
@@ -890,7 +878,7 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException();
         }
 
-        static MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));
+        static readonly MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));
 
 
         protected override Expression VisitConditional(ConditionalExpression c)
@@ -1284,9 +1272,11 @@ namespace Signum.Engine.Linq
             {
                 case "string.IndexOf":
                     {
-                        Expression startIndex = m.TryGetArgument("startIndex")?.Let(e => Expression.Add(e, new SqlConstantExpression(1)));
+                        Expression? startIndex = m.TryGetArgument("startIndex")?.Let(e => Expression.Add(e, new SqlConstantExpression(1)));
 
-                        Expression? charIndex = TrySqlFunction(null, SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
+                        Expression? charIndex = startIndex != null ? 
+                            TrySqlFunction(null, SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex) :
+                            TrySqlFunction(null, SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object);
                         if (charIndex == null)
                             return null;
                         Expression result = Expression.Subtract(charIndex, new SqlConstantExpression(1));
@@ -1458,7 +1448,7 @@ namespace Signum.Engine.Linq
             return Add(acum);
         }
 
-        private Expression? TryEtc(Expression str, Expression max, Expression etcString)
+        private Expression? TryEtc(Expression str, Expression max, Expression? etcString)
         {
             var newStr = Visit(str);
             if (!Has(newStr))
@@ -1472,8 +1462,8 @@ namespace Signum.Engine.Linq
                 Expression.Call(miEtc3, newStr, max, etcString);
         }
 
-        static MethodInfo miEtc2 = ReflectionTools.GetMethodInfo(() => "".Etc(2));
-        static MethodInfo miEtc3 = ReflectionTools.GetMethodInfo(() => "".Etc(2, "..."));
+        static readonly MethodInfo miEtc2 = ReflectionTools.GetMethodInfo(() => "".Etc(2));
+        static readonly MethodInfo miEtc3 = ReflectionTools.GetMethodInfo(() => "".Etc(2, "..."));
 
         IDisposable ForceFullNominate()
         {

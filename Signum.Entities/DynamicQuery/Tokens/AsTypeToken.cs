@@ -73,7 +73,7 @@ namespace Signum.Entities.DynamicQuery
             var routeAllowed = GetPropertyRoute()!.IsAllowed();
 
             if (parentAllowed.HasText() && routeAllowed.HasText())
-                QueryTokenMessage.And.NiceToString().CombineIfNotEmpty(parentAllowed, routeAllowed);
+                QueryTokenMessage.And.NiceToString().Combine(parentAllowed, routeAllowed);
 
             return parentAllowed ?? routeAllowed;
         }

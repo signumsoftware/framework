@@ -31,13 +31,13 @@ namespace Signum.Engine.Linq
             return this.Translate(expression, tr => tr.MainCommand);
         }
 
-        public override object Execute(Expression expression)
+        public override object Execute(Expression expression) /*CSBUG*/
         {
             using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
-                return this.Translate(expression, tr => tr.Execute());
+                return this.Translate(expression, tr => tr.Execute()!);
         }
 
-        public async Task<object> ExecuteAsync(Expression expression, CancellationToken token)
+        public async Task<object?> ExecuteAsync(Expression expression, CancellationToken token)
         {
             using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
                 return await this.Translate(expression, tr => tr.ExecuteAsync(token));

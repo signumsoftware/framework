@@ -15,7 +15,7 @@ namespace Signum.Engine.DynamicQuery
     {
         public IQueryable<T> Query { get; private set; }
 
-        Dictionary<string, Meta> metas;
+        readonly Dictionary<string, Meta?> metas;
 
         public AutoDynamicQueryCore(IQueryable<T> query)
         {
@@ -109,7 +109,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public override object ExecuteQueryValue(QueryValueRequest request)
+        public override object? ExecuteQueryValue(QueryValueRequest request)
         {
             using (SystemTime.Override(request.SystemTime))
             {
@@ -127,7 +127,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
+        public override async Task<object?> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
         {
             using (SystemTime.Override(request.SystemTime))
             {
@@ -145,7 +145,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        public override Lite<Entity>? ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
 
@@ -159,10 +159,10 @@ namespace Signum.Engine.DynamicQuery
                 .SelectOne(ex.Token)
                 .Unique(request.UniqueType);
 
-            return (Lite<Entity>)result;
+            return (Lite<Entity>?)result;
         }
 
-        public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
+        public override async Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
         {
             var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
 
@@ -176,7 +176,7 @@ namespace Signum.Engine.DynamicQuery
                 .SelectOne(ex.Token)
                 .UniqueAsync(request.UniqueType, token);
 
-            return (Lite<Entity>)result;
+            return (Lite<Entity>?)result;
         }
 
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
@@ -213,7 +213,7 @@ namespace Signum.Engine.DynamicQuery
             return new DQueryable<object>(query.Query, query.Context);
         }
 
-        public override Expression Expression
+        public override Expression? Expression
         {
             get { return Query.Expression; }
         }

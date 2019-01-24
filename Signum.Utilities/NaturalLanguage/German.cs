@@ -7,7 +7,7 @@ namespace Signum.Utilities.NaturalLanguage
     public class GermanPluralizer : IPluralizer
     {
         //http://www.alemansencillo.com/el-plural-en-aleman#TOC-Reglas-generales-aplicables-a-todos
-        Dictionary<string, string> terminationsFemenine = new Dictionary<string, string>
+        readonly Dictionary<string, string> terminationsFemenine = new Dictionary<string, string>
         {
             {"itis", "itiden"},
             {"sis", "sen"},
@@ -18,8 +18,7 @@ namespace Signum.Utilities.NaturalLanguage
             {"a", "en"},
             {"", "en"},
         };
-
-        Dictionary<string, string> terminationsMasculine = new Dictionary<string, string>
+        readonly Dictionary<string, string> terminationsMasculine = new Dictionary<string, string>
         {
             {"ant", "anten"},
             {"ent", "enten"},
@@ -29,8 +28,7 @@ namespace Signum.Utilities.NaturalLanguage
             {"e", "en"},
             {"", "e"},
         };
-
-        Dictionary<string, string> terminationsNeutro = new Dictionary<string, string>
+        readonly Dictionary<string, string> terminationsNeutro = new Dictionary<string, string>
         {
             {"nis", "nisse"},
             {"um", "a"},
@@ -44,7 +42,7 @@ namespace Signum.Utilities.NaturalLanguage
             if (string.IsNullOrEmpty(singularName))
                 return singularName;
 
-            string last = singularName.TryAfterLast(' ');
+            string? last = singularName.TryAfterLast(' ');
             if (last != null)
                 return singularName.BeforeLast(' ') + " " + MakePlural(last);
 
@@ -67,7 +65,7 @@ namespace Signum.Utilities.NaturalLanguage
 
     public class GermanGenderDetector : IGenderDetector
     {
-        Dictionary<string, char> terminations = new Dictionary<string, char>
+        readonly Dictionary<string, char> terminations = new Dictionary<string, char>
         {
             //http://www.alemansencillo.com/genero-de-los-sustantivos-masculinos
             {"ich", 'm' },
@@ -136,18 +134,13 @@ namespace Signum.Utilities.NaturalLanguage
 
             return null;
         }
-        
-        ReadOnlyCollection<PronomInfo> pronoms = new ReadOnlyCollection<PronomInfo>(new[]
+
+        public ReadOnlyCollection<PronomInfo> Pronoms { get; } = new ReadOnlyCollection<PronomInfo>(new[]
         {
             new PronomInfo('m', "der", "die"),
             new PronomInfo('f', "die", "die"),
             new PronomInfo('n', "das", "die"),
         });
-
-        public ReadOnlyCollection<PronomInfo> Pronoms
-        {
-            get { return pronoms; }
-        }
     }
 
 

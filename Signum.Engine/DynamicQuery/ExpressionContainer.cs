@@ -142,7 +142,7 @@ namespace Signum.Engine.DynamicQuery
         {
             Expression<Func<T, IEnumerable<KVP>>> result = e => collectionSelector.Evaluate(embeddedSelector.Evaluate(e));
 
-            return (Expression<Func<T, IEnumerable<KVP>>>)ExpressionCleaner.Clean(result);
+            return (Expression<Func<T, IEnumerable<KVP>>>)ExpressionCleaner.Clean(result)!;
         }
 
         private ResetLazy<HashSet<K>> GetAllKeysLazy<T, KVP, K>(Expression<Func<T, IEnumerable<KVP>>> collectionSelector, Expression<Func<KVP, K>> keySelector)
@@ -183,7 +183,7 @@ namespace Signum.Engine.DynamicQuery
 
         public Expression<Func<KVP, V>> ValueSelector { get; set; }
 
-        ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
+        readonly ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
 
         public ExtensionDictionaryInfo(
             Expression<Func<T, IEnumerable<KVP>>> collectionSelector, 

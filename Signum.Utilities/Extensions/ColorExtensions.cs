@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Globalization;
 
@@ -22,7 +22,7 @@ namespace Signum.Utilities
             return ToHtmlColor(color.ToArgb());
         }
 
-        public static string TryToHtml(this Color? color)
+        public static string? TryToHtml(this Color? color)
         {
             if (color == null)
                 return null;
@@ -145,8 +145,8 @@ namespace Signum.Utilities
 
         public static void FromHex(string hex, out byte a, out byte r, out byte g, out byte b)
         {
-            hex = ToRgbaHex(hex);
-            if (hex == null || !uint.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var packedValue))
+            var nhex = ToRgbaHex(hex);
+            if (nhex == null || !uint.TryParse(nhex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var packedValue))
             {
                 throw new ArgumentException("Hexadecimal string is not in the correct format.", nameof(hex));
             }
@@ -157,7 +157,7 @@ namespace Signum.Utilities
             b = (byte)(packedValue >> 8);
         }
 
-        private static string ToRgbaHex(string hex)
+        private static string? ToRgbaHex(string hex)
         {
             hex = hex.StartsWith("#") ? hex.Substring(1) : hex;
 

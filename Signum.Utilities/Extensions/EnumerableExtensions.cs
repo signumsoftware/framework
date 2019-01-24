@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Signum.Utilities
@@ -399,12 +400,12 @@ namespace Signum.Utilities
             }
         }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T>? collection)
+        public static bool IsNullOrEmpty<T>([NotNullWhenFalse]this IEnumerable<T>? collection)
         {
             return collection == null || collection.IsEmpty();
         }
 
-        public static bool HasItems<T>(this IEnumerable<T>? collection)
+        public static bool HasItems<T>([NotNullWhenTrue]this IEnumerable<T>? collection)
         {
             return collection != null && collection.Any();
         }
@@ -904,8 +905,7 @@ namespace Signum.Utilities
             {
                 if (!enumerator.MoveNext())
                     yield break;
-
-
+                
                 T firstItem = enumerator.Current;
                 if (options == BiSelectOptions.Initial || options == BiSelectOptions.InitialAndFinal)
                     yield return func(null, firstItem);

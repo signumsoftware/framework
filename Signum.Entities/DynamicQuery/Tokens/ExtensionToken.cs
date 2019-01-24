@@ -19,7 +19,7 @@ namespace Signum.Entities.DynamicQuery
         {
             this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
-            var shouldHaveImplementations = typeof(IEntity).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
+            var shouldHaveImplementations = typeof(IEntity).IsAssignableFrom((isProjection ? type.ElementType()! : type).CleanType());
 
             if (shouldHaveImplementations && implementations == null)
                 throw new ArgumentException(@"Impossible to determine automatically the implementations for extension token '{0}' (of type {1}) registered on type {2}.

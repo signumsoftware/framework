@@ -55,7 +55,7 @@ namespace Signum.Entities
                 throw new InvalidOperationException("IsByAll");
         }
 
-        public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
+        public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute? ib, ImplementedByAllAttribute? iba)
         {
             if (ib != null && iba != null)
                 throw new NotSupportedException("Route {0} contains both {1} and {2}".FormatWith(route, ib.GetType().Name, iba.GetType().Name));
@@ -70,7 +70,7 @@ namespace Signum.Entities
         }
 
 
-        public static Implementations FromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
+        public static Implementations FromAttributes(Type t, PropertyRoute route, ImplementedByAttribute? ib, ImplementedByAllAttribute? iba)
         {
             Implementations? imp = TryFromAttributes(t, route, ib, iba);
 

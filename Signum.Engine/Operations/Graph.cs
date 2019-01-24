@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Basics;
@@ -21,14 +21,14 @@ namespace Signum.Engine.Operations
             Type IOperation.OverridenType { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
             bool IOperation.Returns { get { return true; } }
-            Type IOperation.ReturnType { get { return typeof(T); } }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-            Type IOperation.StateType { get { return null; } }
+            Type? IOperation.ReturnType { get { return typeof(T); } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type? IOperation.StateType { get { return null; } }
 
             public bool LogAlsoIfNotSaved { get; set; }
 
-            //public Func<object[], T> Construct { get; set; } (inherited)
+            //public Func<object[]?, T> Construct { get; set; } (inherited)
             public bool Lite { get { return false; } }
 
             public Construct(ConstructSymbol<T>.Simple symbol)
@@ -50,18 +50,18 @@ namespace Signum.Engine.Operations
                 return new Construct(symbol.Symbol);
             }
 
-            public void OverrideConstruct(Overrider<Func<object[], T>> overrider)
+            public void OverrideConstruct(Overrider<Func<object[]?, T>> overrider)
             {
                 this.Construct = overrider(this.Construct);
             }
 
-            IEntity IConstructOperation.Construct(params object[] args)
+            IEntity IConstructOperation.Construct(params object[]? args)
             {
                 using (HeavyProfiler.Log("Construct", () => operationSymbol.Key))
                 {
                     OperationLogic.AssertOperationAllowed(operationSymbol, typeof(T), inUserInterface: false);
 
-                    OperationLogEntity log = new OperationLogEntity
+                    OperationLogEntity? log = new OperationLogEntity
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
@@ -72,7 +72,7 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            T result = null;
+                            T? result = null;
                             using (OperationLogic.AllowSave<T>())
                                 OperationLogic.OnSuroundOperation(this, log, null, args).EndUsing(_ =>
                                 {
@@ -92,7 +92,7 @@ namespace Signum.Engine.Operations
                             if (log != null)
                                 log.SaveLog();
 
-                            return tr.Commit(result);
+                            return tr.Commit(result!);
                         }
                     }
                     catch (Exception ex)
@@ -146,15 +146,15 @@ namespace Signum.Engine.Operations
             OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
             Type IOperation.OverridenType { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-            Type IOperation.StateType { get { return null; } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type? IOperation.StateType { get { return null; } }
 
             public bool CanBeModified { get; set; }
             public bool LogAlsoIfNotSaved { get; set; }
 
             bool IOperation.Returns { get { return true; } }
-            Type IOperation.ReturnType { get { return typeof(T); } }
+            Type? IOperation.ReturnType { get { return typeof(T); } }
 
             protected readonly Type baseType;
             Type IEntityOperation.BaseType { get { return baseType; } }
@@ -162,17 +162,17 @@ namespace Signum.Engine.Operations
 
             public bool CanBeNew { get; set; }
 
-            public Func<F, string> CanConstruct { get; set; }
+            public Func<F, string?>? CanConstruct { get; set; }
 
-            public ConstructFrom<F> OverrideCanConstruct(Overrider<Func<F, string>> overrider)
+            public ConstructFrom<F> OverrideCanConstruct(Overrider<Func<F, string?>> overrider)
             {
                 this.CanConstruct = overrider(this.CanConstruct ?? (f => null));
                 return this;
             }
 
-            public Func<F, object[], T> Construct { get; set; }
+            public Func<F, object[]?, T> Construct { get; set; } = null!;
 
-            public void OverrideConstruct(Overrider<Func<F, object[], T>> overrider)
+            public void OverrideConstruct(Overrider<Func<F, object[]?, T>> overrider)
             {
                 this.Construct = overrider(this.Construct);
             }
@@ -198,12 +198,12 @@ namespace Signum.Engine.Operations
                 return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
             }
 
-            string IEntityOperation.CanExecute(IEntity entity)
+            string? IEntityOperation.CanExecute(IEntity entity)
             {
                 return OnCanConstruct(entity);
             }
 
-            string OnCanConstruct(IEntity entity)
+            string? OnCanConstruct(IEntity entity)
             {
                 if (entity.IsNew && !CanBeNew)
                     return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
@@ -214,17 +214,17 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            IEntity IConstructorFromOperation.Construct(IEntity origin, params object[] args)
+            IEntity IConstructorFromOperation.Construct(IEntity origin, params object[]? args)
             {
                 using (HeavyProfiler.Log("ConstructFrom", () => operationSymbol.Key))
                 {
                     OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false);
 
-                    string error = OnCanConstruct(origin);
+                    string? error = OnCanConstruct(origin);
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    OperationLogEntity log = new OperationLogEntity
+                    OperationLogEntity? log = new OperationLogEntity
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
@@ -236,7 +236,7 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            T result = null;
+                            T? result = null;
                             using (OperationLogic.AllowSave(origin.GetType()))
                             using (OperationLogic.AllowSave<T>())
                                 OperationLogic.OnSuroundOperation(this, log, origin, args).EndUsing(_ =>
@@ -259,7 +259,7 @@ namespace Signum.Engine.Operations
                             if (log != null)
                                 log.SaveLog();
 
-                            return tr.Commit(result);
+                            return tr.Commit(result!);
                         }
                     }
                     catch (Exception ex)
@@ -314,19 +314,19 @@ namespace Signum.Engine.Operations
             Type IOperation.OverridenType { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
             bool IOperation.Returns { get { return true; } }
-            Type IOperation.ReturnType { get { return typeof(T); } }
+            Type? IOperation.ReturnType { get { return typeof(T); } }
 
             protected readonly Type baseType;
             Type IConstructorFromManyOperation.BaseType { get { return baseType; } }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-            Type IOperation.StateType { get { return null; } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type? IOperation.StateType { get { return null; } }
 
             public bool LogAlsoIfNotSaved { get; set; }
 
-            public Func<List<Lite<F>>, object[], T> Construct { get; set; }
+            public Func<List<Lite<F>>, object[]?, T> Construct { get; set; } = null!;
 
-            public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object[], T>> overrider)
+            public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object[]?, T>> overrider)
             {
                 this.Construct = overrider(this.Construct);
             }
@@ -354,7 +354,7 @@ namespace Signum.Engine.Operations
             }
 
 
-            IEntity IConstructorFromManyOperation.Construct(IEnumerable<Lite<IEntity>> lites, params object[] args)
+            IEntity IConstructorFromManyOperation.Construct(IEnumerable<Lite<IEntity>> lites, params object[]? args)
             {
                 using (HeavyProfiler.Log("ConstructFromMany", () => operationSymbol.Key))
                 {
@@ -363,7 +363,7 @@ namespace Signum.Engine.Operations
                         OperationLogic.AssertOperationAllowed(operationSymbol, type, inUserInterface: false);
                     }
 
-                    OperationLogEntity log = new OperationLogEntity
+                    OperationLogEntity? log = new OperationLogEntity
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
@@ -374,7 +374,7 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            T result = null;
+                            T? result = null;
 
                             using (OperationLogic.AllowSave<F>())
                             using (OperationLogic.AllowSave<T>())
@@ -398,7 +398,7 @@ namespace Signum.Engine.Operations
                             if (log != null)
                                 log.SaveLog();
 
-                            return tr.Commit(result);
+                            return tr.Commit(result!);
                         }
                     }
                     catch (Exception ex)
@@ -427,7 +427,7 @@ namespace Signum.Engine.Operations
                 }
             }
 
-            protected virtual T OnConstruct(List<Lite<F>> lites, object[] args)
+            protected virtual T OnConstruct(List<Lite<F>> lites, object[]? args)
             {
                 return Construct(lites, args);
             }
@@ -456,26 +456,26 @@ namespace Signum.Engine.Operations
             OperationType IOperation.OperationType { get { return OperationType.Execute; } }
             public bool CanBeModified { get; set; }
             bool IOperation.Returns { get { return true; } }
-            Type IOperation.ReturnType { get { return null; } }
-            Type IOperation.StateType { get { return null; } }
+            Type? IOperation.ReturnType { get { return null; } }
+            Type? IOperation.StateType { get { return null; } }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
 
             public bool CanBeNew { get; set; }
 
-            //public Action<T, object[]> Execute { get; set; } (inherited)
-            public Func<T, string> CanExecute { get; set; }
+            //public Action<T, object[]?> Execute { get; set; } (inherited)
+            public Func<T, string?>? CanExecute { get; set; }
 
-            public Execute OverrideCanExecute(Overrider<Func<T, string>> overrider)
+            public Execute OverrideCanExecute(Overrider<Func<T, string?>> overrider)
             {
                 this.CanExecute = overrider(this.CanExecute ?? (t => null));
                 return this;
             }
 
-            public void OverrideExecute(Overrider<Action<T, object[]>> overrider)
+            public void OverrideExecute(Overrider<Action<T, object[]?>> overrider)
             {
                 this.Execute = overrider(this.Execute);
             }
@@ -485,12 +485,12 @@ namespace Signum.Engine.Operations
                 this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
             }
 
-            string IEntityOperation.CanExecute(IEntity entity)
+            string? IEntityOperation.CanExecute(IEntity entity)
             {
                 return OnCanExecute((T)entity);
             }
 
-            protected virtual string OnCanExecute(T entity)
+            protected virtual string? OnCanExecute(T entity)
             {
                 if (entity.IsNew && !CanBeNew)
                     return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
@@ -501,13 +501,13 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IExecuteOperation.Execute(IEntity entity, params object[] args)
+            void IExecuteOperation.Execute(IEntity entity, params object[]? args)
             {
                 using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                    string error = OnCanExecute((T)entity);
+                    string? error = OnCanExecute((T)entity);
                     if (error != null)
                         throw new ApplicationException(error);
 
@@ -594,26 +594,26 @@ namespace Signum.Engine.Operations
             OperationType IOperation.OperationType { get { return OperationType.Delete; } }
             public bool CanBeModified { get; set; }
             bool IOperation.Returns { get { return false; } }
-            Type IOperation.ReturnType { get { return null; } }
-            IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
-            IEnumerable<Enum> IOperation.UntypedToStates { get { return null; } }
-            Type IOperation.StateType { get { return null; } }
+            Type? IOperation.ReturnType { get { return null; } }
+            IEnumerable<Enum>? IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
+            IEnumerable<Enum>? IOperation.UntypedToStates { get { return null; } }
+            Type? IOperation.StateType { get { return null; } }
 
             public bool CanBeNew { get { return false; } }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanDelete != null; } }
 
-            //public Action<T, object[]> Delete { get; set; } (inherited)
-            public Func<T, string> CanDelete { get; set; }
+            //public Action<T, object[]?> Delete { get; set; } (inherited)
+            public Func<T, string?>? CanDelete { get; set; }
 
-            public Delete OverrideCanDelete(Overrider<Func<T, string>> overrider)
+            public Delete OverrideCanDelete(Overrider<Func<T, string?>> overrider)
             {
                 this.CanDelete = overrider(this.CanDelete ?? (t => null));
                 return this;
             }
 
-            public void OverrideDelete(Overrider<Action<T, object[]>> overrider)
+            public void OverrideDelete(Overrider<Action<T, object[]?>> overrider)
             {
                 this.Delete = overrider(this.Delete);
             }
@@ -623,12 +623,12 @@ namespace Signum.Engine.Operations
                 this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
             }
 
-            string IEntityOperation.CanExecute(IEntity entity)
+            string? IEntityOperation.CanExecute(IEntity entity)
             {
                 return OnCanDelete((T)entity);
             }
 
-            protected virtual string OnCanDelete(T entity)
+            protected virtual string? OnCanDelete(T entity)
             {
                 if (entity.IsNew)
                     return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
@@ -639,13 +639,13 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IDeleteOperation.Delete(IEntity entity, params object[] args)
+            void IDeleteOperation.Delete(IEntity entity, params object[]? args)
             {
                 using (HeavyProfiler.Log("Delete", () => Symbol.Symbol.Key))
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                    string error = OnCanDelete((T)entity);
+                    string? error = OnCanDelete((T)entity);
                     if (error != null)
                         throw new ApplicationException(error);
 
@@ -698,7 +698,7 @@ namespace Signum.Engine.Operations
                 }
             }
 
-            protected virtual void OnDelete(T entity, object[] args)
+            protected virtual void OnDelete(T entity, object[]? args)
             {
                 Delete(entity, args);
             }

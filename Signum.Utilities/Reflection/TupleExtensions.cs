@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +31,7 @@ namespace Signum.Utilities.Reflection
                 case 6: return typeof(Tuple<,,,,,>);
                 case 7: return typeof(Tuple<,,,,,,>);
                 case 8: return typeof(Tuple<,,,,,,,>);
-                default: return null;
+                default: throw new UnexpectedValueException(numParameters);
             }
         }
 

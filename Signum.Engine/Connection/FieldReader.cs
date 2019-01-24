@@ -61,7 +61,7 @@ namespace Signum.Engine
             return reader.IsDBNull(ordinal);
         }
 
-        public string GetString(int ordinal)
+        public string? GetString(int ordinal)
         {
             LastOrdinal = ordinal;
             if (reader.IsDBNull(ordinal))
@@ -96,7 +96,7 @@ namespace Signum.Engine
             }
         }
 
-        public byte[] GetByteArray(int ordinal)
+        public byte[]? GetByteArray(int ordinal)
         {
             LastOrdinal = ordinal;
             if (reader.IsDBNull(ordinal))
@@ -526,7 +526,7 @@ namespace Signum.Engine
             LastOrdinal = ordinal;
             if (reader.IsDBNull(ordinal))
             {
-                return (T)(object)null;
+                return (T)(object)null!;
             }
 
             var udt = Activator.CreateInstance<T>();
@@ -542,8 +542,7 @@ namespace Signum.Engine
 
         public static Expression GetExpression(Expression reader, int ordinal, Type type)
         {
-            MethodInfo mi = methods.TryGetC(type);
-
+            MethodInfo? mi = methods.TryGetC(type);
             if (mi != null)
                 return Expression.Call(reader, mi, Expression.Constant(ordinal));
 
@@ -579,7 +578,12 @@ namespace Signum.Engine
     [Serializable]
     public class FieldReaderException : SqlTypeException
     {
-        public FieldReaderException(Exception inner) : base(null, inner) { }
+        public FieldReaderException(Exception inner, int ordinal, string columnName, Type columnType) : base(null, inner)
+        {
+            this.Ordinal = ordinal;
+            this.ColumnName = columnName;
+            this.ColumnType = columnType;
+        }
         protected FieldReaderException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
@@ -609,7 +613,7 @@ namespace Signum.Engine
         public string ColumnName { get; internal set; }
         public Type ColumnType { get; internal set; }
         public int Row { get; internal set; }
-        public SqlPreCommand Command { get; internal set; }
-        public LambdaExpression Projector { get; internal set; }
+        public SqlPreCommand? Command { get; internal set; }
+        public LambdaExpression? Projector { get; internal set; }
     }
 }

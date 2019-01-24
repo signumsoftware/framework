@@ -1,19 +1,24 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
 {
     internal class AliasProjectionReplacer : DbExpressionVisitor
     {
-        ProjectionExpression root;
+        ProjectionExpression? root;
         AliasGenerator aliasGenerator;
+
+        public AliasProjectionReplacer(ProjectionExpression? root, AliasGenerator aliasGenerator)
+        {
+            this.root = root;
+            this.aliasGenerator = aliasGenerator;
+        }
 
         public static Expression Replace(Expression proj, AliasGenerator aliasGenerator)
         {
-            AliasProjectionReplacer apr = new AliasProjectionReplacer()
-            {
-                aliasGenerator = aliasGenerator,
-                root = proj as ProjectionExpression,
-            };
+            AliasProjectionReplacer apr = new AliasProjectionReplacer(
+                root:  proj as ProjectionExpression,
+                aliasGenerator : aliasGenerator
+            );
             return apr.Visit(proj);
         }
 

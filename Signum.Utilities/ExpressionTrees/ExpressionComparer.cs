@@ -26,12 +26,12 @@ namespace Signum.Utilities.ExpressionTrees
             this.checkParameterNames = checkParameterNames;
         }
 
-        public static bool AreEqual( Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope = null, bool checkParameterNames = false)
+        public static bool AreEqual(Expression? a, Expression? b, ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope = null, bool checkParameterNames = false)
         {
             return new ExpressionComparer(parameterScope, checkParameterNames).Compare(a, b);
         }
 
-        protected virtual bool Compare(Expression a, Expression b)
+        protected virtual bool Compare(Expression? a, Expression? b)
         {
             if (a == b)
                 return true;
@@ -264,7 +264,7 @@ namespace Signum.Utilities.ExpressionTrees
                 && CompareList(a.Initializers, b.Initializers, CompareElementInit);
         }
 
-        protected static bool CompareList<T>(ReadOnlyCollection<T> a, ReadOnlyCollection<T> b, Func<T, T, bool> comparer)
+        protected static bool CompareList<T>(ReadOnlyCollection<T>? a, ReadOnlyCollection<T>? b, Func<T, T, bool> comparer)
         {
             if (a == b)
                 return true;

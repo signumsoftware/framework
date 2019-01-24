@@ -10,29 +10,27 @@ namespace Signum.Entities.Reflection
 {
     public class ModifyInspector
     {
-        static Dictionary<Type, Func<object, object>[]> getterCache = new Dictionary<Type, Func<object, object>[]>();
-
-        static Func<object, object>[] ModifiableFieldGetters(Type type)
+        static readonly Dictionary<Type, Func<object, object?>[]> getterCache = new Dictionary<Type, Func<object, object?>[]>();
+        static Func<object, object?>[] ModifiableFieldGetters(Type type)
         {
             lock (getterCache)
                 return getterCache.GetOrCreate(type, () =>
                 {
                     FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
                     return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && !IsIgnored(fi))
-                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray();
+                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)!).ToArray();
                 });
         }
 
-        static Dictionary<Type, Func<object, object>[]> getterVirtualCache = new Dictionary<Type, Func<object, object>[]>();
-
-        static Func<object, object>[] ModifiableFieldGettersVirtual(Type type)
+        static readonly Dictionary<Type, Func<object, object?>[]> getterVirtualCache = new Dictionary<Type, Func<object, object?>[]>();
+        static Func<object, object?>[] ModifiableFieldGettersVirtual(Type type)
         {
             lock (getterVirtualCache)
                 return getterVirtualCache.GetOrCreate(type, () =>
                 {
                     FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
                     return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && (!IsIgnored(fi) || IsQueryableProperty(fi)))
-                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray();
+                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)!).ToArray();
                 });
         }
 
@@ -55,7 +53,7 @@ namespace Signum.Entities.Reflection
 
             if (Reflector.IsMList(obj.GetType()))
             {
-                Type t = obj.GetType().ElementType();
+                Type t = obj.GetType().ElementType()!;
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
                     IEnumerable col = (IEnumerable)obj;
@@ -93,7 +91,7 @@ namespace Signum.Entities.Reflection
 
             if (Reflector.IsMList(obj.GetType()))
             {
-                Type t = obj.GetType().ElementType();
+                Type t = obj.GetType().ElementType()!;
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
                     IEnumerable col = (IEnumerable)obj;
@@ -131,7 +129,7 @@ namespace Signum.Entities.Reflection
 
             if (Reflector.IsMList(obj.GetType()))
             {
-                Type t = obj.GetType().ElementType();
+                Type t = obj.GetType().ElementType()!;
 
                 if (t.IsModifiable() && !t.IsEntity())
                 {

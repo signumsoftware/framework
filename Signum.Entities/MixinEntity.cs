@@ -167,7 +167,7 @@ namespace Signum.Entities
 
             internal static Action<T, V> Setter<V>(PropertyInfo pi)
             {
-                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
+                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi))!);
             }
         }
 
@@ -181,7 +181,7 @@ namespace Signum.Entities
 
             foreach (var pair in list)
             {
-                pair.nm.CopyFrom(pair.om, args);
+                pair.nm!.CopyFrom(pair.om!, args); /*CSBUG*/
             }
 
             return newEntity;

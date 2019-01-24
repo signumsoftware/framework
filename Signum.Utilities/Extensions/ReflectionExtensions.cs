@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -38,11 +38,12 @@ namespace Signum.Utilities
 
         public static Type ReturningType(this MemberInfo m)
         {
-            return (m is PropertyInfo) ? ((PropertyInfo)m).PropertyType :
-                (m is FieldInfo) ? ((FieldInfo)m).FieldType :
-                (m is MethodInfo) ? ((MethodInfo)m).ReturnType :
-                (m is ConstructorInfo) ? ((ConstructorInfo)m).DeclaringType :
-                (m is EventInfo) ? ((EventInfo)m).EventHandlerType : null;
+            return (m is PropertyInfo pi) ? pi.PropertyType :
+                (m is FieldInfo fi) ? fi.FieldType :
+                (m is MethodInfo mi) ? mi.ReturnType :
+                (m is ConstructorInfo ci) ? ci.DeclaringType :
+                (m is EventInfo ei) ? ei.EventHandlerType :
+                 throw new UnexpectedValueException(m! /*CSBUG*/);
         }
 
         public static bool HasAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute
@@ -93,7 +94,7 @@ namespace Signum.Utilities
             return mi == null || !mi.IsPublic;
         }
 
-        public static Type ElementType(this Type ft)
+        public static Type? ElementType(this Type ft)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(ft))
                 return null;
@@ -108,7 +109,7 @@ namespace Signum.Utilities
             return m.IsStatic && m.HasAttribute<ExtensionAttribute>();
         }
 
-        public static PropertyInfo GetBaseDefinition(this PropertyInfo propertyInfo)
+        public static PropertyInfo? GetBaseDefinition(this PropertyInfo propertyInfo)
         {
             var method = propertyInfo.GetAccessors(true)[0];
             if (method == null)
@@ -142,7 +143,7 @@ namespace Signum.Utilities
                 const int c_PeHeaderOffset = 60;
                 const int c_LinkerTimestampOffset = 8;
                 byte[] b = new byte[2048];
-                System.IO.Stream s = null;
+                System.IO.Stream? s = null;
 
                 try
                 {

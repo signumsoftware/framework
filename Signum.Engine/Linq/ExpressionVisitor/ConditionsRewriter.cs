@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Collections.ObjectModel;
@@ -23,13 +23,13 @@ namespace Signum.Engine.Linq
             return new Disposable(() => inSql = oldInSelect);
         }
 
-        static BinaryExpression TrueCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
-        static BinaryExpression FalseCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
+        static readonly BinaryExpression TrueCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
+        static readonly BinaryExpression FalseCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
 
         Expression MakeSqlCondition(Expression exp)
         {
             if (exp == null)
-                return null;
+                return null!;
 
             if (!inSql || !IsBooleanExpression(exp))
                 return exp;
@@ -53,7 +53,7 @@ namespace Signum.Engine.Linq
         Expression MakeSqlValue(Expression exp)
         {
             if (exp == null)
-                return null;
+                return null!;
 
             if (!inSql || !IsBooleanExpression(exp))
                 return exp;
@@ -114,7 +114,7 @@ namespace Signum.Engine.Linq
             }
 
             var exp = expression as DbExpression;
-            switch (exp.DbNodeType)
+            switch (exp!.DbNodeType) /*CSBUG*/
             {
                 case DbExpressionType.Exists:
                 case DbExpressionType.Like:
@@ -167,16 +167,16 @@ namespace Signum.Engine.Linq
 
         private bool IsTrue(Expression operand)
         {
-            return operand == TrueCondition || (operand is SqlConstantExpression && ((SqlConstantExpression)operand).Value.Equals(1));
+            return operand == TrueCondition || (operand is SqlConstantExpression c && object.Equals(c.Value, 1));
         }
 
         private bool IsFalse(Expression operand)
         {
-            return operand == FalseCondition || (operand is SqlConstantExpression && ((SqlConstantExpression)operand).Value.Equals(0));
+            return operand == FalseCondition || (operand is SqlConstantExpression c && object.Equals(c.Value, 0));
         }
 
-        static ConstantExpression False = Expression.Constant(false);
-        static ConstantExpression True = Expression.Constant(true);
+        static readonly ConstantExpression False = Expression.Constant(false);
+        static readonly ConstantExpression True = Expression.Constant(true);
 
         Expression SmartAnd(Expression left, Expression right, bool sortCircuit)
         {
@@ -317,7 +317,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
-            SourceExpression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From!);
             Expression where = MakeSqlCondition(this.Visit(select.Where));
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);

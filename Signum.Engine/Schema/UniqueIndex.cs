@@ -169,7 +169,7 @@ namespace Signum.Engine.Maps
             if (body.NodeType == ExpressionType.Convert && body.Type == typeof(object))
                 body = ((UnaryExpression)body).Operand;
 
-            Type type = null;
+            Type? type = null;
             if ((body.NodeType == ExpressionType.Convert || body.NodeType == ExpressionType.TypeAs) &&
                 body.Type != typeof(object))
             {

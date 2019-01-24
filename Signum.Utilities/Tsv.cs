@@ -102,7 +102,7 @@ namespace Signum.Utilities
                     {
                         for (int i = 0; i < members.Count; i++)
                         {
-                            var obj = members[i].Getter(item);
+                            var obj = members[i].Getter!(item);
 
                             var str = toString[i](obj);
 
@@ -197,7 +197,7 @@ namespace Signum.Utilities
                     {
                         e.Data["row"] = line;
 
-                        if (defOptions.SkipError == null || !options.SkipError(e, tsvLine))
+                        if (defOptions.SkipError?.Invoke(e, tsvLine) != true)
                             throw new ParseCsvException(e);
                     }
 
@@ -247,7 +247,7 @@ namespace Signum.Utilities
                 {
                     str = vals[i];
                     object? val = parsers[i](str);
-                    members[i].Setter(t, val);
+                    members[i].Setter!(t, val);
                 }
                 catch (Exception e)
                 {

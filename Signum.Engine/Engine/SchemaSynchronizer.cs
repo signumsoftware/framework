@@ -22,7 +22,7 @@ namespace Signum.Engine
             Schema s = Schema.Current;
 
             Dictionary<string, ITable> modelTables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToDictionaryEx(a => a.Name.ToString(), "schema tables");
-            var modelTablesHistory = modelTables.Values.Where(a => a.SystemVersioned != null).ToDictionaryEx(a => a.SystemVersioned.TableName.ToString(), "history schema tables");
+            var modelTablesHistory = modelTables.Values.Where(a => a.SystemVersioned != null).ToDictionaryEx(a => a.SystemVersioned!.TableName.ToString(), "history schema tables");
             HashSet<SchemaName> modelSchemas = modelTables.Values.Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
 
             Dictionary<string, DiffTable> databaseTables = DefaultGetDatabaseDescription(s.DatabaseNames());
@@ -296,7 +296,7 @@ namespace Signum.Engine
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
                             var addSystemVersioning = (tab.SystemVersioned != null &&
-                                (dif.Period == null || !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString())) ?
+                                (dif.Period == null || !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString())) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
 
 
@@ -325,7 +325,7 @@ namespace Signum.Engine
                 SqlPreCommand? historyTables = Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                     createNew: null,
                     removeOld: (tn, dif) => SqlBuilder.DropTable(dif.Name),
-                    mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned.TableName) ? SqlBuilder.RenameOrChangeSchema(dif.Name, tab.SystemVersioned.TableName) : null);
+                    mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? SqlBuilder.RenameOrChangeSchema(dif.Name, tab.SystemVersioned!.TableName) : null);
 
                 SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
@@ -399,7 +399,7 @@ namespace Signum.Engine
                             createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
-                                mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.SystemVersioned.TableName, dix.IndexName, mix.IndexName) : null);
+                                mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.IndexName) : null);
 
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                     });
@@ -438,7 +438,7 @@ namespace Signum.Engine
 
         public static Func<SchemaName, bool> IgnoreSchema = s => s.Name.Contains("\\");
 
-        private static HashSet<SchemaName> DefaultGetSchemas(List<DatabaseName> list)
+        private static HashSet<SchemaName> DefaultGetSchemas(List<DatabaseName?> list)
         {
             HashSet<SchemaName> result = new HashSet<SchemaName>();
             foreach (var db in list)
@@ -625,7 +625,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
         public static Func<DiffTable, bool> IgnoreTable = null;
 
-        public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(List<DatabaseName> databases)
+        public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(List<DatabaseName?> databases)
         {
             List<DiffTable> allTables = new List<DiffTable>();
 
@@ -844,7 +844,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
             }
         }
 
-        private static SqlPreCommand SyncEnums(Schema schema, Table table, Dictionary<string, Entity> current, Dictionary<string, Entity> should)
+        private static SqlPreCommand? SyncEnums(Schema schema, Table table, Dictionary<string, Entity> current, Dictionary<string, Entity> should)
         {
             var deletes = Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                        createNew: null,
@@ -929,6 +929,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class DiffPeriod
     {
         public string StartColumnName;
@@ -1152,7 +1153,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             return result;
         }
 
-        private string CleanParenthesis(string p)
+        private string? CleanParenthesis(string? p)
         {
             if (p == null)
                 return null;
@@ -1401,4 +1402,5 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public string Parent;
         public string Referenced;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

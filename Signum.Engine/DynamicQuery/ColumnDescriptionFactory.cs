@@ -11,7 +11,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ColumnDescriptionFactory
     {
-        readonly internal Meta Meta;
+        readonly internal Meta? Meta;
         public Func<string>? OverrideDisplayName { get; set; }
         public Func<string>? OverrideIsAllowed { get; set; }
 
@@ -92,7 +92,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException();
         }
 
-        public ColumnDescriptionFactory(int index, MemberInfo mi, Meta meta)
+        public ColumnDescriptionFactory(int index, MemberInfo mi, Meta? meta)
         {
             Name = mi.Name;
 

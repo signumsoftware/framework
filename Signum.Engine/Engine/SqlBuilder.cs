@@ -213,7 +213,7 @@ namespace Signum.Engine
             var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
             c = c!;/*CSBUG*/
 
-            return $" ".CombineIfNotEmpty(
+            return $" ".Combine(
                 c.Name.SqlEscape(),
                 fullType,
                 c.Identity ? "IDENTITY " : null, 

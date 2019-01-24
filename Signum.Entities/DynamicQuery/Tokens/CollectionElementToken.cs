@@ -17,11 +17,10 @@ namespace Signum.Entities.DynamicQuery
         QueryToken parent;
         public override QueryToken? Parent => parent;
 
-
-        Type elementType;
+        readonly Type elementType;
         internal CollectionElementToken(QueryToken parent, CollectionElementType type)
         {
-            elementType = parent.Type.ElementType();
+            elementType = parent.Type.ElementType()!;
             if (elementType == null)
                 throw new InvalidOperationException("not a collection");
 
@@ -104,7 +103,7 @@ namespace Signum.Entities.DynamicQuery
             if (parent is ExtensionToken et && et.IsProjection)
                 return et.GetElementPropertyRoute();
 
-            PropertyRoute? pr = this.parent.GetPropertyRoute();
+            PropertyRoute? pr = this.parent!.GetPropertyRoute();
             if (pr != null && pr.Type.ElementType() != null)
                 return pr.Add("Item");
 

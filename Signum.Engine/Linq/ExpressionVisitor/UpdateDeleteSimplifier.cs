@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Signum.Utilities;
 
 namespace Signum.Engine.Linq
@@ -8,25 +8,30 @@ namespace Signum.Engine.Linq
         bool removeSelectRowCount;
         AliasGenerator aliasGenerator;
 
+        public CommandSimplifier(bool removeSelectRowCount, AliasGenerator aliasGenerator)
+        {
+            this.removeSelectRowCount = removeSelectRowCount;
+            this.aliasGenerator = aliasGenerator;
+        }
 
         public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount, AliasGenerator aliasGenerator)
         {
-            return (CommandExpression)new CommandSimplifier { removeSelectRowCount = removeSelectRowCount, aliasGenerator = aliasGenerator }.Visit(ce);
+            return (CommandExpression)new CommandSimplifier(removeSelectRowCount, aliasGenerator).Visit(ce);
         }
 
         protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
         {
             if (removeSelectRowCount)
-                return null;
+                return null!;
 
             return base.VisitSelectRowCount(src);
         }
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
         {
-            var select = delete.Source as SelectExpression;
+            var select = (SelectExpression)delete.Source;
 
-            TableExpression table = select.From as TableExpression;
+            TableExpression? table = select.From as TableExpression;
 
             if (table == null || delete.Table != table.Table)
                 return delete;
@@ -84,7 +89,7 @@ namespace Signum.Engine.Linq
                 if(result == null)
                     return ce;
 
-                TableExpression table = (TableExpression)select.From;
+                TableExpression table = (TableExpression)select.From!;
 
                 if (table.Alias == result.Alias)
                 {

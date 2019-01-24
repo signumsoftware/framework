@@ -25,7 +25,7 @@ namespace Signum.Utilities.ExpressionTrees
             return Clean(expr, ExpressionEvaluator.PartialEval, true);
         }
 
-        public static Expression Clean(Expression expr, Func<Expression, Expression> partialEval, bool shortCircuit)
+        public static Expression? Clean(Expression? expr, Func<Expression, Expression> partialEval, bool shortCircuit)
         {
             ExpressionCleaner ee = new ExpressionCleaner()
             {
@@ -59,7 +59,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Evaluate")
             {
-                LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
+                LambdaExpression lambda = (LambdaExpression)ExpressionEvaluator.Eval(m.Arguments[0])!;
 
                 return Expression.Invoke(lambda, m.Arguments.Skip(1).ToArray());
             }
@@ -191,15 +191,13 @@ namespace Signum.Utilities.ExpressionTrees
             if (obj == null)
                 throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(efa.Name));
 
-            var result = obj as LambdaExpression;
-
-            if (result == null)
+            if (!(obj is LambdaExpression result))
                 throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(efa.Name, type.TypeName()));
 
             return result;
         }
 
-        static BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        static readonly BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         static MemberInfo? GetMember(Type decType, MemberInfo mi)
         {
@@ -235,10 +233,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         static MemberInfo? BaseMember(MemberInfo mi)
         {
-            MemberInfo result;
+            MemberInfo? result;
             if (mi is MethodInfo mti)
                 result = mti.GetBaseDefinition();
-
             else if (mi is PropertyInfo pi)
                 result = pi.GetBaseDefinition();
             else

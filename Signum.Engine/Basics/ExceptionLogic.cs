@@ -50,7 +50,7 @@ namespace Signum.Engine.Basics
 			return entity.SaveForceNew();
 		}
 
-		public static ExceptionEntity GetExceptionEntity(this Exception ex)
+		public static ExceptionEntity? GetExceptionEntity(this Exception ex)
 		{
 			var exEntity = ex.Data[ExceptionEntity.ExceptionDataKey] as ExceptionEntity;
 

@@ -15,10 +15,10 @@ namespace Signum.Engine.CodeGeneration
 {
     public class LogicCodeGenerator
     {
-        public string SolutionName;
-        public string SolutionFolder;
+        public string SolutionName = null!;
+        public string SolutionFolder = null!;
 
-        public Schema CurrentSchema;
+        public Schema CurrentSchema = null!;
 
         protected bool? overwriteFiles = null;
 
@@ -165,7 +165,7 @@ namespace Signum.Engine.CodeGeneration
                     sb.AppendLine();
                 }
 
-                string query = WriteQuery(item);
+                string? query = WriteQuery(item);
                 if (query != null)
                 {
                     sb.Append(query.Indent(8));
@@ -234,7 +234,7 @@ namespace Signum.Engine.CodeGeneration
             return !exp.IsUnique && type == exp.ToType;
         }
 
-        protected virtual string WriteQuery(Type type)
+        protected virtual string? WriteQuery(Type type)
         {
             if (ShouldWriteSimpleQuery(type))
                 return null;
@@ -276,9 +276,17 @@ namespace Signum.Engine.CodeGeneration
             public Type FromType;
             public Type ToType;
             public PropertyInfo Property;
-            public string Name;
-            public string ExpressionName;
             public bool IsUnique;
+            public string? Name;
+            public string? ExpressionName;
+
+            public ExpressionInfo(Type fromType, Type toType, PropertyInfo property, bool isUnique)
+            {
+                FromType = fromType;
+                ToType = toType;
+                Property = property;
+                IsUnique = isUnique;
+            }
         }
 
         protected virtual List<ExpressionInfo> GetExpressions(Type toType)
@@ -289,20 +297,14 @@ namespace Signum.Engine.CodeGeneration
                           let fi = Reflector.TryFindFieldInfo(toType, pi)
                           where fi != null
                           let isUnique = fi.GetCustomAttribute<UniqueIndexAttribute>() != null
-                          select new ExpressionInfo
-                          {
-                              ToType = toType,
-                              FromType = fromType,
-                              Property = pi,
-                              IsUnique = isUnique,
-                          }).ToList();
+                          select new ExpressionInfo(fromType, toType, pi, isUnique))
+                          .ToList();
 
             foreach (var ei in result)
             {
                 ei.Name = GetExpressionName(ei);
             }
-
-
+            
             result = result.GroupBy(ei => new { ei.FromType, ei.ToType }).Where(g => g.Count() == 1).SelectMany(g => g).ToList();
 
             result = result.Where(ShouldWriteExpression).ToList();
@@ -391,18 +393,18 @@ public static IQueryable<{to}> {Method}(this {from} e)
                     select p).Take(10);
         }
 
-        protected virtual string GetWithVirtualMLists(Type type)
+        protected virtual string? GetWithVirtualMLists(Type type)
         {
             return (from p in Reflector.PublicInstancePropertiesInOrder(type)
                     let bp = GetVirtualMListBackReference(p)
                     where bp != null
-                    select GetWithVirtualMList(type, p, bp)).ToString("\r\n").DefaultText(null);
+                    select GetWithVirtualMList(type, p, bp)).ToString("\r\n").DefaultText(null!);
         }
 
         protected virtual string GetWithVirtualMList(Type type, PropertyInfo p, PropertyInfo bp)
         {
             var p1 = GetVariableName(type);
-            var p2 = GetVariableName(p.PropertyType.ElementType());
+            var p2 = GetVariableName(p.PropertyType.ElementType()!);
             if (p1 == p2)
                 p2 += "2";
 
@@ -411,12 +413,12 @@ public static IQueryable<{to}> {Method}(this {from} e)
             return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
         }
 
-        protected virtual PropertyInfo GetVirtualMListBackReference(PropertyInfo pi)
+        protected virtual PropertyInfo? GetVirtualMListBackReference(PropertyInfo pi)
         {
             if (!pi.PropertyType.IsMList())
                 return null;
 
-            if (!pi.PropertyType.ElementType().IsEntity())
+            if (!pi.PropertyType.ElementType()!.IsEntity())
                 return null;
 
             if (!pi.HasAttribute<IgnoreAttribute>())
@@ -445,7 +447,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
         protected virtual bool IsSimpleValueType(Type type)
         {
-            var t = CurrentSchema.Settings.GetSqlDbTypePair(type.UnNullify());
+            var t = CurrentSchema.Settings.TryGetSqlDbTypePair(type.UnNullify());
 
             return t != null && t.UserDefinedTypeName == null && t.SqlDbType != SqlDbType.Image && t.SqlDbType != SqlDbType.VarBinary;
         }
@@ -455,7 +457,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             StringBuilder sb = new StringBuilder();
             foreach (var oper in GetOperationsSymbols(type))
             {
-                string operation = WriteOperation(oper);
+                string? operation = WriteOperation(oper);
                 if (operation != null)
                 {
                     sb.Append(operation);
@@ -465,7 +467,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             return sb.ToString();
         }
 
-        protected virtual string WriteOperation(IOperationSymbolContainer oper)
+        protected virtual string? WriteOperation(IOperationSymbolContainer oper)
         {
 
             switch (GetOperationType(oper))
@@ -538,7 +540,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             return oper.ToString().Contains("Save"); ;
         }
 
-        protected virtual string WriteDeleteOperation(IOperationSymbolContainer oper)
+        protected virtual string? WriteDeleteOperation(IOperationSymbolContainer oper)
         {
             if (ShouldWriteSimpleOperations(oper))
                 return null;

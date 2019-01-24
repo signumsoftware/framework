@@ -123,7 +123,7 @@ namespace Signum.Utilities
 
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.IsEnum && t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
-        public static event Action<CultureInfo,Type,MemberInfo> NotLocalizedMemeber ;
+        public static event Action<CultureInfo, MemberInfo> NotLocalizedMember;
 
         public static Dictionary<Type, Func<MemberInfo, string>> ExternalEnums = new Dictionary<Type, Func<MemberInfo, string>>
         {
@@ -131,14 +131,14 @@ namespace Signum.Utilities
         };
 
 
-        static string Fallback(Type type, Func<LocalizedType, string> typeValue, Action<LocalizedType> notLocalized)
+        static string Fallback(Type type, Func<LocalizedType, string?> typeValue, Action<LocalizedType> notLocalized)
         {
             var cc = CultureInfo.CurrentUICulture;
             {
                 var loc = GetLocalizedType(type, cc);
                 if (loc != null)
                 {
-                    string result = typeValue(loc);
+                    string? result = typeValue(loc);
                     if (result != null)
                         return result;                  
                 }
@@ -149,17 +149,13 @@ namespace Signum.Utilities
                 var loc = GetLocalizedType(type, cc.Parent);
                 if (loc != null)
                 {
-                    string result = typeValue(loc);
+                    string? result = typeValue(loc);
                     if (result != null)
                         return result;              
                 }
-             
             }
 
-  
-
             var defaultCulture = LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly);
-            //if (defaultCulture != null)
             {
                 var loc = GetLocalizedType(type, CultureInfo.GetCultureInfo(defaultCulture));
                 if (loc == null)
@@ -168,10 +164,8 @@ namespace Signum.Utilities
                 if (notLocalized != null)
                     notLocalized.Invoke(loc);
                         
-                return typeValue(loc);
+                return typeValue(loc)!;
             }
-
-            //return null;
         }
 
 
@@ -184,7 +178,7 @@ namespace Signum.Utilities
                 return type.GetCustomAttribute<DescriptionAttribute>()?.Description ?? type.Name.NiceName();
             }
 
-            var result = Fallback(type, lt => lt.Description, lt => OnNotLocalizedMemeber(type, null));
+            var result = Fallback(type, lt => lt.Description, lt => OnNotLocalizedMember(type));
 
             if (result != null)
                 return result;
@@ -197,7 +191,7 @@ namespace Signum.Utilities
         {
             type = CleanType(type);
 
-            var result = Fallback(type, lt => lt.PluralDescription, lt => OnNotLocalizedMemeber(type,null));
+            var result = Fallback(type, lt => lt.PluralDescription, lt => OnNotLocalizedMember(type));
 
             if (result != null)
                 return result;
@@ -213,9 +207,6 @@ namespace Signum.Utilities
 
         public static string NiceToString(this Enum a)
         {
-            if (a == null)
-                return null;
-
             var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
             if (fi != null)
                 return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
@@ -263,23 +254,17 @@ namespace Signum.Utilities
 
                 return memberInfo.GetCustomAttribute<DescriptionAttribute>()?.Description ?? memberInfo.Name.NiceName();
             }
-       
-            var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name), lt => OnNotLocalizedMemeber(null,memberInfo));
+
+            var result = Fallback(type, lt => lt.Members!.TryGetC(memberInfo.Name), lt => OnNotLocalizedMember(memberInfo));
             if (result != null)
                 return result;
-
-
 
             return result;
         }
 
-        private static void OnNotLocalizedMemeber(Type  type, MemberInfo memberInfo)
+        private static void OnNotLocalizedMember(MemberInfo memberInfo)
         {
-            if (NotLocalizedMemeber != null)
-            {
-                var cc = CultureInfo.CurrentUICulture;
-                NotLocalizedMemeber.Invoke(cc, type, memberInfo);
-            }
+            NotLocalizedMember?.Invoke(CultureInfo.CurrentUICulture, memberInfo);
         }
 
         public static char? GetGender(this Type type)
@@ -307,10 +292,10 @@ namespace Signum.Utilities
             return null;
         }
 
-        static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>> localizations = 
-            new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>>();
+        static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly?>> localizations = 
+            new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly?>>();
 
-        public static LocalizedType GetLocalizedType(Type type, CultureInfo cultureInfo)
+        public static LocalizedType? GetLocalizedType(Type type, CultureInfo cultureInfo)
         {
             var la = GetLocalizedAssembly(type.Assembly, cultureInfo);
 
@@ -328,11 +313,11 @@ namespace Signum.Utilities
             return null;
         }
 
-        public static LocalizedAssembly GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
+        public static LocalizedAssembly? GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
         {
             return localizations
-                .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, LocalizedAssembly>())
-                .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo, forceCreate : false));
+                .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, LocalizedAssembly?>())
+                .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo, forceCreate: false));
         }
 
         internal static DescriptionOptions? OnDefaultDescriptionOptions(Type type)
@@ -458,7 +443,7 @@ namespace Signum.Utilities
             return doc;
         }
   
-        public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo, bool forceCreate)
+        public static LocalizedAssembly? ImportXml(Assembly assembly, CultureInfo cultureInfo, bool forceCreate)
         {
             var defaultCulture = GetDefaultAssemblyCulture(assembly);
 
@@ -469,7 +454,7 @@ namespace Signum.Utilities
 
             string fileName = TranslationFileName(assembly, cultureInfo);
 
-            XDocument doc = !File.Exists(fileName) ? null : XDocument.Load(fileName);
+            XDocument? doc = !File.Exists(fileName) ? null : XDocument.Load(fileName);
 
             if (!isDefault && !forceCreate && doc == null)
                 return null;
@@ -477,9 +462,9 @@ namespace Signum.Utilities
             return FromXml(assembly, cultureInfo, doc, null);
         }
 
-        public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument doc, Dictionary<string, string> replacements /*new -> old*/)
+        public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument? doc, Dictionary<string, string>? replacements /*new -> old*/)
         {
-            Dictionary<string, XElement> file = doc?.Element("Translations").Elements("Type")
+            Dictionary<string, XElement>? file = doc?.Element("Translations").Elements("Type")
                 .Select(x => KVP.Create(x.Attribute("Name").Value, x))
                 .Distinct(x => x.Key)
                 .ToDictionary();
@@ -513,11 +498,11 @@ namespace Signum.Utilities
         public LocalizedAssembly Assembly { get; private set; }
         public DescriptionOptions Options { get; private set; }
 
-        public string Description { get; set; }
-        public string PluralDescription { get; set; }
+        public string? Description { get; set; }
+        public string? PluralDescription { get; set; }
         public char? Gender { get; set; }
 
-        public Dictionary<string, string> Members = new Dictionary<string, string>();
+        public Dictionary<string, string>? Members { get; set; }
 
         LocalizedType() { }
 
@@ -533,19 +518,19 @@ namespace Signum.Utilities
 
                     !Options.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
                     PluralDescription == null ||
-                    (PluralDescription == NaturalLanguageTools.Pluralize(Description, Assembly.Culture)) ? null :
+                    (PluralDescription == NaturalLanguageTools.Pluralize(Description!, Assembly.Culture)) ? null :
                     new XAttribute("PluralDescription", PluralDescription),
 
                     !Options.IsSetAssert(DescriptionOptions.Gender, Type) ||
                     Gender == null ||
-                    (Gender == NaturalLanguageTools.GetGender(Description, Assembly.Culture)) ? null :
+                    (Gender == NaturalLanguageTools.GetGender(Description!, Assembly.Culture)) ? null :
                     new XAttribute("Gender", Gender.ToString()),
 
                     !Options.IsSetAssert(DescriptionOptions.Members, Type) ? null :
                      (from m in GetMembers(Type)
                       where DescriptionManager.OnShouldLocalizeMember(m)
                       orderby m.Name
-                      let value = Members.TryGetC(m.Name)
+                      let value = Members!.TryGetC(m.Name)
                       where value != null && !(Assembly.IsDefault && (DescriptionManager.DefaultMemberDescription(m) == value))
                       select new XElement("Member", new XAttribute("Name", m.Name), new XAttribute("Description", value)))
                 );
@@ -566,7 +551,7 @@ namespace Signum.Utilities
 
         internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, LocalizedAssembly assembly, XElement x)
         {
-            string description = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
+            string? description = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
                 (x == null || x.Attribute("Name").Value != type.Name ? null : x.Attribute("Description")?.Value) ??
                 (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
 
@@ -618,8 +603,8 @@ namespace Signum.Utilities
         public bool ContainsDescription(string text)
         {
             return this.Type.Name.Contains(text, StringComparison.InvariantCultureIgnoreCase) ||
-                            this.Description != null && this.Description.Contains(text, StringComparison.InvariantCultureIgnoreCase) ||
-                            this.PluralDescription != null && this.Description.Contains(text, StringComparison.InvariantCultureIgnoreCase);
+                this.Description?.Contains(text, StringComparison.InvariantCultureIgnoreCase) == true ||
+                this.PluralDescription?.Contains(text, StringComparison.InvariantCultureIgnoreCase) == true;
         }
     }
 

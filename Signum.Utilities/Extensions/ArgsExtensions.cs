@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +9,18 @@ namespace Signum.Utilities
 {
     public static class ArgsExtensions
     {
-        public static T GetArg<T>(this IEnumerable<object> args)
+        public static T GetArg<T>(this IEnumerable<object>? args)
         {
             return args.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
         }
 
-        public static T TryGetArgC<T>(this IEnumerable<object> args) where T : class
+        public static T TryGetArgC<T>(this IEnumerable<object>? args) where T : class
         {
             return args.SmartConvertTo<T>().SingleOrDefaultEx(
                 () => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
         }
 
-        public static T? TryGetArgS<T>(this IEnumerable<object> args) where T : struct
+        public static T? TryGetArgS<T>(this IEnumerable<object>? args) where T : struct
         {
             var casted = args.SmartConvertTo<T>();
 
@@ -30,7 +30,7 @@ namespace Signum.Utilities
             return casted.SingleEx(() => "{0} in the argument list".FormatWith(typeof(T)));
         }
 
-        static IEnumerable<T> SmartConvertTo<T>(this IEnumerable<object> args)
+        static IEnumerable<T> SmartConvertTo<T>(this IEnumerable<object>? args)
         {
             if (args == null)
                 yield break;
@@ -50,7 +50,7 @@ namespace Signum.Utilities
                     yield return ReflectionTools.ChangeType<T>(obj);
                 }
                 else if (obj is List<object> list)
-                    yield return (T)giConvertListTo.GetInvoker(typeof(T).ElementType())(list);
+                    yield return (T)giConvertListTo.GetInvoker(typeof(T).ElementType()!)(list);
             }
         }
 

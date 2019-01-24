@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -40,7 +40,7 @@ namespace Signum.Utilities.ExpressionTrees
             return (S)this.Execute(expression);
         }
 
-        object IQueryProvider.Execute(Expression expression)
+        object? IQueryProvider.Execute(Expression expression)
         {
             return this.Execute(expression);
         }

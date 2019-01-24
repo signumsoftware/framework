@@ -133,7 +133,7 @@ namespace Signum.Entities
 
 
         static ConstructorInfo ciInterval = ReflectionTools.GetConstuctorInfo(() => new Interval<DateTime>(new DateTime(), new DateTime()));
-        internal static Expression Intesection(this NewExpression? interval1, NewExpression? interval2)
+        internal static Expression? Intesection(this NewExpression? interval1, NewExpression? interval2)
         {
             if (interval1 == null)
                 return interval2;

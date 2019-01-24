@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -16,12 +16,12 @@ namespace Signum.Engine
     {
         Dictionary<string, object> GetUserData();
 
-        T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
-        T Request<T>(PrimaryKey? id) where T : Entity;
-        T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
-        Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity;
-        T ModifiablePostRetrieving<T>(T entity) where T : Modifiable;
-        IRetriever Parent { get; }
+        T? Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
+        T? Request<T>(PrimaryKey? id) where T : Entity;
+        T? RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
+        Lite<T>? RequestLite<T>(Lite<T>? lite) where T : class, IEntity;
+        T? ModifiablePostRetrieving<T>(T? entity) where T : Modifiable;
+        IRetriever? Parent { get; }
 
         void CompleteAll();
         Task CompleteAllAsync(CancellationToken token);
@@ -31,10 +31,10 @@ namespace Signum.Engine
 
     class RealRetriever : IRetriever
     {
-        Dictionary<string, object> userData;
+        Dictionary<string, object>? userData;
         public Dictionary<string, object> GetUserData() => userData ?? (userData = new Dictionary<string, object>());
 
-        public IRetriever Parent
+        public IRetriever? Parent
         {
             get { return null; }
         }
@@ -46,8 +46,8 @@ namespace Signum.Engine
 
         EntityCache.RealEntityCache entityCache;
         Dictionary<(Type type, PrimaryKey id), Entity> retrieved = new Dictionary<(Type type, PrimaryKey id), Entity>();
-        Dictionary<Type, Dictionary<PrimaryKey, Entity>> requests;
-        Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>> liteRequests;
+        Dictionary<Type, Dictionary<PrimaryKey, Entity>>? requests;
+        Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>>? liteRequests;
         List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
         bool TryGetRequest((Type type, PrimaryKey id) key, out Entity value)
@@ -55,11 +55,11 @@ namespace Signum.Engine
             if (requests != null && requests.TryGetValue(key.type, out Dictionary<PrimaryKey, Entity> dic) && dic.TryGetValue(key.id, out value))
                 return true;
 
-            value = null;
+            value = null!;
             return false;
         }
 
-        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
+        public T? Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
         {
             if (id == null)
                 return null;
@@ -76,7 +76,7 @@ namespace Signum.Engine
             if (TryGetRequest(tuple, out result))
             {
                 entity = (T)result;
-                requests[typeof(T)].Remove(id.Value);
+                requests![typeof(T)].Remove(id.Value);
             }
             else
             {
@@ -91,20 +91,20 @@ namespace Signum.Engine
 
         static GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>> giRequest =
             new GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>>((rr, id) => rr.Request<Entity>(id));
-        public T Request<T>(PrimaryKey? id) where T : Entity
+        public T? Request<T>(PrimaryKey? id) where T : Entity
         {
             if (id == null)
                 return null;
 
             var tuple = (type: typeof(T), id: id.Value);
 
-            if (entityCache.TryGetValue(tuple, out Entity ident))
+            if (entityCache.TryGetValue(tuple, out Entity? ident))
                 return (T)ident;
 
             if (retrieved.TryGetValue(tuple, out ident))
                 return (T)ident;
 
-            ICacheController cc = Schema.Current.CacheController(typeof(T));
+            ICacheController? cc = Schema.Current.CacheController(typeof(T));
             if (cc != null && cc.Enabled)
             {
                 T entityFromCache = EntityCache.Construct<T>(id.Value);
@@ -113,7 +113,7 @@ namespace Signum.Engine
                 return entityFromCache;
             }
 
-            ident = (T)requests?.TryGetC(typeof(T))?.TryGetC(id.Value);
+            ident = (T?)requests?.TryGetC(typeof(T))?.TryGetC(id.Value);
             if (ident != null)
                 return (T)ident;
 
@@ -126,7 +126,7 @@ namespace Signum.Engine
             return entity;
         }
 
-        public T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
+        public T? RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
         {
             if (id == null)
                 return null;
@@ -138,12 +138,12 @@ namespace Signum.Engine
             return (T)(IEntity)giRequest.GetInvoker(type)(this, parsedId);
         }
 
-        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
+        public Lite<T>? RequestLite<T>(Lite<T>? lite) where T : class, IEntity
         {
             if (lite == null)
                 return null;
 
-            ICacheController cc = Schema.Current.CacheController(lite.EntityType);
+            ICacheController? cc = Schema.Current.CacheController(lite.EntityType);
             if (cc != null && cc.Enabled)
             {
                 lite.SetToString(cc.TryGetToString(lite.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(lite.EntityType.NiceName(), lite.Id) + "]"));
@@ -157,7 +157,7 @@ namespace Signum.Engine
             return lite;
         }
 
-        public T ModifiablePostRetrieving<T>(T modifiable) where T : Modifiable
+        public T? ModifiablePostRetrieving<T>(T? modifiable) where T : Modifiable
         {
             if (modifiable != null)
                 modifiablePostRetrieving.Add(modifiable);
@@ -190,8 +190,8 @@ namespace Signum.Engine
                     var group = requests.WithMax(a => a.Value.Count);
 
                     var dic = group.Value;
-                    ICacheController cc = Schema.Current.CacheController(group.Key);
 
+                    ICacheController? cc = Schema.Current.CacheController(group.Key);
                     if (cc != null && cc.Enabled)
                     {
                         cc.Load();
@@ -223,7 +223,7 @@ namespace Signum.Engine
             {
 
                 {
-                    List<(Type type, PrimaryKey id)> toRemove = null;
+                    List<(Type type, PrimaryKey id)>? toRemove = null;
                     foreach (var item in liteRequests)
                     {
                         var entity = retrieved.TryGetC(item.Key);
@@ -303,8 +303,7 @@ namespace Signum.Engine
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>>((ids, token) => GetStrings<Entity>(ids, token));
         static async Task<Dictionary<PrimaryKey, string>> GetStrings<T>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
         {
-            ICacheController cc = Schema.Current.CacheController(typeof(T));
-
+            ICacheController? cc = Schema.Current.CacheController(typeof(T));
             if (cc != null && cc.Enabled)
             {
                 cc.Load();
@@ -344,39 +343,40 @@ namespace Signum.Engine
 
     class ChildRetriever : IRetriever
     {
-        public Dictionary<string, object> GetUserData() => this.Parent.GetUserData();
+        public Dictionary<string, object> GetUserData() => this.parent.GetUserData();
 
         EntityCache.RealEntityCache entityCache;
-        public IRetriever Parent { get; set; }
+        public IRetriever parent;
+        public IRetriever? Parent => parent;
         public ChildRetriever(IRetriever parent, EntityCache.RealEntityCache entityCache)
         {
-            this.Parent = parent;
+            this.parent= parent;
             this.entityCache = entityCache;
         }
 
-        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
+        public T? Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
         {
-            return Parent.Complete<T>(id, complete);
+            return parent.Complete<T>(id, complete);
         }
 
-        public T Request<T>(PrimaryKey? id) where T : Entity
+        public T? Request<T>(PrimaryKey? id) where T : Entity
         {
-            return Parent.Request<T>(id);
+            return parent.Request<T>(id);
         }
 
-        public T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
+        public T? RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
         {
-            return Parent.RequestIBA<T>(typeId, id);
+            return parent.RequestIBA<T>(typeId, id);
         }
 
-        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
+        public Lite<T>? RequestLite<T>(Lite<T>? lite) where T : class, IEntity
         {
-            return Parent.RequestLite<T>(lite);
+            return parent.RequestLite<T>(lite);
         }
 
-        public T ModifiablePostRetrieving<T>(T entity) where T : Modifiable
+        public T? ModifiablePostRetrieving<T>(T? entity) where T : Modifiable
         {
-            return Parent.ModifiablePostRetrieving(entity);
+            return parent.ModifiablePostRetrieving(entity);
         }
 
         public void CompleteAll()

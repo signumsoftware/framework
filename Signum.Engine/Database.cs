@@ -116,7 +116,7 @@ namespace Signum.Engine
             return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
         }
 
-        static GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, Entity>>(id => Retrieve<Entity>(id));
+        static readonly GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, Entity>>(id => Retrieve<Entity>(id));
         public static T Retrieve<T>(PrimaryKey id) where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
@@ -164,7 +164,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>> giRetrieveAsync = new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>>((id, token) => RetrieveAsync<Entity>(id, token));
+        static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>> giRetrieveAsync = new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>>((id, token) => RetrieveAsync<Entity>(id, token));
         public static async Task<T> RetrieveAsync<T>(PrimaryKey id, CancellationToken token) where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
@@ -214,7 +214,7 @@ namespace Signum.Engine
 
         static CacheControllerBase<T>? GetCacheController<T>() where T : Entity
         {
-            CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
+            CacheControllerBase<T>? cc = Schema.Current.CacheController<T>();
 
             if (cc == null || !cc.Enabled)
                 return null;
@@ -253,7 +253,7 @@ namespace Signum.Engine
         }
 
 
-        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => RetrieveLite<Entity>(id));
+        static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => RetrieveLite<Entity>(id));
         public static Lite<T> RetrieveLite<T>(PrimaryKey id)
             where T : Entity
         {
@@ -283,7 +283,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync =
+        static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>>((id, token) => RetrieveLiteAsync<Entity>(id, token));
         public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
@@ -333,7 +333,7 @@ namespace Signum.Engine
 
 
         public static string GetToStr(Type type, PrimaryKey id) => giGetToStr.GetInvoker(type)(id);
-        static GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<Entity>(id));
+        static readonly GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<Entity>(id));
         public static string GetToStr<T>(PrimaryKey id)
             where T : Entity
         {
@@ -358,7 +358,7 @@ namespace Signum.Engine
 
 
         public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
+        static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>>((id, token) => GetToStrAsync<Entity>(id, token));
         public static async Task<string> GetToStrAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
@@ -416,7 +416,7 @@ namespace Signum.Engine
         }
 
         public static bool Exists(Type type, PrimaryKey id) => giExist.GetInvoker(type)(id);
-        static GenericInvoker<Func<PrimaryKey, bool>> giExist =
+        static readonly GenericInvoker<Func<PrimaryKey, bool>> giExist =
             new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<Entity>(id));
         public static bool Exists<T>(PrimaryKey id)
             where T : Entity
@@ -434,7 +434,7 @@ namespace Signum.Engine
         }
 
         public static Task<bool> ExistsAsync(Type type, PrimaryKey id, CancellationToken token) => giExistAsync.GetInvoker(type)(id, token);
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>> giExistAsync =
+        static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>> giExistAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>>((id, token) => ExistsAsync<Entity>(id, token));
         public static async Task<bool> ExistsAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
@@ -626,7 +626,7 @@ namespace Signum.Engine
         }
 
 
-        private static GenericInvoker<Func<List<PrimaryKey>, string?, IList>> giRetrieveList =
+        private static readonly GenericInvoker<Func<List<PrimaryKey>, string?, IList>> giRetrieveList =
             new GenericInvoker<Func<List<PrimaryKey>, string?, IList>>((ids, message) => RetrieveList<Entity>(ids, message));
         public static List<T> RetrieveList<T>(List<PrimaryKey> ids, string? message = null)
             where T : Entity
@@ -718,7 +718,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync =
+        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListAsyncIList<Entity>(ids, token));
         static Task<IList> RetrieveListAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity =>
             RetrieveListAsync<T>(ids, token).ContinueWith(p => (IList)p.Result);
@@ -820,7 +820,7 @@ namespace Signum.Engine
             return list.Cast<Entity>().ToList();
         }
 
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite =
+        static readonly GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite =
             new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<Entity>(ids));
         public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
             where T : Entity
@@ -847,7 +847,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
+        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
         static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
         public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
@@ -978,7 +978,7 @@ namespace Signum.Engine
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
 
-        static GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<Entity>(id));
+        static readonly GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<Entity>(id));
         public static void Delete<T>(PrimaryKey id)
             where T : Entity
         {
@@ -1047,7 +1047,7 @@ namespace Signum.Engine
             giDeleteList.GetInvoker(type)(ids);
         }
 
-        static GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new GenericInvoker<Action<IList<PrimaryKey>>>(l => DeleteList<Entity>(l));
+        static readonly GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new GenericInvoker<Action<IList<PrimaryKey>>>(l => DeleteList<Entity>(l));
         public static void DeleteList<T>(IList<PrimaryKey> ids)
             where T : Entity
         {
@@ -1161,7 +1161,7 @@ namespace Signum.Engine
             return entity.InDB().Select(selector).SingleEx();
         }
 
-        static GenericInvoker<Func<IEntity, IQueryable>> giInDB =
+        static readonly GenericInvoker<Func<IEntity, IQueryable>> giInDB =
             new GenericInvoker<Func<IEntity, IQueryable>>((ie) => InDB<Entity, Entity>((Entity)ie));
         static IQueryable<S> InDB<S, RT>(S entity)
             where S : class, IEntity
@@ -1196,7 +1196,7 @@ namespace Signum.Engine
             return lite.InDB().Select(selector).SingleEx();
         }
 
-        static GenericInvoker<Func<Lite<IEntity>, IQueryable>> giInDBLite =
+        static readonly GenericInvoker<Func<Lite<IEntity>, IQueryable>> giInDBLite =
             new GenericInvoker<Func<Lite<IEntity>, IQueryable>>(l => InDB<IEntity, Entity>((Lite<Entity>)l));
         static IQueryable<S> InDB<S, RT>(Lite<RT> lite)
             where S : class, IEntity
@@ -1215,8 +1215,8 @@ namespace Signum.Engine
 
         public class InDbExpander : IMethodExpander
         {
-            static MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).Select(a => a)).GetGenericMethodDefinition();
-            static MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).SingleEx()).GetGenericMethodDefinition();
+            static readonly MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).Select(a => a)).GetGenericMethodDefinition();
+            static readonly MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).SingleEx()).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
@@ -1650,9 +1650,9 @@ namespace Signum.Engine
 
     class UpdateablePart<A, T> : IUpdateablePart<A, T>
     {
-        IQueryable<A> query;
-        Expression<Func<A, T>> partSelector;
-        ReadOnlyCollection<SetterExpressions> settersExpressions;
+        readonly IQueryable<A> query;
+        readonly Expression<Func<A, T>> partSelector;
+        readonly ReadOnlyCollection<SetterExpressions> settersExpressions;
 
         public UpdateablePart(IQueryable<A> query, Expression<Func<A, T>> partSelector, IEnumerable<SetterExpressions>? setters)
         {
@@ -1716,8 +1716,8 @@ namespace Signum.Engine
 
     class Updateable<T> : IUpdateable<T>
     {
-        IQueryable<T> query;
-        ReadOnlyCollection<SetterExpressions> settersExpressions;
+        readonly IQueryable<T> query;
+        readonly ReadOnlyCollection<SetterExpressions> settersExpressions;
 
         public Updateable(IQueryable<T> query, IEnumerable<SetterExpressions>? setters)
         {

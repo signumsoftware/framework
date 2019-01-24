@@ -362,7 +362,7 @@ namespace Signum.Entities.DynamicQuery
 
                 if (IsCollection(type))
                 {
-                    return QueryTokenMessage.ListOf0.NiceToString().FormatWith(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
+                    return QueryTokenMessage.ListOf0.NiceToString().FormatWith(GetNiceTypeName(Type.ElementType()!, GetElementImplementations()));
                 }
 
                 return GetNiceTypeName(Type, GetImplementations());

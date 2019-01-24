@@ -36,7 +36,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+#pragma warning disable CS8618, IDE0051 // Non-nullable field is uninitialized.
         ResultColumn(SerializationInfo info, StreamingContext context)
         {
             foreach (SerializationEntry entry in info)
@@ -49,7 +49,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
         }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
+#pragma warning restore CS8618, IDE0051 // Non-nullable field is uninitialized.
 
         GenericInvoker<Func<int, IList>> listBuilder = new GenericInvoker<Func<int, IList>>(num => new List<int>(num));
 
@@ -207,7 +207,7 @@ namespace Signum.Entities.DynamicQuery
 
             string toStr = tmp.After(';');
 
-            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr);
+            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr)!;
 
             return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
         }

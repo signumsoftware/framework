@@ -16,13 +16,13 @@ namespace Signum.Engine.CodeGeneration
 {
     public class EntityCodeGenerator
     {
-        public string SolutionName;
-        public string SolutionFolder;
+        public string SolutionName = null!;
+        public string SolutionFolder = null!;
 
-        public Dictionary<ObjectName, DiffTable> Tables;
-        public DirectedGraph<DiffTable> InverseGraph;
+        public Dictionary<ObjectName, DiffTable> Tables = null!;
+        public DirectedGraph<DiffTable> InverseGraph = null!;
 
-        public Schema CurrentSchema;
+        public Schema CurrentSchema = null!;
 
         public virtual void GenerateEntitiesFromDatabaseTables()
         {
@@ -46,8 +46,7 @@ namespace Signum.Engine.CodeGeneration
 
             foreach (var gr in tables.GroupBy(t => GetFileName(t)))
             {
-                string str = WriteFile(gr.Key, gr);
-
+                string? str = WriteFile(gr.Key, gr);
                 if (str != null)
                 {
                     string fileName = Path.Combine(projectFolder, gr.Key);
@@ -92,7 +91,7 @@ namespace Signum.Engine.CodeGeneration
             return name + ".cs";
         }
 
-        protected virtual string WriteFile(string fileName, IEnumerable<DiffTable> tables)
+        protected virtual string? WriteFile(string fileName, IEnumerable<DiffTable> tables)
         {
             StringBuilder sb = new StringBuilder();
             foreach (var item in GetUsingNamespaces(fileName, tables))
@@ -164,7 +163,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var result = SolutionName + ".Entities";
 
-            string folder = fileName.TryBeforeLast('\\');
+            string? folder = fileName.TryBeforeLast('\\');
 
             if (folder != null)
                 result += "." + folder.Replace('\\', '.');
@@ -180,7 +179,7 @@ namespace Signum.Engine.CodeGeneration
             }
         }
 
-        protected virtual string WriteTableEntity(string fileName, DiffTable table)
+        protected virtual string? WriteTableEntity(string fileName, DiffTable table)
         {
             var mListInfo = GetMListInfo(table);
 
@@ -211,7 +210,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("public class {0} : {1}".FormatWith(name, GetEntityBaseClass(table.Name)));
             sb.AppendLine("{");
 
-            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
+            string? multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
             if (multiColumnIndexComment != null)
             {
                 sb.Append(multiColumnIndexComment.Indent(4));
@@ -258,7 +257,7 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
-            string toString = WriteToString(table);
+            string? toString = WriteToString(table);
             if (toString != null)
             {
                 sb.Append(toString.Indent(4));
@@ -278,7 +277,7 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
-            string operations = WriteOperations(table);
+            string? operations = WriteOperations(table);
             if (operations != null)
             {
                 sb.Append(operations);
@@ -287,7 +286,7 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual string GetEmbeddedField(DiffTable table, DiffColumn col)
+        protected virtual string? GetEmbeddedField(DiffTable table, DiffColumn col)
         {
             return null;
         }
@@ -299,7 +298,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("public class {0} : {1}".FormatWith(name, typeof(EmbeddedEntity).Name));
             sb.AppendLine("{");
 
-            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
+            string? multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
             if (multiColumnIndexComment != null)
             {
                 sb.Append(multiColumnIndexComment.Indent(4));
@@ -367,13 +366,11 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> atts = new List<string>();
 
-            string tableNameAttribute = GetTableNameAttribute(table.Name, null);
-
+            string? tableNameAttribute = GetTableNameAttribute(table.Name, null);
             if (tableNameAttribute != null)
                 atts.Add(tableNameAttribute);
 
-            string primaryKeyAttribute = GetPrimaryKeyAttribute(table);
-
+            string? primaryKeyAttribute = GetPrimaryKeyAttribute(table);
             if (primaryKeyAttribute != null)
                 atts.Add(primaryKeyAttribute);
 
@@ -400,7 +397,7 @@ namespace Signum.Engine.CodeGeneration
             return false;
         }
 
-        protected virtual string WriteMultiColumnIndexComment(DiffTable table, string name)
+        protected virtual string? WriteMultiColumnIndexComment(DiffTable table, string name)
         {
             StringBuilder sb = new StringBuilder();
             foreach (var ix in table.Indices.Values.Where(ix => ix.Columns.Count > 1 || ix.FilterDefinition.HasText() || ix.Columns.Any(ic => ic.IsIncluded)))
@@ -413,13 +410,13 @@ namespace Signum.Engine.CodeGeneration
 
                 sb.AppendLine("//Add to Logic class");
                 sb.AppendLine("//sb.AddUniqueIndex<{0}>({1});".FormatWith(name,
-                    new object[] { columns, ix.FilterDefinition, incColumns }.NotNull().ToString(", ")));
+                    new object?[] { columns, ix.FilterDefinition, incColumns }.NotNull().ToString(", ")));
             }
 
-            return sb.ToString().DefaultText(null);
+            return sb.ToString().DefaultText(null!);
         }
 
-        protected virtual string WriteOperations(DiffTable table)
+        protected virtual string? WriteOperations(DiffTable table)
         {
             var kind = GetEntityKind(table);
             if (!(kind == EntityKind.Main || kind == EntityKind.Shared || kind == EntityKind.String))
@@ -439,7 +436,7 @@ namespace Signum.Engine.CodeGeneration
             return GetEntityName(objectName).RemoveSuffix("Entity") + "Operation";
         }
 
-        protected virtual MListInfo GetMListInfo(DiffTable table)
+        protected virtual MListInfo? GetMListInfo(DiffTable table)
         {
             if (this.InverseGraph.RelatedTo(table).Any())
                 return null;
@@ -458,12 +455,12 @@ namespace Signum.Engine.CodeGeneration
             };
         }
 
-        protected virtual DiffColumn GetMListTrivialElementColumn(DiffTable table, DiffColumn parentColumn, DiffColumn orderColumn)
+        protected virtual DiffColumn GetMListTrivialElementColumn(DiffTable table, DiffColumn parentColumn, DiffColumn? orderColumn)
         {
             return table.Columns.Values.Where(c => c != parentColumn && c != orderColumn && !c.PrimaryKey).Only();
         }
 
-        protected virtual DiffColumn GetMListOrderColumn(DiffTable table)
+        protected virtual DiffColumn? GetMListOrderColumn(DiffTable table)
         {
             return table.Columns.TryGetC("Order") ?? table.Columns.TryGetC("Row") ?? table.Columns.TryGetC("Index");
         }
@@ -478,15 +475,15 @@ namespace Signum.Engine.CodeGeneration
 
             atts.Add("EntityKind(EntityKind." + GetEntityKind(table) + ", EntityData." + GetEntityData(table) + ")");
 
-            string tableNameAttribute = GetTableNameAttribute(table.Name, null);
+            string? tableNameAttribute = GetTableNameAttribute(table.Name, null);
             if (tableNameAttribute != null)
                 atts.Add(tableNameAttribute);
 
-            string primaryKeyAttribute = GetPrimaryKeyAttribute(table);
+            string? primaryKeyAttribute = GetPrimaryKeyAttribute(table);
             if (primaryKeyAttribute != null)
                 atts.Add(primaryKeyAttribute);
 
-            string ticksColumnAttribute = GetTicksColumnAttribute(table);
+            string? ticksColumnAttribute = GetTicksColumnAttribute(table);
             if (ticksColumnAttribute != null)
                 atts.Add(ticksColumnAttribute);
 
@@ -499,7 +496,7 @@ namespace Signum.Engine.CodeGeneration
         }
 
 
-        protected virtual string GetPrimaryKeyAttribute(DiffTable table)
+        protected virtual string? GetPrimaryKeyAttribute(DiffTable table)
         {
             DiffColumn primaryKey = GetPrimaryKeyColumn(table);
 
@@ -537,7 +534,7 @@ namespace Signum.Engine.CodeGeneration
             return table.Columns.Values.SingleOrDefaultEx(a => a.PrimaryKey);
         }
 
-        protected virtual string GetTableNameAttribute(ObjectName objectName, MListInfo mListInfo)
+        protected virtual string? GetTableNameAttribute(ObjectName objectName, MListInfo? mListInfo)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("TableName(\"" + objectName.Name + "\"");
@@ -583,7 +580,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteField(string fileName, DiffTable table, DiffColumn col)
         {
-            string relatedEntity = GetRelatedEntity(table, col);
+            string? relatedEntity = GetRelatedEntity(table, col);
 
             string type = GetFieldType(table, col, relatedEntity);
 
@@ -598,7 +595,7 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual string GetRelatedEntity(DiffTable table, DiffColumn col)
+        protected virtual string? GetRelatedEntity(DiffTable table, DiffColumn col)
         {
             if (col.ForeignKey == null)
                 return null;
@@ -611,21 +608,21 @@ namespace Signum.Engine.CodeGeneration
             return false;
         }
 
-        protected virtual IEnumerable<string> GetPropertyAttributes(DiffTable table, DiffColumn col, string relatedEntity)
+        protected virtual IEnumerable<string> GetPropertyAttributes(DiffTable table, DiffColumn col, string? relatedEntity)
         {
             List<string> attributes = new List<string>();
 
             if (RequiresNotNullableAttribute(col, relatedEntity) && GetValueType(col) != typeof(string))
                 attributes.Add("NotNullValidator");
 
-            string stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
+            string? stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
             if(stringLengthValidator != null)
                 attributes.Add(stringLengthValidator);
 
             return attributes;
         }
 
-        protected virtual string GetStringLengthValidator(DiffTable table, DiffColumn col, string relatedEntity)
+        protected virtual string? GetStringLengthValidator(DiffTable table, DiffColumn col, string? relatedEntity)
         {
             if (GetValueType(col) != typeof(string))
                 return null;
@@ -649,7 +646,7 @@ namespace Signum.Engine.CodeGeneration
             return 1;
         }
 
-        protected virtual bool RequiresNotNullableAttribute(DiffColumn col, string relatedEntity)
+        protected virtual bool RequiresNotNullableAttribute(DiffColumn col, string? relatedEntity)
         {
             return !col.Nullable && (relatedEntity != null || GetValueType(col).IsClass);
         }
@@ -670,7 +667,7 @@ namespace Signum.Engine.CodeGeneration
             return name.FirstLower();
         }
 
-        protected virtual IEnumerable<string> GetFieldAttributes(DiffTable table, DiffColumn col, string relatedEntity, bool isMList)
+        protected virtual IEnumerable<string> GetFieldAttributes(DiffTable table, DiffColumn col, string? relatedEntity, bool isMList)
         {
             List<string> attributes = new List<string>();
 
@@ -679,8 +676,7 @@ namespace Signum.Engine.CodeGeneration
 
             if (col.ForeignKey == null)
             {
-                string sqlDbType = GetSqlTypeAttribute(table, col);
-
+                string? sqlDbType = GetSqlTypeAttribute(table, col);
                 if (sqlDbType != null)
                     attributes.Add(sqlDbType);
             }
@@ -723,7 +719,7 @@ namespace Signum.Engine.CodeGeneration
             return fieldName + "ID";
         }
 
-        protected virtual string GetSqlTypeAttribute(DiffTable table, DiffColumn col)
+        protected virtual string? GetSqlTypeAttribute(DiffTable table, DiffColumn col)
         {
             Type type = GetValueType(col);
             List<string> parts = GetSqlDbTypeParts(col, type);
@@ -780,7 +776,7 @@ namespace Signum.Engine.CodeGeneration
             return def;
         }
 
-        protected virtual string GetFieldType(DiffTable table, DiffColumn col, string relatedEntity)
+        protected virtual string GetFieldType(DiffTable table, DiffColumn col, string? relatedEntity)
         {
             if (relatedEntity != null)
             {
@@ -872,25 +868,25 @@ namespace Signum.Engine.CodeGeneration
             }
             else
             {
-                string relatedEntity = GetRelatedEntity(relatedTable, mListInfo.TrivialElementColumn);
+                string relatedEntity = GetRelatedEntity(relatedTable, mListInfo.TrivialElementColumn)!;
                 type = GetFieldType(relatedTable, mListInfo.TrivialElementColumn, relatedEntity);
 
                 fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity, isMList: true).ToList();
             }
 
-            var preserveOrder = GetPreserveOrderAttribute(mListInfo);
+            string? preserveOrder = GetPreserveOrderAttribute(mListInfo);
             if (preserveOrder != null)
                 fieldAttributes.Add(preserveOrder);
 
-            string primaryKey = GetPrimaryKeyAttribute(relatedTable);
+            string? primaryKey = GetPrimaryKeyAttribute(relatedTable);
             if (primaryKey != null)
                 fieldAttributes.Add(primaryKey);
 
-            string tableName = GetTableNameAttribute(relatedTable.Name, mListInfo);
+            string? tableName = GetTableNameAttribute(relatedTable.Name, mListInfo);
             if (tableName != null)
                 fieldAttributes.Add(tableName);
 
-            string backColumn = GetBackColumnNameAttribute(mListInfo.BackReferenceColumn);
+            string? backColumn = GetBackColumnNameAttribute(mListInfo.BackReferenceColumn);
             if (backColumn != null)
                 fieldAttributes.AddRange(backColumn);
 
@@ -904,7 +900,7 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual string GetPreserveOrderAttribute(MListInfo mListInfo)
+        protected virtual string? GetPreserveOrderAttribute(MListInfo mListInfo)
         {
             if(mListInfo.PreserveOrderColumn == null)
                 return null;
@@ -920,7 +916,7 @@ namespace Signum.Engine.CodeGeneration
             return @"PreserveOrder({0})".FormatWith(parts.ToString(", "));
         }
 
-        protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
+        protected virtual string? GetBackColumnNameAttribute(DiffColumn backReference)
         {
             if (backReference.Name == "ParentID")
                 return null;
@@ -933,7 +929,7 @@ namespace Signum.Engine.CodeGeneration
             return NaturalLanguageTools.Pluralize(relatedTable.Name.Name.RemovePrefix(table.Name.Name));
         }
 
-        protected virtual string WriteToString(DiffTable table)
+        protected virtual string? WriteToString(DiffTable table)
         {
             var toStringColumn = GetToStringColumn(table);
             if (toStringColumn == null)
@@ -972,7 +968,7 @@ namespace Signum.Engine.CodeGeneration
         }
 
         public readonly DiffColumn BackReferenceColumn;
-        public DiffColumn TrivialElementColumn;
-        public DiffColumn PreserveOrderColumn;
+        public DiffColumn? TrivialElementColumn;
+        public DiffColumn? PreserveOrderColumn;
     }
 }

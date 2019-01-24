@@ -19,9 +19,6 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class QueryFormatter : DbExpressionVisitor
     {
-        public static readonly ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>> PostFormatter = Statics.ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>>("QueryFormatterPostFormatter");
-
-
         StringBuilder sb = new StringBuilder();
         int indent = 2;
         int depth;
@@ -33,6 +30,12 @@ namespace Signum.Engine.Linq
         {
             internal DbParameter Parameter;
             internal string Name;
+
+            public DbParameterPair(DbParameter parameter, string name)
+            {
+                Parameter = parameter;
+                Name = name;
+            }
         }
 
 
@@ -45,7 +48,7 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        MethodInfo miCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.CreateParameter(null, SqlDbType.BigInt, null, false, null));
+        MethodInfo miCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.CreateParameter(null!, SqlDbType.BigInt, null, false, null));
 
         DbParameterPair CreateParameter(ConstantExpression value)
         {
@@ -60,11 +63,9 @@ namespace Signum.Engine.Linq
 
             var pb = Connector.Current.ParameterBuilder;
 
-            return new DbParameterPair
-            {
-                Parameter = pb.CreateParameter(name, typePair.SqlDbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value),
-                Name = name
-            };
+            var param = pb.CreateParameter(name, typePair.SqlDbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value);
+
+            return new DbParameterPair(param, name);
         }
 
         ObjectNameOptions objectNameOptions;
@@ -83,7 +84,7 @@ namespace Signum.Engine.Linq
 
             var sqlpc = new SqlPreCommandSimple(qf.sb.ToString(), parameters);
 
-            return PostFormatter.Value == null ? sqlpc : PostFormatter.Value.Invoke(sqlpc);
+            return sqlpc;
         }
 
         protected enum Indentation
@@ -673,7 +674,7 @@ namespace Signum.Engine.Linq
             else
                 this.VisitJoin((JoinExpression)source);
 
-            return source;
+            return source!; /*CSBUG*/
         }
 
         protected internal override Expression VisitJoin(JoinExpression join)
@@ -1000,25 +1001,4 @@ namespace Signum.Engine.Linq
         }
 
     }
-
-
-
-
-    public class QueryPostFormatter : IDisposable
-    {
-        Func<SqlPreCommandSimple, SqlPreCommandSimple> prePostFormatter = null;
-
-        public QueryPostFormatter(Func<SqlPreCommandSimple, SqlPreCommandSimple> postFormatter)
-        {
-            prePostFormatter = QueryFormatter.PostFormatter.Value;
-
-            QueryFormatter.PostFormatter.Value = postFormatter;
-        }
-
-        public void Dispose()
-        {
-            QueryFormatter.PostFormatter.Value = prePostFormatter;
-        }
-    }
-
 }

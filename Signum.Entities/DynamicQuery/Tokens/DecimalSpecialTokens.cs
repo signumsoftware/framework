@@ -148,7 +148,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = parent.Parent.BuildExpression(context);
+            var exp = parent.Parent!.BuildExpression(context);
 
             return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize(), RoundingType.Ceil);
         }

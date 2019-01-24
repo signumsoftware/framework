@@ -67,8 +67,8 @@ export interface OperationLogEntity extends Entities.Entity {
   Type: "OperationLog";
   target: Entities.Lite<Entities.Entity> | null;
   origin: Entities.Lite<Entities.Entity> | null;
-  operation: Entities.OperationSymbol;
-  user: Entities.Lite<IUserEntity>;
+  operation: Entities.OperationSymbol | null;
+  user: Entities.Lite<IUserEntity> | null;
   start: string;
   end: string | null;
   exception: Entities.Lite<ExceptionEntity> | null;
@@ -77,14 +77,14 @@ export interface OperationLogEntity extends Entities.Entity {
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";
-  path: string;
+  path: string | null;
   rootType: TypeEntity;
 }
 
 export const QueryEntity = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
   Type: "Query";
-  key: string;
+  key: string | null;
 }
 
 export interface SemiSymbol extends Entities.Entity {
@@ -95,10 +95,10 @@ export interface SemiSymbol extends Entities.Entity {
 export const TypeEntity = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {
   Type: "Type";
-  tableName: string;
-  cleanName: string;
-  namespace: string;
-  className: string;
+  tableName: string | null;
+  cleanName: string | null;
+  namespace: string | null;
+  className: string | null;
 }
 
 

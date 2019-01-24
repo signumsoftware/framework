@@ -320,7 +320,7 @@ namespace Signum.Entities
             if (!match.Success)
                 return ValidationMessage.InvalidFormat.NiceToString();
 
-            Type type = TypeEntity.TryGetType(match.Groups["type"].Value);
+            Type? type = TypeEntity.TryGetType(match.Groups["type"].Value);
             if (type == null)
                 return LiteMessage.Type0NotFound.NiceToString().FormatWith(match.Groups["type"].Value);
 
@@ -378,7 +378,7 @@ namespace Signum.Entities
         }
 
         [DebuggerStepThrough]
-        public static Lite<T> ToLiteFat<T>(this T entity, string toStr)
+        public static Lite<T> ToLiteFat<T>(this T entity, string? toStr)
           where T : class, IEntity
         {
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, toStr ?? entity.ToString());

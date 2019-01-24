@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,7 +11,7 @@ namespace Signum.Utilities.ExpressionTrees
 
     public interface IQueryProviderAsync : IQueryProvider
     {
-        Task<object> ExecuteAsync(Expression expression, CancellationToken token);
+        Task<object?> ExecuteAsync(Expression expression, CancellationToken token);
     }
 
     public static class QueryableAsyncExtensions
@@ -23,7 +23,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             var value = await provider.ExecuteAsync(source.Expression, token);
 
-            return (List<TSource>)value;
+            return (List<TSource>)value!;
         }
 
         public static Task<TSource[]> ToArrayAsync<TSource>(this IQueryable<TSource> source) => source.ToArrayAsync(CancellationToken.None);
@@ -33,16 +33,16 @@ namespace Signum.Utilities.ExpressionTrees
 
             var value = await provider.ExecuteAsync(source.Expression, token);
 
-            return ((List<TSource>)value).ToArray();
+            return ((List<TSource>)value!).ToArray();
         }
 
         static async Task<R> Bind<R>(CancellationToken cancellationToken, Expression<Func<R>> bind)
         {
             var mce = (MethodCallExpression)bind.Body;
 
-            IQueryable query = (IQueryable)ExpressionEvaluator.Eval(mce.Arguments.FirstEx());
+            IQueryable query = (IQueryable)ExpressionEvaluator.Eval(mce.Arguments.FirstEx())!;
 
-            List<Expression> otherExpressions = mce.Arguments.Skip(1).Select(a => (Expression)ExpressionEvaluator.Eval(a)).ToList();
+            List<Expression> otherExpressions = mce.Arguments.Skip(1).Select(a => (Expression)ExpressionEvaluator.Eval(a)!).ToList();
 
             var mc2 = Expression.Call(mce.Method, otherExpressions.PreAnd(query.Expression));
 

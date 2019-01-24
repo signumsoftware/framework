@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
@@ -22,9 +22,8 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         [DebuggerStepThrough]
-        public static Expression TryRemoveConvert(this Expression expression, Func<Type, bool> isAllowed)
+        public static Expression? TryRemoveConvert(this Expression expression, Func<Type, bool> isAllowed)
         {
-
             if (expression.NodeType == ExpressionType.Convert && isAllowed(expression.Type))
                 return ((UnaryExpression)expression).Operand;
 
@@ -112,7 +111,7 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         [DebuggerStepThrough]
-        public static Expression TryGetArgument(this MethodCallExpression mce, string parameterName)
+        public static Expression? TryGetArgument(this MethodCallExpression mce, string parameterName)
         {
             int index = FindParameter(mce.Method.GetParameters(), parameterName);
 
@@ -135,9 +134,6 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static LambdaExpression StripQuotes(this Expression e)
         {
-            if (e == null)
-                return null;
-
             if (e is ConstantExpression)
                 return (LambdaExpression)((ConstantExpression)e).Value;
 
@@ -151,7 +147,7 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static bool IsBase(this IQueryable query)
         {
-            ConstantExpression ce = query.Expression as ConstantExpression;
+            ConstantExpression? ce = query.Expression as ConstantExpression;
             return ce != null && ce.Value == query;
         }
 

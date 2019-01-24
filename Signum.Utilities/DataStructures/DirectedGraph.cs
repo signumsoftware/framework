@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
@@ -7,8 +7,9 @@ using System.Xml.Linq;
 namespace Signum.Utilities.DataStructures
 {
     public class DirectedGraph<T> : IEnumerable<T>
+        where T : object
     {
-        Dictionary<T, HashSet<T>> adjacency;
+        readonly Dictionary<T, HashSet<T>> adjacency;
         public IEqualityComparer<T> Comparer { get; private set; }
 
         public DirectedGraph()
@@ -142,7 +143,7 @@ namespace Signum.Utilities.DataStructures
             inverse.RemoveFullNode(node, to);
         }
 
-        HashSet<T> TryGet(T node)
+        HashSet<T>? TryGet(T node)
         {
             return adjacency.TryGetC(node);
         }
@@ -464,7 +465,7 @@ namespace Signum.Utilities.DataStructures
                     continue;
                 }
 
-                Func<T, int> fanInOut = n => clone.RelatedTo(n).Count() - inv.RelatedTo(n).Count();
+                int fanInOut(T n) => clone.RelatedTo(n).Count() - inv.RelatedTo(n).Count();
 
                 MinMax<T> mm = clone.WithMinMaxPair(fanInOut);
 
@@ -502,7 +503,7 @@ namespace Signum.Utilities.DataStructures
             return result;
         }
 
-        public List<T> ShortestPath(T from, T to)
+        public List<T>? ShortestPath(T from, T to)
         {
             //http://en.wikipedia.org/wiki/Dijkstra's_algorithm
 

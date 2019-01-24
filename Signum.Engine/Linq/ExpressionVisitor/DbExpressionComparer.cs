@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
             return new DbExpressionComparer(parameterScope, aliasScope, checkParameterNames ).Compare(a, b);
         }
 
-        protected override bool Compare(Expression a, Expression b)
+        protected override bool Compare(Expression? a, Expression? b)
         {
             bool result = ComparePrivate(a, b);
 
@@ -46,7 +46,7 @@ namespace Signum.Engine.Linq
 
 
 
-        private bool ComparePrivate(Expression a, Expression b)
+        private bool ComparePrivate(Expression? a, Expression? b)
         {
             if (a == b)
                 return true;
@@ -158,7 +158,7 @@ namespace Signum.Engine.Linq
             return CompareAlias(a.Alias, b.Alias) && a.Name == b.Name;
         }
 
-        protected virtual bool CompareAlias(Alias a, Alias b)
+        protected virtual bool CompareAlias(Alias? a, Alias? b)
         {
             if (a == null && b == null)
                 return true;
@@ -181,7 +181,7 @@ namespace Signum.Engine.Linq
 
             using (AliasScope())
             {
-                MapAliases(a.From, b.From);
+                MapAliases(a.From!, b.From!);
 
                 return Compare(a.Where, b.Where)
                     && CompareList(a.OrderBy, b.OrderBy, CompareOrder)
@@ -385,7 +385,7 @@ namespace Signum.Engine.Linq
                 && CompareValues(a.Values , b.Values);
         }
 
-        protected virtual bool CompareValues(object[] a, object[] b)
+        protected virtual bool CompareValues(object[]? a, object[]? b)
         {
             if (a == b)
                 return true;

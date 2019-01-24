@@ -463,20 +463,20 @@ It's useful for code generation, like C# or SQL statements:
 //  Address
 //FROM Customers
 ```
-### Combine / CombineIfNotEmpty
+### Combine / Combine
 
 Given a separator `this`, combines a sequence of string `params` writing the separator in between.
 
 ```C#
 public static string Combine(this string separator, params object[] elements)
-public static string CombineIfNotEmpty(this string separator, params object[] elements)
+public static string Combine(this string separator, params object[] elements)
 ```
 
-CombineIfNotEmpty ignores null or empty elements.
+Combine ignores null or empty elements.
 
 ```C#
 ",".Combine(0, null, "", "hola"); //returns 0,,,hola
-",".CombineIfNotEmpty(0, null, "", "hola"); //returns 0,hola
+",".Combine(0, null, "", "hola"); //returns 0,hola
 ```
 
 ### ToComputerSize

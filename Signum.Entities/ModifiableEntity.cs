@@ -114,7 +114,7 @@ namespace Signum.Entities
             public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
         }
 
-        static ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
+        static readonly ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
 
         protected PropertyInfo GetPropertyInfo(string propertyName)
         {
@@ -143,7 +143,7 @@ namespace Signum.Entities
 
         protected virtual void RebindEvents()
         {
-            foreach (INotifyCollectionChanged notify in AttributeManager<NotifyCollectionChangedAttribute>.FieldsWithAttribute(this))
+            foreach (INotifyCollectionChanged? notify in AttributeManager<NotifyCollectionChangedAttribute>.FieldsWithAttribute(this))
             {
                 if (notify == null)
                     continue;
@@ -432,7 +432,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return $"{Errors.Count} errors in {" ".CombineIfNotEmpty(Type.Name, Id)}\r\n"
+            return $"{Errors.Count} errors in {" ".Combine(Type.Name, Id)}\r\n"
                   + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
         }
     }
@@ -451,7 +451,7 @@ namespace Signum.Entities
         public override string ToString()
         {
             var validators = Validator.GetPropertyValidators(Entity.GetType());
-            return $"{IntegrityCheck.Errors.Count} errors in {" ".CombineIfNotEmpty(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
+            return $"{IntegrityCheck.Errors.Count} errors in {" ".Combine(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
                   + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
                       kvp.Key,
                       validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity), 

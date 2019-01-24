@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
@@ -66,7 +66,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (expression is ConstantExpression ce && ce.Value == this)
                 return this.GetType().TypeName().CleanIdentifiers();
             else
-                return expression.ToString();
+                return expression!/*CSBUG*/.ToString();
         }
 
         public string QueryText

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities;
@@ -69,7 +69,7 @@ namespace Signum.Engine.Linq
 
         public readonly Meta Meta;
 
-        public MetaExpression(Type type, Meta meta):
+        public MetaExpression(Type type, Meta? meta):
             base(MetaExpressionType.MetaExpression, type)
         {
             this.Meta = meta;

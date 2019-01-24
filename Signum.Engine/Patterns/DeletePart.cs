@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -10,12 +10,12 @@ namespace Signum.Engine
 {
     public static class DeletePart
     {
-        static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidDeletePart");
-
+        static readonly Variable<ImmutableStack<Type/*?*/>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidDeletePart"); /*CSBUG*/ 
+ 
         public static bool ShouldAvoidDeletePart(Type partType)
         {
             var stack = avoidTypes.Value;
-            return stack != null && (stack.Contains(partType) || stack.Contains(null));
+            return stack != null && (stack.Contains(partType) || stack.Contains(null!));
         }
 
         /// <param name="partType">Use null for every type</param>

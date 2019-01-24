@@ -1,21 +1,17 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
 {
     class ScalarSubqueryRewriter : DbExpressionVisitor
     {
-        SourceExpression currentFrom;
-
         Connector connector = Connector.Current;
-
-        bool inAggregate = false;
-
         public static Expression Rewrite(Expression expression)
         {
             return new ScalarSubqueryRewriter().Visit(expression);
         }
 
+        bool inAggregate = false;
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             var saveInAggregate = this.inAggregate;
@@ -29,6 +25,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        SourceExpression? currentFrom;
         protected internal override Expression VisitSelect(SelectExpression select)
         {
             var saveFrom = this.currentFrom;
@@ -36,7 +33,7 @@ namespace Signum.Engine.Linq
 
             this.inAggregate = false;
 
-            SourceExpression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From!);
             this.currentFrom = from;
 
             Expression top = this.Visit(select.Top);
@@ -66,15 +63,15 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                var select = scalar.Select;
+                var select = scalar.Select!;
                 if (string.IsNullOrEmpty(select.Columns[0].Name))
                 {
                     select = new SelectExpression(select.Alias, select.IsDistinct, select.Top,
                         new[] { new ColumnDeclaration("scalar", select.Columns[0].Expression) },
                         select.From, select.Where, select.OrderBy, select.GroupBy, select.SelectOptions);
                 }
-                this.currentFrom = new JoinExpression(JoinType.OuterApply, this.currentFrom, select, null);
-                return new ColumnExpression(scalar.Type, scalar.Select.Alias, select.Columns[0].Name);
+                this.currentFrom = new JoinExpression(JoinType.OuterApply, this.currentFrom!, select, null);
+                return new ColumnExpression(scalar.Type, scalar.Select!.Alias, select.Columns[0].Name);
             }
         }
     }

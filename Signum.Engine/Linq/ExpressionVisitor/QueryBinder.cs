@@ -85,7 +85,7 @@ namespace Signum.Engine.Linq
                         if (m.Arguments.Count == 2)
                             return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes(), null);
                         else
-                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("collectionSelector").StripQuotes(), m.TryGetArgument("resultSelector").StripQuotes());
+                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("collectionSelector").StripQuotes(), m.TryGetArgument("resultSelector")?.StripQuotes());
                     case "Join":
                         return this.BindJoin(
                             m.Type, m.GetArgument("outer"), m.GetArgument("inner"),
@@ -105,14 +105,14 @@ namespace Signum.Engine.Linq
                             m.GetArgument("keySelector").StripQuotes(),
                             m.GetArgument("elementSelector").StripQuotes());
                     case "Any":
-                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m.Method, m == root);
+                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.TryGetArgument("predicate")?.StripQuotes(), m.Method, m == root);
                     case "All":
                         return this.BindAnyAll(m.Type, m.GetArgument("source"), m.GetArgument("predicate").StripQuotes(), m.Method, m == root);
                     case "Contains":
                         return this.BindContains(m.Type, m.GetArgument("source"), m.TryGetArgument("item") ?? m.GetArgument("value"), m == root);
                     case "Count":
                         return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
-                          m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m == root);
+                          m.GetArgument("source"), m.TryGetArgument("predicate")?.StripQuotes(), m == root);
                     case "Sum":
                     case "Min":
                     case "Max":
@@ -120,19 +120,19 @@ namespace Signum.Engine.Linq
                     case "StdDev":
                     case "StdDevP":
                         return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
-                            m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes(), m == root);
+                            m.GetArgument("source"), m.TryGetArgument("selector")?.StripQuotes(), m == root);
                     case "First":
                     case "FirstOrDefault":
                     case "Single":
                     case "SingleOrDefault":
                         return BindUniqueRow(m.Type, m.Method.Name.ToEnum<UniqueFunction>(),
-                            m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m == root);
+                            m.GetArgument("source"), m.TryGetArgument("predicate")?.StripQuotes(), m == root);
 
                     case "FirstEx":
                     case "SingleEx":
                     case "SingleOrDefaultEx":
                         return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
-                           m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes(), m == root);
+                           m.GetArgument("collection"), m.TryGetArgument("predicate")?.StripQuotes(), m == root);
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
                     case "Reverse":
@@ -473,7 +473,7 @@ namespace Signum.Engine.Linq
         //Avoid self referencing SQL problems
         bool inTableValuedFunction = false;
         public Dictionary<ProjectionExpression, Expression> uniqueFunctionReplacements = new Dictionary<ProjectionExpression, Expression>(DbExpressionComparer.GetComparer<ProjectionExpression>(false));
-        private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
+        private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression? predicate, bool isRoot)
         {
             ProjectionExpression rawProjector = this.VisitCastProjection(source);
 
@@ -745,7 +745,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        private Expression? BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
+        private Expression? BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression? selectorOrPredicate, bool isRoot)
         {
             var (newSource, selector, distinct) = DisassembleAggregate(aggregateFunction, source, selectorOrPredicate, isRoot);
 
@@ -865,7 +865,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        private Expression BindAnyAll(Type resultType, Expression source, LambdaExpression predicate, MethodInfo method, bool isRoot)
+        private Expression BindAnyAll(Type resultType, Expression source, LambdaExpression? predicate, MethodInfo method, bool isRoot)
         {
             bool isAll = method.Name == "All";
 
@@ -875,7 +875,7 @@ namespace Signum.Engine.Linq
             if (source is ConstantExpression constSource && !typeof(IQueryable).IsAssignableFrom(constSource.Type))
             {
                 System.Diagnostics.Debug.Assert(!isRoot);
-                Type oType = predicate.Parameters[0].Type;
+                Type oType = predicate!.Parameters[0].Type;
                 Expression[] exp = ((IEnumerable)constSource.Value).Cast<object>().Select(o => Expression.Invoke(predicate, Expression.Constant(o, oType))).ToArray();
 
                 Expression where = isAll ? exp.AggregateAnd() : exp.AggregateOr();
@@ -885,7 +885,7 @@ namespace Signum.Engine.Linq
             else
             {
                 if (isAll)
-                    predicate = Expression.Lambda(Expression.Not(predicate.Body), predicate.Parameters.ToArray());
+                    predicate = Expression.Lambda(Expression.Not(predicate!.Body), predicate!.Parameters.ToArray());
 
                 if (predicate != null)
                     source = Expression.Call(typeof(Enumerable), "Where", method.GetGenericArguments(), source, predicate);
@@ -2192,7 +2192,7 @@ namespace Signum.Engine.Linq
 
             if (pr.Projector is EntityExpression ee)
             {
-                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)));
+                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)))!;
 
                 commands.AddRange(ee.Table.TablesMList().Select(t =>
                 {
@@ -2212,7 +2212,7 @@ namespace Signum.Engine.Linq
             {
                 var vn = eee.ViewTable!;
 
-                Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name));
+                Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name)).ThrowIfNull(() => $"{vn.Name} has no primary name");
 
                 commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
             }
@@ -2283,7 +2283,7 @@ namespace Signum.Engine.Linq
 
             if (entity is EntityExpression ee)
             {
-                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)));
+                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)))!;
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
@@ -2297,7 +2297,7 @@ namespace Signum.Engine.Linq
             }
             else if (entity is EmbeddedEntityExpression eee)
             {
-                Expression id = eee.ViewTable!.GetIdExpression(aliasGenerator.Table(eee.ViewTable!.GetName(isHistory)));
+                Expression id = eee.ViewTable!.GetIdExpression(aliasGenerator.Table(eee.ViewTable!.GetName(isHistory))).ThrowIfNull(() => $"{eee.ViewTable} has not primary key");
 
                 condition = SmartEqualizer.EqualNullable(id, eee.GetViewId());
                 table = eee.ViewTable!;
@@ -2643,9 +2643,9 @@ namespace Signum.Engine.Linq
             {
                 var table = entity.Table;
                 var newAlias = NextTableAlias(table.Name);
-                var id = table.GetIdExpression(newAlias);
+                var id = table.GetIdExpression(newAlias)!;
                 var period = table.GenerateSystemPeriod(newAlias, this);
-                var intersect = period.Intesection(entity.ExternalPeriod);
+                var intersect = period.Intesection(entity.ExternalPeriod); //TODO intersect not used! 
                 var bindings = table.GenerateBindings(newAlias, this, id, period);
                 var mixins = table.GenerateMixins(newAlias, this, id, period);
 

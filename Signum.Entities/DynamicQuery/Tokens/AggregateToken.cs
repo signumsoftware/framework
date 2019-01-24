@@ -62,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
         {
             string? suffix = GetNiceOperation();
 
-            return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue());
+            return " ".Combine(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue());
         }
 
         public override string NiceName()
@@ -70,7 +70,7 @@ namespace Signum.Entities.DynamicQuery
             if (AggregateFunction == AggregateFunction.Count && Parent == null)
                 return AggregateFunction.NiceToString();
 
-            return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), "of", Parent);
+            return " ".Combine(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), "of", Parent);
         }
 
         string? GetNiceOperation()

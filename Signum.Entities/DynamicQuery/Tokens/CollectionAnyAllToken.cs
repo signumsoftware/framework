@@ -14,13 +14,13 @@ namespace Signum.Entities.DynamicQuery
     {
         public CollectionAnyAllType CollectionAnyAllType { get; private set; }
 
-        QueryToken parent;
+        readonly QueryToken parent;
         public override QueryToken? Parent => parent;
-        
-        Type elementType;
+
+        readonly Type elementType;
         internal CollectionAnyAllToken(QueryToken parent, CollectionAnyAllType type)
         {
-            elementType = parent.Type.ElementType();
+            elementType = parent.Type.ElementType()!;
             if (elementType == null)
                 throw new InvalidOperationException("not a collection");
 
@@ -125,10 +125,10 @@ namespace Signum.Entities.DynamicQuery
             get { return "#0000FF"; }
         }
 
-        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
 
         public Expression BuildAnyAll(Expression collection, ParameterExpression param, Expression body)
         {

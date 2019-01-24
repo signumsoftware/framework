@@ -10,7 +10,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class EntityToStringToken : QueryToken
     {
-        QueryToken parent;
+        readonly QueryToken parent;
         public override QueryToken? Parent => parent;
 
         internal EntityToStringToken(QueryToken parent)
@@ -71,19 +71,9 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute? GetPropertyRoute()
         {
-            PropertyRoute? pr = parent.GetPropertyRoute();
-            if (pr == null)
-            {
-                Type? type = Lite.Extract(pr.Type); //Because Parent.Type is always a lite
-                if (type != null)
-                    return PropertyRoute.Root(type).Add(miToStringProperty);
-            }
-            else
-            {
-                Type? type = Lite.Extract(pr.Type); //Because Add doesn't work with lites
-                if (type != null)
-                    return PropertyRoute.Root(type).Add(miToStringProperty);
-            }
+            Type? type = Lite.Extract(parent.GetPropertyRoute()?.Type ?? parent.Type);
+            if (type != null)
+                return PropertyRoute.Root(type).Add(miToStringProperty);
 
             return null;
         }

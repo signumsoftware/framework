@@ -158,7 +158,7 @@ namespace Signum.Utilities
 
     public abstract class SessionVariable<T>: Variable<T>
     {
-        public abstract Func<T>? ValueFactory { get; set; }
+        public Func<T> ValueFactory { get; set; }
 
         protected internal SessionVariable(string name)
             : base(name)
@@ -191,7 +191,7 @@ namespace Signum.Utilities
 
         class VoidVariable<T> : SessionVariable<T>
         {
-            public override Func<T>? ValueFactory { get; set; }
+            //public override Func<T> ValueFactory { get; set; }
 
             public VoidVariable(string name)
                 : base(name)
@@ -227,7 +227,7 @@ namespace Signum.Utilities
 
         class SingletonVariable<T> : SessionVariable<T>
         {
-            public override Func<T>? ValueFactory { get; set; }
+            //public override Func<T> ValueFactory { get; set; }
 
             public SingletonVariable(string name)
                 : base(name)
@@ -297,11 +297,12 @@ namespace Signum.Utilities
                 this.variable = variable;
             }
 
-            public override Func<T>? ValueFactory
-            {
-                get { return variable.ValueFactory; }
-                set { variable.ValueFactory = value; }
-            }
+            /*CSBUG*/
+            //public override Func<T> ValueFactory
+            //{
+            //    get { return variable.ValueFactory; }
+            //    set { variable.ValueFactory = value; }
+            //}
 
             public override T Value
             {

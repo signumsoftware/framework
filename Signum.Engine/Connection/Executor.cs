@@ -10,17 +10,16 @@ namespace Signum.Engine
 {
     public static class Executor
     {
-        public static object ExecuteScalar(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
+        public static object? ExecuteScalar(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteScalar(new SqlPreCommandSimple(sql, parameters), commandType);
         }
 
-        public static object ExecuteScalar(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
+        public static object? ExecuteScalar(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteScalar(preCommand, commandType);
         }
-
-
+        
         public static int ExecuteNonQuery(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteNonQuery(new SqlPreCommandSimple(sql, parameters), commandType);

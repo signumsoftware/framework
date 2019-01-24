@@ -1084,7 +1084,7 @@ namespace Signum.Engine.Linq
 
     internal class RowNumberExpression : DbExpression
     {
-        public readonly ReadOnlyCollection<OrderExpression>? OrderBy;
+        public readonly ReadOnlyCollection<OrderExpression> OrderBy;
 
         public RowNumberExpression(IEnumerable<OrderExpression>? orderBy)
             : base(DbExpressionType.RowNumber, typeof(int))
@@ -1127,7 +1127,7 @@ namespace Signum.Engine.Linq
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var elementType = uniqueFunction == null ? resultType.ElementType() : resultType;
+            var elementType = uniqueFunction == null ? resultType.ElementType()! : resultType;
             if (!elementType.IsAssignableFrom(projector.Type))
                 throw new InvalidOperationException("Projector ({0}) does not fit in the projection ({1})".FormatWith(
                     projector.Type.TypeName(),
@@ -1191,9 +1191,9 @@ namespace Signum.Engine.Linq
         public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
 
         public readonly SourceWithAliasExpression Source;
-        public readonly Expression Where;
+        public readonly Expression? Where;
 
-        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where)
+        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression? where)
             : base(DbExpressionType.Delete)
         {
             this.Table = table;

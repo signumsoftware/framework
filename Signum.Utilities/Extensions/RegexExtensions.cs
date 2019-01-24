@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -41,7 +41,11 @@ namespace Signum.Utilities
         }
 
         public static IEnumerable<R> JoinSimilar<T, S, R>(this List<T> outer, List<S> inner,
-            Func<T, string> outerKeySelector, Func<S, string> innerKeySelector, Func<T, S, int, R> resultSelector)
+            Func<T, string> outerKeySelector, 
+            Func<S, string> innerKeySelector, 
+            Func<T, S, int, R> resultSelector)
+            where T : object
+            where S : object
         {
             StringDistance sd = new StringDistance();
             Dictionary<Tuple<T, S>, int> distances = (from o in outer
@@ -61,7 +65,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static IEnumerable<(Match match, string after)> SplitAfter(this Regex regex, string input)
+        public static IEnumerable<(Match? match, string after)> SplitAfter(this Regex regex, string input)
         {
             var matches = regex.Matches(input).Cast<Match>().ToList();
 
