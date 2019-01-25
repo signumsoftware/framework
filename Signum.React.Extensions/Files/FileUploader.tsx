@@ -142,7 +142,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
             &nbsp;{this.props.dragAndDropMessage || FileMessage.OrDragAFileHere.niceToString()}
           </div> :
             <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-              <FontAwesomeIcon icon="upload" />
+              <FontAwesomeIcon icon="upload"  className="mr-1"/>
               {FileMessage.SelectFile.niceToString()}
               <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
             </div>
