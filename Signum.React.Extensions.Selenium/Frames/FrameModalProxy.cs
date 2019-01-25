@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using OpenQA.Selenium;
 using Signum.Entities;
@@ -14,7 +14,7 @@ namespace Signum.React.Selenium
         public FrameModalProxy(IWebElement element, PropertyRoute route = null)
             : base(element)
         {
-            this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
+            this.Route = route?? PropertyRoute.Root(typeof(T)) ;
         }
 
         public IWebElement ContainerElement()
