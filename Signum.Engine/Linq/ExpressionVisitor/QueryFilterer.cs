@@ -39,8 +39,8 @@ namespace Signum.Engine.Linq
 
                             if (rawFilter != null)
                             {
-                                Expression clean = ExpressionCleaner.Clean(rawFilter);
-                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+                                Expression clean = ExpressionCleaner.Clean(rawFilter)!;
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
 
                                 return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                             }
@@ -56,8 +56,8 @@ namespace Signum.Engine.Linq
                                 var param = Expression.Parameter(queryType, "mle");
                                 var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
 
-                                Expression clean = ExpressionCleaner.Clean(lambda);
-                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+                                Expression clean = ExpressionCleaner.Clean(lambda)!;
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
 
                                 return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                             }
@@ -71,7 +71,7 @@ namespace Signum.Engine.Linq
                     /// <summary>
                     /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
                     /// </summary>
-                    return DbQueryProvider.Clean(query.Expression, filter, null);
+                    return DbQueryProvider.Clean(query.Expression, filter, null)!;
                 }
             }
 

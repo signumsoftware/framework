@@ -616,7 +616,7 @@ namespace Signum.Entities
         object? IList.this[int index]
         {
             get { return this[index]; }
-            set { this[index] = (T)value; }
+            set { this[index] = (T)value!; }
         }
 
         void ICollection.CopyTo(Array array, int index)

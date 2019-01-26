@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -15,7 +16,7 @@ namespace Signum.Utilities
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("HasTextExpression")]
-        public static bool HasText(this string? str)
+        public static bool HasText([NotNullWhenTrue]this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }
@@ -439,11 +440,8 @@ namespace Signum.Utilities
             return str.Substring(0, numChars);
         }
 
-        public static string? TryStart(this string? str, int numChars)
+        public static string TryStart(this string str, int numChars)
         {
-            if (str == null)
-                return null;
-
             if (numChars > str.Length)
                 return str;
 
@@ -458,11 +456,8 @@ namespace Signum.Utilities
             return str.Substring(str.Length - numChars, numChars);
         }
 
-        public static string? TryEnd(this string? str, int numChars)
+        public static string TryEnd(this string str, int numChars)
         {
-            if (str == null)
-                return null;
-
             if (numChars > str.Length)
                 return str;
 

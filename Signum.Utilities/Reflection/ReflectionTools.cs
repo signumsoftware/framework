@@ -403,7 +403,7 @@ namespace Signum.Utilities.Reflection
                 return (T)(object)value;
 
             if (value == null || value == "")
-                return (T)(object?)null;
+                return (T)(object?)null!;
 
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
@@ -449,7 +449,7 @@ namespace Signum.Utilities.Reflection
                 return (T)(object)value;
 
             if (value == null || value == "")
-                return (T)(object?)null;
+                return (T)(object?)null!;
 
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
@@ -481,7 +481,7 @@ namespace Signum.Utilities.Reflection
         {
             if (TryParse(value, typeof(T), CultureInfo.CurrentCulture, out object? objResult))
             {
-                result = (T)objResult;
+                result = (T)objResult!;
                 return true;
             }
             else
@@ -495,7 +495,7 @@ namespace Signum.Utilities.Reflection
         {
             if (TryParse(value, typeof(T), ci, out object? objResult))
             {
-                result = (T)objResult;
+                result = (T)objResult!;
                 return true;
             }
             else
@@ -701,7 +701,7 @@ namespace Signum.Utilities.Reflection
         public static T ChangeType<T>(object value)
         {
             if (value == null)
-                return (T)(object?)null;
+                return (T)(object?)null!;
 
             if (value.GetType() == typeof(T))
                 return (T)value;

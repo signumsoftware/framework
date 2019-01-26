@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -93,16 +93,16 @@ namespace Signum.Engine
                 }
         }
 
-        static SqlPreCommand Schema_Generating()
+        static SqlPreCommand? Schema_Generating()
         {
             Table table = Schema.Current.Table<T>();
 
             IEnumerable<T> should = getSymbols();
 
-            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple).PlainSqlCommand();
+            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple)?.PlainSqlCommand();
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             Table table = Schema.Current.Table<T>();
 
@@ -136,7 +136,7 @@ namespace Signum.Engine
             get { return AssertStarted().Values; }
         }
 
-        public static T TryToSymbol(string key)
+        public static T? TryToSymbol(string key)
         {
             return AssertStarted().TryGetC(key);
         }

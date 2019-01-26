@@ -39,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
                 return
                     MemberInfo is PropertyInfo pi ? pi.PropertyType.Nullify() :
                     MemberInfo is MethodInfo mi ? mi.ReturnType.Nullify() :
-                    throw new UnexpectedValueException(MemberInfo! /*CSBUG*/);
+                    throw new UnexpectedValueException(MemberInfo);
             }
         }
 
@@ -62,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
             var prop =
                 MemberInfo is PropertyInfo pi ? (Expression)Expression.Property(result.UnNullify(), pi) :
                 MemberInfo is MethodInfo mi ? (mi.IsStatic ? Expression.Call(null, mi, result.UnNullify()) : Expression.Call(result.UnNullify(), mi)) :
-                throw new UnexpectedValueException(MemberInfo! /*CSBUG*/);
+                throw new UnexpectedValueException(MemberInfo);
 
             return Expression.Call(miInSql.MakeGenericMethod(prop.Type), prop).Nullify();
         }

@@ -212,7 +212,7 @@ namespace Signum.Engine.DynamicQuery
                     var cleanType = me!.Type.CleanType();
 
                     result.PropertyRoute = cm.PropertyRoutes.Only();
-                    result.Implementations = me!.Meta.Implementations;
+                    result.Implementations = me.Meta.Implementations;
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
@@ -301,7 +301,7 @@ namespace Signum.Engine.DynamicQuery
                     result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
                 }
 
-                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
+                result.IsAllowed = () => me?.Meta.IsAllowed();
 
                 if (ForcePropertyRoute != null)
                     result.PropertyRoute = ForcePropertyRoute!;

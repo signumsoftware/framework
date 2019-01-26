@@ -316,7 +316,7 @@ namespace Signum.Engine.Linq
             if (inExpression.Select == null)
             {
                 bool any = false;
-                foreach (var obj in inExpression.Values)
+                foreach (var obj in inExpression.Values!)
                 {
                     VisitConstant(Expression.Constant(obj));
                     sb.Append(",");
@@ -572,7 +572,7 @@ namespace Signum.Engine.Linq
 
         private void AppendColumn(ColumnDeclaration column)
         {
-            ColumnExpression c = column.Expression as ColumnExpression;
+            ColumnExpression? c = column.Expression as ColumnExpression;
 
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {

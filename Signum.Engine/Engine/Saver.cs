@@ -83,7 +83,7 @@ namespace Signum.Engine
         private static void SaveGraph(Schema schema, DirectedGraph<Entity> identifiables)
         {
             //takes apart the 'forbidden' connections from the good ones
-            DirectedGraph<Entity> backEdges = identifiables.FeedbackEdgeSet();
+            DirectedGraph<Entity>? backEdges = identifiables.FeedbackEdgeSet();
 
             if (backEdges.IsEmpty())
                 backEdges = null;

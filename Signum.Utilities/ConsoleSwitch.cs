@@ -9,9 +9,9 @@ namespace Signum.Utilities
         where K : object
         where V : class
     {
-        Dictionary<string, WithDescription<V>> dictionary = new Dictionary<string, WithDescription<V>>(StringComparer.InvariantCultureIgnoreCase);
-        Dictionary<int, string> separators = new Dictionary<int, string>();
-        string welcomeMessage;
+        readonly Dictionary<string, WithDescription<V>> dictionary = new Dictionary<string, WithDescription<V>>(StringComparer.InvariantCultureIgnoreCase);
+        readonly Dictionary<int, string> separators = new Dictionary<int, string>();
+        readonly string welcomeMessage;
 
         public ConsoleSwitch()
             : this(ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString())
@@ -176,7 +176,9 @@ namespace Signum.Utilities
                 if (from.HasValue && to == null)
                     return dictionary.Keys.Skip(from.Value).Select(s => dictionary.GetOrThrow(s));
 
+#pragma warning disable CS8629 // Nullable value type may be null. CSBUG
                 return dictionary.Keys.Skip(from.Value).Take((to.Value + 1) - from.Value).Select(s => dictionary.GetOrThrow(s));
+#pragma warning restore CS8629 // Nullable value type may be null.
             }
             else
             {

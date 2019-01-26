@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
 
         private MetadataVisitor() { }
 
-        static internal Dictionary<string, Meta?>? GatherMetadata(Expression expression)
+        static internal Dictionary<string, Meta?> GatherMetadata(Expression expression)
         {
             if (expression == null)
                 throw new ArgumentException("expression");
@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
             if (proj.NodeType != ExpressionType.New &&  //anonymous types
                 proj.NodeType != ExpressionType.MemberInit && // not-anonymous type
                 !(proj is MetaExpression && ((MetaExpression)proj).IsEntity)) // raw-entity!
-                return null;
+                throw new UnexpectedValueException(proj);
 
             PropertyInfo[] props = proj.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -457,13 +457,13 @@ namespace Signum.Engine.Linq
                 var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
-                    return new MetaExpression(memberType, null);
+                    return new MetaExpression(memberType, new DirtyMeta(null, new Meta[0]));
 
                 MetaExpression meta = (MetaExpression)source;
 
                 if (meta.Meta.Implementations != null)
                 {
-                    var routes = meta.Meta.Implementations.Value.Types.Select(t=> PropertyRoute.Root(t).Add(pi)).ToArray();
+                    var routes = meta.Meta.Implementations.Value.Types.Select(t => PropertyRoute.Root(t).Add(pi)).ToArray();
 
                     return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
@@ -542,7 +542,7 @@ namespace Signum.Engine.Linq
 
             if (u.NodeType == ExpressionType.Convert || u.NodeType == ExpressionType.TypeAs)
             {
-                var imps = exp.Meta.Implementations?.Let(s => CastImplementations(s, u.Type.CleanType()));
+                var imps = exp.Meta?.Implementations?.Let(s => CastImplementations(s, u.Type.CleanType()));
 
                 return new MetaExpression(u.Type, exp.Meta is DirtyMeta ?
                     (Meta)new DirtyMeta(imps, ((DirtyMeta)exp.Meta).CleanMetas.Cast<Meta>().ToArray()) :

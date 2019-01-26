@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities;
@@ -9,7 +9,7 @@ namespace Signum.Engine
 {
     public static class SchemaGenerator
     {
-        public static SqlPreCommand CreateSchemasScript()
+        public static SqlPreCommand? CreateSchemasScript()
         {
             Schema s = Schema.Current;
 
@@ -21,16 +21,16 @@ namespace Signum.Engine
                 .Combine(Spacing.Simple);
         }
 
-        public static SqlPreCommand CreateTablesScript()
+        public static SqlPreCommand? CreateTablesScript()
         {
             Schema s = Schema.Current;
             List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
 
-            SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double).PlainSqlCommand();
+            SqlPreCommand? createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double)?.PlainSqlCommand();
 
-            SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).PlainSqlCommand();
+            SqlPreCommand? foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double)?.PlainSqlCommand();
 
-            SqlPreCommand indices = tables.Select(t =>
+            SqlPreCommand? indices = tables.Select(t =>
             {
                 var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)); ;
 
@@ -41,23 +41,23 @@ namespace Signum.Engine
 
                 return SqlPreCommand.Combine(Spacing.Double, mainIndices, historyIndices);
 
-            }).NotNull().Combine(Spacing.Double).PlainSqlCommand();
+            }).NotNull().Combine(Spacing.Double)?.PlainSqlCommand();
 
 
             return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }
 
-        public static SqlPreCommand InsertEnumValuesScript()
+        public static SqlPreCommand? InsertEnumValuesScript()
         {
             return (from t in Schema.Current.Tables.Values
                     let enumType = EnumEntity.Extract(t.Type)
                     where enumType != null
                     select EnumEntity.GetEntities(enumType).Select((e, i) => t.InsertSqlSync(e, suffix: t.Name.Name + i)).Combine(Spacing.Simple)
-                    ).Combine(Spacing.Double).PlainSqlCommand();
+                    ).Combine(Spacing.Double)?.PlainSqlCommand();
         }
 
 
-        public static SqlPreCommand SnapshotIsolation()
+        public static SqlPreCommand? SnapshotIsolation()
         {
             if (!Connector.Current.AllowsSetSnapshotIsolation)
                 return null;
@@ -71,13 +71,13 @@ namespace Signum.Engine
                 list.Add(Connector.Current.DatabaseName());
             }
 
-            var cmd = list
+            var cmd = list.NotNull()
                 .Where(db => !SnapshotIsolationEnabled(db))
-                .Select(a => SqlPreCommand.Combine(Spacing.Simple,
-                    SqlBuilder.SetSingleUser(a),
-                    SqlBuilder.SetSnapshotIsolation(a, true),
-                    SqlBuilder.MakeSnapshotIsolationDefault(a, true),
-                    SqlBuilder.SetMultiUser(a))
+                .Select(db => SqlPreCommand.Combine(Spacing.Simple,
+                    SqlBuilder.SetSingleUser(db),
+                    SqlBuilder.SetSnapshotIsolation(db, true),
+                    SqlBuilder.MakeSnapshotIsolationDefault(db, true),
+                    SqlBuilder.SetMultiUser(db))
                 ).Combine(Spacing.Double);
 
             return cmd;

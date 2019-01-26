@@ -16,9 +16,9 @@ namespace Signum.Engine.Maps
     {
         public ITable Table { get; private set; }
         public IColumn[] Columns { get; private set; }
-        public IColumn[] IncludeColumns { get; set; }
+        public IColumn[]? IncludeColumns { get; set; }
 
-        public string Where { get; set; }
+        public string? Where { get; set; }
 
         public static IColumn[] GetColumnsFromFields(params Field[] fields)
         {
@@ -95,7 +95,7 @@ namespace Signum.Engine.Maps
             get { return "UIX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
-        public string ViewName
+        public string? ViewName
         {
             get
             {
@@ -140,7 +140,7 @@ namespace Signum.Engine.Maps
         {
             var body = field.Body;
 
-            Type type = RemoveCasting(ref body);
+            Type? type = RemoveCasting(ref body);
 
             body = IndexWhereExpressionVisitor.RemoveLiteEntity(body);
 
@@ -164,7 +164,7 @@ namespace Signum.Engine.Maps
             return Index.GetColumnsFromFields(f);
         }
 
-        static Type RemoveCasting(ref Expression body)
+        static Type? RemoveCasting(ref Expression body)
         {
             if (body.NodeType == ExpressionType.Convert && body.Type == typeof(object))
                 body = ((UnaryExpression)body).Operand;
@@ -187,12 +187,14 @@ namespace Signum.Engine.Maps
 
         IFieldFinder RootFinder;
 
+        public IndexWhereExpressionVisitor(IFieldFinder rootFinder)
+        {
+            RootFinder = rootFinder;
+        }
+
         public static string GetIndexWhere(LambdaExpression lambda, IFieldFinder rootFiender)
         {
-            IndexWhereExpressionVisitor visitor = new IndexWhereExpressionVisitor
-            {
-                RootFinder = rootFiender
-            };
+            IndexWhereExpressionVisitor visitor = new IndexWhereExpressionVisitor(rootFiender);
 
             var newLambda = (LambdaExpression)ExpressionEvaluator.PartialEval(lambda);
 

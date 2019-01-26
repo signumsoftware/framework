@@ -267,7 +267,7 @@ namespace Signum.Entities.Reflection
 
     public abstract class EqualityComparerResolverWithCache : IEqualityComparerResolver
     {
-        Dictionary<(Type, PropertyInfo?), IEqualityComparer> cache = new Dictionary<(Type, PropertyInfo?), IEqualityComparer>();
+        readonly Dictionary<(Type, PropertyInfo?), IEqualityComparer> cache = new Dictionary<(Type, PropertyInfo?), IEqualityComparer>();
         public virtual IEqualityComparer GetEqualityComparer(Type type, PropertyInfo? pi)
         {
             if (cache.TryGetValue((type, pi), out var comparer))
@@ -280,7 +280,7 @@ namespace Signum.Entities.Reflection
                 if (comp is ICompletableComparer cc)
                     cc.Complete(this, pi);
 
-                return comp! /*CSBUG*/;
+                return comp;
             }
         }
 

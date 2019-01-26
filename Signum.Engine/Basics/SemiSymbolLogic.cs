@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -49,8 +49,8 @@ namespace Signum.Engine.Extensions.Basics
                           (c, s) => { s.SetIdAndProps(c); return s; },
                           "caching " + typeof(T).Name);
 
-                        SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key));
-                        return result.ToDictionary(a => a.Key);
+                        SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key!));
+                        return result.ToDictionary(a => a.Key!);
                     }
                 },
                 new InvalidateWith(typeof(T)),
@@ -74,7 +74,7 @@ namespace Signum.Engine.Extensions.Basics
                 }
         }
 
-        static SqlPreCommand Schema_Generating()
+        static SqlPreCommand? Schema_Generating()
         {
             Table table = Schema.Current.Table<T>();
 
@@ -89,12 +89,12 @@ namespace Signum.Engine.Extensions.Basics
 
             using (CultureInfoUtils.ChangeCulture(Schema.Current.ForceCultureInfo))
                 foreach (var item in should)
-                    item.Name = item.NiceToString();
+                    item.Name = item.NiceToString()!;
 
             return should;
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             Table table = Schema.Current.Table<T>();
 
@@ -103,8 +103,8 @@ namespace Signum.Engine.Extensions.Basics
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name, Spacing.Double,
-                    should.ToDictionary(s => s.Key),
-                    current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
+                    should.ToDictionary(s => s.Key!),
+                    current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key!),
                     createNew: (k, s) => table.InsertSqlSync(s),
                     removeOld: (k, c) => table.DeleteSqlSync(c, s => s.Key == c.Key),
                     mergeBoth: (k, s, c) =>

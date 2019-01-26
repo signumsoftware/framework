@@ -134,8 +134,8 @@ namespace Signum.Engine
                 cmd.Connection = overridenConnection;
             else
             {
-                cmd.Connection = (SqlConnection)Transaction.CurrentConnection;
-                cmd.Transaction = (SqlTransaction)Transaction.CurrentTransaccion;
+                cmd.Connection = (SqlConnection)Transaction.CurrentConnection!;
+                cmd.Transaction = (SqlTransaction)Transaction.CurrentTransaccion!;
             }
 
             cmd.CommandText = preCommand.Sql;
@@ -394,9 +394,9 @@ namespace Signum.Engine
         {
             using (SqlConnection? con = EnsureConnection())
             using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection,
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
                 options,
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion))
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion!))
             using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
             {
                 bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;

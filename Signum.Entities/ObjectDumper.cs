@@ -44,8 +44,8 @@ namespace Signum.Entities
             HashSet<object> objects = new HashSet<Object>(ReferenceEqualityComparer<object>.Default);
             public StringBuilder Sb = new StringBuilder();
             int level = 0;
-            ShowIgnoredFields showIgnoredFields;
-            bool showByteArrays;
+            readonly ShowIgnoredFields showIgnoredFields;
+            readonly bool showByteArrays;
 
             public DumpVisitor(ShowIgnoredFields showIgnoredFields, bool showByteArrays)
             {
@@ -69,7 +69,7 @@ namespace Signum.Entities
                     return;
                 }
 
-                Type t = o!.GetType(); /*CSBUG*/
+                Type t = o.GetType();
 
                 if (IsDelegate(t))
                 {

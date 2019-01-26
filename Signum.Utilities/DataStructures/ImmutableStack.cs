@@ -5,10 +5,7 @@ using System.Threading;
 
 namespace Signum.Utilities.DataStructures
 {
-   
-
     public class ImmutableStack<T> : IEnumerable<T> 
-        where T : object /*CSBUG*/
     {
         class ImmutableFullStack : ImmutableStack<T>
         {

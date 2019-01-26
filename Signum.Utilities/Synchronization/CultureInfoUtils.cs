@@ -39,7 +39,7 @@ namespace Signum.Utilities
             return ChangeCulture(CultureInfo.GetCultureInfo(cultureName));
         }
 
-        public static IDisposable? ChangeCulture(CultureInfo ci)
+        public static IDisposable? ChangeCulture(CultureInfo? ci)
         {
             if (ci == null)
                 return null;

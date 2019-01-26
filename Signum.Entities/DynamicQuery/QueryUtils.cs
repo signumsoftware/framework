@@ -430,7 +430,7 @@ namespace Signum.Entities.DynamicQuery
                 if (!idAndToStr)
                     return Expression.Property(expression, "Entity");
             }
-            return expression!; /*CSBUG*/
+            return expression;
         }
 
         internal static Expression BuildLiteNulifyUnwrapPrimaryKey(this Expression expression, PropertyRoute[] routes)

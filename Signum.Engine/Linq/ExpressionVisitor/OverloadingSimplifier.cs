@@ -248,7 +248,7 @@ namespace Signum.Engine.Linq
                 {
                     var source = Visit(m.GetArgument("source"));
 
-                    Type elemType = source.Type.ElementType();
+                    Type elemType = source.Type.ElementType()!;
 
                     ParameterExpression pe = Expression.Parameter(elemType);
 
@@ -261,7 +261,7 @@ namespace Signum.Engine.Linq
                 {
                     var source = Visit(m.GetArgument("source"));
 
-                    Type elemType = source.Type.ElementType();
+                    Type elemType = source.Type.ElementType()!;
 
                     ParameterExpression pe = Expression.Parameter(elemType);
 
@@ -279,7 +279,7 @@ namespace Signum.Engine.Linq
                 if (mi.Name.Contains("Last"))
                 {
                     var source = Visit(m.GetArgument("source"));
-                    var predicate = (LambdaExpression)Visit(m.TryGetArgument("predicate").StripQuotes());
+                    var predicate = (LambdaExpression)Visit(m.TryGetArgument("predicate")?.StripQuotes());
 
                     Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source);
 

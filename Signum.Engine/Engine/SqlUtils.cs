@@ -218,7 +218,7 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
             return ident;
         }
 
-        public static SqlPreCommand RemoveDuplicatedIndices()
+        public static SqlPreCommand? RemoveDuplicatedIndices()
         {
             var plainData = (from s in Database.View<SysSchemas>()
                              from t in s.Tables()
@@ -238,7 +238,7 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
                              }).ToList();
 
             var tables = plainData.AgGroupToDictionary(a => a.table,
-                gr => gr.AgGroupToDictionary(a => new { a.index, a.is_unique },
+                gr => gr.AgGroupToDictionary(a => new { a.index, a.is_unique }, 
                     gr2 => gr2.OrderBy(a => a.index_column_id)
                         .Select(a => a.column + (a.is_included_column ? "(K)" : "(I)") + (a.is_descending_key ? "(D)" : "(A)"))
                         .ToString("|")));
@@ -248,10 +248,10 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
                 .Where(gr => gr.Count() > 1)
                 .Select(gr =>
                 {
-                    var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index.StartsWith("IX")).ThenByDescending(a => a.index).First();
+                    var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index!/*CSBUG*/.StartsWith("IX")).ThenByDescending(a => a.index).First();
 
                     return gr.Where(g => g != best)
-                        .Select(g => SqlBuilder.DropIndex(t.Key, g.index))
+                        .Select(g => SqlBuilder.DropIndex(t.Key!, g.index!))
                         .PreAnd(new SqlPreCommandSimple("-- DUPLICATIONS OF {0}".FormatWith(best.index))).Combine(Spacing.Simple);
                 })
             ).Combine(Spacing.Double);

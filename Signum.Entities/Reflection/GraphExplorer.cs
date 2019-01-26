@@ -157,7 +157,7 @@ namespace Signum.Entities.Reflection
                 if (m is ModifiableEntity me)
                     me.SetTemporalErrors(null);
 
-                m!.PreSaving(ctx); /*CSBUG*/
+                m.PreSaving(ctx);
             });
         }
 
@@ -194,7 +194,7 @@ namespace Signum.Entities.Reflection
         }
 
 
-        static string[] colors =
+        static readonly string[] colors =
         {
              "aquamarine1",  "aquamarine4", "blue", "blueviolet",
              "brown4", "burlywood", "cadetblue1", "cadetblue",

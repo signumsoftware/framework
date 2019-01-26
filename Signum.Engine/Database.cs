@@ -123,7 +123,7 @@ namespace Signum.Engine
             {
                 if (EntityCache.Created)
                 {
-                    T cached = EntityCache.Get<T>(id);
+                    T? cached = EntityCache.Get<T>(id);
 
                     if (cached != null)
                         return cached;
@@ -143,7 +143,7 @@ namespace Signum.Engine
                         using (new EntityCache())
                         using (var r = EntityCache.NewRetriever())
                         {
-                            result = r.Request<T>(id);
+                            result = r.Request<T>(id)!;
 
                             r.CompleteAll();
                         }
@@ -171,7 +171,7 @@ namespace Signum.Engine
             {
                 if (EntityCache.Created)
                 {
-                    T cached = EntityCache.Get<T>(id);
+                    T? cached = EntityCache.Get<T>(id);
 
                     if (cached != null)
                         return cached;
@@ -191,7 +191,7 @@ namespace Signum.Engine
                         using (new EntityCache())
                         using (var r = EntityCache.NewRetriever())
                         {
-                            result = r.Request<T>(id);
+                            result = r.Request<T>(id)!;
 
                             await r.CompleteAllAsync(token);
                         }
@@ -471,7 +471,7 @@ namespace Signum.Engine
                             using (new EntityCache())
                             using (var r = EntityCache.NewRetriever())
                             {
-                                result = cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                                result = cc.GetAllIds().Select(id => r.Request<T>(id)!).ToList();
 
                                 r.CompleteAll();
                             }
@@ -510,7 +510,7 @@ namespace Signum.Engine
                             using (new EntityCache())
                             using (var r = EntityCache.NewRetriever())
                             {
-                                result = cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                                result = cc.GetAllIds().Select(id => r.Request<T>(id)!).ToList();
 
                                 await r.CompleteAllAsync(token);
                             }
@@ -687,7 +687,7 @@ namespace Signum.Engine
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
                     {
-                        result = ids.Select(id => rr.Request<T>(id)).ToList();
+                        result = ids.Select(id => rr.Request<T>(id)!).ToList();
 
                         rr.CompleteAll();
                     }
@@ -781,7 +781,7 @@ namespace Signum.Engine
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
                     {
-                        result = ids.Select(id => rr.Request<T>(id)).ToList();
+                        result = ids.Select(id => rr.Request<T>(id)!).ToList();
 
                         await rr.CompleteAllAsync(token);
                     }

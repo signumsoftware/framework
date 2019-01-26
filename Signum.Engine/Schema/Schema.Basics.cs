@@ -147,7 +147,7 @@ namespace Signum.Engine.Maps
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
             inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
             updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));
-            saveCollections = new ResetLazy<CollectionsCache>(() => CollectionsCache.InitializeCollections(this));
+            saveCollections = new ResetLazy<CollectionsCache?>(() => CollectionsCache.InitializeCollections(this));
         }
 
         public Field GetField(MemberInfo member)
@@ -325,7 +325,7 @@ namespace Signum.Engine.Maps
             return new[] { UniqueIndex };
         }
 
-        public virtual UniqueIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute attribute)
+        public virtual UniqueIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
         {
             if (attribute == null)
                 return null;

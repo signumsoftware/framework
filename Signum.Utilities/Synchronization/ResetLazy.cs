@@ -29,7 +29,7 @@ namespace Signum.Utilities
 
 
     [ComVisible(false)]
-    public class ResetLazy<T>: IResetLazy where T : class
+    public class ResetLazy<T>: IResetLazy
     {
         class Box
         {

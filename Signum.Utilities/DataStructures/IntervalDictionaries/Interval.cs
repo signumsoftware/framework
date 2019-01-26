@@ -277,7 +277,9 @@ namespace Signum.Utilities.DataStructures
             if (temp != 0)
                 return temp;
 
+#pragma warning disable CS8629 // Nullable value type may be null. CSBUG
             return min.Value.CompareTo(other.min.Value);
+#pragma warning restore CS8629 // Nullable value type may be null.
         }
 
         public int CompareTo(object obj)

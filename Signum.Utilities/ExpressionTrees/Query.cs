@@ -66,7 +66,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (expression is ConstantExpression ce && ce.Value == this)
                 return this.GetType().TypeName().CleanIdentifiers();
             else
-                return expression!/*CSBUG*/.ToString();
+                return expression.ToString();
         }
 
         public string QueryText

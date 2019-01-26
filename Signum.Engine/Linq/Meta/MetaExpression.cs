@@ -67,9 +67,9 @@ namespace Signum.Engine.Linq
             get { return typeof(ModifiableEntity).IsAssignableFrom(Type); }
         }
 
-        public readonly Meta Meta;
+        public Meta Meta { get; private set; }
 
-        public MetaExpression(Type type, Meta? meta):
+        public MetaExpression(Type type, Meta meta):
             base(MetaExpressionType.MetaExpression, type)
         {
             this.Meta = meta;

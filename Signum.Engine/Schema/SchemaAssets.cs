@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
 using Signum.Engine.SchemaInfoTables;
@@ -7,18 +7,18 @@ namespace Signum.Engine.Maps
 {
     public class SchemaAssets
     {
-        internal SqlPreCommand Schema_Generating()
+        internal SqlPreCommand? Schema_Generating()
         {
-            SqlPreCommand views = GenerateViews();
-            SqlPreCommand procedures = GenerateProcedures();
+            SqlPreCommand? views = GenerateViews();
+            SqlPreCommand? procedures = GenerateProcedures();
 
             return SqlPreCommand.Combine(Spacing.Triple, views, procedures);
         }
 
-        internal SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        internal SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
-            SqlPreCommand views = SyncViews(replacements);
-            SqlPreCommand procedures = SyncProcedures(replacements);
+            SqlPreCommand? views = SyncViews(replacements);
+            SqlPreCommand? procedures = SyncProcedures(replacements);
 
             return SqlPreCommand.Combine(Spacing.Triple, views, procedures);
         }
@@ -33,6 +33,12 @@ namespace Signum.Engine.Maps
         {
             public ObjectName Name;
             public string Definition;
+
+            public View(ObjectName name, string definition)
+            {
+                Name = name;
+                Definition = definition;
+            }
 
             public SqlPreCommandSimple CreateView()
             {
@@ -53,19 +59,15 @@ namespace Signum.Engine.Maps
         public Dictionary<ObjectName, View> Views = new Dictionary<ObjectName, View>();
         public View IncludeView(ObjectName viewName, string viewDefinition)
         {
-            return Views[viewName] = new View
-            {
-                Name = viewName,
-                Definition = viewDefinition
-            };
+            return Views[viewName] = new View(viewName, viewDefinition);
         }
 
-        SqlPreCommand GenerateViews()
+        SqlPreCommand? GenerateViews()
         {
             return Views.Values.Select(v => v.CreateView()).Combine(Spacing.Double);
         }
 
-        SqlPreCommand SyncViews(Replacements replacements)
+        SqlPreCommand? SyncViews(Replacements replacements)
         {
             var oldView = Schema.Current.DatabaseNames().SelectMany(db =>
             {
@@ -98,12 +100,7 @@ namespace Signum.Engine.Maps
 
         public Procedure IncludeStoreProcedure(ObjectName procedureName, string procedureCodeAndArguments)
         {
-            return StoreProcedures[procedureName] =  new Procedure
-            {
-                ProcedureName = procedureName,
-                ProcedureCodeAndArguments = procedureCodeAndArguments,
-                ProcedureType = "PROCEDURE"
-            };
+            return StoreProcedures[procedureName] = new Procedure("PROCEDURE", procedureName, procedureCodeAndArguments);
         }
 
         public Procedure IncludeUserDefinedFunction(string functionName, string functionCodeAndArguments)
@@ -113,20 +110,15 @@ namespace Signum.Engine.Maps
 
         public Procedure IncludeUserDefinedFunction(ObjectName functionName, string functionCodeAndArguments)
         {
-            return StoreProcedures[functionName] = new Procedure
-            {
-                ProcedureName = functionName,
-                ProcedureCodeAndArguments = functionCodeAndArguments,
-                ProcedureType = "FUNCTION"
-            };
+            return StoreProcedures[functionName] = new Procedure("FUNCTION", functionName, functionCodeAndArguments);
         }
 
-        SqlPreCommand GenerateProcedures()
+        SqlPreCommand? GenerateProcedures()
         {
             return StoreProcedures.Select(p => p.Value.CreateSql()).Combine(Spacing.Double);
         }
 
-        SqlPreCommand SyncProcedures(Replacements replacements)
+        SqlPreCommand? SyncProcedures(Replacements replacements)
         {
             var oldProcedures = Schema.Current.DatabaseNames().SelectMany(db =>
             {
@@ -155,6 +147,13 @@ namespace Signum.Engine.Maps
             public string ProcedureType;
             public ObjectName ProcedureName;
             public string ProcedureCodeAndArguments;
+
+            public Procedure(string procedureType, ObjectName procedureName, string procedureCodeAndArguments)
+            {
+                ProcedureType = procedureType;
+                ProcedureName = procedureName;
+                ProcedureCodeAndArguments = procedureCodeAndArguments;
+            }
 
             public SqlPreCommandSimple CreateSql()
             {

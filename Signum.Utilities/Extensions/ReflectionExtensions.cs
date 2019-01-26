@@ -43,7 +43,7 @@ namespace Signum.Utilities
                 (m is MethodInfo mi) ? mi.ReturnType :
                 (m is ConstructorInfo ci) ? ci.DeclaringType :
                 (m is EventInfo ei) ? ei.EventHandlerType :
-                 throw new UnexpectedValueException(m! /*CSBUG*/);
+                 throw new UnexpectedValueException(m);
         }
 
         public static bool HasAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute

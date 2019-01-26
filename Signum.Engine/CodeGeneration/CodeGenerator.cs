@@ -63,7 +63,7 @@ namespace Signum.Engine.CodeGeneration
                 if (selected.IsNullOrEmpty())
                     yield break;
 
-                string? moduleName = GetDefaultModuleName(selected, solutionName);
+                string moduleName = GetDefaultModuleName(selected, solutionName)!;
                 SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
 
                 moduleName = Console.ReadLine().DefaultText(moduleName!);

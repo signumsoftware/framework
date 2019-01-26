@@ -132,7 +132,7 @@ namespace Signum.Utilities.ExpressionTrees
                 .Replace("<>h__TransparentIdentifier", "τ");
         }
 
-        public static string Value(object obj)
+        public static string Value(object? obj)
         {
             if (obj == null)
                 return "null";
@@ -142,8 +142,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             if (obj is string s)
                 return ToSrtringLiteral(s);
-
-            obj = obj!/*CSBUG*/;
+            
             if (obj.GetType().IsEnum)
                 return $"{obj.GetType().FullName}.{obj.ToString()}";
 

@@ -50,7 +50,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             var value = await provider.ExecuteAsync(mc2, cancellationToken);
 
-            return (R)value;
+            return (R)value!;
         }
 
         static Task<R> BindAsyncWithoutCancellationToken___<R>(Expression<Func<R>> bind)

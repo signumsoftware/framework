@@ -209,7 +209,7 @@ namespace Signum.Entities.Reflection
             if (e is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = GetMemberListBase(e! /*CSBUG*/);
+            MemberInfo[] result = GetMemberListBase(e);
 
             return result;
         }

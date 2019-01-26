@@ -270,7 +270,7 @@ namespace Signum.Utilities
             return t.Value;
         }
 
-        public static T ThrowIfNull<T>([EnsuresNotNull]this T t, string message)
+        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, string message)
             where T : class
         {
             if (t == null)

@@ -80,7 +80,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned)}");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)}");
         }
 
         static string Period(SystemVersionedInfo sv) {
@@ -98,7 +98,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}))");
         }
 
         public static SqlPreCommand AlterTableDisableSystemVersioning(ObjectName tableName)
@@ -401,7 +401,7 @@ WHERE {primaryKey.Name} NOT IN
             var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null;
             var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
 
-            var tableName = forHistoryTable ? index.Table.SystemVersioned.TableName : index.Table.Name;
+            var tableName = forHistoryTable ? index.Table.SystemVersioned!.TableName : index.Table.Name;
 
             return new SqlPreCommandSimple($"CREATE {indexType} {index.IndexName} ON {tableName}({columns}){include}{where}");
         }

@@ -124,7 +124,9 @@ namespace Signum.Entities
         }
 
         static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property CSBUG
         [HiddenProperty, ExpressionField("ToStringPropertyExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public string ToStringProperty
         {
             get

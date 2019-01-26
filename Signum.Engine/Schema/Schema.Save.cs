@@ -353,7 +353,7 @@ namespace Signum.Engine.Maps
 
         internal static FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity i) => i.id);
 
-        internal void UpdateMany(List<Entity> list, DirectedGraph<Entity> backEdges)
+        internal void UpdateMany(List<Entity> list, DirectedGraph<Entity>? backEdges)
         {
             using (HeavyProfiler.LogNoStackTrace("UpdateMany", () => this.Type.TypeName()))
             {
@@ -369,8 +369,8 @@ namespace Signum.Engine.Maps
             public Func<string, bool, string> SqlUpdatePattern;
             public Func<Entity, long, Forbidden, string, List<DbParameter>> UpdateParameters;
 
-            ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>> updateCache =
-                new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>>();
+            ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>> updateCache =
+                new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>>();
 
             public UpdateCache(Table table, Func<string, bool, string> sqlUpdatePattern, Func<Entity, long, Forbidden, string, List<DbParameter>> updateParameters)
             {
@@ -379,12 +379,12 @@ namespace Signum.Engine.Maps
                 UpdateParameters = updateParameters;
             }
 
-            public Action<List<Entity>, DirectedGraph<Entity>> GetUpdater(int numElements)
+            public Action<List<Entity>, DirectedGraph<Entity>?> GetUpdater(int numElements)
             {
                 return updateCache.GetOrAdd(numElements, num => num == 1 ? GenerateUpdate() : GetUpdateMultiple(num));
             }
 
-            Action<List<Entity>, DirectedGraph<Entity>> GenerateUpdate()
+            Action<List<Entity>, DirectedGraph<Entity>?> GenerateUpdate()
             {
                 string sqlUpdate = SqlUpdatePattern("", false);
 
@@ -427,7 +427,7 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            Action<List<Entity>, DirectedGraph<Entity>> GetUpdateMultiple(int num)
+            Action<List<Entity>, DirectedGraph<Entity>?> GetUpdateMultiple(int num)
             {
                 string sqlMulti = new StringBuilder()
                       .AppendLine("DECLARE @NotFound TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpperInvariant() + ");")
@@ -602,7 +602,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        ResetLazy<CollectionsCache> saveCollections;
+        ResetLazy<CollectionsCache?> saveCollections;
 
 
         public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "")

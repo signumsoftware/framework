@@ -697,10 +697,8 @@ namespace Signum.Engine.Maps
             Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent!.Type, new CleanMeta(route.Parent!.TryGetImplementations(), new[] { route.Parent! })));
 
             MetaExpression? me = e as MetaExpression;
-            if (me == null)
-                return null;
 
-            return me.Meta.Implementations;
+            return me?.Meta.Implementations;
         }
 
         /// <summary>

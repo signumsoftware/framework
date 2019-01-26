@@ -113,7 +113,7 @@ namespace Signum.Utilities
         {
             long beforeStart = PerfCounter.Ticks;
          
-            if (enabled == false || TimeLimit.Value < beforeStart)
+            if (enabled == false || TimeLimit! < beforeStart)
             {
                 enabled = false;
                 Clean();

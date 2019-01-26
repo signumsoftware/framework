@@ -292,7 +292,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public SystemVersionedInfo? ToSystemVersionedInfo(SystemVersionedAttribute att, ObjectName tableName)
+        public SystemVersionedInfo? ToSystemVersionedInfo(SystemVersionedAttribute? att, ObjectName tableName)
         {
             if (att == null)
                 return null;
@@ -437,7 +437,7 @@ namespace Signum.Engine.Maps
 
                 //field name generation
                 NameSequence name;
-                ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
+                ColumnNameAttribute? vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
                 if (vc != null && vc.Name.HasText())
                     name = NameSequence.Void.Add(vc.Name);
                 else if (route.PropertyRouteType != PropertyRouteType.MListItems)
@@ -801,7 +801,7 @@ namespace Signum.Engine.Maps
             return schema;
         }
 
-        public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name, TableNameAttribute tn)
+        public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name, TableNameAttribute? tn)
         {
             SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
 
@@ -846,7 +846,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public virtual string GenerateBackReferenceName(Type type, BackReferenceColumnNameAttribute attribute)
+        public virtual string GenerateBackReferenceName(Type type, BackReferenceColumnNameAttribute? attribute)
         {
             return attribute?.Name ?? "ParentID";
         }

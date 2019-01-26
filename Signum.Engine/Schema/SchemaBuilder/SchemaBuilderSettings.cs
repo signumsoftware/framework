@@ -312,7 +312,7 @@ namespace Signum.Engine.Maps
             return defaultScale.TryGetS(sqlDbType);
         }
 
-        internal string? GetCollate(SqlDbTypeAttribute att)
+        internal string? GetCollate(SqlDbTypeAttribute? att)
         {
             if (att != null && att.Collation != null)
                 return att.Collation;

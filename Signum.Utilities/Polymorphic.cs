@@ -226,52 +226,62 @@ namespace Signum.Utilities
 
 
         public static void Register<T, S>(this Polymorphic<Action<T>> polymorphic, Action<S> action) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), t => action((S)t));
         }
 
         public static void Register<T, S, P0>(this Polymorphic<Action<T, P0>> polymorphic, Action<S, P0> action) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0) => action((S)t, p0));
         }
 
         public static void Register<T, S, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, Action<S, P0, P1> action) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0, p1) => action((S)t, p0, p1));
         }
 
         public static void Register<T, S, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, Action<S, P0, P1, P2> action) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2) => action((S)t, p0, p1, p2));
         }
 
         public static void Register<T, S, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, Action<S, P0, P1, P2, P3> action) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2, p3) => action((S)t, p0, p1, p2, p3));
         }
 
 
         public static void Register<T, S, R>(this Polymorphic<Func<T, R>> polymorphic, Func<S, R> func) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), t => func((S)t));
         }
 
         public static void Register<T, S, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, Func<S, P0, R> func) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0) => func((S)t, p0));
         }
 
         public static void Register<T, S, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, Func<S, P0, P1, R> func) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0, p1) => func((S)t, p0, p1));
         }
 
         public static void Register<T, S, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, Func<S, P0, P1, P2, R> func) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2) => func((S)t, p0, p1, p2));
         }
 
         public static void Register<T, S, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, Func<S, P0, P1, P2, P3, R> func) where S : T
+            where T : class
         {
             polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2, p3) => func((S)t, p0, p1, p2, p3));
         }

@@ -1055,7 +1055,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             return true;
         }
 
-        private static bool IdenticalColumns(DiffTable dif, IColumn[] modColumns, List<DiffIndexColumn> diffColumns)
+        private static bool IdenticalColumns(DiffTable dif, IColumn[]? modColumns, List<DiffIndexColumn> diffColumns)
         {
             if ((modColumns?.Length ?? 0) != diffColumns.Count)
                 return false;
@@ -1065,7 +1065,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
             var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
 
-            var perfect = difColumns.ZipOrDefault(modColumns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
+            var perfect = difColumns.ZipOrDefault(modColumns!, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
             return perfect;
         }
 

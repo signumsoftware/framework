@@ -8,7 +8,7 @@ namespace Signum.Utilities
 {
     public static class Statics
     {
-        static Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
+        static readonly Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
 
         public static ThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)
         {
@@ -56,7 +56,7 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("The thread variable \r\n" + errors);
         }
 
-        static Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
+        static readonly Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
 
         public static SessionVariable<T> SessionVariable<T>(string name)
         {
@@ -101,7 +101,7 @@ namespace Signum.Utilities
         public object? UntypedValue
         {
             get { return Value; }
-            set { Value = (T)value; }
+            set { Value = (T)value!; }
         }
 
         public bool IsClean
@@ -138,7 +138,7 @@ namespace Signum.Utilities
 
     public class ThreadVariable<T> : Variable<T>, IThreadVariable
     {
-        AsyncLocal<T> store = new AsyncLocal<T>();
+        readonly AsyncLocal<T> store = new AsyncLocal<T>();
 
         internal ThreadVariable(string name) : base(name) { }
 
@@ -158,7 +158,7 @@ namespace Signum.Utilities
 
     public abstract class SessionVariable<T>: Variable<T>
     {
-        public Func<T> ValueFactory { get; set; }
+        public abstract Func<T> ValueFactory { get; set; }
 
         protected internal SessionVariable(string name)
             : base(name)
@@ -191,7 +191,7 @@ namespace Signum.Utilities
 
         class VoidVariable<T> : SessionVariable<T>
         {
-            //public override Func<T> ValueFactory { get; set; }
+            public override Func<T> ValueFactory { get; set; }
 
             public VoidVariable(string name)
                 : base(name)
@@ -227,7 +227,7 @@ namespace Signum.Utilities
 
         class SingletonVariable<T> : SessionVariable<T>
         {
-            //public override Func<T> ValueFactory { get; set; }
+            public override Func<T> ValueFactory { get; set; }
 
             public SingletonVariable(string name)
                 : base(name)
@@ -238,7 +238,7 @@ namespace Signum.Utilities
                 get
                 {
                     if (singletonSession.TryGetValue(Name, out object? result))
-                        return (T)result;
+                        return (T)result!;
 
                     return GetDefaulValue();
                 }
@@ -289,20 +289,19 @@ namespace Signum.Utilities
 
         class OverrideableVariable<T> : SessionVariable<T>
         {
-            SessionVariable<T> variable;
+            readonly SessionVariable<T> variable;
 
             public OverrideableVariable(SessionVariable<T> variable)
                 : base(variable.Name)
             {
                 this.variable = variable;
             }
-
-            /*CSBUG*/
-            //public override Func<T> ValueFactory
-            //{
-            //    get { return variable.ValueFactory; }
-            //    set { variable.ValueFactory = value; }
-            //}
+            
+            public override Func<T> ValueFactory
+            {
+                get { return variable.ValueFactory; }
+                set { variable.ValueFactory = value; }
+            }
 
             public override T Value
             {
@@ -313,7 +312,7 @@ namespace Signum.Utilities
                     if (dic != null)
                     {
                         if (dic.TryGetValue(Name, out object? result))
-                            return (T)result;
+                            return (T)result!;
 
                         return GetDefaulValue();
                     }

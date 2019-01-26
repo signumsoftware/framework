@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
         T Add<T>(T expression) where T : Expression?
         {
             if (expression == null)
-                return null;
+                return null!;
 
             this.candidates.Add(expression);
             return expression;

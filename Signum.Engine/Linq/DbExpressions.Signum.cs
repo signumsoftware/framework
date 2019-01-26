@@ -454,10 +454,10 @@ namespace Signum.Engine.Linq
     internal class AdditionalFieldExpression : DbExpression
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
-        public readonly NewExpression ExternalPeriod;
+        public readonly NewExpression? ExternalPeriod;
         public readonly PropertyRoute Route;
 
-        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, NewExpression externalPeriod, PropertyRoute route)
+        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, NewExpression? externalPeriod, PropertyRoute route)
             : base(DbExpressionType.AdditionalField, type)
         {
             this.BackID = backID;

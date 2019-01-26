@@ -15,10 +15,10 @@ namespace Signum.Engine.CodeGeneration
 {
     public class ReactCodeGenerator
     {
-        public string SolutionName;
-        public string SolutionFolder;
+        public string SolutionName = null!;
+        public string SolutionFolder = null!;
 
-        public Schema CurrentSchema;
+        public Schema CurrentSchema = null!;
 
         public virtual void GenerateReactFromEntities()
         {
@@ -73,7 +73,7 @@ namespace Signum.Engine.CodeGeneration
             }
         }
 
-        protected virtual void WriteFile(Func<string> getContent, Func<string> getFileName, ref bool? overwriteFiles)
+        protected virtual void WriteFile(Func<string?> getContent, Func<string> getFileName, ref bool? overwriteFiles)
         {
             var content = getContent();
             if (content == null)
@@ -81,7 +81,6 @@ namespace Signum.Engine.CodeGeneration
 
 
             var fileName = getFileName();
-
 
             FileTools.CreateParentDirectory(fileName);
             if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
@@ -150,7 +149,7 @@ namespace Signum.Engine.CodeGeneration
 
                 var directories = Directory.GetDirectories(GetProjectFolder(), "App\\").Select(a => Path.GetFileName(a));
 
-                string moduleName;
+                string? moduleName;
                 if (directories.IsEmpty())
                 {
                     moduleName = AskModuleName(solutionName, selectedTypes);
@@ -168,11 +167,7 @@ namespace Signum.Engine.CodeGeneration
                 if (!moduleName.HasText())
                     yield break;
 
-                yield return new Module
-                {
-                    ModuleName = moduleName,
-                    Types = selectedTypes.ToList()
-                };
+                yield return new Module(moduleName, selectedTypes.ToList());
 
                 types.SetRange(selectedTypes, a => a, a => true);
             }
@@ -181,10 +176,10 @@ namespace Signum.Engine.CodeGeneration
 
         private static string AskModuleName(string solutionName, Type[] selected)
         {
-            string moduleName = CodeGenerator.GetDefaultModuleName(selected, solutionName);
+            string? moduleName = CodeGenerator.GetDefaultModuleName(selected, solutionName);
             SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
 
-            moduleName = Console.ReadLine().DefaultText(moduleName);
+            moduleName = Console.ReadLine().DefaultText(moduleName!);
             return moduleName;
         }
 
@@ -195,7 +190,7 @@ namespace Signum.Engine.CodeGeneration
             return assembly.GetTypes().Where(t => t.IsModifiableEntity() && !t.IsAbstract && !typeof(MixinEntity).IsAssignableFrom(t)).ToList();
         }
 
-        protected virtual string WriteServerFile(Module mod)
+        protected virtual string? WriteServerFile(Module mod)
         {
             if (!ShouldWriteServerFile(mod))
                 return null;
@@ -248,7 +243,7 @@ namespace Signum.Engine.CodeGeneration
         }
 
 
-        protected virtual string WriteControllerFile(Module mod)
+        protected virtual string? WriteControllerFile(Module mod)
         {
             if (!ShouldWriteControllerFile(mod))
                 return null;
@@ -434,7 +429,7 @@ namespace Signum.Engine.CodeGeneration
 
             foreach (var pi in GetProperties(type))
             {
-                string prop = WriteProperty(pi, v);
+                string? prop = WriteProperty(pi, v);
                 if (prop != null)
                     sb.AppendLine(prop.Indent(8));
             }
@@ -447,7 +442,7 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual string WriteProperty(PropertyInfo pi, string v)
+        protected virtual string? WriteProperty(PropertyInfo pi, string v)
         {
             if (pi.PropertyType.IsLite() || pi.PropertyType.IsIEntity())
                 return WriteEntityProperty(pi, v);
@@ -466,7 +461,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteMListProperty(PropertyInfo pi, string v)
         {
-            var elementType = pi.PropertyType.ElementType().CleanType();
+            var elementType = pi.PropertyType.ElementType()!.CleanType();
 
             if (!(elementType.IsLite() || elementType.IsModifiableEntity()))
                 return $"{{ /* {pi.PropertyType.TypeName()} not supported */ }}";
