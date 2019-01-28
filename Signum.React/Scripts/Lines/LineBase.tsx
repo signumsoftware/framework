@@ -117,7 +117,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
   }
 
   get mandatoryClass() {
-    if (this.state.mandatory && !this.state.readOnly && (this.state.ctx.value == null || this.state.ctx.value == ""))
+    if (this.state.mandatory && !this.state.readOnly && (this.state.ctx.value == null || this.state.ctx.value === ""))
       return "sf-mandatory"
 
     return null;
