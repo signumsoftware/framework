@@ -1,4 +1,4 @@
-﻿//Thanks to https://github.com/react-bootstrap/react-bootstrap
+//Thanks to https://github.com/react-bootstrap/react-bootstrap
 
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
@@ -10,6 +10,9 @@ import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
 import { BsSize, BsColor } from './index';
 import { ErrorBoundary } from './ErrorBoundary';
+import { OperationIcon } from '../Operations';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 
 export interface ModalProps extends ModelDialogProps {
 
@@ -347,6 +350,16 @@ interface ModalHeaderButtonsProps {
   onCancel?: () => void;
   closeBeforeTitle?: boolean;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  okButtonProps?: {
+    color?: BsColor;
+    classes?: string;
+    icon?: OperationIcon;
+  };
+  closeButtonProps?: {
+    color?: BsColor;
+    classes?: string;
+    icon?: OperationIcon;
+  };
 }
 
 export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
@@ -357,6 +370,31 @@ export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps>
         <span aria-hidden="true">×</span>
       </button>;
 
+    let okContent: JSX.Element | string = JavascriptMessage.ok.niceToString();
+    if (this.props.okButtonProps && this.props.okButtonProps.icon) {
+      switch (this.props.okButtonProps.icon.align) {
+        case "left":
+          okContent = (<span><FontAwesomeIcon icon={this.props.okButtonProps.icon.icon} fixedWidth /> {JavascriptMessage.ok.niceToString()}</span>);
+          break;
+        case "right":
+          okContent = (<span>{JavascriptMessage.ok.niceToString()} <FontAwesomeIcon icon={this.props.okButtonProps.icon.icon} fixedWidth /></span>);
+          break;
+      }
+    }
+
+    let closeContent: JSX.Element | string = JavascriptMessage.cancel.niceToString();
+    if (this.props.closeButtonProps && this.props.closeButtonProps.icon) {
+      switch (this.props.closeButtonProps.icon.align) {
+        case "left":
+          closeContent = (<span><FontAwesomeIcon icon={this.props.closeButtonProps.icon.icon} fixedWidth /> {JavascriptMessage.cancel.niceToString()}</span>);
+          break;
+        case "right":
+          closeContent = (<span>{JavascriptMessage.cancel.niceToString()} <FontAwesomeIcon icon={this.props.closeButtonProps.icon.icon} fixedWidth /></span>);
+          break;
+      }
+    }
+
+
     return (
       <div className="modal-header" {...p.htmlAttributes}>
         {p.closeBeforeTitle && close}
@@ -366,12 +404,16 @@ export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps>
         {!p.closeBeforeTitle && close}
         {(this.props.onCancel || this.props.onOk) &&
           <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
-            {this.props.onOk && <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={this.props.okDisabled} onClick={this.props.onOk}>
-              {JavascriptMessage.ok.niceToString()}
+          {this.props.onOk && <button
+            className={classes("btn", "btn-" + ((this.props.okButtonProps && this.props.okButtonProps.color) || "primary"), "sf-entity-button sf-close-button sf-ok-button", this.props.okButtonProps && this.props.okButtonProps.classes)}
+            disabled={this.props.okDisabled} onClick={this.props.onOk}>
+            {okContent}
             </button>
             }
-            {this.props.onCancel && <button className="btn btn-light sf-entity-button sf-close-button sf-cancel-button" onClick={this.props.onCancel}>
-              {JavascriptMessage.cancel.niceToString()}
+          {this.props.onCancel && <button
+            className={classes("btn", "btn-" + ((this.props.closeButtonProps && this.props.closeButtonProps.color) || "light"), "sf-entity-button sf-close-button sf-cancel-button", this.props.closeButtonProps && this.props.closeButtonProps.classes)}
+            onClick={this.props.onCancel}>
+            {closeContent}
             </button>
             }
           </div>

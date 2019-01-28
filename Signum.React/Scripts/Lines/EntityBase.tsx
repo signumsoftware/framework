@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -12,6 +12,7 @@ import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+export let TitleManager = { useTitle: true };
 
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
@@ -160,7 +161,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     return (
       <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        title={EntityControlMessage.View.niceToString()}>
+        title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
         <FontAwesomeIcon icon="arrow-right" />
       </a>
     );
@@ -230,14 +231,14 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }).done();
   };
 
-  renderCreateButton(btn: boolean) {
+  renderCreateButton(btn: boolean, createMessage?: string) {
     if (!this.state.create || this.state.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={EntityControlMessage.Create.niceToString()}>
+        title={TitleManager.useTitle ? createMessage || EntityControlMessage.Create.niceToString() : undefined}>
         <FontAwesomeIcon icon="plus" className="sf-create" />
       </a>
     );
@@ -284,7 +285,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     return (
       <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        title={EntityControlMessage.Find.niceToString()}>
+        title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
         <FontAwesomeIcon icon="search" />
       </a>
     );
@@ -310,7 +311,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     return (
       <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        title={EntityControlMessage.Remove.niceToString()}>
+        title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
         <FontAwesomeIcon icon="times" />
       </a>
     );
