@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,8 @@ namespace Signum.Utilities
 {
     public static class Tsv
     {
-        public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
+        // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
+        public static Encoding DefaultEncoding = Encoding.UTF8;
         public static CultureInfo Culture = CultureInfo.InvariantCulture;
 
         public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding encoding = null, bool autoFlush = false, bool append = false,
