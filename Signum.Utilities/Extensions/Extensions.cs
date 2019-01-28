@@ -300,6 +300,57 @@ namespace Signum.Utilities
             return func(t);
         }
 
+        public delegate R? TryCC<T, R>(T val) where T : class where R : class;
+        public static R? Try<T, R>(this T? t, TryCC<T, R> func) where T : class where R : class
+        {
+            if (t == null)
+                return null;
+            return func(t);
+        }
+
+        public delegate R TryCS<T, R>(T val) where T : class where R : struct;
+        public static R? Try<T, R>(this T? t, TryCS<T, R> func) where T : class where R : struct
+        {
+            if (t == null)
+                return null;
+            return func(t);
+        }
+
+        public delegate R? TryCN<T, R>(T val) where T : class where R : struct;
+        public static R? Try<T, R>(this T? t, TryCN<T, R> func) where T : class where R : struct
+        {
+            if (t == null)
+                return null;
+            return func(t);
+        }
+
+        public delegate R? TrySC<T, R>(T val) where T : struct where R : class;
+        public static R? Try<T, R>(this T? t, TrySC<T, R> func) where T : struct where R : class
+        {
+            if (t == null)
+                return null;
+            return func(t.Value);
+        }
+
+        public delegate R TrySS<T, R>(T val) where T : struct where R : struct;
+        public static R? Try<T, R>(this T? t, TrySS<T, R> func) where T : struct where R : struct
+        {
+            if (t == null)
+                return null;
+
+            return func(t.Value);
+        }
+
+        public delegate R? TrySN<T, R>(T val) where T : struct where R : struct;
+        public static R? Try<T, R>(this T? t, TrySN<T, R> func) where T : struct where R : struct
+        {
+            if (t == null)
+                return null;
+
+            return func(t.Value);
+        }
+
+
         public static T Do<T>(this T t, Action<T> action)
         {
             action(t);
