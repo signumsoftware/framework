@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Packaging;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -23,6 +23,7 @@ using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
+using Signum.Engine;
 
 namespace Signum.Engine.Word
 {
@@ -61,7 +62,6 @@ namespace Signum.Engine.Word
             {
                 
                 sb.Include<WordTemplateEntity>()
-                    .WithSave(WordTemplateOperation.Save)
                     .WithDelete(WordTemplateOperation.Delete)
                     .WithQuery(() => e => new
                     {
@@ -72,6 +72,20 @@ namespace Signum.Engine.Word
                         e.Culture,
                         e.Template.Entity.FileName
                     });
+
+                new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.Save)
+                {
+                    CanBeNew = true,
+                    CanBeModified = true,
+                    Execute = (wt, _) => {
+                        if (!wt.IsNew)
+                        {
+                            var oldFile = wt.InDBEntity(t => t.Template);
+                            if (oldFile != null && !wt.Template.Is(oldFile))
+                                Transaction.PostRealCommit += dic => oldFile.Delete();
+                        }
+                    },
+                }.Register();
 
                 PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
