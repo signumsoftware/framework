@@ -51,7 +51,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate().Set(a => a.Text, a => null).Execute();
+                int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate().Set(a => a.Text, a => null!).Execute();
                 //tr.Commit();
             }
 
@@ -112,7 +112,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 .Execute();
 
                 Assert.False(Database.Query<AlbumEntity>().Any(a => a.BonusTrack == null));
-                Assert.Equal("Mana Mana", Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Name).Distinct().SingleEx());
+                Assert.Equal("Mana Mana", Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Try(b => b.Name)).Distinct().SingleEx());
 
                 //tr.Commit();
             }
@@ -129,7 +129,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Execute();
 
                 Assert.True(Database.Query<AlbumEntity>().All(a => a.BonusTrack == null));
-                Assert.True(Database.Query<AlbumEntity>().All(a => a.BonusTrack.Name == null));
+                Assert.True(Database.Query<AlbumEntity>().All(a => a.BonusTrack.Try(bt => bt.Name) == null));
                 //tr.Commit();
             }
         }
@@ -150,7 +150,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Set(a => a.BonusTrack, a => (int)a.Id % 2 == 0 ? song : null)
                 .Execute();
 
-                Assert.True(Database.Query<AlbumEntity>().All(a => (int)a.Id % 2 == 0 ? a.BonusTrack.Name == "Mana Mana" : a.BonusTrack.Name == null));
+                Assert.True(Database.Query<AlbumEntity>().All(a => (int)a.Id % 2 == 0 ? a.BonusTrack.Try(b => b.Name) == "Mana Mana" : a.BonusTrack.Try(b => b.Name) == null));
 
                 //tr.Commit();
             }
@@ -252,7 +252,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
-                    .Set(a => a.Label, a => null)
+                    .Set(a => a.Label, a => null!)
                     .Execute();
                 //tr.Commit();
             }
@@ -283,7 +283,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
-                    .Set(a => a.Author, a => a.Id > 1 ? michael : null)
+                    .Set(a => a.Author, a => a.Id > 1 ? michael : null!)
                     .Execute();
                 //tr.Commit();
             }
@@ -295,7 +295,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
-                    .Set(a => a.Author, a => null)
+                    .Set(a => a.Author, a => null!)
                     .Execute();
                 //tr.Commit();
             }
@@ -336,7 +336,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
-                    .Set(a => a.Target, a => null)
+                    .Set(a => a.Target, a => null!)
                     .Execute();
                 //tr.Commit();
             }
@@ -364,7 +364,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
-                    .Set(a => a.Target, a => a.CreationTime > DateTime.Now ? michael : null)
+                    .Set(a => a.Target, a => a.CreationTime > DateTime.Now ? michael : null!)
                     .Execute();
                 //tr.Commit();
             }
@@ -420,7 +420,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
-                    .Set(a => a.BonusTrack.Name, a => a.BonusTrack.Name + " - ")
+                    .Set(a => a.BonusTrack!.Name, a => a.BonusTrack!.Name + " - ")
                     .Execute();
                 //tr.Commit();
             }
@@ -447,8 +447,8 @@ namespace Signum.Test.LinqProviderUpdateDelete
             {
                 int count = Database.Query<AlbumEntity>()
                     .Select(a => new { a.Label, Album = a })
-                    .UnsafeUpdatePart(p => p.Label)
-                    .Set(a => a.Name, p => p.Label.Name + "/" + p.Album.Id)
+                    .UnsafeUpdatePart(p => p.Label!)
+                    .Set(a => a.Name, p => p.Label!.Name + "/" + p.Album!.Id)
                     .Execute();
 
                 var list = Database.Query<LabelEntity>().Select(a => a.Name);
@@ -515,7 +515,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                              {
                                  LabelId = a.Label.Id,
                                  mle
-                             }).UnsafeUpdateMListPart(p => p.mle)
+                             }).UnsafeUpdateMListPart(p => p.mle!) /*CSBUG*/
                             .Set(mle => mle.Element.Seconds, p => (int)p.LabelId)
                             .Execute();
 
@@ -542,7 +542,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 Database.Query<LabelEntity>()
-                    .UnsafeUpdatePart(lb => lb.Owner.Entity.Country)
+                    .UnsafeUpdatePart(lb => lb.Owner!.Entity.Country)
                     .Set(ctr => ctr.Name, lb => lb.Name)
                     .Execute();
             }
@@ -556,7 +556,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             {
                 Database.Query<AlbumEntity>()
                     .UnsafeUpdate()
-                    .Set(ctr => ctr.BonusTrack.Index, lb => 2)
+                    .Set(ctr => ctr.BonusTrack!.Index, lb => 2)
                     .Execute();
             }
         }

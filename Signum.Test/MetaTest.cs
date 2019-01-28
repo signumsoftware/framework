@@ -66,7 +66,7 @@ namespace Signum.Test
             Assert.IsType<CleanMeta>(dic["Name"]);
             Assert.IsType<DirtyMeta>(dic["Sum"]);
 
-            var metas = ((DirtyMeta)dic["Sum"]).CleanMetas;
+            var metas = ((DirtyMeta)dic["Sum"]!).CleanMetas;
             Assert.Equal("(Album).Name,(Label).Name", metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","));
         }
 
@@ -81,7 +81,7 @@ namespace Signum.Test
             Assert.IsType<CleanMeta>(dic["Name"]);
             Assert.IsType<DirtyMeta>(dic["Num"]);
 
-            Assert.True(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
+            Assert.True(((DirtyMeta)dic["Num"]!).CleanMetas.Count == 0);
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace Signum.Test
             Assert.IsType<CleanMeta>(dic["Key"]);
             Assert.IsType<DirtyMeta>(dic["Num"]);
 
-            Assert.True(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
+            Assert.True(((DirtyMeta)dic["Num"]!).CleanMetas.Count == 0);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Signum.Test
             Assert.IsType<CleanMeta>(dic["Name"]);
             Assert.IsType<CleanMeta>(dic["Song"]);
 
-            Assert.Equal("(Album).Songs/Name", ((CleanMeta)dic["Song"]).PropertyRoutes[0].ToString());
+            Assert.Equal("(Album).Songs/Name", ((CleanMeta)dic["Song"]!).PropertyRoutes[0].ToString());
         }
 
         [Fact]
@@ -121,7 +121,7 @@ namespace Signum.Test
                     select new { Author = (ArtistEntity)a.Author ?? (IAuthorEntity)(BandEntity)a.Author }
                     );
 
-            DirtyMeta meta = (DirtyMeta)dic["Author"];
+            DirtyMeta meta = (DirtyMeta)dic["Author"]!;
 
             Assert.Equal(meta.Implementations, Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
         }
@@ -134,7 +134,7 @@ namespace Signum.Test
                     select new { Author = a.Id > 1 ? (ArtistEntity)a.Author : (IAuthorEntity)(BandEntity)a.Author }
                     );
 
-            DirtyMeta meta = (DirtyMeta)dic["Author"];
+            DirtyMeta meta = (DirtyMeta)dic["Author"]!;
 
             Assert.Equal(meta.Implementations, Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
         }

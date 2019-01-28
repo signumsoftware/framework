@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
@@ -40,7 +40,7 @@ namespace Signum.Test.LinqProvider
         public void SelecteNullableLookupColumns()
         {
             var neasted = (from l in Database.Query<LabelEntity>()
-                           join o in Database.Query<LabelEntity>().DefaultIfEmpty() on l.Owner.Entity equals o
+                           join o in Database.Query<LabelEntity>().DefaultIfEmpty() on l.Owner!.Entity equals o
                            group l.ToLite() by o.ToLite() into g
                            select new
                            {

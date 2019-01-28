@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Test.Environment;
@@ -30,7 +30,7 @@ namespace Signum.Test.LinqProvider
         public void SelectTypeNull()
         {
             var list = Database.Query<LabelEntity>()
-                .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner.Entity.GetType() }).ToList();
+                .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner!.Entity.GetType() }).ToList();
         }
 
         [Fact]
@@ -266,21 +266,21 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIBPolymorphicForceNullify()
         {
             var list = (from a in Database.Query<AwardNominationEntity>()
-                        select (int?)a.Award.Entity.Year).ToList();
+                        select (int?)a.Award!.Entity.Year).ToList();
         }
 
         [Fact]
         public void SelectCastIBPolymorphicIBUnion()
         {
             var list = (from a in Database.Query<AlbumEntity>()
-                        select a.Author.CombineUnion().LastAward.ToLite()).ToList();
+                        select a.Author.CombineUnion().LastAward.Try(la => la.ToLite())).ToList();
         }
 
         [Fact]
         public void SelectCastIBPolymorphicIBSwitch()
         {
             var list = (from a in Database.Query<AlbumEntity>()
-                        select a.Author.CombineCase().LastAward.ToLite()).ToList();
+                        select a.Author.CombineCase().LastAward.Try(la => la.ToLite())).ToList();
         }
 
         [Fact]

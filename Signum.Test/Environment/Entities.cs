@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -16,14 +16,14 @@ namespace Signum.Test.Environment
     public class NoteWithDateEntity : Entity
     {
         [Nullable]
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
         [ImplementedByAll]
         public IEntity Target { get; set; }
 
         [ImplementedByAll]
-        public Lite<IEntity> OtherTarget { get; set; }
+        public Lite<IEntity>? OtherTarget { get; set; }
 
         public DateTime CreationTime { get; set; }
 
@@ -38,7 +38,7 @@ namespace Signum.Test.Environment
     {
         ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<ArtistEntity> Colaborators { get; set; } = new MList<ArtistEntity>();
     }
 
@@ -53,7 +53,7 @@ namespace Signum.Test.Environment
     {
         string Name { get; }
 
-        AwardEntity LastAward { get; }
+        AwardEntity? LastAward { get; }
 
         string FullName { get; }
 
@@ -63,7 +63,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public class ArtistEntity : Entity, IAuthorEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public bool Dead { get; set; }
@@ -80,7 +80,7 @@ namespace Signum.Test.Environment
         }
 
         [ImplementedByAll]
-        public AwardEntity LastAward { get; set; }
+        public AwardEntity? LastAward { get; set; }
 
         static Expression<Func<ArtistEntity, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
             a => a.Friends;
@@ -93,7 +93,7 @@ namespace Signum.Test.Environment
         public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
 
         [Ignore]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<AwardNominationEntity> Nominations { get; set; } = new MList<AwardNominationEntity>();
 
 
@@ -157,16 +157,16 @@ namespace Signum.Test.Environment
     public class BandEntity : Entity, IAuthorEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [NotNullValidator]
         public MList<ArtistEntity> Members { get; set; } = new MList<ArtistEntity>();
 
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
-        public AwardEntity LastAward { get; set; }
+        public AwardEntity? LastAward { get; set; }
 
-        [NotNullValidator, ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
+        [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
         public MList<AwardEntity> OtherAwards { get; set; } = new MList<AwardEntity>();
 
         static Expression<Func<BandEntity, string>> FullNameExpression =
@@ -204,7 +204,7 @@ namespace Signum.Test.Environment
     {
         public int Year { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Category { get; set; }
 
         public AwardResult Result { get; set; }
@@ -242,12 +242,12 @@ namespace Signum.Test.Environment
     public class LabelEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public CountryEntity Country { get; set; }
 
-        public Lite<LabelEntity> Owner { get; set; }
+        public Lite<LabelEntity>? Owner { get; set; }
 
         [UniqueIndex]
         public SqlHierarchyId Node { get; set; }
@@ -270,7 +270,7 @@ namespace Signum.Test.Environment
     public class CountryEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public override string ToString()
@@ -283,20 +283,19 @@ namespace Signum.Test.Environment
     public class AlbumEntity : Entity, ISecretContainer
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [NumberBetweenValidator(1900, 2100)]
         public int Year { get; set; }
 
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
-        [NotNullValidator]
         public IAuthorEntity Author { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<SongEmbedded> Songs { get; set; } = new MList<SongEmbedded>();
 
-        public SongEmbedded BonusTrack { get; set; }
+        public SongEmbedded? BonusTrack { get; set; }
 
         public LabelEntity Label { get; set; }
 
@@ -339,7 +338,7 @@ namespace Signum.Test.Environment
     [Serializable]
     public class SongEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         TimeSpan? duration;
@@ -371,6 +370,7 @@ namespace Signum.Test.Environment
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
         public Lite<IAuthorEntity> Author { get; set; }
 
+        [Nullable]
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
         public Lite<AwardEntity> Award { get; set; }
 
@@ -379,7 +379,7 @@ namespace Signum.Test.Environment
         public int Order { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<NominationPointEmbedded> Points { get; set; } = new MList<NominationPointEmbedded>();
     }
 
@@ -392,7 +392,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class ConfigEntity : Entity
     {
-        public EmbeddedConfigEmbedded EmbeddedConfig { get; set; }
+        public EmbeddedConfigEmbedded? EmbeddedConfig { get; set; }
     }
 
     [AutoInit]
@@ -403,9 +403,9 @@ namespace Signum.Test.Environment
 
     public class EmbeddedConfigEmbedded : EmbeddedEntity
     {
-        public Lite<LabelEntity> DefaultLabel { get; set; }
+        public Lite<LabelEntity>? DefaultLabel { get; set; }
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<Lite<GrammyAwardEntity>> Awards { get; set; } = new MList<Lite<GrammyAwardEntity>>();
     }
 
@@ -455,7 +455,7 @@ END");
     public class FolderEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Max = 100)]
+        [StringLengthValidator(Max = 100)]
         public string Name { get; set; }
 
         public Lite<FolderEntity> Parent { get; set; }

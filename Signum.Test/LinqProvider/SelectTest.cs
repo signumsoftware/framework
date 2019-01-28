@@ -90,7 +90,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectNoColumns()
         {
-            var list = Database.Query<AlbumEntity>().Select(a => new { DateTime.Now, Album = (AlbumEntity)null, Artist = (Lite<ArtistEntity>)null }).ToList();
+            var list = Database.Query<AlbumEntity>().Select(a => new { DateTime.Now, Album = (AlbumEntity?)null, Artist = (Lite<ArtistEntity>?)null }).ToList();
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace Signum.Test.LinqProvider
         public void SelectConditionalToLiteNull()
         {
             var list = (from l in Database.Query<LabelEntity>()
-                        let owner = (l.Owner == null ? null : l.Owner).Entity
+                        let owner = (l.Owner == null ? null : l.Owner)!.Entity
                         select owner.ToLite(owner.Name)).ToList();
         }
 #pragma warning restore IDE0029 // Use coalesce expression
@@ -162,7 +162,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCoallesceMember()
         {
             var list = (from l in Database.Query<LabelEntity>()
-                        select (l.Owner.Entity ?? l).Name).ToList();
+                        select (l.Owner!.Entity ?? l).Name).ToList();
 
         }
 
@@ -170,7 +170,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCoallesceToLite()
         {
             var list = (from l in Database.Query<LabelEntity>()
-                        select (l.Owner.Entity ?? l).ToLite()).ToList();
+                        select (l.Owner!.Entity ?? l).ToLite()).ToList();
 
         }
 
@@ -178,7 +178,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCoallesceGetType()
         {
             var list = (from l in Database.Query<LabelEntity>()
-                        select (l.Owner.Entity ?? l).GetType()).ToList();
+                        select (l.Owner!.Entity ?? l).GetType()).ToList();
 
         }
 
@@ -400,7 +400,7 @@ namespace Signum.Test.LinqProvider
                  select new
                  {
                      a.Name,
-                     Friend = (Lite<BandEntity>)null
+                     Friend = (Lite<BandEntity>?)null
                  }).ToList();
         }
 
@@ -506,14 +506,14 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectIBAId()
         {
-            var list = Database.Query<ArtistEntity>().Select(a => (PrimaryKey?)a.LastAward.Id).ToList();
+            var list = Database.Query<ArtistEntity>().Select(a => a.LastAward.Try(la => la.Id)).ToList();
         }
 
         [Fact]
         public void SelectIBAIdObject()
         {
             var e = Assert.Throws<InvalidOperationException>(() =>
-                Database.Query<ArtistEntity>().Select(a => ((int?)a.LastAward.Id).InSql()).ToList());
+                Database.Query<ArtistEntity>().Select(a => a.LastAward.Try(la => (int?)la.Id).InSql()).ToList());
 
             Assert.Contains("translated", e.Message);
         }
@@ -562,7 +562,7 @@ namespace Signum.Test.LinqProvider
         public void SelectConditionEnum()
         {
             var results = from b in Database.Query<BandEntity>()
-                          let ga = (GrammyAwardEntity)b.LastAward
+                          let ga = (GrammyAwardEntity?)b.LastAward
                           select (AwardResult?)(ga.Result < ga.Result ? (int)ga.Result : (int)ga.Result).InSql();
 
             results.ToList();
@@ -633,7 +633,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectRetrieve()
         {
-            var e = Assert.Throws<InvalidOperationException>(() => Database.Query<LabelEntity>().Select(l => l.Owner.Retrieve()).ToList());
+            var e = Assert.Throws<InvalidOperationException>(() => Database.Query<LabelEntity>().Select(l => l.Owner!.Retrieve()).ToList());
             Assert.Contains("not supported", e.Message);
         }
 

@@ -18,7 +18,7 @@ namespace Signum.Test
         [Fact]
         public void DelegateOrder()
         {
-            Action action = null;
+            Action action = null!;
             action += A;
             action += B;
 

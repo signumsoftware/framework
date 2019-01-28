@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Test.Environment;
@@ -577,7 +577,7 @@ namespace Signum.Test.LinqProvider
                             Last = a.Songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.True(list.All(a => a.FirstName != a.Last.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last!/*CSBUG*/.Name));
         }
 
         [Fact]
@@ -593,7 +593,7 @@ namespace Signum.Test.LinqProvider
                             Last = g.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.True(list.All(a => a.FirstName != a.Last.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last!/*CSBUG*/.Name));
 
 
         }
@@ -612,7 +612,7 @@ namespace Signum.Test.LinqProvider
                             Last = songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.True(list.All(a => a.FirstName != a.Last.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last!/*CSBUG*/.Name));
 
 
         }

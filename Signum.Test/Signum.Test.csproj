@@ -2,10 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <UserSecretsId>SignumTest</UserSecretsId>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <NullableContextOptions>enable</NullableContextOptions>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Platforms>x64</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>1701;1702;8629;8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

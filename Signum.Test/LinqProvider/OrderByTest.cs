@@ -138,7 +138,7 @@ namespace Signum.Test.LinqProvider
                 Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).All(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).Contains(null)).Select(a => a.Id).ToList();
+                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).Contains(null!)).Select(a => a.Id).ToList();
 
 
 
@@ -155,7 +155,7 @@ namespace Signum.Test.LinqProvider
                 Database.Query<AlbumEntity>().OrderBy(a => a.Name).All(s => s.Name.StartsWith("a"));
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumEntity>().OrderBy(a => a.Name).Contains(null);
+                Database.Query<AlbumEntity>().OrderBy(a => a.Name).Contains(null!);
         }
 
 

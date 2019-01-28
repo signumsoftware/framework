@@ -412,7 +412,7 @@ namespace Signum.Entities
 
 
         [MethodExpander(typeof(IsExpander))]
-        public static bool Is<T>(this T entity1, T entity2)
+        public static bool Is<T>(this T? entity1, T? entity2)
              where T : class, IEntity
         {
             if (entity1 == null && entity2 == null)
@@ -431,7 +431,7 @@ namespace Signum.Entities
         }
 
         [MethodExpander(typeof(IsExpander))]
-        public static bool Is<T>(this Lite<T> lite1, Lite<T> lite2)
+        public static bool Is<T>(this Lite<T>? lite1, Lite<T>? lite2)
           where T : class, IEntity
         {
             if (lite1 == null && lite2 == null)
