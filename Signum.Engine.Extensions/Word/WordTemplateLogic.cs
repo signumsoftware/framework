@@ -82,7 +82,7 @@ namespace Signum.Engine.Word
                         {
                             var oldFile = wt.InDBEntity(t => t.Template);
                             if (oldFile != null && !wt.Template.Is(oldFile))
-                                Transaction.PostRealCommit += dic => oldFile.Delete();
+                                Transaction.PreRealCommit += dic => oldFile.Delete();
                         }
                     },
                 }.Register();
