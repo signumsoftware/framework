@@ -34,10 +34,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
 
   componentWillMount() {
     const userQuery = window.location.search.tryAfter("userQuery=");
-    let canCreate = Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity);
-    debugger;
-
-    if (userQuery) {
+     if (userQuery) {
       const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
       Navigator.API.fillToStrings(uq)
         .then(() => this.setState({ currentUserQuery: uq }))
