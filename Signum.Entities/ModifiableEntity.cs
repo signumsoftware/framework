@@ -97,9 +97,7 @@ namespace Signum.Entities
 
             return true;
         }
-
-
-
+        
         struct PropertyKey : IEquatable<PropertyKey>
         {
             public PropertyKey(Type type, string propertyName)
