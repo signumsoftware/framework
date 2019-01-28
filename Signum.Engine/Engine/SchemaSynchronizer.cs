@@ -242,11 +242,12 @@ namespace Signum.Engine
                         {
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
-                            var alterColumnToNotNullableHistory = tab.Columns.OuterJoinDictionaryCC(dif.Columns, (cn, tabCol, difCol) =>
-                            tabCol != null && difCol != null && !tabCol.Nullable.ToBool() && difCol.Nullable).Any(a => a.Value);
+                            bool alterColumnToNotNullableHistory = false;
 
-                            var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None &&
-                            (tab.SystemVersioned == null || !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || alterColumnToNotNullableHistory) ?
+                            var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && 
+                            (tab.SystemVersioned == null || 
+                            !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
+                            (alterColumnToNotNullableHistory = NullabilityChanges(tab, dif) && SafeConsole.Ask($"Table {tab.Name} has nullability changes. Disable and re-enable System Versioning?"))) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : null);
 
                             var dropPeriod = (dif.Period != null &&
@@ -296,7 +297,9 @@ namespace Signum.Engine
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
                             var addSystemVersioning = (tab.SystemVersioned != null &&
-                                (dif.Period == null || !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || alterColumnToNotNullableHistory) ?
+                                (dif.Period == null || 
+                                !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
+                                alterColumnToNotNullableHistory) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a => a.GoBefore = true) : null);
 
 
@@ -422,6 +425,13 @@ namespace Signum.Engine
             }
         }
 
+        private static bool NullabilityChanges(ITable tab, DiffTable dif)
+        {
+            return tab.Columns.OuterJoinDictionaryCC(dif.Columns, (cn, tabCol, difCol) =>
+                   tabCol != null && difCol != null && !tabCol.Nullable.ToBool() && difCol.Nullable)
+                   .Any(a => a.Value);
+        }
+
         private static SqlPreCommand UpdateCompatible(Replacements replacements, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol)
         {
             if (!(difCol.Nullable && !tabCol.Nullable.ToBool()))
@@ -430,7 +440,7 @@ namespace Signum.Engine
             var defaultValue = GetDefaultValue(tab, tabCol, replacements, forNewColumn: false);
 
             if (defaultValue == "force")
-                return null;
+                return SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name);
 
             bool goBefore = difCol.Name != tabCol.Name;
 
