@@ -9,7 +9,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption
+  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregateAndPinned
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
@@ -375,46 +375,6 @@ export interface ChartColumnOption {
 export interface ChartParameterOption {
   name: string;
   value: string;
-}
-
-export function handleDrillDown(r: ChartRow, lastChartRequest: ChartRequestModel) {
-  if (r.entity) {
-    window.open(Navigator.navigateRoute(r.entity!));
-  } else {
-    const filters = lastChartRequest.filterOptions.filter(a => !hasAggregate(a.token));
-
-    const columns: ColumnOption[] = [];
-
-    lastChartRequest.columns.map((a, i) => {
-
-      const t = a.element.token;
-
-      if (t && t.token && !hasAggregate(t!.token!) && r.hasOwnProperty("c" + i)) {
-        filters.push({
-          token: t!.token!,
-          operation: "EqualTo",
-          value: (r as any)["c" + i],
-          frozen: false
-        } as FilterOptionParsed);
-      }
-
-      if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
-      {
-        var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
-
-        if (col.parent)
-          columns.push({
-            token: col.fullKey
-          });
-      }
-    });
-
-    window.open(Finder.findOptionsPath({
-      queryName: lastChartRequest.queryKey,
-      filterOptions: toFilterOptions(filters),
-      columnOptions: columns,
-    }));
-  }
 }
 
 export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean) {
