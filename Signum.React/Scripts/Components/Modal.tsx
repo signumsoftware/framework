@@ -362,9 +362,7 @@ interface ModalHeaderButtonsProps {
 }
 
 export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
-
- 
-
+  
   render() {
     const p = this.props;
     var close = this.props.onClose &&

@@ -213,7 +213,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
         data-operation={coc.operationInfo.key}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} /> :
+        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
         {(icon || color) && " "}
         {text}
