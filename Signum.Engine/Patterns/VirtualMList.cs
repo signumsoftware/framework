@@ -162,6 +162,9 @@ namespace Signum.Engine
                 {
                     var graph = Saver.PreSaving(() => GraphExplorer.FromRoot(mlist).RemoveAllNodes(ctx.Graph));
                     GraphExplorer.PropagateModifications(graph.Inverse());
+                    var errors = GraphExplorer.FullIntegrityCheck(graph);
+                    if (errors != null)
+                        throw new IntegrityCheckException(errors);
                 }
 
                 if (mlist.IsGraphModified)

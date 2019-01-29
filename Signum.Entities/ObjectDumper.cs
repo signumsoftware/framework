@@ -20,6 +20,12 @@ namespace Signum.Entities
         No,
     }
 
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class AvoidDumpAttribute : Attribute
+    {
+
+    }
+
     public static class ObjectDumper
     {
         public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionEntity) };
@@ -104,7 +110,7 @@ namespace Signum.Entities
                     }
                     if (o is Lite<Entity>)
                     {
-                        var id =  ((Lite<Entity>)o).IdOrNull;
+                        var id = ((Lite<Entity>)o).IdOrNull;
                         Sb.Append(id.HasValue ? "({0})".FormatWith(id.Value) : "");
                     }
                     Sb.Append(" /* [CICLE] {0} */".FormatWith(SafeToString(o!)));
@@ -209,7 +215,7 @@ namespace Signum.Entities
                         }
 
                         var skip = this.showIgnoredFields == ShowIgnoredFields.Yes ? false :
-                            this.showIgnoredFields == ShowIgnoredFields.OnlyQueryables ? IsIgnored(field) && Reflector.TryFindPropertyInfo(field)?.HasAttribute<QueryablePropertyAttribute>() != true:
+                            this.showIgnoredFields == ShowIgnoredFields.OnlyQueryables ? IsIgnored(field) && Reflector.TryFindPropertyInfo(field)?.HasAttribute<QueryablePropertyAttribute>() != true :
                             this.showIgnoredFields == ShowIgnoredFields.No ? IsIgnored(field) :
                             throw new InvalidOperationException("Unexpected ShowIgnoredFields");
 
@@ -226,7 +232,8 @@ namespace Signum.Entities
 
             private static bool IsIgnored(FieldInfo field)
             {
-                return (field.HasAttribute<IgnoreAttribute>() || Reflector.TryFindPropertyInfo(field)?.HasAttribute<IgnoreAttribute>() == true);
+                return (field.HasAttribute<IgnoreAttribute>() || Reflector.TryFindPropertyInfo(field)?.HasAttribute<IgnoreAttribute>() == true) ||
+                    (field.HasAttribute<AvoidDumpAttribute>() || Reflector.TryFindPropertyInfo(field)?.HasAttribute<AvoidDumpAttribute>() == true);
             }
 
             private static string GetFieldName(FieldInfo field)

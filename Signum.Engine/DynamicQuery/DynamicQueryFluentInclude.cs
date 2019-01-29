@@ -25,7 +25,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
-        /// Uses NicePluralName as niceName
+        /// Uses typeof(T) NicePluralName as niceName
         /// </summary>
         public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty)
             where T : Entity
@@ -42,7 +42,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
-        /// Uses NiceName as niceName
+        /// Uses typeof(T) NiceName as niceName
         /// </summary>
         public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, Expression<Func<F, T>> lambdaToMethodOrProperty)
             where T : Entity
@@ -59,7 +59,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
-        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NicePluralName as niceName.
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses typeof(T) NicePluralName as niceName.
         /// </summary>
         public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty)
             where F : Entity
@@ -80,7 +80,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
-        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NiceName as niceName.
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses typeof(T) NiceName as niceName.
         /// </summary>
         public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, T>> lambdaToMethodOrProperty)
             where F : Entity
@@ -91,7 +91,18 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
-        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NiceName as niceName.
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
+            where F : Entity
+            where T : Entity
+        {
+            QueryLogic.Expressions.Register(lambdaToMethodOrProperty, niceName);
+            return fi;
+        }
+
+        /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses typeof(T) NiceName as niceName.
         /// </summary>
         public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty)
             where F : Entity

@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
- using System.Data;
+using System.Data;
 using Signum.Utilities;
- using Signum.Engine.Maps;
-
-//using Microsoft.SqlServer.Types;
-
+using Signum.Engine.Maps;
 
 namespace Signum.Engine
 {
@@ -101,7 +98,7 @@ namespace Signum.Engine
             return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}))");
         }
 
-        public static SqlPreCommand AlterTableDisableSystemVersioning(ObjectName tableName)
+        public static SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
         {
             return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF)");
         }
@@ -163,9 +160,9 @@ namespace Signum.Engine
             return false;
         }
 
-        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null)
+        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column, null)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null)));
 
             if (column.Default == null)
                 return alterColumn;

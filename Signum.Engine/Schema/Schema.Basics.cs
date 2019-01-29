@@ -828,7 +828,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2})".FormatWith(
+            return "{0} -> {1} {3} ({2})".FormatWith(
                 Name,
                 "-",
                 IsLite ? "Lite" : "",

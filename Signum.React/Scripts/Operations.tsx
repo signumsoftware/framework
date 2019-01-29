@@ -100,6 +100,7 @@ export function operationInfos(ti: TypeInfo) {
 export abstract class OperationSettings {
 
   text?: () => string;
+  content?: () => any;
   operationSymbol: OperationSymbol;
 
   constructor(operationSymbol: OperationSymbol) {
@@ -253,6 +254,10 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
+  classes?: string;
+  icon?: IconProp;
+  iconAlign?: "left" | "right";
+  iconColor?: string;
   withClose?: boolean;
 
   constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
@@ -264,8 +269,6 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : undefined;
   }
 }
-
-
 
 export interface EntityOperationOptions<T extends Entity> {
   contextual?: ContextualOperationOptions<T>;
@@ -279,6 +282,10 @@ export interface EntityOperationOptions<T extends Entity> {
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
+  classes?: string;
+  icon?: IconProp;
+  iconAlign?: "left" | "right";
+  iconColor?: string;
   withClose?: boolean;
 }
 

@@ -1,8 +1,9 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
+import { classes } from './Globals';
 
 export type FormGroupStyle =
   "None" |  /// Only the value is rendered. Unaffected by FormGroupSize
@@ -383,7 +384,11 @@ export class TypeContext<T> extends StyleContext {
   }
 
   get errorClass(): string | undefined {
-    return !!this.error ? "has-error" : undefined;
+    return !!this.error ? "has-error": undefined;
+  }
+
+  get errorClassBorder(): string | undefined {
+    return !!this.error ? "border has-error" : undefined;
   }
 }
 

@@ -1,8 +1,8 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { ModifiableEntity, MList, EntityControlMessage } from '../Signum.Entities'
-import { EntityBase } from './EntityBase'
+import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent from './DynamicComponent'
 import { MaxHeightProperty } from 'csstype';
@@ -18,6 +18,10 @@ export interface EntityTableProps extends EntityListBaseProps {
   avoidEmptyTable?: boolean;
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   scrollable?: boolean;
+  isRowVisible?: (ctx: TypeContext<any /*T*/>) => boolean;
+  tableClasses?: string;
+  theadClasses?: string;
+  createMessage?: string;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -73,7 +77,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
           {this.renderButtons()}
           {this.renderTable(ctx)}
         </div>
@@ -94,8 +98,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
   renderButtons() {
     const buttons = (
-      <span className="float-right">
-        {this.state.createAsLink == false && this.renderCreateButton(false)}
+      <span className="ml-2">
+        {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
         {this.renderFindButton(false)}
       </span>
     );
@@ -119,15 +123,17 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
     const readOnly = ctx.readOnly;
     const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
 
+    var isEmpty = this.props.avoidEmptyTable && ctx.value.length == 0;
+
     return (
       <div ref={d => this.containerDiv = d}
         className={this.props.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
         style={{ maxHeight: this.props.scrollable ? this.props.maxResultsHeight : undefined }}>
-        <table className="table table-sm sf-table">
+        <table className={classes("table table-sm sf-table", this.props.tableClasses)} >
           {
-            (!this.props.avoidEmptyTable || ctx.value.length > 0) &&
+            !isEmpty &&
             <thead ref={th => this.thead = th}>
-              <tr className="bg-light">
+              <tr className={this.props.theadClasses || "bg-light"}>
                 <th></th>
                 {
                   this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
@@ -139,25 +145,27 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           }
           <tbody>
             {
-              mlistItemContext(ctx).map((mlec, i) =>
-                (<EntityTableRow key={i}
-                  index={i}
+              mlistItemContext(ctx)
+                .map((mlec, i) => ({ mlec, i }))
+                .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a.mlec))
+                .map(a => <EntityTableRow key={a.i}
+                  index={a.i}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}
-                  onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                  draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
+                  onRemove={this.canRemove(a.mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, a.i) : undefined}
+                  draggable={this.canMove(a.mlec.value) && !readOnly ? this.getDragConfig(a.i, "v") : undefined}
                   columns={this.state.columns!}
-                  ctx={mlec} />))
+                  ctx={a.mlec} />)
             }
             {
               this.state.createAsLink && this.state.create && !readOnly &&
               <tr>
-                <td colSpan={1 + this.state.columns!.length}>
+                <td colSpan={1 + this.state.columns!.length} className={isEmpty ? "border-0" : undefined}>
                   {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-                    <a href="#" title={EntityControlMessage.Create.niceToString()}
+                    <a href="#" title={TitleManager.useTitle ? EntityControlMessage.Create.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={this.handleCreateClick}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
                     </a>}
                 </td>
               </tr>
@@ -206,7 +214,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
           <div className="item-group">
             {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={this.props.onRemove}
-              title={EntityControlMessage.Remove.niceToString()}>
+              title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
               <FontAwesomeIcon icon="times" />
             </a>}
             &nbsp;
@@ -214,7 +222,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
-              title={EntityControlMessage.Move.niceToString()}>
+              title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
               <FontAwesomeIcon icon="bars" />
             </a>}
           </div>

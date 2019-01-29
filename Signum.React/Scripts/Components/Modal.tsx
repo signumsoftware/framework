@@ -1,4 +1,4 @@
-﻿//Thanks to https://github.com/react-bootstrap/react-bootstrap
+//Thanks to https://github.com/react-bootstrap/react-bootstrap
 
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
@@ -10,6 +10,9 @@ import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
 import { BsSize, BsColor } from './index';
 import { ErrorBoundary } from './ErrorBoundary';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+
 
 export interface ModalProps extends ModelDialogProps {
 
@@ -340,6 +343,13 @@ class ModalDialog extends React.Component<ModelDialogProps> {
   }
 }
 
+interface ModalIconProps {
+  color?: BsColor;
+  classes?: string;
+  icon?: IconProp;
+  iconAlign?: string;
+}
+
 interface ModalHeaderButtonsProps {
   onClose?: () => void;
   onOk?: () => void;
@@ -347,15 +357,19 @@ interface ModalHeaderButtonsProps {
   onCancel?: () => void;
   closeBeforeTitle?: boolean;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  okButtonProps?: ModalIconProps;
+  closeButtonProps?: ModalIconProps;
 }
 
 export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
+  
   render() {
     const p = this.props;
     var close = this.props.onClose &&
       <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
         <span aria-hidden="true">×</span>
       </button>;
+    
 
     return (
       <div className="modal-header" {...p.htmlAttributes}>
@@ -366,18 +380,33 @@ export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps>
         {!p.closeBeforeTitle && close}
         {(this.props.onCancel || this.props.onOk) &&
           <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
-            {this.props.onOk && <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={this.props.okDisabled} onClick={this.props.onOk}>
-              {JavascriptMessage.ok.niceToString()}
+          {this.props.onOk && <button
+            className={classes("btn", "btn-" + ((this.props.okButtonProps && this.props.okButtonProps.color) || "primary"), "sf-entity-button sf-close-button sf-ok-button", this.props.okButtonProps && this.props.okButtonProps.classes)}
+            disabled={this.props.okDisabled} onClick={this.props.onOk}>
+            {this.renderButton(JavascriptMessage.ok.niceToString(), this.props.okButtonProps)}
             </button>
             }
-            {this.props.onCancel && <button className="btn btn-light sf-entity-button sf-close-button sf-cancel-button" onClick={this.props.onCancel}>
-              {JavascriptMessage.cancel.niceToString()}
+          {this.props.onCancel && <button
+            className={classes("btn", "btn-" + ((this.props.closeButtonProps && this.props.closeButtonProps.color) || "light"), "sf-entity-button sf-close-button sf-cancel-button", this.props.closeButtonProps && this.props.closeButtonProps.classes)}
+            onClick={this.props.onCancel}>
+            {this.renderButton(JavascriptMessage.cancel.niceToString(), this.props.closeButtonProps)}
             </button>
             }
           </div>
         }
       </div>
     );
+  }
+
+  renderButton(text: string, mip?: ModalIconProps) {
+    if (mip && mip.icon) {
+      switch (mip.iconAlign) {
+        case "right": return (<span>{text} <FontAwesomeIcon icon={mip.icon} fixedWidth /></span>);
+        default: return (<span><FontAwesomeIcon icon={mip.icon} fixedWidth /> {text}</span>);
+      }
+    }
+    else
+      return text;
   }
 }
 

@@ -1,7 +1,8 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ModifiableEntity, Lite, Entity, is, getToString } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
+import { TitleManager } from './EntityBase';
 
 export interface EntityListProps extends EntityListBaseProps {
   size?: number;
@@ -65,7 +66,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         <div className="SF-entity-line">
           <div className={s.ctx.inputGroupClass}>
             <select className={s.ctx.formControlClass} size={this.props.size} onChange={this.handleOnSelect} ref={this.handleSelectLoad}>
-              {list.map((e, i) => <option key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlAttributes(e.element)}>{getToString(e.element)}</option>)}
+              {list.map((e, i) => <option key={i} title={TitleManager.useTitle ? this.getTitle(e.element) : undefined} {...EntityListBase.entityHtmlAttributes(e.element)}>{getToString(e.element)}</option>)}
             </select>
             <span className="input-group-append input-group-vertical">
               {this.renderCreateButton(true)}
