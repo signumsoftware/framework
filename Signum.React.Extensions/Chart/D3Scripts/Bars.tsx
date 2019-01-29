@@ -57,8 +57,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
     .range([0, yRule.size('content')]);
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]!)))
-    .domain(orderedRows.map(r => keyColumn.getValueKey(r)));
+  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)));
 
   var size = xRule.size('content');
   var labelMargin = 10;

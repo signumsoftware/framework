@@ -22,7 +22,7 @@ namespace Signum.Entities.Tree
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-            foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => typeof(TreeEntity).IsAssignableFrom(t) && OmniboxParser.Manager.AllowedType(t), pattern, isPascalCase).OrderBy(ma => ma.Distance))
+            foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => typeof(TreeEntity).IsAssignableFrom(t) && OmniboxParser.Manager.AllowedType(t) && OmniboxParser.Manager.AllowedQuery(t), pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var type = match.Value;
 

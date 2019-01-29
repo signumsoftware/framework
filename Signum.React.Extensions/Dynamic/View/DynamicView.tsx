@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
@@ -44,7 +44,6 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   componentWillMount() {
     this.updateRoot();
-
   }
 
   updateStateSelectedNode(newNode: DesignerNode<BaseNode>) {
@@ -88,9 +87,15 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   getZeroNode() {
     const context = {
-      refreshView: () => this.updateStateSelectedNode(this.state.selectedNode!.reCreateNode()),
+      refreshView: () => {
+        this.updateStateSelectedNode(this.state.selectedNode!.reCreateNode());
+        this.props.ctx.value.modified = true;
+      },
       getSelectedNode: () => this.state.selectedNode,
-      setSelectedNode: (newNode) => this.updateStateSelectedNode(newNode)
+      setSelectedNode: (newNode) => {
+        this.updateStateSelectedNode(newNode);
+        this.props.ctx.value.modified = true;
+      }
     } as DesignerContext;
 
     return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);

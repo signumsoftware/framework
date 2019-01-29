@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
 
@@ -19,7 +19,7 @@ namespace Signum.Entities.Workflow
         public WorkflowGatewayType Type { get; set; }
         public WorkflowGatewayDirection Direction { get; set; }
 
-        [NotNullValidator]
+        [NotNullValidator, AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         static Expression<Func<WorkflowGatewayEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;

@@ -58,8 +58,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 
   var color: (val: ChartRow) => string;
   if (parameters["ColorScale"] == "Ordinal" || (colorKeyColumn.type != "Integer" && colorKeyColumn.type != "Real")) {
-    var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
-    var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorKeyColumn.getValueKey));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorKeyColumn.getValueKey));
     color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
 
   } else {

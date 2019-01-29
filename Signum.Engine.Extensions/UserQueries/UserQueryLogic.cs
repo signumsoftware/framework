@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -217,8 +217,8 @@ namespace Signum.Engine.UserQueries
                 using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + uq.Query.Key)))
                 {
 
-                    if (uq.Filters.Any(a => a.Token.ParseException != null) ||
-                       uq.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
+                    if (uq.Filters.Any(a => a.Token?.ParseException != null) ||
+                       uq.Columns.Any(a => a.Token?.ParseException != null) ||
                        uq.Orders.Any(a => a.Token.ParseException != null))
                     {
 

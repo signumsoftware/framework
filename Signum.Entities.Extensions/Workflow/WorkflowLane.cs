@@ -19,7 +19,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullValidator]
+        [NotNullValidator, AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         [NotNullValidator]

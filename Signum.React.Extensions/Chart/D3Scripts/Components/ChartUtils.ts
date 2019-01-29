@@ -348,195 +348,40 @@ export function getColorScheme(schemeName: string | null | undefined, k: number 
   return undefined;
 }
 
+interface CachedColorOrdinal {
+  category: string;
+  categorySteps: number;
+  scale: d3.ScaleOrdinal<string, string>;
+}
 
+export function colorCategory(parameters: { [name: string]: string }, domain: string[]): d3.ScaleOrdinal<string, string> {
 
-export function stratifyTokens(
-  data: ChartTable,
-  keyColumn: ChartColumn<unknown>, /*Employee*/
-  keyColumnParent?: ChartColumn<unknown>, /*Employee.ReportsTo*/):
-  d3.HierarchyNode<ChartRow | Folder | Root> {
+  const cacheKey = "_cachedColorOrdinal_"; 
 
+  var category = parameters["ColorCategory"];
+  var categorySteps = parseInt(parameters["ColorCategorySteps"]);
+  if (parameters[cacheKey]) {
+    const cached = parameters[cacheKey] as any as CachedColorOrdinal;
 
-  const folders = data.rows
-    .filter(r => keyColumnParent != null && keyColumnParent.getValue(r) != null)
-    .map(r => ({ folder: keyColumnParent!.getValue(r) }) as Folder)
-    .toObjectDistinct(r => keyColumnParent!.getKey(r.folder));
-
-  const root: Root = { isRoot: true };
-
-  const NullConst = "- Null -";
-
-
-  const keyToRow = data.rows.filter(r => keyColumn.getValue(r) != null).toObjectDistinct(r => keyColumn.getValueKey(r));
-
-  const getParent = (d: ChartRow | Folder | Root) => {
-    if ((d as Root).isRoot)
-      return null;
-
-    if ((d as Folder).folder) {
-      const r = keyToRow[keyColumnParent!.getKey((d as Folder).folder)];
-
-      if (!r)
-        return root;
-
-      const parentValue = keyColumnParent!.getValue(r);
-      if (parentValue == null)
-        return root;  //Either null
-
-      return folders[keyColumnParent!.getKey(parentValue)]; // Parent folder
+    if (cached.category == category && cached.categorySteps == categorySteps) {
+      domain.forEach(a => cached.scale(a));
+      return cached.scale;
     }
-
-    var keyVal = keyColumn.getValue(d as ChartRow);
-
-    if (keyVal) {
-      const r = d as ChartRow;
-
-      var fold = folders[keyColumn.getKey(keyVal)];
-      if (fold)
-        return fold; //My folder
-
-      if (keyColumnParent) {
-
-        const parentValue = keyColumnParent.getValue(r);
-
-        const parentFolder = parentValue && folders[keyColumnParent.getKey(parentValue)];
-
-        if (parentFolder)
-          return folders[keyColumnParent.getKey(parentFolder.folder)]; //only parent
-      }
-
-      return root; //No key an no parent
-    }
-
-    return root;
-  };
-
-  var getKey = (r: ChartRow | Folder | Root) => {
-
-    if ((r as Root).isRoot)
-      return "#Root";
-
-    if ((r as Folder).folder)
-      return "F#" + keyColumnParent!.getKey((r as Folder).folder);
-
-    const cr = (r as ChartRow);
-
-    if (keyColumn.getValue(cr) != null)
-      return keyColumn.getKey(cr);
-
-    return NullConst;
   }
 
-  var rootNode = d3.stratify<ChartRow | Folder | Root>()
-    .id(getKey)
-    .parentId(r => {
-      var parent = getParent(r);
-      return parent ? getKey(parent) : null
-    })([root, ...Object.values(folders), ...data.rows]);
+  var scheme = getColorScheme(category, categorySteps);
 
-  return rootNode
-
-}
-
-export interface Folder {
-  folder: unknown;
-}
-
-export function isFolder(obj: any): obj is Folder {
-  return (obj as Folder).folder !== undefined;
-}
-
-export interface Root {
-  isRoot: true;
-}
-
-export function isRoot(obj: any): obj is Root {
-  return (obj as Root).isRoot;
-}
-
-
-export function toPivotTable(data: ChartTable,
-  col0: ChartColumn<unknown>, /*Employee*/
-  usedCols: ChartColumn<number>[]): PivotTable {
-
-  var rows = data.rows
-    .map((r) => ({
-      rowValue: col0.getValue(r),
-      values: usedCols.toObject(cn => cn.name, (cn): PivotValue => ({
-        rowClick: r,
-        value: cn.getValue(r),
-        valueTitle: `${col0.getValueNiceName(r)}, ${cn.title}: ${cn.getValueNiceName(r)}`
-      }))
-    } as PivotRow));
-
-  var title = usedCols.map(c => c.title).join(" | ");
-
-  return {
-    title,
-    columns: d3.values(usedCols.toObject(c => c.name, c => ({
-      color: null,
-      key: c.name,
-      niceName: c.title,
-    } as PivotColumn))),
-    rows,
+  const newCached: CachedColorOrdinal = {
+    category: category,
+    categorySteps: categorySteps,
+    scale: d3.scaleOrdinal(scheme).domain(domain),
   };
+
+  parameters[cacheKey] = newCached as any;
+
+  return newCached.scale;
 }
 
-export function groupedPivotTable(data: ChartTable,
-  col0: ChartColumn<unknown>, /*Employee*/
-  colSplit: ChartColumn<unknown>,
-  colValue: ChartColumn<number>): PivotTable {
 
-  var columns = d3.values(data.rows.map(r => colSplit.getValue(r)).toObjectDistinct(v => colSplit.getKey(v), v => ({
-    niceName: colSplit.getNiceName(v),
-    color: colSplit.getColor(v),
-    key: colSplit.getKey(v),
-  }) as PivotColumn));
 
-  var rows = data.rows.groupBy(r => "k" + col0.getValueKey(r))
-    .map(gr => {
 
-      var rowValue = col0.getValue(gr.elements[0]);
-      return {
-        rowValue: rowValue,
-        values: gr.elements.toObject(
-          r => colSplit.getValueKey(r),
-          (r): PivotValue => ({
-            value: colValue.getValue(r),
-            rowClick: r,
-            valueTitle: `${col0.getNiceName(rowValue)}, ${colSplit.getValueNiceName(r)}: ${colValue.getValueNiceName(r)}`
-          })),
-      } as PivotRow;
-    });
-
-  var title = data.columns.c2!.title + " / " + data.columns.c1!.title;
-
-  return {
-    title,
-    columns,
-    rows,
-  } as PivotTable;
-}
-
-export interface PivotTable {
-  title: string;
-  columns: PivotColumn[];
-  rows: PivotRow[];
-}
-
-export interface PivotColumn {
-  key: string;
-  color?: string | null;
-  niceName?: string | null;
-}
-
-export interface PivotRow {
-  rowValue: unknown;
-  values: { [key: string /*| number*/]: PivotValue };
-}
-
-export interface PivotValue {
-  rowClick: ChartRow;
-  value: number;
-  valueTitle: string;
-}

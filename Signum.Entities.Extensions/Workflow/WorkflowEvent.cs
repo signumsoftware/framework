@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
@@ -24,7 +24,7 @@ namespace Signum.Entities.Workflow
 
         public Lite<WorkflowActivityEntity> BoundaryOf { get; set; }
 
-        [NotNullValidator]
+        [NotNullValidator, AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;

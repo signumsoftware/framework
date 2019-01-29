@@ -52,9 +52,13 @@ li.menu-item-1 > a {
     background-color: #e7e7e7;
 }
 
-.sidebar .dropdown-item .icon {
+body:not(.rtl) .sidebar .dropdown-item .icon {
     width: 20px;
     margin-left: -5px;
+}
+
+body.rtl .sidebar .dropdown-item .icon {
+    width: 20px;
 }
 
 .sf-cursor-pointer{

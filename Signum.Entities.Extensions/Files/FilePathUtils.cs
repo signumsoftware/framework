@@ -91,15 +91,15 @@ namespace Signum.Entities.Files
             }
             if (bytes == null)
             {
-                throw new ArgumentNullException("bytes");
+                throw new ArgumentNullException(nameof(bytes));
             }
             if ((offset < 0) || (offset > bytes.Length))
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if ((count < 0) || ((offset + count) > bytes.Length))
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
             return true;
         }

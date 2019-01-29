@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using S = DocumentFormat.OpenXml.Spreadsheet;
@@ -831,7 +831,7 @@ namespace Signum.Engine.Word
                 this.AnyBlock.MoveChilds(NodesBetween(AnyToken, EndAnyToken));
 
                 this.AnyToken.AscendantNode.ReplaceBy(this);
-                this.NotAnyToken.AscendantNode.Remove();
+                this.EndAnyToken.AscendantNode.Remove();
             }
             else
             {

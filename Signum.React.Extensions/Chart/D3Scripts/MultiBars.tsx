@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
+import { PivotRow, toPivotTable, groupedPivotTable } from './Components/PivotTable';
 import { ChartTable, ChartColumn, ChartScriptProps } from '../ChartClient';
 import Legend from './Components/Legend';
 import TextEllipsis from './Components/TextEllipsis';
@@ -53,8 +54,8 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
   var pivot = c.c1 == null ?
-    ChartUtils.toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
-    ChartUtils.groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
+    toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
+    groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
   var allValues = pivot.rows.flatMap(r => pivot.columns.map(function (c) { return r.values[c.key] && r.values[c.key].value; }));
 
@@ -70,7 +71,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]))).domain(columnsInOrder.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key));
 
   var ySubscale = d3.scaleBand()
     .domain(pivot.columns.map(s => s.key))
@@ -83,7 +84,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
       <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={true} />
 
       {columnsInOrder.map(s => <g key={s.key} className="shape-serie"
-        transform={translate(xRule.start('content'), yRule.start('content'))} >
+        transform={translate(xRule.start('content'), yRule.end('content'))} >
 
         {
           rowsInOrder
@@ -91,7 +92,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
             .map(r => <rect key={keyColumn.getKey(r.rowValue)} className="shape sf-transition"
               stroke={ySubscale.bandwidth() > 4 ? '#fff' : undefined}
               fill={s.color || color(s.key)}
-              transform={translate(0, y(keyColumn.getKey(r.rowValue))! + ySubscale(s.key)!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+              transform={translate(0, -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}
               height={ySubscale.bandwidth()}
               width={x(r.values[s.key] && r.values[s.key].value)}
               onClick={e => onDrillDown(r.values[s.key].rowClick)}
@@ -109,14 +110,14 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
             .map(r => <text key={keyColumn.getKey(r.rowValue)} className="number-label sf-transition"
               transform={translate(
                 x(r.values[s.key] && r.values[s.key].value) / 2,
-                y(keyColumn.getKey(r.rowValue))! + ySubscale(s.key)! + ySubscale.bandwidth() / 2
+                -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
               )}
               opacity={parameters["NumberOpacity"]}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               textAnchor="middle"
               fontWeight="bold">
-              {r.values[s.key].value}
+              {r.values[s.key].valueNiceName}
               <title>
                 {r.values[s.key].valueTitle}
               </title>
