@@ -5,6 +5,7 @@ import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DynamicComponent from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
+import { TitleManager } from "./EntityBase";
 
 interface MultiValueLineProps extends LineBaseProps {
   ctx: TypeContext<MList<any>>;
@@ -75,7 +76,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
             <tr >
               <td colSpan={4}>
                 {!s.ctx.readOnly &&
-                  <a href="#" title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                  <a href="#" title={TitleManager.useTitle ? this.props.addValueText || SearchMessage.AddValue.niceToString() : undefined}
                     className="sf-line-button sf-create"
                     onClick={this.handleAddValue}>
                     <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
@@ -103,7 +104,7 @@ export class MultiValueLineElement extends React.Component<MultiValueLineElement
       <tr>
         <td>
           {!ctx.readOnly &&
-            <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+            <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={this.props.onRemove}>
               <FontAwesomeIcon icon="times" />

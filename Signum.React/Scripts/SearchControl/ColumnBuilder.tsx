@@ -4,6 +4,7 @@ import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./ColumnBuilder.css"
+import { TitleManager } from '../../Scripts/Lines/EntityBase';
 
 export interface ColumnsBuilderProps {
   queryDescription: QueryDescription;
@@ -68,7 +69,7 @@ export default class ColumnsBuilder extends React.Component<ColumnsBuilderProps>
               {!this.props.readonly &&
                 <tr>
                   <td colSpan={4}>
-                    <a title={SearchMessage.AddColumn.niceToString()}
+                    <a title={TitleManager.useTitle ? SearchMessage.AddColumn.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={this.handlerNewColumn}>
                       <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
@@ -124,7 +125,7 @@ export class ColumnComponent extends React.Component<ColumnComponentProps>{
       <tr>
         <td>
           {!readonly &&
-            <a title={JavascriptMessage.removeColumn.niceToString()}
+            <a title={TitleManager.useTitle ? JavascriptMessage.removeColumn.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={this.handleDeleteColumn}>
               <FontAwesomeIcon icon="times" />

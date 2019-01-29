@@ -66,9 +66,19 @@ export namespace Expander {
   }
 }
 
+export namespace NavigatorManager {
+  export function getFramePage() {
+    return import("./Frames/FramePage");
+  }
+
+  export function getFrameModal() {
+    return import("./Frames/FrameModal");
+  }
+}
+
 export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => import("./Frames/FramePage")} />);
-  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => import("./Frames/FramePage")} />);
+  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
+  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage() } />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -597,7 +607,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-  return import("./Frames/FrameModal")
+  return NavigatorManager.getFrameModal()
     .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
@@ -622,7 +632,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-  return import("./Frames/FrameModal")
+  return NavigatorManager.getFrameModal()
     .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 

@@ -340,7 +340,7 @@ namespace Signum.Entities.DynamicQuery
         public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
         {
             if (string.IsNullOrEmpty(tokenString))
-                throw new ArgumentNullException("tokenString");
+                throw new ArgumentNullException(nameof(tokenString));
 
             //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
             string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");

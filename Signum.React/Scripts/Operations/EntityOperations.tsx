@@ -14,6 +14,7 @@ import {
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { TitleManager } from "../../Scripts/Lines/EntityBase";
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
   const ti = getTypeInfo(ctx.pack.entity.Type);
@@ -170,7 +171,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         {...props}
         key="button"
         innerRef={r => elem = r}
-        className={classes(disabled ? "disabled" : undefined, props && props.className)}
+        className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
         onClick={disabled ? undefined : this.handleOnClick}
         data-operation={eoc.operationInfo.key}>
         {iconElement}
@@ -189,7 +190,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         <Button color={bsColor}
           className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
           onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
-          title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
+          title={TitleManager.useTitle ? NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName) : undefined}>
           <span>&times;</span>
         </Button>
       </div>,
@@ -201,15 +202,29 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     if (this.props.children)
       return this.props.children;
 
+    let text: string;
+
     const eoc = this.props.eoc;
     if (eoc.settings && eoc.settings.text)
-      return eoc.settings.text();
+      text = eoc.settings.text();
 
     const group = this.props.group;
     if (group && group.simplifyName)
-      return group.simplifyName(eoc.operationInfo.niceName);
+      text = group.simplifyName(eoc.operationInfo.niceName);
 
-    return eoc.operationInfo.niceName;
+    text = eoc.operationInfo.niceName;
+
+    if (eoc.settings && eoc.settings.icon) {
+      switch (eoc.settings.iconAlign) {
+        case "right":
+          return (<span>{text} <FontAwesomeIcon icon={eoc.settings.icon} fixedWidth /></span>);
+        default:
+          return (<span><FontAwesomeIcon icon={eoc.settings.icon} fixedWidth /> {text}</span>);
+      }
+    }
+    else {
+      return text;
+    }
   }
 
   handleOnClick = (event: React.MouseEvent<any>) => {

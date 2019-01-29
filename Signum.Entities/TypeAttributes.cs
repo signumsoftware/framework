@@ -124,10 +124,10 @@ namespace Signum.Entities
         public static void Override(Type type, EntityKindAttribute attr)
         {
             if (type == null)
-                throw new ArgumentNullException("attr");
+                throw new ArgumentNullException(nameof(attr));
 
             if (attr == null)
-                throw new ArgumentNullException("attr");
+                throw new ArgumentNullException(nameof(attr));
 
             dictionary.AddOrUpdate(type, attr, (t, _) => attr);
         }

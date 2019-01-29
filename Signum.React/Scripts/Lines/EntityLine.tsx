@@ -6,7 +6,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityBase, EntityBaseProps } from './EntityBase'
+import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
 import { AutocompleteConfig } from './AutocompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
@@ -200,7 +200,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         <a ref={e => this.setLinkOrSpan(e)}
           href="#" onClick={this.handleViewClick}
           className={classes(s.ctx.formControlClass, "sf-entity-line-entity")}
-          title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlAttributes}>
+          title={TitleManager.useTitle ? JavascriptMessage.navigate.niceToString() : undefined} {...s.itemHtmlAttributes}>
           {str}
         </a>
       );

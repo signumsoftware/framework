@@ -103,6 +103,8 @@ namespace Signum.React.ApiControllers
         {
             public string token;
             public SubTokensOptions options;
+
+            public override string ToString() => $"{token} ({options})";
         }
 
         public class ParseTokensRequest
