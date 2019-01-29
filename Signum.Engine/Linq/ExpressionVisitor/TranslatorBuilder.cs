@@ -189,7 +189,7 @@ namespace Signum.Engine.Linq
             Expression NullifyColumn(Expression exp)
             {
                 if (!(exp is ColumnExpression ce))
-                    return exp!; /*CSBUG*/
+                    return exp;
 
                 if (ce.Type.IsNullable() || ce.Type.IsClass)
                     return ce;

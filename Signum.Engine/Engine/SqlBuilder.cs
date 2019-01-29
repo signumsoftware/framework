@@ -211,7 +211,6 @@ namespace Signum.Engine
                 null;
 
             var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
-            c = c!;/*CSBUG*/
 
             return $" ".Combine(
                 c.Name.SqlEscape(),
@@ -316,7 +315,7 @@ namespace Signum.Engine
             }
             else
             {
-                return CreateIndexBasic(index! /*CSBUG*/, forHistoryTable: false);
+                return CreateIndexBasic(index, forHistoryTable: false);
             }
         }
 

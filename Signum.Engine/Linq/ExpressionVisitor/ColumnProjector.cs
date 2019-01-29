@@ -135,7 +135,6 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    expression = expression! /*CSBUG*/;
                     if (expression.Type.UnNullify().IsEnum)
                     {
                         var convert = expression.TryConvert(expression.Type.IsNullable() ? typeof(int?) : typeof(int));

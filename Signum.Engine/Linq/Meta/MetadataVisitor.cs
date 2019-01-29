@@ -224,8 +224,6 @@ namespace Signum.Engine.Linq
             if (expression is MetaProjectorExpression mpe)
                 return mpe;
 
-            expression = expression!; /*CSBUG*/
-
             if (expression.NodeType == ExpressionType.New)
             {
                 NewExpression nex = (NewExpression)expression;
@@ -245,7 +243,7 @@ namespace Signum.Engine.Linq
                             new CleanMeta(route.TryGetImplementations(), route)));
                 }
 
-                return new MetaProjectorExpression(expression!/*CSBUG*/.Type, MakeVoidMeta(elementType));
+                return new MetaProjectorExpression(expression.Type, MakeVoidMeta(elementType));
             }
 
             throw new InvalidOperationException();
@@ -450,8 +448,6 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("Property {0} not found on {1}".FormatWith(member.Name, mme.Type.TypeName()));
             }
 
-            source = source! /*CSBUG*/;
-
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IEntity).IsAssignableFrom(source.Type))
             {
                 var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
@@ -581,7 +577,7 @@ namespace Signum.Engine.Linq
                     mLeft.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
-            return MakeDirtyMeta(b.Type, imps, left!, right!); /*CSBUG*/
+            return MakeDirtyMeta(b.Type, imps, left, right);
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
@@ -598,7 +594,7 @@ namespace Signum.Engine.Linq
                     mIfFalse.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
-            return MakeDirtyMeta(c.Type, imps, Visit(c.Test), ifTrue!, ifFalse!); /*CSBUG*/
+            return MakeDirtyMeta(c.Type, imps, Visit(c.Test), ifTrue, ifFalse);
         }
     }
 }

@@ -637,13 +637,16 @@ namespace Signum.Engine.Maps
 
             bool avoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null;
 
-            var implementations = types.ToDictionary(t => t, t => new ImplementationColumn(
-                name: name.Add(TypeLogic.GetCleanName(t)).ToString(),
-                referenceTable: Include(t, route)
-                )
+            var implementations = types.ToDictionary<Type, Type, ImplementationColumn>(t => t, t =>
             {
-                Nullable = nullable,
-                AvoidForeignKey = avoidForeignKey,
+                var rt = Include(t, route);
+
+                string impName = name.Add(TypeLogic.GetCleanName(t)).ToString();
+                return new ImplementationColumn(impName, referenceTable: rt)
+                {
+                    Nullable = nullable,
+                    AvoidForeignKey = avoidForeignKey,
+                };
             });
 
             return new FieldImplementedBy(route, implementations)

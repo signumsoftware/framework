@@ -162,9 +162,7 @@ namespace Signum.Engine.Maps
                     return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
                 }
             }
-
-            member = member! /*CSBUG*/;
-
+            
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
@@ -191,8 +189,6 @@ namespace Signum.Engine.Maps
             {
                 return Mixins?.TryGetC((Type)member);
             }
-
-            member = member!; /*CSBUG*/
 
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
 

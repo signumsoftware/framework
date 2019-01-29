@@ -53,7 +53,7 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public IEnumerator<T> GetEnumerator()
         {
-            return ((IEnumerable<T>)this.provider.Execute(this.expression)).GetEnumerator();
+            return ((IEnumerable<T>)this.provider.Execute(this.expression)!).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

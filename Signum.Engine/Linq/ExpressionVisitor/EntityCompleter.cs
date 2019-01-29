@@ -184,7 +184,7 @@ namespace Signum.Engine.Linq
             if (newEx is ProjectionExpression newProj && newProj.Projector.Type.IsInstantiationOf(typeof(MList<>.RowIdElement)))
                 return new MListProjectionExpression(afe.Type, newProj);
 
-            return newEx!; /*CSBUG*/
+            return newEx;
         }
 
         protected internal override Expression VisitProjection(ProjectionExpression proj)

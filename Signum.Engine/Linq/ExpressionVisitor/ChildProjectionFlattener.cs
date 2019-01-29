@@ -248,7 +248,7 @@ namespace Signum.Engine.Linq
                 if (table.Table is Table t && t.IsView)
                     yield return new ColumnExpression(typeof(int), table.Alias, t.Columns.Values.Single(a => a.PrimaryKey).Name);
                 else
-                    yield return new ColumnExpression(typeof(int), table.Alias, table!.Table.PrimaryKey.Name); /*CSBUG*/
+                    yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name);
             }
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)

@@ -518,9 +518,7 @@ FROM {oldTable.Name}");
 
                 return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
-
-            column = column!; /*CSBUG*/
-
+            
             string typeDefault = forceDefaultValue ??
                 (SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
                 SqlBuilder.IsString(column.SqlDbType) ? "''" :

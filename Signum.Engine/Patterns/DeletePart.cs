@@ -10,7 +10,7 @@ namespace Signum.Engine
 {
     public static class DeletePart
     {
-        static readonly Variable<ImmutableStack<Type/*?*/>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidDeletePart"); /*CSBUG*/ 
+        static readonly Variable<ImmutableStack<Type?>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type?>>("avoidDeletePart"); /*CSBUG*/ 
  
         public static bool ShouldAvoidDeletePart(Type partType)
         {
@@ -21,7 +21,7 @@ namespace Signum.Engine
         /// <param name="partType">Use null for every type</param>
         public static IDisposable AvoidDeletePart(Type partType)
         {
-            avoidTypes.Value = (avoidTypes.Value ?? ImmutableStack<Type>.Empty).Push(partType);
+            avoidTypes.Value = (avoidTypes.Value ?? ImmutableStack<Type?>.Empty).Push(partType);
 
             return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
         }

@@ -674,7 +674,7 @@ namespace Signum.Engine.Linq
             else
                 this.VisitJoin((JoinExpression)source);
 
-            return source!; /*CSBUG*/
+            return source;
         }
 
         protected internal override Expression VisitJoin(JoinExpression join)

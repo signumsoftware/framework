@@ -678,7 +678,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(listTask, query.Context, countTask);
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination!.GetType().Name)); /*CSBUG*/
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination)
@@ -713,7 +713,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(list, query.Context, count);
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination!.GetType().Name)); /*CSBUG*/
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
@@ -751,7 +751,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(list, collection.Context, totalElements ?? collection.Collection.Count());
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination!.GetType().Name)); /*CSBUG*/
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
@@ -780,7 +780,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(c, collection.Context, collection.TotalElements);
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination!.GetType().Name));/*CSBUG*/
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
         #endregion

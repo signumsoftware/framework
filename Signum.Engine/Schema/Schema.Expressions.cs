@@ -108,12 +108,12 @@ namespace Signum.Engine.Maps
         {
             var res = GetIdExpression(alias);
 
-            return res is PrimaryKeyExpression ?
-                (ColumnExpression)((PrimaryKeyExpression)res!).Value : /*CSBUG*/
+            return res is PrimaryKeyExpression pe?
+                (ColumnExpression)pe.Value :
                 (ColumnExpression)res!;
         }
     }
-
+    
     public partial class TableMList
     {
         internal PrimaryKeyExpression RowIdExpression(Alias tableAlias)

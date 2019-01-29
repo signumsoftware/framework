@@ -471,7 +471,7 @@ namespace Signum.Engine.Linq
             var visitedToStrExp = Visit(toStrExp);
 
             return Expression.Condition(
-                Expression.Equal(expression, Expression.Constant(null, expression!/*CSBUG*/.Type.Nullify())),
+                Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),
                 Expression.Constant(null, typeof(string)),
                 Visit(visitedToStrExp));
         }

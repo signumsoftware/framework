@@ -179,16 +179,16 @@ namespace Signum.Engine
             if (value is bool b)
                 return (b ? 1 : 0).ToString();
 
-            if (Schema.Current.Settings.UdtSqlName.TryGetValue(value!.GetType() /*CSBUG*/, out var name))
+            if (Schema.Current.Settings.UdtSqlName.TryGetValue(value.GetType(), out var name))
                 return "CAST('{0}' AS {1})".FormatWith(value, name);
 
-            if (value!.GetType().IsEnum /*CSBUG*/)
+            if (value.GetType().IsEnum)
                 return Convert.ToInt32(value).ToString();
 
             if (value is byte[] bytes)
                 return "0x" + BitConverter.ToString(bytes).Replace("-", "");
 
-            return value!.ToString(); /*CSBUG*/
+            return value.ToString();
         }
 
         protected internal override void PlainSql(StringBuilder sb)

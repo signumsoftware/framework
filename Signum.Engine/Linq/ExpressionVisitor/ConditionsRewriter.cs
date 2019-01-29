@@ -113,8 +113,8 @@ namespace Signum.Engine.Linq
                     return false;
             }
 
-            var exp = expression as DbExpression;
-            switch (exp!.DbNodeType) /*CSBUG*/
+            var exp = (DbExpression)expression;
+            switch (exp.DbNodeType)
             {
                 case DbExpressionType.Exists:
                 case DbExpressionType.Like:

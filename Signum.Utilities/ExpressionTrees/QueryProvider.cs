@@ -37,7 +37,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         S IQueryProvider.Execute<S>(Expression expression)
         {
-            return (S)this.Execute(expression);
+            return (S)this.Execute(expression)!;
         }
 
         object? IQueryProvider.Execute(Expression expression)
@@ -46,6 +46,6 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         public abstract string GetQueryText(Expression expression);
-        public abstract object Execute(Expression expression);
+        public abstract object? Execute(Expression expression);
     }
 }

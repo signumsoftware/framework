@@ -224,7 +224,7 @@ namespace Signum.Engine.Linq
                             kvp => kvp.Key,
                             kvp => kvp.Value.WithExpandEntity(expandEntity)));
 
-                    throw new NotImplementedException("Expand Entity not supported for " + e!/*CSBUG*/.GetType());
+                    throw new NotImplementedException("Expand Entity not supported for " + e.GetType());
                 });
 
             return new ProjectionExpression(projection.Select, newProjector, projection.UniqueFunction, projection.Type);
@@ -279,7 +279,7 @@ namespace Signum.Engine.Linq
                     ee = Completed(ee);
 
 
-                    var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m!/*CSBUG*/.DeclaringType, (PropertyInfo)m! /*CSBUG*/);
+                    var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType, (PropertyInfo)m);
 
                     var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
 
@@ -291,7 +291,7 @@ namespace Signum.Engine.Linq
                 }
                 else if (projector is NewExpression ne)
                 {
-                    var p = (PropertyInfo)m! /*CSBUG*/;
+                    var p = (PropertyInfo)m;
 
                     var mIndex = ne.Members.IndexOf(pi => ReflectionTools.PropertyEquals((PropertyInfo)pi, p));
 
@@ -322,7 +322,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException($"ChangeProjector not implemented for projector of type {projector!/*CSBUG*/.Type} and member {m}");
+            throw new NotImplementedException($"ChangeProjector not implemented for projector of type {projector.Type} and member {m}");
         }
 
         string? currentTableHint;
@@ -366,7 +366,7 @@ namespace Signum.Engine.Linq
             return MapVisitExpand(lambda, projection.Projector, projection.Select);
         }
 
-        internal Expression MapVisitExpand(LambdaExpression lambda, Expression projector, SourceExpression? source)
+        internal Expression MapVisitExpand(LambdaExpression lambda, Expression projector, SourceExpression source)
         {
             using (SetCurrentSource(source))
             {
@@ -890,7 +890,7 @@ namespace Signum.Engine.Linq
                 if (predicate != null)
                     source = Expression.Call(typeof(Enumerable), "Where", method.GetGenericArguments(), source, predicate);
 
-                ProjectionExpression projection = this.VisitCastProjection(source!/*CSBUG*/);
+                ProjectionExpression projection = this.VisitCastProjection(source);
                 Expression result = new ExistsExpression(projection.Select);
                 if (isAll)
                     result = Expression.Not(result);
@@ -1231,14 +1231,14 @@ namespace Signum.Engine.Linq
                 {
                     expr = ((MethodCallExpression)expr).Arguments[0];
                 }
-                else if (expr!/*CSBUG*/.Type == typeof(Type))
+                else if (expr.Type == typeof(Type))
                 {
-                    expr = ExtractTypeId(expr!/*CSBUG*/);
+                    expr = ExtractTypeId(expr);
                 }
 
-                if (expr!/*CSBUG*/.Type.UnNullify() == typeof(PrimaryKey))
+                if (expr.Type.UnNullify() == typeof(PrimaryKey))
                 {
-                    expr = SmartEqualizer.UnwrapPrimaryKey(expr!/*CSBUG*/);
+                    expr = SmartEqualizer.UnwrapPrimaryKey(expr);
                 }
 
                 return DbExpressionNominator.FullNominate(expr)!;
@@ -1460,14 +1460,14 @@ namespace Signum.Engine.Linq
 
                     return toStr;
                 }
-                else if (source!/*CSBUG*/.NodeType == ExpressionType.Convert && source!/*CSBUG*/.Type.UnNullify().IsEnum)
+                else if (source.NodeType == ExpressionType.Convert && source.Type.UnNullify().IsEnum)
                 {
-                    var table = Schema.Current.Table(EnumEntity.Generate(source!/*CSBUG*/.Type.UnNullify()));
+                    var table = Schema.Current.Table(EnumEntity.Generate(source.Type.UnNullify()));
 
                     if (table != null)
                     {
-                        var ee = new EntityExpression(EnumEntity.Generate(source!/*CSBUG*/.Type.UnNullify()),
-                            new PrimaryKeyExpression(((UnaryExpression)source!/*CSBUG*/).Operand.Nullify()), null, null, null, null, null, false);
+                        var ee = new EntityExpression(EnumEntity.Generate(source.Type.UnNullify()),
+                            new PrimaryKeyExpression(((UnaryExpression)source).Operand.Nullify()), null, null, null, null, null, false);
 
                         return Completed(ee).GetBinding(EntityExpression.ToStrField);
                     }
@@ -1573,7 +1573,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            source = RemoveProjectionConvert(source!/*CSBUG*/);
+            source = RemoveProjectionConvert(source);
 
             switch (source.NodeType)
             {
@@ -1968,7 +1968,7 @@ namespace Signum.Engine.Linq
                     TypeConstant(imp.Key).Nullify(), acum)));
             }
 
-            throw new InvalidOperationException("Impossible to extract TypeId from {0}".FormatWith(exp!/*CSBUG*/.ToString()));
+            throw new InvalidOperationException("Impossible to extract TypeId from {0}".FormatWith(exp.ToString()));
         }
 
         protected override Expression VisitInvocation(InvocationExpression iv)
@@ -2217,7 +2217,7 @@ namespace Signum.Engine.Linq
                 commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
             }
             else
-                throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector!/*CSBUG*/.GetType().TypeName()));
+                throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));
 
             commands.Add(new SelectRowCountExpression());
 
@@ -2242,7 +2242,7 @@ namespace Signum.Engine.Linq
                 entity is EntityExpression entEx ? (ITable)entEx.Table :
                 entity is EmbeddedEntityExpression eeEx ? (ITable)eeEx.ViewTable!:
                 entity is MListElementExpression mlistEx ? (ITable)mlistEx.Table!:
-                throw new UnexpectedValueException(entity!/*CSBUG*/);
+                throw new UnexpectedValueException(entity);
 
             Alias alias = aliasGenerator.Table(table.Name);
 
@@ -2303,7 +2303,7 @@ namespace Signum.Engine.Linq
                 table = eee.ViewTable!;
             }
             else
-                throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity!/*CSBUG*/.GetType().TypeName()));
+                throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
 
 
             var result = new CommandAggregateExpression(new CommandExpression[]
@@ -2348,8 +2348,6 @@ namespace Signum.Engine.Linq
             {
                 assignments.Add(new ColumnAssignment(entityTable.Ticks.Name, Expression.Constant(0L, typeof(long))));
             }
-
-            table = table!; /*CSBUG*/
 
             var isHistory = this.systemTime is SystemTime.HistoryTable;
 
@@ -2554,9 +2552,9 @@ namespace Signum.Engine.Linq
 
         ImmutableStack<SourceExpression> currentSource = ImmutableStack<SourceExpression>.Empty;
 
-        public IDisposable SetCurrentSource(SourceExpression? source)
+        public IDisposable SetCurrentSource(SourceExpression source)
         {
-            this.currentSource = currentSource.Push(source!/*CSBUG*/);
+            this.currentSource = currentSource.Push(source);
             return new Disposable(() => currentSource = currentSource.Pop());
         }
 
@@ -2690,8 +2688,6 @@ namespace Signum.Engine.Linq
                 return aggregate;
             }
 
-            expression = expression!;/*CSBUG*/
-
             if (expression.NodeType == ExpressionType.Conditional)
             {
                 var con = (ConditionalExpression)expression;
@@ -2734,8 +2730,6 @@ namespace Signum.Engine.Linq
 
             if (expression is ImplementedByAllExpression iba)
                 return iba.Id;
-
-            expression = expression!; /*CSBUG*/
 
             if (expression.NodeType == ExpressionType.Conditional)
             {
@@ -2781,7 +2775,6 @@ namespace Signum.Engine.Linq
                 return iba.TypeId;
             }
 
-            expression = expression!; /*CSBUG*/
             if (expression.NodeType == ExpressionType.Conditional)
             {
                 var con = (ConditionalExpression)expression;
@@ -2866,7 +2859,7 @@ namespace Signum.Engine.Linq
 
             var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
-            var expression = this.MapVisitExpand(cleanLambda, parentEntity, null);
+            var expression = this.MapVisitExpand(cleanLambda, parentEntity, null!);
 
             if(expression is MethodCallExpression mce)
             {
@@ -3213,7 +3206,7 @@ namespace Signum.Engine.Linq
                     source = new JoinExpression(JoinType.SingleRowLeftOuterJoin, source, unionAll, condition);
                 }
 
-                r!/*CSBUG*/.Consumed = true;
+                r.Consumed = true;
             }
             return source;
         }

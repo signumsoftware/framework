@@ -31,7 +31,7 @@ namespace Signum.Engine.Linq
             return this.Translate(expression, tr => tr.MainCommand);
         }
 
-        public override object Execute(Expression expression) /*CSBUG*/
+        public override object? Execute(Expression expression)
         {
             using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
                 return this.Translate(expression, tr => tr.Execute()!);

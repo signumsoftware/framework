@@ -387,7 +387,7 @@ namespace Signum.Engine
                 }
             }
 
-            return ex! /*CSBUG*/;
+            return ex;
         }
 
         protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)

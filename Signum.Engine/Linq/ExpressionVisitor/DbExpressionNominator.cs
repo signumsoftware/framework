@@ -667,8 +667,8 @@ namespace Signum.Engine.Linq
                 return true;
             }
 
-            if (exp!/*CSBUG*/.NodeType == ExpressionType.Convert && exp!/*CSBUG*/.Type.UnNullify() == typeof(DayOfWeek))
-                return ExtractDayOfWeek(((UnaryExpression)exp!/*CSBUG*/).Operand, out result);
+            if (exp.NodeType == ExpressionType.Convert && exp.Type.UnNullify() == typeof(DayOfWeek))
+                return ExtractDayOfWeek(((UnaryExpression)exp).Operand, out result);
 
             result = null;
             return false;
@@ -732,12 +732,12 @@ namespace Signum.Engine.Linq
             if (left is SqlFunctionExpression fLeft && fLeft.SqlFunction == SqlFunction.COALESCE.ToString())
                 expressions.AddRange(fLeft.Arguments);
             else
-                expressions.Add(left!/*CSBUG*/);
+                expressions.Add(left);
 
             if (right is SqlFunctionExpression fRight && fRight.SqlFunction == SqlFunction.COALESCE.ToString())
                 expressions.AddRange(fRight.Arguments);
             else
-                expressions.Add(right!/*CSBUG*/);
+                expressions.Add(right);
 
             return Add(new SqlFunctionExpression(b.Type, null, SqlFunction.COALESCE.ToString(), expressions));
         }
@@ -901,8 +901,6 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    ifFalse = ifFalse!; /*CSBUG*/
-
                     if (ifTrue.IsNull() && ifFalse.IsNull())
                         return ifTrue; //cond? null: null doesn't work in sql
 
