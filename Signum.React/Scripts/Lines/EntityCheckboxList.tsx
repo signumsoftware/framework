@@ -34,7 +34,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-checkbox-list", s.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+        <div className={classes("SF-checkbox-list", s.ctx.errorClassBorder)} {...{ ...this.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
           {this.renderButtons()}
           {this.renderCheckboxList()}
         </div>

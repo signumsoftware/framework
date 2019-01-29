@@ -11,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
@@ -22,7 +22,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute
+  TypeInfo, PropertyRoute, QueryTokenString
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -31,7 +31,7 @@ import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import ButtonBar from "./Frames/ButtonBar";
-import { json } from "d3";
+import { json, namespace } from "d3";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -42,12 +42,20 @@ export function clearQuerySettings() {
 
 
 export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => import("./SearchControl/SearchPage")} />);
+  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => FinderFindManager.getSearchPage()} />);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
+
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => QueryTokenString<any>)[]): FilterGroupOption {
+  return {
+    groupOperation: "Or",
+    pinned: { splitText: true },
+    filters: tokens.map(t => ({ token: t(type.token()), operation: "Contains" } as FilterConditionOption))
+  };
+} 
 
 export function getSettings(queryName: PseudoType | QueryKey): QuerySettings {
   return querySettings[getQueryKey(queryName)];
@@ -79,7 +87,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
-  let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => import("./SearchControl/SearchModal")
+  let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
     .then(rr => rr && rr.entity);
 
@@ -95,11 +103,20 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   return getPromiseSearchModal();
 }
 
+export namespace FinderFindManager {
+  export function getSearchPage() {
+    return import("./SearchControl/SearchPage");
+  }
+  export function getSearchModal() {
+    return import("./SearchControl/SearchModal");
+  }
+}
+
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
 
   var qs = getSettings(fo.queryName);
 
-  return import("./SearchControl/SearchModal")
+  return FinderFindManager.getSearchModal()
     .then(a => a.default.open(fo, modalOptions));
 }
 
@@ -118,7 +135,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
-  let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => import("./SearchControl/SearchModal")
+  let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
     .then(rows => rows && rows.map(a => a.entity!));
 
@@ -138,7 +155,7 @@ export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): 
 
   var qs = getSettings(fo.queryName);
 
-  return import("./SearchControl/SearchModal")
+  return FinderFindManager.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions));
 }
 
@@ -156,7 +173,7 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
   if (qs && qs.onExplore && !(modalOptions && modalOptions.useDefaultBehaviour))
     return qs.onExplore(findOptions, modalOptions);
 
-  return import("./SearchControl/SearchModal")
+  return FinderFindManager.getSearchModal()
     .then(a => a.default.explore(findOptions, modalOptions));
 }
 
@@ -653,9 +670,16 @@ interface OverridenValue {
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
   if (fop.pinned && overridenValue == null) {
-    if (fop.pinned.splitText && fop.value != null && typeof fop.value == "string") {
+    if (fop.pinned.splitText) {
+
+      if (!fop.value)
+        return undefined;
+
+      if (typeof fop.value != "string")
+        throw new Error("Split text only works with string");
+
       var parts = fop.value.split(/\s+/);
-      
+
       return ({
         groupOperation: "And",
         token: fop.token && fop.token.fullKey,

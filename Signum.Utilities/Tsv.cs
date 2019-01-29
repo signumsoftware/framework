@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +12,9 @@ namespace Signum.Utilities
 {
     public static class Tsv
     {
-        public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
-        public static CultureInfo Culture = CultureInfo.InvariantCulture;
+        // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
+        public static Encoding DefaultEncoding = Encoding.UTF8;
+        public static CultureInfo DefaultCulture = CultureInfo.InvariantCulture;
 
         public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding encoding = null, bool autoFlush = false, bool append = false,
             Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
@@ -40,31 +41,33 @@ namespace Signum.Utilities
             return fileName;
         }
 
-        public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
+        public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
             Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
-                ToTsv<T>(collection, fs, encoding, writeHeaders, autoFlush, toStringFactory);
+                ToTsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
 
             return fileName;
         }
 
-        public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false,
+        public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false,
             Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                collection.ToTsv(ms, encoding, writeHeaders, autoFlush, toStringFactory);
+                collection.ToTsv(ms, encoding, culture, writeHeaders, autoFlush, toStringFactory);
                 return ms.ToArray();
             }
         }
 
         private const string tab = "\t";
 
-        public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false,
+        public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false,
             Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
+
+            var defCulture = culture ?? DefaultCulture;
 
             if (typeof(IList).IsAssignableFrom(typeof(T)))
             {
@@ -76,7 +79,7 @@ namespace Signum.Utilities
                         {
                             var obj = row[i];
 
-                            var str = ConvertToString(obj);
+                            var str = ConvertToString(obj, defCulture);
 
                             sw.Write(str);
                             if (i < row.Count - 1)
@@ -91,7 +94,7 @@ namespace Signum.Utilities
             {
                 var columns = ColumnInfoCache<T>.Columns;
                 var members = columns.Select(c => c.MemberEntry).ToList();
-                var toString = columns.Select(c => GetToString(c, toStringFactory)).ToList();
+                var toString = columns.Select(c => GetToString(c, defCulture, toStringFactory)).ToList();
 
                 using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
                 {
@@ -117,7 +120,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory)
+        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory)
         {
             if (toStringFactory != null)
             {
@@ -127,16 +130,16 @@ namespace Signum.Utilities
                     return result;
             }
 
-            return ConvertToString;
+            return obj => ConvertToString(obj, culture);
         }
 
-        static string ConvertToString(object obj)
+        static string ConvertToString(object obj, CultureInfo culture)
         {
             if (obj == null)
                 return "";
 
             if (obj is IFormattable f)
-                return f.ToString(null, Culture);
+                return f.ToString(null, culture);
             else
             {
                 var p = obj.ToString();
@@ -151,29 +154,31 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, int skipLines = 1, TsvReadOptions<T> options = null) where T : class, new()
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, int skipLines = 1, CultureInfo culture = null, TsvReadOptions<T> options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, skipLines, options).ToList();
+                return ReadStream<T>(fs, encoding, skipLines, culture, options).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, int skipLines = 1, TsvReadOptions<T> options = null) where T : class, new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, int skipLines = 1, CultureInfo culture = null, TsvReadOptions<T> options = null) where T : class, new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, skipLines, options).ToList();
+                return ReadStream<T>(ms, encoding, skipLines, culture, options).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, int skipLines = 1, TsvReadOptions<T> options = null) where T : class, new()
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, int skipLines = 1, CultureInfo culture = null, TsvReadOptions<T> options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             if (options == null)
                 options = new TsvReadOptions<T>();
 
+            var defCulture = culture ?? DefaultCulture;
+
             var columns = ColumnInfoCache<T>.Columns;
             var members = columns.Select(c => c.MemberEntry).ToList();
-            var parsers = columns.Select(c => GetParser(c, options.ParserFactory)).ToList();
+            var parsers = columns.Select(c => GetParser(c, defCulture, options.ParserFactory)).ToList();
 
 
             using (StreamReader sr = new StreamReader(stream, encoding))
@@ -208,7 +213,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static T ReadLine<T>(string tsvLine, TsvReadOptions<T> options = null)
+        public static T ReadLine<T>(string tsvLine, CultureInfo culture, TsvReadOptions<T> options = null)
             where T : class, new()
         {
             if (options == null)
@@ -218,10 +223,10 @@ namespace Signum.Utilities
 
             return ReadObject<T>(tsvLine,
                 columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(c, options.ParserFactory)).ToList());
+                columns.Select(c => GetParser(c, culture, options.ParserFactory)).ToList());
         }
 
-        private static Func<string, object> GetParser<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<string, object>> parserFactory)
+        private static Func<string, object> GetParser<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<string, object>> parserFactory)
         {
             if (parserFactory != null)
             {
@@ -231,7 +236,7 @@ namespace Signum.Utilities
                     return result;
             }
 
-            return str => ConvertTo(str, column.MemberInfo.ReturningType(), column.Format);
+            return str => ConvertTo(str, column.MemberInfo.ReturningType(), column.Format, culture);
         }
 
         static T ReadObject<T>(string line, List<MemberEntry<T>> members, List<Func<string, object>> parsers) where T : new()
@@ -270,7 +275,7 @@ namespace Signum.Utilities
                 .Select((me, i) => new TsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
         }
 
-        static object ConvertTo(string s, Type type, string format)
+        static object ConvertTo(string s, Type type, string format, CultureInfo culture)
         {
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
@@ -286,11 +291,11 @@ namespace Signum.Utilities
 
             if (type == typeof(DateTime))
                 if (format == null)
-                    return DateTime.Parse(s, Culture);
+                    return DateTime.Parse(s, culture);
                 else
-                    return DateTime.ParseExact(s, format, Culture);
+                    return DateTime.ParseExact(s, format, culture);
 
-            return Convert.ChangeType(s, type, Culture);
+            return Convert.ChangeType(s, type, culture);
         }
     }
 

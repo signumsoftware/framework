@@ -47,10 +47,10 @@ namespace Signum.Utilities
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             if (predicate == null)
-                throw new ArgumentNullException("predicate");
+                throw new ArgumentNullException(nameof(predicate));
 
             T result = default(T);
             bool found = false;
@@ -88,7 +88,7 @@ namespace Signum.Utilities
         public static T SingleEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -132,7 +132,7 @@ namespace Signum.Utilities
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -160,10 +160,10 @@ namespace Signum.Utilities
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             if (predicate == null)
-                throw new ArgumentNullException("predicate");
+                throw new ArgumentNullException(nameof(predicate));
 
             T result = default(T);
             bool found = false;
@@ -191,7 +191,7 @@ namespace Signum.Utilities
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -210,7 +210,7 @@ namespace Signum.Utilities
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -230,10 +230,10 @@ namespace Signum.Utilities
         public static T FirstEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             if (predicate == null)
-                throw new ArgumentNullException("predicate");
+                throw new ArgumentNullException(nameof(predicate));
 
             foreach (T item in collection)
             {
@@ -253,7 +253,7 @@ namespace Signum.Utilities
         public static T FirstEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -267,7 +267,7 @@ namespace Signum.Utilities
         public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -293,7 +293,7 @@ namespace Signum.Utilities
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -312,7 +312,7 @@ namespace Signum.Utilities
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -332,7 +332,7 @@ namespace Signum.Utilities
         public static T SingleOrMany<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
@@ -352,7 +352,7 @@ namespace Signum.Utilities
         public static T Only<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {

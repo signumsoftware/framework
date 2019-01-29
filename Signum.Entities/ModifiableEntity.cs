@@ -17,8 +17,15 @@ using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
+
+    public interface IModifiableEntity : INotifyPropertyChanged, IDataErrorInfo
+    {
+
+    }
+
+
     [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
-    public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
+    public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable
     {
         static Func<bool> isRetrievingFunc = null;
         static public bool IsRetrieving
@@ -97,9 +104,7 @@ namespace Signum.Entities
 
             return true;
         }
-
-
-
+        
         struct PropertyKey : IEquatable<PropertyKey>
         {
             public PropertyKey(Type type, string propertyName)

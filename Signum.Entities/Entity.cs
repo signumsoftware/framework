@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -202,7 +202,7 @@ namespace Signum.Entities
     }
 
     [InTypeScript(false)]
-    public interface IEntity : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
+    public interface IEntity : IModifiableEntity, IRootEntity
     {
         PrimaryKey Id { get; }
 
