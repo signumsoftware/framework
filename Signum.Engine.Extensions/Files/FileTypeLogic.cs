@@ -132,10 +132,10 @@ namespace Signum.Engine.Files
                 error = "GetPrefixPair";
 
             if (!WeakFileReference && CalculateSuffix == null)
-                error = ", ".CombineIfNotEmpty(error, "CalculateSufix");
+                error = ", ".Combine(error, "CalculateSufix");
 
             if (RenameOnCollision && RenameAlgorithm == null)
-                error = ", ".CombineIfNotEmpty(error, "RenameAlgorithm");
+                error = ", ".Combine(error, "RenameAlgorithm");
 
             if (error.HasText())
                 error += " not set";

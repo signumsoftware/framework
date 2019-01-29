@@ -30,7 +30,7 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
         public string UserName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 128)]
+        [ForceNotNullable, SqlDbType(Size = 128)]
         byte[] passwordHash;
         [NotNullValidator]
         public byte[] PasswordHash

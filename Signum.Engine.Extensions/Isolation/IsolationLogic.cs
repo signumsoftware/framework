@@ -180,7 +180,7 @@ namespace Signum.Engine.Isolation
 
             if (strategy == IsolationStrategy.Optional)
             {
-                Schema.Current.Settings.FieldAttributes((T e) => e.Mixin<IsolationMixin>().Isolation).Remove<NotNullableAttribute>(); //Remove non-null 
+                Schema.Current.Settings.FieldAttributes((T e) => e.Mixin<IsolationMixin>().Isolation).Remove<ForceNotNullableAttribute>(); //Remove non-null 
             }
         }
         

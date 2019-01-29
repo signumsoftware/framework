@@ -127,7 +127,7 @@ namespace Signum.Entities.Mailing
         [NotNullValidator]
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-        [SqlDbType(Size = int.MaxValue), NotNullable]
+        [SqlDbType(Size = int.MaxValue), ForceNotNullable]
         public string RawContent { get; set; }
 
         public DateTime SentDate { get; set; }

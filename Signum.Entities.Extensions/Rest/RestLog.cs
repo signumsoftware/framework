@@ -13,7 +13,7 @@ namespace Signum.Entities.Rest
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string HttpMethod { get; set; }
 
-        [NotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, SqlDbType(Size = MaxValue)]
         public string Url { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -22,7 +22,7 @@ namespace Signum.Entities.Rest
 
         public DateTime? ReplayDate { get; set; }
 
-        [NotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, SqlDbType(Size = MaxValue)]
         public string RequestBody { get; set; }
 
         [NotNullValidator, PreserveOrder]
@@ -39,13 +39,13 @@ namespace Signum.Entities.Rest
         [SqlDbType(Size = int.MaxValue)]
         public string Referrer { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [ForceNotNullable, SqlDbType(Size = 100)]
         public string Controller { get; set; }
 
-        [Nullable, SqlDbType(Size = 100)]
+        [ForcNullable, SqlDbType(Size = 100)]
         public string ControllerName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [ForceNotNullable, SqlDbType(Size = 100)]
         public string Action { get; set; }
 
         [SqlDbType(Size = 100)]
@@ -76,7 +76,7 @@ namespace Signum.Entities.Rest
     [Serializable]
     public class QueryStringValueEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, SqlDbType(Size = MaxValue)]
         public string Key { get; set; }
 
         [SqlDbType(Size = MaxValue)]

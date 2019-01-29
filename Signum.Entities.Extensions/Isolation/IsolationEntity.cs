@@ -99,7 +99,7 @@ namespace Signum.Entities.Isolation
         {
         }
 
-        [NotNullable, AttachToUniqueIndexes]
+        [ForceNotNullable, AttachToUniqueIndexes]
         public Lite<IsolationEntity> Isolation { get; set; } = IsRetrieving ? null : IsolationEntity.Current;
 
         protected override void CopyFrom(MixinEntity mixin, object[] args)

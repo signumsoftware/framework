@@ -74,7 +74,7 @@ namespace Signum.Entities.Files
         [Ignore]
         public string CalculatedDirectory { get; set; }
 
-        [NotNullable]
+        [ForceNotNullable]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]

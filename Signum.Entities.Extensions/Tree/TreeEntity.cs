@@ -33,7 +33,7 @@ namespace Signum.Entities.Tree
             get { return RouteToStringExpression.Evaluate(this); }
         }
 
-        [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
+        [ForceNotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
         public string ParentRoute { get; set; }
 
         static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();

@@ -11,7 +11,7 @@ namespace Signum.Entities.Chart
         [NotNullValidator]
         public Lite<Entity> Related { get; set; }
 
-        [NotNullable]
+        [ForceNotNullable]
         //[NotNullValidator]
         public ColorEmbedded Color { get; set; }
 
