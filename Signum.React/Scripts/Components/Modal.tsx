@@ -10,8 +10,8 @@ import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
 import { BsSize, BsColor } from './index';
 import { ErrorBoundary } from './ErrorBoundary';
-import { OperationIcon } from '../Operations';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 
 export interface ModalProps extends ModelDialogProps {
@@ -343,6 +343,13 @@ class ModalDialog extends React.Component<ModelDialogProps> {
   }
 }
 
+interface ModalIconProps {
+  color?: BsColor;
+  classes?: string;
+  icon?: IconProp;
+  iconAlign?: string;
+}
+
 interface ModalHeaderButtonsProps {
   onClose?: () => void;
   onOk?: () => void;
@@ -350,50 +357,21 @@ interface ModalHeaderButtonsProps {
   onCancel?: () => void;
   closeBeforeTitle?: boolean;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  okButtonProps?: {
-    color?: BsColor;
-    classes?: string;
-    icon?: OperationIcon;
-  };
-  closeButtonProps?: {
-    color?: BsColor;
-    classes?: string;
-    icon?: OperationIcon;
-  };
+  okButtonProps?: ModalIconProps;
+  closeButtonProps?: ModalIconProps;
 }
 
 export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
+
+ 
+
   render() {
     const p = this.props;
     var close = this.props.onClose &&
       <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
         <span aria-hidden="true">×</span>
       </button>;
-
-    let okContent: JSX.Element | string = JavascriptMessage.ok.niceToString();
-    if (this.props.okButtonProps && this.props.okButtonProps.icon) {
-      switch (this.props.okButtonProps.icon.align) {
-        case "left":
-          okContent = (<span><FontAwesomeIcon icon={this.props.okButtonProps.icon.icon} fixedWidth /> {JavascriptMessage.ok.niceToString()}</span>);
-          break;
-        case "right":
-          okContent = (<span>{JavascriptMessage.ok.niceToString()} <FontAwesomeIcon icon={this.props.okButtonProps.icon.icon} fixedWidth /></span>);
-          break;
-      }
-    }
-
-    let closeContent: JSX.Element | string = JavascriptMessage.cancel.niceToString();
-    if (this.props.closeButtonProps && this.props.closeButtonProps.icon) {
-      switch (this.props.closeButtonProps.icon.align) {
-        case "left":
-          closeContent = (<span><FontAwesomeIcon icon={this.props.closeButtonProps.icon.icon} fixedWidth /> {JavascriptMessage.cancel.niceToString()}</span>);
-          break;
-        case "right":
-          closeContent = (<span>{JavascriptMessage.cancel.niceToString()} <FontAwesomeIcon icon={this.props.closeButtonProps.icon.icon} fixedWidth /></span>);
-          break;
-      }
-    }
-
+    
 
     return (
       <div className="modal-header" {...p.htmlAttributes}>
@@ -407,19 +385,30 @@ export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps>
           {this.props.onOk && <button
             className={classes("btn", "btn-" + ((this.props.okButtonProps && this.props.okButtonProps.color) || "primary"), "sf-entity-button sf-close-button sf-ok-button", this.props.okButtonProps && this.props.okButtonProps.classes)}
             disabled={this.props.okDisabled} onClick={this.props.onOk}>
-            {okContent}
+            {this.renderButton(JavascriptMessage.ok.niceToString(), this.props.okButtonProps)}
             </button>
             }
           {this.props.onCancel && <button
             className={classes("btn", "btn-" + ((this.props.closeButtonProps && this.props.closeButtonProps.color) || "light"), "sf-entity-button sf-close-button sf-cancel-button", this.props.closeButtonProps && this.props.closeButtonProps.classes)}
             onClick={this.props.onCancel}>
-            {closeContent}
+            {this.renderButton(JavascriptMessage.cancel.niceToString(), this.props.closeButtonProps)}
             </button>
             }
           </div>
         }
       </div>
     );
+  }
+
+  renderButton(text: string, mip?: ModalIconProps) {
+    if (mip && mip.icon) {
+      switch (mip.iconAlign) {
+        case "right": return (<span>{text} <FontAwesomeIcon icon={mip.icon} fixedWidth /></span>);
+        default: return (<span><FontAwesomeIcon icon={mip.icon} fixedWidth /> {text}</span>);
+      }
+    }
+    else
+      return text;
   }
 }
 
