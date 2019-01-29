@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
@@ -13,6 +13,7 @@ import {
   CreateGroup, API, isEntityOperation, autoColorFunction, isSave
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
   const ti = getTypeInfo(ctx.pack.entity.Type);
@@ -130,6 +131,10 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
     const bsColor = eoc.settings && eoc.settings.color || autoColorFunction(eoc.operationInfo);
 
+    const icon = eoc.settings && eoc.settings.icon;
+    const iconColor = eoc.settings && eoc.settings.icon && eoc.settings.iconColor;
+    const iconElement = icon && <span><FontAwesomeIcon icon={icon} color={iconColor} />&nbsp;&nbsp;</span>;
+
     const disabled = !!canExecute;
 
     const withClose = getWithClose(eoc);
@@ -153,6 +158,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
           disabled={disabled}
           onClick={disabled ? undefined : this.handleOnClick}
           data-operation={eoc.operationInfo.key}>
+          {iconElement}
           {this.renderChildren()}
         </DropdownItem>,
         tooltip
@@ -167,6 +173,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         className={classes(disabled ? "disabled" : undefined, props && props.className)}
         onClick={disabled ? undefined : this.handleOnClick}
         data-operation={eoc.operationInfo.key}>
+        {iconElement}
         {this.renderChildren()}
       </Button>,
       tooltip

@@ -253,6 +253,8 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
   withClose?: boolean;
 
   constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
@@ -279,6 +281,8 @@ export interface EntityOperationOptions<T extends Entity> {
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
   withClose?: boolean;
 }
 
