@@ -18,14 +18,14 @@ using System.Collections.Concurrent;
 namespace Signum.Entities
 {
 
-    public interface IModifiableEntity : INotifyPropertyChanged, IDataErrorInfo, ICloneable
+    public interface IModifiableEntity : INotifyPropertyChanged, IDataErrorInfo
     {
 
     }
 
 
     [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
-    public abstract class ModifiableEntity : Modifiable, IModifiableEntity
+    public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable
     {
         static Func<bool> isRetrievingFunc = null;
         static public bool IsRetrieving
