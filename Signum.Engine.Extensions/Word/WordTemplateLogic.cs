@@ -62,7 +62,6 @@ namespace Signum.Engine.Word
             {
                 
                 sb.Include<WordTemplateEntity>()
-                    .WithDelete(WordTemplateOperation.Delete)
                     .WithQuery(() => e => new
                     {
                         Entity = e,
@@ -85,6 +84,11 @@ namespace Signum.Engine.Word
                                 Transaction.PreRealCommit += dic => oldFile.Delete();
                         }
                     },
+                }.Register();
+                
+                new Graph<WordTemplateEntity>.Delete(WordTemplateOperation.Delete)
+                {
+                    Delete = (e, _) => e.Delete(),
                 }.Register();
 
                 PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
