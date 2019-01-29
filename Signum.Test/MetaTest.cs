@@ -26,14 +26,14 @@ namespace Signum.Test
         [Fact]
         public void MetaRawEntity()
         {
-            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>());
+            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>())!;
             Assert.NotNull(dic);
         }
 
         [Fact]
         public void MetaAnonymousType()
         {
-            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }));
+            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }))!;
             Assert.IsType<CleanMeta>(dic["Target"]);
             Assert.IsType<CleanMeta>(dic["Text"]);
             Assert.IsType<DirtyMeta>(dic["Length"]);
@@ -49,7 +49,7 @@ namespace Signum.Test
         [Fact]
         public void MetaNamedType()
         {
-            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }));
+            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }))!;
             Assert.IsType<CleanMeta>(dic["ToStr"]);
             Assert.IsType<DirtyMeta>(dic["Length"]);
         }
@@ -60,7 +60,7 @@ namespace Signum.Test
             var dic = DynamicQueryCore.QueryMetadata(
                     from l in Database.Query<LabelEntity>()
                     join a in Database.Query<AlbumEntity>() on l equals a.Label
-                    select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name });
+                    select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name })!;
 
             Assert.IsType<CleanMeta>(dic["Label"]);
             Assert.IsType<CleanMeta>(dic["Name"]);
@@ -76,7 +76,7 @@ namespace Signum.Test
             var dic = DynamicQueryCore.QueryMetadata(
                       from l in Database.Query<LabelEntity>()
                       join a in Database.Query<AlbumEntity>() on l equals a.Label into g
-                      select new { l.Name, Num = g.Count() });
+                      select new { l.Name, Num = g.Count() })!;
 
             Assert.IsType<CleanMeta>(dic["Name"]);
             Assert.IsType<DirtyMeta>(dic["Num"]);
@@ -90,7 +90,7 @@ namespace Signum.Test
             var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     group a by a.Label into g
-                    select new { g.Key, Num = g.Count() });
+                    select new { g.Key, Num = g.Count() })!;
 
             Assert.IsType<CleanMeta>(dic["Key"]);
             Assert.IsType<DirtyMeta>(dic["Num"]);
@@ -105,7 +105,7 @@ namespace Signum.Test
                     from a in Database.Query<AlbumEntity>()
                     from s in a.Songs
                     select new { a.Name, Song = s.Name }
-                    );
+                    )!;
 
             Assert.IsType<CleanMeta>(dic["Name"]);
             Assert.IsType<CleanMeta>(dic["Song"]);
@@ -119,7 +119,7 @@ namespace Signum.Test
             var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     select new { Author = (ArtistEntity)a.Author ?? (IAuthorEntity)(BandEntity)a.Author }
-                    );
+                    )!;
 
             DirtyMeta meta = (DirtyMeta)dic["Author"]!;
 
@@ -132,7 +132,7 @@ namespace Signum.Test
             var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     select new { Author = a.Id > 1 ? (ArtistEntity)a.Author : (IAuthorEntity)(BandEntity)a.Author }
-                    );
+                    )!;
 
             DirtyMeta meta = (DirtyMeta)dic["Author"]!;
 

@@ -113,7 +113,7 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQueryCore<T>(Database.Query<E>().Select(selector));
         }
 
-        public static Dictionary<string, Meta?> QueryMetadata(IQueryable query)
+        public static Dictionary<string, Meta?>? QueryMetadata(IQueryable query)
         {
             return MetadataVisitor.GatherMetadata(query.Expression);
         }

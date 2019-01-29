@@ -72,11 +72,11 @@ namespace Signum.React.Filters
             }
         }
 
-        private string Try(int size, Func<string> getValue)
+        private string? Try(int size, Func<string?> getValue)
         {
             try
             {
-                return getValue().TryStart(size);
+                return getValue()?.TryStart(size);
             }
             catch(Exception e)
             {
@@ -96,9 +96,9 @@ namespace Signum.React.Filters
             return Encoding.UTF8.GetString(httpContext.Request.Body.ReadAllBytes());
         }
 
-        private object TryGetProp(HttpContext context, string key)
+        private object? TryGetProp(HttpContext context, string key)
         {
-            object result = null;
+            object? result;
             context.Items.TryGetValue(key, out result);
             return result;
         }
@@ -134,10 +134,10 @@ namespace Signum.React.Filters
             this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
         }
 
-        public string ExceptionId;
+        public string? ExceptionId;
         public string ExceptionMessage;
         public string ExceptionType;
         public string StackTrace;
-        public HttpError InnerException;
+        public HttpError? InnerException;
     }
 }

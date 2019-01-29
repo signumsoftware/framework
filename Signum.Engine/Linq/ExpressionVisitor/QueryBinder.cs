@@ -3153,6 +3153,9 @@ namespace Signum.Engine.Linq
 
         protected internal override SourceExpression VisitSource(SourceExpression source)
         {
+            if (source == null)
+                return null!;
+
             var reqs = requests.TryGetC(source);
 
             //if (reqs != null)

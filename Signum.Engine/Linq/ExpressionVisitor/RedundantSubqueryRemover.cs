@@ -160,7 +160,7 @@ namespace Signum.Engine.Linq
                 // logic except for the existence of a where clause
                 while (CanMergeWithFrom(select, wasTopLevel))
                 {
-                    SelectExpression? fromSelect = GetLeftMostSelect(select.From!);
+                    SelectExpression fromSelect = GetLeftMostSelect(select.From!)!;
 
                     // remove the redundant subquery
                     select = (SelectExpression)SubqueryRemover.Remove(select, new[] { fromSelect });
@@ -253,7 +253,7 @@ namespace Signum.Engine.Linq
                 return true;
             }
 
-            static SelectExpression GetLeftMostSelect(Expression source)
+            static SelectExpression? GetLeftMostSelect(Expression source)
             {
                 if (source is SelectExpression select)
                     return select;
@@ -261,7 +261,7 @@ namespace Signum.Engine.Linq
                 if (source is JoinExpression join)
                     return GetLeftMostSelect(join.Left);
 
-                throw new UnexpectedValueException(source);
+                return null;
             }
 
             static bool HasApplyJoin(SourceExpression source)

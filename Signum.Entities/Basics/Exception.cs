@@ -28,7 +28,7 @@ namespace Signum.Entities.Basics
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [ForceNotNullable, SqlDbType(Size = 100)]
         public string? ExceptionType { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]

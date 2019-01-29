@@ -21,7 +21,7 @@ namespace Signum.Engine.DynamicQuery
         {
             this.Query = query;
 
-            metas = DynamicQueryCore.QueryMetadata(Query);
+            metas = DynamicQueryCore.QueryMetadata(Query).ThrowIfNull("Query should be an anoynmous type");
 
             StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();

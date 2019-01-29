@@ -6,6 +6,22 @@ using System.Text;
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    public class NullableAttribute : Attribute
+    {
+        public NullableAttribute(byte b) {
+            B = b;
+        }
+
+        public NullableAttribute(byte[] bs)
+        {
+            Bs = bs;
+        }
+
+        public byte? B { get; }
+        public byte[]? Bs { get; }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class AssertsTrueAttribute : Attribute
     {
         public AssertsTrueAttribute() { }

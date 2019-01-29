@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
 
         private MetadataVisitor() { }
 
-        static internal Dictionary<string, Meta?> GatherMetadata(Expression expression)
+        static internal Dictionary<string, Meta?>? GatherMetadata(Expression expression)
         {
             if (expression == null)
                 throw new ArgumentException("expression");
@@ -34,14 +34,16 @@ namespace Signum.Engine.Linq
 
             Expression? simplified = MetaEvaluator.Clean(expression);
 
-            var meta = (MetaProjectorExpression)new MetadataVisitor().Visit(simplified!);
-            
+            var meta = (MetaProjectorExpression?)new MetadataVisitor().Visit(simplified!);
+            if (meta == null)
+                return null;
+
             var proj = meta.Projector;
 
             if (proj.NodeType != ExpressionType.New &&  //anonymous types
                 proj.NodeType != ExpressionType.MemberInit && // not-anonymous type
                 !(proj is MetaExpression && ((MetaExpression)proj).IsEntity)) // raw-entity!
-                throw new UnexpectedValueException(proj);
+                return null;
 
             PropertyInfo[] props = proj.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 

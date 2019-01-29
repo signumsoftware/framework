@@ -211,10 +211,10 @@ namespace Signum.Engine.Maps
 
         private IsNullable GetIsNullablePrivate(PropertyRoute propertyRoute)
         {
-            if (FieldAttribute<NotNullableAttribute>(propertyRoute) != null)
+            if (FieldAttribute<ForceNotNullableAttribute>(propertyRoute) != null)
                 return IsNullable.No;
 
-            if (FieldAttribute<NullableAttribute>(propertyRoute) != null)
+            if (FieldAttribute<ForceNullableAttribute>(propertyRoute) != null)
                 return IsNullable.Yes;
 
             if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
@@ -366,7 +366,7 @@ namespace Signum.Engine.Maps
 
         public bool IsDbType(Type type)
         {
-            return type.IsEnum || GetSqlDbTypePair(type) != null;
+            return type.IsEnum || TryGetSqlDbTypePair(type) != null;
         }
 
     }

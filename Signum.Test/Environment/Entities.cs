@@ -15,7 +15,7 @@ namespace Signum.Test.Environment
         Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateEntity : Entity
     {
-        [Nullable]
+        [ForceNullable]
         [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
@@ -370,7 +370,7 @@ namespace Signum.Test.Environment
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
         public Lite<IAuthorEntity> Author { get; set; }
 
-        [Nullable]
+        [ForceNullable]
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
         public Lite<AwardEntity> Award { get; set; }
 

@@ -318,8 +318,8 @@ namespace Signum.Engine.Linq
 
         private static Expression? ConditionalEquals(Expression exp1, Expression exp2)
         {
-            if (Schema.Current.Settings.IsDbType(exp1.Type)||
-                Schema.Current.Settings.IsDbType(exp2.Type))
+            if (Schema.Current.Settings.IsDbType(exp1.Type.UnNullify())||
+                Schema.Current.Settings.IsDbType(exp2.Type.UnNullify()))
                 return null;
 
             if (exp1 is ConditionalExpression ce1)
@@ -341,8 +341,8 @@ namespace Signum.Engine.Linq
 
         private static Expression? CoalesceEquals(Expression exp1, Expression exp2)
         {
-            if (Schema.Current.Settings.IsDbType(exp1.Type)||
-                Schema.Current.Settings.IsDbType(exp2.Type))
+            if (Schema.Current.Settings.IsDbType(exp1.Type.UnNullify()) ||
+                Schema.Current.Settings.IsDbType(exp2.Type.UnNullify()))
                 return null;
 
             if (exp1.NodeType == ExpressionType.Coalesce)
