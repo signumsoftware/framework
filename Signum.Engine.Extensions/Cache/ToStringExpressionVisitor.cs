@@ -277,7 +277,7 @@ namespace Signum.Engine.Cache
         public CachedEntityExpression(Expression primaryKey, Type type, CachedTableConstructor constructor, FieldEmbedded embedded)
         {
             if (primaryKey == null)
-                throw new ArgumentNullException("primaryKey");
+                throw new ArgumentNullException(nameof(primaryKey));
 
             if (primaryKey.Type.UnNullify() != typeof(PrimaryKey))
                 throw new InvalidOperationException("primaryKey should be a PrimaryKey");
@@ -290,7 +290,7 @@ namespace Signum.Engine.Cache
             else
             {
                 if (embedded == null)
-                    throw new ArgumentNullException("embedded");
+                    throw new ArgumentNullException(nameof(embedded));
 
                 this.FieldEmbedded = embedded;
             }

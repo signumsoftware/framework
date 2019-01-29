@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '@framework/Reflection'
@@ -180,7 +180,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
     }
 
     handleOnView = (exampleEntity: Lite<Entity> | ModifiableEntity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
     }
 
     renderMessage(res: DynamicValidationTestResponse) {
