@@ -9,13 +9,12 @@ namespace Signum.Entities
 {
     public abstract class SystemTime
     {
-        static Variable<SystemTime> currentVariable = Statics.ThreadVariable<SystemTime>("systemTime");
+        static Variable<SystemTime?> currentVariable = Statics.ThreadVariable<SystemTime?>("systemTime");
 
-        public static SystemTime Current => currentVariable.Value;
-
-
+        public static SystemTime? Current => currentVariable.Value;
+        
         public static IDisposable Override(DateTime asOf) => Override(new SystemTime.AsOf(asOf));
-        public static IDisposable Override(SystemTime systemTime)
+        public static IDisposable Override(SystemTime? systemTime)
         {
             var old = currentVariable.Value;
             currentVariable.Value = systemTime;

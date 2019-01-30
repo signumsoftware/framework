@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using System;
@@ -36,17 +36,17 @@ namespace Signum.React.Json
             writer.WriteEndObject();
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
                 return null;
 
             reader.Assert(JsonToken.StartObject);
 
-            string toString = null;
-            string idObj = null;
-            string typeStr = null;
-            Entity entity = null;
+            string? toString = null;
+            string? idObj = null;
+            string? typeStr = null;
+            Entity? entity = null;
 
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
@@ -68,12 +68,12 @@ namespace Signum.React.Json
 
             reader.Assert(JsonToken.EndObject);
 
-            Type type = TypeLogic.GetType(typeStr);
+            Type type = TypeLogic.GetType(typeStr!);
 
             PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
 
             if (entity == null)
-                return Lite.Create(type, idOrNull.Value, toString);
+                return Lite.Create(type, idOrNull.Value, toString!);
 
             var result = entity.ToLiteFat(toString);
 
@@ -85,7 +85,7 @@ namespace Signum.React.Json
 
             var existing = existingValue as Lite<Entity>;
 
-            if (existing.Is(result) && existing.EntityOrNull == null && result.EntityOrNull != null)
+            if (existing.Is(result) && existing!.EntityOrNull == null && result.EntityOrNull != null)
             {
                 existing.SetEntity(result.EntityOrNull);
                 return existing;

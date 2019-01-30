@@ -24,7 +24,7 @@ export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
 export const DeleteLogsTypeOverridesEmbedded = new Type<DeleteLogsTypeOverridesEmbedded>("DeleteLogsTypeOverridesEmbedded");
 export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogsTypeOverridesEmbedded";
-  type?: Entities.Lite<TypeEntity> | null;
+  type?: Entities.Lite<TypeEntity>;
   deleteLogsWithMoreThan?: number | null;
   cleanLogsWithMoreThan?: number | null;
 }
@@ -34,12 +34,12 @@ export interface ExceptionEntity extends Entities.Entity {
   Type: "Exception";
   creationDate?: string;
   exceptionType?: string | null;
-  exceptionMessage?: string | null;
+  exceptionMessage?: string;
   exceptionMessageHash?: number;
-  stackTrace?: string | null;
+  stackTrace?: string;
   stackTraceHash?: number;
   threadId?: number;
-  user?: Entities.Lite<IUserEntity> | null;
+  user?: Entities.Lite<IUserEntity>;
   environment?: string | null;
   version?: string | null;
   userAgent?: string | null;
@@ -65,40 +65,40 @@ export interface IUserEntity extends Entities.Entity {
 export const OperationLogEntity = new Type<OperationLogEntity>("OperationLog");
 export interface OperationLogEntity extends Entities.Entity {
   Type: "OperationLog";
-  target: Entities.Lite<Entities.Entity> | null;
-  origin: Entities.Lite<Entities.Entity> | null;
-  operation: Entities.OperationSymbol | null;
-  user: Entities.Lite<IUserEntity> | null;
+  target: Entities.Lite<Entities.Entity>;
+  origin: Entities.Lite<Entities.Entity>;
+  operation: Entities.OperationSymbol;
+  user: Entities.Lite<IUserEntity>;
   start: string;
   end: string | null;
-  exception: Entities.Lite<ExceptionEntity> | null;
+  exception: Entities.Lite<ExceptionEntity>;
 }
 
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";
-  path: string | null;
+  path: string;
   rootType: TypeEntity;
 }
 
 export const QueryEntity = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
   Type: "Query";
-  key: string | null;
+  key: string;
 }
 
 export interface SemiSymbol extends Entities.Entity {
   key?: string | null;
-  name?: string | null;
+  name?: string;
 }
 
 export const TypeEntity = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {
   Type: "Type";
-  tableName: string | null;
-  cleanName: string | null;
-  namespace: string | null;
-  className: string | null;
+  tableName: string;
+  cleanName: string;
+  namespace: string;
+  className: string;
 }
 
 

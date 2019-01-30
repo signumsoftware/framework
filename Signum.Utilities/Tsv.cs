@@ -120,7 +120,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, CultureInfo? culture, Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory)
+        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory)
         {
             if (toStringFactory != null)
             {

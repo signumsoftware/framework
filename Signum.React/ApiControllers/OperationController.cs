@@ -20,7 +20,7 @@ namespace Signum.React.ApiControllers
     public class OperationController : Controller
     {
         [HttpPost("api/operation/construct"), ValidateModelFilter, ProfilerActionSplitter]
-        public EntityPackTS Construct([Required, FromBody]ConstructOperationRequest request)
+        public EntityPackTS? Construct([Required, FromBody]ConstructOperationRequest request)
         {
             var entityType = TypeLogic.GetType(request.type);
 
@@ -30,7 +30,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/operation/constructFromEntity"), ProfilerActionSplitter]
-        public EntityPackTS ConstructFromEntity([Required, FromBody]EntityOperationRequest request)
+        public EntityPackTS? ConstructFromEntity([Required, FromBody]EntityOperationRequest request)
         {
             var entity = OperationLogic.ServiceConstructFrom(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
 
@@ -38,7 +38,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/operation/constructFromLite"), ProfilerActionSplitter]
-        public EntityPackTS ConstructFromLite([Required, FromBody]LiteOperationRequest request)
+        public EntityPackTS? ConstructFromLite([Required, FromBody]LiteOperationRequest request)
         {
             var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
             return entity == null ? null: SignumServer.GetEntityPack(entity);
@@ -87,11 +87,11 @@ namespace Signum.React.ApiControllers
         }
 
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class ConstructOperationRequest : BaseOperationRequest
         {
             public string type { get; set; }
-
         }
 
 
@@ -113,11 +113,11 @@ namespace Signum.React.ApiControllers
         {
             public string operationKey { get; set; }
 
-            public object[] args { get; set; }
+            public object[]? args { get; set; }
 
             public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType, this.args);
 
-            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object[] args = null)
+            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object[]? args = null)
             {
                 var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
@@ -128,6 +128,7 @@ namespace Signum.React.ApiControllers
 
             public override string ToString() => operationKey;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
         public EntityPackTS ConstructFromMany([Required, FromBody]MultiOperationRequest request)
@@ -145,7 +146,7 @@ namespace Signum.React.ApiControllers
             var errors = ForeachMultiple(request.lites, lite =>
                 OperationLogic.ServiceConstructFromLite(lite, request.GetOperationSymbol(lite.EntityType), request.args));
 
-            return new MultiOperationResponse { errors = errors };
+            return new MultiOperationResponse(errors);
         }
 
 
@@ -155,7 +156,7 @@ namespace Signum.React.ApiControllers
             var errors = ForeachMultiple(request.lites, lite =>
                         OperationLogic.ServiceExecuteLite(lite, request.GetOperationSymbol(lite.EntityType), request.args));
 
-            return new MultiOperationResponse { errors = errors };
+            return new MultiOperationResponse(errors);
         }
 
         [HttpPost("api/operation/deleteMultiple"), ProfilerActionSplitter]
@@ -164,7 +165,7 @@ namespace Signum.React.ApiControllers
             var errors = ForeachMultiple(request.lites, lite =>
                     OperationLogic.ServiceDelete(lite, request.GetOperationSymbol(lite.EntityType), request.args));
 
-            return new MultiOperationResponse { errors = errors };
+            return new MultiOperationResponse(errors);
         }
 
         static Dictionary<string, string> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Action<Lite<Entity>> action)
@@ -188,15 +189,22 @@ namespace Signum.React.ApiControllers
         }
 
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class MultiOperationRequest : BaseOperationRequest
         {
             public string type { get; set; }
             public Lite<Entity>[] lites { get; set; }
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public class MultiOperationResponse
         {
+            public MultiOperationResponse(Dictionary<string, string> errors)
+            {
+                this.errors = errors;
+            }
+
             public Dictionary<string, string> errors { get; set; }
         }
 
@@ -209,19 +217,26 @@ namespace Signum.React.ApiControllers
                 .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
                 .ToList();
 
-            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols);
+            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols)!;
 
-            return new StateCanExecuteResponse { canExecutes = result.SelectDictionary(a => a.Key, v => v) };
+            return new StateCanExecuteResponse(result.SelectDictionary(a => a.Key, v => v));
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class StateCanExecuteRequest
         {
             public string[] operationKeys { get; set; }
             public Lite<Entity>[] lites { get; set; }
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public class StateCanExecuteResponse
         {
+            public StateCanExecuteResponse(Dictionary<string, string> canExecutes)
+            {
+                this.canExecutes = canExecutes;
+            }
+
             public Dictionary<string, string> canExecutes { get; set; }
         }
 

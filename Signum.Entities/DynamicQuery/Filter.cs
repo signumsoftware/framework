@@ -30,10 +30,10 @@ namespace Signum.Entities.DynamicQuery
     public class FilterGroup : Filter
     {
         public FilterGroupOperation GroupOperation { get; }
-        public QueryToken Token { get; }
+        public QueryToken? Token { get; }
         public List<Filter> Filters { get; }
 
-        public FilterGroup(FilterGroupOperation groupOperation, QueryToken token, List<Filter> filters)
+        public FilterGroup(FilterGroupOperation groupOperation, QueryToken? token, List<Filter> filters)
         {
             this.GroupOperation = groupOperation;
             this.Token = token;
@@ -91,7 +91,7 @@ namespace Signum.Entities.DynamicQuery
         public FilterOperation Operation { get; }
         public object? Value { get; }
 
-        public FilterCondition(QueryToken token, FilterOperation operation, object value)
+        public FilterCondition(QueryToken token, FilterOperation operation, object? value)
         {
             this.Token = token;
             this.Operation = operation;

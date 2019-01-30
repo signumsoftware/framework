@@ -181,18 +181,19 @@ namespace Signum.React.Facades
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
-                              ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
+                              ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!),
                               QueryDefined = queries.QueryDefined(type),
-                              Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
+                              Members = PropertyRoute.GenerateRoutes(type)
+                                .Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>
                                 {
                                     var mi = new MemberInfoTS
                                     {
-                                        NiceName = p.PropertyInfo?.NiceName(),
-                                        TypeNiceName = GetTypeNiceName(p.PropertyInfo?.PropertyType),
+                                        NiceName = p.PropertyInfo!.NiceName(),
+                                        TypeNiceName = GetTypeNiceName(p.PropertyInfo!.PropertyType),
                                         Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                         IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
-                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || Validator.TryGetPropertyValidator(p).Validators.Any(v => !v.DisabledInModelBinder && (v is NotNullValidatorAttribute || v is StringLengthValidatorAttribute s && s.AllowNulls == false))),
+                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || Validator.TryGetPropertyValidator(p)!.Validators.Any(v => (v is NotNullValidatorAttribute) && !v.DisabledInModelBinder)),
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                         IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
@@ -214,7 +215,8 @@ namespace Signum.React.Facades
 
         public static bool InTypeScript(PropertyRoute pr)
         {
-            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || (pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() ?? !IsExpression(pr.Parent.Type, pr.PropertyInfo)));
+            return (pr.Parent == null || InTypeScript(pr.Parent)) && 
+                (pr.PropertyInfo == null || (pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() ?? !IsExpression(pr.Parent!.Type, pr.PropertyInfo)));
         }
 
         private static bool IsExpression(Type type, PropertyInfo propertyInfo)
@@ -222,7 +224,7 @@ namespace Signum.React.Facades
             return propertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(type, propertyInfo);
         }
 
-        static string GetTypeNiceName(Type type)
+        static string? GetTypeNiceName(Type type)
         {
             if (type.IsModifiableEntity() && !type.IsEntity())
                 return type.NiceName();
@@ -232,8 +234,8 @@ namespace Signum.React.Facades
         public static bool IsId(PropertyRoute p)
         {
             return p.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
-                p.PropertyInfo.Name == nameof(Entity.Id) &&
-                p.Parent.PropertyRouteType == PropertyRouteType.Root;
+                p.PropertyInfo!.Name == nameof(Entity.Id) &&
+                p.Parent!.PropertyRouteType == PropertyRouteType.Root;
         }
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
@@ -300,7 +302,7 @@ namespace Signum.React.Facades
                 return (s.FieldInfo, s.IdOrNull);
 
             if(v is SemiSymbol semiS)
-                return (semiS.FieldInfo, semiS.IdOrNull);
+                return (semiS.FieldInfo!, semiS.IdOrNull);
 
             throw new InvalidOperationException();
         }
@@ -320,13 +322,13 @@ namespace Signum.React.Facades
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "kind")]
         public KindOfType Kind { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "fullName")]
-        public string FullName { get; set; }
+        public string FullName { get; set; } = null!;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string NiceName { get; set; }
+        public string? NiceName { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "nicePluralName")]
-        public string NicePluralName { get; set; }
+        public string? NicePluralName { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "gender")]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityKind")]
         public EntityKind? EntityKind { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
@@ -336,13 +338,13 @@ namespace Signum.React.Facades
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isSystemVersioned")]
         public bool IsSystemVersioned { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
-        public string ToStringFunction { get; set; }
+        public string? ToStringFunction { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
         public bool QueryDefined { get; internal set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
-        public Dictionary<string, MemberInfoTS> Members { get; set; }
+        public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
-        public Dictionary<string, OperationInfoTS> Operations { get; set; }
+        public Dictionary<string, OperationInfoTS>? Operations { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "requiresEntityPack")]
         public bool RequiresEntityPack { get; set; }
 
@@ -356,19 +358,19 @@ namespace Signum.React.Facades
     public class MemberInfoTS
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
-        public TypeReferenceTS Type { get; set; }
+        public TypeReferenceTS? Type { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string NiceName { get; set; }
+        public string? NiceName { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
-        public string TypeNiceName { get; set; }
+        public string? TypeNiceName { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isReadOnly")]
         public bool IsReadOnly { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "required")]
         public bool Required { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
-        public string Unit { get; set; }
+        public string? Unit { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
-        public string Format { get; set; }
+        public string? Format { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnoredEnum")]
         public bool IsIgnoredEnum { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "maxLength")]
@@ -379,7 +381,7 @@ namespace Signum.React.Facades
         public bool PreserveOrder { get; internal set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
-        public object Id { get; set; }
+        public object? Id { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -424,9 +426,11 @@ namespace Signum.React.Facades
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
         public string Name { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
-        public string TypeNiceName { get; set; }
+        public string? TypeNiceName { get; set; }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public TypeReferenceTS() { }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
             this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
@@ -454,11 +458,11 @@ namespace Signum.React.Facades
         private static Type CleanMList(Type type)
         {
             if (type.IsMList())
-                type = type.ElementType();
+                type = type.ElementType()!;
             return type;
         }
 
-        public static string BasicType(Type type)
+        public static string? BasicType(Type type)
         {
             if (type.IsEnum)
                 return null;

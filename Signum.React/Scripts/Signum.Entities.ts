@@ -471,7 +471,7 @@ export module SelectorMessage {
 }
 
 export interface Symbol extends Entity {
-  key: string | null;
+  key: string;
 }
 
 export module SynchronizerMessage {

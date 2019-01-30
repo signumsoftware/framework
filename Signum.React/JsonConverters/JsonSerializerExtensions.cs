@@ -8,7 +8,7 @@ namespace Signum.React.Json
 {
     public static class JsonSerializerExtensions
     {
-        public static object DeserializeValue(this JsonSerializer serializer, JsonReader reader, Type valueType, object oldValue)
+        public static object DeserializeValue(this JsonSerializer serializer, JsonReader reader, Type valueType, object? oldValue)
         {
             if (oldValue != null)
             {
@@ -31,14 +31,14 @@ namespace Signum.React.Json
         }
 
 
-        static readonly ThreadVariable<PropertyRoute> currentPropertyRoute = Statics.ThreadVariable<PropertyRoute>("jsonPropertyRoute");
+        static readonly ThreadVariable<PropertyRoute?> currentPropertyRoute = Statics.ThreadVariable<PropertyRoute?>("jsonPropertyRoute");
 
-        public static PropertyRoute CurrentPropertyRoute
+        public static PropertyRoute? CurrentPropertyRoute
         {
             get { return currentPropertyRoute.Value; }
         }
 
-        public static IDisposable SetCurrentPropertyRoute(PropertyRoute route)
+        public static IDisposable SetCurrentPropertyRoute(PropertyRoute? route)
         {
             var old = currentPropertyRoute.Value;
 

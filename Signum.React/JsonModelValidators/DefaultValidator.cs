@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -73,11 +73,11 @@ namespace Signum.React
         protected ValidationStack CurrentPath { get; }
 #pragma warning restore PUB0001
 
-        protected object Container { get; set; }
-        protected string Key { get; set; }
-        protected object Model { get; set; }
-        protected ModelMetadata Metadata { get; set; }
-        protected IValidationStrategy Strategy { get; set; }
+        protected object? Container { get; set; }
+        protected string? Key { get; set; }
+        protected object? Model { get; set; }
+        protected ModelMetadata? Metadata { get; set; }
+        protected IValidationStrategy? Strategy { get; set; }
 
         /// <summary>
         /// Indicates whether validation of a complex type should be performed if validation fails for any of its children. The default behavior is false.
@@ -103,7 +103,7 @@ namespace Signum.React
         /// <param name="model">The model object.</param>
         /// <param name="alwaysValidateAtTopLevel">If <c>true</c>, applies validation rules even if the top-level value is <c>null</c>.</param>
         /// <returns><c>true</c> if the object is valid, otherwise <c>false</c>.</returns>
-        public virtual bool Validate(ModelMetadata metadata, string key, object model, bool alwaysValidateAtTopLevel)
+        public virtual bool Validate(ModelMetadata? metadata, string key, object model, bool alwaysValidateAtTopLevel)
         {
             if (model == null && key != null && !alwaysValidateAtTopLevel)
             {
@@ -181,7 +181,7 @@ namespace Signum.React
             }
         }
 
-        protected virtual bool Visit(ModelMetadata metadata, string key, object model)
+        protected virtual bool Visit(ModelMetadata? metadata, string key, object model)
         {
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
@@ -211,7 +211,7 @@ namespace Signum.React
 
             using (StateManager.Recurse(this, key ?? string.Empty, metadata, model, strategy))
             {
-                if (Metadata.IsEnumerableType)
+                if (Metadata!.IsEnumerableType)
                 {
                     return VisitComplexType(DefaultCollectionValidationStrategy.Instance);
                 }
@@ -230,7 +230,7 @@ namespace Signum.React
         {
             var isValid = true;
 
-            if (Model != null && Metadata.ValidateChildren)
+            if (Model != null && Metadata!.ValidateChildren)
             {
                 var strategy = Strategy ?? defaultStrategy;
                 isValid = VisitChildren(strategy);
@@ -240,7 +240,7 @@ namespace Signum.React
                 // Suppress validation for the entries matching this prefix. This will temporarily set
                 // the current node to 'skipped' but we're going to visit it right away, so subsequent
                 // code will set it to 'valid' or 'invalid'
-                SuppressValidation(Key);
+                SuppressValidation(Key!);
             }
 
             // Double-checking HasReachedMaxErrors just in case this model has no properties.
@@ -257,7 +257,7 @@ namespace Signum.React
         {
             if (ModelState.HasReachedMaxErrors)
             {
-                SuppressValidation(Key);
+                SuppressValidation(Key!);
                 return false;
             }
 
@@ -303,12 +303,10 @@ namespace Signum.React
             }
         }
 
-        protected virtual ValidationStateEntry GetValidationEntry(object model)
+        protected virtual ValidationStateEntry? GetValidationEntry(object model)
         {
             if (model == null || ValidationState == null)
-            {
                 return null;
-            }
 
             ValidationState.TryGetValue(model, out var entry);
             return entry;
@@ -320,16 +318,16 @@ namespace Signum.React
             private readonly object _container;
             private readonly string _key;
             private readonly ModelMetadata _metadata;
-            private readonly object _model;
-            private readonly object _newModel;
-            private readonly IValidationStrategy _strategy;
+            private readonly object? _model;
+            private readonly object? _newModel;
+            private readonly IValidationStrategy? _strategy;
 
             public static StateManager Recurse(
                 ValidationVisitor visitor,
                 string key,
-                ModelMetadata metadata,
-                object model,
-                IValidationStrategy strategy)
+                ModelMetadata? metadata,
+                object? model,
+                IValidationStrategy? strategy)
             {
                 var recursifier = new StateManager(visitor, model);
 
@@ -342,15 +340,15 @@ namespace Signum.React
                 return recursifier;
             }
 
-            public StateManager(ValidationVisitor visitor, object newModel)
+            public StateManager(ValidationVisitor visitor, object? newModel)
             {
                 _visitor = visitor;
                 _newModel = newModel;
 
-                _container = _visitor.Container;
-                _key = _visitor.Key;
-                _metadata = _visitor.Metadata;
-                _model = _visitor.Model;
+                _container = _visitor.Container!;
+                _key = _visitor.Key!;
+                _metadata = _visitor.Metadata!;
+                _model = _visitor.Model!;
                 _strategy = _visitor.Strategy;
             }
 

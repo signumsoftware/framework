@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -12,7 +12,7 @@ namespace Signum.React.Facades
 {
     internal class LambdaToJavascriptConverter
     {
-        public static string ToJavascript(LambdaExpression lambdaExpression)
+        public static string? ToJavascript(LambdaExpression lambdaExpression)
         {
             if (lambdaExpression == null)
                 return null;
@@ -32,7 +32,7 @@ namespace Signum.React.Facades
             { "\r", ""},
         };
 
-        private static string ToJavascript(ParameterExpression param, Expression expr)
+        private static string? ToJavascript(ParameterExpression param, Expression expr)
         {
             if (param == expr)
                 return "e";
@@ -126,7 +126,7 @@ namespace Signum.React.Facades
             return null;
         }
 
-        private static string ToJavascriptToString(ParameterExpression param, Expression expr, string format = null)
+        private static string? ToJavascriptToString(ParameterExpression param, Expression expr, string? format = null)
         {
             var r = ToJavascript(param, expr);
 
@@ -139,7 +139,7 @@ namespace Signum.React.Facades
             if (expr.Type.IsModifiableEntity() || expr.Type.IsLite() || expr.Type.IsIEntity())
                 return "getToString(" + r + ")";
 
-            string formatFull = format == null ? null : (", '" + format + "'");
+            string? formatFull = format == null ? null : (", '" + format + "'");
 
             if (expr.Type.UnNullify() == typeof(DateTime))
                 return "dateToString(" + r + formatFull + ")";

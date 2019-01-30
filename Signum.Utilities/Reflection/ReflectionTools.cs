@@ -724,7 +724,7 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static object? ChangeType(object value, Type type)
+        public static object? ChangeType(object? value, Type type)
         {
             if (value == null)
                 return null;

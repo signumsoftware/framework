@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Signum.Engine;
 using Signum.Entities;
@@ -12,14 +12,13 @@ namespace Signum.React.Json
 {
     public class ArgsJsonConverter : JsonConverter
     {
-        public static Dictionary<OperationSymbol, Func<JToken, object>> CustomOperationArgsConverters =
-            new Dictionary<OperationSymbol, Func<JToken, object>>();
+        public static Dictionary<OperationSymbol, Func<JToken, object?>> CustomOperationArgsConverters = new Dictionary<OperationSymbol, Func<JToken, object?>>();
 
-        public static void RegisterCustomOperationArgsConverter(OperationSymbol operationSymbol, Func<JToken, object> converter)
+        public static void RegisterCustomOperationArgsConverter(OperationSymbol operationSymbol, Func<JToken, object?> converter)
         {
-            CustomOperationArgsConverters[operationSymbol] =
-                CustomOperationArgsConverters.TryGetC(operationSymbol) +
-                converter;
+            Func<JToken, object?>? a = CustomOperationArgsConverters.TryGetC(operationSymbol); /*CSBUG*/
+
+            CustomOperationArgsConverters[operationSymbol] = a + converter;
         }
 
         public override bool CanConvert(Type objectType)
@@ -50,7 +49,7 @@ namespace Signum.React.Json
         private object ConvertObject(JToken token, JsonSerializer serializer, OperationSymbol operationSymbol)
         {
             if (token == null)
-                return null;
+                return null!;
 
             if (token is JValue)
             {

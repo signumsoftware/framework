@@ -217,7 +217,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, SubTokensOptions options)
+        public static List<QueryToken> SubTokens(this QueryToken? token, QueryDescription qd, SubTokensOptions options)
         {
             var result = SubTokensBasic(token, qd, options);
 
@@ -299,7 +299,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         public static Func<bool> MergeEntityColumns = null;
-        static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd, SubTokensOptions options)
+        static List<QueryToken> SubTokensBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options)
         {
             if (token == null)
             {

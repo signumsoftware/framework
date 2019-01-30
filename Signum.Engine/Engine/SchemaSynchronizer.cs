@@ -449,9 +449,9 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(Spacing.Simple,
                 NotNullUpdate(tab.Name, tabCol, defaultValue, goBefore),
                 SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name),
-                history ? NotNullUpdate(tab.SystemVersioned.TableName, tabCol, defaultValue, goBefore) : null,
-                history ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name, tab.SystemVersioned.TableName) : null
-            );
+                history ? NotNullUpdate(tab.SystemVersioned!.TableName, tabCol, defaultValue, goBefore) : null,
+                history ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name, tab.SystemVersioned!.TableName) : null
+            )!;
         }
 
         private static SqlPreCommandSimple NotNullUpdate(ObjectName tab, IColumn tabCol, string defaultValue, bool goBefore)

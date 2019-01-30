@@ -31,7 +31,7 @@ namespace Signum.Engine.Linq
 
         internal AliasGenerator aliasGenerator;
 
-        internal SystemTime systemTime;
+        internal SystemTime? systemTime;
 
         public QueryBinder(AliasGenerator aliasGenerator)
         {

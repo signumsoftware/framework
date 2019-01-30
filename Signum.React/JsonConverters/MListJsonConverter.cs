@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -20,7 +20,7 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            giWriteJsonInternal.GetInvoker(value.GetType().ElementType())(writer, (IMListPrivate)value, serializer);
+            giWriteJsonInternal.GetInvoker(value.GetType().ElementType()!)(writer, (IMListPrivate)value, serializer);
         }
 
         static GenericInvoker<Action<JsonWriter, IMListPrivate, JsonSerializer>> giWriteJsonInternal = new GenericInvoker<Action<JsonWriter, IMListPrivate, JsonSerializer>>(
@@ -29,7 +29,7 @@ namespace Signum.React.Json
         static void WriteJsonInternal<T>(JsonWriter writer, MList<T> value, JsonSerializer serializer)
         {
             writer.WriteStartArray();
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+            var pr = JsonSerializerExtensions.CurrentPropertyRoute!;
 
             var elementPr = pr.Add("Item");
 
@@ -54,7 +54,7 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return giReadJsonInternal.GetInvoker(objectType.ElementType())(reader, (IMListPrivate)existingValue, serializer);
+            return giReadJsonInternal.GetInvoker(objectType.ElementType()!)(reader, (IMListPrivate)existingValue, serializer);
         }
 
         static GenericInvoker<Func<JsonReader, IMListPrivate, JsonSerializer, IMListPrivate>> giReadJsonInternal =
@@ -68,7 +68,7 @@ namespace Signum.React.Json
 
             var newList = new List<MList<T>.RowIdElement>();
 
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+            var pr = JsonSerializerExtensions.CurrentPropertyRoute!;
 
             var elementPr = pr.Add("Item");
 
@@ -99,7 +99,7 @@ namespace Signum.React.Json
                     reader.Read();
                     if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
                     {
-                        var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType));
+                        var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
 
                         var oldValue = dic.TryGetS(rowId);
 
@@ -113,7 +113,7 @@ namespace Signum.React.Json
                         {
                             T newValue = (T)serializer.DeserializeValue(reader, typeof(T), oldValue.Value.Element);
 
-                            if (oldValue.Value.Element.Equals(newValue))
+                            if (oldValue.Value.Element!.Equals(newValue))
                                 newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
                             else
                                 newList.Add(new MList<T>.RowIdElement(newValue));
@@ -137,7 +137,7 @@ namespace Signum.React.Json
             if (existingValue == null) //Strange case...
             {
                 if (newList.IsEmpty())
-                    return null;
+                    return null!;
                 else
                     existingValue = new MList<T>();
             }
@@ -158,7 +158,7 @@ namespace Signum.React.Json
         {
             var settings = Schema.Current.Settings;
             var att = settings.FieldAttribute<PrimaryKeyAttribute>(route) ??
-                (route.IsVirtualMList() ? settings.TypeAttribute<PrimaryKeyAttribute>(route.Type.ElementType()) : null) ??
+                (route.IsVirtualMList() ? settings.TypeAttribute<PrimaryKeyAttribute>(route.Type.ElementType()!) : null) ??
                 settings.DefaultPrimaryKeyAttribute;
 
             return att.Type;

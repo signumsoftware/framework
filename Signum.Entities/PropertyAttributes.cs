@@ -29,7 +29,7 @@ namespace Signum.Entities
     {
         public static Dictionary<string, Func<string>> UnitTranslations = new Dictionary<string, Func<string>>();
 
-        public static string? GetTranslation(string unitName)
+        public static string? GetTranslation(string? unitName)
         {
             if (string.IsNullOrEmpty(unitName))
                 return null;

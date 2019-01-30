@@ -174,7 +174,7 @@ namespace Signum.React.Json
         private bool ValidateMList(IMListPrivate mlist)
         {
             bool isValid = true;
-            Type elementType = mlist.GetType().ElementType();
+            Type elementType = mlist.GetType().ElementType()!;
 
             int i = 0;
             foreach (object element in (IEnumerable)mlist)
@@ -212,15 +212,14 @@ namespace Signum.React.Json
                         if (kvp.Value.AvoidValidate)
                             continue;
 
-                        string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
-
+                        string? error = kvp.Value.PropertyValidator!.PropertyCheck(mod);
                         if (error != null)
                         {
                             isValid = false;
                             ModelState.AddModelError(this.Key + "." + kvp.Key, error);
                         }
 
-                        var val = kvp.Value.GetValue(mod);
+                        var val = kvp.Value.GetValue!(mod);
                         if (this.CurrentPath.Push(val))
                         {
                             using (StateManager.Recurse(this, this.Key + "." + kvp.Key, null, val, null))

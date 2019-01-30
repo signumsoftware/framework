@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -480,19 +480,20 @@ namespace Signum.TSGenerator
             if (IsCollection(p.PropertyType))
                 return false;
 
-            if (GetTypescriptUndefined(p.DeclaringType) == false &&
-                p.CustomAttributes.Any(a =>
-                a.AttributeType.Name == "NotNullableAttribute" ||
-                a.AttributeType.Name == "NotNullValidatorAttribute" ||
-                a.AttributeType.Name == "StringLengthValidatorAttribute" && a.Properties.Any(na => na.Name == "AllowNulls" && false.Equals(na.Argument.Value))))
-                return false;
-
-            return !p.PropertyType.IsValueType || p.PropertyType.UnNullify() != p.PropertyType;
+            if (p.PropertyType.IsValueType)
+                return p.PropertyType.IsNullable();
+            else
+                return p.CustomAttributes.Any(a => a.AttributeType.Name == "NullableAttribute" && ((byte)2).Equals(a.ConstructorArguments[0].Value));
         }
 
         private static string FirstLower(string name)
         {
             return char.ToLowerInvariant(name[0]) + name.Substring(1);
+        }
+
+        public static bool IsNullable(this TypeReference type)
+        {
+            return type is GenericInstanceType gtype && gtype.ElementType.Name == "Nullable`1";
         }
 
         public static TypeReference UnNullify(this TypeReference type)
