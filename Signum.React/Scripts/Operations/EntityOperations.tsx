@@ -1,5 +1,4 @@
 import * as React from "react"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
@@ -15,6 +14,7 @@ import {
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
 import { TitleManager } from "../../Scripts/Lines/EntityBase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -209,13 +209,11 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
     text = eoc.operationInfo.niceName;
 
-    if (eoc.settings && eoc.settings.icon) {
-      const icon = eoc.settings.icon;
-      switch (icon.align) {
-        case "left":
-          return (<span><FontAwesomeIcon icon={icon.icon} fixedWidth /> {text}</span>);
-        case "right":
-          return (<span>{text} <FontAwesomeIcon icon={icon.icon} fixedWidth /></span>);
+    const s = eoc.settings;
+    if (s && s.icon) {
+      switch (s.iconAlign) {
+		case "right": return (<span>{text} <FontAwesomeIcon icon={s.icon} color={s.iconColor} fixedWidth /></span>);
+        default:      return (<span><FontAwesomeIcon icon={s.icon} color={s.iconColor} fixedWidth /> {text}</span>);
       }
     }
     else {

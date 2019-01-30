@@ -255,7 +255,9 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   order?: number;
   color?: BsColor;
   classes?: string;
-  icon?: OperationIcon;
+  icon?: IconProp;
+  iconAlign?: "left" | "right";
+  iconColor?: string;
   withClose?: boolean;
 
   constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
@@ -268,17 +270,11 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   }
 }
 
-export interface OperationIcon {
-  align: "left" | "right";
-  icon: IconProp;
-}
-
 export interface EntityOperationOptions<T extends Entity> {
   contextual?: ContextualOperationOptions<T>;
   contextualFromMany?: ContextualOperationOptions<T>;
 
   text?: () => string;
-  icon?: OperationIcon;
   isVisible?: (ctx: EntityOperationContext<T>) => boolean;
   confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (ctx: EntityOperationContext<T>) => void;
@@ -287,6 +283,9 @@ export interface EntityOperationOptions<T extends Entity> {
   order?: number;
   color?: BsColor;
   classes?: string;
+  icon?: IconProp;
+  iconAlign?: "left" | "right";
+  iconColor?: string;
   withClose?: boolean;
 }
 
