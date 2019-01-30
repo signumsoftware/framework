@@ -52,8 +52,8 @@ namespace Signum.Engine
 
             return SqlPreCommandConcat.Combine(Spacing.Simple,
                 AlterTableDisableSystemVersioning(diffTable.Name),
-                DropTable(diffTable.Name),
-                DropTable(diffTable.TemporalTableName)
+                DropTable(diffTable.Name)
+                //DropTable(diffTable.TemporalTableName)
             );
         }
 
