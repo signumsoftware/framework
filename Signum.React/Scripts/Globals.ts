@@ -3,9 +3,9 @@ Array.prototype.clear = function (): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string): { key: any /*string*/; elements: any[] }[] {
-  const result: { key: string; elements: any[] }[] = [];
-  const objectGrouped = this.groupToObject(keySelector);
+Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string | number): { key: any /*string*/; elements: any[] }[] {
+  const result: { key: string | number; elements: any[] }[] = [];
+  const objectGrouped = this.groupToObject(keySelector as ((element: any) => string));
   for (const prop in objectGrouped) {
     if (objectGrouped.hasOwnProperty(prop))
       result.push({ key: prop, elements: objectGrouped[prop] });
@@ -52,10 +52,10 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
   return result;
 };
 
-Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): { key: any /*string*/, elements: any[] }[] {
+Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string | number): { key: any /*string*/, elements: any[] }[] {
   const result: { key: any, elements: any[] }[] = [];
 
-  let current: { key: string, elements: any[] } | undefined = undefined;
+  let current: { key: string | number, elements: any[] } | undefined = undefined;
 
   for (let i = 0; i < this.length; i++) {
     const item: any = this[i];
