@@ -975,7 +975,7 @@ export class EnumType<T extends string> {
     return val;
   }
 
-  niceName(): string | undefined {
+  niceTypeName(): string | undefined {
     return this.typeInfo().niceName;
   }
 
