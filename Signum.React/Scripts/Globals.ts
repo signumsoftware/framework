@@ -112,7 +112,7 @@ Array.prototype.withMin = function (this: any[], keySelector: (element: any) => 
 
   var min = keySelector(this[0]);
   var result = this[0];
-  for (var i = 0; i < this.length; i++) {
+  for (var i = 1; i < this.length; i++) {
     var val = keySelector(this[i]);
     if (val < min) {
       min = val;
@@ -128,7 +128,7 @@ Array.prototype.withMax = function (this: any[], keySelector: (element: any) => 
 
   var max = keySelector(this[0]);
   var result = this[0];
-  for (var i = 0; i < this.length; i++) {
+  for (var i = 1; i < this.length; i++) {
     var val = keySelector(this[i]);
     if (val > max) {
       max = val;
@@ -228,18 +228,40 @@ Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize
 
 Array.prototype.max = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-  if (selector)
-    return Math.max.apply(undefined, this.map(selector));
+  var array: number[]= selector ?
+    this.map(selector).filter(a => a != null) :
+    this.filter(a => a != null);
+  
+  if (array.length == 0)
+    return null;
 
-  return Math.max.apply(undefined, this);
+  var max = array[0];
+  for (var i = 1; i < array.length; i++) {
+    var val = array[i];
+    if (max < val) {
+      max = val;
+    }
+  }
+  return max;
 };
 
 Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-  if (selector)
-    return Math.min.apply(undefined, this.map(selector));
+  var array : number[] = selector ?
+    this.map(selector).filter(a => a != null) :
+    this.filter(a => a != null);
 
-  return Math.min.apply(undefined, this);
+  if (array.length == 0)
+    return null;
+
+  var min = array[0];
+  for (var i = 1; i < array.length; i++) {
+    var val = array[i];
+    if (val < min) {
+      min = val;
+    }
+  }
+  return min;
 };
 
 Array.prototype.sum = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
