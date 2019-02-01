@@ -164,7 +164,7 @@ namespace Signum.Utilities.NaturalLanguage
             DecimalUnitGender = null,
 
             NumberOfDecimals = 2,
-            OmitDecimalZeros = true
+            OmitDecimalZeros = true,
         };
 
 
@@ -179,13 +179,13 @@ namespace Signum.Utilities.NaturalLanguage
 
             string[] numberString = number.ToString().Split(',');
 
-            string euro = numberString[0];
+            string euro = numberString[0];            
 
             string output = "";
 
             if (number < 0) throw new Exception(" Can not convert values under 0 to a String");
             if (1000000000 < number) throw new Exception(" Can not convert values over a billion to a String");
-            if (number < 1) return "Null";
+            if (number < 1) output += "Null";
 
 
             else
@@ -231,6 +231,19 @@ namespace Signum.Utilities.NaturalLanguage
                         }
                         output += GetUpToThousand(Convert.ToInt32(hunderter));
                     }
+                }
+            }
+
+            //cent operation
+            if(settings.NumberOfDecimals == 2)
+            {
+                if (numberString.Length < 2)
+                {
+                    output += " 00/100";
+                }
+                else
+                {
+                    output += " " + numberString[1] + "/100";
                 }
             }
             return output;
