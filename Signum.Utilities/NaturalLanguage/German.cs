@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -150,6 +151,142 @@ namespace Signum.Utilities.NaturalLanguage
         }
     }
 
+    public class GermanNumberWriter : INumberWriter
+    {
+        public static NumberWriterSettings EuroSettings = new NumberWriterSettings
+        {
+            Unit = "Euro",
+            UnitPlural = "Euro",
+            UnitGender = null,
 
+            DecimalUnit = "Cent",
+            DecimalUnitPlural = "Cent",
+            DecimalUnitGender = null,
+
+            NumberOfDecimals = 2,
+            OmitDecimalZeros = true
+        };
+
+
+        public string ToNumber(decimal number, NumberWriterSettings settings)
+        {
+            /// <summary>
+            /// Converts a decimal to its written text. e.g. 12 --> "zwölf"
+            /// </summary>
+            /// <param name="number">Number to be written as text. Can only be greater equal to 0 and less then one billion </param>
+            /// <returns>String number</returns>
+            /// 
+
+            string[] numberString = number.ToString().Split(',');
+
+            string euro = numberString[0];
+
+            string output = "";
+
+            if (number < 0) throw new Exception(" Can not convert values under 0 to a String");
+            if (1000000000 < number) throw new Exception(" Can not convert values over a billion to a String");
+            if (number < 1) return "Null";
+
+
+            else
+            {
+                if (euro.Length <= 3 && euro.Length > 0)
+                {
+                    output = GetUpToThousand(Convert.ToInt32(euro));
+                }
+
+                else if (euro.Length <= 6 && euro.Length > 3)
+                {
+                    string hunderter = euro.Substring(euro.Length - 3);
+                    string tausender = euro.Substring(0, euro.Length - 3);
+                    output
+                    = GetUpToThousand(Convert.ToInt32(tausender))
+                    + "tausend"
+                    + GetUpToThousand(Convert.ToInt32(hunderter));
+                }
+                else if (euro.Length <= 9 && euro.Length > 6)
+                {
+                    string hunderter = euro.Substring(euro.Length - 3);
+                    string tausender = euro.Substring(euro.Length - 6, 3);
+                    string million = euro.Substring(0, euro.Length - 6);
+
+                    //Ausnahme falls eine million
+                    if (1000000 <= number && number < 2000000)
+                    {
+                        output = "eine Million";
+                        if (Convert.ToInt32(tausender) != 0)
+                        {
+                            output += GetUpToThousand(Convert.ToInt32(tausender)) + "tausend";
+                        }
+                        output += GetUpToThousand(Convert.ToInt32(hunderter));
+                    }
+                    else
+                    {
+                        output = GetUpToThousand(Convert.ToInt32(million))
+                        + " Millionen ";
+
+                        if (Convert.ToInt32(tausender) != 0)
+                        {
+                            output += GetUpToThousand(Convert.ToInt32(tausender)) + "tausend";
+                        }
+                        output += GetUpToThousand(Convert.ToInt32(hunderter));
+                    }
+                }
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// returns a string value for a number with up to 3 digits e.g. einhundertzweiundzwanzig or siebenundsiebzig
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static string GetUpToThousand(int number)
+        {
+            if (1000 <= number) throw new Exception("Can only convert numbers less than thousand");
+            if (number < 100)
+            {
+                return GetUpToHundred(number);
+            }
+            else
+            {
+                int firstDigit = Convert.ToInt32(number.ToString().Substring(0, 1));
+                int lastDigits = Convert.ToInt32(number.ToString().Substring(1, 2));
+                return EinerArray[firstDigit] + "hundert" + GetUpToHundred(lastDigits);
+            }
+        }
+
+        private static string GetUpToHundred(int number)
+        {
+            if (number <= 12)
+            {
+                return EinerArray[number];
+            }
+            switch (number)
+            {
+                case 16: return "sechzehn";
+                case 17: return "siebzehn";
+            }
+            string tempString = number.ToString();
+
+            if (number < 20)
+            {
+                int einerWert = Convert.ToInt32(number.ToString().Substring(1, 1));
+                return EinerArray[einerWert] + "zehn";
+            }
+            else
+            {
+                int einerWert = Convert.ToInt32(number.ToString().Substring(1, 1));
+                int zehnerWert = Convert.ToInt32(number.ToString().Substring(0, 1));
+
+                return EinerArray[einerWert] + "und" + ZehnerArray[zehnerWert];
+            }
+        }
+
+        private static string[] EinerArray = { "", "ein", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun", "zehn", "elf", "zwölf" };
+        private static string[] ZehnerArray = { "", "zehn", "zwanzig", "dreißig", "vierzig", "fünfzig", "sechzig", "siebzig", "achtzig", "neunzig" };
+
+
+    }
 
 }
