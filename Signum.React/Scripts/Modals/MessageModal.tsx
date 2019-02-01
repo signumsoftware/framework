@@ -206,7 +206,7 @@ function dialogHeaderClass(style: MessageModalStyle | undefined) {
     case "error":
       return "dialog-header-error";
     default:
-      return "bg-primary";
+      return "bg-primary text-light";
   }
 }
 
