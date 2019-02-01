@@ -1,4 +1,4 @@
-﻿import * as d3 from 'd3'
+import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { colorScaleLog } from '../../Utils'
@@ -38,21 +38,21 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
     getTooltip: t => t.entityData
   };
 
-  const columnsColor = colorScaleLog(info.tables.map(a => a.columns).max());
+  const columnsColor = colorScaleLog(info.tables.map(a => a.columns).max()!);
   const columns: ClientColorProvider = {
     name: "columns",
     getFill: t => <any>columnsColor(t.columns),
     getTooltip: t => t.columns + " " + MapMessage.Columns.niceToString()
   };
 
-  const rowsColor = colorScaleLog(info.tables.filter(a => a.rows != null).map(a => a.rows!).max());
+  const rowsColor = colorScaleLog(info.tables.filter(a => a.rows != null).map(a => a.rows!).max()!);
   const rows: ClientColorProvider = {
     name: "rows",
     getFill: t => t.rows == null ? "gray" : <any>rowsColor(t.rows),
     getTooltip: t => numbro(t.rows).format("0a") + " " + MapMessage.Rows.niceToString()
   };
 
-  const tableSizeColor = colorScaleLog(info.tables.filter(a => a.total_size_kb != null).map(a => a.total_size_kb!).max());
+  const tableSizeColor = colorScaleLog(info.tables.filter(a => a.total_size_kb != null).map(a => a.total_size_kb!).max()!);
   const tableSize: ClientColorProvider = {
     name: "tableSize",
     getFill: t => t.total_size_kb == null ? "gray" : <any>tableSizeColor(t.total_size_kb),
@@ -62,7 +62,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
   var result = [namespace, entityKind, entityData, columns, rows, tableSize];
 
   if (info.providers.some(a => a.name == "rows_history")) {
-    const rowsColorHistory = colorScaleLog(info.tables.filter(a => a.rows_history != null).map(a => a.rows_history!).max());
+    const rowsColorHistory = colorScaleLog(info.tables.filter(a => a.rows_history != null).map(a => a.rows_history!).max()!);
     const rowsHistory: ClientColorProvider = {
       name: "rows_history",
       getFill: t => t.rows_history == null ? "gray" : <any>rowsColorHistory(t.rows_history),
@@ -73,7 +73,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
   }
 
   if (info.providers.some(a => a.name == "tableSize_history")) {
-    const tableSizeColorHistory = colorScaleLog(info.tables.filter(a => a.total_size_kb_history != null).map(a => a.total_size_kb_history!).max());
+    const tableSizeColorHistory = colorScaleLog(info.tables.filter(a => a.total_size_kb_history != null).map(a => a.total_size_kb_history!).max()!);
     const tableSizeHistory: ClientColorProvider = {
       name: "tableSize_history",
       getFill: t => t.total_size_kb_history == null ? "gray" : <any>tableSizeColorHistory(t.total_size_kb_history),

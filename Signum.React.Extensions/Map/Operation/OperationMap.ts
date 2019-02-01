@@ -1,4 +1,4 @@
-﻿import * as d3 from "d3"
+import * as d3 from "d3"
 import * as Finder from '@framework/Finder'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { Point, Rectangle, calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
@@ -283,7 +283,7 @@ export class OperationMapD3 {
     let c: (d: MapState) => any;
 
     if (this.color == "rows") {
-      const colorStates = colorScale(this.map.states.map(a => a.count).max());
+      const colorStates = colorScale(this.map.states.map(a => a.count).max()!);
       c = d => colorStates(d.count);
     } else {
       const scale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -299,7 +299,7 @@ export class OperationMapD3 {
     let c: (d: MapOperation) => any;
 
     if (this.color == "rows") {
-      const colorOperations = colorScale(this.map.operations.map(a => a.count).max());
+      const colorOperations = colorScale(this.map.operations.map(a => a.count).max()!);
       c = d => colorOperations(d.count);
     } else {
       c = d => "transparent";
