@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
@@ -60,7 +61,10 @@ namespace Signum.React.Translation
 
             ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
             {
-                Expires = DateTimeOffset.MaxValue
+                Expires = DateTimeOffset.MaxValue,
+                Path = "/",
+                IsEssential = true,
+                Domain = Request.Host.Host
             });
             return ci.Name;
         }
