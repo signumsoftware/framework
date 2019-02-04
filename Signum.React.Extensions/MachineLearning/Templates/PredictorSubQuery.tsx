@@ -119,7 +119,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
 
     return (
       <div>
-        <ValueLine ctx={ctx.subCtx(f => f.name)} onTextboxBlur={() => parentCtx.frame!.entityComponent!.forceUpdate()} />
+        <ValueLine ctx={ctx.subCtx(f => f.name)} valueHtmlAttributes={{ onBlur: () => parentCtx.frame!.entityComponent!.forceUpdate() }} />
         <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
         {queryKey &&
           <div>

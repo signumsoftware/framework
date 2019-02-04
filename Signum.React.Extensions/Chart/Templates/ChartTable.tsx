@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed } from '@framework/FindOptions'
+import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed, withoutAggregateAndPinned } from '@framework/FindOptions'
 import { ChartRequestModel, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
@@ -94,7 +94,7 @@ export default class ChartTableComponent extends React.Component<ChartTableProps
 
     } else {
 
-      const filters = lcr.filterOptions.filter(a => !hasAggregate(a.token));
+      const filters = lcr.filterOptions.map(f => withoutAggregateAndPinned(f)!).filter(Boolean);
       const columns: ColumnOption[] = [];
 
       lcr.columns.filter(a => a.element.token).map((a, i) => {

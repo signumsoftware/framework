@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { CachePermission } from '../../../Cache/Signum.Entities.Cache'
 import { isPermissionAuthorized } from '../../../Authorization/AuthClient'
@@ -17,7 +17,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
 }
 
 function getColorProvider(info: SchemaMapInfo, name: string, title: string, withDefs: boolean): ClientColorProvider {
-  const max = info.tables.map(a => a.extra[name]).filter(n => n != undefined).max();
+  const max = info.tables.map(a => a.extra[name]).filter(n => n != undefined).max()!;
   const color = colorScale(max);
 
   return {
