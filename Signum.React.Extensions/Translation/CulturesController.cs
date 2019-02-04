@@ -61,7 +61,7 @@ namespace Signum.React.Translation
 
             ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
             {
-                Expires = DateTimeOffset.MaxValue,
+                Expires = DateTimeOffset.Now.AddYears(10),
                 Path = "/",
                 IsEssential = true,
                 Domain = Request.Host.Host

@@ -19,9 +19,6 @@ export function loadCurrentCulture(): Promise<void> {
 
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
   API.setCurrentCulture(newCulture)
-    .then(c => {
-      document.cookie = "language=" + c + ";path =" + Navigator.toAbsoluteUrl("~/");
-    })
     .then(() => reloadTypes())
     .then(() => Finder.clearQueryDescriptionCache())
     .then(() => loadCurrentCulture())
