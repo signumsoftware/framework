@@ -16,7 +16,7 @@ import {
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -57,7 +57,7 @@ export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: (
   };
 } 
 
-export function getSettings(queryName: PseudoType | QueryKey): QuerySettings {
+export function getSettings(queryName: PseudoType | QueryKey): QuerySettings | undefined {
   return querySettings[getQueryKey(queryName)];
 }
 
@@ -1254,6 +1254,7 @@ export interface QuerySettings {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
@@ -1280,7 +1281,7 @@ export interface CellFormatterContext {
 }
 
 
-export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed, sc: SearchControlLoaded | undefined): CellFormatter | undefined {
+export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOptionParsed, sc: SearchControlLoaded | undefined): CellFormatter | undefined {
   if (!co.token)
     return undefined;
 
@@ -1414,7 +1415,7 @@ export const entityFormatRules: EntityFormatRule[] = [
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc && sc.handleOnNavigated}
-        getViewPromise={sc && sc.props.getViewPromise}>
+        getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}>
         {EntityControlMessage.View.niceToString()}
       </EntityLink>
   },
