@@ -89,12 +89,12 @@ export interface FileDownloaderConfiguration<T extends IFile> {
 }
 
 FileDownloader.registerConfiguration(FileEntity, {
-  fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()),
-  viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
+  fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
+  viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id))
 });
 
 FileDownloader.registerConfiguration(FilePathEntity, {
-  fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()),
+  fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
 });
 
 FileDownloader.registerConfiguration(FileEmbedded, {
