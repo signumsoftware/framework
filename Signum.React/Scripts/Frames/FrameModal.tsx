@@ -192,7 +192,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     const entity = this.state.pack.entity;
 
-    GraphExplorer.propagateAll(entity);
+    var ge = GraphExplorer.propagateAll(entity);
 
     return entity.modified && JSON.stringify(entity) != this.state.lastEntity;
   }
