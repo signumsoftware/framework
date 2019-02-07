@@ -18,10 +18,11 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
     constructor(props: { ctx: TypeContext<RestLogEntity> }) {
         super(props);
-        var prefix = Navigator.toAbsoluteUrl("~/api");
-        var suffix = props.ctx.subCtx(f => f.url).value.after("/api");
+        const prefix = Navigator.toAbsoluteUrl("~/api");
+        const suffix = props.ctx.subCtx(f => f.url).value.after("/api");
+        const queryParams = props.ctx.value.queryString.map(mle =>`${mle.element.key}=${mle.element.value}`).join("&");
         this.state = {
-            newURL: location.protocol + "//" + location.hostname + prefix + suffix
+            newURL: `${location.protocol}//${location.hostname}:${location.port}${prefix}${suffix}?${queryParams}`
         }
     }
 
