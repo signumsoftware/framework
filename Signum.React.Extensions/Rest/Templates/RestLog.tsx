@@ -21,7 +21,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         var prefix = Navigator.toAbsoluteUrl("~/api");
         var suffix = props.ctx.subCtx(f => f.url).value.after("/api");
         this.state = {
-            newURL: location.protocol + "//" + location.hostname + prefix + suffix
+            newURL: `${location.protocol}//${location.hostname}:${location.port}${prefix}${suffix}`
         }
     }
 
