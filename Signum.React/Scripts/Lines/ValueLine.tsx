@@ -494,7 +494,9 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
     const result = value == undefined || value.length == 0 ? null : numbro.unformat(value, this.props.format);
     this.setState({ text: undefined });
-    this.props.onChange(result);
+    if (result != this.props.value)
+      this.props.onChange(result);
+
     if (this.props.htmlAttributes && this.props.htmlAttributes.onBlur)
       this.props.htmlAttributes.onBlur(e);
   }
@@ -643,7 +645,8 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
     const input = e.currentTarget as HTMLInputElement;
     const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
     this.setState({ text: undefined });
-    this.props.onChange(result);
+    if (this.props.value != result)
+      this.props.onChange(result);;
     if (this.props.htmlAttributes && this.props.htmlAttributes.onBlur)
       this.props.htmlAttributes.onBlur(e);
   }
