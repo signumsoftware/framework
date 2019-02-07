@@ -13,11 +13,9 @@ import { DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from '@framework
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 
-
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
 }
-
 
 interface UserQueryMenuState {
   currentUserQuery?: Lite<UserQueryEntity>;
@@ -64,7 +62,6 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
           sc.setState({ showFilters: true });
           this.setState({
             currentUserQuery: uq,
-            
           });
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();

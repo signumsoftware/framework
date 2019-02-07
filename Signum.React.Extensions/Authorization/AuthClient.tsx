@@ -32,8 +32,6 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
   resetPassword = options.resetPassword;
 
   if (userTicket) {
-
-
     if (!authenticators.contains(loginFromCookie))
       throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
@@ -46,7 +44,6 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     notifyLogout = options.notifyLogout;
 
     window.addEventListener("storage", se => {
-
       if (se.key == 'requestLogout' + Services.SessionSharing.getAppName()) {
 
         var userName = se.newValue!.before("&&");
