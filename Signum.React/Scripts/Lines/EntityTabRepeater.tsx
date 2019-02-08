@@ -92,7 +92,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                   {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
                   &nbsp;
 										{this.canRemove(mlec.value) && !readOnly &&
-                    <span className={classes("sf-line-button", "sf-create")}
+                    <span className={classes("sf-line-button", "sf-remove")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
                       title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
