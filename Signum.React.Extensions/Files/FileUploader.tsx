@@ -90,7 +90,9 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
 
     return new Promise((resolve) => {
       if (file.type && this.props.accept) {
-        if (!file.type.startsWith(this.props.accept.replace("*", ""))) {
+        
+
+        if (!this.props.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
           this.setError(FileMessage.TheFile0IsNotA1.niceToString(file.name, this.props.accept));
           return resolve();
         }
