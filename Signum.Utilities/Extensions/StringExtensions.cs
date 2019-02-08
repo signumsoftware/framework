@@ -844,5 +844,15 @@ namespace Signum.Utilities
         {
             return text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        public static string EmptyToNull(this string text)
+        {
+            return string.IsNullOrEmpty(text) ? null : text;
+        }
+
+        public static string WhiteSpaceToNull(this string text)
+        {
+            return string.IsNullOrWhiteSpace(text) ? null : text;
+        }
     }
 }
