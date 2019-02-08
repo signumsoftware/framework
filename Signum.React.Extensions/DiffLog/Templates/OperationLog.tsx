@@ -47,7 +47,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
   }
 
   componentWillMount() {
-    API.diffLog(this.props.ctx.value.id)
+    API.diffLog(this.props.ctx.value.id!)
       .then(result => this.setState({ result }))
       .done();
   }
@@ -55,7 +55,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
   componentWillReceiveProps(nextProps: { ctx: TypeContext<OperationLogEntity> }) {
     if (!is(nextProps.ctx.value, this.props.ctx.value))
-      API.diffLog(nextProps.ctx.value.id)
+      API.diffLog(nextProps.ctx.value.id!)
         .then(result => this.setState({ result }))
         .done();
   }

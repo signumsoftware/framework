@@ -98,7 +98,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         <FormGroup ctx={ctx} labelText={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatDuration(stats.estimatedDuration)}</FormGroup>
         <FormGroup ctx={ctx} labelText={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatDuration(stats.averageDuration)}</FormGroup>
         <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatDuration(stats.duration)}</FormGroup>
-        <FormGroup ctx={ctx} labelText={WorkflowActivityType.niceName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>
+        <FormGroup ctx={ctx} labelText={WorkflowActivityType.niceTypeName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>
         {
           stats.workflowActivityType == "Task" || stats.workflowActivityType == "Decision" ? this.renderTaskExtra() :
             stats.workflowActivityType == "Script" ? this.renderScriptTaskExtra() :

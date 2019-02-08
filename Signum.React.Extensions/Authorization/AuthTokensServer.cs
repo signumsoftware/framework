@@ -94,7 +94,7 @@ namespace Signum.React.Authorization
             if (newUser.UserName != oldToken.User.UserName)
                 throw new AuthenticationException(AuthMessage.InvalidUsername.NiceToString());
 
-            if (!newUser.PasswordHash.SequenceEqual(oldToken.User.PasswordHash))
+            if (!newUser.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
                 throw new AuthenticationException(AuthMessage.InvalidPassword.NiceToString());
 
             AuthToken newToken = new AuthToken

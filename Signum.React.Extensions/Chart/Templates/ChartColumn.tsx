@@ -121,7 +121,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { expanded: b
             <div>
               <div className="row">
                 <div className="col-sm-4">
-                  <ValueLine ctx={ctx.subCtx(a => a.displayName, { formSize: "Small", formGroupStyle: "Basic" })} onTextboxBlur={this.props.onRedraw} />
+                  <ValueLine ctx={ctx.subCtx(a => a.displayName, { formSize: "Small", formGroupStyle: "Basic" })} valueHtmlAttributes={{ onBlur: this.props.onRedraw }} />
                 </div>
                 {this.getColorPalettes().map((t, i) =>
                   <div className="col-sm-4" key={i}>

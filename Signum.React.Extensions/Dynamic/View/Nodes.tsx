@@ -179,7 +179,7 @@ NodeUtils.register<TabNode>({
   avoidHighlight: true,
   validParent: "Tabs",
   initialize: (n, parentNode) => {
-    let byName = parentNode.node.children.map(a => parseInt((a as TabNode).eventKey.tryAfter("tab") || "")).filter(s => isFinite(s)).max() + 1;
+    let byName = (parentNode.node.children.map(a => parseInt((a as TabNode).eventKey.tryAfter("tab") || "")).filter(s => isFinite(s)).max() || 0) + 1;
     let byPosition = parentNode.node.children.length + 1;
     let index = Math.max(byName, byPosition);
     n.title = "My Tab " + index;

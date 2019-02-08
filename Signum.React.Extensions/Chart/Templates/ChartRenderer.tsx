@@ -3,7 +3,7 @@ import { DomUtils, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { parseLite, is } from '@framework/Signum.Entities'
-import { FilterOptionParsed, ColumnOption, hasAggregate } from '@framework/FindOptions'
+import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregateAndPinned } from '@framework/FindOptions'
 import { ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
@@ -75,7 +75,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     if (r.entity) {
       window.open(Navigator.navigateRoute(r.entity!));
     } else {
-      const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+      const filters = cr.filterOptions.map(f => withoutAggregateAndPinned(f)!).filter(Boolean);
 
       const columns: ColumnOption[] = [];
 

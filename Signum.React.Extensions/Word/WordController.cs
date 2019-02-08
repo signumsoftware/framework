@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities;
 using Signum.React.Facades;
@@ -17,7 +17,7 @@ namespace Signum.React.Word
     public class WordController : ControllerBase
     {
         [HttpPost("api/word/createReport")]
-        public FileStreamResult View([Required, FromBody]CreateWordReportRequest request)
+        public FileStreamResult CreateReport([Required, FromBody]CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
             var model = request.entity ?? request.lite.Retrieve();
@@ -27,14 +27,12 @@ namespace Signum.React.Word
             return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);
         }
 
-#pragma warning disable IDE1006 // Naming Styles
         public class CreateWordReportRequest
         {
             public Lite<WordTemplateEntity> template { get; set; }
             public Lite<Entity> lite { get; set; }
             public ModifiableEntity entity { get; set; }
         }
-#pragma warning restore IDE1006 // Naming Styles
 
         [HttpPost("api/word/constructorType")]
         public string GetConstructorType([Required, FromBody]SystemWordTemplateEntity systemWordTemplate)

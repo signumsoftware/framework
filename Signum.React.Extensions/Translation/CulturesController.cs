@@ -1,3 +1,4 @@
+using System;
 using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
@@ -14,6 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
 {
@@ -56,7 +59,13 @@ namespace Signum.React.Translation
                 }
             }
 
-            ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name);
+            ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
+            {
+                Expires = DateTimeOffset.Now.AddYears(10),
+                Path = "/",
+                IsEssential = true,
+                Domain = Request.Host.Host
+            });
             return ci.Name;
         }
     }
