@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <TypeScriptToolsVersion>3.2</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
     <LangVersion>latest</LangVersion>
     <OutputType>Library</OutputType>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
