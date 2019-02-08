@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Migrations;
@@ -29,7 +29,7 @@ namespace Signum.Engine.Dynamic
             return IsAppliedExpression.Evaluate(r);
         }
 
-        public static StringBuilder CurrentLog = null;
+        public static StringBuilder? CurrentLog = null;
         public static string LastLog;
 
         public static void Start(SchemaBuilder sb)

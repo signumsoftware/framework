@@ -14,7 +14,7 @@ export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   label?: string | null;
   iconName?: string | null;
   iconColor?: string | null;
-  content?: Entities.Lite<Entities.Entity> | null;
+  content?: Entities.Lite<Entities.Entity>;
   url?: string | null;
   openInPopup?: boolean;
   autoRefreshPeriod?: number | null;
@@ -29,8 +29,8 @@ export type ToolbarElementType =
 export const ToolbarEntity = new Type<ToolbarEntity>("Toolbar");
 export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Toolbar";
-  owner?: Entities.Lite<Entities.Entity> | null;
-  name?: string | null;
+  owner?: Entities.Lite<Entities.Entity>;
+  name?: string;
   location?: ToolbarLocation;
   priority?: number | null;
   elements: Entities.MList<ToolbarElementEmbedded>;
@@ -45,9 +45,9 @@ export type ToolbarLocation =
 export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "ToolbarMenu";
-  owner?: Entities.Lite<Entities.Entity> | null;
+  owner?: Entities.Lite<Entities.Entity>;
   guid?: string;
-  name?: string | null;
+  name?: string;
   elements: Entities.MList<ToolbarElementEmbedded>;
 }
 

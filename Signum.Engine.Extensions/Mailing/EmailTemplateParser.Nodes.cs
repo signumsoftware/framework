@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,6 +35,11 @@ namespace Signum.Engine.Mailing
         {
             public string Text;
 
+            public LiteralNode(string text)
+            {
+                Text = text;
+            }
+
             public override void PrintList(EmailTemplateParameters p)
             {
                 p.StringBuilder.Append(Text);
@@ -58,11 +63,11 @@ namespace Signum.Engine.Mailing
 
         public class DeclareNode : TextNode
         {
-            public readonly ValueProviderBase ValueProvider;
+            public readonly ValueProviderBase? ValueProvider;
 
-            internal DeclareNode(ValueProviderBase valueProvider, Action<bool, string> addError)
+            internal DeclareNode(ValueProviderBase? valueProvider, Action<bool, string> addError)
             {
-                if (!valueProvider.Variable.HasText())
+                if (!valueProvider!.Variable.HasText())
                     addError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
 
                 this.ValueProvider = valueProvider;
@@ -80,24 +85,24 @@ namespace Signum.Engine.Mailing
             {
                 sb.Append("@declare");
 
-                ValueProvider.ToStringBrackets(sb, variables, null);
+                ValueProvider!.ToStringBrackets(sb, variables, null);
 
                 ValueProvider.Declare(variables);
             }
 
             public override void Synchronize(SynchronizationContext sc)
             {
-                ValueProvider.Synchronize(sc, "@declare");
+                ValueProvider!.Synchronize(sc, "@declare");
             }
         }
 
         public class ValueNode : TextNode
         {
-            public readonly ValueProviderBase ValueProvider;
+            public readonly ValueProviderBase? ValueProvider;
             public readonly bool IsRaw;
-            public readonly string Format;
+            public readonly string? Format;
 
-            internal ValueNode(ValueProviderBase valueProvider, string format, bool isRaw)
+            internal ValueNode(ValueProviderBase? valueProvider, string? format, bool isRaw)
             {
                 this.ValueProvider = valueProvider;
                 this.Format = format;
@@ -106,7 +111,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p)
             {
-                var obj = ValueProvider.GetValue(p);
+                var obj = ValueProvider!.GetValue(p);
 
                 var text = obj is Enum ? ((Enum)obj).NiceToString() :
                        obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
@@ -117,7 +122,7 @@ namespace Signum.Engine.Mailing
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                this.ValueProvider.FillQueryTokens(list);
+                this.ValueProvider!.FillQueryTokens(list);
             }
 
             public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
@@ -126,12 +131,12 @@ namespace Signum.Engine.Mailing
                 if (IsRaw)
                     sb.Append("raw");
 
-                ValueProvider.ToStringBrackets(sb, variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
+                ValueProvider!.ToStringBrackets(sb, variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
             }
 
             public override void Synchronize(SynchronizationContext sc)
             {
-                ValueProvider.Synchronize(sc, IsRaw ? "@raw[]" : "@[]");
+                ValueProvider!.Synchronize(sc, IsRaw ? "@raw[]" : "@[]");
             }
         }
 
@@ -139,9 +144,9 @@ namespace Signum.Engine.Mailing
         {
             public readonly List<TextNode> Nodes = new List<TextNode>();
 
-            public readonly TextNode owner;
+            public readonly TextNode? owner;
 
-            public BlockNode(TextNode owner)
+            public BlockNode(TextNode? owner)
             {
                 this.owner = owner;
             }
@@ -168,7 +173,7 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            public static string UserString(Type type)
+            public static string UserString(Type? type)
             {
                 if (type == typeof(ForeachNode))
                     return "foreach";
@@ -200,11 +205,11 @@ namespace Signum.Engine.Mailing
 
         public class ForeachNode : TextNode
         {
-            public readonly ValueProviderBase ValueProvider;
+            public readonly ValueProviderBase? ValueProvider;
 
             public readonly BlockNode Block;
 
-            public ForeachNode(ValueProviderBase valueProvider)
+            public ForeachNode(ValueProviderBase? valueProvider)
             {
                 this.ValueProvider = valueProvider;
                 this.Block = new BlockNode(this);
@@ -212,19 +217,19 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p)
             {
-                ValueProvider.Foreach(p, () => Block.PrintList(p));
+                ValueProvider!.Foreach(p, () => Block.PrintList(p));
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                ValueProvider.FillQueryTokens(list);
+                ValueProvider!.FillQueryTokens(list);
                 Block.FillQueryTokens(list);
             }
 
             public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@foreach");
-                ValueProvider.ToStringBrackets(sb, variables, null);
+                ValueProvider!.ToStringBrackets(sb, variables, null);
                 {
                     var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                     ValueProvider.Declare(newVars);
@@ -235,7 +240,7 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SynchronizationContext sc)
             {
-                ValueProvider.Synchronize(sc, "@foreach[]");
+                ValueProvider!.Synchronize(sc, "@foreach[]");
 
                 using (sc.NewScope())
                 {
@@ -251,7 +256,7 @@ namespace Signum.Engine.Mailing
             public ConditionBase Condition;
 
             public readonly BlockNode AnyBlock;
-            public BlockNode NotAnyBlock;
+            public BlockNode? NotAnyBlock;
 
             internal AnyNode(ConditionBase condition)
             {
@@ -339,7 +344,7 @@ namespace Signum.Engine.Mailing
         {
             public readonly ConditionBase Condition;
             public readonly BlockNode IfBlock;
-            public BlockNode ElseBlock;
+            public BlockNode? ElseBlock;
 
             internal IfNode(ConditionBase condition, TemplateWalker walker)
             {

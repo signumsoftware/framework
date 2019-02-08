@@ -11,10 +11,10 @@ export const NoteEntity = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
   Type: "Note";
   title?: string | null;
-  target?: Entities.Lite<Entities.Entity> | null;
+  target?: Entities.Lite<Entities.Entity>;
   creationDate?: string;
-  text?: string | null;
-  createdBy?: Entities.Lite<Basics.IUserEntity> | null;
+  text?: string;
+  createdBy?: Entities.Lite<Basics.IUserEntity>;
   noteType?: NoteTypeEntity | null;
 }
 

@@ -41,7 +41,7 @@ namespace Signum.React.Workflow
                     activity = activity,
                     canExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
                     canExecuteMainEntity = ep.canExecute,
-                    Extension = ep.Extension,
+                    Extension = ep.extension,
                 };
             }
         }

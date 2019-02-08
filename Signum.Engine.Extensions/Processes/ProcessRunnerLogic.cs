@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -142,7 +142,7 @@ namespace Signum.Engine.Processes
                     var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
                     SystemEventLogLogic.Log("Start ProcessRunner");
-                    ExceptionEntity exception = null;
+                    ExceptionEntity? exception = null;
                     using (AuthLogic.Disable())
                     {
                         try
@@ -403,7 +403,7 @@ namespace Signum.Engine.Processes
 
         public static int DecimalPlaces = 3;
 
-        public void ProgressChanged(int position, int count, string status = null)
+        public void ProgressChanged(int position, int count, string? status = null)
         {
             if (position > count)
                 throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".FormatWith(position, count));
@@ -416,7 +416,7 @@ namespace Signum.Engine.Processes
             ProgressChanged(progress, status);
         }
 
-        public void ProgressChanged(decimal progress, string status = null)
+        public void ProgressChanged(decimal progress, string? status = null)
         {
             if (progress != CurrentProcess.Progress || status != CurrentProcess.Status)
             {

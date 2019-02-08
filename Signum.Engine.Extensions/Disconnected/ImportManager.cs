@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Disconnected;
@@ -75,7 +75,7 @@ namespace Signum.Engine.Disconnected
 
         Dictionary<Lite<DisconnectedImportEntity>, RunningImports> runningImports = new Dictionary<Lite<DisconnectedImportEntity>, RunningImports>();
 
-        public virtual Lite<DisconnectedImportEntity> BeginImportDatabase(DisconnectedMachineEntity machine, Stream file = null)
+        public virtual Lite<DisconnectedImportEntity> BeginImportDatabase(DisconnectedMachineEntity machine, Stream? file = null)
         {
             Lite<DisconnectedImportEntity> import = new DisconnectedImportEntity
             {
@@ -151,7 +151,7 @@ namespace Signum.Engine.Disconnected
 
                                 foreach (var tuple in uploadTables)
                                 {
-                                    ImportResult result = null;
+                                    ImportResult? result = null;
                                     using (token.MeasureTime(l =>
                                     {
                                         if (result != null)

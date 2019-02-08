@@ -10,8 +10,8 @@ export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
   Type: "CultureInfo";
   name: string;
-  nativeName: string | null;
-  englishName: string | null;
+  nativeName: string;
+  englishName: string;
   hidden: boolean;
 }
 

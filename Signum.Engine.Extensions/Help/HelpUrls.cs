@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -36,7 +36,7 @@ namespace Signum.Engine.Help
             return "p-" + route.PropertyString().Replace('.', '_').Replace('/', '_').Replace('[', '_').Replace(']', '_');
         }
 
-        public static string QueryUrl(object queryName, Type type = null)
+        public static string QueryUrl(object queryName, Type? type = null)
         {
             return EntityUrl(type ?? GetQueryType(queryName)) + "#" + IdQuery(queryName);
         }

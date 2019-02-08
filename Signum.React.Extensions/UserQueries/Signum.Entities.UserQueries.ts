@@ -23,14 +23,14 @@ export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
 export const QueryColumnEmbedded = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");
 export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnEmbedded";
-  token?: UserAssets.QueryTokenEmbedded | null;
+  token?: UserAssets.QueryTokenEmbedded;
   displayName?: string | null;
 }
 
 export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
 export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryFilterEmbedded";
-  token?: UserAssets.QueryTokenEmbedded | null;
+  token?: UserAssets.QueryTokenEmbedded;
   isGroup?: boolean;
   groupOperation?: DynamicQuery.FilterGroupOperation | null;
   operation?: DynamicQuery.FilterOperation | null;
@@ -42,19 +42,19 @@ export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
 export const QueryOrderEmbedded = new Type<QueryOrderEmbedded>("QueryOrderEmbedded");
 export interface QueryOrderEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryOrderEmbedded";
-  token?: UserAssets.QueryTokenEmbedded | null;
+  token?: UserAssets.QueryTokenEmbedded;
   orderType?: DynamicQuery.OrderType;
 }
 
 export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserQuery";
-  query?: Basics.QueryEntity | null;
+  query?: Basics.QueryEntity;
   groupResults?: boolean;
-  entityType?: Entities.Lite<Basics.TypeEntity> | null;
+  entityType?: Entities.Lite<Basics.TypeEntity>;
   hideQuickLink?: boolean;
-  owner?: Entities.Lite<Entities.Entity> | null;
-  displayName?: string | null;
+  owner?: Entities.Lite<Entities.Entity>;
+  displayName?: string;
   appendFilters?: boolean;
   filters: Entities.MList<QueryFilterEmbedded>;
   orders: Entities.MList<QueryOrderEmbedded>;

@@ -30,7 +30,7 @@ export type IChartBase = ChartRequestModel | UserChartEntity;
 export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
   Type: "ChartColor";
-  related?: Entities.Lite<Entities.Entity> | null;
+  related?: Entities.Lite<Entities.Entity>;
   color?: Basics.ColorEmbedded | null;
 }
 
@@ -94,14 +94,14 @@ export module ChartMessage {
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
   Type: "ChartPaletteModel";
-  type?: Basics.TypeEntity | null;
+  type?: Basics.TypeEntity;
   colors: Entities.MList<ChartColorEntity>;
 }
 
 export const ChartParameterEmbedded = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
 export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartParameterEmbedded";
-  name?: string | null;
+  name?: string;
   value?: string | null;
 }
 
@@ -158,9 +158,9 @@ export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserChart";
   query: Basics.QueryEntity;
-  entityType: Entities.Lite<Basics.TypeEntity> | null;
+  entityType: Entities.Lite<Basics.TypeEntity>;
   hideQuickLink: boolean;
-  owner: Entities.Lite<Entities.Entity> | null;
+  owner: Entities.Lite<Entities.Entity>;
   displayName: string;
   chartScript: ChartScriptSymbol;
   parameters: Entities.MList<ChartParameterEmbedded>;

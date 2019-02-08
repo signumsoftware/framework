@@ -49,7 +49,7 @@ export const UserAssetPreviewLineEmbedded = new Type<UserAssetPreviewLineEmbedde
 export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   Type: "UserAssetPreviewLineEmbedded";
   type?: Basics.TypeEntity | null;
-  text?: string | null;
+  text?: string;
   action?: EntityAction;
   overrideEntity?: boolean;
   guid?: string;

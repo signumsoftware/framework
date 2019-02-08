@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -114,7 +114,7 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
         {
             using (Transaction tr = new Transaction())
             {
-                string message = null;
+                string? message = null;
 
                 ((SqlConnection)Transaction.CurrentConnection).InfoMessage += (object sender, SqlInfoMessageEventArgs e) => { message = e.Message; };
 

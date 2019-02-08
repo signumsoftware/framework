@@ -19,7 +19,7 @@ export module ActiveDirectoryAuthorizerMessage {
 export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
-  domainName?: string | null;
+  domainName?: string;
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
@@ -261,8 +261,8 @@ export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
 export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
   Type: "ResetPasswordRequest";
-  code?: string | null;
-  user?: UserEntity | null;
+  code?: string;
+  user?: UserEntity;
   requestDate?: string;
   lapsed?: boolean;
 }
@@ -270,7 +270,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
 export const RoleEntity = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
   Type: "Role";
-  name?: string | null;
+  name?: string;
   mergeStrategy?: MergeStrategy;
   roles: Entities.MList<Entities.Lite<RoleEntity>>;
 }
@@ -285,9 +285,9 @@ export module RoleQuery {
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {
-  role?: Entities.Lite<RoleEntity> | null;
-  resource?: R | null;
-  allowed?: A | null;
+  role?: Entities.Lite<RoleEntity>;
+  resource?: R;
+  allowed?: A;
 }
 
 export const RuleOperationEntity = new Type<RuleOperationEntity>("RuleOperation");
@@ -313,7 +313,7 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAll
 export const RuleTypeConditionEmbedded = new Type<RuleTypeConditionEmbedded>("RuleTypeConditionEmbedded");
 export interface RuleTypeConditionEmbedded extends Entities.EmbeddedEntity {
   Type: "RuleTypeConditionEmbedded";
-  condition?: Signum.TypeConditionSymbol | null;
+  condition?: Signum.TypeConditionSymbol;
   allowed?: TypeAllowed;
 }
 
@@ -326,7 +326,7 @@ export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowe
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
-  user?: Entities.Lite<UserEntity> | null;
+  user?: Entities.Lite<UserEntity>;
   sessionStart?: string;
   sessionEnd?: string | null;
   sessionTimeOut?: boolean;
@@ -389,12 +389,12 @@ export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
-  userName?: string | null;
-  passwordHash?: string | null;
+  userName?: string;
+  passwordHash?: string;
   passwordSetDate?: string;
   passwordNeverExpires?: boolean;
-  role?: Entities.Lite<RoleEntity> | null;
-  email?: string | null;
+  role?: Entities.Lite<RoleEntity>;
+  email?: string;
   cultureInfo?: Signum.CultureInfoEntity | null;
   anulationDate?: string | null;
   state?: UserState;
@@ -418,10 +418,10 @@ export type UserState =
 export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
   Type: "UserTicket";
-  user?: Entities.Lite<UserEntity> | null;
-  ticket?: string | null;
+  user?: Entities.Lite<UserEntity>;
+  ticket?: string;
   connectionDate?: string;
-  device?: string | null;
+  device?: string;
 }
 
 

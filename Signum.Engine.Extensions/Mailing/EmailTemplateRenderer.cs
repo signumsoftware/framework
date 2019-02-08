@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,13 +13,13 @@ namespace Signum.Engine.Mailing
     class EmailMessageBuilder
     {
         EmailTemplateEntity template;
-        Entity entity;
-        ISystemEmail systemEmail;
+        Entity? entity;
+        ISystemEmail? systemEmail;
         object queryName;
         QueryDescription qd;
-        SmtpConfigurationEntity smtpConfig;
+        SmtpConfigurationEntity? smtpConfig;
 
-        public EmailMessageBuilder(EmailTemplateEntity template, Entity entity, ISystemEmail systemEmail)
+        public EmailMessageBuilder(EmailTemplateEntity template, Entity? entity, ISystemEmail? systemEmail)
         {
             this.template = template;
             this.entity = entity;
@@ -27,12 +27,12 @@ namespace Signum.Engine.Mailing
 
             this.queryName = QueryLogic.ToQueryName(template.Query.Key);
             this.qd = QueryLogic.Queries.QueryDescription(queryName);
-            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration == null ? null : EmailTemplateLogic.GetSmtpConfiguration(template, (systemEmail?.UntypedEntity as Entity ?? entity)?.ToLite());
+            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration?.Invoke(template, (systemEmail?.UntypedEntity as Entity ?? entity)?.ToLite());
         }
 
-        ResultTable table;
-        Dictionary<QueryToken, ResultColumn> dicTokenColumn;
-        IEnumerable<ResultRow> currentRows;
+        ResultTable table = null!;
+        Dictionary<QueryToken, ResultColumn> dicTokenColumn = null!;
+        IEnumerable<ResultRow> currentRows = null!;
 
 
         public IEnumerable<EmailMessageEntity> CreateEmailMessageInternal()
@@ -43,26 +43,23 @@ namespace Signum.Engine.Mailing
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
-                    CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault().ToCultureInfo() ?? EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
+                    CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ?? 
+                        EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
                     EmailMessageEntity email = new EmailMessageEntity
                     {
-                        Target = entity?.ToLite() ?? (this.systemEmail.UntypedEntity as Entity)?.ToLite(),
+                        Target = entity?.ToLite() ?? (this.systemEmail!.UntypedEntity as Entity)?.ToLite(),
                         Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
                         From = from,
                         IsBodyHtml = template.IsBodyHtml,
                         EditableMessage = template.EditableMessage,
                         Template = template.ToLite(),
-                        Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, new EmailTemplateLogic.GenerateAttachmentContext
-                        {
-                            QueryDescription = this.qd,
-                            ModelType = template.SystemEmail.ToType(),
+                        Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, 
+                        new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
+                        { 
+                            ModelType = template.SystemEmail?.ToType(),
                             SystemEmail = systemEmail,
-                            CurrentRows = currentRows,
-                            ResultColumns = dicTokenColumn,
                             Entity = entity, 
-                            Template = template,
-                            Culture = ci,
                         })).ToMList()
                     };
                     
@@ -110,7 +107,7 @@ namespace Signum.Engine.Mailing
                         body = EmailMasterTemplateEntity.MasterTemplateContentRegex.Replace(emtm.Text, m => body);
                 }
 
-                message.TextParsedNode = EmailTemplateParser.Parse(body, qd, template.SystemEmail.ToType());
+                message.TextParsedNode = EmailTemplateParser.Parse(body, qd, template.SystemEmail?.ToType());
             }
 
             return (EmailTemplateParser.BlockNode)message.TextParsedNode;
@@ -119,7 +116,7 @@ namespace Signum.Engine.Mailing
         EmailTemplateParser.BlockNode SubjectNode(EmailTemplateMessageEmbedded message)
         {
             if (message.SubjectParsedNode == null)
-                message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType());
+                message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail?.ToType());
 
             return (EmailTemplateParser.BlockNode)message.SubjectParsedNode;
         }
@@ -134,11 +131,11 @@ namespace Signum.Engine.Mailing
 
                     if (!template.SendDifferentMessages)
                     {
-                        yield return new EmailAddressEmbedded(currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().SingleEx());
+                        yield return new EmailAddressEmbedded(currentRows.Select(r => (EmailOwnerData)r[owner]!).Distinct().SingleEx());
                     }
                     else
                     {
-                        var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]);
+                        var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!);
 
                         if (groups.Count() == 1 && groups.Single().Key?.Owner == null)
                             yield break;
@@ -161,7 +158,7 @@ namespace Signum.Engine.Mailing
                     yield return new EmailAddressEmbedded(new EmailOwnerData
                     {
                         CultureInfo = null,
-                        Email = template.From.EmailAddress,
+                        Email = template.From.EmailAddress!,
                         DisplayName = template.From.DisplayName,
                     });
                 }
@@ -186,7 +183,7 @@ namespace Signum.Engine.Mailing
                 recipients.AddRange(template.Recipients.Where(a => a.Token == null).Select(tr => new EmailOwnerRecipientData(new EmailOwnerData
                 {
                     CultureInfo = null,
-                    Email = tr.EmailAddress,
+                    Email = tr.EmailAddress!,
                     DisplayName = tr.DisplayName
                 }) { Kind = tr.Kind }));
 
@@ -212,9 +209,9 @@ namespace Signum.Engine.Mailing
                 { 
                     tokenRecipients.SelectMany(tr =>
                     {
-                        ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token.Token);
+                        ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token!.Token);
 
-                        List<EmailOwnerData> groups = currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().ToList();
+                        List<EmailOwnerData> groups = currentRows.Select(r => (EmailOwnerData)r[owner]!).Distinct().ToList();
 
                         if (groups.Count == 1 && groups[0]?.Email == null)
                             return new List<EmailOwnerRecipientData>();
@@ -237,9 +234,9 @@ namespace Signum.Engine.Mailing
             {
                 EmailTemplateRecipientEmbedded tr = tokenRecipients[pos];
 
-                ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token.Token);
+                ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token!.Token);
 
-                var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]).ToList();
+                var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
                 if (groups.Count == 1 && groups[0].Key?.Email == null)
                 {
@@ -275,7 +272,7 @@ namespace Signum.Engine.Mailing
                     tokens.Add(template.From.Token.Token);
 
                 foreach (var tr in template.Recipients.Where(r => r.Token != null))
-                    tokens.Add(tr.Token.Token);
+                    tokens.Add(tr.Token!.Token);
 
                 foreach (var t in template.Messages)
                 {
@@ -285,18 +282,16 @@ namespace Signum.Engine.Mailing
 
                 foreach (var a in template.Attachments)
                 {
-                    EmailTemplateLogic.FillAttachmentTokens.Invoke(a, new EmailTemplateLogic.FillAttachmentTokenContext
+                    EmailTemplateLogic.FillAttachmentTokens.Invoke(a, new EmailTemplateLogic.FillAttachmentTokenContext(qd, tokens)
                     {
-                        QueryDescription = qd, 
-                        ModelType = template.SystemEmail.ToType(),
-                        QueryTokens = tokens,
+                        ModelType = template.SystemEmail?.ToType(),
                     });
                 }
 
                 var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
                 var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
-                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
+                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) };
 
                 this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
                 {

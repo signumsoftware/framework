@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Utilities;
 using System;
@@ -433,7 +433,7 @@ namespace Signum.Engine.Translation
                 Culture = culture,
                 Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]),
                     Lite.Parse<Entity>(cellValues[0]),
-                    cellValues[2].DefaultText(null)?.Let(s => PrimaryKey.Parse(s, type))),
+                    cellValues[2].EmtpyToNull()?.Let(s => PrimaryKey.Parse(s, type))),
                 OriginalText = cellValues[3],
                 TranslatedText = cellValues[4]
             });

@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -68,7 +68,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static Lite<EmailMasterTemplateEntity> GetDefaultMasterTemplate()
+        public static Lite<EmailMasterTemplateEntity>? GetDefaultMasterTemplate()
         {
             var result = Database.Query<EmailMasterTemplateEntity>().Select(emt => emt.ToLite()).FirstOrDefault();
 

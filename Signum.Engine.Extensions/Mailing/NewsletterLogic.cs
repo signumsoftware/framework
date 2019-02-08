@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -102,7 +102,7 @@ namespace Signum.Engine.Mailing
             {
                 EmailTemplateParser.TryParse(text, qd, null, out string error);
 
-                return error.DefaultText(null);
+                return error.EmtpyToNull();
             }
             catch (Exception e)
             {

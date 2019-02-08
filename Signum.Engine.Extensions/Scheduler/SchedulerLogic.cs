@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,7 +58,8 @@ namespace Signum.Engine.Scheduler
             return ExceptionLinesExpression.Evaluate(e);
         }
 
-        public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>>();
+        public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask = 
+            new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
 
         public class ScheduledTaskPair
         {
@@ -380,7 +381,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
+        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
         {
             using (ExecutionContext.SuppressFlow())
                 Task.Run(() =>
@@ -400,9 +401,9 @@ namespace Signum.Engine.Scheduler
                 });
         }
 
-        public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
+        public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity? user)
         {
-            IUserEntity entityIUser = user ?? (IUserEntity)scheduledTask.User.Retrieve();
+            IUserEntity entityIUser = (user ?? (IUserEntity?)scheduledTask?.User.Retrieve())!;
 
             var isolation = entityIUser.TryIsolation();
             if (isolation == null)

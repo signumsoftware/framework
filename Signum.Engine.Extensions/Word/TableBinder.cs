@@ -62,7 +62,7 @@ namespace Signum.Engine.Word
                 var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
                 var title = GetTitle(nonVisualProps);
 
-                Data.DataTable dataTable = title != null ? GetDataTable(parameters, title) : null;
+                Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
                 if (dataTable != null)
                 {
                     var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
@@ -206,14 +206,14 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static string ToStringLocal(object val)
+        private static string? ToStringLocal(object val)
         {
             return val == null ? null :
                 (val is IFormattable) ? ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture) :
                 val.ToString();
         }
 
-        private static Data.DataTable GetDataTable(WordTemplateParameters parameters, string title)
+        private static Data.DataTable? GetDataTable(WordTemplateParameters parameters, string title)
         {
             var key = title.TryBefore(":");
 
@@ -222,12 +222,7 @@ namespace Signum.Engine.Word
 
             var provider = WordTemplateLogic.ToDataTableProviders.GetOrThrow(key);
 
-            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext
-            {
-                Entity = (Entity)parameters.Entity,
-                SystemWordTemplate = parameters.SystemWordTemplate,
-                Template = parameters.Template
-            });
+            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext(parameters.Template, (Entity?)parameters.Entity, parameters.SystemWordTemplate));
 
             return table;
         }
@@ -252,7 +247,7 @@ namespace Signum.Engine.Word
             }
 
             if (!(result is Data.DataTable))
-                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.SystemWordTemplate.GetType().Name}' did not return a DataTable");
+                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.SystemWordTemplate!.GetType().Name}' did not return a DataTable");
 
             return (Data.DataTable)result;
         }
@@ -271,7 +266,7 @@ namespace Signum.Engine.Word
             return mi;
         }
 
-        public string Validate(string suffix, WordTemplateEntity template)
+        public string? Validate(string suffix, WordTemplateEntity template)
         {
             try
             {
@@ -300,7 +295,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public string Validate(string suffix, WordTemplateEntity template)
+        public string? Validate(string suffix, WordTemplateEntity template)
         {
             if (!Guid.TryParse(suffix, out Guid guid))
                 return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
@@ -322,14 +317,14 @@ namespace Signum.Engine.Word
             {
                 var chartRequest = UserChartLogic.ToChartRequest(userChart);
                 ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;
-                var tokens = chartRequest.Columns.Where(a => a.Token != null).ToList();
+                var tokens = chartRequest.Columns.Select(a => a.Token).NotNull().ToList();
 
                 //TODO: Too specific. Will be better if controlled by some parameters. 
-                if (chartRequest.HasAggregates() && tokens.Count(a => !(a.Token.Token is AggregateToken)) == 2 && tokens.Count(a => a.Token.Token is AggregateToken) == 1)
+                if (chartRequest.HasAggregates() && tokens.Count(a => !(a.Token is AggregateToken)) == 2 && tokens.Count(a => a.Token is AggregateToken) == 1)
                 {
-                    var firstKeyIndex = tokens.FindIndex(a => !(a.Token.Token is AggregateToken));
-                    var secondKeyIndex = tokens.FindIndex(firstKeyIndex + 1, a => !(a.Token.Token is AggregateToken));
-                    var valueIndex = tokens.FindIndex(a => a.Token.Token is AggregateToken);
+                    var firstKeyIndex = tokens.FindIndex(a => !(a.Token is AggregateToken));
+                    var secondKeyIndex = tokens.FindIndex(firstKeyIndex + 1, a => !(a.Token is AggregateToken));
+                    var valueIndex = tokens.FindIndex(a => a.Token is AggregateToken);
                     return result.ToDataTablePivot(secondKeyIndex, firstKeyIndex, valueIndex);
                 }
                 else
@@ -337,7 +332,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public string Validate(string suffix, WordTemplateEntity template)
+        public string? Validate(string suffix, WordTemplateEntity template)
         {
             if (!Guid.TryParse(suffix, out Guid guid))
                 return "Impossible to convert '{0}' in a GUID for a UserChart".FormatWith(suffix);

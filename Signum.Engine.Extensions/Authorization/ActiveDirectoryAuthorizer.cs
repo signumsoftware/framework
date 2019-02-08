@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.Services;
 using Signum.Utilities;
 using System;
@@ -10,9 +10,9 @@ namespace Signum.Engine.Authorization
     {
         Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
 
-        public Func<PrincipalContext, UserEntity> AutoCreateUser;  //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
+        public Func<PrincipalContext, UserEntity>? AutoCreateUser;  //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
 
-        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<PrincipalContext, UserEntity> autoCreateUser = null)
+        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<PrincipalContext, UserEntity>? autoCreateUser = null)
         {
             this.GetConfig = getConfig;
             this.AutoCreateUser = autoCreateUser;

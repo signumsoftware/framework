@@ -22,7 +22,7 @@ namespace Signum.Engine.Authorization
     public static partial class TypeAuthLogic
     {
         static readonly Variable<bool> queryFilterDisabled = Statics.ThreadVariable<bool>("queryFilterDisabled");
-        public static IDisposable DisableQueryFilter()
+        public static IDisposable? DisableQueryFilter()
         {
             if (queryFilterDisabled.Value) return null;
             queryFilterDisabled.Value = true;
@@ -35,7 +35,7 @@ namespace Signum.Engine.Authorization
         }
 
         static readonly Variable<bool> inSave = Statics.ThreadVariable<bool>("inSave");
-        static IDisposable OnInSave()
+        static IDisposable? OnInSave()
         {
             if (inSave.Value) return null;
             inSave.Value = true;
@@ -72,11 +72,11 @@ namespace Signum.Engine.Authorization
 
         private static bool IsCreatedOrModified(Dictionary<string, object> dictionary, Entity ident)
         {
-            var modified = (List<Entity>)dictionary.TryGetC(ModifiedKey);
+            var modified = (List<Entity>?)dictionary.TryGetC(ModifiedKey);
             if (modified != null && modified.Contains(ident))
                 return true;
 
-            var created = (List<Entity>)dictionary.TryGetC(CreatedKey);
+            var created = (List<Entity>?)dictionary.TryGetC(CreatedKey);
             if (created != null && created.Contains(ident))
                 return true;
 
@@ -85,11 +85,11 @@ namespace Signum.Engine.Authorization
 
         public static void RemovePreRealCommitChecking(Entity entity)
         {
-            var created = (List<Entity>)Transaction.UserData.TryGetC(CreatedKey);
+            var created = (List<Entity>?)Transaction.UserData.TryGetC(CreatedKey);
             if (created != null && created.Contains(entity))
                 created.Remove(entity);
 
-            var modified = (List<Entity>)Transaction.UserData.TryGetC(ModifiedKey);
+            var modified = (List<Entity>?)Transaction.UserData.TryGetC(ModifiedKey);
             if (modified != null && modified.Contains(entity))
                 modified.Remove(entity);
         }
@@ -98,7 +98,7 @@ namespace Signum.Engine.Authorization
         {
             using (OnInSave())
             {
-                var modified = (List<Entity>)dic.TryGetC(ModifiedKey);
+                var modified = (List<Entity>?)dic.TryGetC(ModifiedKey);
 
                 if (modified.HasItems())
                 {
@@ -120,7 +120,7 @@ namespace Signum.Engine.Authorization
                     }
                 }
 
-                var created = (List<Entity>)Transaction.UserData.TryGetC(CreatedKey);
+                var created = (List<Entity>?)Transaction.UserData.TryGetC(CreatedKey);
 
                 if (created.HasItems())
                 {
@@ -184,7 +184,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
         {
             if (lite.IdOrNull == null)
-                AssertAllowed(lite.EntityOrNull, allowed, inUserInterface);
+                AssertAllowed(lite.Entity, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
@@ -231,7 +231,7 @@ namespace Signum.Engine.Authorization
                 return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
         }
 
-        private static Func<T, bool> IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
+        private static Func<T, bool>? IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
         {
             if (tac.Conditions.Any(c => TypeConditionLogic.GetInMemoryCondition<T>(c.TypeCondition) == null))
                 return null;
@@ -296,7 +296,7 @@ namespace Signum.Engine.Authorization
         }
 
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
-        public static string CanBeModified(this IEntity ident)
+        public static string? CanBeModified(this IEntity ident)
         {
             var taac = TypeAuthLogic.GetAllowed(ident.GetType());
 
@@ -316,8 +316,8 @@ namespace Signum.Engine.Authorization
             where T : Entity
         {
             if (!AuthLogic.IsEnabled)
-                return null;
-
+                throw new InvalidOperationException("AuthLogic.IsEnabled is false");
+            
             if (entity.IsNew)
                 throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
 
@@ -338,7 +338,7 @@ namespace Signum.Engine.Authorization
              where T : Entity
         {
             if (!AuthLogic.IsEnabled)
-                return null;
+                throw new InvalidOperationException("AuthLogic.IsEnabled is false");
 
             using (DisableQueryFilter())
                 return ((Lite<T>)lite).InDB().Select(a => a.IsAllowedForDebug(allowed, inUserInterface)).SingleEx();
@@ -359,7 +359,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static FilterQueryResult<T> TypeAuthLogic_FilterQuery<T>()
+        static FilterQueryResult<T>? TypeAuthLogic_FilterQuery<T>()
           where T : Entity
         {
             if (queryFilterDisabled.Value)
@@ -381,7 +381,7 @@ namespace Signum.Engine.Authorization
                     return null;
             }
 
-            Func<T, bool> func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), TypeAllowedBasic.Read, ui);
+            Func<T, bool>? func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), TypeAllowedBasic.Read, ui);
 
             return new FilterQueryResult<T>(Expression.Lambda<Func<T, bool>>(body, e), func);
         }
@@ -490,7 +490,7 @@ namespace Signum.Engine.Authorization
                     return Expression.And(Expression.Not(exp), acum);
             });
 
-            return DbQueryProvider.Clean(expression, false, null);
+            return DbQueryProvider.Clean(expression, false, null)!;
         }
 
 
@@ -554,7 +554,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public string Error
+            public string? Error
             {
                 get
                 {
@@ -570,7 +570,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public string CanBeModified
+            public string? CanBeModified
             {
                 get
                 {
@@ -628,7 +628,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
+            public override async Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
             {
                 using (this.AuthDisable ? AuthLogic.Disable() : null)
                 using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter() : null)
@@ -637,7 +637,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
+            public override async Task<object?> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
             {
                 using (this.AuthDisable ? AuthLogic.Disable() : null)
                 using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter() : null)
@@ -668,7 +668,7 @@ namespace Signum.Engine.Authorization
                 rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)));
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements rep)
+        static SqlPreCommand? Schema_Synchronizing(Replacements rep)
         {
             var conds = (from rt in Database.Query<RuleTypeEntity>()
                          from c in rt.Conditions
@@ -677,24 +677,26 @@ namespace Signum.Engine.Authorization
             var errors = conds.GroupBy(a => new { a.Resource, a.Condition }, a => a.Role)
                 .Where(gr =>
                 {
-                    if (gr.Key.Condition.FieldInfo == null)
+                    if (gr.Key.Condition!.FieldInfo == null) /*CSBUG*/
                     {
                         var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.Condition.Key);
                         if (replacedName == null)
                             return false; // Other Syncronizer will do it
 
-                        return !TypeConditionLogic.ConditionsFor(gr.Key.Resource.ToType()).Any(a => a.Key == replacedName);
+                        return !TypeConditionLogic.ConditionsFor(gr.Key.Resource!.ToType()).Any(a => a.Key == replacedName);
                     }
 
-                    return !TypeConditionLogic.IsDefined(gr.Key.Resource.ToType(), gr.Key.Condition);
+                    return !TypeConditionLogic.IsDefined(gr.Key.Resource!.ToType(), gr.Key.Condition);
                 })
                 .ToList();
 
             using (rep.WithReplacedDatabaseName())
-                return errors.Select(a => Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
-                    .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
-                    .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
-                    .Combine(Spacing.Double);
+                return errors.Select(a =>
+                {
+                    return Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
+                        .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))!
+                        .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", ")));
+                }).Combine(Spacing.Double);
         }
     }
 }

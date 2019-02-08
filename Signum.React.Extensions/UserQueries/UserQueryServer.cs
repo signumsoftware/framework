@@ -36,7 +36,7 @@ namespace Signum.React.UserQueries
 
                 var userQueries = UserQueryLogic.GetUserQueriesEntity(ep.entity.GetType());
                 if (userQueries.Any())
-                    ep.Extension.Add("userQueries", userQueries);
+                    ep.extension.Add("userQueries", userQueries);
             };
 
         }

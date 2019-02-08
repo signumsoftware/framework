@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -212,13 +212,13 @@ namespace Signum.Engine.Workflow
                 Suspended = st.Suspended,
                 Rule = st.Rule.Clone(),
                 Task = newTask,
-                User = AuthLogic.SystemUser.ToLite(),
+                User = AuthLogic.SystemUser!.ToLite(),
             }.Execute(ScheduledTaskOperation.Save);
         }
 
         public static void DeleteWorkflowEventScheduledTask(ScheduledTaskEntity schedule)
         {
-            var workflowEventTask = (schedule.Task as WorkflowEventTaskEntity);
+            var workflowEventTask = ((WorkflowEventTaskEntity)schedule.Task);
             schedule.Delete(ScheduledTaskOperation.Delete);
             workflowEventTask.Delete(WorkflowEventTaskOperation.Delete);
         }

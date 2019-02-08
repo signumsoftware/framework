@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.MachineLearning;
@@ -300,7 +300,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             using (HeavyProfiler.LogNoStackTrace("GetPredictionDictionary"))
             {
-                return new PredictDictionary(ctx.Predictor)
+                return new PredictDictionary(ctx.Predictor, options, null)
                 {
                     MainQueryValues = ctx.MainOutputCodifications.SelectDictionary(col => col,
                     (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues, options)),

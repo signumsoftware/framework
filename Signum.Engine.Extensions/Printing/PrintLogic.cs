@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Files;
+using Signum.Engine.Files;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -38,7 +38,7 @@ namespace Signum.Engine.Printing
 
         public static FileTypeSymbol TestFileType; 
 
-        public static void Start(SchemaBuilder sb, FileTypeSymbol testFileType = null)
+        public static void Start(SchemaBuilder sb, FileTypeSymbol? testFileType = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -124,7 +124,7 @@ namespace Signum.Engine.Printing
             }.Save();
         }
 
-        public static ProcessEntity CreateProcess(FileTypeSymbol fileType = null)
+        public static ProcessEntity CreateProcess(FileTypeSymbol? fileType = null)
         {
             using (Transaction tr = new Transaction())
             {

@@ -14,7 +14,7 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
 export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "AutoconfigureNeuralNetwork";
-  initialPredictor?: Entities.Lite<PredictorEntity> | null;
+  initialPredictor?: Entities.Lite<PredictorEntity>;
   exploreLearner?: boolean;
   exploreLearningValues?: boolean;
   exploreHiddenLayers?: boolean;
@@ -141,7 +141,7 @@ export interface PredictorClassificationMetricsEmbedded extends Entities.Embedde
 export const PredictorCodificationEntity = new Type<PredictorCodificationEntity>("PredictorCodification");
 export interface PredictorCodificationEntity extends Entities.Entity {
   Type: "PredictorCodification";
-  predictor?: Entities.Lite<PredictorEntity> | null;
+  predictor?: Entities.Lite<PredictorEntity>;
   usage?: PredictorColumnUsage;
   index?: number;
   subQueryIndex?: number | null;
@@ -160,8 +160,8 @@ export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("Predic
 export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorColumnEmbedded";
   usage?: PredictorColumnUsage;
-  token?: UserAssets.QueryTokenEmbedded | null;
-  encoding?: PredictorColumnEncodingSymbol | null;
+  token?: UserAssets.QueryTokenEmbedded;
+  encoding?: PredictorColumnEncodingSymbol;
   nullHandling?: PredictorColumnNullHandling;
 }
 
@@ -187,13 +187,13 @@ export const PredictorEntity = new Type<PredictorEntity>("Predictor");
 export interface PredictorEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "Predictor";
   name?: string | null;
-  settings?: PredictorSettingsEmbedded | null;
-  algorithm?: PredictorAlgorithmSymbol | null;
-  resultSaver?: PredictorResultSaverSymbol | null;
+  settings?: PredictorSettingsEmbedded;
+  algorithm?: PredictorAlgorithmSymbol;
+  resultSaver?: PredictorResultSaverSymbol;
   publication?: PredictorPublicationSymbol | null;
-  trainingException?: Entities.Lite<Basics.ExceptionEntity> | null;
-  user?: Entities.Lite<Basics.IUserEntity> | null;
-  algorithmSettings?: IPredictorAlgorithmSettings | null;
+  trainingException?: Entities.Lite<Basics.ExceptionEntity>;
+  user?: Entities.Lite<Basics.IUserEntity>;
+  algorithmSettings?: IPredictorAlgorithmSettings;
   state?: PredictorState;
   mainQuery: PredictorMainQueryEmbedded;
   subQueries: Entities.MList<PredictorSubQueryEntity>;
@@ -209,7 +209,7 @@ export interface PredictorEntity extends Entities.Entity, Processes.IProcessData
 export const PredictorEpochProgressEntity = new Type<PredictorEpochProgressEntity>("PredictorEpochProgress");
 export interface PredictorEpochProgressEntity extends Entities.Entity {
   Type: "PredictorEpochProgress";
-  predictor?: Entities.Lite<PredictorEntity> | null;
+  predictor?: Entities.Lite<PredictorEntity>;
   creationDate?: string;
   ellapsed?: number;
   trainingExamples?: number;
@@ -227,7 +227,7 @@ export module PredictorFileType {
 export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
 export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMainQueryEmbedded";
-  query?: Basics.QueryEntity | null;
+  query?: Basics.QueryEntity;
   groupResults?: boolean;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   columns: Entities.MList<PredictorColumnEmbedded>;
@@ -331,8 +331,8 @@ export const PredictorSubQueryColumnEmbedded = new Type<PredictorSubQueryColumnE
 export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorSubQueryColumnEmbedded";
   usage?: PredictorSubQueryColumnUsage;
-  token?: UserAssets.QueryTokenEmbedded | null;
-  encoding?: PredictorColumnEncodingSymbol | null;
+  token?: UserAssets.QueryTokenEmbedded;
+  encoding?: PredictorColumnEncodingSymbol;
   nullHandling?: PredictorColumnNullHandling | null;
 }
 
@@ -346,9 +346,9 @@ export type PredictorSubQueryColumnUsage =
 export const PredictorSubQueryEntity = new Type<PredictorSubQueryEntity>("PredictorSubQuery");
 export interface PredictorSubQueryEntity extends Entities.Entity {
   Type: "PredictorSubQuery";
-  predictor?: Entities.Lite<PredictorEntity> | null;
-  name?: string | null;
-  query?: Basics.QueryEntity | null;
+  predictor?: Entities.Lite<PredictorEntity>;
+  name?: string;
+  query?: Basics.QueryEntity;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
   order?: number;
@@ -357,8 +357,8 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
 export const PredictSimpleResultEntity = new Type<PredictSimpleResultEntity>("PredictSimpleResult");
 export interface PredictSimpleResultEntity extends Entities.Entity {
   Type: "PredictSimpleResult";
-  predictor?: Entities.Lite<PredictorEntity> | null;
-  target?: Entities.Lite<Entities.Entity> | null;
+  predictor?: Entities.Lite<PredictorEntity>;
+  target?: Entities.Lite<Entities.Entity>;
   key0?: string | null;
   key1?: string | null;
   key2?: string | null;

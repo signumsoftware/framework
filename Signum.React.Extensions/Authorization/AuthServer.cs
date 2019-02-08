@@ -62,7 +62,7 @@ namespace Signum.React.Authorization
                     TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
                     TypeAllowedBasic.None;
 
-                    ep.Extension.Add("typeAllowed", typeAllowed);
+                    ep.extension.Add("typeAllowed", typeAllowed);
                 };
             }
 

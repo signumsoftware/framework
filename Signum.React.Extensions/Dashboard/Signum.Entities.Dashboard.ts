@@ -20,17 +20,17 @@ export type DashboardEmbedededInEntity =
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Dashboard";
-  entityType?: Entities.Lite<Basics.TypeEntity> | null;
+  entityType?: Entities.Lite<Basics.TypeEntity>;
   embeddedInEntity?: DashboardEmbedededInEntity | null;
-  owner?: Entities.Lite<Entities.Entity> | null;
+  owner?: Entities.Lite<Entities.Entity>;
   dashboardPriority?: number | null;
   autoRefreshPeriod?: number | null;
-  displayName?: string | null;
+  displayName?: string;
   combineSimilarRows?: boolean;
   parts: Entities.MList<PanelPartEmbedded>;
   guid?: string;
   forNavbar?: boolean;
-  key?: string | null;
+  key?: string;
 }
 
 export module DashboardMessage {
@@ -59,8 +59,8 @@ export interface IPartEntity extends Entities.Entity {
 export const LinkElementEmbedded = new Type<LinkElementEmbedded>("LinkElementEmbedded");
 export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
   Type: "LinkElementEmbedded";
-  label?: string | null;
-  link?: string | null;
+  label?: string;
+  link?: string;
 }
 
 export const LinkListPartEntity = new Type<LinkListPartEntity>("LinkListPart");
@@ -80,7 +80,7 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   startColumn?: number;
   columns?: number;
   style?: PanelStyle;
-  content?: IPartEntity | null;
+  content?: IPartEntity;
 }
 
 export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
@@ -98,7 +98,7 @@ export type PanelStyle =
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserChartPart";
-  userChart?: Chart.UserChartEntity | null;
+  userChart?: Chart.UserChartEntity;
   showData?: boolean;
   allowChangeShowData?: boolean;
   requiresTitle?: boolean;
@@ -107,7 +107,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
 export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserQueryPart";
-  userQuery?: UserQueries.UserQueryEntity | null;
+  userQuery?: UserQueries.UserQueryEntity;
   renderMode?: UserQueryPartRenderMode;
   requiresTitle?: boolean;
 }
@@ -121,9 +121,9 @@ export type UserQueryPartRenderMode =
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";
-  label?: string | null;
-  userQuery?: UserQueries.UserQueryEntity | null;
-  href?: string | null;
+  label?: string;
+  userQuery?: UserQueries.UserQueryEntity;
+  href?: string;
 }
 
 export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");

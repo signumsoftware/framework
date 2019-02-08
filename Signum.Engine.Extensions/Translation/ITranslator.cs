@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -181,7 +181,7 @@ namespace Signum.Engine.Translation
     //        request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; es-ES; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3";
     //        request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-    //        string response = null;
+    //        string? response = null;
     //        using (StreamReader readStream = new StreamReader(request.GetResponse().GetResponseStream(), Encoding.UTF8))
     //        {
     //            response = readStream.ReadToEnd();

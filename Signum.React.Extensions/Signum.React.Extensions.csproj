@@ -16,11 +16,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
-    <PackageReference Include="Signum.TSGenerator" Version="1.0.3" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.0.0-beta" />
   </ItemGroup>
 
   <ItemGroup>

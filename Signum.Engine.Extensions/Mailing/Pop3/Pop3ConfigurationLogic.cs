@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -338,7 +338,7 @@ namespace Signum.Engine.Mailing.Pop3
                 using (OperationLogic.AllowSave<EmailMessageEntity>())
                 using (Transaction tr = Transaction.ForceNew())
                 {
-                    string rawContent = null;
+                    string? rawContent = null;
                     try
                     {
                         var email = client.GetMessage(mi, reception.ToLite());

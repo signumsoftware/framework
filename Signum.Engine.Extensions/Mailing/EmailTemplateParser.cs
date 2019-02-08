@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,12 +21,12 @@ namespace Signum.Engine.Mailing
 {
     public static partial class EmailTemplateParser
     {
-        public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
+        public static BlockNode Parse(string? text, QueryDescription qd, Type? modelType)
         {
             return new TemplateWalker(text, qd, modelType).Parse();      
         }
 
-        public static BlockNode TryParse(string text, QueryDescription qd, Type modelType, out string errorMessage)
+        public static BlockNode TryParse(string? text, QueryDescription qd, Type? modelType, out string errorMessage)
         {
             return new TemplateWalker(text, qd, modelType).TryParse(out errorMessage);
         }
@@ -35,24 +35,21 @@ namespace Signum.Engine.Mailing
         {
             string text;
             
-            BlockNode mainBlock;
-            Stack<BlockNode> stack;
-            public ScopedDictionary<string, ValueProviderBase> Variables { get; set; }
-            List<TemplateError> errors;
+            BlockNode mainBlock = null!;
+            Stack<BlockNode> stack = null!;
+            public ScopedDictionary<string, ValueProviderBase> Variables { get; set; } = null!;
+            List<TemplateError> errors = null!;
 
-            public Type ModelType { get; private set; }
+            public Type? ModelType { get; private set; }
 
             static PropertyInfo piSystemEmail = ReflectionTools.GetPropertyInfo((EmailTemplateEntity e) => e.SystemEmail);
             public PropertyInfo ModelProperty => piSystemEmail;
             public QueryDescription QueryDescription { get; private set; }
 
-            public TemplateWalker(string text, QueryDescription qd, Type modelType)
+            public TemplateWalker(string? text, QueryDescription qd, Type? modelType)
             {
-                if (qd == null)
-                    throw new ArgumentNullException(nameof(qd));
-
                 this.text = text ?? "";
-                this.QueryDescription = qd;
+                this.QueryDescription = qd ?? throw new ArgumentNullException(nameof(qd));
                 this.ModelType = modelType; 
             }
 
@@ -88,18 +85,18 @@ namespace Signum.Engine.Mailing
                 errors.Add(new TemplateError(fatal, message)); 
             }
 
-            void DeclareVariable(ValueProviderBase token)
+            void DeclareVariable(ValueProviderBase? valueProvider)
             {
-                if (token?.Variable.HasText() == true)
+                if (valueProvider?.Variable.HasText() == true)
                 {
-                    if (Variables.ContainsKey(token.Variable))
-                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
+                    if (Variables.ContainsKey(valueProvider!.Variable!))
+                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(valueProvider.Variable));
 
-                    Variables.Add(token.Variable, token);
+                    Variables.Add(valueProvider.Variable!, valueProvider);
                 }
             }
 
-            public BlockNode PopBlock(Type type)
+            public BlockNode? PopBlock(Type type)
             {
                 if (stack.Count() <= 1)
                 {
@@ -107,7 +104,7 @@ namespace Signum.Engine.Mailing
                     return null;
                 }
                 var n = stack.Pop();
-                Variables = Variables.Previous;
+                Variables = Variables.Previous!;
                 if (n.owner == null || n.owner.GetType() != type)
                 {
                     AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.owner?.GetType())));
@@ -135,7 +132,7 @@ namespace Signum.Engine.Mailing
 
                     if (matches.Count == 0)
                     {
-                        stack.Peek().Nodes.Add(new LiteralNode { Text = text });
+                        stack.Peek().Nodes.Add(new LiteralNode(text));
                         stack.Pop();
                         return;
                     }
@@ -145,7 +142,7 @@ namespace Signum.Engine.Mailing
                     {
                         if (index < match.Index)
                         {
-                            stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
+                            stack.Peek().Nodes.Add(new LiteralNode(text.Substring(index, match.Index - index)));
                         }
                         var expr = match.Groups["expr"].Value;
                         var keyword = match.Groups["keyword"].Value;
@@ -187,7 +184,7 @@ namespace Signum.Engine.Mailing
                                 }
                             case "notany":
                                 {
-                                    var an = (AnyNode)PopBlock(typeof(AnyNode)).owner;
+                                    var an = (AnyNode?)PopBlock(typeof(AnyNode))?.owner;
                                     if (an != null)
                                         PushBlock(an.CreateNotAny());
                                     break;
@@ -199,11 +196,12 @@ namespace Signum.Engine.Mailing
                                 }
                             case "foreach":
                                 {
-                                    ValueProviderBase vp = ValueProviderBase.TryParse(expr, variable, this);
+                                    ValueProviderBase? vp = ValueProviderBase.TryParse(expr, variable, this);
                                     var fn = new ForeachNode(vp);
                                     stack.Peek().Nodes.Add(fn);
                                     PushBlock(fn.Block);
-                                    vp.IsForeach = true;
+                                    if(vp != null)
+                                        vp.IsForeach = true;
                                     DeclareVariable(vp);
                                     break;
                                 }
@@ -224,7 +222,7 @@ namespace Signum.Engine.Mailing
                                 }
                             case "else":
                                 {
-                                    var ifn = (IfNode)PopBlock(typeof(IfNode)).owner;
+                                    var ifn = (IfNode?)PopBlock(typeof(IfNode))?.owner;
                                     if (ifn != null)
                                         PushBlock(ifn.CreateElse());
                                     break;
@@ -246,7 +244,7 @@ namespace Signum.Engine.Mailing
 
                     var lastM = matches.Cast<Match>().LastOrDefault();
                     if (lastM != null && lastM.Index + lastM.Length < text.Length)
-                        stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
+                        stack.Peek().Nodes.Add(new LiteralNode(text.Substring(lastM.Index + lastM.Length)));
 
                     stack.Pop();
                 }
@@ -269,7 +267,7 @@ namespace Signum.Engine.Mailing
         }
 
 
-        internal static SqlPreCommand ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateEntity et, StringDistance sd)
+        internal static SqlPreCommand? ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateEntity et, StringDistance sd)
         {
             Console.Write(".");
             try
@@ -301,7 +299,7 @@ namespace Signum.Engine.Mailing
                         {
                             foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                             {
-                                QueryTokenEmbedded token = item.Token;
+                                QueryTokenEmbedded token = item.Token!;
                                 switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
                                 {
                                     case FixTokenResult.Nothing: break;
@@ -321,14 +319,7 @@ namespace Signum.Engine.Mailing
 
                         foreach (var item in et.Messages)
                         {
-                            SynchronizationContext sc = new SynchronizationContext
-                            {
-                                ModelType = et.SystemEmail.ToType(),
-                                QueryDescription = qd,
-                                Replacements = replacements,
-                                StringDistance = sd,
-                                Variables = new ScopedDictionary<string, ValueProviderBase>(null)
-                            };
+                            SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, et.SystemEmail?.ToType());
 
                             item.Subject = Synchronize(item.Subject, sc);
                             item.Text = Synchronize(item.Text, sc);
@@ -358,9 +349,9 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        internal static SqlPreCommand Regenerate(EmailTemplateEntity et, Replacements replacements, Table table)
+        internal static SqlPreCommand? Regenerate(EmailTemplateEntity et, Replacements? replacements, Table table)
         {
-            var newTemplate = SystemEmailLogic.CreateDefaultTemplate(et.SystemEmail);
+            var newTemplate = SystemEmailLogic.CreateDefaultTemplate(et.SystemEmail!);
 
             newTemplate.SetId(et.IdOrNull);
             newTemplate.SetIsNew(false);
@@ -373,13 +364,13 @@ namespace Signum.Engine.Mailing
 
     public class EmailTemplateParameters : TemplateParameters
     {
-        public EmailTemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows): 
+        public EmailTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows): 
               base(entity, culture, columns, rows)
         { }
 
         public StringBuilder StringBuilder = new StringBuilder();
         public bool IsHtml;
-        public ISystemEmail SystemEmail;
+        public ISystemEmail? SystemEmail;
 
         public override object GetModel()
         {

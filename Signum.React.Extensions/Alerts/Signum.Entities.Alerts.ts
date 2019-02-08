@@ -16,15 +16,15 @@ export type AlertCurrentState =
 export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
   Type: "Alert";
-  target?: Entities.Lite<Entities.Entity> | null;
+  target?: Entities.Lite<Entities.Entity>;
   creationDate?: string;
   alertDate?: string | null;
   attendedDate?: string | null;
   title?: string | null;
-  text?: string | null;
-  createdBy?: Entities.Lite<Basics.IUserEntity> | null;
-  recipient?: Entities.Lite<Basics.IUserEntity> | null;
-  attendedBy?: Entities.Lite<Basics.IUserEntity> | null;
+  text?: string;
+  createdBy?: Entities.Lite<Basics.IUserEntity>;
+  recipient?: Entities.Lite<Basics.IUserEntity>;
+  attendedBy?: Entities.Lite<Basics.IUserEntity>;
   alertType?: AlertTypeEntity | null;
   state?: AlertState;
 }

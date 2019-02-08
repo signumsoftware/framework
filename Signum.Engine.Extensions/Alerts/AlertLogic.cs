@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Operations;
@@ -42,7 +42,7 @@ namespace Signum.Engine.Alerts
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null!)));
         }
 
         public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
@@ -102,12 +102,12 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType);
         }
 
-        public static AlertEntity CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null, Lite<IUserEntity> recipient = null)
+        public static AlertEntity? CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             return CreateAlert(entity.ToLiteFat(), text, alertType, alertDate, user, title);
         }
 
-        public static AlertEntity CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null, Lite<IUserEntity> recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
@@ -126,12 +126,12 @@ namespace Signum.Engine.Alerts
             return result.Execute(AlertOperation.Save);
         }
 
-        public static AlertEntity CreateAlertForceNew(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null)
+        public static AlertEntity? CreateAlertForceNew(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null)
         {
             return CreateAlertForceNew(entity.ToLite(), text, alertType, alertDate, user);
         }
 
-        public static AlertEntity CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null) where T : class, IEntity
+        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
@@ -175,7 +175,7 @@ namespace Signum.Engine.Alerts
                     AlertDate = TimeZoneManager.Now,
                     CreatedBy = UserHolder.Current.ToLite(),
                     Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
-                    Text = null,
+                    Text = "",
                     Title = null,
                     Target = a.ToLite(),
                     AlertType = null
@@ -190,9 +190,9 @@ namespace Signum.Engine.Alerts
                     AlertDate = TimeZoneManager.Now,
                     CreatedBy = UserHolder.Current.ToLite(),
                     Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
-                    Text = null,
+                    Text = "",
                     Title = null,
-                    Target = null,
+                    Target = null!,
                     AlertType = null
                 }
             }.Register();

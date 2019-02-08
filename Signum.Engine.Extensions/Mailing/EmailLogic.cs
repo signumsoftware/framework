@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
@@ -31,7 +31,7 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null!, null!, null, null)));
         }
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
@@ -39,14 +39,14 @@ namespace Signum.Engine.Mailing
         public static void Start(
             SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration,  
-            Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, 
-            IFileTypeAlgorithm attachment = null)
+            Func<EmailTemplateEntity?, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration,  
+            Func<EmailMessageEntity, SmtpClient>? getSmtpClient = null, 
+            IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
                 if (getSmtpClient == null && getSmtpConfiguration != null)
-                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow), message.Target).GenerateSmtpClient();
+                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(a => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(a)), message.Target).GenerateSmtpClient();
 
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);

@@ -64,7 +64,7 @@ namespace Signum.Engine.Workflow
                 Task.Factory.StartNew(() =>
                 {
                     SystemEventLogLogic.Log("Start WorkflowScriptRunner");
-                    ExceptionEntity exception = null;
+                    ExceptionEntity? exception = null;
                     try
                     {
                         running = true;

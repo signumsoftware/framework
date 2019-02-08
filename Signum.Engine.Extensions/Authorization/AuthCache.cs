@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -33,6 +33,9 @@ namespace Signum.Entities.Authorization
     class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
+        where A : object
+        where R : object
+        where K : object
     {
         readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
@@ -42,7 +45,8 @@ namespace Signum.Entities.Authorization
         IMerger<K, A> merger;
         Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, 
+            Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K>? coercer = null)
         {
             this.ToKey = toKey;
             this.ToEntity = toEntity;
@@ -114,7 +118,7 @@ namespace Signum.Entities.Authorization
                             where isEquals.Evaluate(r.Resource, resource)
                             select new { r.Role, r.Allowed }).ToList();
 
-                specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
+                specificRules = list.ToDictionary(a => a.Role!, a => a.Allowed); /*CSBUG*/
 
                 this.coercer = coercer;
                 this.merger = merger;
@@ -143,7 +147,7 @@ namespace Signum.Entities.Authorization
             Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules =
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
-                  .AgGroupToDictionary(ru => ru.Role, gr => gr
+                  .AgGroupToDictionary(ru => ru.Role!, gr => gr
                     .SelectCatch(ru => KVP.Create(ToKey(ru.Resource), ru.Allowed))
                     .ToDictionaryEx());
 
@@ -218,7 +222,7 @@ namespace Signum.Entities.Authorization
             readonly List<RoleAllowedCache> baseCaches;
 
 
-            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
+            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues, Func<K, A, A> coercer)
             {
                 this.role = role;
 
@@ -233,10 +237,10 @@ namespace Signum.Entities.Authorization
 
                 var keys = baseCaches
                     .Where(b => b.rules.OverrideDictionary != null)
-                    .SelectMany(a => a.rules.OverrideDictionary.Keys)
+                    .SelectMany(a => a.rules.OverrideDictionary!.Keys)
                     .ToHashSet();
 
-                Dictionary<K, A> tmpRules = keys.ToDictionary(k => k, baseAllowed);
+                Dictionary<K, A>? tmpRules = keys.ToDictionary(k => k, baseAllowed);
                 if (newValues != null)
                     tmpRules.SetRange(newValues);
 
@@ -245,7 +249,7 @@ namespace Signum.Entities.Authorization
                 rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
             }
 
-            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
+            internal Dictionary<K, A>? Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
@@ -280,7 +284,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString, List<K> allKeys)
+        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString, List<K>? allKeys)
         {
             var rules = runtimeRules.Value;
 
@@ -302,7 +306,7 @@ namespace Signum.Entities.Authorization
         }
 
 
-        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
+        internal SqlPreCommand? ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
             Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
@@ -320,7 +324,7 @@ namespace Signum.Entities.Authorization
                                select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                    SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
+                    SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RT
                     {
                         Resource = kvp.Key,
                         Role = role,
@@ -342,7 +346,7 @@ namespace Signum.Entities.Authorization
 
                     var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
+                    SqlPreCommand? restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);

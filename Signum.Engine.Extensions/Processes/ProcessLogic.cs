@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -273,7 +273,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity processData, Entity copyMixinsFrom = null)
+        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity processData, Entity? copyMixinsFrom = null)
         {
             using (OperationLogic.AllowSave<ProcessEntity>())
             {
@@ -366,7 +366,7 @@ namespace Signum.Engine.Processes
         }
 
         public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
-            Func<T, string> elementInfo, Action<T> action, string status = null)
+            Func<T, string> elementInfo, Action<T> action, string? status = null)
         {
             if (executingProcess == null)
             {
@@ -386,7 +386,7 @@ namespace Signum.Engine.Processes
 
 
         public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection,
-            Func<T, string> elementInfo, Action<T> action, string status = null)
+            Func<T, string> elementInfo, Action<T> action, string? status = null)
         {
             if (executingProcess == null)
             {
@@ -486,7 +486,7 @@ namespace Signum.Engine.Processes
             Action<K, N> createNew,
             Action<K, O> removeOld,
             Action<K, N, O> merge,
-            string status = null)
+            string? status = null)
             where O : class
             where N : class
         {

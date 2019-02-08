@@ -3,9 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>Signum.Engine</RootNamespace>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <NullableContextOptions>enable</NullableContextOptions>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Platforms>x64</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>1701;1702;8629</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

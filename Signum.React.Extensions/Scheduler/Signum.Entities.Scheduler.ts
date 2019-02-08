@@ -11,7 +11,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity {
   Type: "HolidayCalendar";
-  name?: string | null;
+  name?: string;
   holidays: Entities.MList<HolidayEmbedded>;
 }
 
@@ -49,26 +49,26 @@ export module ITaskOperation {
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
   Type: "ScheduledTask";
-  rule?: IScheduleRuleEntity | null;
-  task?: ITaskEntity | null;
+  rule?: IScheduleRuleEntity;
+  task?: ITaskEntity;
   suspended?: boolean;
-  machineName?: string | null;
-  user?: Entities.Lite<Basics.IUserEntity> | null;
-  applicationName?: string | null;
+  machineName?: string;
+  user?: Entities.Lite<Basics.IUserEntity>;
+  applicationName?: string;
 }
 
 export const ScheduledTaskLogEntity = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
 export interface ScheduledTaskLogEntity extends Entities.Entity {
   Type: "ScheduledTaskLog";
-  task?: ITaskEntity | null;
+  task?: ITaskEntity;
   scheduledTask?: ScheduledTaskEntity | null;
-  user?: Entities.Lite<Basics.IUserEntity> | null;
+  user?: Entities.Lite<Basics.IUserEntity>;
   startTime?: string;
   endTime?: string | null;
-  machineName?: string | null;
-  applicationName?: string | null;
-  productEntity?: Entities.Lite<Entities.Entity> | null;
-  exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+  machineName?: string;
+  applicationName?: string;
+  productEntity?: Entities.Lite<Entities.Entity>;
+  exception?: Entities.Lite<Basics.ExceptionEntity>;
   remarks?: string | null;
 }
 
@@ -122,9 +122,9 @@ export module SchedulerPermission {
 export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionLineEntity>("SchedulerTaskExceptionLine");
 export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
   Type: "SchedulerTaskExceptionLine";
-  elementInfo?: string | null;
-  schedulerTaskLog?: Entities.Lite<ScheduledTaskLogEntity> | null;
-  exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+  elementInfo?: string;
+  schedulerTaskLog?: Entities.Lite<ScheduledTaskLogEntity>;
+  exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
@@ -176,11 +176,11 @@ export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
 export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventLog");
 export interface SystemEventLogEntity extends Entities.Entity {
   Type: "SystemEventLog";
-  machineName?: string | null;
+  machineName?: string;
   date?: string;
-  user?: Entities.Lite<Basics.IUserEntity> | null;
-  eventType?: string | null;
-  exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+  user?: Entities.Lite<Basics.IUserEntity>;
+  eventType?: string;
+  exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 

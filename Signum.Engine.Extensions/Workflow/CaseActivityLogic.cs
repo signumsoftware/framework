@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -229,8 +229,8 @@ namespace Signum.Engine.Workflow
                 }.Register();
 
                 sb.Include<CaseActivityEntity>()
-                    .WithIndex(a => new { a.ScriptExecution.ProcessIdentifier }, a => a.DoneDate == null)
-                    .WithIndex(a => new { a.ScriptExecution.NextExecution }, a => a.DoneDate == null)
+                    .WithIndex(a => new { a.ScriptExecution!.ProcessIdentifier }, a => a.DoneDate == null)
+                    .WithIndex(a => new { a.ScriptExecution!.NextExecution }, a => a.DoneDate == null)
                     .WithExpressionFrom((WorkflowActivityEntity c) => c.CaseActivities())
                     .WithExpressionFrom((CaseEntity c) => c.CaseActivities())
                     .WithExpressionFrom((CaseActivityEntity c) => c.NextActivities())
@@ -269,7 +269,7 @@ namespace Signum.Engine.Workflow
                      where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
                      we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we)) :
                      false
-                     select new { Activity = ca, Event = we }).ToList();
+                     select new ActivityEvent(ca, we)).ToList();
 
 
                     var intermediateCandidates =
@@ -277,20 +277,20 @@ namespace Signum.Engine.Workflow
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      let we = ((WorkflowEventEntity)ca.WorkflowActivity)
                      where we.Type == WorkflowEventType.IntermediateTimer
-                     select new { Activity = ca, Event = we }).ToList();
+                     select new ActivityEvent(ca, we)).ToList();
 
                     var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
-                    var conditions = candidates.Select(a => a.Event.Timer.Condition).Distinct().ToList();
+                    var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
 
                     var now = TimeZoneManager.Now;
                     var activities = conditions.SelectMany(cond =>
                     {
                         if (cond == null)
-                            return candidates.Where(a => a.Event.Timer.Duration != null && a.Event.Timer.Duration.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
+                            return candidates.Where(a => a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
 
                         var condEval = cond.RetrieveFromCache().Eval.Algorithm;
 
-                        return candidates.Where(a => a.Event.Timer.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+                        return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                     }).Distinct().ToList();
 
                     if (!activities.Any())
@@ -335,7 +335,7 @@ namespace Signum.Engine.Workflow
                         from cn in Database.Query<CaseNotificationEntity>()
                         where cn.User == UserEntity.Current.ToLite()
                         let ca = cn.CaseActivity.Entity
-                        let previous = ca.Previous.Entity
+                        let previous = ca.Previous!.Entity
                         select new
                         {
                             Entity = cn.CaseActivity,
@@ -343,13 +343,13 @@ namespace Signum.Engine.Workflow
                             Workflow = ca.Case.Workflow.ToLite(),
                             Activity = new ActivityWithRemarks
                             {
-                                workflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
-                                @case = ca.Case.ToLite(),
-                                caseActivity = ca.ToLite(),
-                                notification = cn.ToLite(),
-                                remarks = cn.Remarks,
-                                alerts = ca.MyActiveAlerts().Count(),
-                                tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
+                                WorkflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
+                                Case = ca.Case.ToLite(),
+                                CaseActivity = ca.ToLite(),
+                                Notification = cn.ToLite(),
+                                Remarks = cn.Remarks,
+                                Alerts = ca.MyActiveAlerts().Count(),
+                                Tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
                             },
                             MainEntity = ca.Case.MainEntity.ToLite(ca.Case.ToString()),
                             Sender = previous.DoneBy,
@@ -376,6 +376,18 @@ namespace Signum.Engine.Workflow
 
                 CaseActivityGraph.Register();
             }
+        }
+
+        class ActivityEvent
+        {
+            public ActivityEvent(CaseActivityEntity activity, WorkflowEventEntity @event)
+            {
+                Activity = activity;
+                Event = @event;
+            }
+
+            public CaseActivityEntity Activity { get; set; }
+            public WorkflowEventEntity Event { get; set; }
         }
 
         public static CaseActivityEntity CreateCaseActivity(this WorkflowEntity workflow, ICaseMainEntity mainEntity)

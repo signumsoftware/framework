@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.DynamicQuery;
@@ -108,11 +108,10 @@ namespace Signum.Engine.MachineLearning.CNTK
                 //Softmax
                 var sum = cods.Sum(cod => Math.Exp(outputValues[cod.Index]));
 
-                return cods.OrderByDescending(c => outputValues[c.Index]).Take(options.AlternativeCount.Value).Select(c => new AlternativePrediction
-                {
-                    Value = c.IsValue,
-                    Probability = (float)(Math.Exp(outputValues[c.Index]) / sum),
-                }).ToList();
+                return cods.OrderByDescending(c => outputValues[c.Index]).Take(options.AlternativeCount.Value).Select(c => new AlternativePrediction(
+                    probability: (float)(Math.Exp(outputValues[c.Index]) / sum),
+                    value: c.IsValue
+                )).ToList();
             }
         }
     }

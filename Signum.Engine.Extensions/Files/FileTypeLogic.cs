@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -126,7 +126,7 @@ namespace Signum.Engine.Files
         
         public string ConfigErrors()
         {
-            string error = null;
+            string? error = null;
 
             if (GetPrefixPair == null)
                 error = "GetPrefixPair";
@@ -170,7 +170,7 @@ namespace Signum.Engine.Files
 
         public virtual void SaveFileInDisk(IFilePath fp)
         {
-            string fullPhysicalPath = null;
+            string? fullPhysicalPath = null;
             try
             {
                 string path = Path.GetDirectoryName(fp.FullPhysicalPath());

@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Packaging;
 using D = DocumentFormat.OpenXml.Drawing;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -14,25 +14,25 @@ namespace Signum.Engine.Word
 {
     class TemplateRenderer
     {
-         OpenXmlPackage document;
-         QueryDescription queryDescription;
-         Entity entity;
-         CultureInfo culture;
-         ISystemWordTemplate systemWordTemplate;
+        OpenXmlPackage document;
+        QueryDescription queryDescription;
+        Entity entity;
+        CultureInfo culture;
         WordTemplateEntity template;
+        ISystemWordTemplate? systemWordTemplate;
 
-        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, Entity entity, CultureInfo culture, ISystemWordTemplate systemWordTemplate, WordTemplateEntity template)
+        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate, Entity entity)
         {
             this.document = document;
-            this.entity = entity;
             this.culture = culture;
-            this.systemWordTemplate = systemWordTemplate;
             this.queryDescription = queryDescription;
             this.template = template;
+            this.entity = entity;
+            this.systemWordTemplate = systemWordTemplate;
         }
 
-        ResultTable table;
-        Dictionary<QueryToken, ResultColumn> dicTokenColumn;
+        ResultTable? table;
+        Dictionary<QueryToken, ResultColumn>? dicTokenColumn;
 
         internal void MakeQuery()
         {
@@ -68,11 +68,7 @@ namespace Signum.Engine.Word
 
         internal void RenderNodes()
         {
-            var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn, this.table.Rows)
-            {
-                SystemWordTemplate = systemWordTemplate,
-                Template = template,
-            };
+            var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows, template, systemWordTemplate);
             
             foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {

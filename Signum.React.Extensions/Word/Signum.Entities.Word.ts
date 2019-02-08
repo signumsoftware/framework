@@ -15,16 +15,16 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
   Type: "SystemWordTemplate";
-  fullClassName?: string | null;
+  fullClassName?: string;
 }
 
 export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
 export interface WordAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
   Type: "WordAttachment";
-  fileName?: string | null;
-  wordTemplate?: Entities.Lite<WordTemplateEntity> | null;
-  overrideModel?: Entities.Lite<Entities.Entity> | null;
-  modelConverter?: Templating.ModelConverterSymbol | null;
+  fileName?: string;
+  wordTemplate?: Entities.Lite<WordTemplateEntity>;
+  overrideModel?: Entities.Lite<Entities.Entity>;
+  modelConverter?: Templating.ModelConverterSymbol;
 }
 
 export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
@@ -35,16 +35,16 @@ export interface WordConverterSymbol extends Entities.Symbol {
 export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
   Type: "WordTemplate";
-  name?: string | null;
-  query?: Basics.QueryEntity | null;
+  name?: string;
+  query?: Basics.QueryEntity;
   systemWordTemplate?: SystemWordTemplateEntity | null;
-  culture?: Signum.CultureInfoEntity | null;
-  applicable?: Templating.TemplateApplicableEval | null;
+  culture?: Signum.CultureInfoEntity;
+  applicable?: Templating.TemplateApplicableEval;
   disableAuthorization?: boolean;
-  template?: Entities.Lite<Files.FileEntity> | null;
-  fileName?: string | null;
-  wordTransformer?: WordTransformerSymbol | null;
-  wordConverter?: WordConverterSymbol | null;
+  template?: Entities.Lite<Files.FileEntity>;
+  fileName?: string;
+  wordTransformer?: WordTransformerSymbol;
+  wordConverter?: WordConverterSymbol;
 }
 
 export module WordTemplateMessage {

@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -80,7 +80,7 @@ namespace Signum.Engine.Word
                 try
                 {
                     WordAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, WordAttachment.FileName, out string errorMessage);
-                    return errorMessage.DefaultText(null);
+                    return errorMessage.EmtpyToNull();
                 }
                 catch (Exception ex)
                 {
