@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
@@ -19,7 +19,7 @@ namespace Signum.Entities.Basics
         }
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 10)]
+        [StringLengthValidator(Min = 2, Max = 10)]
         public string Name { get; set; }
 
         public string NativeName { get; private set; }
@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
         /// </summary>
         public bool Hidden { get; set; }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Name) && Name.HasText())
             {

@@ -15,14 +15,14 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Title { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Title { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string IconName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? IconName { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string IconColor { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? IconColor { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Row { get; set; }
@@ -47,7 +47,7 @@ namespace Signum.Entities.Dashboard
             return Title.HasText() ? Title : Content.ToString();
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Title) && string.IsNullOrEmpty(Title))
             {
@@ -141,7 +141,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
+        
         public UserQueryEntity UserQuery { get; set; }
 
         public UserQueryPartRenderMode RenderMode { get; set; }
@@ -192,7 +192,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserChartPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
+        
         public UserChartEntity UserChart { get; set; }
 
         public bool ShowData { get; set; } = false;
@@ -240,7 +240,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
+        
         public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
         public override string ToString()
@@ -283,7 +283,7 @@ namespace Signum.Entities.Dashboard
             set { Set(ref label, value); }
         }
 
-        [NotNullValidator]
+        
         public UserQueryEntity UserQuery { get; set; }
 
         public string Href { get; set; }
@@ -317,7 +317,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkListPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
+        
         public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
 
         public override string ToString()
@@ -354,10 +354,10 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class LinkElementEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string Label { get; set; }
 
-        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(Max = int.MaxValue)]
         public string Link { get; set; }
 
         public LinkElementEmbedded Clone()

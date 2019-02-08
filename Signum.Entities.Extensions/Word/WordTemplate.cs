@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Files;
 using Signum.Utilities;
@@ -13,15 +13,15 @@ namespace Signum.Entities.Word
     public class WordTemplateEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string Name { get; set; }
 
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
-        public SystemWordTemplateEntity SystemWordTemplate { get; set; }
+        public SystemWordTemplateEntity? SystemWordTemplate { get; set; }
 
-        [NotNullValidator]
+        
         public CultureInfoEntity Culture { get; set; }
 
         [NotifyChildProperty]
@@ -30,9 +30,9 @@ namespace Signum.Entities.Word
         public bool DisableAuthorization { get; set; }
 
 
-        public Lite<FileEntity> Template { get; set; }
+        public Lite<FileEntity>? Template { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
+        [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
         public string FileName { get; set; }
 
         public WordTransformerSymbol WordTransformer { get; set; }
@@ -46,14 +46,14 @@ namespace Signum.Entities.Word
             return ToStringExpression.Evaluate(this);
         }
 
-        public bool IsApplicable(Entity entity)
+        public bool IsApplicable(Entity? entity)
         {
             if (Applicable == null)
                 return true;
 
             try
             {
-                return Applicable.Algorithm.ApplicableUntyped(entity);
+                return Applicable.Algorithm!.ApplicableUntyped(entity);
             }
             catch (Exception e)
             {

@@ -12,18 +12,18 @@ namespace Signum.Entities.ViewLog
         [NotNullValidator]
         public Lite<Entity> Target { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<IUserEntity> User { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ViewAction { get; set; }
 
         public DateTime StartDate { get; private set; } = TimeZoneManager.Now;
 
         public DateTime EndDate { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 0, MultiLine = true)]
-        public string Data { get; set; }
+        [StringLengthValidator(Min = 0, MultiLine = true)]
+        public string? Data { get; set; }
 
         static Expression<Func<ViewLogEntity, double>> DurationExpression =
            sl => (sl.EndDate - sl.StartDate).TotalMilliseconds;

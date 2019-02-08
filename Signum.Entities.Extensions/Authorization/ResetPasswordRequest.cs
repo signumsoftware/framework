@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.Authorization
 {
@@ -7,7 +7,7 @@ namespace Signum.Entities.Authorization
     {
         public string Code { get; set; }
 
-        [NotNullValidator]
+        
         public UserEntity User { get; set; }
 
         public DateTime RequestDate { get; set; }

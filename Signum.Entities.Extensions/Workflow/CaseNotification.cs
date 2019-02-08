@@ -6,18 +6,18 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseNotificationEntity : Entity
     {
-        [NotNullValidator]
+        
         public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<UserEntity> User { get; set; }
 
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator]
         public Lite<Entity> Actor { get; internal set; }
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string Remarks { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? Remarks { get; set; }
 
         public CaseNotificationState State { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿using Signum.Entities.UserAssets;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
 using System.Reflection;
@@ -25,12 +25,12 @@ namespace Signum.Entities.Chart
             set { scriptParameter = value; Notify(() => ScriptParameter); }
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        string value;
-        [StringLengthValidator(AllowNulls = true, Max = 50)]
-        public string Value
+        string? value;
+        [StringLengthValidator(Max = 50)]
+        public string? Value
         {
             get { return value; }
             set
@@ -40,7 +40,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Name) && Name != scriptParameter.Name)
                 return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);

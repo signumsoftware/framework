@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -11,7 +11,7 @@ namespace Signum.Entities.Disconnected
     {
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
-        [NotNullValidator]
+        
         public Lite<DisconnectedMachineEntity> Machine { get; set; }
 
         [Unit("ms")]
@@ -26,7 +26,7 @@ namespace Signum.Entities.Disconnected
         [Unit("ms")]
         public int? DisableForeignKeys { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<DisconnectedExportTableEmbedded> Copies { get; set; } = new MList<DisconnectedExportTableEmbedded>();
 
         [Unit("ms")]
@@ -46,7 +46,7 @@ namespace Signum.Entities.Disconnected
 
         public DisconnectedExportState State { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         public double Ratio(DisconnectedExportEntity estimation)
         {
@@ -149,7 +149,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedExportTableEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("ms")]

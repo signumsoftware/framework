@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
@@ -7,7 +7,7 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SessionLogEntity : Entity
     {
-        [NotNullValidator]
+        
         public Lite<UserEntity> User { get; set; }
 
         [SecondsPrecisionValidator]
@@ -18,11 +18,11 @@ namespace Signum.Entities.Authorization
 
         public bool SessionTimeOut { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string UserHostAddress { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? UserHostAddress { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 300)]
-        public string UserAgent { get; set; }
+        [StringLengthValidator(Max = 300)]
+        public string? UserAgent { get; set; }
 
         public override string ToString()
         {

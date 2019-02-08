@@ -26,31 +26,31 @@ namespace Signum.Entities.UserQueries
         [Ignore]
         internal object queryName;
 
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
         public bool GroupResults { get; set; }
 
-        public Lite<TypeEntity> EntityType { get; set; }
+        public Lite<TypeEntity>? EntityType { get; set; }
 
         public bool HideQuickLink { get; set; }
 
         public Lite<Entity> Owner { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200)]
+        [StringLengthValidator(Min = 1, Max = 200)]
         public string DisplayName { get; set; }
 
         public bool AppendFilters { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         public ColumnOptionsMode ColumnsMode { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
 
         public bool SearchOnLoad { get; set; } = true;
@@ -77,7 +77,7 @@ namespace Signum.Entities.UserQueries
             return ToStringExpression.Evaluate(this);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(ElementsPerPage))
             {
@@ -85,7 +85,7 @@ namespace Signum.Entities.UserQueries
                     return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode?.Let(pm => pm.NiceToString()) ?? "");
 
                 if (ElementsPerPage == null && ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode!.NiceToString());
             }
 
             return base.PropertyValidation(pi);
@@ -153,7 +153,7 @@ namespace Signum.Entities.UserQueries
             ParseData(ctx.GetQueryDescription(Query));
         }
 
-        public Pagination GetPagination()
+        public Pagination? GetPagination()
         {
             switch (PaginationMode)
             {
@@ -182,7 +182,7 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryOrderEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public QueryTokenEmbedded Token { get; set; }
 
         public OrderType OrderType { get; set; }
@@ -205,7 +205,7 @@ namespace Signum.Entities.UserQueries
             Token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
@@ -224,13 +224,13 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryColumnEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public QueryTokenEmbedded Token { get; set; }
 
-        string displayName;
-        public string DisplayName
+        string? displayName;
+        public string? DisplayName
         {
-            get { return displayName.DefaultText(null); }
+            get { return displayName.EmtpyToNull(); }
             set { Set(ref displayName, value); }
         }
 
@@ -252,7 +252,7 @@ namespace Signum.Entities.UserQueries
             Token.ParseData(context, description, options);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
@@ -293,10 +293,10 @@ namespace Signum.Entities.UserQueries
 
         public FilterOperation? Operation { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 300)]
-        public string ValueString { get; set; }
+        [StringLengthValidator(Max = 300)]
+        public string? ValueString { get; set; }
         
-        public PinnedQueryFilterEmbedded Pinned { get; set; }
+        public PinnedQueryFilterEmbedded? Pinned { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Indentation { get; set; }
@@ -306,7 +306,7 @@ namespace Signum.Entities.UserQueries
             token?.ParseData(context, description, options);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (IsGroup)
             {
@@ -408,8 +408,8 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class PinnedQueryFilterEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Label { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Label { get; set; }
 
         public int? Column { get; set; }
 
@@ -432,7 +432,7 @@ namespace Signum.Entities.UserQueries
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Pinned",
-                Label.DefaultText(null)?.Let(l => new XAttribute("Label", l)),
+                Label.EmtpyToNull()?.Let(l => new XAttribute("Label", l)),
                 Column?.Let(l => new XAttribute("Column", l)),
                 Row?.Let(l => new XAttribute("Row", l)),
                 DisableOnNull == false ? null : new XAttribute("DisableOnNull", DisableOnNull),

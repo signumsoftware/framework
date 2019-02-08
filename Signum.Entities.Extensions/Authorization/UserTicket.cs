@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
 
@@ -7,10 +7,10 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class UserTicketEntity : Entity
     {
-        [NotNullValidator]
+        
         public Lite<UserEntity> User { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 36, Max = 36)]
+        [StringLengthValidator(Min = 36, Max = 36)]
         public string Ticket { get; set; }
 
         public DateTime ConnectionDate { get; set; }

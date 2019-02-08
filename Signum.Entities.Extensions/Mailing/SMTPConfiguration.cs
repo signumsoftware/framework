@@ -15,25 +15,25 @@ namespace Signum.Entities.Mailing
         }
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string Name { get; set; }
 
         public SmtpDeliveryFormat DeliveryFormat { get; set; }
 
         public SmtpDeliveryMethod DeliveryMethod { get; set; }
 
-        public SmtpNetworkDeliveryEmbedded Network { get; set; }
+        public SmtpNetworkDeliveryEmbedded? Network { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300), FileNameValidator]
-        public string PickupDirectoryLocation { get; set; }
+        [StringLengthValidator(Min = 3, Max = 300), FileNameValidator]
+        public string? PickupDirectoryLocation { get; set; }
 
-        public EmailAddressEmbedded DefaultFrom { get; set; }
+        public EmailAddressEmbedded? DefaultFrom { get; set; }
 
         [NotNullValidator]
         [NoRepeatValidator]
         public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
@@ -64,29 +64,29 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Host { get; set; }
 
         public int Port { get; set; } = 25;
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Username { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Username { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Password { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Password { get; set; }
 
         public bool UseDefaultCredentials { get; set; } = true;
 
         public bool EnableSSL { get; set; }
 
-        [NotNullValidator]
+        
         public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
     }
 
     [Serializable]
     public class ClientCertificationFileEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 300),]
+        [StringLengthValidator(Min = 2, Max = 300),]
         public string FullFilePath { get; set; }
 
         public CertFileType CertFileType { get; set; }

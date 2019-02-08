@@ -13,7 +13,7 @@ namespace Signum.Entities.Chart
 {
     public interface IHasEntitytype
     {
-        Lite<TypeEntity> EntityType { get; }
+        Lite<TypeEntity>? EntityType { get; }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master), InTypeScript(Undefined = false)]
@@ -35,16 +35,16 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal object queryName;
 
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
-        public Lite<TypeEntity> EntityType { get; set; }
+        public Lite<TypeEntity>? EntityType { get; set; }
 
         public bool HideQuickLink { get; set; }
 
         public Lite<Entity> Owner { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
         ChartScriptSymbol chartScript;
@@ -68,7 +68,7 @@ namespace Signum.Entities.Chart
             return ChartRequestModel.GetChartScriptFunc(this.ChartScript);
         }
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
         [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
@@ -82,7 +82,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
         
         [UniqueIndex]
@@ -180,7 +180,7 @@ namespace Signum.Entities.Chart
             });
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Parameters) && Parameters != null && ChartScript != null)
             {

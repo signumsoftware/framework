@@ -11,10 +11,10 @@ namespace Signum.Entities.Workflow
     public class WorkflowEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator]
+        
         public TypeEntity MainEntityType { get; set; }
 
         public MList<WorkflowMainEntityStrategy> MainEntityStrategies { get; set; } = new MList<WorkflowMainEntityStrategy>();
@@ -24,7 +24,7 @@ namespace Signum.Entities.Workflow
         /// REDUNDANT! Only for diff logging
         /// </summary>
         [InTypeScript(false), AvoidDump]
-        public WorkflowXmlEmbedded FullDiagramXml { get; set; }
+        public WorkflowXmlEmbedded? FullDiagramXml { get; set; }
 
         static Expression<Func<WorkflowEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -73,7 +73,7 @@ namespace Signum.Entities.Workflow
     {
         [NotNullValidator]
         [ImplementedBy()]
-        public ModelEntity Model { get; set; }
+        public ModelEntity? Model { get; set; }
 
         [NotNullValidator]
         public string BpmnElementId { get; set; }
@@ -127,14 +127,14 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowXmlEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue, MultiLine = true)]
+        [StringLengthValidator(Min = 3, Max = int.MaxValue, MultiLine = true)]
         public string DiagramXml { get; set; }
     }
 
     public interface IWorkflowObjectEntity : IEntity
     {
         WorkflowXmlEmbedded Xml { get; set; }
-        string Name { get; set; }
+        //string? Name { get; set; }
         string BpmnElementId { get; set; }
     }
 
@@ -154,9 +154,9 @@ namespace Signum.Entities.Workflow
     {
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
-        public Lite<IWorkflowNodeEntity> OldNode { get; set; }
+        public Lite<IWorkflowNodeEntity>? OldNode { get; set; }
 
-        public Lite<WorkflowEntity> SubWorkflow { get; set; }
+        public Lite<WorkflowEntity>? SubWorkflow { get; set; }
 
         public string NewNode { get; set; }
     }
@@ -170,9 +170,9 @@ namespace Signum.Entities.Workflow
             this.Connection = conn;
         }
 
-        public CaseActivityEntity PreviousCaseActivity { get; internal set; }
-        public WorkflowConnectionEntity Connection { get; internal set; }
-        public CaseEntity Case { get; set; }
+        public CaseActivityEntity? PreviousCaseActivity { get; internal set; }
+        public WorkflowConnectionEntity? Connection { get; internal set; }
+        public CaseEntity? Case { get; set; }
     }
 
     public enum WorkflowValidationMessage

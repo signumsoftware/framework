@@ -10,10 +10,10 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicTypeConditionEntity : Entity
     {
-        [NotNullValidator]
+        
         public DynamicTypeConditionSymbolEntity SymbolName { get; set; }
 
-        [NotNullValidator]
+        
         public TypeEntity EntityType { get; set; }
 
         [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
@@ -40,7 +40,7 @@ namespace Signum.Entities.Dynamic
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()).EntityType.ToType().FullName;
+            var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()!).EntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +

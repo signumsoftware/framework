@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Mailing;
@@ -18,7 +18,7 @@ namespace Signum.Entities.Authorization
             return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
         };
 
-        public static string OnValidatePassword(string password)
+        public static string? OnValidatePassword(string password)
         {
             if (ValidatePassword != null)
                 return ValidatePassword(password);
@@ -27,7 +27,7 @@ namespace Signum.Entities.Authorization
         }
 
         [UniqueIndex(AvoidAttachToUniqueIndexes = true)]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
+        [StringLengthValidator(Min = 2, Max = 100)]
         public string UserName { get; set; }
 
         [ForceNotNullable, SqlDbType(Size = 128)]
@@ -47,19 +47,19 @@ namespace Signum.Entities.Authorization
 
         public bool PasswordNeverExpires { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<RoleEntity> Role { get; set; }
 
         [EMailValidator]
         public string Email { get; set; }
 
-        public CultureInfoEntity CultureInfo { get; set; }
+        public CultureInfoEntity? CultureInfo { get; set; }
 
         public DateTime? AnulationDate { get; set; }
 
         public UserState State { get; set; } = UserState.New;
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(State))
             {

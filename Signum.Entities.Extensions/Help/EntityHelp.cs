@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Utilities;
@@ -8,19 +8,19 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EntityHelpEntity : Entity
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; set; }
 
-        [NotNullValidator]
+        
         public CultureInfoEntity Culture { get; set; }
 
-		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+		[StringLengthValidator(Min = 3, MultiLine = true)]
+        public string? Description { get; set; }
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<PropertyRouteHelpEmbedded> Properties { get; set; } = new MList<PropertyRouteHelpEmbedded>();
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<OperationHelpEmbedded> Operations { get; set; } = new MList<OperationHelpEmbedded>();
 
         [Ignore]
@@ -38,7 +38,7 @@ namespace Signum.Entities.Help
             get { return string.IsNullOrEmpty(this.Description) && Properties.IsEmpty() && Operations.IsEmpty(); }
         }
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(IsEmpty) && IsEmpty)
                 return "IsEmpty is true";
@@ -56,10 +56,10 @@ namespace Signum.Entities.Help
     [Serializable]
     public class PropertyRouteHelpEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public PropertyRouteEntity Property { get; set; }
 
-		[StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+		[StringLengthValidator(Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         public override string ToString()
@@ -74,7 +74,7 @@ namespace Signum.Entities.Help
         [NotNullValidator]
         public OperationSymbol Operation { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         public override string ToString()

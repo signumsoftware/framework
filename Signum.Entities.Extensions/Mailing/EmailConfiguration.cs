@@ -6,7 +6,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailConfigurationEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public CultureInfoEntity DefaultCulture { get; set; }
 
         public string UrlLeft { get; set; }
@@ -15,8 +15,8 @@ namespace Signum.Entities.Mailing
 
         public bool ReciveEmails { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), EMailValidator]
-        public string OverrideEmailAddress { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100), EMailValidator]
+        public string? OverrideEmailAddress { get; set; }
 
         [Unit("hs")]
         public double? AvoidSendingEmailsOlderThan { get; set; }

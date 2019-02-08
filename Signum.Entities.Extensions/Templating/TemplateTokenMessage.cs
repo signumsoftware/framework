@@ -25,7 +25,7 @@ namespace Signum.Entities.Templating
     public class MultiEntityModel : ModelEntity
     {
         [ImplementedByAll]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<Lite<Entity>> Entities { get; set; } = new MList<Lite<Entity>>();
     }
 

@@ -13,7 +13,7 @@ namespace Signum.Entities.Chart
 
         [ForceNotNullable]
         //[NotNullValidator]
-        public ColorEmbedded Color { get; set; }
+        public ColorEmbedded? Color { get; set; }
 
         public override string ToString()
         {
@@ -28,10 +28,10 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartPaletteModel : ModelEntity
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; set; }
 
-        [NotNullValidator]
+        
         public MList<ChartColorEntity> Colors { get; set; } = new MList<ChartColorEntity>();
 
         public override string ToString()

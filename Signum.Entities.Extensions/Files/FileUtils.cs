@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.ComponentModel;
 
@@ -21,7 +21,7 @@ namespace Signum.Entities.Files
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
-        string FullWebPath();
+        string? FullWebPath();
     }
 
     public enum FileMessage

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Signum.Entities.Basics;
 using Signum.Entities.Omnibox;
 using Signum.Utilities;
@@ -80,7 +80,7 @@ namespace Signum.Entities.Map
         public Type Type { get; set; }
 
 
-        public string TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
+        public string? TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
 
         public OmniboxMatch TypeMatch { get; set; }
 

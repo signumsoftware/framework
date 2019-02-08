@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Basics;
@@ -10,31 +10,21 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class DefaultDictionary<K, A>
     {
-        public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A> overridesDictionary)
+        public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A>? overridesDictionary)
         {
-            this.defaultAllowed = defaultAllowed;
-            this.overrideDictionary = overridesDictionary;
+            this.DefaultAllowed = defaultAllowed;
+            this.OverrideDictionary = overridesDictionary;
         }
 
-        readonly Dictionary<K, A> overrideDictionary;
-        readonly Func<K, A> defaultAllowed;
+        public Dictionary<K, A>? OverrideDictionary { get; private set; }
+        public Func<K, A> DefaultAllowed { get; private set; }
 
         public A GetAllowed(K key)
         {
-            if (overrideDictionary != null && overrideDictionary.TryGetValue(key, out A result))
+            if (OverrideDictionary != null && OverrideDictionary.TryGetValue(key, out A result))
                 return result;
 
-            return defaultAllowed(key);
-        }
-
-        public Dictionary<K, A> OverrideDictionary
-        {
-            get { return overrideDictionary; }
-        }
-
-        public Func<K, A> DefaultAllowed
-        {
-            get { return defaultAllowed; }
+            return DefaultAllowed(key);
         }
     }
 
@@ -85,7 +75,7 @@ namespace Signum.Entities.Authorization
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class BaseRulePack<T> : ModelEntity
     {
-        [NotNullValidator]
+        
         public Lite<RoleEntity> Role { get; internal set; }
 
         [HiddenProperty]
@@ -107,12 +97,14 @@ namespace Signum.Entities.Authorization
         }
 
 
-        [NotNullValidator]
+        
         public MList<T> Rules { get; set; } = new MList<T>();
     }
 
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class AllowedRule<R, A> : ModelEntity
+        where R : object
+        where A : object
     {
         A allowedBase;
         [InTypeScript(Null = false)]
@@ -335,7 +327,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; internal set; }
 
         public override string ToString()
@@ -352,7 +344,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class QueryRulePack : BaseRulePack<QueryAllowedRule>
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; internal set; }
 
         public override string ToString()
@@ -367,7 +359,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class OperationRulePack : BaseRulePack<OperationAllowedRule>
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; internal set; }
 
         public override string ToString()

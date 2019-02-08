@@ -10,8 +10,8 @@ namespace Signum.Entities.Migrations
         [UniqueIndex]
         public string VersionNumber { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 0, Max = 400)]
-        public string Comment { get; set; }
+        [StringLengthValidator(Min = 0, Max = 400)]
+        public string? Comment { get; set; }
 
         static Expression<Func<SqlMigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
         [ExpressionField]

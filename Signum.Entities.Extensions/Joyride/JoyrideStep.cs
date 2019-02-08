@@ -13,17 +13,17 @@ namespace Signum.Entities.Joyride
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        public Lite<CultureInfoEntity> Culture { get; set; }
+        public Lite<CultureInfoEntity>? Culture { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Title { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string Text { get; set; }
 
-        public JoyrideStepStyleEntity Style { get; set; }
+        public JoyrideStepStyleEntity? Style { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Selector { get; set; }
 
         public JoyrideStepPosition Position { get; set; }

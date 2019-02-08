@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -64,7 +64,7 @@ namespace Signum.Entities.Omnibox
                     {
                         foreach (Lite<Entity> lite in autoComplete)
                         {
-                            OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString() ?? "", pattern);
+                            OmniboxMatch? distance = OmniboxUtils.Contains(lite, lite.ToString() ?? "", pattern);
 
                             if (distance != null)
                                 yield return new EntityOmniboxResult

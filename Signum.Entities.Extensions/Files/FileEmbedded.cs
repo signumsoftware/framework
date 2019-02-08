@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 
 namespace Signum.Entities.Files
@@ -6,7 +6,7 @@ namespace Signum.Entities.Files
     [Serializable]
     public class FileEmbedded : EmbeddedEntity, IFile
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string FileName { get; set; }
 
         [NotNullValidator]
@@ -18,7 +18,7 @@ namespace Signum.Entities.Files
         }
 
 
-        public string FullWebPath()
+        public string? FullWebPath()
         {
             return null;
         }

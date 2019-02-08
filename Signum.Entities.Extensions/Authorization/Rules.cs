@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using Signum.Entities.Basics;
@@ -8,7 +8,7 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public abstract class RuleEntity<R, A> : Entity
     {
-        [NotNullValidator]
+        
         public Lite<RoleEntity> Role { get; set; }
 
         [NotNullValidator]
@@ -44,7 +44,7 @@ namespace Signum.Entities.Authorization
         public OperationSymbol Operation { get; set; }
 
         //[NotNullable] While transition
-        [NotNullValidator]
+        
         public TypeEntity Type { get; set; }
 
         public override string ToString()
@@ -59,7 +59,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     {
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
     }
 

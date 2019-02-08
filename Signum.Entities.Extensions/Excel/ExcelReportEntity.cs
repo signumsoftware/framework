@@ -10,13 +10,13 @@ namespace Signum.Entities.Excel
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ExcelReportEntity : Entity
     {
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
-        [NotNullValidator]
+        
         public FileEmbedded File { get; set; }
 
         static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.DisplayName;

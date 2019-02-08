@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -11,19 +11,19 @@ namespace Signum.Entities.SMS
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class SMSTemplateEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public bool Certified { get; set; }
 
         public bool EditableMessage { get; set; } = AllowEditMessages;
 
-        public TypeEntity AssociatedType { get; set; }
+        public TypeEntity? AssociatedType { get; set; }
 
         [NotifyCollectionChanged]
         public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string From { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
@@ -38,6 +38,7 @@ namespace Signum.Entities.SMS
         [MinutesPrecisionValidator]
         public DateTime? EndDate { get; set; }
 
+
         static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         [ExpressionField]
@@ -46,7 +47,9 @@ namespace Signum.Entities.SMS
             return IsActiveNowExpression.Evaluate(this);
         }
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        public static bool AllowEditMessages = true;
+
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
             {
@@ -72,29 +75,7 @@ namespace Signum.Entities.SMS
         {
             return ToStringExpression.Evaluate(this);
         }
-
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
-            if (sender == Messages)
-            {
-                if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageEmbedded>())
-                        item.Template = null;
-
-                if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageEmbedded>())
-                        item.Template = this;
-            }
-        }
-
-        protected override void PreSaving(PreSavingContext ctx)
-        {
-            base.PreSaving(ctx);
-
-            Messages.ForEach(e => e.Template = this);
-        }
-
-        public static bool AllowEditMessages = true;
+        
     }
 
     [AutoInit]
@@ -120,19 +101,10 @@ namespace Signum.Entities.SMS
         {
             this.CultureInfo = culture;
         }
-
-        [Ignore]
-        internal SMSTemplateEntity template;
-        public SMSTemplateEntity Template
-        {
-            get { return template; }
-            set { template = value; }
-        }
-
-        [NotNullValidator]
+        
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string Message { get; set; }
 
         public override string ToString()

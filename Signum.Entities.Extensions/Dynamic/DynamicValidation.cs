@@ -13,13 +13,13 @@ namespace Signum.Entities.Dynamic
     public class DynamicValidationEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator]
+        
         public TypeEntity EntityType { get; set; }
 
-        public PropertyRouteEntity SubEntity { get; set; }
+        public PropertyRouteEntity? SubEntity { get; set; }
 
         public static Func<DynamicValidationEntity, Type> GetMainType; 
 
@@ -48,7 +48,7 @@ namespace Signum.Entities.Dynamic
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()).FullName;
+            var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()!).FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +

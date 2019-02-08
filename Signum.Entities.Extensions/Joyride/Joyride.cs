@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
@@ -12,15 +12,15 @@ namespace Signum.Entities.Joyride
     public class JoyrideEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        public Lite<CultureInfoEntity> Culture { get; set; }
+        public Lite<CultureInfoEntity>? Culture { get; set; }
 
         public JoyrideType Type { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<JoyrideStepEntity> Steps { get; set; } = new MList<JoyrideStepEntity>();
 
         public bool ShowSkipButton { get; set; }

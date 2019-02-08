@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
@@ -36,17 +36,17 @@ namespace Signum.Entities.Processes
             get { return algorithm; }
         }
 
-        public IProcessDataEntity Data { get; set; }
+        public IProcessDataEntity? Data { get; set; }
 
         public const string None = "none";
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string MachineName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ApplicationName { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<IUserEntity> User { get; set; }
 
         public ProcessState State { get; set; }
@@ -80,7 +80,9 @@ namespace Signum.Entities.Processes
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
          log => (double?)(log.ExecutionEnd - log.ExecutionStart).Value.TotalMilliseconds;
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public double? Duration
         {
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
@@ -88,7 +90,9 @@ namespace Signum.Entities.Processes
 
         static Expression<Func<ProcessEntity, TimeSpan?>> DurationSpanExpression =
         log => log.ExecutionEnd - log.ExecutionStart;
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationSpanExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public TimeSpan? DurationSpan
         {
             get { return ExecutionEnd == null ? null : DurationSpanExpression.Evaluate(this); }
@@ -98,7 +102,7 @@ namespace Signum.Entities.Processes
 
         public DateTime? ExceptionDate { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         [NumberBetweenValidator(0, 1), Format("p")]
         public decimal? Progress { get; set; }
@@ -120,7 +124,7 @@ namespace Signum.Entities.Processes
        {ProcessState.Error,     null,           null,                   null,              null,                  null,                null,               null,        null,         true,                true ,          null,          null },
         };
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(ExecutionStart) || pi.Name == nameof(ExecutionEnd))
             {
@@ -213,12 +217,12 @@ namespace Signum.Entities.Processes
         [SqlDbType(Size = int.MaxValue)]
         public string ElementInfo { get; set; }
 
-        public Lite<IProcessLineDataEntity> Line { get; set; }
+        public Lite<IProcessLineDataEntity>? Line { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<ProcessEntity> Process { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

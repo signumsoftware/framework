@@ -42,7 +42,7 @@ namespace Signum.Entities.Dashboard
         [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
         public int? AutoRefreshPeriod { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 200)]
+        [StringLengthValidator(Min = 2, Max = 200)]
         public string DisplayName { get; set; }
 
         public bool CombineSimilarRows { get; set; } = true;
@@ -66,7 +66,7 @@ namespace Signum.Entities.Dashboard
             return ContainsContentExpression.Evaluate(this, content);
         }
 
-        protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             if (sender is PanelPartEmbedded part)
             {
@@ -91,7 +91,7 @@ namespace Signum.Entities.Dashboard
                         .ToString(uc => DashboardMessage._0Is1InstedOf2In3.NiceToString(NicePropertyName(() => EntityType), uc.EntityType, entityType, uc),
                         "\r\n");
 
-                    return errorsUserQuery.DefaultText(null);
+                    return errorsUserQuery.DefaultText(null!);
                 }
             }
 
@@ -171,7 +171,7 @@ namespace Signum.Entities.Dashboard
             Parts.Synchronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(EmbeddedInEntity))
             {

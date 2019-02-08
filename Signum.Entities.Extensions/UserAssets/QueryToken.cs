@@ -28,7 +28,7 @@ namespace Signum.Entities.UserAssets
             this.TokenString = tokenString;
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200), InTypeScript(Undefined = false, Null = false)]
+        [StringLengthValidator(Min = 1, Max = 200), InTypeScript(Undefined = false, Null = false)]
         public string TokenString { get; set; }
 
         [Ignore]
@@ -77,7 +77,7 @@ namespace Signum.Entities.UserAssets
             }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(TokenString) && token == null)
             {

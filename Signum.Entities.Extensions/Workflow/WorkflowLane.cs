@@ -13,20 +13,20 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        [NotNullValidator]
+        
         public WorkflowPoolEntity Pool { get; set; }
 
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
         [NotifyChildProperty]
@@ -65,7 +65,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowLaneEntity)this.GetParentEntity();
+            var parent = (WorkflowLaneEntity)this.GetParentEntity()!;
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -112,14 +112,14 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowLaneModel : ModelEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
         public WorkflowLaneActorsEval ActorsEval { get; set; }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.Files
 {
@@ -16,12 +16,12 @@ namespace Signum.Entities.Files
     [System.AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public class DefaultFileTypeAttribute : Attribute
     {
-        public string SymbolContainer { get; set; }
+        public string? SymbolContainer { get; set; }
         public string SymbolName { get; set; }
 
         public FileTypeSymbol FileTypeSymbol { get; set; }
 
-        public DefaultFileTypeAttribute(string symbolName, string symbolContainer = null)
+        public DefaultFileTypeAttribute(string symbolName, string? symbolContainer = null)
         {
             this.SymbolName = symbolName;
             this.SymbolContainer = symbolContainer;

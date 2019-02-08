@@ -18,7 +18,7 @@ namespace Signum.Entities.UserAssets
     [Serializable]
     public class UserAssetPreviewLineEmbedded : EmbeddedEntity
     {
-        public TypeEntity Type { get; set; }
+        public TypeEntity? Type { get; set; }
 
         public string Text { get; set; }
 

@@ -9,22 +9,22 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullValidator]
+        
         public WorkflowLaneEntity Lane { get; set; }
 
         public WorkflowEventType Type { get; set; }
 
-        public WorkflowTimerEmbedded Timer { get; set; }
+        public WorkflowTimerEmbedded? Timer { get; set; }
 
-        public Lite<WorkflowActivityEntity> BoundaryOf { get; set; }
+        public Lite<WorkflowActivityEntity>? BoundaryOf { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
@@ -56,7 +56,7 @@ namespace Signum.Entities.Workflow
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Timer))
             {
@@ -83,11 +83,11 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowTimerEmbedded : EmbeddedEntity
     {
-        public TimeSpanEmbedded Duration { get; set; }
+        public TimeSpanEmbedded? Duration { get; set; }
 
-        public Lite<WorkflowTimerConditionEntity> Condition { get; set; }
+        public Lite<WorkflowTimerConditionEntity>? Condition { get; set; }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Duration) && Duration == null && Condition == null)
                 return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => Condition));
@@ -142,17 +142,17 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowEventModel : ModelEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
         public WorkflowEventType Type { get; set; }
 
         public WorkflowEventTaskModel Task { get; set; }
 
-        public WorkflowTimerEmbedded Timer { get; set; }
+        public WorkflowTimerEmbedded? Timer { get; set; }
 
         public string BpmnElementId { get; set; }
     }

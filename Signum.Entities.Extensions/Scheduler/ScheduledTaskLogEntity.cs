@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -9,12 +9,12 @@ namespace Signum.Entities.Scheduler
     public class ScheduledTaskLogEntity : Entity
     {
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        [NotNullValidator]
+        
         public ITaskEntity Task { get; set; }
 
-        public ScheduledTaskEntity ScheduledTask { get; set; }
+        public ScheduledTaskEntity? ScheduledTask { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<IUserEntity> User { get; set; }
 
         [Format("G")]
@@ -25,26 +25,28 @@ namespace Signum.Entities.Scheduler
 
         static Expression<Func<ScheduledTaskLogEntity, double?>> DurationExpression =
             log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression"), Unit("ms")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public double? Duration
         {
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string MachineName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string ApplicationName { get; set; }
 
 
         [ImplementedByAll]
-        public Lite<IEntity> ProductEntity { get; set; }
+        public Lite<IEntity>? ProductEntity { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string Remarks { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? Remarks { get; set; }
 
         public override string ToString()
         {
@@ -68,9 +70,9 @@ namespace Signum.Entities.Scheduler
         [SqlDbType(Size = int.MaxValue)]
         public string ElementInfo { get; set; }
 
-        public Lite<ScheduledTaskLogEntity> SchedulerTaskLog { get; set; }
+        public Lite<ScheduledTaskLogEntity>? SchedulerTaskLog { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Signum.Utilities;
 using Signum.Services;
@@ -16,7 +16,7 @@ namespace Signum.Entities.Files
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 254)]
+        [StringLengthValidator(Min = 3, Max = 254)]
         public string FileName { get; set; }
 
         public string Hash { get; private set; }
@@ -37,7 +37,7 @@ namespace Signum.Entities.Files
             return "{0} {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
-        public string FullWebPath()
+        public string? FullWebPath()
         {
             return null;
         }
