@@ -23,10 +23,10 @@ namespace Signum.Entities.DynamicQuery
             : base(null)
         {
             if (column == null)
-                throw new ArgumentNullException("column");
+                throw new ArgumentNullException(nameof(column));
 
             if (queryName == null)
-                throw new ArgumentNullException("queryName");
+                throw new ArgumentNullException(nameof(queryName));
 
             this.column = column;
             this.queryName = queryName;
@@ -69,8 +69,9 @@ namespace Signum.Entities.DynamicQuery
                 if (Column.PropertyRoutes != null)
                 {
                     DateTimePrecision? precision =
-                        Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
-                        .Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx())
+                        Column.PropertyRoutes.Select(pr => 
+                        Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)?.Validators
+                        .OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx())
                         .Select(dtp => dtp?.Precision).Distinct().Only();
 
                     if (precision != null)
@@ -88,8 +89,9 @@ namespace Signum.Entities.DynamicQuery
                 if (Column.PropertyRoutes != null)
                 {
                     int? decimalPlaces=
-                        Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
-                        .Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx())
+                        Column.PropertyRoutes.Select(pr => 
+                        Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)?.Validators
+                        .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx())
                         .Select(dtp => dtp?.DecimalPlaces).Distinct().Only();
 
                     if (decimalPlaces != null)

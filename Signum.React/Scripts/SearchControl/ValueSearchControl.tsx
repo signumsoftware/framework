@@ -5,14 +5,14 @@ import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumbroFormat, toMomentFormat, getEnumInfo } from '../Reflection'
+import { getQueryKey, toNumbroFormat, toMomentFormat, getEnumInfo, QueryTokenString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { toFilterRequests } from '../Finder';
 
 export interface ValueSearchControlProps extends React.Props<ValueSearchControl> {
-  valueToken?: string;
+  valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -29,6 +29,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   avoidNotifyPendingRequest?: boolean;
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
+  onRender?: (value: any, vsc: ValueSearchControl) => React.ReactNode;
 }
 
 export interface ValueSearchControlState {
@@ -53,7 +54,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     return {
       queryKey: fo.queryKey,
       filters: toFilterRequests(fo.filterOptions),
-      valueToken: this.props.valueToken
+      valueToken: this.props.valueToken && this.props.valueToken.toString(),
+      systemTime: fo.systemTime && { ...fo.systemTime }
     };
   }
 
@@ -86,7 +88,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     this.setState({ token: undefined, value: undefined });
     if (props.valueToken)
-      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken, SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll)
+      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll)
         .then(st => {
           this.setState({ token: st });
           this.props.onTokenLoaded && this.props.onTokenLoaded();
@@ -147,12 +149,16 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       );
     }
 
+    if (this.props.onRender)
+      return this.props.onRender(this.state.value, this);
+
     let className = classes(
       p.valueToken == undefined && "count-search",
       p.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
-      p.isBadge == true || (p.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge badge-pill badge-" + (this.props.badgeColor || "secondary") : "",
+      p.isBadge == false ? "" :
+        "badge badge-pill " + (this.props.badgeColor ? ("badge-" + this.props.badgeColor) : (p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted")),
       p.customClass
     );
 

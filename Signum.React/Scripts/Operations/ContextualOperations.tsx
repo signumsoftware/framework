@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Entity, JavascriptMessage, OperationMessage, SearchMessage } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
@@ -195,7 +195,8 @@ export namespace MenuItemConstructor { //To allow monkey patching
         simplifyName(coc.operationInfo.niceName);
 
     const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
-    const icon = coc.settings && coc.settings.icon;
+    const icon = coc.settings && coc.settings.icon || coc.entityOperationSettings && coc.entityOperationSettings.icon;
+    const iconColor = coc.settings && coc.settings.iconColor || coc.entityOperationSettings && coc.entityOperationSettings.iconColor;
 
     const disabled = !!coc.canExecute;
 
@@ -212,7 +213,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
         data-operation={coc.operationInfo.key}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={coc.settings && coc.settings.iconColor} /> :
+        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
         {(icon || color) && " "}
         {text}

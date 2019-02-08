@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'
@@ -6,6 +6,7 @@ import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../Find
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import * as DropdownList from 'react-widgets/lib/DropdownList'
+import { TitleManager } from '../../Scripts/Lines/EntityBase';
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
   prefixQueryToken?: QueryToken | undefined;
@@ -109,7 +110,8 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { subTo
   componentWillReceiveProps(newProps: QueryTokenPartProps) {
     if ((newProps.readOnly == false && this.props.readOnly == true) ||
       !newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) ||
-        this.props.subTokenOptions != newProps.subTokenOptions)) {
+        this.props.subTokenOptions != newProps.subTokenOptions ||
+        this.props.queryKey != newProps.queryKey)) {
       this.setState({ subTokens: undefined });
       this.requestSubTokens(newProps);
     }
@@ -174,7 +176,7 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null }>
     return (
       <span
         style={{ color: item.typeColor }}
-        title={item.niceTypeName}>
+        title={TitleManager.useTitle ? item.niceTypeName : undefined}>
         {item.toString}
       </span>
     );
@@ -200,7 +202,7 @@ export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken |
     return (
       <span data-token={item.key}
         style={{ color: item.typeColor }}
-        title={item.niceTypeName}>
+        title={TitleManager.useTitle ? item.niceTypeName : undefined}>
         {((item.parent && !parentToken) ? " > " : "") + item.toString}
       </span>
     );

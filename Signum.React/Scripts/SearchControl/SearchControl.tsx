@@ -1,4 +1,4 @@
-﻿/// <reference path="../globals.d.ts" />
+/// <reference path="../globals.d.ts" />
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
@@ -29,7 +29,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   showContextMenu?: boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
-  showHeader?: boolean;
+  showHeader?: boolean | "PinnedFilters";
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters?: boolean;
@@ -62,7 +62,19 @@ export interface SearchControlState {
   findOptions?: FindOptionsParsed;
   queryDescription?: QueryDescription;
 }
+
+function is_touch_device(): boolean {
+  return 'ontouchstart' in window        // works on most browsers 
+    || Boolean(navigator.maxTouchPoints);       // works on IE10/11 and Surface
+}
+
+
 export default class SearchControl extends React.Component<SearchControlProps, SearchControlState> {
+
+  static showSelectedButton = (sc: SearchControl) => is_touch_device();
+  static showSystemTimeButton = (sc: SearchControl) => true;
+  static showGroupButton = (sc: SearchControl) => true;
+  
   static defaultProps = {
     allowSelection: true,
     avoidFullScreenButton: false,
@@ -175,8 +187,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
           showFilters={p.showFilters != null ? p.showFilters : false}
           showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
           showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
-          showSystemTimeButton={p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true)}
-          showGroupButton={p.showGroupButton != null ? p.showGroupButton : false}
+          showSystemTimeButton={SearchControl.showSystemTimeButton(this) && (p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true))}
+          showGroupButton={SearchControl.showGroupButton(this) && p.showGroupButton != null ? p.showGroupButton : false}
+          showSelectedButton={SearchControl.showSelectedButton(this)}
           showFooter={p.showFooter != null ? p.showFooter : true}
           allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
           allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}

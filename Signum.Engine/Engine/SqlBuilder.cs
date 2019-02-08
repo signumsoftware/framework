@@ -1,12 +1,9 @@
-﻿﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
- using System.Data;
+using System.Data;
 using Signum.Utilities;
- using Signum.Engine.Maps;
-
-//using Microsoft.SqlServer.Types;
-
+using Signum.Engine.Maps;
 
 namespace Signum.Engine
 {
@@ -55,8 +52,8 @@ namespace Signum.Engine
 
             return SqlPreCommandConcat.Combine(Spacing.Simple,
                 AlterTableDisableSystemVersioning(diffTable.Name),
-                DropTable(diffTable.Name),
-                DropTable(diffTable.TemporalTableName)
+                DropTable(diffTable.Name)
+                //DropTable(diffTable.TemporalTableName)
             );
         }
 
@@ -101,7 +98,7 @@ namespace Signum.Engine
             return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
         }
 
-        public static SqlPreCommand AlterTableDisableSystemVersioning(ObjectName tableName)
+        public static SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
         {
             return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF)");
         }
@@ -163,9 +160,9 @@ namespace Signum.Engine
             return false;
         }
 
-        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string defaultConstraintName = null)
+        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string defaultConstraintName = null, ObjectName forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column, null)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null)));
 
             if (column.Default == null)
                 return alterColumn;
@@ -332,7 +329,7 @@ WHERE {oldPrimaryKey} NOT IN
     FROM {oldTableName}
     {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-)");
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}");
         }
 
         public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
@@ -378,8 +375,9 @@ WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
     FROM {uniqueIndex.Table.Name}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
     GROUP BY {columns}
-)".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)}".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
         }
 
         public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)
@@ -452,24 +450,30 @@ WHERE {primaryKey.Name} NOT IN
                 ));
         }
 
-        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
+        public static SqlPreCommand RenameOrChangeSchema(ObjectName oldTableName, ObjectName newTableName)
         {
-            if (object.Equals(oldTable.Name.Schema, newTable.Name.Schema))
-                return RenameTable(oldTable.Name, newTable.Name.Name);
+            if (!object.Equals(oldTableName.Schema.Database, newTableName.Schema.Database))
+                throw new InvalidOperationException("Different database");
 
-            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
-            {
-                var oldNewSchema = oldTable.Name.OnSchema(newTable.Name.Schema);
-
-                return SqlPreCommand.Combine(Spacing.Simple,
-                    AlterSchema(oldTable.Name, newTable.Name.Schema),
-                    oldNewSchema.Equals(newTable.Name) ? null : RenameTable(oldNewSchema, newTable.Name.Name));
-            }
+            if (object.Equals(oldTableName.Schema, newTableName.Schema))
+                return RenameTable(oldTableName, newTableName.Name);
+            
+            var oldNewSchema = oldTableName.OnSchema(newTableName.Schema);
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                CreateTableSql(newTable),
-                MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
-                DropTable(oldTable));
+                AlterSchema(oldTableName, newTableName.Schema),
+                oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name));
+        }
+
+        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
+        {
+            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
+                return RenameOrChangeSchema(oldTable.Name, newTable.Name);
+            
+            return SqlPreCommand.Combine(Spacing.Simple,
+              CreateTableSql(newTable),
+              MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
+              DropTable(oldTable));
         }
 
         public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)

@@ -1,9 +1,10 @@
-﻿import * as moment from 'moment';
+import * as moment from 'moment';
 import * as numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
+import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
@@ -45,6 +46,7 @@ export interface MemberInfo {
   isIgnoredEnum?: boolean;
   unit?: string;
   format?: string;
+  required?: boolean;
   maxLength?: number;
   isMultiline?: boolean;
   preserveOrder?: boolean;
@@ -87,8 +89,8 @@ export function toMomentFormat(format: string | undefined): string | undefined {
     case "M":
     case "m": return "D MMM";
     case "u":
-    case "s":
-    case "o": return undefined;
+    case "s": return "YYYY-MM-DDTHH:mm:ss";
+    case "o": 
     case "t": return "LT";
     case "T": return "LTS";
     case "y": return "LTS";
@@ -864,6 +866,87 @@ export class Type<T extends ModifiableEntity> implements IType {
   isLite(obj: any): obj is Lite<T & Entity> {
     return obj && (obj as Lite<Entity>).EntityType == this.typeName;
   }
+
+  /* Constructs a QueryToken compatible string like "Name" from a strongly typed lambda like a => a.name
+   * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc) but this method works in the common simple cases*/
+  token(): QueryTokenString<T>;
+  token<S>(lambdaToColumn: (v: T) => S) : QueryTokenString<S>;
+  token(lambdaToColumn?: Function): QueryTokenString<any> {
+    if (lambdaToColumn == null)
+      return new QueryTokenString("");
+    else
+      return new QueryTokenString(tokenSequence(lambdaToColumn));
+  }
+}
+
+/*  Some examples being in ExceptionEntity:
+ *  "User" -> ExceptionEntity.token().append(a => a.user) 
+ *            ExceptionEntity.token(a => a.user) 
+ *  "Entity.User" -> ExceptionEntity.token().entity().append(a=>a.user)
+ *                   ExceptionEntity.token().entity(a => a.user)
+ * 
+ */
+export class QueryTokenString<T> {
+
+  token: string;
+  constructor(token: string) {
+    this.token = token;
+  }
+
+  toString() {
+    return this.token;
+  }
+
+  static entity<T extends Entity = Entity>() {
+    return new QueryTokenString<T>("Entity");
+  }
+
+  static count() {
+    return new QueryTokenString("Count");
+  }
+
+  systemValidFrom() {
+    return new QueryTokenString(this.token + ".SystemValidFrom");
+  }
+
+  systemValidTo() {
+    return new QueryTokenString(this.token + ".SystemValidTo");
+  }
+
+  entity() : QueryTokenString<T>;
+  entity<S>(lambdaToProperty: (v: T) => S) : QueryTokenString<S>;
+  entity(lambdaToProperty?: Function): QueryTokenString<any> {
+    if (this.token != "")
+      throw new Error("entity is only meant to be used with an empty token");
+
+    if (lambdaToProperty == null)
+      return new QueryTokenString("Entity")
+    else
+      return new QueryTokenString("Entity." + tokenSequence(lambdaToProperty));
+  }
+
+  cast<R extends Entity>(t: Type<R>): QueryTokenString<R> {
+    return new QueryTokenString<R>(this.token + ".(" + t.typeName + ")");
+  }
+
+  append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty));
+  }
+
+  mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
+    return new QueryTokenString<M>(this.token);
+  }
+
+  expression<S>(expressionName: string): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + expressionName);
+  }
+}
+
+function tokenSequence(lambdaToProperty: Function) {
+  return getLambdaMembers(lambdaToProperty)
+    .filter(a => a.name != "entity") //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
+    .map(a => a.name.firstUpper())
+    .join(".");
 }
 
 export class EnumType<T extends string> {
@@ -892,7 +975,7 @@ export class EnumType<T extends string> {
     return val;
   }
 
-  niceName(): string | undefined {
+  niceTypeName(): string | undefined {
     return this.typeInfo().niceName;
   }
 
@@ -940,6 +1023,8 @@ export interface ISymbol {
 }
 
 let missingSymbols: ISymbol[] = [];
+
+
 
 function getMember(key: string): MemberInfo | undefined {
 
@@ -1267,9 +1352,10 @@ export type GraphExplorerMode = "collect" | "set" | "clean";
 
 export class GraphExplorer {
 
-  static propagateAll(...args: any[]) {
+  static propagateAll(...args: any[]): GraphExplorer {
     const ge = new GraphExplorer("clean", {});
     args.forEach(o => ge.isModified(o, ""));
+    return ge;
   }
 
   static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {

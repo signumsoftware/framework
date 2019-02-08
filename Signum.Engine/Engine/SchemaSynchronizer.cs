@@ -35,6 +35,10 @@ namespace Signum.Engine
 
             databaseTables = replacements.ApplyReplacementsToOld(databaseTables, Replacements.KeyTables);
 
+            replacements.AskForReplacements(databaseTablesHistory.Keys.ToHashSet(), modelTablesHistory.Keys.ToHashSet(), Replacements.KeyTables);
+
+            databaseTablesHistory = replacements.ApplyReplacementsToOld(databaseTablesHistory, Replacements.KeyTables);
+
             Dictionary<ITable, Dictionary<string, Index>> modelIndices = modelTables.Values
                 .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
 
@@ -51,8 +55,14 @@ namespace Signum.Engine
                 replacements.AskForReplacements(diff.Columns.Keys.ToHashSet(), tab.Columns.Keys.ToHashSet(), key);
 
                 diff.Columns = replacements.ApplyReplacementsToOld(diff.Columns, key);
-
                 diff.Indices = ApplyIndexAutoReplacements(diff, tab, modelIndices[tab]);
+
+                if(diff.TemporalTableName != null)
+                {
+                    var diffTemp = databaseTablesHistory.GetOrThrow(replacements.Apply(Replacements.KeyTables, diff.TemporalTableName.ToString()));
+                    diffTemp.Columns = replacements.ApplyReplacementsToOld(diffTemp.Columns, key);
+                    diffTemp.Indices = ApplyIndexAutoReplacements(diffTemp, tab, modelIndices[tab]);
+                }
 
                 var diffPk = diff.Columns.TryGetC(tab.PrimaryKey.Name);
                 if (diffPk != null && tab.PrimaryKey.Identity != diffPk.Identity)
@@ -232,9 +242,13 @@ namespace Signum.Engine
                         {
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
-                            var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && (
-                                tab.SystemVersioned == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
-                                SqlBuilder.AlterTableDisableSystemVersioning(tab.Name) : null);
+                            bool alterColumnToNotNullableHistory = false;
+
+                            var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && 
+                            (tab.SystemVersioned == null || 
+                            !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
+                            (alterColumnToNotNullableHistory = NullabilityChanges(tab, dif) && SafeConsole.Ask($"Table {tab.Name} has nullability changes. Disable and re-enable System Versioning?"))) ?
+                                SqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : null);
 
                             var dropPeriod = (dif.Period != null &&
                                 (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?
@@ -248,7 +262,7 @@ namespace Signum.Engine
                                     createNew: (cn, tabCol) => SqlPreCommand.Combine(Spacing.Simple,
                                         tabCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
                                         AlterTableAddColumnDefault(tab, tabCol, replacements,
-                                            cn.EndsWith("_HasValue") && dif.Columns.Values.Any(c=>c.Name.StartsWith(cn.Before("HasValue")) && c.Nullable == false) ? "1" : null)),
+                                            cn.EndsWith("_HasValue") && dif.Columns.Values.Any(c => c.Name.StartsWith(cn.Before("HasValue")) && c.Nullable == false) ? "1" : null)),
 
                                     removeOld: (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
                                          difCol.DefaultConstraint != null ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
@@ -261,10 +275,7 @@ namespace Signum.Engine
                                         difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: false) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
                                         difCol.CompatibleTypes(tabCol) ?
-                                                 SqlPreCommand.Combine(Spacing.Simple,
-                                                    difCol.Nullable && !tabCol.Nullable.ToBool() ? NotNullUpdate(tab, tabCol, replacements) : null,
-                                                    SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name)
-                                                ):
+                                                UpdateCompatible(replacements, tab, dif, tabCol, difCol) :
                                                 SqlPreCommand.Combine(Spacing.Simple,
                                                     SqlBuilder.AlterTableAddColumn(tab, tabCol),
                                                     new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = YourCode({difCol.Name})"),
@@ -279,22 +290,25 @@ namespace Signum.Engine
 
                                         UpdateByFkChange(tn, difCol, tabCol, ChangeName, copyDataFrom)
                                     )
-                        );
+                            );
 
                             var addPeriod = ((tab.SystemVersioned != null &&
                                 (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
                             var addSystemVersioning = (tab.SystemVersioned != null &&
-                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
-                                SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
+                                (dif.Period == null || 
+                                !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
+                                alterColumnToNotNullableHistory) ?
+                                SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a => a.GoBefore = true) : null);
 
 
                             SqlPreCommand combinedAddPeriod = null;
-                            if(addPeriod != null && columns is SqlPreCommandConcat cols)
+                            if (addPeriod != null && columns is SqlPreCommandConcat cols)
                             {
                                 var periodRows = cols.Leaves().Where(pcs => pcs.Sql.Contains(" ADD ") && pcs.Sql.Contains("GENERATED ALWAYS AS ROW")).ToList();
-                                if (periodRows.Count == 2) {
+                                if (periodRows.Count == 2)
+                                {
 
                                     combinedAddPeriod = new SqlPreCommandSimple($@"ALTER TABLE {tn} ADD
     {periodRows[0].Sql.After(" ADD ")},
@@ -312,16 +326,12 @@ namespace Signum.Engine
                 if (tables != null)
                     tables.GoAfter = true;
 
-                SqlPreCommand syncEnums;
+                SqlPreCommand historyTables = Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
+                    createNew: null,
+                    removeOld: (tn, dif) => SqlBuilder.DropTable(dif.Name),
+                    mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned.TableName) ? SqlBuilder.RenameOrChangeSchema(dif.Name, tab.SystemVersioned.TableName) : null);
 
-                try
-                {
-                    syncEnums = SynchronizeEnumsScript(replacements);
-                }
-                catch (Exception e)
-                {
-                    syncEnums = new SqlPreCommandSimple("-- Exception synchronizing enums: " + e.Message);
-                }
+                SqlPreCommand syncEnums = SynchronizeEnumsScript(replacements);
 
                 SqlPreCommand addForeingKeys = Synchronizer.SynchronizeScript(
                      Spacing.Double,
@@ -349,7 +359,7 @@ namespace Signum.Engine
 
                              var name = SqlBuilder.ForeignKeyName(tab.Name.Name, colModel.Name);
                              return SqlPreCommand.Combine(Spacing.Simple,
-                                name != coldb.ForeignKey.Name.Name ? SqlBuilder.RenameForeignKey(coldb.ForeignKey.Name, name) : null,
+                                name != coldb.ForeignKey.Name.Name ? SqlBuilder.RenameForeignKey(coldb.ForeignKey.Name.OnSchema(tab.Name.Schema), name) : null,
                                 (coldb.ForeignKey.IsDisabled || coldb.ForeignKey.IsNotTrusted) && !replacements.SchemaOnly ? SqlBuilder.EnableForeignKey(tab.Name, name) : null);
                          })
                      );
@@ -406,18 +416,47 @@ namespace Signum.Engine
                     mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : SqlBuilder.DropSchema(oldSN)
                  );
 
-                return SqlPreCommand.Combine(Spacing.Triple, preRenameTables, createSchemas, dropStatistics, dropIndices, dropIndicesHistory, dropForeignKeys, preRenamePks, tables, syncEnums, addForeingKeys, addIndices, addIndicesHistory, dropSchemas);
+                return SqlPreCommand.Combine(Spacing.Triple, preRenameTables, 
+                    createSchemas, 
+                    dropStatistics, dropIndices, dropIndicesHistory, dropForeignKeys, 
+                    preRenamePks, tables, historyTables, syncEnums, 
+                    addForeingKeys, addIndices, addIndicesHistory, 
+                    dropSchemas);
             }
         }
 
-        private static SqlPreCommandSimple NotNullUpdate(ITable tab, IColumn tabCol, Replacements rep)
+        private static bool NullabilityChanges(ITable tab, DiffTable dif)
         {
-            var defaultValue = GetDefaultValue(tab, tabCol, rep, forNewColumn: false);
+            return tab.Columns.OuterJoinDictionaryCC(dif.Columns, (cn, tabCol, difCol) =>
+                   tabCol != null && difCol != null && !tabCol.Nullable.ToBool() && difCol.Nullable)
+                   .Any(a => a.Value);
+        }
+
+        private static SqlPreCommand UpdateCompatible(Replacements replacements, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol)
+        {
+            if (!(difCol.Nullable && !tabCol.Nullable.ToBool()))
+                return SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name);
+            
+            var defaultValue = GetDefaultValue(tab, tabCol, replacements, forNewColumn: false);
 
             if (defaultValue == "force")
-                return null;
+                return SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name);
 
-            return new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL");
+            bool goBefore = difCol.Name != tabCol.Name;
+
+            bool history = dif.TemporalType != SysTableTemporalType.None && tab.SystemVersioned != null;
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                NotNullUpdate(tab.Name, tabCol, defaultValue, goBefore),
+                SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name),
+                history ? NotNullUpdate(tab.SystemVersioned.TableName, tabCol, defaultValue, goBefore) : null,
+                history ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name, tab.SystemVersioned.TableName) : null
+            );
+        }
+
+        private static SqlPreCommandSimple NotNullUpdate(ObjectName tab, IColumn tabCol, string defaultValue, bool goBefore)
+        {
+            return new SqlPreCommandSimple($"UPDATE {tab} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL") { GoBefore = goBefore };
         }
 
         private static bool DifferentDatabase(ObjectName name, ObjectName name2)
@@ -651,10 +690,10 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                               }).SingleOrDefaultEx(),
 
                              TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null :
-                             Database.View<SysTables>()
-                             .Where(ht => ht.object_id == t.history_table_id)
-                             .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name), ht.name))
-                             .SingleOrDefault(),
+                                 Database.View<SysTables>()
+                                 .Where(ht => ht.object_id == t.history_table_id)
+                                 .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name), ht.name))
+                                 .SingleOrDefault(),
 
                              PrimaryKeyName = (from k in t.KeyConstraints()
                                                where k.type == "PK"
@@ -767,62 +806,69 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
         static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
         {
-            Schema schema = Schema.Current;
-
-            List<SqlPreCommand> commands = new List<SqlPreCommand>();
-
-            foreach (var table in schema.Tables.Values)
+            try
             {
-                Type enumType = EnumEntity.Extract(table.Type);
-                if (enumType != null)
+                Schema schema = Schema.Current;
+
+                List<SqlPreCommand> commands = new List<SqlPreCommand>();
+
+                foreach (var table in schema.Tables.Values)
                 {
-                    Console.Write(".");
-
-                    IEnumerable<Entity> should = EnumEntity.GetEntities(enumType);
-                    Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
-
-                    List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
-                    Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr, table.Name.Name);
-
-                    string key = Replacements.KeyEnumsForTable(table.Name.Name);
-
-                    replacements.AskForReplacements(currentByName.Keys.ToHashSet(), shouldByName.Keys.ToHashSet(), key);
-
-                    currentByName = replacements.ApplyReplacementsToOld(currentByName, key);
-
-                    var mix = shouldByName.JoinDictionary(currentByName, (n, s, c) => new { s, c }).Where(a => a.Value.s.id != a.Value.c.id).ToDictionary();
-
-                    HashSet<PrimaryKey> usedIds = current.Select(a => a.Id).ToHashSet();
-
-                    Dictionary<string, Entity> middleByName = mix.Where(kvp => usedIds.Contains(kvp.Value.s.Id)).ToDictionary(kvp => kvp.Key, kvp => Clone(kvp.Value.c));
-
-                    if (middleByName.Any())
+                    Type enumType = EnumEntity.Extract(table.Type);
+                    if (enumType != null)
                     {
-                        var moveToAux = SyncEnums(schema, table,
-                            currentByName.Where(a => middleByName.ContainsKey(a.Key)).ToDictionary(),
-                            middleByName);
-                        if (moveToAux != null)
-                            commands.Add(moveToAux);
-                    }
+                        Console.Write(".");
 
-                    var com = SyncEnums(schema, table,
-                        currentByName.Where(a => !middleByName.ContainsKey(a.Key)).ToDictionary(),
-                        shouldByName.Where(a => !middleByName.ContainsKey(a.Key)).ToDictionary());
-                    if (com != null)
-                        commands.Add(com);
+                        IEnumerable<Entity> should = EnumEntity.GetEntities(enumType);
+                        Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 
-                    if (middleByName.Any())
-                    {
-                        var backFromAux = SyncEnums(schema, table,
-                            middleByName,
-                            shouldByName.Where(a => middleByName.ContainsKey(a.Key)).ToDictionary());
-                        if (backFromAux != null)
-                            commands.Add(backFromAux);
+                        List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
+                        Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr, table.Name.Name);
+
+                        string key = Replacements.KeyEnumsForTable(table.Name.Name);
+
+                        replacements.AskForReplacements(currentByName.Keys.ToHashSet(), shouldByName.Keys.ToHashSet(), key);
+
+                        currentByName = replacements.ApplyReplacementsToOld(currentByName, key);
+
+                        var mix = shouldByName.JoinDictionary(currentByName, (n, s, c) => new { s, c }).Where(a => a.Value.s.id != a.Value.c.id).ToDictionary();
+
+                        HashSet<PrimaryKey> usedIds = current.Select(a => a.Id).ToHashSet();
+
+                        Dictionary<string, Entity> middleByName = mix.Where(kvp => usedIds.Contains(kvp.Value.s.Id)).ToDictionary(kvp => kvp.Key, kvp => Clone(kvp.Value.c));
+
+                        if (middleByName.Any())
+                        {
+                            var moveToAux = SyncEnums(schema, table,
+                                currentByName.Where(a => middleByName.ContainsKey(a.Key)).ToDictionary(),
+                                middleByName);
+                            if (moveToAux != null)
+                                commands.Add(moveToAux);
+                        }
+
+                        var com = SyncEnums(schema, table,
+                            currentByName.Where(a => !middleByName.ContainsKey(a.Key)).ToDictionary(),
+                            shouldByName.Where(a => !middleByName.ContainsKey(a.Key)).ToDictionary());
+                        if (com != null)
+                            commands.Add(com);
+
+                        if (middleByName.Any())
+                        {
+                            var backFromAux = SyncEnums(schema, table,
+                                middleByName,
+                                shouldByName.Where(a => middleByName.ContainsKey(a.Key)).ToDictionary());
+                            if (backFromAux != null)
+                                commands.Add(backFromAux);
+                        }
                     }
                 }
-            }
 
-            return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
+                return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception synchronizing enums: " + e.Message);
+            }
         }
 
         private static SqlPreCommand SyncEnums(Schema schema, Table table, Dictionary<string, Entity> current, Dictionary<string, Entity> should)

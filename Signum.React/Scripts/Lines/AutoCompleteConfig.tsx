@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
-import { getTypeInfo, getQueryKey } from '../Reflection'
+import { getTypeInfo, getQueryKey, QueryTokenString } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { toFilterRequests } from '../Finder';
@@ -173,7 +173,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       Finder.API.FindRowsLike({
         queryKey: getQueryKey(this.findOptions.queryName),
         columns: columns.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnRequest),
-        filters: [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
+        filters: [{ token: QueryTokenString.entity<Entity>().append(e => e.id).toString(), operation: "EqualTo", value: lite.id }],
         orders: [],
         count: 1,
         subString: ""

@@ -61,9 +61,9 @@ label > input[type=checkbox] {
         max-width: 120px;
     }
 
-
-.sf-entity-line-entity {
-    background: transparent;
+.sf-entity-line-entity,
+.sf-entity-line-entity:focus{
+    background-color: #f8f8f8;
     overflow: hidden;
 }
 
@@ -252,7 +252,7 @@ body.rtl .form-group.row > label {
 /* Emulating Bootstrap 3 Validation*/
 .has-error,
 .has-error div.rw-widget-picker.rw-widget-container {
-    border-color: #a94442;
+    border-color: #a94442 !important;
 }
 
     .has-error label {
@@ -341,7 +341,12 @@ select.form-control-xs:not([size]):not([multiple]),
     margin-bottom: 5px;
 }
 
-
+.btn-xs, .btn-group-xs > .btn {
+    padding: 0rem 0.2rem;
+    font-size: 0.875rem;
+    /*line-height: 1.5;*/
+    border-radius: 0.2rem;
+}
 
 .rw-widget-sm .rw-input {
     padding: 3px 6px;
@@ -416,4 +421,14 @@ table.sf-multi-value {
     line-height: 1;
     border-radius: 0.25rem;
     background-color: #efefef;
+}
+
+body.rtl .sf-mandatory,
+body.rtl .sf-mandatory-widget .rw-input {
+    border-right: 2px solid red;
+}
+
+body:not(.rtl) .sf-mandatory,
+body:not(.rtl) .sf-mandatory-widget .rw-input {
+    border-left: 2px solid red;
 }

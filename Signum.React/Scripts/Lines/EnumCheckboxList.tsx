@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { getTypeInfo } from '../Reflection'
@@ -70,7 +70,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        <div className={classes("SF-checkbox-list", this.state.ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
           {this.renderContent()}
         </div>
       );

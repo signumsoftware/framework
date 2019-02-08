@@ -10,7 +10,8 @@ export const ColumnOptionsMode = new EnumType<ColumnOptionsMode>("ColumnOptionsM
 export type ColumnOptionsMode =
   "Add" |
   "Remove" |
-  "Replace";
+  "Replace" |
+  "InsertStart";
 
 export const FilterGroupOperation = new EnumType<FilterGroupOperation>("FilterGroupOperation");
 export type FilterGroupOperation =

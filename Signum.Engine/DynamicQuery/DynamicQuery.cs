@@ -28,9 +28,9 @@ namespace Signum.Engine.DynamicQuery
         public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> lazyQueryCore, Implementations entityImplementations)
         {
             if (lazyQueryCore == null)
-                throw new ArgumentNullException("lazyQueryCore");
+                throw new ArgumentNullException(nameof(lazyQueryCore));
 
-            this.QueryName = queryName ?? throw new ArgumentNullException("queryName");
+            this.QueryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
             this.EntityImplementations = entityImplementations;
 
             this.Core = new ResetLazy<IDynamicQueryCore>(() =>
@@ -651,7 +651,7 @@ namespace Signum.Engine.DynamicQuery
         public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, CancellationToken token)
         {
             if (pagination == null)
-                throw new ArgumentNullException("pagination");
+                throw new ArgumentNullException(nameof(pagination));
 
             if (pagination is Pagination.All)
             {
@@ -686,7 +686,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination)
         {
             if (pagination == null)
-                throw new ArgumentNullException("pagination");
+                throw new ArgumentNullException(nameof(pagination));
 
             if (pagination is Pagination.All)
             {
@@ -721,7 +721,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
         {
             if (pagination == null)
-                throw new ArgumentNullException("pagination");
+                throw new ArgumentNullException(nameof(pagination));
 
             if (pagination is Pagination.All)
             {
@@ -759,7 +759,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
         {
             if (pagination == null)
-                throw new ArgumentNullException("pagination");
+                throw new ArgumentNullException(nameof(pagination));
 
             if (pagination is Pagination.All)
             {

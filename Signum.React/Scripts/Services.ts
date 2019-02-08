@@ -351,6 +351,9 @@ export class AbortableRequest<Q, A> {
     }
   }
 
+  isRunning() {
+    return this.abortController != null;
+  }
 
   getData(query: Q): Promise<A> {
 

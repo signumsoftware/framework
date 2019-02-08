@@ -3,9 +3,9 @@ Array.prototype.clear = function (): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string): { key: string; elements: any[] }[] {
-  const result: { key: string; elements: any[] }[] = [];
-  const objectGrouped = this.groupToObject(keySelector);
+Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string | number): { key: any /*string*/; elements: any[] }[] {
+  const result: { key: string | number; elements: any[] }[] = [];
+  const objectGrouped = this.groupToObject(keySelector as ((element: any) => string));
   for (const prop in objectGrouped) {
     if (objectGrouped.hasOwnProperty(prop))
       result.push({ key: prop, elements: objectGrouped[prop] });
@@ -52,10 +52,10 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
   return result;
 };
 
-Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): { key: string, elements: any[] }[] {
+Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string | number): { key: any /*string*/, elements: any[] }[] {
   const result: { key: any, elements: any[] }[] = [];
 
-  let current: { key: string, elements: any[] } | undefined = undefined;
+  let current: { key: string | number, elements: any[] } | undefined = undefined;
 
   for (let i = 0; i < this.length; i++) {
     const item: any = this[i];
@@ -112,7 +112,7 @@ Array.prototype.withMin = function (this: any[], keySelector: (element: any) => 
 
   var min = keySelector(this[0]);
   var result = this[0];
-  for (var i = 0; i < this.length; i++) {
+  for (var i = 1; i < this.length; i++) {
     var val = keySelector(this[i]);
     if (val < min) {
       min = val;
@@ -128,7 +128,7 @@ Array.prototype.withMax = function (this: any[], keySelector: (element: any) => 
 
   var max = keySelector(this[0]);
   var result = this[0];
-  for (var i = 0; i < this.length; i++) {
+  for (var i = 1; i < this.length; i++) {
     var val = keySelector(this[i]);
     if (val > max) {
       max = val;
@@ -228,18 +228,40 @@ Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize
 
 Array.prototype.max = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-  if (selector)
-    return Math.max.apply(undefined, this.map(selector));
+  var array: number[]= selector ?
+    this.map(selector).filter(a => a != null) :
+    this.filter(a => a != null);
+  
+  if (array.length == 0)
+    return null;
 
-  return Math.max.apply(undefined, this);
+  var max = array[0];
+  for (var i = 1; i < array.length; i++) {
+    var val = array[i];
+    if (max < val) {
+      max = val;
+    }
+  }
+  return max;
 };
 
 Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-  if (selector)
-    return Math.min.apply(undefined, this.map(selector));
+  var array : number[] = selector ?
+    this.map(selector).filter(a => a != null) :
+    this.filter(a => a != null);
 
-  return Math.min.apply(undefined, this);
+  if (array.length == 0)
+    return null;
+
+  var min = array[0];
+  for (var i = 1; i < array.length; i++) {
+    var val = array[i];
+    if (val < min) {
+      min = val;
+    }
+  }
+  return min;
 };
 
 Array.prototype.sum = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
@@ -770,6 +792,17 @@ export module Dic {
         delete obj[name];
       }
     }
+  }
+
+  export function except(obj: { [key: string]: any }, keys: string[]): { [key: string]: any } {
+    var result : { [key: string]: any } = {};
+    for (const name in obj) {
+      if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
+        if (!keys.contains(name))
+          result[name] = obj[name];
+      }
+    }
+    return result; 
   }
 
   export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): R[] {

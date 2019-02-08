@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import { classes } from '../Globals';
 
@@ -33,7 +33,7 @@ export class DropdownItem extends React.Component<DropdownItemProps> {
   }
 
   onClick = (e: React.MouseEvent<any>) => {
-    if (this.props.disabled || this.props.header || this.props.divider) {
+    if (this.props.disabled || this.props.divider) {
       e.preventDefault();
       return;
     }
@@ -74,6 +74,7 @@ export class DropdownItem extends React.Component<DropdownItemProps> {
       !divider && !header && 'dropdown-item',
       active && 'active',
       header && 'dropdown-header',
+      header && !disabled && (this.props.onClick || this.props.toggle) && 'sf-cursor-pointer',
       divider && 'dropdown-divider'
     );
 

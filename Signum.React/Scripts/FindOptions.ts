@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";
@@ -25,7 +25,7 @@ export interface ModalFindOptions {
 export interface FindOptions {
   queryName: PseudoType | QueryKey;
   groupResults?: boolean;
-  parentToken?: string;
+  parentToken?: string | QueryTokenString<any>;
   parentValue?: any;
 
   filterOptions?: FilterOption[];
@@ -54,16 +54,19 @@ export function isFilterGroupOption(fo: FilterOption): fo is FilterGroupOption {
 }
 
 export interface FilterConditionOption {
-  token: string;
+  token: string | QueryTokenString<any>;
   frozen?: boolean;
   operation?: FilterOperation;
-  value: any;
+  value?: any;
+  pinned?: PinnedFilter;
 }
 
 export interface FilterGroupOption {
-  token: string;
+  token?: string | QueryTokenString<any>;
   groupOperation: FilterGroupOperation;
   filters: FilterOption[];
+  pinned?: PinnedFilter;
+  value?: string; /*For search in multiple columns*/
 }
 
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
@@ -77,6 +80,15 @@ export interface FilterConditionOptionParsed {
   frozen: boolean;
   operation?: FilterOperation;
   value: any;
+  pinned?: PinnedFilter;
+}
+
+export interface PinnedFilter {
+  label?: string;
+  row?: number;
+  column?: number;
+  disableOnNull?: boolean;
+  splitText?: boolean;
 }
 
 export interface FilterGroupOptionParsed {
@@ -84,10 +96,12 @@ export interface FilterGroupOptionParsed {
   frozen: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
+  pinned?: PinnedFilter;
+  value?: string; /*For search in multiple columns*/
 }
 
 export interface OrderOption {
-  token: string;
+  token: string | QueryTokenString<any>;
   orderType: OrderType;
 }
 
@@ -97,7 +111,7 @@ export interface OrderOptionParsed {
 }
 
 export interface ColumnOption {
-  token: string;
+  token: string | QueryTokenString<any>;
   displayName?: string;
 }
 
@@ -164,6 +178,28 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
     return true;
 
   return hasAggregate(token.parent);
+}
+
+export function withoutAggregateAndPinned(fop: FilterOptionParsed): FilterOptionParsed | undefined {
+
+  if (hasAggregate(fop.token))
+    return undefined;
+
+  if (isFilterGroupOptionParsed(fop)) {
+    var newFilters = fop.filters.map(f => withoutAggregateAndPinned(f)).filter(Boolean);
+    if (newFilters.length == 0)
+      return undefined;
+    return ({
+      ...fop,
+      filters: newFilters,
+      pinned: undefined
+    }) as FilterOptionParsed;
+  };
+
+  return {
+    ...fop,
+    pinned: undefined
+  };
 }
 
 export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
@@ -245,6 +281,7 @@ export interface QueryValueRequest {
   queryKey: string;
   filters: FilterRequest[];
   valueToken?: string;
+  systemTime?: SystemTime;
 }
 
 export interface ResultColumn {

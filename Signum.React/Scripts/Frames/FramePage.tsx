@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -13,7 +13,7 @@ import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 
-interface FramePageProps extends RouteComponentProps<{ type: string; id?: string, waitData?: string }> {
+interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
 }
 
@@ -100,7 +100,8 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
 
   loadComponent(): Promise<void> {
-    return Navigator.getViewPromise(this.state.pack!.entity).promise
+    const viewName: string | undefined = QueryString.parse(this.props.location.search).viewName
+    return Navigator.getViewPromise(this.state.pack!.entity, viewName).promise
       .then(c => this.setState({ getComponent: c }));
   }
 
@@ -200,7 +201,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       <h4>
         <span className="display-6 sf-entity-title">{getToString(entity)}</span>
         <br />
-        <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
+        <small className="sf-type-nice-name text-muted">{Navigator.getTypeTitle(entity, undefined)}</small>
       </h4>
     );
   }

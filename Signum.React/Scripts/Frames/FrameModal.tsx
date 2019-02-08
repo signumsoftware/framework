@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
@@ -27,7 +27,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   requiresSaveOperation?: boolean;
   avoidPromptLooseChange?: boolean;
   extraComponentProps?: {}
-  getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+  getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   isNavigate?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
@@ -60,7 +60,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
   componentWillMount() {
     Navigator.toEntityPack(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
-      .then(() => this.loadComponent())
+      .then(pack => this.loadComponent(pack))
       .done();
   }
 
@@ -69,7 +69,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     Navigator.toEntityPack(props.entityOrPack)
       .then(ep => this.setPack(ep))
-      .then(() => this.loadComponent())
+      .then(pack => this.loadComponent(pack))
       .done();
   }
 
@@ -104,19 +104,21 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
 
 
-  setPack(pack: EntityPack<ModifiableEntity>): void {
+  setPack(pack: EntityPack<ModifiableEntity>): EntityPack<ModifiableEntity> {
     this.setState({
       pack: pack,
       refreshCount: this.state.refreshCount + 1,
       lastEntity: JSON.stringify(pack.entity)
     });
+
+    return pack;
   }
 
-  loadComponent() {
+  loadComponent(pack: EntityPack<ModifiableEntity>) {
 
-    const result = this.props.getViewPromise && this.props.getViewPromise(this.state.pack!.entity);
+    const result = this.props.getViewPromise && this.props.getViewPromise(pack.entity);
 
-    var viewPromise = result instanceof ViewPromise ? result : Navigator.getViewPromise(this.state.pack!.entity, result);
+    var viewPromise = result instanceof ViewPromise ? result : Navigator.getViewPromise(pack.entity, result);
 
     if (this.props.extraComponentProps)
       viewPromise = viewPromise.withProps(this.props.extraComponentProps);
@@ -190,7 +192,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     const entity = this.state.pack.entity;
 
-    GraphExplorer.propagateAll(entity);
+    var ge = GraphExplorer.propagateAll(entity);
 
     return entity.modified && JSON.stringify(entity) != this.state.lastEntity;
   }
@@ -285,7 +287,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
                 {this.renderExpandLink()}
         <br />
-        <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+        <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
       </span>
     );
   }
@@ -311,7 +313,10 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
   handlePopupFullScreen = (e: React.MouseEvent<any>) => {
     e.preventDefault();
-    Navigator.pushOrOpenInTab(Navigator.navigateRoute(this.state.pack!.entity as Entity), e);
+
+    var entity = this.state.pack!.entity;
+    var vp = this.props.getViewPromise && this.props.getViewPromise(entity);
+    Navigator.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }
 
   static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity | undefined> {

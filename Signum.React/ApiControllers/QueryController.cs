@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Basics;
@@ -103,6 +103,8 @@ namespace Signum.React.ApiControllers
         {
             public string token;
             public SubTokensOptions options;
+
+            public override string ToString() => $"{token} ({options})";
         }
 
         public class ParseTokensRequest
@@ -158,6 +160,7 @@ namespace Signum.React.ApiControllers
         public string querykey;
         public List<FilterTS> filters;
         public string valueToken;
+        public SystemTimeTS/*?*/ systemTime;
 
         public QueryValueRequest ToQueryCountRequest()
         {
@@ -171,6 +174,7 @@ namespace Signum.React.ApiControllers
                 QueryName = qn,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
                 ValueToken = value,
+                SystemTime = this.systemTime?.ToSystemTime(),
             };
         }
 

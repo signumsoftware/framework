@@ -1,4 +1,4 @@
-﻿using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -331,8 +331,8 @@ namespace Signum.Utilities
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
-            foreach (var item in keys.ZipStrict(values))
-                dictionary.Add(item.first, item.second);
+            foreach (var (first, second) in keys.ZipStrict(values))
+                dictionary.Add(first, second);
         }
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values, string errorContext)
@@ -387,8 +387,8 @@ namespace Signum.Utilities
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
-            foreach (var item in keys.ZipStrict(values))
-                dictionary[item.first] = item.second;
+            foreach (var (first, second) in keys.ZipStrict(values))
+                dictionary[first] = second;
         }
 
         public static void SetRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
@@ -406,9 +406,9 @@ namespace Signum.Utilities
 
         public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
-            foreach (var item in keys.ZipStrict(values))
-                if (!dictionary.ContainsKey(item.first))
-                    dictionary[item.first] = item.second;
+            foreach (var (first, second) in keys.ZipStrict(values))
+                if (!dictionary.ContainsKey(first))
+                    dictionary[first] = second;
         }
 
         public static void DefaultRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)

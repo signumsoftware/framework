@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type } from './Reflection'
@@ -10,11 +10,14 @@ import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is } from 
 import { onWidgets, WidgetContext } from './Frames/Widgets'
 import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
 import { DropdownItem, DropdownToggle, DropdownMenu, UncontrolledDropdown } from './Components';
+import { TitleManager } from './Lines/EntityBase';
 
 export function start() {
 
   onWidgets.push(getQuickLinkWidget);
   onContextualItems.push(getQuickLinkContextMenus);
+
+  Navigator.clearSettingsActions.push(clearQuickLinks);
 }
 
 export interface QuickLinkContext<T extends Entity> {
@@ -24,6 +27,11 @@ export interface QuickLinkContext<T extends Entity> {
 }
 
 type Seq<T> = (T | undefined)[] | T | undefined;
+
+export function clearQuickLinks() {
+  onGlobalQuickLinks.clear();
+  Dic.clear(onQuickLinks);
+}
 
 export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> = [];
 export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {
@@ -146,7 +154,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         <DropdownToggle tag="span" data-toggle="dropdown">
           <a
             className={classes("badge badge-secondary badge-pill", "sf-widgets-active", "sf-quicklinks")}
-            title={QuickLinkMessage.Quicklinks.niceToString()}
+            title={TitleManager.useTitle ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
             role="button"
             href="#"
             data-toggle="dropdown"

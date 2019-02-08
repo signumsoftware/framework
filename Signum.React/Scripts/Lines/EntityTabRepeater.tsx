@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, MListElement, EntityControlMessage, getToString } from '../Signum.Entities'
@@ -8,6 +8,7 @@ import { Tab, Tabs } from '../Components/Tabs';
 import { newMListElement } from '../Signum.Entities';
 import { isLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TitleManager } from './EntityBase';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean;
@@ -37,7 +38,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+        <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
           {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
           {this.renderButtons()}
           {this.renderTabs()}
@@ -60,7 +61,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
   renderButtons() {
     const buttons = (
-      <span className="float-right">
+      <span className="ml-2">
         {this.renderCreateButton(false)}
         {this.renderFindButton(false)}
       </span>
@@ -93,16 +94,16 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 										{this.canRemove(mlec.value) && !readOnly &&
                     <span className={classes("sf-line-button", "sf-create")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
-                      title={EntityControlMessage.Remove.niceToString()}>
+                      title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
                     </span>
                   }
                   &nbsp;
-                                        {drag && <span className={classes("sf-line-button", "sf-move")}
+                {drag && <span className={classes("sf-line-button", "sf-move")}
                     draggable={true}
                     onDragStart={drag.onDragStart}
                     onDragEnd={drag.onDragEnd}
-                    title={EntityControlMessage.Move.niceToString()}>
+                    title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
                     <FontAwesomeIcon icon="bars" />
                   </span>}
                 </div> as any

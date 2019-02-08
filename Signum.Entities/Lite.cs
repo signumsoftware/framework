@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -32,7 +32,7 @@ namespace Signum.Entities
         void ClearEntity();
         void SetEntity(Entity ei);
         void SetToString(string toStr);
-        void RefreshId();
+        PrimaryKey RefreshId();
 
         string Key();
         string KeyLong();
@@ -81,7 +81,7 @@ namespace Signum.Entities
                     throw new InvalidOperationException(typeof(T).Name + " is abstract");
 
                 if (entity.GetType() != typeof(T))
-                    throw new ArgumentNullException("entity");
+                    throw new ArgumentNullException(nameof(entity));
 
                 this.entityOrNull = entity;
                 this.id = entity.IdOrNull;
@@ -155,9 +155,11 @@ namespace Signum.Entities
                 this.entityOrNull = null;
             }
 
-            public void RefreshId()
+            public PrimaryKey RefreshId()
             {
-                id = entityOrNull.Id;
+                var newId = entityOrNull.Id;
+                id = newId;
+                return newId;
             }
 
             protected internal override void PreSaving(PreSavingContext ctx)

@@ -25,7 +25,7 @@ export default class ButtonBar extends React.Component<ButtonBarProps>{
       .map((a, i) => OrderUtils.cloneElementWithoutOrder(a!, { key: i }));
 
     return (
-      <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "right" : undefined)} >
+      <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "justify-content-end" : undefined)} >
         {buttons}
       </div>
     );

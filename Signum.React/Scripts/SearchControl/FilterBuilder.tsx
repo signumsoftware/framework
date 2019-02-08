@@ -1,15 +1,18 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as moment from 'moment'
 import { Dic, areEqual, classes } from '../Globals'
-import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption } from '../FindOptions'
+import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
-import { ValueLine, EntityLine, EntityCombo } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, StyleContext } from '../Lines'
 import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FilterGroupOperation } from '../Signum.Entities.DynamicQuery';
 import "./FilterBuilder.css"
+import { NumericTextBox } from '../Lines/ValueLine';
+import PinnedFilterBuilder from './PinnedFilterBuilder';
+import { TitleManager } from '../Lines/EntityBase';
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -21,7 +24,8 @@ interface FilterBuilderProps {
   onHeightChanged?: () => void;
   readOnly?: boolean;
   title?: React.ReactNode;
-  renderValue?: (fc: FilterConditionComponent) => React.ReactElement<any> | undefined;
+  renderValue?: (fc: FilterConditionComponent | FilterGroupComponent) => React.ReactElement<any> | undefined;
+  showPinnedFilters?: boolean;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps>{
@@ -80,6 +84,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                 <th>{SearchMessage.Field.niceToString()}</th>
                 <th>{SearchMessage.Operation.niceToString()}</th>
                 <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
+                {this.props.showPinnedFilters && <th></th>}
               </tr>
             </thead>
             <tbody>
@@ -88,24 +93,26 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                   prefixToken={undefined}
                   subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
                   onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.handleFilterChanged}
-                  lastToken={this.props.lastToken} onHeightChanged={this.handleHeightChanged} renderValue={this.props.renderValue} /> :
+                  lastToken={this.props.lastToken} onHeightChanged={this.handleHeightChanged} renderValue={this.props.renderValue}
+                  showPinnedFilters={this.props.showPinnedFilters || false} disableValue={false} /> :
                 <FilterConditionComponent key={i} filter={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
                   prefixToken={undefined}
                   subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
-                  onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.handleFilterChanged} renderValue={this.props.renderValue} />
+                  onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.handleFilterChanged} renderValue={this.props.renderValue}
+                  showPinnedFilters={this.props.showPinnedFilters || false} disableValue={false} />
               )}
               {!this.props.readOnly &&
                 <tr >
-                  <td colSpan={4}>
-                    <a href="#" title={SearchMessage.AddFilter.niceToString()}
+                <td colSpan={4}>
+                  <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={e => this.handlerNewFilter(e, false)}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
-                    </a>
-                    <a href="#" title={SearchMessage.AddGroup.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddFilter.niceToString()}
+                  </a>
+                  <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
                       className="sf-line-button sf-create ml-3"
                       onClick={e => this.handlerNewFilter(e, true)}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
                     </a>
                   </td>
                 </tr>
@@ -129,11 +136,14 @@ export interface FilterGroupComponentsProps extends React.Props<FilterConditionC
   onFilterChanged: () => void;
   onHeightChanged: () => void;
   lastToken: QueryToken | undefined;
-  renderValue?: (fc: FilterConditionComponent) => React.ReactElement<any> | undefined;
+  renderValue?: (fc: FilterConditionComponent | FilterGroupComponent) => React.ReactElement<any> | undefined;
+  showPinnedFilters: boolean;
+  disableValue: boolean;
 }
 
 
 export class FilterGroupComponent extends React.Component<FilterGroupComponentsProps>{
+
   handleDeleteFilter = (e: React.MouseEvent<any>) => {
     e.preventDefault();
     this.props.onDeleteFilter(this.props.filterGroup);
@@ -205,29 +215,51 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
       <tr>
         <td style={{ verticalAlign: "top" }}>
           {!readOnly &&
-            <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+            <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={this.handleDeleteFilter}>
               <FontAwesomeIcon icon="times" />
             </a>}
         </td>
         <td colSpan={3} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
-          <select className="form-control form-control-sm sf-group-selector" value={fg.groupOperation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
-            {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
-          </select>
-          <div className={classes("rw-widget-xs ml-3", fg.token == null ? "hidden" : undefined)} style={{ display: "inline" }}>
-            <label>Prefix:&nbsp;</label>
-            <QueryTokenBuilder
-              prefixQueryToken={this.props.prefixToken}
-              queryToken={fg.token}
-              onTokenChange={this.handleTokenChanged}
-              queryKey={this.props.queryDescription.queryKey}
-              subTokenOptions={this.props.subTokensOptions}
-              readOnly={readOnly} />
+          <div className="justify-content-between d-flex" >
+            <div className="form-inline">
+              <label>Group:</label>
+              <select className="form-control form-control-sm sf-group-selector ml-2" value={fg.groupOperation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
+                {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
+              </select>
+            </div>
+
+            <div className="form-inline">
+              <label>Prefix:</label>
+              <div className={classes("rw-widget-xs ml-3", fg.token == null ? "hidden" : undefined)}>
+                <QueryTokenBuilder
+                  prefixQueryToken={this.props.prefixToken}
+                  queryToken={fg.token}
+                  onTokenChange={this.handleTokenChanged}
+                  queryKey={this.props.queryDescription.queryKey}
+                  subTokenOptions={this.props.subTokensOptions}
+                  readOnly={readOnly} />
+              </div>
+            </div>
+            {fg.pinned && <div>
+            {(this.props.renderValue ? this.props.renderValue(this) : this.renderValue())}
+              
+              
+
+            </div>}
+            <div>
+              {this.props.showPinnedFilters &&
+                <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => { fg.pinned = fg.pinned ? undefined : {}; this.changeFilter(); }}>
+                  <FontAwesomeIcon color="orange" icon={[fg.pinned ? "fas" : "far", "star"]} />
+                </button>
+              }
+            </div>
           </div>
           <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-            <table className="table-sm">
+            <table className="table-sm" style={{ width: "100%" }}>
               <thead>
+                {fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => this.changeFilter()} />}
                 <tr>
                   <th style={{ minWidth: "24px" }}></th>
                   <th>{SearchMessage.Field.niceToString()}</th>
@@ -242,23 +274,29 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
                     prefixToken={fg.token}
                     subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
                     onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged}
-                    lastToken={this.props.lastToken} onHeightChanged={this.props.onHeightChanged} renderValue={this.props.renderValue} /> :
+                    lastToken={this.props.lastToken} onHeightChanged={this.props.onHeightChanged} renderValue={this.props.renderValue}
+                    showPinnedFilters={this.props.showPinnedFilters}
+                    disableValue={this.props.disableValue || Boolean(fg.pinned)}
+                  /> :
 
                   <FilterConditionComponent key={i} filter={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
                     prefixToken={fg.token}
                     subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
-                    onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged} renderValue={this.props.renderValue} />
+                    onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged} renderValue={this.props.renderValue}
+                    showPinnedFilters={this.props.showPinnedFilters}
+                    disableValue={this.props.disableValue || Boolean(fg.pinned)}
+                  />
                 )}
                 {!this.props.readOnly &&
                   <tr >
-                    <td colSpan={4}>
-                      <a href="#" title={SearchMessage.AddFilter.niceToString()}
+                  <td colSpan={4}>
+                      <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
                         className="sf-line-button sf-create"
                         onClick={e => this.handlerNewFilter(e, false)}>
                         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
                       </a>
 
-                      <a href="#" title={SearchMessage.AddGroup.niceToString()}
+                      <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
                         className="sf-line-button sf-create ml-3"
                         onClick={e => this.handlerNewFilter(e, true)}>
                         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
@@ -274,7 +312,26 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
     );
   }
 
+  renderValue() {
 
+    const f = this.props.filterGroup;
+
+    const readOnly = this.props.readOnly || f.frozen;
+    
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+
+    return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => this.handleValueChange()} />
+
+  }
+
+  handleValueChange = () => {
+    this.props.onFilterChanged();
+  }
+
+  changeFilter() {
+    this.forceUpdate();
+    this.props.onFilterChanged();
+  }
 }
 
 export interface FilterConditionComponentProps extends React.Props<FilterConditionComponent> {
@@ -285,8 +342,10 @@ export interface FilterConditionComponentProps extends React.Props<FilterConditi
   queryDescription: QueryDescription;
   subTokensOptions: SubTokensOptions;
   onTokenChanged?: (token: QueryToken | undefined) => void;
-  onFilterChanged: (filter: FilterConditionOptionParsed) => void;
-  renderValue?: (fc: FilterConditionComponent) => React.ReactElement<any> | undefined;
+  onFilterChanged: () => void;
+  renderValue?: (fc: FilterConditionComponent | FilterGroupComponent) => React.ReactElement<any> | undefined;
+  showPinnedFilters: boolean;
+  disableValue: boolean;
 }
 
 export class FilterConditionComponent extends React.Component<FilterConditionComponentProps>{
@@ -319,7 +378,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
     if (this.props.onTokenChanged)
       this.props.onTokenChanged(newToken || undefined);
 
-    this.props.onFilterChanged(this.props.filter);
+    this.props.onFilterChanged();
 
     this.forceUpdate();
   }
@@ -341,7 +400,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
 
     this.props.filter.operation = operation;
 
-    this.props.onFilterChanged(this.props.filter);
+    this.props.onFilterChanged();
 
     this.forceUpdate();
   }
@@ -352,40 +411,59 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
     const readOnly = f.frozen || this.props.readOnly;
 
     return (
-      <tr>
-        <td>
-          {!readOnly &&
-            <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-              className="sf-line-button sf-remove"
-              onClick={this.handleDeleteFilter}>
-              <FontAwesomeIcon icon="times" />
-            </a>}
-        </td>
-        <td>
-          <div className="rw-widget-xs">
-            <QueryTokenBuilder
-              prefixQueryToken={this.props.prefixToken}
-              queryToken={f.token}
-              onTokenChange={this.handleTokenChanged}
-              queryKey={this.props.queryDescription.queryKey}
-              subTokenOptions={this.props.subTokensOptions}
-              readOnly={readOnly} />
-          </div>
-        </td>
-        <td className="sf-filter-operation">
-          {f.token && f.token.filterType && f.operation &&
-            <select className="form-control form-control-xs" value={f.operation} disabled={readOnly} onChange={this.handleChangeOperation}>
-              {f.token.filterType && filterOperations[f.token.filterType!]
-                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
-            </select>}
-        </td>
+      <>
+        <tr>
+          <td>
+            {!readOnly &&
+              <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
+                className="sf-line-button sf-remove"
+                onClick={this.handleDeleteFilter}>
+                <FontAwesomeIcon icon="times" />
+              </a>}
+          </td>
+          <td>
+            <div className="rw-widget-xs">
+              <QueryTokenBuilder
+                prefixQueryToken={this.props.prefixToken}
+                queryToken={f.token}
+                onTokenChange={this.handleTokenChanged}
+                queryKey={this.props.queryDescription.queryKey}
+                subTokenOptions={this.props.subTokensOptions}
+                readOnly={readOnly} />
+            </div>
+          </td>
+          <td className="sf-filter-operation">
+            {f.token && f.token.filterType && f.operation &&
+              <select className="form-control form-control-xs" value={f.operation} disabled={readOnly} onChange={this.handleChangeOperation}>
+                {f.token.filterType && filterOperations[f.token.filterType!]
+                  .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
+              </select>}
+          </td>
 
-        <td className="sf-filter-value">
-          {f.token && f.token.filterType && f.operation && (this.props.renderValue ? this.props.renderValue(this) : this.renderValue())}
-        </td>
-      </tr>
+          <td className="sf-filter-value">
+            {this.props.disableValue ? <small className="text-muted">{SearchMessage.ParentValue.niceToString()}</small> :
+              f.token && f.token.filterType && f.operation && (this.props.renderValue ? this.props.renderValue(this) : this.renderValue())}
+          </td>
+          {f.token && f.token.filterType && f.operation && this.props.showPinnedFilters &&
+            <td>
+              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => { f.pinned = f.pinned ? undefined : {}; this.changeFilter(); }}>
+                <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} />
+              </button>
+            </td>
+          }
+        </tr>
+        {this.props.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => this.changeFilter()} />}
+      </>
     );
   }
+
+
+
+  changeFilter() {
+    this.forceUpdate();
+    this.props.onFilterChanged();
+  }
+
 
   renderValue() {
 
@@ -394,40 +472,88 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
     const readOnly = this.props.readOnly || f.frozen;
 
     if (isList(f.operation!))
-      return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} readOnly={readOnly} onChange={this.handleValueChange} />;
+      return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, this.handleValueChange)} readOnly={readOnly} onChange={this.handleValueChange} />;
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
-    return this.handleCreateAppropiateControl(ctx);
+    return createFilterValueControl(ctx, f.token!, this.handleValueChange);
   }
 
-  handleCreateAppropiateControl = (ctx: TypeContext<any>): React.ReactElement<any> => {
-
-    const token = this.props.filter.token!;
-
-    switch (token.filterType) {
-      case "Lite":
-        if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
-          return <EntityLine ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />;
-        else
-          return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />
-      case "Embedded":
-        return <EntityLine ctx={ctx} type={token.type} create={false} autocomplete={null} onChange={this.handleValueChange} />;
-      case "Enum":
-        const ti = getTypeInfos(token.type).single();
-        if (!ti)
-          throw new Error(`EnumType ${token.type.name} not found`);
-        const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-        return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={this.handleValueChange} />;
-      default:
-        return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={this.handleValueChange} />;
-    }
-  }
 
   handleValueChange = () => {
-    this.props.onFilterChanged(this.props.filter);
+    this.props.onFilterChanged();
   }
 }
+
+
+interface PinnedFilterEditorProps {
+  pinned: PinnedFilter;
+  onChange: () => void;
+}
+
+export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps> {
+  render() {
+    var p = this.props.pinned;
+    return (
+      <tr style={{ backgroundColor: "#fff6e6", verticalAlign: "top" }}>
+        <td></td>
+        <td>
+          <div>
+            <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()}
+              value={p.label || ""}
+              onChange={e => { p!.label = e.currentTarget.value; this.props.onChange(); }} />
+          </div>
+        </td>
+        <td>
+          <div className="input-group input-group-xs">
+            <NumericTextBox value={p.column == undefined ? null : p.column} onChange={n => { p!.column = n == null ? undefined : n; this.props.onChange(); }}
+              validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: SearchMessage.Column.niceToString(), style: { width: "30px" } }} />
+            <NumericTextBox value={p.row == undefined ? null : p.row} onChange={n => { p!.row = n == null ? undefined : n; this.props.onChange(); }}
+              validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: SearchMessage.Row.niceToString(), style: { width: "30px" } }} />
+          </div>
+        </td>
+        <td colSpan={2}>
+          <div className="btn-group btn-group-xs" role="group" aria-label="Basic example" style={{ verticalAlign: "unset" }}>
+            {this.renderButton(Binding.create(p, a => a.splitText), "SplitText", "To enable google-like search")}
+            {this.renderButton(Binding.create(p, a => a.disableOnNull), "DisableNull", "Disables the filter when no value is selected")}
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
+    return (
+      <button type="button" className={classes("btn btn-light", binding.getValue() && "active")}
+        onClick={e => { binding.setValue(!binding.getValue()); this.props.onChange(); }}
+        title={TitleManager.useTitle ? title : undefined}>
+        {label}
+      </button>
+    );
+  }
+}
+
+export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string): React.ReactElement<any> {
+
+  switch (token.filterType) {
+    case "Lite":
+      if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
+        return <EntityLine ctx={ctx} type={token.type} create={false} onChange={handleValueChange} labelText={labelText} />;
+      else
+        return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={handleValueChange} labelText={labelText} />
+    case "Embedded":
+      return <EntityLine ctx={ctx} type={token.type} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
+    case "Enum":
+      const ti = getTypeInfos(token.type).single();
+      if (!ti)
+        throw new Error(`EnumType ${token.type.name} not found`);
+      const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
+      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={handleValueChange} labelText={labelText} />;
+    default:
+      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={handleValueChange} labelText={labelText} />;
+  }
+}
+
 
 
 export interface MultiValueProps {
@@ -464,7 +590,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
               <tr key={i}>
                 <td>
                   {!this.props.readOnly &&
-                    <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+                    <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
                       className="sf-line-button sf-remove"
                       onClick={e => this.handleDeleteValue(e, i)}>
                       <FontAwesomeIcon icon="times" />
@@ -485,7 +611,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
           <tr >
             <td colSpan={4}>
               {!this.props.readOnly &&
-                <a href="#" title={SearchMessage.AddValue.niceToString()}
+                <a href="#" title={TitleManager.useTitle ? SearchMessage.AddValue.niceToString() : undefined}
                   className="sf-line-button sf-create"
                   onClick={this.handleAddValue}>
                   <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
@@ -495,9 +621,6 @@ export class MultiValue extends React.Component<MultiValueProps> {
         </tbody>
       </table>
     );
-
   }
 }
-
-
 

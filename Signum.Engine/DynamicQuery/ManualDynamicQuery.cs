@@ -18,7 +18,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ManualDynamicQueryCore(Func<QueryRequest, QueryDescription, CancellationToken, Task<DEnumerableCount<T>>> execute)
         {
-            this.Execute = execute ?? throw new ArgumentNullException("execute");
+            this.Execute = execute ?? throw new ArgumentNullException(nameof(execute));
 
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, null)).ToArray();

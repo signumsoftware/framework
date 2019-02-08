@@ -1,7 +1,7 @@
 import * as React from "react"
 import * as H from "history"
 import { Route, Switch } from "react-router"
-import { Dic, } from './Globals';
+import { Dic, classes, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
@@ -17,6 +17,8 @@ import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
 import ButtonBar from "./Frames/ButtonBar";
+import { clearWidgets } from "./Frames/Widgets";
+import { clearContextualItems } from "./SearchControl/ContextualItems";
 
 Dic.skipClasses.push(React.Component);
 
@@ -64,9 +66,19 @@ export namespace Expander {
   }
 }
 
+export namespace NavigatorManager {
+  export function getFramePage() {
+    return import("./Frames/FramePage");
+  }
+
+  export function getFrameModal() {
+    return import("./Frames/FrameModal");
+  }
+}
+
 export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => import("./Frames/FramePage")} />);
-  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => import("./Frames/FramePage")} />);
+  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
+  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage() } />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -89,43 +101,50 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
     if (entity.isNew)
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return NormalWindowMessage.Type0Id1.niceToString().formatWith(typeInfo.niceName, (entity as Entity).id);
+    return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
   }
 }
 
+let renderId = (entity: Entity): React.ReactChild => <span className={classes(getTypeInfo(entity.Type).members["Id"].type!.name == "Guid" ? "sf-guid-id" : "")}>{entity.id}</span>;
 
-export function navigateRoute(entity: Entity): string;
-export function navigateRoute(lite: Lite<Entity>): string;
-export function navigateRoute(type: PseudoType, id: number | string): string;
-export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string | undefined = undefined): string {
+export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
+  renderId = newFunction;
+}
+
+export function navigateRoute(entity: Entity, viewName?: string): string;
+export function navigateRoute(lite: Lite<Entity>, viewName?: string): string;
+export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: string): string {
   let typeName: string;
-  if (isEntity(typeOrEntity)) {
-    typeName = typeOrEntity.Type;
-    id = typeOrEntity.id;
+  let id: number | string | undefined;
+  if (isEntity(entityOrLite)) {
+    typeName = entityOrLite.Type;
+    id = entityOrLite.id;
   }
-  else if (isLite(typeOrEntity)) {
-    typeName = typeOrEntity.EntityType;
-    id = typeOrEntity.id;
+  else if (isLite(entityOrLite)) {
+    typeName = entityOrLite.EntityType;
+    id = entityOrLite.id;
   }
-  else {
-    typeName = getTypeName(typeOrEntity as PseudoType);
-  }
+  else
+    throw new Error("Entity or Lite expected");
+
+  if (id == null)
+    throw new Error("No Id");
 
   const es = getSettings(typeName);
   if (es && es.onNavigateRoute)
-    return es.onNavigateRoute(typeName, id!);
+    return es.onNavigateRoute(typeName, id!, viewName);
   else
-    return navigateRouteDefault(typeName, id!);
+    return navigateRouteDefault(typeName, id!, viewName);
 
 }
 
-export function navigateRouteDefault(typeName: string, id: number | string) {
-  return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id);
+export function navigateRouteDefault(typeName: string, id: number | string, viewName?: string) {
+  return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id + (viewName ? "?viewName=" + viewName : ""));
 
 }
 
-export function createRoute(type: PseudoType) {
-  return toAbsoluteUrl("~/create/" + getTypeName(type));
+export function createRoute(type: PseudoType, viewName?: string) {
+  return toAbsoluteUrl("~/create/" + getTypeName(type) + (viewName ? "?viewName=" + viewName : ""));
 }
 
 
@@ -135,6 +154,8 @@ export const clearSettingsActions: Array<() => void> = [
   Finder.ButtonBarQuery.clearButtonBarElements,
   ButtonBar.clearButtonBarRenderer,
   Operations.clearOperationSettings,
+  clearWidgets,
+  clearContextualItems
 ];
 
 export function clearAllSettings() {
@@ -588,7 +609,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-  return import("./Frames/FrameModal")
+  return NavigatorManager.getFrameModal()
     .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
@@ -613,7 +634,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-  return import("./Frames/FrameModal")
+  return NavigatorManager.getFrameModal()
     .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
@@ -789,7 +810,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   findOptions?: FindOptions;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
-  onNavigateRoute?: (typeName: string, id: string | number) => string;
+  onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
 

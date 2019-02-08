@@ -1,4 +1,4 @@
-﻿declare function require<T>(path: string): T;
+declare function require<T>(path: string): T;
 declare function require<T>(paths: string[], callback: (...modules: any[]) => void): void;
 
 declare interface Promise<T> {
@@ -11,26 +11,33 @@ declare interface Window {
 }
 
 interface Array<T> {
-  groupBy(this: Array<T>, keySelector: (element: T) => string): { key: string; elements: T[] }[];
+  groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
   groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
   groupWhen(this: Array<T>, condition: (element: T) => boolean): { key: T, elements: T[] }[];
-  groupWhenChange(this: Array<T>, keySelector: (element: T) => string): { key: string, elements: T[] }[];
+  groupWhenChange<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
+
   orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
   orderByDescending<V>(this: Array<T>, keySelector: (element: T) => V): T[];
-  withMin<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
-  withMax<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
+
+  
   toObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
   toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
   toObjectDistinct(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
   toObjectDistinct<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
   distinctBy(this: Array<T>, keySelector?: (element: T) => string): T[];
+
   flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
+
   clear(this: Array<T>): void;
   groupsOf(this: Array<T>, groupSize: number, elementSize?: (item: T) => number): T[][];
-  max(this: Array<T>): T;
-  max<V>(this: Array<T>, selector: (element: T, index: number, array: T[]) => V): V;
-  min(this: Array<T>): T;
-  min<V>(this: Array<T>, selector: (element: T, index: number, array: T[]) => V): V;
+
+  withMin<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
+  withMax<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
+  max(this: Array<number | null | undefined>): number | null;
+  max(this: Array<T>, selector: (element: T, index: number, array: T[]) => number | null | undefined): number | null;
+  min(this: Array<number | null | undefined>): number | null;
+  min(this: Array<T>, selector: (element: T, index: number, array: T[]) => number | null | undefined): number | null;
+
   sum(this: Array<number>): number;
   sum(this: Array<T>, selector: (element: T, index: number, array: T[]) => number): number;
 
@@ -58,6 +65,7 @@ interface Array<T> {
   moveUp(this: Array<T>, index: number): number;
   moveDown(this: Array<T>, index: number): number;
   insertAt(this: Array<T>, index: number, element: T): void;
+
   clone(this: Array<T>, ): T[];
   joinComma(this: Array<T>, lastSeparator: string): string;
   extract(this: Array<T>, filter: (element: T) => boolean): T[];

@@ -4,13 +4,17 @@
     text-align: center;
 }
 
-body:not(.rtl) .dropdown-item .arrow-align {
+body:not(.rtl) .dropdown-item .arrow-align,
+body:not(.rtl) .dropdown-header .arrow-align
+{
     float: right;
     font-size: 11px;
     margin-top: 3px;
 }
 
-body.rtl .dropdown-item .arrow-align {
+body.rtl .dropdown-item .arrow-align,
+body.rtl .dropdown-header .arrow-align
+{
     float: left;
     font-size: 11px;
     margin-top: 3px;
