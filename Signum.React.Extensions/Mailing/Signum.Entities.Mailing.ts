@@ -97,7 +97,7 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   Type: "EmailMessage";
   recipients: Entities.MList<EmailRecipientEmbedded>;
   target?: Entities.Lite<Entities.Entity>;
-  from?: EmailAddressEmbedded | null;
+  from?: EmailAddressEmbedded;
   template?: Entities.Lite<EmailTemplateEntity>;
   creationDate?: string;
   sent?: string | null;

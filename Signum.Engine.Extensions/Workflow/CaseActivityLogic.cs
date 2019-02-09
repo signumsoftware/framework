@@ -412,6 +412,12 @@ namespace Signum.Engine.Workflow
         {
             public Func<ICaseMainEntity> Constructor;
             public Action<ICaseMainEntity> SaveEntity;
+
+            public WorkflowOptions(Func<ICaseMainEntity> constructor, Action<ICaseMainEntity> saveEntity)
+            {
+                Constructor = constructor;
+                SaveEntity = saveEntity;
+            }
         }
         
         public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T> constructor, Action<T> save)
@@ -425,11 +431,7 @@ namespace Signum.Engine.Workflow
                 e.NotifyInProgress();
             };
 
-            Options[typeof(T)] = new WorkflowOptions
-            {
-                Constructor = constructor,
-                SaveEntity = e => save((T)e)
-            };
+            Options[typeof(T)] = new WorkflowOptions(constructor, e => save((T)e));
 
             return fi; 
         }
@@ -456,11 +458,17 @@ namespace Signum.Engine.Workflow
         public class WorkflowExecuteStepContext
         {
             public CaseEntity Case;
-            public CaseActivityEntity CaseActivity;
+            public CaseActivityEntity? CaseActivity;
             public List<WorkflowActivityEntity> ToActivities = new List<WorkflowActivityEntity>();
             public List<WorkflowEventEntity> ToIntermediateEvents = new List<WorkflowEventEntity>();
             public bool IsFinished { get; set; }
             public List<WorkflowConnectionEntity> Connections = new List<WorkflowConnectionEntity>();
+
+            public WorkflowExecuteStepContext(CaseEntity @case, CaseActivityEntity? caseActivity)
+            {
+                Case = @case;
+                CaseActivity = caseActivity;
+            }
 
             public void ExecuteConnection(WorkflowConnectionEntity connection)
             {
@@ -586,11 +594,7 @@ namespace Signum.Engine.Workflow
                             Case = @case,
                         };
 
-                        new WorkflowExecuteStepContext
-                        {
-                            Case = @case,
-                            CaseActivity = ca,
-                        }.ExecuteConnection(connection);
+                        new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
                        
                         return ca;
                     }
@@ -634,11 +638,7 @@ namespace Signum.Engine.Workflow
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
 
-                        new WorkflowExecuteStepContext
-                        {
-                            Case = ca.Case,
-                            CaseActivity = ca,
-                        }.ExecuteConnection(prevConn);
+                        new WorkflowExecuteStepContext(ca.Case, ca).ExecuteConnection(prevConn);
 
                         ca.StartDate = now;
                         ca.Save();
@@ -741,10 +741,10 @@ namespace Signum.Engine.Workflow
 
                         var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || !alreadyExecuted.Contains(e.ToLite())).FirstOrDefault(t =>
                         {
-                            if (t.Timer.Duration != null)
-                                return t.Timer.Duration.Add(ca.StartDate) < now;
+                            if (t.Timer!.Duration != null)
+                                return t.Timer!.Duration!.Add(ca.StartDate) < now;
 
-                            return t.Timer.Condition.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
+                            return t.Timer!.Condition!.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
                         });
                         
                         if (timer == null)
@@ -840,11 +840,11 @@ namespace Signum.Engine.Workflow
                     ToStates = { CaseActivityState.Done },
                     Execute = (ca, args) =>
                     {
-                        var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script.Script.RetrieveFromCache();
+                        var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.Script!.RetrieveFromCache();
                         script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
                         {
                             CaseActivity = ca,
-                            RetryCount = ca.ScriptExecution.RetryCount,
+                            RetryCount = ca.ScriptExecution!.RetryCount,
                         });
                         ExecuteStep(ca, DoneType.ScriptSuccess, null);
                     },
@@ -857,9 +857,10 @@ namespace Signum.Engine.Workflow
                     ToStates = { CaseActivityState.PendingNext },
                     Execute = (ca, args) =>
                     {
-                        ca.ScriptExecution.RetryCount++;
-                        ca.ScriptExecution.NextExecution = args.GetArg<DateTime>();
-                        ca.ScriptExecution.ProcessIdentifier = null;
+                        var se = ca.ScriptExecution!;
+                        se.RetryCount++;
+                        se.NextExecution = args.GetArg<DateTime>();
+                        se.ProcessIdentifier = null;
                         ca.Save();
                     },
                 }.Register();
@@ -886,7 +887,7 @@ namespace Signum.Engine.Workflow
             }
 
 
-            private static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, WorkflowConnectionEntity firstConnection)
+            private static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, WorkflowConnectionEntity? firstConnection)
             {
                 using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection }))
                 {
@@ -904,11 +905,7 @@ namespace Signum.Engine.Workflow
                    .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
                    .Execute();
 
-                var ctx = new WorkflowExecuteStepContext
-                {
-                    Case = ca.Case,
-                    CaseActivity = ca,
-                };
+                var ctx = new WorkflowExecuteStepContext(ca.Case, ca);
 
                 if (firstConnection != null)
                 {
@@ -935,9 +932,8 @@ namespace Signum.Engine.Workflow
                 FinishStep(ca.Case, ctx, ca);
             }
 
-            private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
+            private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? ca)
             {
-                
                 @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
 
                 if (ctx.IsFinished)
@@ -948,7 +944,7 @@ namespace Signum.Engine.Workflow
                     if (@case.CaseActivities().Any(a => a.State == CaseActivityState.PendingNext || a.State == CaseActivityState.PendingDecision))
                         return;
 
-                    @case.FinishDate = ca.DoneDate.Value;
+                    @case.FinishDate = ca!.DoneDate.Value;
                     @case.Save();
 
                     if (@case.ParentCase != null)
@@ -960,7 +956,7 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void CreateNextActivities(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
+            private static void CreateNextActivities(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? ca)
             {
                 @case.Save();
 
@@ -990,7 +986,7 @@ namespace Signum.Engine.Workflow
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
                 var @case = ca.Case;
-                var ctx = new WorkflowExecuteStepContext
+                var ctx = new WorkflowExecuteStepContext(@case, ca)
                 {
                     Case = @case,
                     CaseActivity = ca,
@@ -1011,16 +1007,12 @@ namespace Signum.Engine.Workflow
 
             private static void ExecuteInitialStep(CaseEntity  @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
             {
-
                 SaveEntity(@case.MainEntity);
                 
                 @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
                 @case.Save();
                 
-                var ctx = new WorkflowExecuteStepContext
-                {
-                    Case = @case
-                };
+                var ctx = new WorkflowExecuteStepContext(@case, null);
              
                 if (transition.Condition != null)
                 {
@@ -1038,14 +1030,14 @@ namespace Signum.Engine.Workflow
                 FinishStep(@case, ctx, null);
             }
 
-            static CaseActivityEntity InsertNewCaseActivity(CaseEntity @case, IWorkflowNodeEntity workflowActivity, CaseActivityEntity previous)
+            static CaseActivityEntity InsertNewCaseActivity(CaseEntity @case, IWorkflowNodeEntity workflowActivity, CaseActivityEntity? previous)
             {
                 return new CaseActivityEntity
                 {
                     StartDate = previous?.DoneDate ?? TimeZoneManager.Now,
                     Previous = previous?.ToLite(),
                     WorkflowActivity = workflowActivity,
-                    OriginalWorkflowActivityName = workflowActivity.Name,
+                    OriginalWorkflowActivityName = workflowActivity.GetName()!,
                     Case = @case,
                     ScriptExecution = workflowActivity is WorkflowActivityEntity w && w.Type == WorkflowActivityType.Script ? new ScriptExecutionEmbedded
                     {
@@ -1069,10 +1061,10 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void Decompose(CaseEntity @case, CaseActivityEntity previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn)
+            private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn)
             {
                 var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
-                var subEntities = decActivity.SubWorkflow.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
+                var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
                 if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
                     throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
 
@@ -1198,7 +1190,7 @@ namespace Signum.Engine.Workflow
 
             static bool? IsCaseActivityCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
             {
-                if (node.Is(ctx.CaseActivity.WorkflowActivity))
+                if (node.Is(ctx.CaseActivity!.WorkflowActivity))
                     return true;
 
                 // Parallel gateways always have CaseActivity but for Inclusive gateways maybe not be created because of conditions
@@ -1223,7 +1215,7 @@ namespace Signum.Engine.Workflow
                 }
                 if (node is WorkflowEventEntity e && (e.Type == WorkflowEventType.BoundaryForkTimer || e.Type == WorkflowEventType.BoundaryInterruptingTimer))
                 {
-                    var parentActivity = WorkflowLogic.GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).Activities.GetOrThrow(e.BoundaryOf);
+                    var parentActivity = WorkflowLogic.GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).Activities.GetOrThrow(e.BoundaryOf!);
 
                     var completed = IsCaseActivityCompleted(depth, parentActivity, ctx);
 

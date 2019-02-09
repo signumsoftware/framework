@@ -11,10 +11,11 @@ namespace Signum.Entities.Workflow
     {
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
+        
+        public string? GetName() => Name;
 
         [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
-
         
         public WorkflowLaneEntity Lane { get; set; }
 
@@ -150,7 +151,7 @@ namespace Signum.Entities.Workflow
 
         public WorkflowEventType Type { get; set; }
 
-        public WorkflowEventTaskModel Task { get; set; }
+        public WorkflowEventTaskModel? Task { get; set; }
 
         public WorkflowTimerEmbedded? Timer { get; set; }
 

@@ -24,9 +24,7 @@ namespace Signum.Engine.Workflow
         private Dictionary<Lite<WorkflowPoolEntity>, PoolBuilder> pools;
         private List<XmlEntity<WorkflowConnectionEntity>> messageFlows; //Contains the connections that cross two different Pools EXCLUDING the connections internal to each pool
         private WorkflowEntity workflow;
-
-        public object HasMultipleInputsAndOutputsAtTheSameTime { get; private set; }
-
+        
         public WorkflowBuilder(WorkflowEntity wf)
         {
             using (HeavyProfiler.Log("WorkflowBuilder"))
@@ -383,6 +381,7 @@ namespace Signum.Engine.Workflow
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class PreviewResult
     {
         public WorkflowReplacementModel Model;
@@ -393,8 +392,9 @@ namespace Signum.Engine.Workflow
     {
         public string BpmnId;
         public string Name;
-        public Lite<WorkflowEntity> SubWorkflow;
+        public Lite<WorkflowEntity>? SubWorkflow;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class Locator
     {
@@ -406,8 +406,8 @@ namespace Signum.Engine.Workflow
         {
             this.wb = wb;
             this.diagramElements = diagramElements;
-            this.Replacements = (replacements?.Replacements).EmptyIfNull().ToDictionary(a => a.OldNode, a => a.NewNode);
-            this.entitiesFromModel = model.Entities.ToDictionary(a => a.BpmnElementId, a => a.Model);
+            this.Replacements = (replacements?.Replacements).EmptyIfNull().ToDictionary(a => a.OldNode!, a => a.NewNode!);
+            this.entitiesFromModel = model.Entities.ToDictionary(a => a.BpmnElementId!, a => a.Model!);
         }
 
         public IWorkflowNodeEntity FindEntity(string bpmElementId)
@@ -438,10 +438,10 @@ namespace Signum.Engine.Workflow
             return this.FindEntity(bpmnElementId);
         }
 
-        internal T GetModelEntity<T>(string bpmnElementId)
+        internal T? GetModelEntity<T>(string bpmnElementId)
             where T : ModelEntity, new()
         {
-            return (T)this.entitiesFromModel.TryGetC(bpmnElementId);
+            return (T?)this.entitiesFromModel.TryGetC(bpmnElementId);
         }
 
         internal bool HasReplacement(Lite<IWorkflowNodeEntity> lite)
@@ -620,14 +620,12 @@ namespace Signum.Engine.Workflow
 
             Entity = entity;
             Document = XDocument.Parse(finalXml);
-            Element = Document.Root.Element(WorkflowBuilder.bpmndi + "BPMNDiagram").Elements().First();
+            this.Element = Document.Root.Element(WorkflowBuilder.bpmndi + "BPMNDiagram").Elements().First();
             bpmnElementId = Element.Attribute("bpmnElement").Value;
         }
 
         public XDocument Document;
-
-        private XElement element;
-        public XElement Element { get { return element; } private set { element = value; } }
+        public XElement Element { get; private set; }
         public string bpmnElementId;
         
         public T Entity;
@@ -635,7 +633,7 @@ namespace Signum.Engine.Workflow
         public KeyValuePair<string, Entity> ToKVP() => new KeyValuePair<string, Entity>(bpmnElementId, Entity);
         public KeyValuePair<string, ModelEntity> ToModelKVP() => new KeyValuePair<string, ModelEntity>(bpmnElementId, Entity.GetModel());
 
-        public override string ToString() => $"{bpmnElementId} {Entity.GetType().Name} {Entity.Name}";
+        public override string ToString() => $"{bpmnElementId} {Entity.GetType().Name} {Entity.GetName()}";
 
         public string ToQuoted(string str)
         {

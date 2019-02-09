@@ -44,7 +44,7 @@ namespace Signum.Engine.Translation
             var pi = mi as PropertyInfo;
             var type = pi?.ReflectedType ?? mi as Type;
 
-            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(type);
+            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(type!);
 
             if (pi == null)
                 typeOccurrences.Ocurrences++;
@@ -131,7 +131,7 @@ namespace Signum.Engine.Translation
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null)));
+            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null!)));
 
             return result;
         }

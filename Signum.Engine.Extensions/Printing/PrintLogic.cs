@@ -36,7 +36,7 @@ namespace Signum.Engine.Printing
             return LinesExpression.Evaluate(e);
         }
 
-        public static FileTypeSymbol TestFileType; 
+        public static FileTypeSymbol? TestFileType; 
 
         public static void Start(SchemaBuilder sb, FileTypeSymbol? testFileType = null)
         {
@@ -100,7 +100,7 @@ namespace Signum.Engine.Printing
         {
             public void Execute(ExecutingProcess executingProcess)
             {
-                PrintPackageEntity package = (PrintPackageEntity)executingProcess.Data;
+                PrintPackageEntity package = (PrintPackageEntity)executingProcess.Data!;
 
                 executingProcess.ForEachLine(package.Lines().Where(a => a.State != PrintLineState.Printed), line =>
                 {
@@ -124,7 +124,7 @@ namespace Signum.Engine.Printing
             }.Save();
         }
 
-        public static ProcessEntity CreateProcess(FileTypeSymbol? fileType = null)
+        public static ProcessEntity? CreateProcess(FileTypeSymbol? fileType = null)
         {
             using (Transaction tr = new Transaction())
             {
@@ -159,11 +159,8 @@ namespace Signum.Engine.Printing
             return Database.Query<PrintLineEntity>()
                 .Where(a => a.State == PrintLineState.ReadyToPrint)
                 .GroupBy(a => a.File.FileType)
-                .Select(gr => new PrintStat
-                {
-                    fileType = gr.Key,
-                    count = gr.Count()
-                }).ToList();            
+                .Select(gr => new PrintStat(gr.Key,gr.Count()))
+                .ToList();            
         }
 
        
@@ -195,6 +192,12 @@ namespace Signum.Engine.Printing
     {
         public FileTypeSymbol fileType;
         public int count;
+
+        public PrintStat(FileTypeSymbol fileType, int count)
+        {
+            this.fileType = fileType;
+            this.count = count;
+        }
     }
 
     public class PrintLineGraph : Graph<PrintLineEntity, PrintLineState>
@@ -209,7 +212,7 @@ namespace Signum.Engine.Printing
                 Construct = (args) => new PrintLineEntity
                 {
                     State = PrintLineState.NewTest,
-                    TestFileType = PrintingLogic.TestFileType,
+                    TestFileType = PrintingLogic.TestFileType!,
                 }
             }.Register();
 

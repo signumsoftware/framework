@@ -149,14 +149,14 @@ export const OperationHelpEmbedded = new Type<OperationHelpEmbedded>("OperationH
 export interface OperationHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "OperationHelpEmbedded";
   operation?: Entities.OperationSymbol;
-  description?: string;
+  description?: string | null;
 }
 
 export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("PropertyRouteHelpEmbedded");
 export interface PropertyRouteHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "PropertyRouteHelpEmbedded";
   property?: Signum.PropertyRouteEntity;
-  description?: string;
+  description?: string | null;
 }
 
 export const QueryColumnHelpEmbedded = new Type<QueryColumnHelpEmbedded>("QueryColumnHelpEmbedded");

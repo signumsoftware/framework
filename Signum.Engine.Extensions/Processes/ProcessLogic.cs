@@ -23,7 +23,7 @@ namespace Signum.Engine.Processes
     {
         public static bool JustMyProcesses = true;
 
-        public static Func<ProcessEntity, IDisposable> ApplySession;
+        public static Func<ProcessEntity, IDisposable?> ApplySession;
 
         static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessEntity>>> ProcessesFromAlgorithmExpression =
             p => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p);
@@ -87,7 +87,7 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -175,7 +175,7 @@ namespace Signum.Engine.Processes
             Remove(ProcessState.Error);
         }
 
-        public static IDisposable OnApplySession(ProcessEntity process)
+        public static IDisposable? OnApplySession(ProcessEntity process)
         {
             return Disposable.Combine(ApplySession, f => f(process));
         }
@@ -273,7 +273,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity processData, Entity? copyMixinsFrom = null)
+        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity? processData, Entity? copyMixinsFrom = null)
         {
             using (OperationLogic.AllowSave<ProcessEntity>())
             {
@@ -464,17 +464,17 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string s)
+        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string? str)
         {
             if (ep != null)
             {
-                ep.WriteMessage(s);
+                ep.WriteMessage(str);
             }
             else
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    SafeConsole.WriteLineColor(color, s);
+                    SafeConsole.WriteLineColor(color, str);
                 }
             }
         }
@@ -489,6 +489,7 @@ namespace Signum.Engine.Processes
             string? status = null)
             where O : class
             where N : class
+            where K : object
         {
 
             if (ep == null)
@@ -508,7 +509,7 @@ namespace Signum.Engine.Processes
 
                     if (oldVal == null)
                     {
-                        createNew?.Invoke(key, newVal);
+                        createNew?.Invoke(key, newVal!);
                     }
                     else if (newVal == null)
                     {
@@ -531,6 +532,7 @@ namespace Signum.Engine.Processes
             Action<K, N, O> merge)
             where O : class
             where N : class
+            where K : object
         {
 
             if (ep == null)
@@ -547,7 +549,7 @@ namespace Signum.Engine.Processes
 
                     if (oldVal == null)
                     {
-                        createNew?.Invoke(key, newVal);
+                        createNew?.Invoke(key, newVal!);
                     }
                     else if (newVal == null)
                     {

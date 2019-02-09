@@ -80,7 +80,7 @@ namespace Signum.Engine.Translation
                 dic.SetRange(subList, subResult);
             }
 
-            return list.Select(dic.GetOrThrow).ToList();
+            return list.Select(s => dic.GetOrThrow(s)!).ToList();
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
@@ -102,9 +102,9 @@ namespace Signum.Engine.Translation
             if (from.PluralDescription.HasText() && to.PluralDescription.HasText())
                 yield return KVP.Create(from.PluralDescription, to.PluralDescription);
 
-            foreach (var item in from.Members)
+            foreach (var item in from.Members!)
             {
-                var toMember = to.Members.TryGetC(item.Key);
+                var toMember = to.Members!.TryGetC(item.Key);
 
                 if (toMember.HasText())
                     yield return KVP.Create(item.Value, toMember);
@@ -133,8 +133,7 @@ namespace Signum.Engine.Translation
         {
             var result = Inner.TranslateBatch(list, from, to);
 
-            TranslationReplacementPack pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
-
+            TranslationReplacementPack? pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
             if (pack == null)
                 return result;
 

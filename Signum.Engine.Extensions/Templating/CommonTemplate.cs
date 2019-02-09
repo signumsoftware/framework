@@ -268,14 +268,14 @@ namespace Signum.Engine.Templating
                 SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
                 Console.WriteLine(" " + remainingText);
 
-                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
+                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
                 switch (result)
                 {
                     case FixTokenResult.Nothing:
                     case FixTokenResult.Fix:
                         this.HasChanges = true;
                         parsedToken.QueryToken = token;
-                        parsedToken.String = token.FullKey();
+                        parsedToken.String = token!.FullKey();
                         break;
                     case FixTokenResult.SkipEntity:
                     case FixTokenResult.RemoveToken:
@@ -287,7 +287,7 @@ namespace Signum.Engine.Templating
 
         public void SynchronizeValue(Type type, ref string? value, bool isList)
         {
-            string val = value;
+            string? val = value;
             FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, type, ref val, allowRemoveToken: false, isList: isList);
             switch (result)
             {

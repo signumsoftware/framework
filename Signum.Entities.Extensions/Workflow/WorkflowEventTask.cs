@@ -13,8 +13,7 @@ namespace Signum.Entities.Workflow
 {
     [Serializable,  EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowEventTaskEntity : Entity, ITaskEntity
-    {
-        
+    {   
         public Lite<WorkflowEntity> Workflow { get; set; }
 
         [Ignore]
@@ -32,11 +31,11 @@ namespace Signum.Entities.Workflow
         public TriggeredOn TriggeredOn { get; set; }
 
         [NotifyChildProperty]
-        public WorkflowEventTaskConditionEval Condition { get; set; }
+        public WorkflowEventTaskConditionEval? Condition { get; set; }
 
         [NotNullValidator]
         [NotifyChildProperty]
-        public WorkflowEventTaskActionEval Action { get; set; }
+        public WorkflowEventTaskActionEval? Action { get; set; }
 
 
         static Expression<Func<WorkflowEventTaskEntity, string>> ToStringExpression = @this => @this.Workflow + " : " + @this.Event;
@@ -64,8 +63,8 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowEventTaskModel : ModelEntity
     {
-        public static Func<WorkflowEventEntity, WorkflowEventTaskModel> GetModel;
-        public static Action<WorkflowEventEntity, WorkflowEventTaskModel> ApplyModel;
+        public static Func<WorkflowEventEntity, WorkflowEventTaskModel?> GetModel;
+        public static Action<WorkflowEventEntity, WorkflowEventTaskModel?> ApplyModel;
 
         public bool Suspended { get; set; }
         public IScheduleRuleEntity? Rule { get; set; }
@@ -73,11 +72,11 @@ namespace Signum.Entities.Workflow
         public TriggeredOn TriggeredOn { get; set; }
 
         [NotifyChildProperty]
-        public WorkflowEventTaskConditionEval Condition { get; set; }
+        public WorkflowEventTaskConditionEval? Condition { get; set; }
 
         [NotNullValidator]
         [NotifyChildProperty]
-        public WorkflowEventTaskActionEval Action { get; set; }
+        public WorkflowEventTaskActionEval? Action { get; set; }
     }
 
     public enum TriggeredOn

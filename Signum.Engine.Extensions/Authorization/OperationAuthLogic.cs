@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -241,14 +241,14 @@ namespace Signum.Engine.Authorization
             var operation = OperationLogic.FindOperation(operationType.type ?? /*Temp*/  OperationLogic.FindTypes(operationType.operation).First(), operationType.operation);
 
             Type resultType = operation.OperationType == OperationType.ConstructorFrom ||
-                operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType : operation.OverridenType;
+                operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType! : operation.OverridenType;
 
             var result = operationAllowed(resultType);
 
             if (result == OperationAllowed.None)
                 return result;
 
-            Type fromType = operation.OperationType == OperationType.ConstructorFrom ||
+            Type? fromType = operation.OperationType == OperationType.ConstructorFrom ||
                 operation.OperationType == OperationType.ConstructorFromMany ? operation.OverridenType : null;
 
             if (fromType == null)

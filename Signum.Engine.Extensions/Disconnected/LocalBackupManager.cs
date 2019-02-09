@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Signum.Utilities;
 using System.Data.SqlClient;
 using Signum.Engine.Maps;
@@ -17,7 +17,7 @@ namespace Signum.Engine.Disconnected
 
             csb.InitialCatalog = "";
 
-            using (SqlConnector.Override(new SqlConnector(csb.ToString(), null, SqlServerVersion.SqlServer2012)))
+            using (SqlConnector.Override(new SqlConnector(csb.ToString(), null!, SqlServerVersion.SqlServer2012)))
             {
                 DropIfExists(databaseName);
 

@@ -6,12 +6,13 @@ namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowPoolEntity : Entity, IWorkflowObjectEntity, IWithModel
-    {
-        
+    {   
         public WorkflowEntity Workflow { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
+
+        public string? GetName() => Name;
 
         [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }

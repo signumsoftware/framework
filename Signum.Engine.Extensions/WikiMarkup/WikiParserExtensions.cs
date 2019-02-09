@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,7 +15,7 @@ namespace Signum.Engine.WikiMarkup
             MaxTwoLineBreaks = true;
         }
 
-        public Func<string, string> TokenParser;
+        public Func<string, string?>? TokenParser;
         public bool Strong { get; set; }
         public bool Em { get; set; }
         public bool Underlined { get; set; }

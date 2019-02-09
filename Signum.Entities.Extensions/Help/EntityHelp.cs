@@ -60,7 +60,7 @@ namespace Signum.Entities.Help
         public PropertyRouteEntity Property { get; set; }
 
 		[StringLengthValidator(Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public override string ToString()
         {
@@ -75,7 +75,7 @@ namespace Signum.Entities.Help
         public OperationSymbol Operation { get; set; }
 
         [StringLengthValidator(Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public override string ToString()
         {

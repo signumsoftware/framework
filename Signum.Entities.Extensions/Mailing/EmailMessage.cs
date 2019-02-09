@@ -28,7 +28,7 @@ namespace Signum.Entities.Mailing
         [ImplementedByAll]
         public Lite<Entity>? Target { get; set; }
         
-        public EmailAddressEmbedded? From { get; set; }
+        public EmailAddressEmbedded From { get; set; }
 
         public Lite<EmailTemplateEntity>? Template { get; set; }
 

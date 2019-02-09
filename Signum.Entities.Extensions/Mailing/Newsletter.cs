@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Basics;
@@ -67,7 +67,7 @@ namespace Signum.Entities.Mailing
 
         public Lite<IEmailOwnerEntity>? Recipient { get; set; }
 
-        public Lite<NewsletterEntity>? Newsletter { get; set; }
+        public Lite<NewsletterEntity> Newsletter { get; set; }
     }
 
     [AutoInit]

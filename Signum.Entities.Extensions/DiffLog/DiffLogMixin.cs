@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.DiffLog
 {
@@ -11,10 +11,10 @@ namespace Signum.Entities.DiffLog
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string InitialState { get; set; }
+        public string? InitialState { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string FinalState { get; set; }
+        public string? FinalState { get; set; }
 
         public bool Cleaned { get; set; }
     }

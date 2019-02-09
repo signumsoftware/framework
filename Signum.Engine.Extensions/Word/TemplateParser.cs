@@ -210,9 +210,9 @@ namespace Signum.Engine.Word
                             {
                                 var vp = ValueProviderBase.TryParse(s.Value.Token, variable, this);
 
-                                matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp, s.Value.Format)
+                                matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp!, s.Value.Format!)
                                 {
-                                    RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
+                                    RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -221,9 +221,9 @@ namespace Signum.Engine.Word
                         case "declare":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
-                                matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp, this.AddError)
+                                matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp!, this.AddError)
                                 {
-                                    RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
+                                    RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -299,7 +299,7 @@ namespace Signum.Engine.Word
                         case "foreach":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
-                                var fn = new ForeachNode(matchNode.NodeProvider, vp) { ForeachToken = new MatchNodePair(matchNode) };
+                                var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
                                 PushBlock(fn);
 
                                 DeclareVariable(vp);
@@ -377,18 +377,18 @@ namespace Signum.Engine.Word
         }
 
 
-        void DeclareVariable(ValueProviderBase token)
+        void DeclareVariable(ValueProviderBase? token)
         {
             if (token?.Variable.HasText() == true)
             {
-                if (Variables.TryGetValue(token.Variable, out ValueProviderBase t))
+                if (Variables.TryGetValue(token!.Variable!, out ValueProviderBase t))
                 {
                     if (!t.Equals(token))
                         AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
                 }
                 else
                 {
-                    Variables.Add(token.Variable, token);
+                    Variables.Add(token!.Variable!, token);
                 }
             }
         }

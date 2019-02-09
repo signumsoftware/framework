@@ -21,7 +21,7 @@ namespace Signum.Engine.Authorization
     public static class AuthLogic
     {
         public static event Action<UserEntity> UserLogingIn;
-        public static event Func<string> LoginMessage;
+        public static event Func<string?> LoginMessage;
         public static ICustomAuthorizer Authorizer;
 
         public static string? SystemUserName { get; private set; }

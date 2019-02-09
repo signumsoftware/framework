@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 
 namespace Signum.Entities.MachineLearning
@@ -10,7 +10,7 @@ namespace Signum.Entities.MachineLearning
         public Lite<PredictorEntity> Predictor { get; internal set; }
 
         [ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
+        public Lite<Entity>? Target { get; set; }
 
         [StringLengthValidator(Max = 100)]
         public string? Key0 { get; set; }

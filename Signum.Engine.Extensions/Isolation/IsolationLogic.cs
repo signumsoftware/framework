@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -66,17 +66,12 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static IDisposable ProcessLogic_ApplySession(ProcessEntity process)
+        static IDisposable? ProcessLogic_ApplySession(ProcessEntity process)
         {
-            return IsolationEntity.Override(process.Data.TryIsolation());
+            return IsolationEntity.Override(process.Data!.TryIsolation());
         }
 
-        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled, IUserEntity user)
-        {
-            return IsolationEntity.Override(scheduled?.TryIsolation() ?? task?.TryIsolation() ?? user?.TryIsolation());
-        }
-
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
+        static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object[]? args)
         {
             return IsolationEntity.Override(entity?.TryIsolation() ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }

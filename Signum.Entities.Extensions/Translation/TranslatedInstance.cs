@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Reflection;
@@ -7,18 +7,16 @@ namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public class TranslatedInstanceEntity : Entity
-    {
-        
+    {   
         public CultureInfoEntity Culture { get; set; }
 
         [ImplementedByAll]
         [NotNullValidator]
         public Lite<Entity> Instance { get; set; }
-
         
         public PropertyRouteEntity PropertyRoute { get; set; }
 
-        public string RowId { get; set; }
+        public string? RowId { get; set; }
 
         [StringLengthValidator(MultiLine = true)]
         public string TranslatedText { get; set; }

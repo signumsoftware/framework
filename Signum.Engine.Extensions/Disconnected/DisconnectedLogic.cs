@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -104,7 +104,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        private static SqlPreCommand Schema_Generating()
+        private static SqlPreCommand? Schema_Generating()
         {
             if (DisconnectedLogic.OfflineMode)
                 return null;
@@ -114,7 +114,7 @@ namespace Signum.Engine.Disconnected
                 .Combine(Spacing.Simple);
         }
 
-        private static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        private static SqlPreCommand? Schema_Synchronizing(Replacements arg)
         {
             if (DisconnectedLogic.OfflineMode)
                 return null;
@@ -136,7 +136,7 @@ namespace Signum.Engine.Disconnected
                 .Where(t => t.PrimaryKey.Identity);
         }
 
-        static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
+        static string? ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
         {
             var conflicts = Database.Query<DisconnectedMachineEntity>()
                 .Where(e => e.SeedInterval.Overlaps(dm.SeedInterval) && e != dm)
@@ -192,7 +192,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        static SqlPreCommand? AuthCache_PreDeleteSqlSync(Entity arg)
         {
             TypeEntity type = (TypeEntity)arg;
 
@@ -348,13 +348,13 @@ namespace Signum.Engine.Disconnected
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
             }
 
-            public ICustomImporter Importer
+            public ICustomImporter? Importer
             {
                 get { return null; }
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
             }
 
-            public ICustomExporter Exporter
+            public ICustomExporter? Exporter
             {
                 get { return null; }
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
@@ -392,13 +392,13 @@ namespace Signum.Engine.Disconnected
 
         void Saving(Entity ident);
 
-        ICustomImporter Importer { get; set; }
-        ICustomExporter Exporter { get; set; }
+        ICustomImporter? Importer { get; set; }
+        ICustomExporter? Exporter { get; set; }
     }
 
     public class DisconnectedStrategy<T> : IDisconnectedStrategy where T : Entity
     {
-        internal DisconnectedStrategy(Download download, Expression<Func<T, bool>> downloadSubset, Upload upload, Expression<Func<T, bool>> uploadSubset, BasicImporter<T> importer)
+        internal DisconnectedStrategy(Download download, Expression<Func<T, bool>>? downloadSubset, Upload upload, Expression<Func<T, bool>>? uploadSubset, BasicImporter<T> importer)
         {
             if (download == Download.Subset && downloadSubset == null)
                 throw new InvalidOperationException("In order to use Download.Subset, use an overload that takes a downloadSubset expression");
@@ -432,10 +432,10 @@ namespace Signum.Engine.Disconnected
         }
 
         public Download Download { get; private set; }
-        public Expression<Func<T, bool>> DownloadSubset { get; private set; }
+        public Expression<Func<T, bool>>? DownloadSubset { get; private set; }
 
         public Upload Upload { get; private set; }
-        public Expression<Func<T, bool>> UploadSubset { get; private set; }
+        public Expression<Func<T, bool>>? UploadSubset { get; private set; }
 
         public void Saving(Entity entity)
         {
@@ -485,7 +485,7 @@ namespace Signum.Engine.Disconnected
 
         public bool? DisableForeignKeys { get; set; }
 
-        public ICustomImporter Importer { get; set; }
-        public ICustomExporter Exporter { get; set; }
+        public ICustomImporter? Importer { get; set; }
+        public ICustomExporter? Exporter { get; set; }
     }
 }

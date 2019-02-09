@@ -80,7 +80,7 @@ namespace Signum.Engine.Dynamic
                     Construct = (e, _) => {
 
                         var def = e.GetDefinition();
-                        var result = new DynamicTypeEntity { TypeName = null, BaseType = e.BaseType };
+                        var result = new DynamicTypeEntity { TypeName = null!, BaseType = e.BaseType };
                         result.SetDefinition(def);
                         return result;
                     },
@@ -112,23 +112,23 @@ namespace Signum.Engine.Dynamic
 
                             var pairs = newDef.Properties
                                 .Join(oldDef.Properties, n => n.UID, o => o.UID, (n, o) => new { n, o })
-                                .Where(a => a.n.Type == a.o.Type);
+                                .Where(a => a.n!.Type == a.o!.Type); /*CSBUG*/
 
                             {
                                 string ColName(DynamicProperty dp) => dp.ColumnName ?? dp.Name;
 
                                 string replacementKey = (e.BaseType != DynamicBaseType.Entity || old.BaseType != DynamicBaseType.Entity) ? UnknownColumnKey : Replacements.KeyColumnsForTable(oldName);
-                                foreach (var a in pairs.Where(a => ColName(a.n) != ColName(a.o)))
+                                foreach (var a in pairs.Where(a => ColName(a.n!) != ColName(a.o!)))
                                 {
-                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, ColName(a.o), ColName(a.n));
+                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, ColName(a.o!), ColName(a.n!));
                                 }
                             }
 
                             {
                                 string replacementKey = (e.BaseType != DynamicBaseType.Entity || old.BaseType != DynamicBaseType.Entity) ? UnknownPropertyKey : PropertyRouteLogic.PropertiesFor.FormatWith(old.TypeName);
-                                foreach (var a in pairs.Where(a => a.n.Name != a.o.Name))
+                                foreach (var a in pairs.Where(a => a.n!.Name != a.o!.Name))
                                 {
-                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, a.o.Name, a.n.Name);
+                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, a.o!.Name, a.n!.Name);
                                 }
 
                             }
@@ -154,7 +154,7 @@ namespace Signum.Engine.Dynamic
 
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, null, DynamicBaseType.Entity, null, new HashSet<string>());
+            var generator = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, null!, DynamicBaseType.Entity, null!, new HashSet<string>());
 
             return generator.GetPropertyType(property);
         }
@@ -183,7 +183,7 @@ namespace Signum.Engine.Dynamic
         }
 
         public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
-        public static Func<Dictionary<string, Dictionary<string, Tuple<string, string>>>> GetFormattedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, Tuple<string?, string?>>>> GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {
@@ -200,11 +200,7 @@ namespace Signum.Engine.Dynamic
                 var dcg = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces);
 
                 var content = dcg.GetFileCode();
-                return new CodeFile
-                {
-                    FileName = dt.TypeName + ".cs",
-                    FileContent = content
-                };
+                return new CodeFile(dt.TypeName + ".cs", content);
             }).ToList();
             result.AddRange(entities);
 
@@ -219,20 +215,12 @@ namespace Signum.Engine.Dynamic
                 };
 
                 var content = dlg.GetFileCode();
-                return new CodeFile
-                {
-                    FileName = dt.TypeName + "Logic.cs",
-                    FileContent = content
-                };
+                return new CodeFile(dt.TypeName + "Logic.cs", content);
             }).ToList();
             result.AddRange(logics);
 
             var bs = new DynamicBeforeSchemaGenerator(DynamicCode.CodeGenEntitiesNamespace, types.Select(a => a.GetDefinition().CustomBeforeSchema).NotNull().ToList(), DynamicCode.Namespaces);
-            result.Add(new CodeFile
-            {
-                FileName = "CodeGenBeforeSchema.cs",
-                FileContent = bs.GetFileCode()
-            });
+            result.Add(new CodeFile("CodeGenBeforeSchema.cs", bs.GetFileCode()));
 
             return result;
         }
@@ -278,7 +266,7 @@ namespace Signum.Engine.Dynamic
                 }
             }
 
-            if (this.Def.CustomTypes != null)
+            if (this.Def!.CustomTypes != null)
                 sb.AppendLine(this.Def.CustomTypes.Code);
 
             sb.AppendLine("}");
@@ -313,7 +301,7 @@ namespace Signum.Engine.Dynamic
             if (this.Def.CustomEntityMembers != null)
                 sb.AppendLine(this.Def.CustomEntityMembers.Code.Indent(4));
 
-            string toString = GetToString();
+            string? toString = GetToString();
             if (toString != null)
             {
                 sb.Append(toString.Indent(4));
@@ -326,7 +314,7 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        public string GetEntityOperation()
+        public string? GetEntityOperation()
         {
             if (this.IsTreeEntity)
                 return null;
@@ -370,7 +358,7 @@ namespace Signum.Engine.Dynamic
             return baseType.ToString();
         }
 
-        protected virtual string GetToString()
+        protected virtual string? GetToString()
         {
             if (Def.ToStringExpression == null)
                 return null;
@@ -442,7 +430,7 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            string inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
+            string? inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
             string fieldName = GetFieldName(property);
 
             WriteAttributeTag(sb, GetFieldAttributes(property));
@@ -568,13 +556,13 @@ namespace Signum.Engine.Dynamic
 
             var objName = ObjectName.Parse(value);
 
-            return new List<string>
-                {
+            return new List<string?>
+            {
                      Literal(objName.Name),
-                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
-                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
-                     objName.Schema.Database.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
-                }.NotNull().ToString(", ");
+                objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+                objName.Schema.Database?.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
+            }.NotNull().ToString(", ");
         }
 
         public virtual string GetPropertyType(DynamicProperty property)
@@ -628,7 +616,7 @@ namespace Signum.Engine.Dynamic
             return type;
         }
 
-        public Type TryResolveType(string typeName)
+        public Type? TryResolveType(string typeName)
         {
             switch (typeName)
             {
@@ -671,8 +659,8 @@ namespace Signum.Engine.Dynamic
         public DynamicTypeDefinition Def { get; private set; }
         public bool IsTreeEntity { get; private set; }
 
-        public Dictionary<string, string> AlreadyTranslated { get; set; }
-        public Dictionary<string, Tuple<string, string>> Formatted { get; set; }
+        public Dictionary<string, string>? AlreadyTranslated { get; set; }
+        public Dictionary<string, Tuple<string, string>>? Formatted { get; set; }
 
         public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicBaseType baseType, DynamicTypeDefinition def, HashSet<string> usings)
         {
@@ -776,7 +764,7 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        public static string GetComplexQueryField(string field)
+        public static string? GetComplexQueryField(string field)
         {
             var fieldName = field.TryBefore("=")?.Trim();
 
@@ -886,9 +874,7 @@ namespace Signum.Engine.Dynamic
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public List<DynamicTypeCustomCode> BeforeSchema { get; private set; }
-
-        public Dictionary<string, string> AlreadyTranslated { get; set; }
-
+        
         public DynamicBeforeSchemaGenerator(string @namespace, List<DynamicTypeCustomCode> beforeSchema, HashSet<string> usings)
         {
             this.Usings = usings;

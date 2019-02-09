@@ -65,6 +65,12 @@ namespace Signum.Engine.Scheduler
         {
             public ScheduledTaskEntity ScheduledTask;
             public DateTime NextDate;
+
+            public ScheduledTaskPair(ScheduledTaskEntity scheduledTask, DateTime nextDate)
+            {
+                ScheduledTask = scheduledTask;
+                NextDate = nextDate;
+            }
         }
 
         static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
@@ -303,10 +309,10 @@ namespace Signum.Engine.Scheduler
                         bool isMiss = next < now;
 
                         return new ScheduledTaskPair
-                        {
-                            ScheduledTask = st,
-                            NextDate = isMiss ? now : next,
-                        };
+                        (
+                            scheduledTask: st,
+                            nextDate: isMiss ? now : next
+                        );
                     }));
 
                     SetTimer();
@@ -436,7 +442,7 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var ctx = new ScheduledTaskContext { Log = stl };
+                    var ctx = new ScheduledTaskContext(stl);
                     RunningTasks.TryAdd(stl, ctx);
 
                     using (UserHolder.UserSession(entityIUser))
@@ -520,6 +526,7 @@ namespace Signum.Engine.Scheduler
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class SchedulerState
     {
         public bool Running;
@@ -543,9 +550,15 @@ namespace Signum.Engine.Scheduler
         public DateTime StartTime;
         public string Remarks;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class ScheduledTaskContext
     {
+        public ScheduledTaskContext(ScheduledTaskLogEntity log)
+        {
+            Log = log;
+        }
+
         public ScheduledTaskLogEntity Log { internal get; set; }
 
         public StringBuilder StringBuilder { get; } = new StringBuilder();

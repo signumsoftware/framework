@@ -69,7 +69,7 @@ export interface ProcessEntity extends Entities.Entity {
   exceptionDate?: string | null;
   exception?: Entities.Lite<Basics.ExceptionEntity>;
   progress?: number | null;
-  status?: string;
+  status?: string | null;
 }
 
 export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");

@@ -41,7 +41,7 @@ namespace Signum.Engine.DiffLog
             ShouldLog.SetDefinition(typeof(T), func);
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object[]? args)
         {
             if (entity != null && ShouldLog.Invoke(entity, operation))
             {
@@ -74,11 +74,11 @@ namespace Signum.Engine.DiffLog
                 return entity.ToLite().Retrieve();
         }
 
-        public static MinMax<OperationLogEntity> OperationLogNextPrev(OperationLogEntity log)
+        public static MinMax<OperationLogEntity?> OperationLogNextPrev(OperationLogEntity log)
         {
             var logs = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target == log.Target);
 
-            return new MinMax<OperationLogEntity>(
+            return new MinMax<OperationLogEntity?>(
                  log.Mixin<DiffLogMixin>().InitialState == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
                  log.Mixin<DiffLogMixin>().FinalState == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
         }

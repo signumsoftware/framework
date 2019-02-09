@@ -15,7 +15,7 @@ export interface TranslatedInstanceEntity extends Entities.Entity {
   culture?: Basics.CultureInfoEntity;
   instance?: Entities.Lite<Entities.Entity>;
   propertyRoute?: Signum.PropertyRouteEntity;
-  rowId?: string;
+  rowId?: string | null;
   translatedText?: string;
   originalText?: string;
 }

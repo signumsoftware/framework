@@ -39,7 +39,7 @@ namespace Signum.Engine.Mailing
         public static void Start(
             SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity?, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration,  
+            Func<EmailTemplateEntity?, Lite<Entity>?, SmtpConfigurationEntity> getSmtpConfiguration,  
             Func<EmailMessageEntity, SmtpClient>? getSmtpClient = null, 
             IFileTypeAlgorithm? attachment = null)
         {
@@ -267,7 +267,7 @@ namespace Signum.Engine.Mailing
                     ToStates = { EmailMessageState.Created },
                     Construct = (m, _) => new EmailMessageEntity
                     {
-                        From = m.From.Clone(),
+                        From = m.From!.Clone(),
                         Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
                         Target = m.Target,
                         Subject = m.Subject,
@@ -359,9 +359,7 @@ namespace Signum.Engine.Mailing
                 Subject = email.Subject,
                 IsBodyHtml = email.IsBodyHtml,
             };
-
             
-
             AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)

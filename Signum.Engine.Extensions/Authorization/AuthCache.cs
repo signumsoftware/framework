@@ -34,7 +34,7 @@ namespace Signum.Entities.Authorization
         where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
         where A : object
-        where R : object
+        where R : class
         where K : object
     {
         readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
@@ -148,7 +148,7 @@ namespace Signum.Entities.Authorization
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
                   .AgGroupToDictionary(ru => ru.Role!, gr => gr
-                    .SelectCatch(ru => KVP.Create(ToKey(ru.Resource), ru.Allowed))
+                    .SelectCatch(ru => KVP.Create(ToKey(ru.Resource!), ru.Allowed))
                     .ToDictionaryEx());
 
             Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
@@ -307,7 +307,7 @@ namespace Signum.Entities.Authorization
 
 
         internal SqlPreCommand? ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
-            Func<string, R> toResource, Func<string, A> parseAllowed)
+            Func<string, R?> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
             var xRoles = (element.Element(rootName)?.Elements("Role")).EmptyIfNull();

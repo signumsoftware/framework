@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -383,10 +383,10 @@ namespace Signum.Engine.Workflow
                     .WithSave(WorkflowConnectionOperation.Save)
                     .WithDelete(WorkflowConnectionOperation.Delete)
                     .WithExpressionFrom((WorkflowEntity p) => p.WorkflowConnections())
-                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowMessageConnections(), null)
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowMessageConnections(), null!)
                     .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowConnections())
-                    .WithExpressionFrom((IWorkflowNodeEntity p) => p.NextConnections(), null)
-                    .WithExpressionFrom((IWorkflowNodeEntity p) => p.PreviousConnections(), null)
+                    .WithExpressionFrom((IWorkflowNodeEntity p) => p.NextConnections(), null!)
+                    .WithExpressionFrom((IWorkflowNodeEntity p) => p.PreviousConnections(), null!)
                     .WithQuery(() => e => new
                     {
                         Entity = e,
@@ -479,7 +479,7 @@ namespace Signum.Engine.Workflow
 
                         var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
-                            ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Save);
+                            ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Save);
                     }
 
                     e.Save();
@@ -490,7 +490,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Delete);
+                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -649,7 +649,7 @@ namespace Signum.Engine.Workflow
 
                         var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
-                            ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == e.ToLite()), e, WorkflowScriptOperation.Save);
+                            ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script == e.ToLite()), e, WorkflowScriptOperation.Save);
                     }
 
                     e.Save();
@@ -668,7 +668,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (s, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == s.ToLite()), s, WorkflowScriptOperation.Delete);
+                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script == s.ToLite()), s, WorkflowScriptOperation.Delete);
                     s.Delete();
                 },
             }.Register();
@@ -695,7 +695,7 @@ namespace Signum.Engine.Workflow
             var errors = queryable.Select(a => new { Connection = a.ToLite(), From = a.From.ToLite(), To = a.To.ToLite(), Workflow = a.From.Lane.Pool.Workflow.ToLite() }).ToList();
 
             var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
-                  gr.ToString(a => $"Connection {a.Connection.Id} ({a.Connection}): {a.From} -> {a.To}", "\r\n").Indent(4),
+                  gr.ToString(a => $"Connection {a.Connection!.Id} ({a.Connection}): {a.From} -> {a.To}", "\r\n").Indent(4),
                 "\r\n\r\n").Indent(4);
 
             throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some connections: \r\n" + formattedErrors);
@@ -749,7 +749,7 @@ namespace Signum.Engine.Workflow
                     {
                         var usedWorkflows = Database.Query<CaseEntity>()
                                                 .Where(c => c.Workflow.Is(w) && c.ParentCase != null)
-                                                .Select(c => c.ParentCase.Workflow)
+                                                .Select(c => c.ParentCase!.Workflow)
                                                 .ToList();
 
                         if (usedWorkflows.Any())

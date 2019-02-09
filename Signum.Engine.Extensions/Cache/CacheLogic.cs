@@ -549,13 +549,14 @@ namespace Signum.Engine.Cache
                 Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
             }
 
-            public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>>> backReference, Lite<R> lite)
+            public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             {
-                var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
+                throw new InvalidOperationException();
+                //var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
 
-                var ids = dic.TryGetC(lite.Id).EmptyIfNull();
+                //var ids = dic.TryGetC(lite.Id).EmptyIfNull();
 
-                return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
+                //return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
             }
 
             public Type Type

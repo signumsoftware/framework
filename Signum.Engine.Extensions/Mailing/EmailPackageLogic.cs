@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Mailing;
@@ -109,7 +109,7 @@ namespace Signum.Engine.Mailing
     {
         public virtual void Execute(ExecutingProcess executingProcess)
         {
-            PackageEntity package = (PackageEntity)executingProcess.Data;
+            PackageEntity package = (PackageEntity)executingProcess.Data!;
 
             var args = package.OperationArgs;
             var template = args.GetArg<Lite<EmailTemplateEntity>>();
@@ -131,7 +131,7 @@ namespace Signum.Engine.Mailing
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data;          
+            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data!;          
 
             List<Lite<EmailMessageEntity>> emails = package.RemainingMessages()
                                                 .OrderBy(e => e.CreationDate)

@@ -20,6 +20,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
 
+        public string? GetName() => Name;
+
         [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 

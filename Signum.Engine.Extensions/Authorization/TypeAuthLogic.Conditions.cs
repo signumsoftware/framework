@@ -240,7 +240,7 @@ namespace Signum.Engine.Authorization
             {
                 foreach (var cond in tac.Conditions.Reverse())
                 {
-                    var func = TypeConditionLogic.GetInMemoryCondition<T>(cond.TypeCondition);
+                    var func = TypeConditionLogic.GetInMemoryCondition<T>(cond.TypeCondition)!;
 
                     if (func(entity))
                         return cond.Allowed.Get(inUserInterface) >= allowed;

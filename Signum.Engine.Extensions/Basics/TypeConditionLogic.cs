@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +14,7 @@ namespace Signum.Engine.Basics
 {
     public class TypeConditionPair
     {
-        public TypeConditionPair(LambdaExpression condition, Delegate inMemoryCondition)
+        public TypeConditionPair(LambdaExpression condition, Delegate? inMemoryCondition)
         {
             if (condition == null)
                 throw new ArgumentNullException("lambda");
@@ -24,7 +24,7 @@ namespace Signum.Engine.Basics
         }
 
         public LambdaExpression Condition;
-        public Delegate InMemoryCondition;
+        public Delegate? InMemoryCondition;
     }
 
     public static class TypeConditionLogic
@@ -32,8 +32,8 @@ namespace Signum.Engine.Basics
         static Dictionary<Type, Dictionary<TypeConditionSymbol, TypeConditionPair>> infos = new Dictionary<Type, Dictionary<TypeConditionSymbol, TypeConditionPair>>();
 
 
-        static readonly Variable<Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>> tempConditions =
-            Statics.ThreadVariable<Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>>("tempConditions");
+        static readonly Variable<Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>?> tempConditions =
+            Statics.ThreadVariable<Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>?>("tempConditions");
 
         public static IDisposable ReplaceTemporally<T>(TypeConditionSymbol typeAllowed, Expression<Func<T, bool>> condition)
             where T : Entity
@@ -81,7 +81,7 @@ namespace Signum.Engine.Basics
             Register<T>(typeCondition, condition, condition.Compile());
         }
 
-        public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool> inMemoryCondition)
+        public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool>? inMemoryCondition)
             where T : Entity
         {
             if (typeCondition == null)
@@ -104,7 +104,7 @@ namespace Signum.Engine.Basics
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression entity = arguments[0];
-                TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1]);
+                TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1])!;
 
                 var exp = GetCondition(entity.Type, typeCondition);
 
@@ -131,7 +131,7 @@ namespace Signum.Engine.Basics
                 Type type = mi.GetGenericArguments()[0];
 
                 Expression query = arguments[0];
-                TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1]);
+                TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1])!;
 
                 LambdaExpression exp = GetCondition(type, typeCondition);
 
@@ -154,17 +154,17 @@ namespace Signum.Engine.Basics
             if (tempExpr != null)
                 return tempExpr;
 
-            var pair = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
+            var pair = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").GetOrThrow(typeCondition);
 
             return pair.Condition;
         }
 
-        public static Func<T, bool> GetInMemoryCondition<T>(TypeConditionSymbol typeCondition)
+        public static Func<T, bool>? GetInMemoryCondition<T>(TypeConditionSymbol typeCondition)
             where T : Entity
         {
-            var pair = infos.GetOrThrow(typeof(T), "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
+            var pair = infos.GetOrThrow(typeof(T), "There's no TypeCondition registered for type {0}").GetOrThrow(typeCondition);
 
-            return (Func<T, bool>)pair.InMemoryCondition;
+            return (Func<T, bool>?)pair.InMemoryCondition;
         }
 
         public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)

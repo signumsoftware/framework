@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,7 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, true, true)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, true, true)));
         }
 
         public static void Start(SchemaBuilder sb, bool packages, bool packageOperations)
@@ -217,7 +217,7 @@ namespace Signum.Engine.Processes
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            PackageOperationEntity package = (PackageOperationEntity)executingProcess.Data;
+            PackageOperationEntity package = (PackageOperationEntity)executingProcess.Data!;
 
             OperationSymbol operationSymbol = package.Operation;
 
@@ -254,9 +254,7 @@ namespace Signum.Engine.Processes
     public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEntity
     {
         public DeleteSymbol<T> DeleteSymbol { get; private set; }
-
-        public Func<PackageEntity, PackageLineEntity, object[]> OperationArgs;
-
+        
         public PackageDeleteAlgorithm(DeleteSymbol<T> deleteSymbol)
         {
             this.DeleteSymbol = deleteSymbol ?? throw new ArgumentNullException("operatonKey");
@@ -264,7 +262,7 @@ namespace Signum.Engine.Processes
 
         public virtual void Execute(ExecutingProcess executingProcess)
         {
-            PackageEntity package = (PackageEntity)executingProcess.Data;
+            PackageEntity package = (PackageEntity)executingProcess.Data!;
 
             var args = package.OperationArgs;
 
@@ -282,7 +280,7 @@ namespace Signum.Engine.Processes
     {
         public virtual void Execute(ExecutingProcess executingProcess)
         {
-            PackageEntity package = (PackageEntity)executingProcess.Data;
+            PackageEntity package = (PackageEntity)executingProcess.Data!;
 
             var args = package.OperationArgs;
 
@@ -307,7 +305,7 @@ namespace Signum.Engine.Processes
 
         public virtual void Execute(ExecutingProcess executingProcess)
         {
-            PackageEntity package = (PackageEntity)executingProcess.Data;
+            PackageEntity package = (PackageEntity)executingProcess.Data!;
 
             var args = package.OperationArgs;
 
@@ -325,7 +323,6 @@ namespace Signum.Engine.Processes
         where F : class, IEntity
     {
         public ConstructSymbol<T>.From<F> Symbol { get; private set; }
-        public Enum OperationKey { get; private set; }
 
         public PackageConstructFromAlgorithm(ConstructSymbol<T>.From<F> symbol)
         {
@@ -334,7 +331,7 @@ namespace Signum.Engine.Processes
 
         public virtual void Execute(ExecutingProcess executingProcess)
         {
-            PackageEntity package = (PackageEntity)executingProcess.Data;
+            PackageEntity package = (PackageEntity)executingProcess.Data!;
 
             var args = package.OperationArgs;
 

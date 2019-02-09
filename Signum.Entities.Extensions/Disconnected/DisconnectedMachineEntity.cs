@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.ComponentModel;
@@ -38,9 +38,9 @@ namespace Signum.Entities.Disconnected
             return ToStringExpression.Evaluate(this);
         }
 
-        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>> CurrentVariable =
-            Statics.SessionVariable<Lite<DisconnectedMachineEntity>>("disconectedMachine");
-        public static Lite<DisconnectedMachineEntity> Current
+        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>?> CurrentVariable =
+            Statics.SessionVariable<Lite<DisconnectedMachineEntity>?>("disconectedMachine");
+        public static Lite<DisconnectedMachineEntity>? Current
         {
             get { return CurrentVariable.Value; }
             set { CurrentVariable.Value = value; }

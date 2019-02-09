@@ -59,7 +59,7 @@ namespace Signum.Engine.UserQueries
                 UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KVP.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
-                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KVP.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType.Id), uq.ToLite())).GroupToDictionary(),
+                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KVP.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserQueryEntity)));
             }
         }
@@ -194,7 +194,7 @@ namespace Signum.Engine.UserQueries
         }
 
 
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             if (!replacements.Interactive)
                 return null;
@@ -203,12 +203,12 @@ namespace Signum.Engine.UserQueries
 
             var table = Schema.Current.Table(typeof(UserQueryEntity));
 
-            SqlPreCommand cmd = list.Select(uq => ProcessUserQuery(replacements, table, uq)).Combine(Spacing.Double);
+            SqlPreCommand? cmd = list.Select(uq => ProcessUserQuery(replacements, table, uq)).Combine(Spacing.Double);
 
             return cmd;
         }
 
-        static SqlPreCommand ProcessUserQuery(Replacements replacements, Table table, UserQueryEntity uq)
+        static SqlPreCommand? ProcessUserQuery(Replacements replacements, Table table, UserQueryEntity uq)
         {
             Console.Write(".");
             try
@@ -288,7 +288,7 @@ namespace Signum.Engine.UserQueries
                     foreach (var item in uq.Filters.Where(f => !f.IsGroup).ToList())
                     {
                         retry:
-                        string val = item.ValueString;
+                        string? val = item.ValueString;
                         switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;

@@ -317,7 +317,7 @@ namespace Signum.Engine.UserAssets
             });
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEmbedded token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReCreate)
+        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEmbedded token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReCreate)
         {
             var t = token;
             using (DelayedConsole.Delay(() => { SafeConsole.WriteColor(t.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + t.TokenString); Console.WriteLine(" " + remainingText); }))
@@ -335,7 +335,7 @@ namespace Signum.Engine.UserAssets
             }
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken? token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReGenerate)
+        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken? token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate)
         {
             string[] parts = original.Split('.');
 
@@ -397,7 +397,7 @@ namespace Signum.Engine.UserAssets
             }
         }
 
-        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReGenerate)
+        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate)
         {
             var top = Console.CursorTop;
 

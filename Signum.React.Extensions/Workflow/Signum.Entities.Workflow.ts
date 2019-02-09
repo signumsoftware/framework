@@ -455,7 +455,7 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
   mainEntityType: Basics.TypeEntity;
   name?: string | null;
   type?: WorkflowEventType;
-  task?: WorkflowEventTaskModel;
+  task?: WorkflowEventTaskModel | null;
   timer?: WorkflowTimerEmbedded | null;
   bpmnElementId?: string;
 }
@@ -489,8 +489,8 @@ export interface WorkflowEventTaskEntity extends Entities.Entity, Scheduler.ITas
   workflow?: Entities.Lite<WorkflowEntity>;
   event?: Entities.Lite<WorkflowEventEntity>;
   triggeredOn?: TriggeredOn;
-  condition?: WorkflowEventTaskConditionEval;
-  action?: WorkflowEventTaskActionEval;
+  condition?: WorkflowEventTaskConditionEval | null;
+  action?: WorkflowEventTaskActionEval | null;
 }
 
 export const WorkflowEventTaskModel = new Type<WorkflowEventTaskModel>("WorkflowEventTaskModel");
@@ -499,8 +499,8 @@ export interface WorkflowEventTaskModel extends Entities.ModelEntity {
   suspended?: boolean;
   rule?: Scheduler.IScheduleRuleEntity | null;
   triggeredOn?: TriggeredOn;
-  condition?: WorkflowEventTaskConditionEval;
-  action?: WorkflowEventTaskActionEval;
+  condition?: WorkflowEventTaskConditionEval | null;
+  action?: WorkflowEventTaskActionEval | null;
 }
 
 export module WorkflowEventTaskOperation {
@@ -570,7 +570,7 @@ export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEnti
   xml?: WorkflowXmlEmbedded;
   pool?: WorkflowPoolEntity;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
-  actorsEval?: WorkflowLaneActorsEval;
+  actorsEval?: WorkflowLaneActorsEval | null;
 }
 
 export const WorkflowLaneModel = new Type<WorkflowLaneModel>("WorkflowLaneModel");
@@ -579,7 +579,7 @@ export interface WorkflowLaneModel extends Entities.ModelEntity {
   mainEntityType: Basics.TypeEntity;
   name?: string;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
-  actorsEval?: WorkflowLaneActorsEval;
+  actorsEval?: WorkflowLaneActorsEval | null;
 }
 
 export module WorkflowLaneOperation {

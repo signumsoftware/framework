@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -33,8 +33,8 @@ namespace Signum.Engine.Chart
 
                 Colors = sb.GlobalLazy(() =>
                     Database.Query<ChartColorEntity>()
-                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
-                        .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
+                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color!.Argb })
+                        .AgGroupToDictionary(a => a.EntityType!, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
                     new InvalidateWith(typeof(ChartColorEntity)));
             }
         }

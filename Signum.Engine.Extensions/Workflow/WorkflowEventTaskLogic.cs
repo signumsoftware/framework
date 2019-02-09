@@ -58,7 +58,7 @@ namespace Signum.Engine.Workflow
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                var ib = sb.Schema.Settings.FieldAttribute<ImplementedByAttribute>(PropertyRoute.Construct((ScheduledTaskEntity e) => e.Rule));
+                var ib = sb.Schema.Settings.FieldAttribute<ImplementedByAttribute>(PropertyRoute.Construct((ScheduledTaskEntity e) => e.Rule))!;
                 sb.Schema.Settings.FieldAttributes((WorkflowEventTaskModel a) => a.Rule).Replace(new ImplementedByAttribute(ib.ImplementedTypes));
 
                 sb.Include<WorkflowEventTaskEntity>()
@@ -120,8 +120,8 @@ namespace Signum.Engine.Workflow
                         Suspended = schedule?.Suspended ?? true,
                         Rule = schedule?.Rule,
                         TriggeredOn = triggeredOn,
-                        Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = task.Condition.Script },
-                        Action = new WorkflowEventTaskActionEval() { Script = task?.Action.Script ?? "" }
+                        Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = task!.Condition!.Script },
+                        Action = new WorkflowEventTaskActionEval() { Script = task?.Action!.Script ?? "" }
                     };
                 };
 
@@ -136,14 +136,16 @@ namespace Signum.Engine.Workflow
                         return;
                     }
 
+                    model = model!;
+
                     if (schedule != null)
                     {
-                        var task = (schedule.Task as WorkflowEventTaskEntity);
+                        var task = (WorkflowEventTaskEntity)schedule.Task;
                         schedule.Suspended = model.Suspended;
                         if (!object.ReferenceEquals(schedule.Rule, model.Rule))
                         {
-                            schedule.Rule = null;
-                            schedule.Rule = model.Rule;
+                            schedule.Rule = null!;
+                            schedule.Rule = model.Rule!;
                         }
                         task.TriggeredOn = model.TriggeredOn;
 
@@ -154,10 +156,10 @@ namespace Signum.Engine.Workflow
                         {
                             if (task.Condition == null)
                                 task.Condition = new WorkflowEventTaskConditionEval();
-                            task.Condition.Script = model.Condition.Script;
+                            task.Condition.Script = model.Condition!.Script;
                         };
 
-                        task.Action.Script = model.Action.Script;
+                        task.Action!.Script = model.Action!.Script;
                         if (GraphExplorer.IsGraphModified(schedule))
                         {
                             task.Execute(WorkflowEventTaskOperation.Save);
@@ -171,16 +173,16 @@ namespace Signum.Engine.Workflow
                             Workflow = @event.Lane.Pool.Workflow.ToLite(),
                             Event = @event.ToLite(),
                             TriggeredOn = model.TriggeredOn,
-                            Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = model.Condition.Script },
-                            Action = new WorkflowEventTaskActionEval() { Script = model.Action.Script },
+                            Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = model.Condition!.Script },
+                            Action = new WorkflowEventTaskActionEval() { Script = model.Action!.Script },
                         }.Execute(WorkflowEventTaskOperation.Save);
 
-                        schedule = new ScheduledTaskEntity()
+                        schedule = new ScheduledTaskEntity
                         {
                             Suspended = model.Suspended,
-                            Rule = model.Rule,
+                            Rule = model.Rule!,
                             Task = newTask,
-                            User = AuthLogic.SystemUser.ToLite(),
+                            User = AuthLogic.SystemUser!.ToLite(),
                         }.Execute(ScheduledTaskOperation.Save);
                     }
                 };
@@ -204,7 +206,7 @@ namespace Signum.Engine.Workflow
                 Event = newEvent.ToLite(),
                 TriggeredOn = task.TriggeredOn,
                 Condition = task.Condition != null ? new WorkflowEventTaskConditionEval() { Script = task.Condition.Script } : null,
-                Action = new WorkflowEventTaskActionEval() { Script = task.Action.Script },
+                Action = new WorkflowEventTaskActionEval() { Script = task.Action!.Script },
             }.Execute(WorkflowEventTaskOperation.Save);
 
             new ScheduledTaskEntity()
@@ -235,14 +237,14 @@ namespace Signum.Engine.Workflow
                .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static Lite<IEntity> ExecuteTask(WorkflowEventTaskEntity wet)
+        public static Lite<IEntity>? ExecuteTask(WorkflowEventTaskEntity wet)
         {
             using (Transaction tr = new Transaction())
             {
                 if (!EvaluateCondition(wet))
-                    return tr.Commit<Lite<IEntity>>(null);
+                    return tr.Commit<Lite<IEntity>?>(null);
 
-                var mainEntities = wet.Action.Algorithm.EvaluateUntyped();
+                var mainEntities = wet.Action!.Algorithm.EvaluateUntyped();
                 var caseActivities = new List<Lite<CaseActivityEntity>>();
                 foreach (var me in mainEntities)
                 {
@@ -266,7 +268,7 @@ namespace Signum.Engine.Workflow
             if (task.TriggeredOn == TriggeredOn.Always)
                 return true;
             
-            var result = task.Condition.Algorithm.Evaluate();
+            var result = task.Condition!.Algorithm.Evaluate();
             if (task.TriggeredOn == TriggeredOn.ConditionIsTrue)
                 return result;
 

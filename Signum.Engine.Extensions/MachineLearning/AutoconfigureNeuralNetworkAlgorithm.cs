@@ -13,7 +13,7 @@ namespace Signum.Engine.MachineLearning
     {
         public void Execute(ExecutingProcess ep)
         {   
-            var conf = (AutoconfigureNeuralNetworkEntity)ep.Data;
+            var conf = (AutoconfigureNeuralNetworkEntity)ep.Data!;
 
             var initial = conf.InitialPredictor.RetrieveAndForget();
             Random r = conf.Seed == null ? 

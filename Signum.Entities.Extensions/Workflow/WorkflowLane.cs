@@ -16,6 +16,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        public string? GetName() => Name;
+
         [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
@@ -30,7 +32,7 @@ namespace Signum.Entities.Workflow
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
         [NotifyChildProperty]
-        public WorkflowLaneActorsEval ActorsEval { get; set; }
+        public WorkflowLaneActorsEval? ActorsEval { get; set; }
 
         static Expression<Func<WorkflowLaneEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
@@ -122,6 +124,6 @@ namespace Signum.Entities.Workflow
         [NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
-        public WorkflowLaneActorsEval ActorsEval { get; set; }
+        public WorkflowLaneActorsEval? ActorsEval { get; set; }
     }
 }

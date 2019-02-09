@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -42,7 +42,7 @@ namespace Signum.Engine.ViewLog
 
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
-        public static Func<BaseQueryRequest, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
+        public static Func<BaseQueryRequest?, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
       
 
         public static void Start(SchemaBuilder sb, HashSet<Type> registerExpression)
@@ -86,7 +86,7 @@ namespace Signum.Engine.ViewLog
             return Administrator.DeleteWhereScript(t, f, arg.Id);
         }
 
-        static IDisposable Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest request)
+        static IDisposable? Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)
         {
             if (request == null || !LogQuery(request, type))
                 return null;

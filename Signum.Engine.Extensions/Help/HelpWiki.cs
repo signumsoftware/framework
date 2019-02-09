@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,9 +30,8 @@ namespace Signum.Engine.Help
 
         public class MultiWikiLink : WikiLink
         {
-
             public MultiWikiLink(string text)
-                : base(null, text)
+                : base(null!, text)
             {
             }
 
@@ -45,7 +44,7 @@ namespace Signum.Engine.Help
         }
 
 
-        public static WikiLink LinkParser(string content)
+        public static WikiLink? LinkParser(string content)
         {
             Match m = HelpLogic.HelpLinkRegex.Match(content);
             
@@ -58,7 +57,7 @@ namespace Signum.Engine.Help
                 switch (letter)
                 {
                     case WikiFormat.EntityLink:
-                        Type t = TypeLogic.TryGetType(link);
+                        Type t = TypeLogic.GetType(link);
                         return new WikiLink(
                             HelpUrls.EntityUrl(t),
                             text.HasText() ? text : t.NiceName());
@@ -67,7 +66,7 @@ namespace Signum.Engine.Help
                         return new WikiLink(link, text);
 
                     case WikiFormat.OperationLink:
-                        OperationSymbol operation = SymbolLogic<OperationSymbol>.TryToSymbol(link);
+                        OperationSymbol operation = SymbolLogic<OperationSymbol>.ToSymbol(link);
 
                         List<Type> types = OperationLogic.FindTypes(operation).Where(TypeLogic.TypeToEntity.ContainsKey).ToList();
                         if (types.Count == 1)
@@ -88,23 +87,22 @@ namespace Signum.Engine.Help
                         }
 
                     case WikiFormat.PropertyLink:
-                        PropertyRoute route = PropertyRoute.Parse(TypeLogic.TryGetType(link.Before('.')), link.After('.'));
+                        PropertyRoute route = PropertyRoute.Parse(TypeLogic.GetType(link.Before('.')), link.After('.'));
 
                         while (route.PropertyRouteType == PropertyRouteType.LiteEntity ||
                                route.PropertyRouteType == PropertyRouteType.Mixin ||
                                route.PropertyRouteType == PropertyRouteType.MListItems)
-                            route = route.Parent;
+                            route = route.Parent!;
 
-                        return new WikiLink(HelpUrls.PropertyUrl(route), route.PropertyInfo.NiceName());
+                        return new WikiLink(HelpUrls.PropertyUrl(route), route.PropertyInfo!.NiceName());
 
                     case WikiFormat.QueryLink:
-                        object o = QueryLogic.TryToQueryName(link);
-                        if (o as Enum != null)
+                        object o = QueryLogic.ToQueryName(link);
+                        if (o is Enum en)
                         {
-                            Enum query = (Enum)o;
                             return new WikiLink(
-                                HelpUrls.QueryUrl(query),
-                                text.HasText() ? text : QueryUtils.GetNiceName(query));
+                                HelpUrls.QueryUrl(en),
+                                text.HasText() ? text : QueryUtils.GetNiceName(en));
                         }
                         else
                         {
@@ -134,7 +132,7 @@ namespace Signum.Engine.Help
 
         static Regex ImageRegex = new Regex(@"^image(?<position>[^\|]+)\|(?<url>[^\|\]]*)(\|(?<footer>.*))?$");
 
-        public static string ProcessImages(string content)
+        public static string? ProcessImages(string content)
         {
             Match m = ImageRegex.Match(content);
 
@@ -160,7 +158,7 @@ namespace Signum.Engine.Help
             return null;
         }
 
-        public static string RemoveImages(string content)
+        public static string? RemoveImages(string content)
         {
             Match m = ImageRegex.Match(content);
 
@@ -173,9 +171,9 @@ namespace Signum.Engine.Help
 
         public class WikiLink
         {
-            public string Text { get; set; }
             public string Url { get; set; }
-            public string Class { get; set; }
+            public string? Text { get; set; }
+            public string? Class { get; set; }
 
             public WikiLink(string url)
             {

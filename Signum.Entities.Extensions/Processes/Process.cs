@@ -108,7 +108,7 @@ namespace Signum.Entities.Processes
         public decimal? Progress { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         static StateValidator<ProcessEntity, ProcessState> stateValidator = new StateValidator<ProcessEntity, ProcessState>
         (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.Status, e => e.ExceptionDate, e => e.Exception, e => e.MachineName, e => e.ApplicationName)

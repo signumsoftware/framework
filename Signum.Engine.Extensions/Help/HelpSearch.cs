@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
@@ -9,13 +9,13 @@ namespace Signum.Engine.Help
 {
     public static class HelpSearch
     {
-        public static SearchResult Search(this AppendixHelp entity, Regex regex)
+        public static SearchResult? Search(this AppendixHelp entity, Regex regex)
         {
             {
                 Match m = regex.Match(entity.Title.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Appendix, entity.Title, entity.Description.Etc(etcLength).DefaultText(entity.Title), null, m, 
+                    return new SearchResult(TypeSearchResult.Appendix, entity.Title, entity.Description.Try(d => d.Etc(etcLength)).DefaultText(entity.Title), null, m,
                         HelpUrls.AppendixUrl(entity.UniqueName));
                 }
             }
@@ -33,16 +33,15 @@ namespace Signum.Engine.Help
         }
 
 
-        public static SearchResult Search(this NamespaceHelp entity, Regex regex)
+        public static SearchResult? Search(this NamespaceHelp entity, Regex regex)
         {
             {
                 Match m = regex.Match(entity.Title.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Namespace, entity.Title, entity.Description.Etc(etcLength).DefaultText(entity.Title), null, m, HelpUrls.NamespaceUrl(entity.Namespace));
+                    return new SearchResult(TypeSearchResult.Namespace, entity.Title, entity.Description.Try(d => d.Etc(etcLength)).DefaultText(entity.Title), null, m, HelpUrls.NamespaceUrl(entity.Namespace));
                 }
             }
-
 
             if (entity.Description.HasText())
             {
@@ -160,13 +159,13 @@ namespace Signum.Engine.Help
     {
         public TypeSearchResult TypeSearchResult { get; set; }
         public string ObjectName { get; set; }
-        public Type Type { get; set; }
+        public Type? Type { get; set; }
         public MatchType MatchType { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public string Link { get; set; }
         public bool IsDescription { get; set; }
 
-        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string description, Type type, Match match, string link, bool isDescription = false)
+        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string? description, Type? type, Match match, string link, bool isDescription = false)
         {
             this.ObjectName = objectName;
             this.TypeSearchResult = typeSearchResult;

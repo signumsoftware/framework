@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
 using System.Reflection;
@@ -27,8 +27,8 @@ namespace Signum.Engine.Mailing
                         Entity = s,
                         s.Id,
                         s.DeliveryMethod,
-                        s.Network.Host,
-                        s.Network.Username,
+                        s.Network!.Host,
+                        s.Network!.Username,
                         s.PickupDirectoryLocation
                     });
                 
@@ -67,7 +67,7 @@ namespace Signum.Engine.Mailing
             }
             else
             {
-                SmtpClient client = EmailLogic.SafeSmtpClient(config.Network.Host, config.Network.Port);
+                SmtpClient client = EmailLogic.SafeSmtpClient(config.Network!.Host, config.Network.Port);
                 client.DeliveryFormat = config.DeliveryFormat;
                 client.UseDefaultCredentials = config.Network.UseDefaultCredentials;
                 client.Credentials = config.Network.Username.HasText() ? new NetworkCredential(config.Network.Username, config.Network.Password) : null;

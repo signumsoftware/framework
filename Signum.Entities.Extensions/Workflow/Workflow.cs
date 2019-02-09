@@ -134,7 +134,7 @@ namespace Signum.Entities.Workflow
     public interface IWorkflowObjectEntity : IEntity
     {
         WorkflowXmlEmbedded Xml { get; set; }
-        //string? Name { get; set; }
+        string? GetName();
         string BpmnElementId { get; set; }
     }
 
@@ -163,7 +163,7 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowTransitionContext
     {
-        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, WorkflowConnectionEntity conn)
+        public WorkflowTransitionContext(CaseEntity? @case, CaseActivityEntity? previous, WorkflowConnectionEntity? conn)
         {
             this.Case = @case;
             this.PreviousCaseActivity = previous;
