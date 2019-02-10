@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
 
         #region Events
 
-        public event Func<Type, bool, string> IsAllowedCallback;
+        public event Func<Type, bool, string?> IsAllowedCallback;
 
         public string? IsAllowed(Type type, bool inUserInterface)
         {
@@ -317,7 +317,7 @@ namespace Signum.Engine.Maps
             
             return new FilterQueryResult<T>(
                 a => one!.InDatabaseExpresson.Evaluate(a) && two.InDatabaseExpresson.Evaluate(a),
-                a => one!.InMemoryFunction(a) && two!.InMemoryFunction(a));
+                a => one!.InMemoryFunction!(a) && two!.InMemoryFunction!(a));
         }
 
         public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
@@ -801,7 +801,7 @@ namespace Signum.Engine.Maps
         void Complete(Entity entity, IRetriever retriver);
 
         string GetToString(PrimaryKey id);
-        string TryGetToString(PrimaryKey id);
+        string? TryGetToString(PrimaryKey id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -823,9 +823,11 @@ namespace Signum.Engine.Maps
         public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(PrimaryKey id);
-        public abstract string TryGetToString(PrimaryKey id);
+        public abstract string? TryGetToString(PrimaryKey id);
 
-        public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>>> backReference, Lite<R> lite)
+        public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             where R : Entity;
     }
+
+
 }

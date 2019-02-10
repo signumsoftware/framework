@@ -24,7 +24,7 @@ namespace Signum.Entities
             return new Disposable(() => inModelBinderVariable.Value = old);
         }
 
-        public static Func<ModifiableEntity, PropertyInfo, string> GlobalValidation { get; set; }
+        public static Func<ModifiableEntity, PropertyInfo, string?> GlobalValidation { get; set; }
 
         static Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
@@ -54,7 +54,7 @@ namespace Signum.Entities
 
   
 
-        public static PropertyValidator<T> OverridePropertyValidator<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static PropertyValidator<T> OverridePropertyValidator<T>(Expression<Func<T, object?>> property) where T : ModifiableEntity
         {
             GenerateType<T>();
 
@@ -74,7 +74,7 @@ namespace Signum.Entities
             return result;
         }
 
-        public static PropertyValidator<T> PropertyValidator<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static PropertyValidator<T> PropertyValidator<T>(Expression<Func<T, object?>> property) where T : ModifiableEntity
         {
             GenerateType<T>();
 
@@ -155,7 +155,7 @@ namespace Signum.Entities
         public Func<T, bool>? IsApplicableParentChildPropertyValidation { get; set; }
         public Func<T, bool>? IsApplicableStaticPropertyValidation { get; set; }
 
-        public Func<T, PropertyInfo, string>? StaticPropertyValidation { get; set; }
+        public Func<T, PropertyInfo, string?>? StaticPropertyValidation { get; set; }
 
         public bool Required => throw new NotImplementedException();
 

@@ -458,7 +458,7 @@ namespace Signum.Engine
             get { return true; }
         }
 
-        public SqlConnector ForDatabase(Maps.DatabaseName database)
+        public SqlConnector ForDatabase(Maps.DatabaseName? database)
         {
             if (database == null)
                 return this;

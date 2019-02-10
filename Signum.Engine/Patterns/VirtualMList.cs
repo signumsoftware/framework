@@ -56,14 +56,14 @@ namespace Signum.Engine
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
-            Expression<Func<L, Lite<T>>> getBackReference,
+            Expression<Func<L, Lite<T>?>> backReference,
             ExecuteSymbol<L> saveOperation,
             DeleteSymbol<L> deleteOperation)
             where T : Entity
             where L : Entity
         {
 
-            return fi.WithVirtualMList(mListField, getBackReference,
+            return fi.WithVirtualMList(mListField, backReference,
                 onSave: saveOperation == null ? null : new Action<L, T>((line, e) =>
                 {
                     line.Execute(saveOperation);
@@ -76,7 +76,7 @@ namespace Signum.Engine
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
-            Expression<Func<L, Lite<T>>> backReference,
+            Expression<Func<L, Lite<T>?>> backReference,
             Action<L, T>? onSave = null,
             Action<L, T>? onRemove = null,
             bool? lazyRetrieve = null,
@@ -259,7 +259,7 @@ namespace Signum.Engine
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
-            Expression<Func<L, Lite<T>>> backReference,
+            Expression<Func<L, Lite<T>?>> backReference,
             Action<L, T>? onSave = null)
             where T : Entity
             where L : Entity
@@ -345,7 +345,7 @@ namespace Signum.Engine
                 );
         }
 
-        public static Action<L, Lite<T>>? CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
+        public static Action<L, Lite<T>>? CreateSetter<T, L>(Expression<Func<L, Lite<T>?>> getBackReference)
             where T : Entity
             where L : Entity
         {

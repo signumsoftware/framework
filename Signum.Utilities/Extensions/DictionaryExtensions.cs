@@ -23,6 +23,13 @@ namespace Signum.Utilities
             return null;
         }
 
+        public static V? TryGetCN<K, V>(this IReadOnlyDictionary<K, V?> dictionary, K key) where V : class
+        {
+            if (dictionary.TryGetValue(key, out V? result))
+                return result;
+            return null;
+        }
+
         public static V? TryGetS<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : struct
         {
             if (dictionary.TryGetValue(key, out V result))
@@ -47,7 +54,9 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static V GetOrAdd<K, V>(this ConcurrentDictionary<K, V> dictionary, K key) where V : new()
+        public static V GetOrAdd<K, V>(this ConcurrentDictionary<K, V> dictionary, K key)
+            where K : object
+            where V : new()
         {
             return dictionary.GetOrAdd(key, k => new V());
         }

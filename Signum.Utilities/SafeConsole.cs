@@ -12,17 +12,17 @@ namespace Signum.Utilities
         public static readonly object SyncKey = new object();
         static bool needToClear = false;
 
-        public static void WriteSameLine(string format, params object[] parameters)
+        public static void WriteSameLine(string? format, params object?[] parameters)
         {
             WriteSameLine(string.Format(format, parameters));
         }
 
-        public static void WriteSameLine(string str)
+        public static void WriteSameLine(string? str)
         {
             if (needToClear)
-                str = str.PadChopRight(Console.BufferWidth - 1);
+                str = str?.PadChopRight(Console.BufferWidth - 1);
             else
-                str = str.TryStart(Console.BufferWidth - 1)!;
+                str = str?.TryStart(Console.BufferWidth - 1)!;
 
             Console.WriteLine(str);
 
@@ -57,12 +57,12 @@ namespace Signum.Utilities
 
 
 
-        public static void WriteLineColor(ConsoleColor color, string format, params object[] parameters)
+        public static void WriteLineColor(ConsoleColor color, string? format, params object?[] parameters)
         {
             WriteLineColor(color, string.Format(format, parameters));
         }
 
-        public static void WriteLineColor(ConsoleColor color, string str)
+        public static void WriteLineColor(ConsoleColor color, string? str)
         {
             ConsoleColor old = Console.ForegroundColor;
             Console.ForegroundColor = color;
@@ -70,7 +70,7 @@ namespace Signum.Utilities
             Console.ForegroundColor = old;
         }
 
-        public static void WriteSameLineColor(ConsoleColor color, string str)
+        public static void WriteSameLineColor(ConsoleColor color, string? str)
         {
             ConsoleColor old = Console.ForegroundColor;
             Console.ForegroundColor = color;

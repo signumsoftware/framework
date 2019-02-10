@@ -851,11 +851,11 @@ namespace Signum.Entities
         Func<E, S> getState;
         string[] propertyNames;
         PropertyInfo[] properties;
-        Func<E, object>[] getters;
+        Func<E, object?>[] getters;
 
         Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
 
-        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] propertyGetters)
+        public StateValidator(Func<E, S> getState, params Expression<Func<E, object?>>[] propertyGetters)
         {
             this.getState = getState;
             this.properties = propertyGetters.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();

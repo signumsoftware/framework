@@ -276,7 +276,7 @@ namespace Signum.Entities.DynamicQuery
 
             string Null = "- NULL -";
 
-            Dictionary<object, Dictionary<object, object>> dictionary =
+            Dictionary<object, Dictionary<object, object?>> dictionary =
                 this.Rows
                 .AgGroupToDictionary(
                     row => row[rowColumnIndex] ?? Null,
@@ -298,7 +298,7 @@ namespace Signum.Entities.DynamicQuery
             foreach (var kvp in dictionary)
             {
                 result.Rows.Add(
-                    allColumns.Select(val => defConverter.ConvertValue(kvp.Value.TryGetC(val), valueColumn.Column))
+                    allColumns.Select(val => defConverter.ConvertValue(kvp.Value.TryGetCN(val), valueColumn.Column))
                     .PreAnd(defConverter.ConvertValue(kvp.Key, rowColumn.Column))
                     .ToArray());
             }
@@ -417,12 +417,12 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public object this[int columnIndex]
+        public object? this[int columnIndex]
         {
             get { return Table.Columns[columnIndex].Values[Index]; }
         }
 
-        public object this[ResultColumn column]
+        public object? this[ResultColumn column]
         {
             get { return column.Values[Index]; }
         }
@@ -445,22 +445,22 @@ namespace Signum.Entities.DynamicQuery
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)]!;
         }
 
         public T GetValue<T>(int columnIndex)
         {
-            return (T)this[columnIndex];
+            return (T)this[columnIndex]!;
         }
 
         public T GetValue<T>(ResultColumn column)
         {
-            return (T)this[column];
+            return (T)this[column]!;
         }
 
-        public object[] GetValues(ResultColumn[] columnArray)
+        public object?[] GetValues(ResultColumn[] columnArray)
         {
-            var result = new object[columnArray.Length];
+            var result = new object?[columnArray.Length];
             for (int i = 0; i < columnArray.Length; i++)
             {
                 result[i] = this[columnArray[i]];

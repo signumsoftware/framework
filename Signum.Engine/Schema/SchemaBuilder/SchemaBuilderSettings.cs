@@ -234,13 +234,13 @@ namespace Signum.Engine.Maps
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
         }
 
-        public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
+        public bool ImplementedBy<T>(Expression<Func<T, object?>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var imp = GetImplementations(propertyRoute);
             return !imp.IsByAll && imp.Types.Contains(typeToImplement);
         }
 
-        public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
+        public void AssertImplementedBy<T>(Expression<Func<T, object?>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var route = PropertyRoute.Construct(propertyRoute);
 
@@ -252,7 +252,7 @@ namespace Signum.Engine.Maps
                     Implementations.ConsiderMessage(route, imp.Types.And(typeToImplement).ToString(t => $"typeof({t.TypeName()})", ", ")));
         }
 
-        public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : Entity
+        public Implementations GetImplementations<T>(Expression<Func<T, object?>> propertyRoute) where T : Entity
         {
             return GetImplementations(PropertyRoute.Construct(propertyRoute));
         }

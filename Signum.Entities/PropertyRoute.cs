@@ -367,12 +367,12 @@ namespace Signum.Entities
             return FindImplementations(this);
         }
 
-        public static void SetIsAllowedCallback(Func<PropertyRoute, string> isAllowed)
+        public static void SetIsAllowedCallback(Func<PropertyRoute, string?> isAllowed)
         {
             IsAllowedCallback = isAllowed;
         }
 
-        static Func<PropertyRoute, string> IsAllowedCallback;
+        static Func<PropertyRoute, string?> IsAllowedCallback;
 
         public string? IsAllowed()
         {

@@ -102,7 +102,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public event Func<ExecuteType, object, BaseQueryRequest?, IDisposable> QueryExecuted;
+        public event Func<ExecuteType, object, BaseQueryRequest?, IDisposable?> QueryExecuted;
 
         public enum ExecuteType
         {

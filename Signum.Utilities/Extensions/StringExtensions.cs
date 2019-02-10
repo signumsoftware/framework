@@ -33,6 +33,18 @@ namespace Signum.Utilities
                 return defaultText;
         }
 
+#pragma warning disable IDE0052 // Remove unread private members
+        static readonly Expression<Func<string, string>> EmtpyToNullExpression = a => a == null || a.Length == 0 ? null : a;
+#pragma warning restore IDE0052 // Remove unread private members
+        [ExpressionField("EmtpyToNullExpression")]
+        public static string? EmtpyToNull(this string? str)
+        {
+            if (!str.HasText())
+                return null;
+
+            return str;
+        }
+
         public static string AssertHasText(this string? str, string errorMessage)
         {
             if (str.HasText())

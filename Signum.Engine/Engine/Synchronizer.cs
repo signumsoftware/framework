@@ -315,9 +315,9 @@ namespace Signum.Engine
         {
             public string ReplacementKey;
             public string OldValue;
-            public List<string> NewValues;
+            public List<string>? NewValues;
 
-            public AutoReplacementContext(string replacementKey, string oldValue, List<string> newValues)
+            public AutoReplacementContext(string replacementKey, string oldValue, List<string>? newValues)
             {
                 ReplacementKey = replacementKey;
                 OldValue = oldValue;

@@ -18,7 +18,7 @@ namespace Signum.Engine
 
         T? Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
         T? Request<T>(PrimaryKey? id) where T : Entity;
-        T? RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
+        T? RequestIBA<T>(PrimaryKey? typeId, string? id) where T : class, IEntity;
         Lite<T>? RequestLite<T>(Lite<T>? lite) where T : class, IEntity;
         T? ModifiablePostRetrieving<T>(T? entity) where T : Modifiable;
         IRetriever? Parent { get; }
@@ -126,7 +126,7 @@ namespace Signum.Engine
             return entity;
         }
 
-        public T? RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
+        public T? RequestIBA<T>(PrimaryKey? typeId, string? id) where T : class, IEntity
         {
             if (id == null)
                 return null;
@@ -307,7 +307,7 @@ namespace Signum.Engine
             if (cc != null && cc.Enabled)
             {
                 cc.Load();
-                return ids.ToDictionary(a => a, a => cc.TryGetToString(a));
+                return ids.ToDictionary(a => a, a => cc.TryGetToString(a)!);
             }
             else if (token != null)
             {
@@ -364,7 +364,7 @@ namespace Signum.Engine
             return parent.Request<T>(id);
         }
 
-        public T? RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
+        public T? RequestIBA<T>(PrimaryKey? typeId, string? id) where T : class, IEntity
         {
             return parent.RequestIBA<T>(typeId, id);
         }

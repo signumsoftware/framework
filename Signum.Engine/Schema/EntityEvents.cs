@@ -53,7 +53,7 @@ namespace Signum.Engine.Maps
             if (FilterQuery == null)
                 return Enumerable.Empty<FilterQueryResult<T>>();
 
-            return FilterQuery.GetInvocationListTyped().Select(f => f()).ToList();
+            return FilterQuery.GetInvocationListTyped().Select(f => f()).NotNull().ToList();
         }
 
         internal IDisposable? OnPreUnsafeDelete(IQueryable<T> entityQuery)
@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
     public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
-    public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
+    public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>() where T : Entity;
     public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
     public delegate IDisposable? PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
@@ -276,14 +276,14 @@ namespace Signum.Engine.Maps
 
     public class FilterQueryResult<T> : IFilterQueryResult where T : Entity
     {
-        public FilterQueryResult(Expression<Func<T, bool>> inDatabaseExpression, Func<T, bool> inMemoryFunction)
+        public FilterQueryResult(Expression<Func<T, bool>> inDatabaseExpression, Func<T, bool>? inMemoryFunction)
         {
             this.InDatabaseExpresson = inDatabaseExpression;
             this.InMemoryFunction = inMemoryFunction;
         }
 
         public readonly Expression<Func<T, bool>> InDatabaseExpresson;
-        public readonly Func<T, bool> InMemoryFunction;
+        public readonly Func<T, bool>? InMemoryFunction;
 
         LambdaExpression IFilterQueryResult.InDatabaseExpression { get { return this.InDatabaseExpresson; } }
     }

@@ -500,7 +500,7 @@ namespace Signum.Utilities
             return sb.ToString();  // Remove at the end is faster
         }
 
-        public static string ToString<T>(this IEnumerable<T> source, Func<T, string> toString, string separator)
+        public static string ToString<T>(this IEnumerable<T> source, Func<T, string?> toString, string separator)
         {
             StringBuilder? sb = null;
             foreach (var item in source)
@@ -519,7 +519,7 @@ namespace Signum.Utilities
             return sb.ToString();  // Remove at the end is faster
         }
 
-        public static string ToString<T>(this IQueryable<T> source, Expression<Func<T, string>> toString, string separator)
+        public static string ToString<T>(this IQueryable<T> source, Expression<Func<T, string?>> toString, string separator)
         {
             return source.Select(toString).ToString(separator);
         }
@@ -529,17 +529,17 @@ namespace Signum.Utilities
             return CommaString(collection.Select(a => a!.ToString()).ToArray(), CollectionMessage.And.NiceToString());
         }
 
-        public static string CommaAnd<T>(this IEnumerable<T> collection, Func<T, string> toString)
+        public static string CommaAnd<T>(this IEnumerable<T> collection, Func<T, string?> toString)
         {
             return CommaString(collection.Select(toString).ToArray(), CollectionMessage.And.NiceToString());
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a => a!.ToString()).ToArray(), CollectionMessage.Or.NiceToString());
+            return CommaString(collection.Select(a => a?.ToString()).ToArray(), CollectionMessage.Or.NiceToString());
         }
 
-        public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
+        public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string?> toString)
         {
             return CommaString(collection.Select(toString).ToArray(), CollectionMessage.Or.NiceToString());
         }
@@ -554,7 +554,7 @@ namespace Signum.Utilities
             return CommaString(collection.Select(toString).ToArray(), lastSeparator);
         }
 
-        static string CommaString(this string[] values, string lastSeparator)
+        static string CommaString(this string?[] values, string lastSeparator)
         {
             if (values.Length == 0)
                 return "";

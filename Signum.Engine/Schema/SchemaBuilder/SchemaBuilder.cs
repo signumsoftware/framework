@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object>>? includeFields = null) where T : Entity
+        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
         {
             var table = Schema.Table<T>();
 
@@ -89,7 +89,7 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        public Index AddIndex<T>(Expression<Func<T, object>> fields, 
+        public Index AddIndex<T>(Expression<Func<T, object?>> fields, 
             Expression<Func<T, bool>>? where = null, 
             Expression<Func<T, object>>? includeFields = null) where T : Entity
         {

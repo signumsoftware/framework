@@ -128,9 +128,7 @@ namespace Signum.Engine.Maps
                 
                 return resultColumns.ToArray();
             }
-
-
-
+            
             return GetColumns(finder, columns);
         }
 

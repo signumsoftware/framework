@@ -77,7 +77,7 @@ namespace Signum.Entities
 
             SetSelfModified();
             field = value;
-            
+
             if (field is INotifyCollectionChanged cola)
             {
                 if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
@@ -87,7 +87,7 @@ namespace Signum.Entities
                     foreach (ModifiableEntity item in (IEnumerable)cola)
                         item.SetParentEntity(this);
             }
-            
+
             if (field is ModifiableEntity moda)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
@@ -102,7 +102,7 @@ namespace Signum.Entities
 
             return true;
         }
-        
+
         struct PropertyKey : IEquatable<PropertyKey>
         {
             public PropertyKey(Type type, string propertyName)
@@ -129,7 +129,7 @@ namespace Signum.Entities
         }
 
         static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
-#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property CSBUG
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [HiddenProperty, ExpressionField("ToStringPropertyExpression")]
 #pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public string ToStringProperty
@@ -140,7 +140,7 @@ namespace Signum.Entities
                 return str.HasText() ? str : this.GetType().NiceName();
             }
         }
-
+        
         #region Collection Events
 
         protected internal override void PostRetrieving()
@@ -327,7 +327,7 @@ namespace Signum.Entities
             }
         }
 
-        public string? PropertyCheck(Expression<Func<object>> property)
+        public string? PropertyCheck(Expression<Func<object?>> property)
         {
             return PropertyCheck(ReflectionTools.GetPropertyInfo(property).Name);
         }
@@ -347,7 +347,7 @@ namespace Signum.Entities
             return null;
         }
 
-        protected static void Validate<T>(Expression<Func<T, object>> property, Func<T, PropertyInfo, string> validate) where T : ModifiableEntity
+        protected static void Validate<T>(Expression<Func<T, object?>> property, Func<T, PropertyInfo, string?> validate) where T : ModifiableEntity
         {
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }

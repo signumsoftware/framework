@@ -148,7 +148,7 @@ namespace Signum.Engine
                             r.CompleteAll();
                         }
 
-                        if (filter != null && !filter.InMemoryFunction(result))
+                        if (filter != null && !filter.InMemoryFunction!(result))
                             throw new EntityNotFoundException(typeof(T), id);
 
                         return result;
@@ -196,7 +196,7 @@ namespace Signum.Engine
                             await r.CompleteAllAsync(token);
                         }
 
-                        if (filter != null && !filter.InMemoryFunction(result))
+                        if (filter != null && !filter.InMemoryFunction!(result))
                             throw new EntityNotFoundException(typeof(T), id);
 
                         return result;

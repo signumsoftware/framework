@@ -505,12 +505,12 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static bool TryParse(string value, Type type, out object? result)
+        public static bool TryParse(string? value, Type type, out object? result)
         {
             return TryParse(value, type, CultureInfo.CurrentCulture, out result);
         }
 
-        public static bool TryParse(string value, Type type, CultureInfo ci, out object? result)
+        public static bool TryParse(string? value, Type type, CultureInfo ci, out object? result)
         {
             if (type == typeof(string))
             {
@@ -698,7 +698,7 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static T ChangeType<T>(object value)
+        public static T ChangeType<T>(object? value)
         {
             if (value == null)
                 return (T)(object?)null!;

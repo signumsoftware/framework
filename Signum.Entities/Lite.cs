@@ -345,7 +345,7 @@ namespace Signum.Entities
             return giNewLite.GetInvoker(type)(id, null);
         }
 
-        public static Lite<Entity> Create(Type type, PrimaryKey id, string toStr)
+        public static Lite<Entity> Create(Type type, PrimaryKey id, string? toStr)
         {
             return giNewLite.GetInvoker(type)(id, toStr);
         }
@@ -361,7 +361,7 @@ namespace Signum.Entities
         }
 
         [DebuggerStepThrough]
-        public static Lite<T> ToLite<T>(this T entity, string toStr)
+        public static Lite<T> ToLite<T>(this T entity, string? toStr)
             where T : class, IEntity
         {
             if (entity.IsNew)
@@ -471,7 +471,7 @@ namespace Signum.Entities
         }
 
         [MethodExpander(typeof(IsEntityLiteExpander))]
-        public static bool Is<T>(this T entity1, Lite<T> lite2)
+        public static bool Is<T>(this T? entity1, Lite<T>? lite2)
              where T : class, IEntity
         {
             if (entity1 == null && lite2 == null)
@@ -511,7 +511,7 @@ namespace Signum.Entities
         }
 
         [MethodExpander(typeof(IsLiteEntityExpander))]
-        public static bool Is<T>(this Lite<T> lite1, T entity2)
+        public static bool Is<T>(this Lite<T>? lite1, T? entity2)
             where T : class, IEntity
         {
             if (lite1 == null && entity2 == null)
