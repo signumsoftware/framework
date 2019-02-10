@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28516.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Engine", "..\Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Entities", "..\Signum.Entities\Signum.Entities.csproj", "{F2B51D08-498D-4C9F-8112-9521A7762B02}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Utilities", "..\Signum.Utilities\Signum.Utilities.csproj", "{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.MSBuildTask", "..\Signum.MSBuildTask\Signum.MSBuildTask.csproj", "{7B29A947-1044-4F86-8A76-E1D2D6371CF3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Analyzer", "Signum.Analyzer\Signum.Analyzer.csproj", "{C7E2DF3E-E66A-41E2-87E8-230F20CA533A}"
 EndProject
@@ -30,9 +28,6 @@ Global
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Debug|Any CPU.Build.0 = Debug|x64
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Release|Any CPU.ActiveCfg = Release|x64
-		{7B29A947-1044-4F86-8A76-E1D2D6371CF3}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{7B29A947-1044-4F86-8A76-E1D2D6371CF3}.Debug|Any CPU.Build.0 = Debug|x64
-		{7B29A947-1044-4F86-8A76-E1D2D6371CF3}.Release|Any CPU.ActiveCfg = Release|x64
 		{C7E2DF3E-E66A-41E2-87E8-230F20CA533A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C7E2DF3E-E66A-41E2-87E8-230F20CA533A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7E2DF3E-E66A-41E2-87E8-230F20CA533A}.Release|Any CPU.ActiveCfg = Release|Any CPU
