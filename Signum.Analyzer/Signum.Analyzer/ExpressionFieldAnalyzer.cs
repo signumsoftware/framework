@@ -26,11 +26,11 @@ namespace Signum.Analyzer
 
         public override void Initialize(AnalysisContext context)
         {
-            context.RegisterSyntaxNodeAction(AnalyzePropertySymbol, SyntaxKind.Attribute);
+            context.RegisterSyntaxNodeAction(AnalyzeAttributeSymbol, SyntaxKind.Attribute);
         }
 
 
-        static void AnalyzePropertySymbol(SyntaxNodeAnalysisContext context)
+        static void AnalyzeAttributeSymbol(SyntaxNodeAnalysisContext context)
         {
             try
             {
@@ -92,9 +92,12 @@ namespace Signum.Analyzer
 
                     if (!expressionType.Equals(fieldSymbol.Type))
                     {
-                        var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
-                        Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
-                        return;
+                        //if (!expressionType.ToString().Equals(fieldSymbol.Type.ToString())) // Till there is an API to express nullability
+                        {
+                            var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
+                            Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
+                            return;
+                        }
                     }
                 }
                 else

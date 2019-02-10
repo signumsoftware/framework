@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -18,7 +18,7 @@ namespace Signum.Analyzer
         
         private static DiagnosticDescriptor RuleLiteEntity = new DiagnosticDescriptor(DiagnosticId,
             "Prevents comparisons between Lite<T> and T",
-            "Impossible to compare Lite<T> and T. Consider using RefersTo method", "Lite",
+            "Impossible to compare Lite<T> and T. Consider using 'Is' extension method", "Lite",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "Checks that Lite<T> and T are not compared directly. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance");
@@ -61,8 +61,8 @@ namespace Signum.Analyzer
 
                 if (tLeft != null && 
                     tRight != null &&
-                    !tLeft.IsAbstract &&
-                    !tRight.IsAbstract &&
+                    tLeft.TypeKind != TypeKind.Interface &&
+                    tRight.TypeKind != TypeKind.Interface &&
                     !tLeft.GetBaseTypesAndThis().Contains(tRight) &&
                     !tRight.GetBaseTypesAndThis().Contains(tLeft))
                 {

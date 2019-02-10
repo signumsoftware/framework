@@ -8,6 +8,8 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -24,8 +26,14 @@ namespace TestHelper
         private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
         private static readonly MetadataReference SystemLinqExpression = MetadataReference.CreateFromFile(typeof(Expression).Assembly.Location);
-        private static readonly MetadataReference SystemRuntimeReference= MetadataReference.CreateFromFile(@"C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.1.0\ref\netcoreapp2.1\System.Runtime.dll"/*typeof(ValueType).Assembly.Location*/);
+
+
+
+        private static readonly MetadataReference SystemPrivateCorLib = MetadataReference.CreateFromFile(typeof(Func<>).Assembly.Location);
+        private static readonly MetadataReference SystemRuntimeReference = MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(Func<>).Assembly.Location), "System.Runtime.dll"));
         private static readonly MetadataReference SystemRuntime = MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location);
+        private static readonly MetadataReference SystemObjectModel = MetadataReference.CreateFromFile(typeof(INotifyPropertyChanged).Assembly.Location);
+        private static readonly MetadataReference SystemComponentModelTypeConverter = MetadataReference.CreateFromFile(typeof(IDataErrorInfo).Assembly.Location);
         private static readonly MetadataReference SignumUtilitiesReference = MetadataReference.CreateFromFile(typeof(Csv).Assembly.Location);
         private static readonly MetadataReference SignumEntitiesReference = MetadataReference.CreateFromFile(typeof(Entity).Assembly.Location);
         private static readonly MetadataReference SignumEngineReference = MetadataReference.CreateFromFile(typeof(Database).Assembly.Location);
@@ -44,9 +52,10 @@ namespace TestHelper
         /// <param name="language">The language the source classes are in</param>
         /// <param name="analyzer">The analyzer to be run on the sources</param>
         /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
-        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer)
+        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, bool assertErrors, DiagnosticAnalyzer analyzer)
         {
-            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language));
+            var docs = GetDocuments(sources, language);
+            return GetSortedDiagnosticsFromDocuments(analyzer, assertErrors, docs);
         }
 
         /// <summary>
@@ -56,7 +65,7 @@ namespace TestHelper
         /// <param name="analyzer">The analyzer to run on the documents</param>
         /// <param name="documents">The Documents that the analyzer will be run on</param>
         /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
-        protected static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents)
+        protected static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, bool assertErrors, Document[] documents)
         {
             var projects = new HashSet<Project>();
             foreach (var document in documents)
@@ -67,7 +76,15 @@ namespace TestHelper
             var diagnostics = new List<Diagnostic>();
             foreach (var project in projects)
             {
-                var compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
+                var compilation = project.GetCompilationAsync().Result;
+                if (assertErrors)
+                {
+                    var errors = compilation.GetDiagnostics();
+                    if (errors.Any(a => a.Severity == DiagnosticSeverity.Error))
+                        throw new InvalidOperationException("Errors found:\n" + errors.Where(a => a.Severity == DiagnosticSeverity.Error).ToString("\n").Indent(2));
+                }   
+
+                var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer));
                 var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
                 foreach (var diag in diags)
                 {
@@ -116,7 +133,7 @@ namespace TestHelper
         /// <returns>A Tuple containing the Documents produced from the sources and their TextSpans if relevant</returns>
         private static Document[] GetDocuments(string[] sources, string language)
         {
-            if (language != LanguageNames.CSharp && language != LanguageNames.VisualBasic)
+            if (language != LanguageNames.CSharp)
             {
                 throw new ArgumentException("Unsupported Language");
             }
@@ -158,14 +175,19 @@ namespace TestHelper
 
             var solution = new AdhocWorkspace()
                 .CurrentSolution
-                .AddProject(projectId, TestProjectName, TestProjectName, language)
+                .AddProject( projectId, TestProjectName, TestProjectName, language)
+                .WithProjectParseOptions(projectId, new CSharpParseOptions(LanguageVersion.CSharp8))
+                .WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithNullableContextOptions(NullableContextOptions.Enable))
                 .AddMetadataReference(projectId, CorlibReference)
                 .AddMetadataReference(projectId, SystemCoreReference)
                 .AddMetadataReference(projectId, CSharpSymbolsReference)
                 .AddMetadataReference(projectId, CodeAnalysisReference)
+                .AddMetadataReference(projectId, SystemPrivateCorLib)
                 .AddMetadataReference(projectId, SystemRuntimeReference)
                 .AddMetadataReference(projectId, SystemLinqExpression)
                 .AddMetadataReference(projectId, SystemRuntime)
+                .AddMetadataReference(projectId, SystemObjectModel)
+                .AddMetadataReference(projectId, SystemComponentModelTypeConverter)
                 .AddMetadataReference(projectId, SignumUtilitiesReference)
                 .AddMetadataReference(projectId, SignumEntitiesReference)
                 .AddMetadataReference(projectId, SignumEngineReference);
