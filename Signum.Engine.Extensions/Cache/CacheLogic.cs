@@ -551,7 +551,7 @@ namespace Signum.Engine.Cache
 
             public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(); /*CSBUG https://github.com/dotnet/roslyn/issues/33276*/
                 //var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
 
                 //var ids = dic.TryGetC(lite.Id).EmptyIfNull();
@@ -915,3 +915,5 @@ Remember that the Start could be called with an empty database!");
         None
     }
 }
+
+
