@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
@@ -98,7 +98,7 @@ namespace Signum.React.Selenium
 
         public static void WaitReload(this IEntityButtonContainer container, Action action)
         {
-            var ticks = container.TestTicks().Value;
+            var ticks = container.TestTicks()!.Value;
             action();
             container.Element.GetDriver().Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }

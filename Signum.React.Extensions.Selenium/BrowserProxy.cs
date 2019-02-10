@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium.Remote;
 using System.Threading;
 using Signum.Utilities;
@@ -95,7 +95,7 @@ namespace Signum.React.Selenium
         }
 
 
-        public virtual string GetCurrentUser()
+        public virtual string? GetCurrentUser()
         {
             var element = Selenium.WaitElementPresent(By.CssSelector("#sfUserDropDown, .sf-login"));
 

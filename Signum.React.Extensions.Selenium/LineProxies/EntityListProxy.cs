@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
 
@@ -40,7 +40,7 @@ namespace Signum.React.Selenium
             return this.ListElement.Find().FindElements(By.CssSelector("option")).Count;
         }
 
-        public EntityInfoProxy EntityInfo(int index)
+        public EntityInfoProxy? EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }

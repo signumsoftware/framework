@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using System;
 
@@ -57,7 +57,7 @@ namespace Signum.React.Selenium.ModalProxies
             return true;
         }
 
-        public static MessageModalProxy GetMessageModal(this RemoteWebDriver selenium)
+        public static MessageModalProxy? GetMessageModal(this RemoteWebDriver selenium)
         {
             var element = selenium.TryFindElement(By.ClassName("message-modal"));
 
@@ -69,7 +69,7 @@ namespace Signum.React.Selenium.ModalProxies
 
         public static void CloseMessageModal(this RemoteWebDriver selenium, MessageModalButton button)
         {
-            var message = selenium.Wait(() => GetMessageModal(selenium));
+            var message = selenium.Wait(() => GetMessageModal(selenium))!;
 
             message.Click(button);
         }

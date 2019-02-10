@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using OpenQA.Selenium;
 using Signum.Engine.Basics;
@@ -86,7 +86,7 @@ namespace Signum.React.Selenium
             WaitChanges(() => this.RemoveButton.Find().Click(), "removing");
         }
 
-        public SearchModalProxy Find(Type selectType = null)
+        public SearchModalProxy Find(Type? selectType = null)
         {
             string changes = GetChanges();
             var popup = FindButton.Find().CaptureOnClick();
@@ -110,7 +110,7 @@ namespace Signum.React.Selenium
             SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType));
         }
 
-        private IWebElement ChooseTypeCapture(Type selectType, IWebElement element)
+        private IWebElement ChooseTypeCapture(Type? selectType, IWebElement element)
         {
             if (!SelectorModalProxy.IsSelector(element))
                 return element;
@@ -119,7 +119,7 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("No type to choose from selected");
 
             var newElement = element.GetDriver().CapturePopup(() =>
-                SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType)));
+                SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType!)));
 
             return newElement;
         }
@@ -143,7 +143,7 @@ namespace Signum.React.Selenium
             return this.Element.GetAttribute("data-changes");
         }
 
-        protected EntityInfoProxy EntityInfoInternal(int? index)
+        protected EntityInfoProxy? EntityInfoInternal(int? index)
         {
             var element = index == null ? Element :
                 this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
@@ -182,32 +182,34 @@ namespace Signum.React.Selenium
         public Type EntityType;
         public PrimaryKey? IdOrNull { get; set; }
 
-
-        public Lite<Entity> ToLite(string toString = null)
+        public EntityInfoProxy(string dataEntity)
         {
-            return Lite.Create(this.EntityType, this.IdOrNull.Value, toString);
-        }
-
-        public static EntityInfoProxy Parse(string dataEntity)
-        {
-            if (dataEntity == "null" || dataEntity == "undefined")
-                return null;
-
             var parts = dataEntity.Split(';');
 
             var typeName = parts[0];
             var id = parts[1];
             var isNew = parts[2];
 
-            var type = TypeLogic.TryGetType(typeName);
+            var type = TypeLogic.GetType(typeName);
 
-            return new EntityInfoProxy
-            {
-                TypeName = typeName,
-                EntityType = type,
-                IdOrNull = id.HasText() ? PrimaryKey.Parse(id, type) : (PrimaryKey?)null,
-                IsNew = isNew.HasText() && bool.Parse(isNew)
-            };
+            this.TypeName = typeName;
+            this.EntityType = type;
+            this.IdOrNull = id.HasText() ? PrimaryKey.Parse(id, type) : (PrimaryKey?)null;
+            this.IsNew = isNew.HasText() && bool.Parse(isNew);
+        }
+
+
+        public Lite<Entity> ToLite(string? toString = null)
+        {
+            return Lite.Create(this.EntityType, this.IdOrNull!.Value, toString);
+        }
+
+        public static EntityInfoProxy Parse(string dataEntity)
+        {
+            if (dataEntity == "null" || dataEntity == "undefined")
+                return null!;
+
+            return new EntityInfoProxy(dataEntity);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
 
@@ -58,7 +58,7 @@ namespace Signum.React.Selenium
             this.RemoveElementIndex(index).Click();
         }
 
-        public EntityInfoProxy EntityInfo(int index)
+        public EntityInfoProxy? EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }

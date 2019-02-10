@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using OpenQA.Selenium;
 using Signum.Entities;
@@ -19,7 +19,7 @@ namespace Signum.React.Selenium
             get { return this.Element.FindElement(By.CssSelector("select")).SelectElement(); }
         }
 
-        public Lite<IEntity> LiteValue
+        public Lite<IEntity>? LiteValue
         {
             get
             {
@@ -73,7 +73,7 @@ namespace Signum.React.Selenium
                 "ComboBox selected");
         }
 
-        public EntityInfoProxy EntityInfo()
+        public EntityInfoProxy? EntityInfo()
         {
             return EntityInfoInternal(null);
         }

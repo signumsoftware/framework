@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
@@ -55,7 +55,7 @@ namespace Signum.React.Selenium
             Disposing?.Invoke(OkPressed);
         }
 
-        public Action<bool> Disposing;
+        public Action<bool>? Disposing;
 
         public WebElementLocator OkButton
         {

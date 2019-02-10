@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
@@ -45,10 +45,10 @@ namespace Signum.React.Selenium
 
         public void WaitInitialSearchCompleted()
         {
-            WaitSearchCompleted((string)null);
+            WaitSearchCompleted((string?)null);
         }
 
-        void WaitSearchCompleted(string counter)
+        void WaitSearchCompleted(string? counter)
         {
             Selenium.Wait(() =>
              this.Element.GetAttribute("data-search-count") != counter

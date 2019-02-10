@@ -129,6 +129,7 @@ namespace Signum.Entities.Tree
     {
         [ImplementedByAll]
         public Lite<TreeEntity>? NewParent { get; set; }
+
         public InsertPlace InsertPlace { get; set; }
 
         [ImplementedByAll]

@@ -11,7 +11,7 @@ namespace Signum.React.Selenium
     {
         public PropertyRoute Route { get; private set; }
 
-        public FrameModalProxy(IWebElement element, PropertyRoute route = null)
+        public FrameModalProxy(IWebElement element, PropertyRoute? route = null)
             : base(element)
         {
             this.Route = route?? PropertyRoute.Root(typeof(T)) ;
@@ -35,7 +35,7 @@ namespace Signum.React.Selenium
         {
             if (!AvoidClose)
             {
-                string confirmationMessage = null;
+                string? confirmationMessage = null;
                 Selenium.Wait(() =>
                 {
                     if (this.Element.IsStale())

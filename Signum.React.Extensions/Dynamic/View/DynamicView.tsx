@@ -108,7 +108,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     var dve = this.props.ctx.value;
 
     if (dve.entityType == null) {
-      dve.viewContent = null;
+      dve.viewContent = null!;
       this.setState({ exampleEntity: undefined });
     } else {
       dve.viewContent = JSON.stringify(NodeConstructor.createDefaultNode(getTypeInfo(dve.entityType.cleanName)));
