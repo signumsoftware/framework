@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -129,7 +129,7 @@ namespace Signum.Test.Environment
     }
 
     [Flags]
-    public enum Sex : short
+    public enum Sex
     {
         Male,
         Female,
