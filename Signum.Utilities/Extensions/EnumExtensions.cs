@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -111,6 +111,14 @@ namespace Signum.Utilities
             return (T?)(object)EnumFieldCache.Get(typeof(T))
                 .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code == code)
                 .Select(kvp => kvp.Key)
+                .SingleOrDefaultEx();
+        }
+
+        public static string GetCode<T>(string key)
+        {
+            return (EnumFieldCache.Get(typeof(T))
+                .Where(kvp => kvp.Key.NiceToString() == key)
+                .Select(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code))
                 .SingleOrDefaultEx();
         }
 
