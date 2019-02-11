@@ -67,8 +67,13 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   }
 
   componentWillReceiveProps(newProps: ValueSearchControlProps) {
+
+    function toString(token: string | QueryTokenString<any> | undefined) {
+      return token && token.toString();
+    }
+
     if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
-      this.props.valueToken == newProps.valueToken) {
+      toString(this.props.valueToken) == toString(newProps.valueToken)) {
 
       if (this.props.refreshKey != newProps.refreshKey)
         this.refreshValue(newProps)
