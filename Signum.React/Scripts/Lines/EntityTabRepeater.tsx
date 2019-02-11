@@ -15,7 +15,7 @@ export interface EntityTabRepeaterProps extends EntityListBaseProps {
   avoidFieldSet?: boolean;
   selectedIndex?: number;
   getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
-
+  extraTabs?: (c: EntityTabRepeater) => React.ReactNode;
 }
 
 export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
@@ -91,7 +91,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                   onDrop={drag && drag.onDrop}>
                   {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
                   &nbsp;
-										{this.canRemove(mlec.value) && !readOnly &&
+                {this.canRemove(mlec.value) && !readOnly &&
                     <span className={classes("sf-line-button", "sf-remove")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
                       title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
@@ -112,6 +112,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
             </Tab>
           })
         }
+        {this.props.extraTabs && this.props.extraTabs(this)}
       </Tabs>
     );
   }
