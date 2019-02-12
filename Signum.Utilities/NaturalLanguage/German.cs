@@ -190,12 +190,12 @@ namespace Signum.Utilities.NaturalLanguage
 
             else
             {
-                if (euro.Length <= 3 && euro.Length > 0)
+                if (euro.Length <= 3 && euro.Length > 0) // 0 -> 999
                 {
                     output = GetUpToThousand(Convert.ToInt32(euro));
                 }
 
-                else if (euro.Length <= 6 && euro.Length > 3)
+                else if (euro.Length <= 6 && euro.Length > 3) //1000 -> 999.999
                 {
                     string hunderter = euro.Substring(euro.Length - 3);
                     string tausender = euro.Substring(0, euro.Length - 3);
@@ -271,6 +271,7 @@ namespace Signum.Utilities.NaturalLanguage
 
         private static string GetUpToHundred(int number)
         {
+            string output = "";
             if (number <= 12)
             {
                 return EinerArray[number];
@@ -291,8 +292,12 @@ namespace Signum.Utilities.NaturalLanguage
             {
                 int einerWert = Convert.ToInt32(number.ToString().Substring(1, 1));
                 int zehnerWert = Convert.ToInt32(number.ToString().Substring(0, 1));
-
-                return EinerArray[einerWert] + "und" + ZehnerArray[zehnerWert];
+                if (einerWert > 0)
+                {
+                    output += EinerArray[einerWert] + "und";
+                }
+                output +=  ZehnerArray[zehnerWert];
+                return output;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Basics;
@@ -458,6 +458,7 @@ namespace Signum.Engine.Operations
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return null; } }
             Type IOperation.StateType { get { return null; } }
+            public bool AvoidImplicitSave { get; set; }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
@@ -529,7 +530,8 @@ namespace Signum.Engine.Operations
 
                                     AssertEntity((T)entity);
 
-                                    entity.Save(); //Nothing happens if already saved
+                                    if (!AvoidImplicitSave)
+                                        entity.Save(); //Nothing happens if already saved
 
                                     log.SetTarget(entity);
                                     log.End = TimeZoneManager.Now;

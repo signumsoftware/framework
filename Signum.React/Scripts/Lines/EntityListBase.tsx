@@ -231,13 +231,13 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   }
 
   handlerDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v") => {
+    if (this.state.dragIndex == null)
+      return;
+
     de.preventDefault();
 
     const th = de.currentTarget as HTMLElement;
-
-
-    const size = th.scrollWidth;
-
+    
     const offset = orientation == "v" ?
       this.getOffsetVertical((de.nativeEvent as DragEvent), th.getBoundingClientRect()) :
       this.getOffsetHorizontal((de.nativeEvent as DragEvent), th.getBoundingClientRect());
@@ -246,8 +246,6 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     if (dropBorderIndex == this.state.dragIndex || dropBorderIndex == this.state.dragIndex! + 1)
       dropBorderIndex = undefined;
-
-    //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
 
     if (this.state.dropBorderIndex != dropBorderIndex) {
       this.state.dropBorderIndex = dropBorderIndex;
@@ -294,8 +292,6 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     this.state.dragIndex = undefined;
     this.forceUpdate();
   }
-
-
 }
 
 export interface DragConfig {
