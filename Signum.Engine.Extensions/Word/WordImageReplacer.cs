@@ -98,7 +98,7 @@ namespace Signum.Engine.Word
     public static class ImageResizer
     {
         //http://stackoverflow.com/a/10445101/38670
-        internal static Bitmap Resize(Bitmap image, int width, int height)
+        public static Bitmap Resize(Bitmap image, int width, int height)
         {
             var brush = new SolidBrush(System.Drawing.Color.White);
 

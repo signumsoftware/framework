@@ -9,6 +9,7 @@ import * as Dashboard from '../../Dashboard/Admin/Dashboard'
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
 
 export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }> {
+
   handleTypeChanges = () => {
     var a = this.props.ctx.value;
     if (a.type == "Divider") {
@@ -16,6 +17,14 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
       a.content == null;
       a.label == null;
       a.modified = true;
+    }
+    this.forceUpdate();
+  }
+
+  handleContentChange = () => {
+    const tbe = this.props.ctx.value;
+    if (tbe.content && !PermissionSymbol.isLite(tbe.content)) {
+      tbe.url = null;
     }
     this.forceUpdate();
   }
@@ -39,7 +48,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
             <ValueLine ctx={ctx4.subCtx(t => t.type)} onChange={this.handleTypeChanges} />
           </div>
           <div className="col-sm-5 offset-sm-1">
-            {ctx2.value.type != "Divider" && <EntityLine ctx={ctx2.subCtx(t => t.content)} onChange={() => this.forceUpdate()} />}
+            {ctx2.value.type != "Divider" && <EntityLine ctx={ctx2.subCtx(t => t.content)} onChange={this.handleContentChange} />}
           </div>
         </div>
 
