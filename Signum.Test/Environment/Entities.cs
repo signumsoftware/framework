@@ -129,7 +129,7 @@ namespace Signum.Test.Environment
     }
 
     [Flags]
-    public enum Sex
+    public enum Sex : short
     {
         Male,
         Female,
