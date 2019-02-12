@@ -3,6 +3,7 @@
   <Type Name="AggregateFunction" />
   <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
+  <Type Name="CollectionAnyAllType" />
   <Type Name="CollectionElementType" />
   <Type Name="ColorEmbedded" />
   <Type Name="ColumnOptionsMode" />
@@ -23,6 +24,7 @@
   <Type Name="EntityMessage" />
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" />
+  <Type Name="FilterGroupOperation" />
   <Type Name="FilterOperation">
     <Member Name="Contains" Description="contains" />
     <Member Name="DistinctTo" Description="distinct to" />

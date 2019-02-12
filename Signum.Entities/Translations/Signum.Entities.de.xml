@@ -14,22 +14,11 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
+  <Type Name="CollectionAnyAllType" />
   <Type Name="CollectionElementType">
-    <Member Name="All" Description="Alle" />
-    <Member Name="All2" Description="Alle (2)" />
-    <Member Name="All3" Description="Alle (3)" />
-    <Member Name="Any" Description="Einige" />
-    <Member Name="Any2" Description="Einige (2)" />
-    <Member Name="Any3" Description="Einige (3)" />
-    <Member Name="AnyNo" Description="Einige nicht" />
-    <Member Name="AnyNo2" Description="Einige nicht (2)" />
-    <Member Name="AnyNo3" Description="Einige nicht (3)" />
     <Member Name="Element" Description="Element" />
     <Member Name="Element2" Description="Element (2)" />
     <Member Name="Element3" Description="Element (3)" />
-    <Member Name="NoOne" Description="Kein" />
-    <Member Name="NoOne2" Description="Kein (2)" />
-    <Member Name="NoOne3" Description="Kein (3)" />
   </Type>
   <Type Name="ColorEmbedded" Description="Farbe">
     <Member Name="Argb" Description="ARGB" />
@@ -125,6 +114,7 @@
     <Member Name="UserHostName" Description="Benutzer Hostname" />
     <Member Name="Version" Description="Version" />
   </Type>
+  <Type Name="FilterGroupOperation" />
   <Type Name="FilterOperation" Description="Filteroperation">
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
@@ -406,7 +396,6 @@
     <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} und {1} können nicht gleichzeitig festgelegt werden" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} hat kein gültiges {1}-Format" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} hat ein ungültiges Format" />
-    <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} hat eine genauigkeit von {1} statt {2}" />
     <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} hat mehr als {1} Dezimalstellen" />
     <Member Name="_0HasSomeRepeatedElements1" Description="{0} hat einige wiederholte Elemente: {1}" />
     <Member Name="_0HasToBeBetween1And2" Description="{0} muss zwischen {1} und {2} sein" />

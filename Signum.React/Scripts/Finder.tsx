@@ -499,6 +499,9 @@ export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undef
       pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
     }];
   }
+  else {
+    return undefined;
+  }
 }
 
 export function isAggregate(fop: FilterOptionParsed): boolean {
