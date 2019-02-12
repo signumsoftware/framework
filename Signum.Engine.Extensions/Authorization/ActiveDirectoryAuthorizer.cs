@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Engine.Operations;
+using Signum.Entities.Authorization;
 using Signum.Services;
 using Signum.Utilities;
 using System;
@@ -6,13 +7,34 @@ using System.DirectoryServices.AccountManagement;
 
 namespace Signum.Engine.Authorization
 {
+    public class AutoCreateUserContext
+    {
+        public readonly PrincipalContext PrincipalContext;
+        public readonly string UserName;
+        public readonly string DomainName;
+
+        UserPrincipal userPrincipal;
+
+        public AutoCreateUserContext(PrincipalContext principalContext, string userName, string domainName)
+        {
+            PrincipalContext = principalContext;
+            UserName = userName;
+            DomainName = domainName;
+        }
+
+        public UserPrincipal GetUserPrincipal() //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
+        {
+            return userPrincipal ?? (userPrincipal = UserPrincipal.FindByIdentity(PrincipalContext, UserName));
+        }
+    }
+
     public class ActiveDirectoryAuthorizer : ICustomAuthorizer
     {
         Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
 
-        public Func<PrincipalContext, UserEntity> AutoCreateUser;  //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
+        public Func<AutoCreateUserContext, UserEntity> AutoCreateUser;  
 
-        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<PrincipalContext, UserEntity> autoCreateUser = null)
+        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<AutoCreateUserContext, UserEntity> autoCreateUser = null)
         {
             this.GetConfig = getConfig;
             this.AutoCreateUser = autoCreateUser;
@@ -42,7 +64,15 @@ namespace Signum.Engine.Authorization
                                 {
                                     if (this.AutoCreateUser != null)
                                     {
-                                        user = this.AutoCreateUser(pc);
+                                        user = this.AutoCreateUser(new AutoCreateUserContext(pc, localName, domainName));
+                                        if(user != null && user.IsNew)
+                                        {
+                                            using (ExecutionMode.Global())
+                                            using (OperationLogic.AllowSave<UserEntity>())
+                                            {
+                                                user.Save();
+                                            }
+                                        }
                                     }
                                 }
 
