@@ -158,8 +158,8 @@ namespace Signum.Entities.UserQueries
             switch (PaginationMode)
             {
                 case Signum.Entities.DynamicQuery.PaginationMode.All: return new Pagination.All();
-                case Signum.Entities.DynamicQuery.PaginationMode.Firsts: return new Pagination.Firsts(ElementsPerPage.Value);
-                case Signum.Entities.DynamicQuery.PaginationMode.Paginate: return new Pagination.Paginate(ElementsPerPage.Value, 1);
+                case Signum.Entities.DynamicQuery.PaginationMode.Firsts: return new Pagination.Firsts(ElementsPerPage!.Value);
+                case Signum.Entities.DynamicQuery.PaginationMode.Paginate: return new Pagination.Paginate(ElementsPerPage!.Value, 1);
                 default: return null;
             }
         }
@@ -273,8 +273,8 @@ namespace Signum.Entities.UserQueries
     {
         public QueryFilterEmbedded() { }
 
-        QueryTokenEmbedded token;
-        public QueryTokenEmbedded Token
+        QueryTokenEmbedded? token;
+        public QueryTokenEmbedded? Token
         {
             get { return token; }
             set
@@ -339,7 +339,7 @@ namespace Signum.Entities.UserQueries
 
                     if (pi.Name == nameof(Operation) && Operation != null)
                     {
-                        FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
+                        FilterType? filterType = QueryUtils.TryGetFilterType(Token!.Token.Type);
 
                         if (filterType == null)
                             return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
@@ -350,7 +350,7 @@ namespace Signum.Entities.UserQueries
 
                     if (pi.Name == nameof(ValueString))
                     {
-                        var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.Value.IsList());
+                        var result = FilterValueConverter.TryParse(ValueString, Token!.Token.Type, Operation!.Value.IsList());
                         return result is Result<object>.Error e ? e.ErrorText : null;
                     }
                 }
@@ -373,7 +373,7 @@ namespace Signum.Entities.UserQueries
             {
                 return new XElement("Filter",
                     new XAttribute("Indentation", Indentation),
-                    new XAttribute("Token", Token.Token.FullKey()),
+                    new XAttribute("Token", Token!.Token.FullKey()),
                     new XAttribute("Operation", Operation),
                     new XAttribute("Value", ValueString ?? ""),
                     Pinned?.ToXml(ctx));
@@ -398,7 +398,11 @@ namespace Signum.Entities.UserQueries
 
         internal QueryFilterEmbedded Clone() => new QueryFilterEmbedded
         {
-            Token = Token.Clone(),
+            Indentation = Indentation,
+            GroupOperation = GroupOperation,
+            IsGroup = IsGroup,
+            Pinned = Pinned?.Clone(),
+            Token = Token?.Clone(),
             Operation = Operation,
             ValueString = ValueString,
         };
@@ -418,6 +422,15 @@ namespace Signum.Entities.UserQueries
         public bool DisableOnNull { get; set; }
 
         public bool SplitText { get; set; }
+
+        internal PinnedQueryFilterEmbedded Clone() => new PinnedQueryFilterEmbedded
+        {
+            Label = Label,
+            Column = Column,
+            Row = Row,
+            DisableOnNull = DisableOnNull,
+            SplitText = SplitText,
+        };
 
         internal PinnedQueryFilterEmbedded FromXml(XElement p, IFromXmlContext ctx)
         {
@@ -456,7 +469,7 @@ namespace Signum.Entities.UserQueries
 
                     var filter = gr.Key;
 
-                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation.Value.IsList());
+                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation!.Value.IsList());
 
                     return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
                 }
@@ -464,7 +477,7 @@ namespace Signum.Entities.UserQueries
                 {
                     var group = gr.Key;
 
-                    return (Filter)new FilterGroup(group.GroupOperation.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
+                    return (Filter)new FilterGroup(group.GroupOperation!.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
                 }
             }).ToList();
         }

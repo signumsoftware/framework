@@ -10,7 +10,7 @@ namespace Signum.Entities.Alerts
     public class AlertEntity : Entity
     {
         [ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
+        public Lite<Entity>? Target { get; set; }
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 

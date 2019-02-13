@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Net.Mail;
@@ -29,7 +29,6 @@ namespace Signum.Entities.Mailing
 
         public EmailAddressEmbedded? DefaultFrom { get; set; }
 
-        [NotNullValidator]
         [NoRepeatValidator]
         public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 

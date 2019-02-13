@@ -5,8 +5,8 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ResetPasswordRequestEntity : Entity
     {
+        [StringLengthValidator(Max = 200)]
         public string Code { get; set; }
-
         
         public UserEntity User { get; set; }
 

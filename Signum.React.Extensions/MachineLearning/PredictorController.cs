@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +40,7 @@ namespace Signum.React.MachineLearning
         }
 
         [HttpGet("api/predictor/epochProgress/{id}")]
-        public List<object[]> GetProgressLosses(int id)
+        public List<object?[]> GetProgressLosses(int id)
         {
             return Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Id == id).Select(p => new EpochProgress
             {
@@ -57,15 +57,15 @@ namespace Signum.React.MachineLearning
         }
 
         [HttpPost("api/predict/get/{predictorId}")]
-        public PredictRequestTS GetPredict(string predictorId, [Required, FromBody]Dictionary<string, object> mainKeys)
+        public PredictRequestTS GetPredict(string predictorId, [Required, FromBody]Dictionary<string, object?> mainKeys)
         {
             var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            PredictDictionary fromEntity = mainKeys == null ? null : pctx.GetInputsFromParentKeys(pctx.ParseMainKeys(mainKeys));
+            PredictDictionary? fromEntity = mainKeys == null ? null : pctx.GetInputsFromParentKeys(pctx.ParseMainKeys(mainKeys));
             PredictDictionary inputs = fromEntity ?? pctx.GetInputsEmpty();
-            PredictDictionary originalOutputs = fromEntity;
+            PredictDictionary? originalOutputs = fromEntity;
 
             PredictDictionary predictedOutputs = inputs.PredictBasic();
 
@@ -84,9 +84,9 @@ namespace Signum.React.MachineLearning
             if (request.alternativesCount != null)
                 inputs.Options = new PredictionOptions { AlternativeCount = request.alternativesCount };
 
-            PredictDictionary predictedOutputs = inputs != null ? inputs.PredictBasic() : null;
+            PredictDictionary predictedOutputs =  inputs.PredictBasic() ;
 
-            request.SetOutput(pctx, predictedOutputs);
+            request.SetOutput(predictedOutputs);
 
             return request;
         }

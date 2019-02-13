@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -27,7 +27,7 @@ namespace Signum.React.Authorization
                 return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
-            UserEntity user = null;
+            UserEntity user;
             try
             {
                 if (AuthLogic.Authorizer == null)
@@ -49,6 +49,7 @@ namespace Signum.React.Authorization
                 {
                     return ModelError("password", AuthMessage.InvalidPassword.NiceToString());
                 }
+                throw;
             }
             catch (Exception e)
             {
@@ -66,7 +67,7 @@ namespace Signum.React.Authorization
 
                 AuthServer.AddUserSession(ControllerContext, user);
 
-                string message = AuthLogic.OnLoginMessage();
+                string? message = AuthLogic.OnLoginMessage();
 
                 var token = AuthTokenServer.CreateToken(user);
 
@@ -77,7 +78,7 @@ namespace Signum.React.Authorization
         [HttpGet("api/auth/loginFromApiKey")]
         public LoginResponse LoginFromApiKey(string apiKey)
         {
-            string message = AuthLogic.OnLoginMessage();
+            string? message = AuthLogic.OnLoginMessage();
 
             var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
@@ -85,14 +86,14 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/loginFromCookie"), AllowAnonymous]
-        public LoginResponse LoginFromCookie()
+        public LoginResponse? LoginFromCookie()
         {
             using (ScopeSessionFactory.OverrideSession())
             {
                 if (!UserTicketServer.LoginFromCookie(ControllerContext))
                     return null;
 
-                string message = AuthLogic.OnLoginMessage();
+                string? message = AuthLogic.OnLoginMessage();
 
                 var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
@@ -101,7 +102,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpGet("api/auth/currentUser")]
-        public UserEntity GetCurrentUser()
+        public UserEntity? GetCurrentUser()
         {
             var result = UserEntity.Current;
             return result.Is(AuthLogic.AnonymousUser) ? null : result;
@@ -152,7 +153,7 @@ namespace Signum.React.Authorization
 
         public class LoginResponse
         {
-            public string message { get; set; }
+            public string? message { get; set; }
             public string token { get; set; }
             public UserEntity userEntity { get; set; }
         }

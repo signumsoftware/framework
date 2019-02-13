@@ -19,7 +19,7 @@ export module ActiveDirectoryAuthorizerMessage {
 export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
-  domainName?: string;
+  domainName: string;
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
@@ -151,8 +151,8 @@ export type AuthThumbnail =
 export const AuthTokenConfigurationEmbedded = new Type<AuthTokenConfigurationEmbedded>("AuthTokenConfigurationEmbedded");
 export interface AuthTokenConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "AuthTokenConfigurationEmbedded";
-  refreshTokenEvery?: number;
-  refreshAnyTokenPreviousTo?: string | null;
+  refreshTokenEvery: number;
+  refreshAnyTokenPreviousTo: string | null;
 }
 
 export interface BaseRulePack<T> extends Entities.ModelEntity {
@@ -200,9 +200,9 @@ export interface OperationTypeEmbedded extends Entities.EmbeddedEntity {
 export const PasswordExpiresIntervalEntity = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
 export interface PasswordExpiresIntervalEntity extends Entities.Entity {
   Type: "PasswordExpiresInterval";
-  days?: number;
-  daysWarning?: number;
-  enabled?: boolean;
+  days: number;
+  daysWarning: number;
+  enabled: boolean;
 }
 
 export module PasswordExpiresIntervalOperation {
@@ -261,17 +261,17 @@ export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
 export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
   Type: "ResetPasswordRequest";
-  code?: string;
-  user?: UserEntity;
-  requestDate?: string;
-  lapsed?: boolean;
+  code: string;
+  user: UserEntity;
+  requestDate: string;
+  lapsed: boolean;
 }
 
 export const RoleEntity = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
   Type: "Role";
-  name?: string;
-  mergeStrategy?: MergeStrategy;
+  name: string;
+  mergeStrategy: MergeStrategy;
   roles: Entities.MList<Entities.Lite<RoleEntity>>;
 }
 
@@ -285,9 +285,9 @@ export module RoleQuery {
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {
-  role?: Entities.Lite<RoleEntity>;
-  resource?: R;
-  allowed?: A;
+  role: Entities.Lite<RoleEntity>;
+  resource: R;
+  allowed: A;
 }
 
 export const RuleOperationEntity = new Type<RuleOperationEntity>("RuleOperation");
@@ -313,8 +313,8 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAll
 export const RuleTypeConditionEmbedded = new Type<RuleTypeConditionEmbedded>("RuleTypeConditionEmbedded");
 export interface RuleTypeConditionEmbedded extends Entities.EmbeddedEntity {
   Type: "RuleTypeConditionEmbedded";
-  condition?: Signum.TypeConditionSymbol;
-  allowed?: TypeAllowed;
+  condition: Signum.TypeConditionSymbol;
+  allowed: TypeAllowed;
 }
 
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
@@ -326,12 +326,12 @@ export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowe
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
-  user?: Entities.Lite<UserEntity>;
-  sessionStart?: string;
-  sessionEnd?: string | null;
-  sessionTimeOut?: boolean;
-  userHostAddress?: string | null;
-  userAgent?: string | null;
+  user: Entities.Lite<UserEntity>;
+  sessionStart: string;
+  sessionEnd: string | null;
+  sessionTimeOut: boolean;
+  userHostAddress: string | null;
+  userAgent: string | null;
 }
 
 export module SessionLogPermission {
@@ -389,15 +389,15 @@ export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
-  userName?: string;
-  passwordHash?: string;
-  passwordSetDate?: string;
-  passwordNeverExpires?: boolean;
-  role?: Entities.Lite<RoleEntity>;
-  email?: string;
-  cultureInfo?: Signum.CultureInfoEntity | null;
-  anulationDate?: string | null;
-  state?: UserState;
+  userName: string;
+  passwordHash: string;
+  passwordSetDate: string;
+  passwordNeverExpires: boolean;
+  role: Entities.Lite<RoleEntity>;
+  email: string;
+  cultureInfo: Signum.CultureInfoEntity | null;
+  anulationDate: string | null;
+  state: UserState;
 }
 
 export module UserOperation {
@@ -418,10 +418,10 @@ export type UserState =
 export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
   Type: "UserTicket";
-  user?: Entities.Lite<UserEntity>;
-  ticket?: string;
-  connectionDate?: string;
-  device?: string;
+  user: Entities.Lite<UserEntity>;
+  ticket: string;
+  connectionDate: string;
+  device: string;
 }
 
 

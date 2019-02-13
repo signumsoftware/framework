@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
 
@@ -8,6 +8,7 @@ namespace Signum.Entities.Migrations
     public class CSharpMigrationEntity : Entity
     {
         [UniqueIndex]
+        [StringLengthValidator(Max = 200)]
         public string UniqueName { get; set; }
 
         public DateTime ExecutionDate { get; set; }

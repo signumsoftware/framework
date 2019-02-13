@@ -83,7 +83,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
     if (isInputOutput(ctx.value.usage)) {
       initializeColumn(this.props.ctx.findParent(PredictorEntity), col);
     } else {
-      col.encoding = null;
+      col.encoding = null!;
       col.nullHandling = null;
     }
 

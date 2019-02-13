@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Utilities;
@@ -10,11 +10,11 @@ namespace Signum.Entities.Help
     {
         [StringLengthValidator(Min = 3, Max = 300)]
         public string Name { get; set; }
-
         
         public CultureInfoEntity Culture { get; set; }
 
-                public string Title { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Title { get; set; }
 
 		[StringLengthValidator(Min = 3, MultiLine = true)]
         public string? Description { get; set; }

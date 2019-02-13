@@ -192,11 +192,10 @@ namespace Signum.Entities.Workflow
 
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
-    {
-        
+    {   
         public WorkflowEntity Workflow { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
 
         public SubWorkflowEmbedded Clone()

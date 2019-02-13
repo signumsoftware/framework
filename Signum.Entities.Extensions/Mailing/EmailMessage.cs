@@ -21,7 +21,6 @@ namespace Signum.Entities.Mailing
             this.UniqueIdentifier = Guid.NewGuid();
         }
 
-        [NotNullValidator]
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
         public MList<EmailRecipientEmbedded> Recipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
@@ -142,7 +141,6 @@ namespace Signum.Entities.Mailing
         public EmailAttachmentType Type { get; set; }
 
         FilePathEmbedded file;
-        [NotNullValidator]
         public FilePathEmbedded File
         {
             get { return file; }

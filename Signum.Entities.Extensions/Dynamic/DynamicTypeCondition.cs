@@ -16,7 +16,7 @@ namespace Signum.Entities.Dynamic
         
         public TypeEntity EntityType { get; set; }
 
-        [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public DynamicTypeConditionEval Eval { get; set; }
 
         static Expression<Func<DynamicTypeConditionEntity, string>> ToStringExpression = @this => (@this.EntityType == null ? "" : @this.EntityType.CleanName + " : ") + @this.SymbolName;

@@ -22,8 +22,10 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Min = 2, Max = 10)]
         public string Name { get; set; }
 
+        [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string NativeName { get; private set; }
 
+        [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string EnglishName { get; private set; }
 
         /// <summary>

@@ -60,7 +60,7 @@ namespace Signum.Engine.MachineLearning
             return ctx.FromFilters(new List<Filter> { new FilterCondition(entityToken, FilterOperation.EqualTo, entity) }, options).SingleEx();
         }
 
-        public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object> parentKeyValues, PredictionOptions? options = null)
+        public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object?> parentKeyValues, PredictionOptions? options = null)
         {
             if (!ctx.Predictor.MainQuery.GroupResults)
             {

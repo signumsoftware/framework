@@ -79,17 +79,19 @@ namespace Signum.React.Workflow
             var wb = new WorkflowBuilder(wf);
             List<WorkflowIssue> issues = new List<WorkflowIssue>();
             wb.ValidateGraph(issues);
-            return new WorkflowModelAndIssues
-            {
-                model = model,
-                issues = issues,
-            };
+            return new WorkflowModelAndIssues(model, issues);
         }
 
         public class WorkflowModelAndIssues
         {
             public WorkflowModel model;
             public List<WorkflowIssue> issues;
+
+            public WorkflowModelAndIssues(WorkflowModel model, List<WorkflowIssue> issues)
+            {
+                this.model = model;
+                this.issues = issues;
+            }
         }
 
         [HttpPost("api/workflow/previewChanges/{workflowId}")]
@@ -108,7 +110,7 @@ namespace Signum.React.Workflow
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
             try
             {
-                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, request.args.And(issuesContainer).ToArray());
+                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, (request.args.EmptyIfNull()).And(issuesContainer).ToArray());
             }
             catch (IntegrityCheckException ex)
             {
@@ -118,13 +120,19 @@ namespace Signum.React.Workflow
                 return BadRequest(this.ModelState);
             }
 
-            return new EntityPackWithIssues { entityPack = SignumServer.GetEntityPack(entity), issues = issuesContainer };
+            return new EntityPackWithIssues(SignumServer.GetEntityPack(entity), issuesContainer);
         }
 
         public class EntityPackWithIssues
         {
             public EntityPackTS entityPack;
             public List<WorkflowIssue> issues;
+
+            public EntityPackWithIssues(EntityPackTS entityPack, List<WorkflowIssue> issues)
+            {
+                this.entityPack = entityPack;
+                this.issues = issues;
+            }
         }
 
         [HttpGet("api/workflow/findMainEntityType")]

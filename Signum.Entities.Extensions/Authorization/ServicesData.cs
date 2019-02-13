@@ -84,7 +84,6 @@ namespace Signum.Entities.Authorization
         [HiddenProperty]
         public MList<Lite<RoleEntity>> SubRoles { get; set; } = new MList<Lite<RoleEntity>>();
 
-        [NotNullValidator]
         public string Strategy
         {
             get
@@ -95,8 +94,7 @@ namespace Signum.Entities.Authorization
                     SubRoles.CommaAnd());
             }
         }
-
-
+        
         
         public MList<T> Rules { get; set; } = new MList<T>();
     }
@@ -247,7 +245,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback!.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Min());
         }
 
         public TypeAllowedBasic MaxUI()
@@ -255,7 +253,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback!.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Max());
         }
 
         public TypeAllowedBasic MinDB()
@@ -263,7 +261,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback!.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Min());
         }
 
         public TypeAllowedBasic MaxDB()
@@ -271,7 +269,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback!.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Max());
         }
 
         public override string ToString()

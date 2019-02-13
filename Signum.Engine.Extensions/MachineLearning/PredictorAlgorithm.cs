@@ -15,13 +15,13 @@ namespace Signum.Engine.MachineLearning
     public class TrainingProgress
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
-        public string Message;
+        public string? Message;
         public decimal? Progress;
         public bool Running;
 
         public PredictorState State { get; set; }
 
-        public List<object[]> EpochProgresses { get; set; }
+        public List<object?[]>? EpochProgresses { get; set; }
     }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
@@ -247,7 +247,7 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictDictionary
     {
-        public PredictDictionary(PredictorEntity predictor, PredictionOptions? options, Lite<Entity>? entity)
+        public PredictDictionary(PredictorEntity predictor, PredictionOptions? options = null, Lite<Entity>? entity = null)
         {
             Predictor = predictor;
             Options = options;

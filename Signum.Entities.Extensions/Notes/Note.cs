@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.ComponentModel;
@@ -12,7 +12,6 @@ namespace Signum.Entities.Notes
         public string? Title { get; set; }
 
         [ImplementedByAll]
-        [NotNullValidator]
         public Lite<Entity> Target { get; set; }
 
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;

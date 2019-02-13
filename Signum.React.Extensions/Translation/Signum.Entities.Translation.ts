@@ -12,12 +12,12 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
   Type: "TranslatedInstance";
-  culture?: Basics.CultureInfoEntity;
-  instance?: Entities.Lite<Entities.Entity>;
-  propertyRoute?: Signum.PropertyRouteEntity;
-  rowId?: string | null;
-  translatedText?: string;
-  originalText?: string;
+  culture: Basics.CultureInfoEntity;
+  instance: Entities.Lite<Entities.Entity>;
+  propertyRoute: Signum.PropertyRouteEntity;
+  rowId: string | null;
+  translatedText: string;
+  originalText: string;
 }
 
 export module TranslationJavascriptMessage {
@@ -63,9 +63,9 @@ export module TranslationPermission {
 export const TranslationReplacementEntity = new Type<TranslationReplacementEntity>("TranslationReplacement");
 export interface TranslationReplacementEntity extends Entities.Entity {
   Type: "TranslationReplacement";
-  cultureInfo?: Basics.CultureInfoEntity;
-  wrongTranslation?: string;
-  rightTranslation?: string;
+  cultureInfo: Basics.CultureInfoEntity;
+  wrongTranslation: string;
+  rightTranslation: string;
 }
 
 export module TranslationReplacementOperation {

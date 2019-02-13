@@ -45,16 +45,14 @@ namespace Signum.Entities.Processes
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class PackageLineEntity : Entity, IProcessLineDataEntity
-    {
-        
+    {   
         public Lite<PackageEntity> Package { get; set; }
 
         [ImplementedByAll]
-        [NotNullValidator]
         public Entity Target { get; set; }
 
         [ImplementedByAll]
-        public Lite<Entity> Result { get; set; } //ConstructFrom only!
+        public Lite<Entity>? Result { get; set; } //ConstructFrom only!
 
         public DateTime? FinishTime { get; set; }
     }

@@ -7,11 +7,9 @@ namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public abstract class RuleEntity<R, A> : Entity
-    {
-        
+    {   
         public Lite<RoleEntity> Role { get; set; }
 
-        [NotNullValidator]
         public R Resource { get; set; }
 
         public A Allowed { get; set; }
@@ -40,10 +38,7 @@ namespace Signum.Entities.Authorization
     [Serializable, InTypeScript(Undefined = false)]
     public class OperationTypeEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
         public OperationSymbol Operation { get; set; }
-
-        //[NotNullable] While transition
         
         public TypeEntity Type { get; set; }
 
@@ -66,7 +61,6 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeConditionEmbedded : EmbeddedEntity, IEquatable<RuleTypeConditionEmbedded>
     {
-        [NotNullValidator]
         public TypeConditionSymbol Condition { get; set; }
 
         public TypeAllowed Allowed { get; set; }

@@ -46,7 +46,7 @@ namespace Signum.React.Selenium
 
                     if (MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
                     {
-                        var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium);
+                        var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium)!;
                         alert.Click(MessageModalButton.Yes);
                     }
 

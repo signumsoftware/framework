@@ -1,4 +1,4 @@
-﻿using Signum.Entities.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +32,7 @@ namespace Signum.Entities.Templating
     [Serializable]
     public class QueryModel : ModelEntity
     {
-        [NotNullValidator, InTypeScript(false)]
+        [InTypeScript(false)]
         public object QueryName { get; set; }
 
         [InTypeScript(false)]
@@ -41,7 +41,7 @@ namespace Signum.Entities.Templating
         [InTypeScript(false)]
         public List<Order> Orders { get; set; } = new List<Order>();
 
-        [NotNullValidator, InTypeScript(false)]
+        [InTypeScript(false)]
         public Pagination Pagination { get; set; }
     }
 

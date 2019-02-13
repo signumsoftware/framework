@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Basics;
 
 namespace Signum.Entities.Help
@@ -8,13 +8,13 @@ namespace Signum.Entities.Help
     {
         [StringLengthValidator(Min = 3, Max = 100)]
         public string UniqueName { get; set; }
-
         
         public CultureInfoEntity Culture { get; set; }
 
-        public string Title { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Title { get; set; }
 
-		[StringLengthValidator(Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string? Description { get; set; }
 
         public override string ToString()

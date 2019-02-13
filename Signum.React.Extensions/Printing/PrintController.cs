@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Printing;
+using Signum.Engine.Printing;
 using Signum.Entities.Files;
 using Signum.Entities.Processes;
 using Signum.React.Filters;
@@ -18,7 +18,7 @@ namespace Signum.React.Processes
         }
 
         [HttpPost("api/printing/createProcess")]
-        public ProcessEntity Stats([Required, FromBody]FileTypeSymbol fileType)
+        public ProcessEntity? Stats([Required, FromBody]FileTypeSymbol fileType)
         {
             return PrintingLogic.CreateProcess(fileType);
         }

@@ -81,7 +81,7 @@ namespace Signum.Entities.Dynamic
             }
         }
 
-        private string Dump(object result, string format)
+        private string Dump(object? result, string? format)
         {
             if (result == null)
                 return "null";

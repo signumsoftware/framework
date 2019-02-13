@@ -18,7 +18,7 @@ namespace Signum.Entities.Workflow
         
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public WorkflowActionEval Eval { get; set; }
 
         static Expression<Func<WorkflowActionEntity, string>> ToStringExpression = @this => @this.Name;

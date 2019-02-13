@@ -27,12 +27,12 @@ export interface WorkflowEntitiesDictionary {
 export const ActivityWithRemarks = new Type<ActivityWithRemarks>("ActivityWithRemarks");
 export interface ActivityWithRemarks extends Entities.ModelEntity {
   Type: "ActivityWithRemarks";
-  workflowActivity?: Entities.Lite<WorkflowActivityEntity>;
-  case?: Entities.Lite<CaseEntity>;
-  caseActivity?: Entities.Lite<CaseActivityEntity>;
-  notification?: Entities.Lite<CaseNotificationEntity>;
-  remarks?: string | null;
-  alerts?: number;
+  workflowActivity: Entities.Lite<WorkflowActivityEntity>;
+  case: Entities.Lite<CaseEntity>;
+  caseActivity: Entities.Lite<CaseActivityEntity>;
+  notification: Entities.Lite<CaseNotificationEntity>;
+  remarks: string | null;
+  alerts: number;
   tags: Array<CaseTagTypeEntity>;
 }
 
@@ -62,9 +62,9 @@ export interface CaseActivityEntity extends Entities.Entity {
 export const CaseActivityExecutedTimerEntity = new Type<CaseActivityExecutedTimerEntity>("CaseActivityExecutedTimer");
 export interface CaseActivityExecutedTimerEntity extends Entities.Entity {
   Type: "CaseActivityExecutedTimer";
-  creationDate?: string;
-  caseActivity?: Entities.Lite<CaseActivityEntity>;
-  boundaryEvent?: Entities.Lite<WorkflowEventEntity>;
+  creationDate: string;
+  caseActivity: Entities.Lite<CaseActivityEntity>;
+  boundaryEvent: Entities.Lite<WorkflowEventEntity>;
 }
 
 export module CaseActivityMessage {
@@ -141,19 +141,19 @@ export type CaseFlowColor =
 export const CaseJunctionEntity = new Type<CaseJunctionEntity>("CaseJunction");
 export interface CaseJunctionEntity extends Entities.Entity {
   Type: "CaseJunction";
-  direction?: WorkflowGatewayDirection;
-  from?: Entities.Lite<CaseActivityEntity>;
-  to?: Entities.Lite<CaseActivityEntity>;
+  direction: WorkflowGatewayDirection;
+  from: Entities.Lite<CaseActivityEntity>;
+  to: Entities.Lite<CaseActivityEntity>;
 }
 
 export const CaseNotificationEntity = new Type<CaseNotificationEntity>("CaseNotification");
 export interface CaseNotificationEntity extends Entities.Entity {
   Type: "CaseNotification";
-  caseActivity?: Entities.Lite<CaseActivityEntity>;
-  user?: Entities.Lite<Authorization.UserEntity>;
-  actor?: Entities.Lite<Entities.Entity>;
-  remarks?: string | null;
-  state?: CaseNotificationState;
+  caseActivity: Entities.Lite<CaseActivityEntity>;
+  user: Entities.Lite<Authorization.UserEntity>;
+  actor: Entities.Lite<Entities.Entity>;
+  remarks: string | null;
+  state: CaseNotificationState;
 }
 
 export module CaseNotificationOperation {
@@ -175,10 +175,10 @@ export module CaseOperation {
 export const CaseTagEntity = new Type<CaseTagEntity>("CaseTag");
 export interface CaseTagEntity extends Entities.Entity {
   Type: "CaseTag";
-  creationDate?: string;
-  case?: Entities.Lite<CaseEntity>;
-  tagType?: CaseTagTypeEntity;
-  createdBy?: Entities.Lite<Basics.IUserEntity>;
+  creationDate: string;
+  case: Entities.Lite<CaseEntity>;
+  tagType: CaseTagTypeEntity;
+  createdBy: Entities.Lite<Basics.IUserEntity>;
 }
 
 export const CaseTagsModel = new Type<CaseTagsModel>("CaseTagsModel");
@@ -191,8 +191,8 @@ export interface CaseTagsModel extends Entities.ModelEntity {
 export const CaseTagTypeEntity = new Type<CaseTagTypeEntity>("CaseTagType");
 export interface CaseTagTypeEntity extends Entities.Entity {
   Type: "CaseTagType";
-  name?: string;
-  color?: string;
+  name: string;
+  color: string;
 }
 
 export module CaseTagTypeOperation {
@@ -231,10 +231,10 @@ export interface ICaseMainEntity extends Entities.Entity {
 export const InboxFilterModel = new Type<InboxFilterModel>("InboxFilterModel");
 export interface InboxFilterModel extends Entities.ModelEntity {
   Type: "InboxFilterModel";
-  range?: DateFilterRange;
+  range: DateFilterRange;
   states: Entities.MList<CaseNotificationState>;
-  fromDate?: string | null;
-  toDate?: string | null;
+  fromDate: string | null;
+  toDate: string | null;
 }
 
 export module InboxMessage {
@@ -246,20 +246,20 @@ export module InboxMessage {
 }
 
 export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Entity {
-  lane?: WorkflowLaneEntity;
+  lane: WorkflowLaneEntity;
 }
 
 export interface IWorkflowObjectEntity extends Entities.Entity {
-  xml?: WorkflowXmlEmbedded;
-  bpmnElementId?: string;
+  xml: WorkflowXmlEmbedded;
+  bpmnElementId: string;
 }
 
 export const ScriptExecutionEmbedded = new Type<ScriptExecutionEmbedded>("ScriptExecutionEmbedded");
 export interface ScriptExecutionEmbedded extends Entities.EmbeddedEntity {
   Type: "ScriptExecutionEmbedded";
-  nextExecution?: string;
-  retryCount?: number;
-  processIdentifier?: string | null;
+  nextExecution: string;
+  retryCount: number;
+  processIdentifier: string | null;
 }
 
 export const SubEntitiesEval = new Type<SubEntitiesEval>("SubEntitiesEval");
@@ -270,8 +270,8 @@ export interface SubEntitiesEval extends Dynamic.EvalEmbedded<ISubEntitiesEvalua
 export const SubWorkflowEmbedded = new Type<SubWorkflowEmbedded>("SubWorkflowEmbedded");
 export interface SubWorkflowEmbedded extends Entities.EmbeddedEntity {
   Type: "SubWorkflowEmbedded";
-  workflow?: WorkflowEntity;
-  subEntitiesEval?: SubEntitiesEval;
+  workflow: WorkflowEntity;
+  subEntitiesEval: SubEntitiesEval;
 }
 
 export const TriggeredOn = new EnumType<TriggeredOn>("TriggeredOn");
@@ -283,9 +283,9 @@ export type TriggeredOn =
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
 export interface WorkflowActionEntity extends Entities.Entity {
   Type: "WorkflowAction";
-  name?: string;
-  mainEntityType?: Basics.TypeEntity;
-  eval?: WorkflowActionEval;
+  name: string;
+  mainEntityType: Basics.TypeEntity;
+  eval: WorkflowActionEval;
 }
 
 export const WorkflowActionEval = new Type<WorkflowActionEval>("WorkflowActionEval");
@@ -302,19 +302,19 @@ export module WorkflowActionOperation {
 export const WorkflowActivityEntity = new Type<WorkflowActivityEntity>("WorkflowActivity");
 export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
   Type: "WorkflowActivity";
-  lane?: WorkflowLaneEntity;
-  name?: string;
-  bpmnElementId?: string;
-  comments?: string | null;
-  type?: WorkflowActivityType;
-  requiresOpen?: boolean;
+  lane: WorkflowLaneEntity;
+  name: string;
+  bpmnElementId: string;
+  comments: string | null;
+  type: WorkflowActivityType;
+  requiresOpen: boolean;
   boundaryTimers: Entities.MList<WorkflowEventEntity>;
-  estimatedDuration?: number | null;
-  viewName?: string | null;
-  script?: WorkflowScriptPartEmbedded | null;
-  xml?: WorkflowXmlEmbedded;
-  subWorkflow?: SubWorkflowEmbedded | null;
-  userHelp?: string | null;
+  estimatedDuration: number | null;
+  viewName: string | null;
+  script: WorkflowScriptPartEmbedded | null;
+  xml: WorkflowXmlEmbedded;
+  subWorkflow: SubWorkflowEmbedded | null;
+  userHelp: string | null;
 }
 
 export module WorkflowActivityMessage {
@@ -332,19 +332,19 @@ export module WorkflowActivityMessage {
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
 export interface WorkflowActivityModel extends Entities.ModelEntity {
   Type: "WorkflowActivityModel";
-  workflowActivity?: Entities.Lite<WorkflowActivityEntity>;
-  workflow?: WorkflowEntity | null;
+  workflowActivity: Entities.Lite<WorkflowActivityEntity>;
+  workflow: WorkflowEntity | null;
   mainEntityType: Basics.TypeEntity;
-  name?: string;
-  type?: WorkflowActivityType;
-  requiresOpen?: boolean;
+  name: string;
+  type: WorkflowActivityType;
+  requiresOpen: boolean;
   boundaryTimers: Entities.MList<WorkflowEventModel>;
-  estimatedDuration?: number | null;
-  script?: WorkflowScriptPartEmbedded | null;
-  viewName?: string | null;
-  comments?: string | null;
-  userHelp?: string | null;
-  subWorkflow?: SubWorkflowEmbedded | null;
+  estimatedDuration: number | null;
+  script: WorkflowScriptPartEmbedded | null;
+  viewName: string | null;
+  comments: string | null;
+  userHelp: string | null;
+  subWorkflow: SubWorkflowEmbedded | null;
 }
 
 export module WorkflowActivityMonitorMessage {
@@ -372,9 +372,9 @@ export type WorkflowActivityType =
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
 export interface WorkflowConditionEntity extends Entities.Entity {
   Type: "WorkflowCondition";
-  name?: string;
-  mainEntityType?: Basics.TypeEntity;
-  eval?: WorkflowConditionEval;
+  name: string;
+  mainEntityType: Basics.TypeEntity;
+  eval: WorkflowConditionEval;
 }
 
 export const WorkflowConditionEval = new Type<WorkflowConditionEval>("WorkflowConditionEval");
@@ -391,36 +391,36 @@ export module WorkflowConditionOperation {
 export const WorkflowConfigurationEmbedded = new Type<WorkflowConfigurationEmbedded>("WorkflowConfigurationEmbedded");
 export interface WorkflowConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowConfigurationEmbedded";
-  scriptRunnerPeriod?: number;
-  avoidExecutingScriptsOlderThan?: number | null;
-  chunkSizeRunningScripts?: number;
+  scriptRunnerPeriod: number;
+  avoidExecutingScriptsOlderThan: number | null;
+  chunkSizeRunningScripts: number;
 }
 
 export const WorkflowConnectionEntity = new Type<WorkflowConnectionEntity>("WorkflowConnection");
 export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObjectEntity {
   Type: "WorkflowConnection";
-  from?: IWorkflowNodeEntity;
-  to?: IWorkflowNodeEntity;
-  name?: string | null;
-  bpmnElementId?: string;
-  type?: ConnectionType;
-  condition?: Entities.Lite<WorkflowConditionEntity>;
-  action?: Entities.Lite<WorkflowActionEntity>;
-  order?: number | null;
-  xml?: WorkflowXmlEmbedded;
+  from: IWorkflowNodeEntity;
+  to: IWorkflowNodeEntity;
+  name: string | null;
+  bpmnElementId: string;
+  type: ConnectionType;
+  condition: Entities.Lite<WorkflowConditionEntity>;
+  action: Entities.Lite<WorkflowActionEntity>;
+  order: number | null;
+  xml: WorkflowXmlEmbedded;
 }
 
 export const WorkflowConnectionModel = new Type<WorkflowConnectionModel>("WorkflowConnectionModel");
 export interface WorkflowConnectionModel extends Entities.ModelEntity {
   Type: "WorkflowConnectionModel";
   mainEntityType: Basics.TypeEntity;
-  name?: string | null;
-  needCondition?: boolean;
-  needOrder?: boolean;
-  type?: ConnectionType;
-  condition?: Entities.Lite<WorkflowConditionEntity>;
-  action?: Entities.Lite<WorkflowActionEntity>;
-  order?: number | null;
+  name: string | null;
+  needCondition: boolean;
+  needOrder: boolean;
+  type: ConnectionType;
+  condition: Entities.Lite<WorkflowConditionEntity>;
+  action: Entities.Lite<WorkflowActionEntity>;
+  order: number | null;
 }
 
 export module WorkflowConnectionOperation {
@@ -431,33 +431,33 @@ export module WorkflowConnectionOperation {
 export const WorkflowEntity = new Type<WorkflowEntity>("Workflow");
 export interface WorkflowEntity extends Entities.Entity {
   Type: "Workflow";
-  name?: string;
-  mainEntityType?: Basics.TypeEntity;
+  name: string;
+  mainEntityType: Basics.TypeEntity;
   mainEntityStrategies: Entities.MList<WorkflowMainEntityStrategy>;
-  expirationDate?: string | null;
+  expirationDate: string | null;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");
 export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
   Type: "WorkflowEvent";
-  name?: string | null;
-  bpmnElementId?: string;
-  lane?: WorkflowLaneEntity;
-  type?: WorkflowEventType;
-  timer?: WorkflowTimerEmbedded | null;
-  boundaryOf?: Entities.Lite<WorkflowActivityEntity>;
-  xml?: WorkflowXmlEmbedded;
+  name: string | null;
+  bpmnElementId: string;
+  lane: WorkflowLaneEntity;
+  type: WorkflowEventType;
+  timer: WorkflowTimerEmbedded | null;
+  boundaryOf: Entities.Lite<WorkflowActivityEntity>;
+  xml: WorkflowXmlEmbedded;
 }
 
 export const WorkflowEventModel = new Type<WorkflowEventModel>("WorkflowEventModel");
 export interface WorkflowEventModel extends Entities.ModelEntity {
   Type: "WorkflowEventModel";
   mainEntityType: Basics.TypeEntity;
-  name?: string | null;
-  type?: WorkflowEventType;
-  task?: WorkflowEventTaskModel | null;
-  timer?: WorkflowTimerEmbedded | null;
-  bpmnElementId?: string;
+  name: string | null;
+  type: WorkflowEventType;
+  task: WorkflowEventTaskModel | null;
+  timer: WorkflowTimerEmbedded | null;
+  bpmnElementId: string;
 }
 
 export module WorkflowEventOperation {
@@ -478,29 +478,29 @@ export interface WorkflowEventTaskConditionEval extends Dynamic.EvalEmbedded<IWo
 export const WorkflowEventTaskConditionResultEntity = new Type<WorkflowEventTaskConditionResultEntity>("WorkflowEventTaskConditionResult");
 export interface WorkflowEventTaskConditionResultEntity extends Entities.Entity {
   Type: "WorkflowEventTaskConditionResult";
-  creationDate?: string;
-  workflowEventTask?: Entities.Lite<WorkflowEventTaskEntity>;
-  result?: boolean;
+  creationDate: string;
+  workflowEventTask: Entities.Lite<WorkflowEventTaskEntity>;
+  result: boolean;
 }
 
 export const WorkflowEventTaskEntity = new Type<WorkflowEventTaskEntity>("WorkflowEventTask");
 export interface WorkflowEventTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
   Type: "WorkflowEventTask";
-  workflow?: Entities.Lite<WorkflowEntity>;
-  event?: Entities.Lite<WorkflowEventEntity>;
-  triggeredOn?: TriggeredOn;
-  condition?: WorkflowEventTaskConditionEval | null;
-  action?: WorkflowEventTaskActionEval | null;
+  workflow: Entities.Lite<WorkflowEntity>;
+  event: Entities.Lite<WorkflowEventEntity>;
+  triggeredOn: TriggeredOn;
+  condition: WorkflowEventTaskConditionEval | null;
+  action: WorkflowEventTaskActionEval | null;
 }
 
 export const WorkflowEventTaskModel = new Type<WorkflowEventTaskModel>("WorkflowEventTaskModel");
 export interface WorkflowEventTaskModel extends Entities.ModelEntity {
   Type: "WorkflowEventTaskModel";
-  suspended?: boolean;
-  rule?: Scheduler.IScheduleRuleEntity | null;
-  triggeredOn?: TriggeredOn;
-  condition?: WorkflowEventTaskConditionEval | null;
-  action?: WorkflowEventTaskActionEval | null;
+  suspended: boolean;
+  rule: Scheduler.IScheduleRuleEntity | null;
+  triggeredOn: TriggeredOn;
+  condition: WorkflowEventTaskConditionEval | null;
+  action: WorkflowEventTaskActionEval | null;
 }
 
 export module WorkflowEventTaskOperation {
@@ -525,20 +525,20 @@ export type WorkflowGatewayDirection =
 export const WorkflowGatewayEntity = new Type<WorkflowGatewayEntity>("WorkflowGateway");
 export interface WorkflowGatewayEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
   Type: "WorkflowGateway";
-  lane?: WorkflowLaneEntity;
-  name?: string | null;
-  bpmnElementId?: string;
-  type?: WorkflowGatewayType;
-  direction?: WorkflowGatewayDirection;
-  xml?: WorkflowXmlEmbedded;
+  lane: WorkflowLaneEntity;
+  name: string | null;
+  bpmnElementId: string;
+  type: WorkflowGatewayType;
+  direction: WorkflowGatewayDirection;
+  xml: WorkflowXmlEmbedded;
 }
 
 export const WorkflowGatewayModel = new Type<WorkflowGatewayModel>("WorkflowGatewayModel");
 export interface WorkflowGatewayModel extends Entities.ModelEntity {
   Type: "WorkflowGatewayModel";
-  name?: string | null;
-  type?: WorkflowGatewayType;
-  direction?: WorkflowGatewayDirection;
+  name: string | null;
+  type: WorkflowGatewayType;
+  direction: WorkflowGatewayDirection;
 }
 
 export module WorkflowGatewayOperation {
@@ -565,21 +565,21 @@ export interface WorkflowLaneActorsEval extends Dynamic.EvalEmbedded<IWorkflowLa
 export const WorkflowLaneEntity = new Type<WorkflowLaneEntity>("WorkflowLane");
 export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEntity {
   Type: "WorkflowLane";
-  name?: string;
-  bpmnElementId?: string;
-  xml?: WorkflowXmlEmbedded;
-  pool?: WorkflowPoolEntity;
+  name: string;
+  bpmnElementId: string;
+  xml: WorkflowXmlEmbedded;
+  pool: WorkflowPoolEntity;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
-  actorsEval?: WorkflowLaneActorsEval | null;
+  actorsEval: WorkflowLaneActorsEval | null;
 }
 
 export const WorkflowLaneModel = new Type<WorkflowLaneModel>("WorkflowLaneModel");
 export interface WorkflowLaneModel extends Entities.ModelEntity {
   Type: "WorkflowLaneModel";
   mainEntityType: Basics.TypeEntity;
-  name?: string;
+  name: string;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
-  actorsEval?: WorkflowLaneActorsEval | null;
+  actorsEval: WorkflowLaneActorsEval | null;
 }
 
 export module WorkflowLaneOperation {
@@ -636,16 +636,16 @@ export module WorkflowPanelPermission {
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");
 export interface WorkflowPoolEntity extends Entities.Entity, IWorkflowObjectEntity {
   Type: "WorkflowPool";
-  workflow?: WorkflowEntity;
-  name?: string;
-  bpmnElementId?: string;
-  xml?: WorkflowXmlEmbedded;
+  workflow: WorkflowEntity;
+  name: string;
+  bpmnElementId: string;
+  xml: WorkflowXmlEmbedded;
 }
 
 export const WorkflowPoolModel = new Type<WorkflowPoolModel>("WorkflowPoolModel");
 export interface WorkflowPoolModel extends Entities.ModelEntity {
   Type: "WorkflowPoolModel";
-  name?: string;
+  name: string;
 }
 
 export module WorkflowPoolOperation {
@@ -657,8 +657,8 @@ export const WorkflowReplacementItemEmbedded = new Type<WorkflowReplacementItemE
 export interface WorkflowReplacementItemEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowReplacementItemEmbedded";
   oldNode: Entities.Lite<IWorkflowNodeEntity>;
-  subWorkflow?: Entities.Lite<WorkflowEntity>;
-  newNode?: string;
+  subWorkflow: Entities.Lite<WorkflowEntity>;
+  newNode: string;
 }
 
 export const WorkflowReplacementModel = new Type<WorkflowReplacementModel>("WorkflowReplacementModel");
@@ -670,15 +670,15 @@ export interface WorkflowReplacementModel extends Entities.ModelEntity {
 export const WorkflowScriptEntity = new Type<WorkflowScriptEntity>("WorkflowScript");
 export interface WorkflowScriptEntity extends Entities.Entity {
   Type: "WorkflowScript";
-  name?: string;
-  mainEntityType?: Basics.TypeEntity;
-  eval?: WorkflowScriptEval;
+  name: string;
+  mainEntityType: Basics.TypeEntity;
+  eval: WorkflowScriptEval;
 }
 
 export const WorkflowScriptEval = new Type<WorkflowScriptEval>("WorkflowScriptEval");
 export interface WorkflowScriptEval extends Dynamic.EvalEmbedded<IWorkflowScriptExecutor> {
   Type: "WorkflowScriptEval";
-  customTypes?: string | null;
+  customTypes: string | null;
 }
 
 export module WorkflowScriptOperation {
@@ -690,14 +690,14 @@ export module WorkflowScriptOperation {
 export const WorkflowScriptPartEmbedded = new Type<WorkflowScriptPartEmbedded>("WorkflowScriptPartEmbedded");
 export interface WorkflowScriptPartEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowScriptPartEmbedded";
-  script?: Entities.Lite<WorkflowScriptEntity>;
-  retryStrategy?: WorkflowScriptRetryStrategyEntity | null;
+  script: Entities.Lite<WorkflowScriptEntity>;
+  retryStrategy: WorkflowScriptRetryStrategyEntity | null;
 }
 
 export const WorkflowScriptRetryStrategyEntity = new Type<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy");
 export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity {
   Type: "WorkflowScriptRetryStrategy";
-  rule?: string;
+  rule: string;
 }
 
 export module WorkflowScriptRetryStrategyOperation {
@@ -708,9 +708,9 @@ export module WorkflowScriptRetryStrategyOperation {
 export const WorkflowTimerConditionEntity = new Type<WorkflowTimerConditionEntity>("WorkflowTimerCondition");
 export interface WorkflowTimerConditionEntity extends Entities.Entity {
   Type: "WorkflowTimerCondition";
-  name?: string;
-  mainEntityType?: Basics.TypeEntity;
-  eval?: WorkflowTimerConditionEval;
+  name: string;
+  mainEntityType: Basics.TypeEntity;
+  eval: WorkflowTimerConditionEval;
 }
 
 export const WorkflowTimerConditionEval = new Type<WorkflowTimerConditionEval>("WorkflowTimerConditionEval");
@@ -727,8 +727,8 @@ export module WorkflowTimerConditionOperation {
 export const WorkflowTimerEmbedded = new Type<WorkflowTimerEmbedded>("WorkflowTimerEmbedded");
 export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowTimerEmbedded";
-  duration?: Signum.TimeSpanEmbedded | null;
-  condition?: Entities.Lite<WorkflowTimerConditionEntity>;
+  duration: Signum.TimeSpanEmbedded | null;
+  condition: Entities.Lite<WorkflowTimerConditionEntity>;
 }
 
 export module WorkflowValidationMessage {
@@ -776,7 +776,7 @@ export module WorkflowValidationMessage {
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");
 export interface WorkflowXmlEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowXmlEmbedded";
-  diagramXml?: string;
+  diagramXml: string;
 }
 
 

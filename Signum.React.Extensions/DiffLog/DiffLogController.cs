@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.DiffLog;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -23,8 +23,8 @@ namespace Signum.React.DiffLog
 
             var prevFinal = logs.Min?.Mixin<DiffLogMixin>().FinalState;
 
-            string nextInitial = logs.Max != null ? logs.Max.Mixin<DiffLogMixin>().InitialState :
-                operationLog.Target.Exists() ? GetDump(operationLog.Target) : null;
+            string? nextInitial = logs.Max != null ? logs.Max.Mixin<DiffLogMixin>().InitialState :
+                operationLog.Target!.Exists() ? GetDump(operationLog.Target!) : null;
 
             return new DiffLogResult
             {
@@ -48,13 +48,13 @@ namespace Signum.React.DiffLog
 #pragma warning disable IDE1006 // Naming Styles
     public class DiffLogResult
     {
-        public Lite<OperationLogEntity> prev { get; internal set; }
-        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diffPrev { get; internal set; }
+        public Lite<OperationLogEntity>? prev { get; internal set; }
+        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diffPrev { get; internal set; }
 
-        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; internal set; }
+        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diff { get; internal set; }
 
-        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diffNext { get; internal set; }
-        public Lite<OperationLogEntity> next { get; internal set; }
+        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diffNext { get; internal set; }
+        public Lite<OperationLogEntity>? next { get; internal set; }
     }
 #pragma warning restore IDE1006 // Naming Styles
 }

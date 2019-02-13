@@ -62,7 +62,6 @@ namespace Signum.Entities.Workflow
     [Serializable, InTypeScript(Undefined = false)]
     public class WorkflowModel : ModelEntity
     {
-        [NotNullValidator]
         public string DiagramXml { get; set;  }
 
         public MList<BpmnEntityPairEmbedded> Entities { get; set; } = new MList<BpmnEntityPairEmbedded>();
@@ -71,11 +70,9 @@ namespace Signum.Entities.Workflow
     [Serializable, InTypeScript(Undefined = false)]
     public class BpmnEntityPairEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
         [ImplementedBy()]
-        public ModelEntity? Model { get; set; }
+        public ModelEntity Model { get; set; }
 
-        [NotNullValidator]
         public string BpmnElementId { get; set; }
 
         public override string ToString()
@@ -152,7 +149,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
+        [InTypeScript(Undefined = false, Null= false)]
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
         public Lite<IWorkflowNodeEntity>? OldNode { get; set; }
 

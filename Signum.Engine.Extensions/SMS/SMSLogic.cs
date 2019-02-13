@@ -60,14 +60,16 @@ namespace Signum.Engine.SMS
             get { return getConfiguration(); }
         }
 
-        public static ISMSProvider Provider { get; set; }
+        public static ISMSProvider? Provider { get; set; }
+
+        public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null!, null!)));
         }
 
-        public static void Start(SchemaBuilder sb, ISMSProvider provider, Func<SMSConfigurationEmbedded> getConfiguration)
+        public static void Start(SchemaBuilder sb, ISMSProvider? provider, Func<SMSConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -117,7 +119,7 @@ namespace Signum.Engine.SMS
         static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
         static Dictionary<Type, LambdaExpression> cultureProviders = new Dictionary<Type, LambdaExpression>();
 
-        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo>> cultureExpression) where T : Entity
+        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo?>> cultureExpression) where T : Entity
         {
             phoneNumberProviders[typeof(T)] = phoneExpression;
             cultureProviders[typeof(T)] = cultureExpression;
@@ -178,7 +180,7 @@ namespace Signum.Engine.SMS
             return phoneFunc.Evaluate(entity);
         }
 
-        public static CultureInfo GetCulture<T>(T entity) where T : IEntity
+        public static CultureInfo? GetCulture<T>(T entity) where T : IEntity
         {
             var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
                 .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".FormatWith(typeof(T).NiceName()));
@@ -312,7 +314,7 @@ namespace Signum.Engine.SMS
 
         static Regex literalFinder = new Regex(@"{(?<name>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)}");
 
-        public static string ComposeMessage(this SMSTemplateEntity template, object obj, CultureInfo culture)
+        public static string ComposeMessage(this SMSTemplateEntity template, object obj, CultureInfo? culture)
         {
             var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
             var templateMessage = template.GetCultureMessage(culture ?? defaultCulture) ??
@@ -453,9 +455,6 @@ namespace Signum.Engine.SMS
         
         public static void SendSMS(SMSMessageEntity message)
         {
-            if (Provider == null)
-                throw new InvalidOperationException("Provider was not established");
-
             if (!message.DestinationNumber.Contains(','))
             {
                 SendOneMessage(message);
@@ -487,7 +486,7 @@ namespace Signum.Engine.SMS
 
         private static void SendOneMessage(SMSMessageEntity message)
         {
-            message.MessageID = Provider.SMSSendAndGetTicket(message);
+            message.MessageID = GetProvider().SMSSendAndGetTicket(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
             message.Save();
@@ -504,7 +503,7 @@ namespace Signum.Engine.SMS
         public static List<SMSMessageEntity> CreateAndSendMultipleSMSMessages(MultipleSMSModel template, List<string> phones)
         {
             var messages = new List<SMSMessageEntity>();
-            var IDs = Provider.SMSMultipleSendAction(template, phones);
+            var IDs = GetProvider().SMSMultipleSendAction(template, phones);
             var sendDate = TimeZoneManager.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
@@ -582,7 +581,7 @@ namespace Signum.Engine.SMS
                 {
                     var func = args.TryGetArgC<Func<SMSMessageEntity, SMSMessageState>>();
                     if (func == null)
-                        func = SMSLogic.Provider.SMSUpdateStatusAction;
+                        func = SMSLogic.GetProvider().SMSUpdateStatusAction;
 
                     sms.State = func(sms);
 

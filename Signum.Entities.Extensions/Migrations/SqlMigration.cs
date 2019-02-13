@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 
@@ -8,6 +8,7 @@ namespace Signum.Entities.Migrations
     public class SqlMigrationEntity : Entity
     {
         [UniqueIndex]
+        [StringLengthValidator(Max = 200)]
         public string VersionNumber { get; set; }
 
         [StringLengthValidator(Min = 0, Max = 400)]

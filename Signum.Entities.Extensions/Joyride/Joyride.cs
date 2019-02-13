@@ -59,7 +59,7 @@ namespace Signum.Entities.Joyride
         {
             Name = element.Element("Name").Value;
             Culture = element.Element("Culture")?.Let(a => Lite.Parse<CultureInfoEntity>(a.Value));
-            Type = (JoyrideType) element.Element("Type")?.Value.ToEnum<JoyrideType>();
+            Type = element.Element("Type").Value.ToEnum<JoyrideType>();
             Steps.Synchronize(element.Element("Steps").Elements().ToList(), (s, x) => s.FromXml(x, ctx));
             ShowSkipButton = Boolean.Parse(element.Element("ShowSkipButton").Value);
             ShowStepsProgress = Boolean.Parse(element.Element("ShowStepsProgress").Value);

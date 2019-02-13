@@ -431,7 +431,7 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static List<Lite<EmailTemplateEntity>> GetApplicableEmailTemplates(object queryName, Entity entity, EmailTemplateVisibleOn visibleOn)
+        public static List<Lite<EmailTemplateEntity>> GetApplicableEmailTemplates(object queryName, Entity? entity, EmailTemplateVisibleOn visibleOn)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
             return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()

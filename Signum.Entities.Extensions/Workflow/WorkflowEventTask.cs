@@ -33,7 +33,6 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowEventTaskConditionEval? Condition { get; set; }
 
-        [NotNullValidator]
         [NotifyChildProperty]
         public WorkflowEventTaskActionEval? Action { get; set; }
 
@@ -74,7 +73,6 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowEventTaskConditionEval? Condition { get; set; }
 
-        [NotNullValidator]
         [NotifyChildProperty]
         public WorkflowEventTaskActionEval? Action { get; set; }
     }

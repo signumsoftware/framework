@@ -17,22 +17,22 @@ export interface IProcessLineDataEntity extends Entities.Entity {
 export const PackageEntity = new Type<PackageEntity>("Package");
 export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
   Type: "Package";
-  name?: string | null;
-  operationArguments?: string;
+  name: string | null;
+  operationArguments: string;
 }
 
 export const PackageLineEntity = new Type<PackageLineEntity>("PackageLine");
 export interface PackageLineEntity extends Entities.Entity, IProcessLineDataEntity {
   Type: "PackageLine";
-  package?: Entities.Lite<PackageEntity>;
-  target?: Entities.Entity;
-  result?: Entities.Lite<Entities.Entity>;
-  finishTime?: string | null;
+  package: Entities.Lite<PackageEntity>;
+  target: Entities.Entity;
+  result: Entities.Lite<Entities.Entity>;
+  finishTime: string | null;
 }
 
 export const PackageOperationEntity = new Type<PackageOperationEntity>("PackageOperation");
 export interface PackageOperationEntity extends PackageEntity {
-  operation?: Entities.OperationSymbol;
+  operation: Entities.OperationSymbol;
 }
 
 export module PackageOperationProcess {
@@ -53,32 +53,32 @@ export interface ProcessAlgorithmSymbol extends Entities.Symbol {
 export const ProcessEntity = new Type<ProcessEntity>("Process");
 export interface ProcessEntity extends Entities.Entity {
   Type: "Process";
-  algorithm?: ProcessAlgorithmSymbol;
-  data?: IProcessDataEntity | null;
-  machineName?: string;
-  applicationName?: string;
-  user?: Entities.Lite<Basics.IUserEntity>;
-  state?: ProcessState;
-  creationDate?: string;
-  plannedDate?: string | null;
-  cancelationDate?: string | null;
-  queuedDate?: string | null;
-  executionStart?: string | null;
-  executionEnd?: string | null;
-  suspendDate?: string | null;
-  exceptionDate?: string | null;
-  exception?: Entities.Lite<Basics.ExceptionEntity>;
-  progress?: number | null;
-  status?: string | null;
+  algorithm: ProcessAlgorithmSymbol;
+  data: IProcessDataEntity | null;
+  machineName: string;
+  applicationName: string;
+  user: Entities.Lite<Basics.IUserEntity>;
+  state: ProcessState;
+  creationDate: string;
+  plannedDate: string | null;
+  cancelationDate: string | null;
+  queuedDate: string | null;
+  executionStart: string | null;
+  executionEnd: string | null;
+  suspendDate: string | null;
+  exceptionDate: string | null;
+  exception: Entities.Lite<Basics.ExceptionEntity>;
+  progress: number | null;
+  status: string | null;
 }
 
 export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
 export interface ProcessExceptionLineEntity extends Entities.Entity {
   Type: "ProcessExceptionLine";
-  elementInfo?: string;
-  line?: Entities.Lite<IProcessLineDataEntity>;
-  process?: Entities.Lite<ProcessEntity>;
-  exception?: Entities.Lite<Basics.ExceptionEntity>;
+  elementInfo: string;
+  line: Entities.Lite<IProcessLineDataEntity>;
+  process: Entities.Lite<ProcessEntity>;
+  exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export module ProcessMessage {

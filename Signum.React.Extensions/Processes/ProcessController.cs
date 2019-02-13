@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
@@ -19,7 +19,7 @@ namespace Signum.React.Processes
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
 
-            var entity = PackageLogic.CreatePackageOperation(request.lites, request.GetOperationSymbol(type), request.args);
+            var entity = PackageLogic.CreatePackageOperation(request.lites, request.GetOperationSymbol(type!), request.args);
 
             return SignumServer.GetEntityPack(entity);
         }

@@ -14,11 +14,10 @@ namespace Signum.Entities.Workflow
         [UniqueIndex]
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
-
         
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public WorkflowConditionEval Eval { get; set; }
 
         static Expression<Func<WorkflowConditionEntity, string>> ToStringExpression = @this => @this.Name;

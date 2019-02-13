@@ -20,8 +20,8 @@ export type DynamicBaseType =
 export const DynamicCSSOverrideEntity = new Type<DynamicCSSOverrideEntity>("DynamicCSSOverride");
 export interface DynamicCSSOverrideEntity extends Entities.Entity {
   Type: "DynamicCSSOverride";
-  name?: string;
-  script?: string;
+  name: string;
+  script: string;
 }
 
 export module DynamicCSSOverrideOperation {
@@ -32,13 +32,13 @@ export module DynamicCSSOverrideOperation {
 export const DynamicExpressionEntity = new Type<DynamicExpressionEntity>("DynamicExpression");
 export interface DynamicExpressionEntity extends Entities.Entity {
   Type: "DynamicExpression";
-  name?: string;
-  fromType?: string;
-  returnType?: string;
-  body?: string;
-  format?: string | null;
-  unit?: string | null;
-  translation?: DynamicExpressionTranslation;
+  name: string;
+  fromType: string;
+  returnType: string;
+  body: string;
+  format: string | null;
+  unit: string | null;
+  translation: DynamicExpressionTranslation;
 }
 
 export module DynamicExpressionOperation {
@@ -56,8 +56,8 @@ export type DynamicExpressionTranslation =
 export const DynamicMixinConnectionEntity = new Type<DynamicMixinConnectionEntity>("DynamicMixinConnection");
 export interface DynamicMixinConnectionEntity extends Entities.Entity {
   Type: "DynamicMixinConnection";
-  entityType?: Entities.Lite<Basics.TypeEntity>;
-  mixinName?: string;
+  entityType: Entities.Lite<Basics.TypeEntity>;
+  mixinName: string;
 }
 
 export module DynamicMixinConnectionOperation {
@@ -73,21 +73,21 @@ export module DynamicPanelPermission {
 export const DynamicRenameEntity = new Type<DynamicRenameEntity>("DynamicRename");
 export interface DynamicRenameEntity extends Entities.Entity {
   Type: "DynamicRename";
-  creationDate?: string;
-  replacementKey?: string;
-  oldName?: string;
-  newName?: string;
+  creationDate: string;
+  replacementKey: string;
+  oldName: string;
+  newName: string;
 }
 
 export const DynamicSqlMigrationEntity = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
 export interface DynamicSqlMigrationEntity extends Entities.Entity {
   Type: "DynamicSqlMigration";
-  creationDate?: string;
-  createdBy?: Entities.Lite<Basics.IUserEntity>;
-  executionDate?: string | null;
-  executedBy?: Entities.Lite<Basics.IUserEntity>;
-  comment?: string;
-  script?: string;
+  creationDate: string;
+  createdBy: Entities.Lite<Basics.IUserEntity>;
+  executionDate: string | null;
+  executedBy: Entities.Lite<Basics.IUserEntity>;
+  comment: string;
+  script: string;
 }
 
 export module DynamicSqlMigrationMessage {
@@ -105,8 +105,8 @@ export module DynamicSqlMigrationOperation {
 export const DynamicTypeConditionEntity = new Type<DynamicTypeConditionEntity>("DynamicTypeCondition");
 export interface DynamicTypeConditionEntity extends Entities.Entity {
   Type: "DynamicTypeCondition";
-  symbolName?: DynamicTypeConditionSymbolEntity;
-  entityType?: Basics.TypeEntity;
+  symbolName: DynamicTypeConditionSymbolEntity;
+  entityType: Basics.TypeEntity;
   eval: DynamicTypeConditionEval;
 }
 
@@ -123,7 +123,7 @@ export module DynamicTypeConditionOperation {
 export const DynamicTypeConditionSymbolEntity = new Type<DynamicTypeConditionSymbolEntity>("DynamicTypeConditionSymbol");
 export interface DynamicTypeConditionSymbolEntity extends Entities.Entity {
   Type: "DynamicTypeConditionSymbol";
-  name?: string;
+  name: string;
 }
 
 export module DynamicTypeConditionSymbolOperation {
@@ -133,9 +133,9 @@ export module DynamicTypeConditionSymbolOperation {
 export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
 export interface DynamicTypeEntity extends Entities.Entity {
   Type: "DynamicType";
-  baseType?: DynamicBaseType;
-  typeName?: string;
-  typeDefinition?: string;
+  baseType: DynamicBaseType;
+  typeName: string;
+  typeDefinition: string;
 }
 
 export module DynamicTypeMessage {
@@ -155,9 +155,9 @@ export module DynamicTypeOperation {
 export const DynamicValidationEntity = new Type<DynamicValidationEntity>("DynamicValidation");
 export interface DynamicValidationEntity extends Entities.Entity {
   Type: "DynamicValidation";
-  name?: string;
-  entityType?: Basics.TypeEntity;
-  subEntity?: Basics.PropertyRouteEntity | null;
+  name: string;
+  entityType: Basics.TypeEntity;
+  subEntity: Basics.PropertyRouteEntity | null;
   eval: DynamicValidationEval;
 }
 
@@ -179,9 +179,9 @@ export module DynamicValidationOperation {
 export const DynamicViewEntity = new Type<DynamicViewEntity>("DynamicView");
 export interface DynamicViewEntity extends Entities.Entity {
   Type: "DynamicView";
-  viewName?: string;
-  entityType?: Basics.TypeEntity;
-  viewContent?: string;
+  viewName: string;
+  entityType: Basics.TypeEntity;
+  viewContent: string;
 }
 
 export module DynamicViewMessage {
@@ -212,9 +212,9 @@ export module DynamicViewOperation {
 export const DynamicViewOverrideEntity = new Type<DynamicViewOverrideEntity>("DynamicViewOverride");
 export interface DynamicViewOverrideEntity extends Entities.Entity {
   Type: "DynamicViewOverride";
-  entityType?: Basics.TypeEntity;
-  viewName?: string | null;
-  script?: string;
+  entityType: Basics.TypeEntity;
+  viewName: string | null;
+  script: string;
 }
 
 export module DynamicViewOverrideOperation {
@@ -225,8 +225,8 @@ export module DynamicViewOverrideOperation {
 export const DynamicViewSelectorEntity = new Type<DynamicViewSelectorEntity>("DynamicViewSelector");
 export interface DynamicViewSelectorEntity extends Entities.Entity {
   Type: "DynamicViewSelector";
-  entityType?: Basics.TypeEntity;
-  script?: string;
+  entityType: Basics.TypeEntity;
+  script: string;
 }
 
 export module DynamicViewSelectorOperation {
@@ -251,7 +251,7 @@ export module DynamicViewValidationMessage {
 }
 
 export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {
-  script?: string;
+  script: string;
 }
 
 

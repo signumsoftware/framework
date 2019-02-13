@@ -71,7 +71,6 @@ namespace Signum.Entities.Help
     [Serializable]
     public class OperationHelpEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
         public OperationSymbol Operation { get; set; }
 
         [StringLengthValidator(Min = 3, MultiLine = true)]

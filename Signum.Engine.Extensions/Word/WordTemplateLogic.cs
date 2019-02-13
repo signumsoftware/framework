@@ -189,7 +189,7 @@ namespace Signum.Engine.Word
             return ((should & visibleOn) != 0);
         }
 
-        public static List<Lite<WordTemplateEntity>> GetApplicableWordTemplates(object queryName, Entity entity, WordTemplateVisibleOn visibleOn)
+        public static List<Lite<WordTemplateEntity>> GetApplicableWordTemplates(object queryName, Entity? entity, WordTemplateVisibleOn visibleOn)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
             return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()

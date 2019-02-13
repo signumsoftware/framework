@@ -6,8 +6,7 @@ namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class UserTicketEntity : Entity
-    {
-        
+    {   
         public Lite<UserEntity> User { get; set; }
 
         [StringLengthValidator(Min = 36, Max = 36)]
@@ -15,7 +14,8 @@ namespace Signum.Entities.Authorization
 
         public DateTime ConnectionDate { get; set; }
 
-                public string Device { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string Device { get; set; }
 
         public string StringTicket()
         {

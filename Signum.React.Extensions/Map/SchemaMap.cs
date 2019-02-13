@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
@@ -37,7 +37,7 @@ namespace Signum.React.Maps
                              total_size_kb_history = t.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.total_size_kb),
                              mlistTables = t.TablesMList().Select(ml => new MListTableInfo
                              {
-                                 niceName = ml.PropertyRoute.PropertyInfo.NiceName(),
+                                 niceName = ml.PropertyRoute.PropertyInfo!.NiceName(),
                                  tableName = ml.Name.ToString(),
                                  rows = getStats.TryGetC(ml.Name)?.rows,
                                  total_size_kb = getStats.TryGetC(ml.Name)?.total_size_kb,
@@ -160,7 +160,7 @@ namespace Signum.React.Maps
         public int? total_size_kb;
         public int? rows_history;
         public int? total_size_kb_history;
-        public Dictionary<string, object> extra = new Dictionary<string, object>();
+        public Dictionary<string, object?> extra = new Dictionary<string, object?>();
 
         public List<MListTableInfo> mlistTables;
     }
@@ -185,7 +185,7 @@ namespace Signum.React.Maps
         public int? history_rows;
         public int? history_total_size_kb;
 
-        public Dictionary<string, object> extra = new Dictionary<string, object>();
+        public Dictionary<string, object?> extra = new Dictionary<string, object?>();
     }
 
     public class RelationInfo

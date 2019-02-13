@@ -63,7 +63,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
   }
 
   handleTokenChange = (cc: ChartColumnEmbedded) => {
-    cc.displayName = undefined;
+    cc.displayName = null!;
     cc.modified = true;
     this.forceUpdate();
     this.props.onTokenChange();

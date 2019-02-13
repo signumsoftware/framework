@@ -43,7 +43,7 @@ namespace Signum.Entities.Disconnected
 
         public double Ratio(DisconnectedImportEntity orientative)
         {
-            double total = orientative.Total.Value;
+            double total = orientative.Total!.Value;
 
             double result = 0;
 
@@ -52,30 +52,30 @@ namespace Signum.Entities.Disconnected
 
             if (!SynchronizeSchema.HasValue)
                 return result;
-            result += (orientative.SynchronizeSchema.Value) / total;
+            result += (orientative.SynchronizeSchema!.Value) / total;
 
             if (!DisableForeignKeys.HasValue)
                 return result;
-            result += (orientative.DisableForeignKeys.Value) / total;
+            result += (orientative.DisableForeignKeys!.Value) / total;
 
             result += Copies.Where(c => c.CopyTable.HasValue).Join(
                 orientative.Copies.Where(o => o.CopyTable.HasValue && o.CopyTable.Value > 0),
-                c => c.Type, o => o.Type, (c, o) => o.CopyTable.Value / total).Sum();
+                c => c.Type, o => o.Type, (c, o) => o.CopyTable!.Value / total).Sum();
 
             if (!Copies.All(a => a.CopyTable.HasValue))
                 return result;
 
             if (!Unlock.HasValue)
                 return result;
-            result += (orientative.Unlock.Value) / total;
+            result += (orientative.Unlock!.Value) / total;
 
             if (!EnableForeignKeys.HasValue)
                 return result;
-            result += (orientative.EnableForeignKeys.Value) / total;
+            result += (orientative.EnableForeignKeys!.Value) / total;
 
             if (!DropDatabase.HasValue)
                 return result;
-            result += (orientative.DropDatabase.Value) / total;
+            result += (orientative.DropDatabase!.Value) / total;
 
             return result;
         }

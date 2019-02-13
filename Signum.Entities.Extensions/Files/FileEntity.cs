@@ -18,7 +18,8 @@ namespace Signum.Entities.Files
 
         [StringLengthValidator(Min = 3, Max = 254)]
         public string FileName { get; set; }
-
+        
+        [NotNullValidator(DisabledInModelBinder = true)]
         public string Hash { get; private set; }
 
         byte[] binaryFile;

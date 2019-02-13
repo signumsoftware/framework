@@ -55,9 +55,9 @@ namespace Signum.React.UserAssets
 
                     var filter = gr.Key;
 
-                    var token = QueryUtils.Parse(filter.tokenString, qd, options);
+                    var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList());
+                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation!.Value.IsList());
 
                     return new FilterNode
                     {
@@ -71,13 +71,13 @@ namespace Signum.React.UserAssets
                 {
                     var group = gr.Key;
 
-                    var token = group.token == null ? null : QueryUtils.Parse(group.tokenString, qd, options);
+                    var token = group.token == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
 
                     var value = FilterValueConverter.Parse(group.valueString, typeof(string), false);
 
                     return new FilterNode
                     {
-                        groupOperation = group.groupOperation.Value,
+                        groupOperation = group.groupOperation!.Value,
                         token = token == null ? null : new QueryTokenTS(token, true),
                         pinned = gr.Key.pinned,
                         filters = ParseFilterInternal(gr, qd, options, indent + 1).ToList()
@@ -113,7 +113,7 @@ namespace Signum.React.UserAssets
         {
             if (filter.groupOperation == null)
             {
-                var token = QueryUtils.Parse(filter.tokenString, qd, options);
+                var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
                 yield return new QueryFilterItem
                 {
@@ -151,12 +151,12 @@ namespace Signum.React.UserAssets
 
         public class QueryFilterItem
         {
-            public QueryTokenTS token;
-            public string tokenString;
+            public QueryTokenTS? token;
+            public string? tokenString;
             public bool isGroup;
             public FilterGroupOperation? groupOperation;
             public FilterOperation? operation;
-            public string valueString;
+            public string? valueString;
             public PinnedFilter pinned;
             public int indentation;
         }
@@ -173,10 +173,10 @@ namespace Signum.React.UserAssets
         public class FilterNode
         {
             public FilterGroupOperation? groupOperation;
-            public string tokenString; //For Request
-            public QueryTokenTS token; //For response
+            public string? tokenString; //For Request
+            public QueryTokenTS? token; //For response
             public FilterOperation? operation;
-            public object value;
+            public object? value;
             public List<FilterNode> filters;
             public PinnedFilter pinned;
         }

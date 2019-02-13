@@ -48,7 +48,6 @@ namespace Signum.Entities.Chart
         public string DisplayName { get; set; }
 
         ChartScriptSymbol chartScript;
-        [NotNullValidator]
         public ChartScriptSymbol ChartScript
         {
             get { return chartScript; }

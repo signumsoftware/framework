@@ -38,7 +38,7 @@ namespace Signum.React.Authorization
             throw new AuthenticationException("No authentication information found!");
         }
 
-        public static SignumAuthenticationResult AnonymousUserAuthenticator(FilterContext actionContext)
+        public static SignumAuthenticationResult? AnonymousUserAuthenticator(FilterContext actionContext)
         {
             if (AuthLogic.AnonymousUser != null)
                 return new SignumAuthenticationResult { User = AuthLogic.AnonymousUser };
@@ -47,17 +47,16 @@ namespace Signum.React.Authorization
         }
 
 
-        public static SignumAuthenticationResult AllowAnonymousAuthenticator(FilterContext actionContext)
+        public static SignumAuthenticationResult? AllowAnonymousAuthenticator(FilterContext actionContext)
         {
-            var cad = actionContext.ActionDescriptor as ControllerActionDescriptor;
-            if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() ||
-                cad.ControllerTypeInfo.HasAttribute<AllowAnonymousAttribute>())
+            if (actionContext.ActionDescriptor is ControllerActionDescriptor cad && 
+                (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() || cad.ControllerTypeInfo.HasAttribute<AllowAnonymousAttribute>()))
                 return new SignumAuthenticationResult();
 
             return null;
         }
 
-        static SignumAuthenticationResult TokenAuthenticator(FilterContext ctx)
+        static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
             var authHeader = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             if (authHeader == null)

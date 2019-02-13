@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.Translation;
 using System.Globalization;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace Signum.React.Translation
             Translator = translator;
         }
 
-        public static CultureInfo GetCultureRequest(ActionContext actionContext)
+        public static CultureInfo? GetCultureRequest(ActionContext actionContext)
         {
             foreach (string lang in actionContext.HttpContext.Request.Headers["accept-languages"])
             {
@@ -40,7 +40,7 @@ namespace Signum.React.Translation
         }
 
 
-        public static string ReadLanguageCookie(ActionContext ac)
+        public static string? ReadLanguageCookie(ActionContext ac)
         {
             return ac.HttpContext.Request.Cookies.TryGetValue("language", out string value) ? value : null;
         }

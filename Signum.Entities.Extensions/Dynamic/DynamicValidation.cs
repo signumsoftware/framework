@@ -23,7 +23,7 @@ namespace Signum.Entities.Dynamic
 
         public static Func<DynamicValidationEntity, Type> GetMainType; 
 
-        [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicValidationEval Eval { get; set; }
 
         static Expression<Func<DynamicValidationEntity, string>> ToStringExpression = @this =>@this.EntityType + (@this.SubEntity == null ? null : (" " + @this.SubEntity))+ ": " + @this.Name;

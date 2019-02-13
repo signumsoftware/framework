@@ -11,7 +11,6 @@ namespace Signum.Entities.Translation
         public CultureInfoEntity Culture { get; set; }
 
         [ImplementedByAll]
-        [NotNullValidator]
         public Lite<Entity> Instance { get; set; }
         
         public PropertyRouteEntity PropertyRoute { get; set; }

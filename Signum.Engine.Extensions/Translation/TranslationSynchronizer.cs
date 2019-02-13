@@ -12,12 +12,12 @@ namespace Signum.Engine.Translation
     {
         public static int MaxTotalSyncCharacters = 800;
 
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity> role, string @namespace, out int totalTypes)
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity>? role, string? @namespace, out int totalTypes)
         {
             var types = GetMergeChanges(target, master, support);
 
             if (role != null)
-                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role, t.Type.Assembly.Culture, t.Type.Type) > 0).ToList();
+                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role!, t.Type.Assembly.Culture, t.Type.Type) > 0).ToList();
 
             if (@namespace != null)
                 types = types.Where(t => t.Type.Type.Namespace == @namespace).ToList();

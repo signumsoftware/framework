@@ -239,8 +239,7 @@ namespace Signum.Entities.Dashboard
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
-    {
-        
+    {   
         public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
         public override string ToString()
@@ -276,17 +275,13 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class ValueUserQueryElementEmbedded : EmbeddedEntity
     {
-        string label;
-        public string Label
-        {
-            get { return label ?? UserQuery?.DisplayName; }
-            set { Set(ref label, value); }
-        }
-
+        [StringLengthValidator(Max = 200)]
+        public string? Label { get; set; }
         
         public UserQueryEntity UserQuery { get; set; }
 
-        public string Href { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Href { get; set; }
 
         public ValueUserQueryElementEmbedded Clone()
         {

@@ -13,58 +13,58 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const PinnedQueryFilterEmbedded = new Type<PinnedQueryFilterEmbedded>("PinnedQueryFilterEmbedded");
 export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
   Type: "PinnedQueryFilterEmbedded";
-  label?: string | null;
-  column?: number | null;
-  row?: number | null;
-  disableOnNull?: boolean;
-  splitText?: boolean;
+  label: string | null;
+  column: number | null;
+  row: number | null;
+  disableOnNull: boolean;
+  splitText: boolean;
 }
 
 export const QueryColumnEmbedded = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");
 export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnEmbedded";
-  token?: UserAssets.QueryTokenEmbedded;
-  displayName?: string | null;
+  token: UserAssets.QueryTokenEmbedded;
+  displayName: string | null;
 }
 
 export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
 export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryFilterEmbedded";
-  token?: UserAssets.QueryTokenEmbedded;
-  isGroup?: boolean;
-  groupOperation?: DynamicQuery.FilterGroupOperation | null;
-  operation?: DynamicQuery.FilterOperation | null;
-  valueString?: string | null;
-  pinned?: PinnedQueryFilterEmbedded | null;
-  indentation?: number;
+  token: UserAssets.QueryTokenEmbedded;
+  isGroup: boolean;
+  groupOperation: DynamicQuery.FilterGroupOperation | null;
+  operation: DynamicQuery.FilterOperation | null;
+  valueString: string | null;
+  pinned: PinnedQueryFilterEmbedded | null;
+  indentation: number;
 }
 
 export const QueryOrderEmbedded = new Type<QueryOrderEmbedded>("QueryOrderEmbedded");
 export interface QueryOrderEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryOrderEmbedded";
-  token?: UserAssets.QueryTokenEmbedded;
-  orderType?: DynamicQuery.OrderType;
+  token: UserAssets.QueryTokenEmbedded;
+  orderType: DynamicQuery.OrderType;
 }
 
 export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserQuery";
-  query?: Basics.QueryEntity;
-  groupResults?: boolean;
-  entityType?: Entities.Lite<Basics.TypeEntity>;
-  hideQuickLink?: boolean;
-  owner?: Entities.Lite<Entities.Entity>;
-  displayName?: string;
-  appendFilters?: boolean;
+  query: Basics.QueryEntity;
+  groupResults: boolean;
+  entityType: Entities.Lite<Basics.TypeEntity>;
+  hideQuickLink: boolean;
+  owner: Entities.Lite<Entities.Entity>;
+  displayName: string;
+  appendFilters: boolean;
   filters: Entities.MList<QueryFilterEmbedded>;
   orders: Entities.MList<QueryOrderEmbedded>;
-  columnsMode?: DynamicQuery.ColumnOptionsMode;
+  columnsMode: DynamicQuery.ColumnOptionsMode;
   columns: Entities.MList<QueryColumnEmbedded>;
-  searchOnLoad?: boolean;
-  showFilterButton?: boolean;
-  paginationMode?: DynamicQuery.PaginationMode | null;
-  elementsPerPage?: number | null;
-  guid?: string;
+  searchOnLoad: boolean;
+  showFilterButton: boolean;
+  paginationMode: DynamicQuery.PaginationMode | null;
+  elementsPerPage: number | null;
+  guid: string;
 }
 
 export module UserQueryMessage {

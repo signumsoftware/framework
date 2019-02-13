@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 
@@ -8,11 +8,9 @@ namespace Signum.Entities.Chart
     public class ChartColorEntity : Entity
     {
         [ImplementedByAll, UniqueIndex]
-        [NotNullValidator]
         public Lite<Entity> Related { get; set; }
 
         [ForceNotNullable]
-        //[NotNullValidator]
         public ColorEmbedded? Color { get; set; }
 
         public override string ToString()

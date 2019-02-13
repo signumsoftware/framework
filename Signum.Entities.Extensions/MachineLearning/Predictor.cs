@@ -28,10 +28,9 @@ namespace Signum.Entities.MachineLearning
         
         public PredictorSettingsEmbedded Settings { get; set; }
 
-        [NotNullValidator]
         public PredictorAlgorithmSymbol Algorithm { get; set; }
 
-        public PredictorResultSaverSymbol ResultSaver { get; set; }
+        public PredictorResultSaverSymbol? ResultSaver { get; set; }
 
         public PredictorPublicationSymbol? Publication { get; set; }
 

@@ -16,18 +16,18 @@ export type InsertPlace =
 export const MoveTreeModel = new Type<MoveTreeModel>("MoveTreeModel");
 export interface MoveTreeModel extends Entities.ModelEntity {
   Type: "MoveTreeModel";
-  newParent?: Entities.Lite<TreeEntity>;
-  insertPlace?: InsertPlace;
-  sibling?: Entities.Lite<TreeEntity>;
+  newParent: Entities.Lite<TreeEntity>;
+  insertPlace: InsertPlace;
+  sibling: Entities.Lite<TreeEntity>;
 }
 
 export interface TreeEntity extends Entities.Entity {
-  parentRoute?: string;
-  level?: number | null;
-  parentOrSibling?: Entities.Lite<TreeEntity>;
-  isSibling?: boolean;
-  name?: string;
-  fullName?: string;
+  parentRoute: string;
+  level: number | null;
+  parentOrSibling: Entities.Lite<TreeEntity>;
+  isSibling: boolean;
+  name: string;
+  fullName: string;
 }
 
 export module TreeMessage {

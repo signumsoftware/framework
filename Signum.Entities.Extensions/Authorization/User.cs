@@ -30,9 +30,8 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Min = 2, Max = 100)]
         public string UserName { get; set; }
 
-        [ForceNotNullable, SqlDbType(Size = 128)]
+        [SqlDbType(Size = 128)]
         byte[] passwordHash;
-        [NotNullValidator]
         public byte[] PasswordHash
         {
             get { return passwordHash; }
@@ -50,8 +49,8 @@ namespace Signum.Entities.Authorization
         
         public Lite<RoleEntity> Role { get; set; }
 
-        [EMailValidator]
-        public string Email { get; set; }
+        [StringLengthValidator(Max = 200), EMailValidator]
+        public string? Email { get; set; }
 
         public CultureInfoEntity? CultureInfo { get; set; }
 

@@ -50,49 +50,49 @@ namespace Signum.Entities.Disconnected
 
         public double Ratio(DisconnectedExportEntity estimation)
         {
-            double total = (long)estimation.Total.Value;
+            double total = (long)estimation.Total!.Value;
 
             double result = 0;
 
-            if (!Lock.HasValue)
+            if (Lock != null)
                 return result;
-            result += (estimation.Lock.Value) / total;
+            result += (estimation.Lock!.Value) / total;
 
             if (!CreateDatabase.HasValue)
                 return result;
-            result += (estimation.CreateDatabase.Value) / total;
+            result += (estimation.CreateDatabase!.Value) / total;
 
             if (!CreateSchema.HasValue)
                 return result;
-            result += (estimation.CreateSchema.Value) / total;
+            result += (estimation.CreateSchema!.Value) / total;
 
             if (!DisableForeignKeys.HasValue)
                 return result;
-            result += (estimation.DisableForeignKeys.Value) / total;
+            result += (estimation.DisableForeignKeys!.Value) / total;
 
 
             result += Copies.Where(c => c.CopyTable.HasValue).Join(
                 estimation.Copies.Where(o => o.CopyTable.HasValue && o.CopyTable.Value > 0),
-                c => c.Type, o => o.Type, (c, o) => o.CopyTable.Value / total).Sum();
+                c => c.Type, o => o.Type, (c, o) => o.CopyTable!.Value / total).Sum();
 
             if (!Copies.All(a => a.CopyTable.HasValue))
                 return result;
 
             if (!EnableForeignKeys.HasValue)
                 return result;
-            result += (estimation.EnableForeignKeys.Value) / total;
+            result += (estimation.EnableForeignKeys!.Value) / total;
 
             if (!ReseedIds.HasValue)
                 return result;
-            result += (estimation.ReseedIds.Value) / total;
+            result += (estimation.ReseedIds!.Value) / total;
 
             if (!BackupDatabase.HasValue)
                 return result;
-            result += (estimation.BackupDatabase.Value) / total;
+            result += (estimation.BackupDatabase!.Value) / total;
 
             if (!DropDatabase.HasValue)
                 return result;
-            result += (estimation.DropDatabase.Value) / total;
+            result += (estimation.DropDatabase!.Value) / total;
 
             return result;
         }

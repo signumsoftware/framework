@@ -9,7 +9,6 @@ namespace Signum.Entities.Files
         [StringLengthValidator(Min = 3, Max = 200)]
         public string FileName { get; set; }
 
-        [NotNullValidator]
         public byte[] BinaryFile { get; set; }
 
         public override string ToString()

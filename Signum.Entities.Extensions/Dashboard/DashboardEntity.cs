@@ -22,8 +22,8 @@ namespace Signum.Entities.Dashboard
             RebindEvents();
         }
 
-        Lite<TypeEntity> entityType;
-        public Lite<TypeEntity> EntityType
+        Lite<TypeEntity>? entityType;
+        public Lite<TypeEntity>? EntityType
         {
             get { return entityType; }
             set
@@ -35,7 +35,7 @@ namespace Signum.Entities.Dashboard
 
         public DashboardEmbedededInEntity? EmbeddedInEntity { get; set; }
 
-        public Lite<Entity> Owner { get; set; }
+        public Lite<Entity>? Owner { get; set; }
 
         public int? DashboardPriority { get; set; }
 
@@ -47,7 +47,7 @@ namespace Signum.Entities.Dashboard
 
         public bool CombineSimilarRows { get; set; } = true;
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
+        [NotifyCollectionChanged, NotifyChildProperty]
         [NoRepeatValidator]
         public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
@@ -56,7 +56,8 @@ namespace Signum.Entities.Dashboard
 
         public bool ForNavbar { get; set; }
 
-        public string Key { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Key { get; set; }
 
         static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));

@@ -191,7 +191,7 @@ namespace Signum.Engine.Processes
             }); 
         }
 
-        public static ProcessEntity CreatePackageOperation(IEnumerable<Lite<IEntity>> entities, OperationSymbol operation, params object[] operationArgs)
+        public static ProcessEntity CreatePackageOperation(IEnumerable<Lite<IEntity>> entities, OperationSymbol operation, params object[]? operationArgs)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationEntity()
             {

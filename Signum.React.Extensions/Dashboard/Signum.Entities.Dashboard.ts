@@ -20,17 +20,17 @@ export type DashboardEmbedededInEntity =
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Dashboard";
-  entityType?: Entities.Lite<Basics.TypeEntity>;
-  embeddedInEntity?: DashboardEmbedededInEntity | null;
-  owner?: Entities.Lite<Entities.Entity>;
-  dashboardPriority?: number | null;
-  autoRefreshPeriod?: number | null;
-  displayName?: string;
-  combineSimilarRows?: boolean;
+  entityType: Entities.Lite<Basics.TypeEntity>;
+  embeddedInEntity: DashboardEmbedededInEntity | null;
+  owner: Entities.Lite<Entities.Entity>;
+  dashboardPriority: number | null;
+  autoRefreshPeriod: number | null;
+  displayName: string;
+  combineSimilarRows: boolean;
   parts: Entities.MList<PanelPartEmbedded>;
-  guid?: string;
-  forNavbar?: boolean;
-  key?: string;
+  guid: string;
+  forNavbar: boolean;
+  key: string;
 }
 
 export module DashboardMessage {
@@ -53,34 +53,34 @@ export module DashboardPermission {
 }
 
 export interface IPartEntity extends Entities.Entity {
-  requiresTitle?: boolean;
+  requiresTitle: boolean;
 }
 
 export const LinkElementEmbedded = new Type<LinkElementEmbedded>("LinkElementEmbedded");
 export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
   Type: "LinkElementEmbedded";
-  label?: string;
-  link?: string;
+  label: string;
+  link: string;
 }
 
 export const LinkListPartEntity = new Type<LinkListPartEntity>("LinkListPart");
 export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
   Type: "LinkListPart";
   links: Entities.MList<LinkElementEmbedded>;
-  requiresTitle?: boolean;
+  requiresTitle: boolean;
 }
 
 export const PanelPartEmbedded = new Type<PanelPartEmbedded>("PanelPartEmbedded");
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
-  title?: string | null;
-  iconName?: string | null;
-  iconColor?: string | null;
-  row?: number;
-  startColumn?: number;
-  columns?: number;
-  style?: PanelStyle;
-  content?: IPartEntity;
+  title: string | null;
+  iconName: string | null;
+  iconColor: string | null;
+  row: number;
+  startColumn: number;
+  columns: number;
+  style: PanelStyle;
+  content: IPartEntity;
 }
 
 export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
@@ -98,18 +98,18 @@ export type PanelStyle =
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserChartPart";
-  userChart?: Chart.UserChartEntity;
-  showData?: boolean;
-  allowChangeShowData?: boolean;
-  requiresTitle?: boolean;
+  userChart: Chart.UserChartEntity;
+  showData: boolean;
+  allowChangeShowData: boolean;
+  requiresTitle: boolean;
 }
 
 export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserQueryPart";
-  userQuery?: UserQueries.UserQueryEntity;
-  renderMode?: UserQueryPartRenderMode;
-  requiresTitle?: boolean;
+  userQuery: UserQueries.UserQueryEntity;
+  renderMode: UserQueryPartRenderMode;
+  requiresTitle: boolean;
 }
 
 export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
@@ -121,16 +121,16 @@ export type UserQueryPartRenderMode =
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";
-  label?: string;
-  userQuery?: UserQueries.UserQueryEntity;
-  href?: string;
+  label: string;
+  userQuery: UserQueries.UserQueryEntity;
+  href: string;
 }
 
 export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
 export interface ValueUserQueryListPartEntity extends Entities.Entity, IPartEntity {
   Type: "ValueUserQueryListPart";
   userQueries: Entities.MList<ValueUserQueryElementEmbedded>;
-  requiresTitle?: boolean;
+  requiresTitle: boolean;
 }
 
 

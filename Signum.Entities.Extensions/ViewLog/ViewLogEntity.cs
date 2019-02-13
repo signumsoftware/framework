@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -9,9 +9,7 @@ namespace Signum.Entities.ViewLog
     public class ViewLogEntity : Entity
     {
         [ImplementedByAll]
-        [NotNullValidator]
         public Lite<Entity> Target { get; set; }
-
         
         public Lite<IUserEntity> User { get; set; }
 

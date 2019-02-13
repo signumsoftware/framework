@@ -11,15 +11,15 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const QueryStringValueEmbedded = new Type<QueryStringValueEmbedded>("QueryStringValueEmbedded");
 export interface QueryStringValueEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryStringValueEmbedded";
-  key?: string;
-  value?: string;
+  key: string;
+  value: string;
 }
 
 export const RestApiKeyEntity = new Type<RestApiKeyEntity>("RestApiKey");
 export interface RestApiKeyEntity extends Entities.Entity {
   Type: "RestApiKey";
-  user?: Entities.Lite<Authorization.UserEntity>;
-  apiKey?: string;
+  user: Entities.Lite<Authorization.UserEntity>;
+  apiKey: string;
 }
 
 export module RestApiKeyOperation {

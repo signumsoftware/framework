@@ -26,15 +26,10 @@ namespace Signum.Entities.Processes
 
         public ProcessEntity(ProcessAlgorithmSymbol process)
         {
-            this.algorithm = process;
+            this.Algorithm = process;
         }
-
-        ProcessAlgorithmSymbol algorithm;
-        [NotNullValidator]
-        public ProcessAlgorithmSymbol Algorithm
-        {
-            get { return algorithm; }
-        }
+        
+        public ProcessAlgorithmSymbol Algorithm { get; private set; }
 
         public IProcessDataEntity? Data { get; set; }
 
@@ -143,16 +138,16 @@ namespace Signum.Entities.Processes
         {
             switch (State)
             {
-                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Created.NiceToString(), CreationDate);
-                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
-                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
-                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
-                case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Executing.NiceToString(), executionStart);
-                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
-                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
-                case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Finished.NiceToString(), executionEnd);
-                case ProcessState.Error: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Error.NiceToString(), executionEnd);
-                default: return "{0} ??".FormatWith(algorithm);
+                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Created.NiceToString(), CreationDate);
+                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(Algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
+                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
+                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
+                case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Executing.NiceToString(), executionStart);
+                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
+                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
+                case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Finished.NiceToString(), executionEnd);
+                case ProcessState.Error: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Error.NiceToString(), executionEnd);
+                default: return "{0} ??".FormatWith(Algorithm);
             }
         }
     }
@@ -215,13 +210,11 @@ namespace Signum.Entities.Processes
     public class ProcessExceptionLineEntity : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
-        public string ElementInfo { get; set; }
+        public string? ElementInfo { get; set; }
 
         public Lite<IProcessLineDataEntity>? Line { get; set; }
-
         
         public Lite<ProcessEntity> Process { get; set; }
-
         
         public Lite<ExceptionEntity> Exception { get; set; }
     }

@@ -20,12 +20,11 @@ namespace Signum.Entities.Word
         public QueryEntity Query { get; set; }
 
         public SystemWordTemplateEntity? SystemWordTemplate { get; set; }
-
         
         public CultureInfoEntity Culture { get; set; }
 
         [NotifyChildProperty]
-        public TemplateApplicableEval Applicable { get; set; }
+        public TemplateApplicableEval? Applicable { get; set; }
 
         public bool DisableAuthorization { get; set; }
 
@@ -35,9 +34,9 @@ namespace Signum.Entities.Word
         [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
         public string FileName { get; set; }
 
-        public WordTransformerSymbol WordTransformer { get; set; }
+        public WordTransformerSymbol? WordTransformer { get; set; }
 
-        public WordConverterSymbol WordConverter { get; set; }
+        public WordConverterSymbol? WordConverter { get; set; }
 
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
         [ExpressionField]

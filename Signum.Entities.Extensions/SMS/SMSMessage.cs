@@ -32,8 +32,8 @@ namespace Signum.Entities.SMS
 
         public Lite<SMSSendPackageEntity>? SendPackage { get; set; }
 
-        Lite<SMSUpdatePackageEntity> updatePackage;
-        public Lite<SMSUpdatePackageEntity> UpdatePackage
+        Lite<SMSUpdatePackageEntity>? updatePackage;
+        public Lite<SMSUpdatePackageEntity>? UpdatePackage
         {
             get { return updatePackage; }
             set

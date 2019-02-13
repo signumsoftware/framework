@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using System;
 
 namespace Signum.Entities.Workflow
@@ -13,7 +13,6 @@ namespace Signum.Entities.Workflow
         public Lite<UserEntity> User { get; set; }
 
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator]
         public Lite<Entity> Actor { get; internal set; }
 
         [StringLengthValidator(MultiLine = true)]

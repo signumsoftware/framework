@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.React.Facades;
 using Signum.React.Json;
 using Signum.Utilities;
@@ -177,7 +177,7 @@ namespace Signum.React.Authorization
                 NiceName = "Role - " + r.ToString(),
                 AddExtra = t =>
                 {
-                    TypeAllowedAndConditions tac = roleRules[r].TryGetC(t.typeName);
+                    TypeAllowedAndConditions? tac = roleRules[r].TryGetC(t.typeName);
 
                     if (tac == null)
                         return;

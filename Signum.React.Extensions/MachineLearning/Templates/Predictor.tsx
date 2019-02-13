@@ -100,8 +100,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
   handleGroupChange = () => {
 
     const p = this.props.ctx.value;
-    p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
-    p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
+    p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false)!);
+    p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false)!);
     this.forceUpdate();
   }
 
@@ -132,7 +132,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     var pred = this.props.ctx.value;
     var al = pred.algorithm;
     if (al == null)
-      pred.algorithmSettings = null;
+      pred.algorithmSettings = null!;
     else {
       var init = PredictorClient.initializers[al.key];
 
