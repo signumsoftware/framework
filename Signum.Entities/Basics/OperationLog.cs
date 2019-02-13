@@ -32,7 +32,7 @@ namespace Signum.Entities.Basics
             get { return End == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         public override string ToString()
         {

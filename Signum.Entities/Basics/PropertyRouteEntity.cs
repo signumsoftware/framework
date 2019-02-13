@@ -20,7 +20,6 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Min = 1, Max = 100)]
         public string Path { get; set; }
 
-        [NotNullValidator]
         public TypeEntity RootType { get; set; }
 
         public static Func<PropertyRouteEntity, PropertyRoute> ToPropertyRouteFunc;

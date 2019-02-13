@@ -682,7 +682,7 @@ namespace Signum.Entities
         {
             var prev = this.innerList[index];
 
-            this.innerList[index] = new RowIdElement(prev.Element, prev.RowId.Value, index);
+            this.innerList[index] = new RowIdElement(prev.Element, prev.RowId!.Value, index);
         }
 
         void IMListPrivate.ExecutePostRetrieving()
@@ -695,11 +695,11 @@ namespace Signum.Entities
             if (this.innerList.Any(a => a.RowId == null))
                 return; //The MList was changed in the entity PostRetriever, like UserChart Columns
 
-            if (this.innerList.Select(a => a.RowId.Value).Duplicates().Any())
+            if (this.innerList.Select(a => a.RowId!.Value).Duplicates().Any())
                 throw new InvalidOperationException("Duplicated RowId found, possible problem in LINQ provider");
 
             if (this.innerList.Any(a => a.OldIndex.HasValue))
-                this.innerList.Sort(a => a.OldIndex.Value);
+                this.innerList.Sort(a => a.OldIndex!.Value);
         }
 
         public bool AssignMList(MList<T> list)
@@ -758,7 +758,7 @@ namespace Signum.Entities
             }
             else
             {
-                var current = innerList.ToDictionary(a => a.RowId.Value, a => a.Element);
+                var current = innerList.ToDictionary(a => a.RowId!.Value, a => a.Element);
 
                 foreach (var item in newList)
                 {

@@ -9,10 +9,6 @@
     <Platforms>x64</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <NoWarn>1701;1702;8629</NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
     <PackageReference Include="Signum.MSBuildTask" Version="1.0.3" />

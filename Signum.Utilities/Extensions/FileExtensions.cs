@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace Signum.Utilities
@@ -34,7 +34,7 @@ namespace Signum.Utilities
 
         public class TemporalFile : IDisposable
         {
-            string tempFile;
+            string tempFile = null!;
             public string Path
             {
                 get { return tempFile; }

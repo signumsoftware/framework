@@ -283,7 +283,7 @@ namespace Signum.React.Facades
                                   .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
                                   {
                                       NiceName = s.FieldInfo.NiceName(),
-                                      Id = s.IdOrNull.Value.Object
+                                      Id = s.IdOrNull!.Value.Object
                                   }, s.FieldInfo))
                           }, type)))
                           .Where(a => a.Value.Members.Any())

@@ -8,7 +8,7 @@ namespace Signum.Utilities
 {
     public static class TreeHelper
     {
-        public static ObservableCollection<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T> getParent)
+        public static ObservableCollection<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T?> getParent)
             where T : class
         {
             Node<T> top = new Node<T>();
@@ -20,7 +20,7 @@ namespace Signum.Utilities
             createNode = item => dic.GetOrCreate(item, () =>
             {
                 Node<T> itemNode = new Node<T>(item);
-                T parent = getParent(item);
+                T? parent = getParent(item);
                 Node<T> parentNode = parent != null ? createNode(parent) : top;
                 parentNode.Children.Add(itemNode);
                 return itemNode;
@@ -148,6 +148,7 @@ namespace Signum.Utilities
 
         public Node()
         {
+            Value = default(T)!;
             Children = new ObservableCollection<Node<T>>();
         }
 

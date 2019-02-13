@@ -20,6 +20,12 @@ namespace Signum.Utilities.ExpressionTrees
 
         bool shortCircuit;
 
+        public ExpressionCleaner(Func<Expression, Expression> partialEval, bool shortCircuit)
+        {
+            this.partialEval = partialEval;
+            this.shortCircuit = shortCircuit;
+        }
+
         public static Expression? Clean(Expression? expr)
         {
             return Clean(expr, ExpressionEvaluator.PartialEval, true);
@@ -27,11 +33,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static Expression? Clean(Expression? expr, Func<Expression, Expression> partialEval, bool shortCircuit)
         {
-            ExpressionCleaner ee = new ExpressionCleaner()
-            {
-                partialEval = partialEval,
-                shortCircuit = shortCircuit
-            };
+            ExpressionCleaner ee = new ExpressionCleaner(partialEval, shortCircuit);
             var result = ee.Visit(expr);
             return partialEval(result);
         }
@@ -198,6 +200,8 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         static readonly BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        
 
         static MemberInfo? GetMember(Type decType, MemberInfo mi)
         {

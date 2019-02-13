@@ -128,7 +128,7 @@ namespace Signum.Entities.Basics
     public class DeleteLogParametersEmbedded : EmbeddedEntity
     {
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<DeleteLogsTypeOverridesEmbedded> DeleteLogs { get; set; } = new MList<DeleteLogsTypeOverridesEmbedded>();
 
         public DateTime? GetDateLimitDelete(TypeEntity type)
@@ -163,7 +163,6 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]

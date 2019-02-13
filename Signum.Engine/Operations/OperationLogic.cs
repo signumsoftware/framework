@@ -160,7 +160,7 @@ namespace Signum.Engine.Operations
             if (dateLimit == null)
                 return;
 
-            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void OperationLogic_Initializing()

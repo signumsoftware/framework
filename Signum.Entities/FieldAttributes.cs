@@ -250,7 +250,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public SqlDbType SqlDbType
         {
-            get { return sqlDbType.Value; }
+            get { return sqlDbType!.Value; }
             set { sqlDbType = value; }
         }
 
@@ -261,7 +261,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public int Size
         {
-            get { return size.Value; }
+            get { return size!.Value; }
             set { size = value; }
         }
 
@@ -272,7 +272,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public int Scale
         {
-            get { return scale.Value; }
+            get { return scale!.Value; }
             set { scale = value; }
         }
 

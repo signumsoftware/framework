@@ -316,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
 
         public int? TotalPages
         {
-            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements.Value) : (int?)null; }
+            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements!.Value) : (int?)null; }
         }
 
         public int? StartElementIndex

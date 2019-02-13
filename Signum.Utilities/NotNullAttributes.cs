@@ -8,13 +8,26 @@ namespace System.Runtime.CompilerServices
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class NullableAttribute : Attribute
     {
-        public NullableAttribute(byte b) {
+        public NullableAttribute(byte b)
+        {
             B = b;
         }
 
         public NullableAttribute(byte[] bs)
         {
             Bs = bs;
+        }
+
+        public bool? IsNullableMain
+        {
+            get
+            {
+                var first = B ?? Bs![0];
+
+                return first == 1 ? (bool?)false :
+                    first == 2 ? (bool?)true :
+                    null;
+            }
         }
 
         public byte? B { get; }

@@ -394,8 +394,7 @@ namespace Signum.Utilities
         public int? Row { get; set; }
         public string Member { get; set; }
         public string Value { get; set; }
-        
-        public ParseCsvException() { }
+
         public ParseCsvException(Exception inner) : base(inner.Message, inner)
         {
             this.Row = (int?)inner.Data["row"];
@@ -403,10 +402,6 @@ namespace Signum.Utilities
             this.Member = (string)inner.Data["member"];
 
         }
-        protected ParseCsvException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        { }
 
         public override string Message
         {

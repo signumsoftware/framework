@@ -160,7 +160,6 @@ namespace Signum.Test.Environment
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator]
         public MList<ArtistEntity> Members { get; set; } = new MList<ArtistEntity>();
 
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]

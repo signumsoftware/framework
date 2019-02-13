@@ -131,7 +131,7 @@ namespace Signum.Engine
             if (id == null)
                 return null;
 
-            Type type = TypeLogic.IdToType[typeId.Value];
+            Type type = TypeLogic.IdToType[typeId!.Value];
 
             var parsedId = PrimaryKey.Parse(id, type);
 
@@ -312,7 +312,7 @@ namespace Signum.Engine
             else if (token != null)
             {
                 var tasks = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
-                   .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToListAsync(token.Value))
+                   .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToListAsync(token!.Value))
                    .ToList();
 
                 var list = await Task.WhenAll(tasks);

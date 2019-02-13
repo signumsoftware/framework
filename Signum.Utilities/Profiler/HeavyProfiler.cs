@@ -298,7 +298,7 @@ namespace Signum.Utilities
             return entry!;
         }
     }
-
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable]
     public class HeavyProfilerEntry
     {

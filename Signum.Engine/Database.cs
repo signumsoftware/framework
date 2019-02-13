@@ -314,11 +314,8 @@ namespace Signum.Engine
             }
         }
 
-        public static Lite<T>? FillToString<T>(this Lite<T> lite) where T : class, IEntity
+        public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntity
         {
-            if (lite == null)
-                return null;
-
             lite.SetToString(GetToStr(lite.EntityType, lite.Id));
 
             return lite;

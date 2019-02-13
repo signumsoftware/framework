@@ -787,7 +787,7 @@ namespace Signum.Engine.Maps
             return type;
         }
 
-        public virtual ObjectName GenerateTableName(Type type, TableNameAttribute tn)
+        public virtual ObjectName GenerateTableName(Type type, TableNameAttribute? tn)
         {
             SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
 
@@ -987,7 +987,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        public override ObjectName GenerateTableName(Type type, TableNameAttribute tn)
+        public override ObjectName GenerateTableName(Type type, TableNameAttribute? tn)
         {
             if (tn != null)
             {

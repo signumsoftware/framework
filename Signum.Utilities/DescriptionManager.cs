@@ -376,7 +376,9 @@ namespace Signum.Utilities
         public CultureInfo Culture;
         public bool IsDefault;
 
-        private LocalizedAssembly() { }
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+        LocalizedAssembly() { }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public Dictionary<Type, LocalizedType> Types = new Dictionary<Type, LocalizedType>();
 
@@ -504,7 +506,9 @@ namespace Signum.Utilities
 
         public Dictionary<string, string>? Members { get; set; }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         LocalizedType() { }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public XElement ExportXml()
         {

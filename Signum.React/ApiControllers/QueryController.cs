@@ -51,7 +51,7 @@ namespace Signum.React.ApiControllers
             };
 
             var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
-            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
+            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations!.Value.Types.SingleEx();
 
             var result = await dqueryable.Query.AutocompleteUntypedAsync(dqueryable.Context.GetEntitySelector(), request.subString, request.count, entityType, token);
 
@@ -365,8 +365,8 @@ namespace Signum.React.ApiControllers
             switch (mode)
             {
                 case PaginationMode.All: return new Pagination.All();
-                case PaginationMode.Firsts: return new Pagination.Firsts(this.elementsPerPage.Value);
-                case PaginationMode.Paginate: return new Pagination.Paginate(this.elementsPerPage.Value, this.currentPage.Value);
+                case PaginationMode.Firsts: return new Pagination.Firsts(this.elementsPerPage!.Value);
+                case PaginationMode.Paginate: return new Pagination.Paginate(this.elementsPerPage!.Value, this.currentPage!.Value);
                 default:throw new InvalidOperationException($"Unexpected {mode}");
             }
         }
@@ -423,9 +423,9 @@ namespace Signum.React.ApiControllers
             switch (mode)
             {
                 case SystemTimeMode.All: return new SystemTime.All();
-                case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate.Value);
-                case SystemTimeMode.Between: return new SystemTime.Between(startDate.Value, endDate.Value);
-                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate.Value, endDate.Value);
+                case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate!.Value);
+                case SystemTimeMode.Between: return new SystemTime.Between(startDate!.Value, endDate!.Value);
+                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate!.Value, endDate!.Value);
                 default: throw new InvalidOperationException($"Unexpected {mode}");
             }
         }

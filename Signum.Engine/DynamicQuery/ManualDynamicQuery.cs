@@ -83,7 +83,7 @@ namespace Signum.Engine.DynamicQuery
                 req.Pagination = new Pagination.Paginate(1, 1);
                 req.Columns.Add(new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName));
                 var result = await Execute(req, GetQueryDescription(), cancellationToken);
-                return result.TotalElements.Value;
+                return result.TotalElements!.Value;
             }
 
             else if (request.ValueToken is AggregateToken)

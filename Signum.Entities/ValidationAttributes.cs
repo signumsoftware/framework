@@ -66,9 +66,14 @@ namespace Signum.Entities
 
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
+        public bool Disabled { get; set; }
+
         protected override string? OverrideError(object? obj)
         {
-            if (obj == null)
+            if (Disabled)
+                return null;
+
+            if (obj == null || obj is string s && s == "")
                 return ValidationMessage._0IsNotSet.NiceToString();
 
             return null;

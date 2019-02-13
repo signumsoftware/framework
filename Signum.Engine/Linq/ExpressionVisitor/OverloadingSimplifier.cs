@@ -50,10 +50,7 @@ namespace Signum.Engine.Linq
 
         static MethodInfo miWhereIndexQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
         static MethodInfo miWhereIndexE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
-
-        static MethodInfo miContainsQ = ReflectionTools.GetMethodInfo(() => Queryable.Contains((IQueryable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miContainsE = ReflectionTools.GetMethodInfo(() => Enumerable.Contains((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-
+        
         static MethodInfo miElementAtQ = ReflectionTools.GetMethodInfo(() => Queryable.ElementAt((IQueryable<string>)null, 0)).GetGenericMethodDefinition();
         static MethodInfo miElementAtE = ReflectionTools.GetMethodInfo(() => Enumerable.ElementAt((IEnumerable<string>)null, 0)).GetGenericMethodDefinition();
 
@@ -403,6 +400,19 @@ namespace Signum.Engine.Linq
                         Expression.Call((isQuery ? miSelectQ : miSelectE).MakeGenericMethod(type, typeof(string)), source, toString),
                         separator);
                 }
+            }
+
+            if(m.Method.DeclaringType == typeof (Signum.Utilities.Extensions) && m.Method.Name == "Try")
+            {
+                var t = m.GetArgument("t");
+                var func = (LambdaExpression)m.GetArgument("func");
+
+                var result = ExpressionReplacer.Replace(func.Body, new Dictionary<ParameterExpression, Expression>
+                {
+                    { func.Parameters.SingleEx(), t.UnNullify() }
+                }).Nullify();
+
+                return Visit(result);
             }
 
             if (m.Method.DeclaringType == typeof(string) && m.Method.Name == nameof(string.Format))

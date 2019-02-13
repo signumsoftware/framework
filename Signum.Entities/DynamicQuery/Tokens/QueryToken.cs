@@ -170,7 +170,7 @@ namespace Signum.Entities.DynamicQuery
             Type cleanType = type.CleanType();
             if (cleanType.IsIEntity())
             {
-                if (implementations.Value.IsByAll)
+                if (implementations!.Value.IsByAll)
                     return ImplementedByAllSubTokens(this, type, options); // new[] { EntityPropertyToken.IdProperty(this) };
 
                 var onlyType = implementations.Value.Types.Only();
@@ -397,7 +397,7 @@ namespace Signum.Entities.DynamicQuery
                 case FilterType.Lite:
                     {
                         var cleanType = type.CleanType();
-                        var imp = implementations.Value;
+                        var imp = implementations!.Value;
 
                         if (imp.IsByAll)
                             return QueryTokenMessage.AnyEntity.NiceToString();

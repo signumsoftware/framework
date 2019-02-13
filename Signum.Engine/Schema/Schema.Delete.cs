@@ -36,7 +36,7 @@ namespace Signum.Engine.Maps
             var query = DbQueryProvider.Single.GetMainSqlCommand(Database.Query<T>().Where(where).Select(a => a.Id).Expression);
 
             string variableName = SqlParameterBuilder.GetParameterName(this.Name.Name + "Id_" + (parameterIndex++));
-            entity.SetId(new Entities.PrimaryKey(entity.id.Value.Object, variableName));
+            entity.SetId(new Entities.PrimaryKey(entity.id!.Value.Object, variableName));
 
             string queryString = query.PlainSql().Lines().ToString(" ");
 

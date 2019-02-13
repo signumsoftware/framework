@@ -6,6 +6,7 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities
 {
@@ -51,8 +52,6 @@ namespace Signum.Entities
 
             validators.SetDefinition(typeof(T), dic);
         }
-
-  
 
         public static PropertyValidator<T> OverridePropertyValidator<T>(Expression<Func<T, object?>> property) where T : ModifiableEntity
         {
@@ -164,6 +163,10 @@ namespace Signum.Entities
             this.PropertyInfo = pi;
 
             this.Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
+            
+            var nullable = pi.GetCustomAttribute<NullableAttribute>();
+            if (nullable != null && nullable.IsNullableMain == false && this.Validators.Any(v => v is ValidatorAttribute))
+                this.Validators.Add(new NotNullValidatorAttribute());
 
             this.GetValue = ReflectionTools.CreateGetter<T>(pi)!;
             this.SetValue = ReflectionTools.CreateSetter<T>(pi)!;

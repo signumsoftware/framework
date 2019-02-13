@@ -434,7 +434,6 @@ namespace Signum.TSGenerator
                 return att;
 
             return GetAttributeInherit(type.BaseType?.Resolve(), attributeName);
-
         }
 
         public static bool? InTypeScript(this MemberReference mr)
@@ -455,13 +454,10 @@ namespace Signum.TSGenerator
 
             if (b != null)
                 return b.Value;
-
-            if (IsCollection(p.PropertyType))
-                return false;
-
-            return GetTypescriptUndefined(p.DeclaringType) ?? true;
+            
+            return GetTypescriptUndefined(p.DeclaringType) ?? false;
         }
-
+        
         private static bool? GetTypescriptUndefined(TypeDefinition declaringType)
         {
             var attr = GetAttributeInherit(declaringType, Cache.InTypeScriptAttribute.FullName);
@@ -476,10 +472,7 @@ namespace Signum.TSGenerator
             var b = attr == null ? null : (bool?)attr.Properties.SingleOrDefault(a => a.Name == "Null").Argument.Value;
             if (b != null)
                 return b.Value;
-
-            if (IsCollection(p.PropertyType))
-                return false;
-
+            
             if (p.PropertyType.IsValueType)
                 return p.PropertyType.IsNullable();
             else
@@ -614,14 +607,7 @@ namespace Signum.TSGenerator
         {
             return type.Interfaces.Select(a => a.InterfaceType).Concat(type.BaseType == null ? Enumerable.Empty<TypeReference>() : AllInterfaces(type.BaseType.Resolve()));
         }
-
-        public static bool IsCollection(this TypeReference type)
-        {
-            return type.FullName != typeof(string).FullName &&
-                type.FullName != typeof(byte[]).FullName &&
-                (type.IsArray || type.Resolve()?.Interfaces.Any(i => i.InterfaceType.FullName == typeof(IEnumerable).FullName) == true);
-        }
-
+        
         public static NamespaceTSReference GetNamespaceReference(Options options, TypeDefinition type)
         {
             AssemblyReference assemblyReference;

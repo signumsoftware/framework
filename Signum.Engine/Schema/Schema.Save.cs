@@ -824,7 +824,7 @@ namespace Signum.Engine.Maps
 
                             var row = pair.MList.InnerList[pair.Index];
 
-                            parameters.AddRange(UpdateParameters(pair.Entity, row.RowId.Value, row.Element, pair.Index, pair.Forbidden, i.ToString()));
+                            parameters.AddRange(UpdateParameters(pair.Entity, row.RowId!.Value, row.Element, pair.Index, pair.Forbidden, i.ToString()));
                         }
                         new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
                     };

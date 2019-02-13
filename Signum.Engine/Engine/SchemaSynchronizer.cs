@@ -911,7 +911,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
         {
             var instance = (Entity)Activator.CreateInstance(current.GetType());
             instance.toStr = current.toStr;
-            instance.id = (int)current.id.Value + 1000000;
+            instance.id = (int)current.id!.Value + 1000000;
             return instance;
         }
 

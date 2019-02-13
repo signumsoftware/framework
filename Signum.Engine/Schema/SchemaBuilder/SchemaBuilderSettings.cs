@@ -12,6 +12,7 @@ using Microsoft.SqlServer.Server;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Maps
 {
@@ -220,18 +221,14 @@ namespace Signum.Engine.Maps
             if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
                 return IsNullable.No;
 
-            if (ValidatorAttribute<NotNullValidatorAttribute>(propertyRoute) != null)
-                return IsNullable.No;
+            if (propertyRoute.Type.IsValueType)
+                return propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
 
-            //if (propertyRoute.Type == typeof(string))
-            //{
-            //    var slv = ValidatorAttribute<StringLengthValidatorAttribute>(propertyRoute);
+            var nullable = FieldAttribute<NullableAttribute>(propertyRoute);
+            if (nullable != null && nullable.IsNullableMain == true)
+                return IsNullable.Yes;
 
-            //    if (slv != null)
-            //        return slv.AllowNulls ? IsNullable.Yes : IsNullable.No;
-            //}
-
-            return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
+            return IsNullable.No;
         }
 
         public bool ImplementedBy<T>(Expression<Func<T, object?>> propertyRoute, Type typeToImplement) where T : Entity

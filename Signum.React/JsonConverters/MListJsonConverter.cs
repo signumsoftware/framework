@@ -64,7 +64,7 @@ namespace Signum.React.Json
         static MList<T> ReadJsonInternal<T>(JsonReader reader, IMListPrivate<T> existingValue, JsonSerializer serializer)
         {
             var dic = existingValue == null ? new Dictionary<PrimaryKey, MList<T>.RowIdElement>() :
-                 existingValue.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a);
+                 existingValue.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId!.Value, a => a);
 
             var newList = new List<MList<T>.RowIdElement>();
 

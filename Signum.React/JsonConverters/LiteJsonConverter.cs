@@ -73,7 +73,7 @@ namespace Signum.React.Json
             PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
 
             if (entity == null)
-                return Lite.Create(type, idOrNull.Value, toString!);
+                return Lite.Create(type, idOrNull!.Value, toString!);
 
             var result = entity.ToLiteFat(toString);
 

@@ -250,7 +250,7 @@ export module ConnectionMessage {
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
   Type: "CorruptMixin";
-  corrupt?: boolean;
+  corrupt: boolean;
 }
 
 export interface EmbeddedEntity extends ModifiableEntity {
@@ -281,7 +281,7 @@ export module EntityControlMessage {
 }
 
 export interface ImmutableEntity extends Entity {
-  allowChange?: boolean;
+  allowChange: boolean;
 }
 
 export module JavascriptMessage {
