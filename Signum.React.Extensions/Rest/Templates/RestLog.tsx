@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as moment from 'moment'
 import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, EntityLine, EntityRepeater } from "@framework/Lines";
@@ -18,10 +18,11 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
     constructor(props: { ctx: TypeContext<RestLogEntity> }) {
         super(props);
-        var prefix = Navigator.toAbsoluteUrl("~/api");
-        var suffix = props.ctx.subCtx(f => f.url).value.after("/api");
+        const prefix = Navigator.toAbsoluteUrl("~/api");
+        const suffix = props.ctx.subCtx(f => f.url).value.after("/api");
+        const queryParams = props.ctx.value.queryString.map(mle =>`${mle.element.key}=${mle.element.value}`).join("&");
         this.state = {
-            newURL: location.protocol + "//" + location.hostname + prefix + suffix
+            newURL: `${location.protocol}//${location.hostname}:${location.port}${prefix}${suffix}?${queryParams}`
         }
     }
 
@@ -70,7 +71,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)} />
                 {
                     ctx.value.allowReplay && <div>
-                        <Button color="info" onClick={() => { API.replayRestLog(ctx.value.id, encodeURIComponent(this.state.newURL)).then(d => this.setState({ diff: d })).done() }}>Replay</Button>
+                        <Button color="info" onClick={() => { API.replayRestLog(ctx.value.id!, encodeURIComponent(this.state.newURL)).then(d => this.setState({ diff: d })).done() }}>Replay</Button>
                         <input type="text" className="form-control" value={this.state.newURL} onChange={e => this.setState({ newURL: e.currentTarget.value })} />
                     </div>
                 }

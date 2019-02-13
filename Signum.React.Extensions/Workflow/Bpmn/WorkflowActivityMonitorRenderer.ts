@@ -1,4 +1,4 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.d.ts" />
 import * as moment from 'moment'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Entities.Workflow'
 import { Color, Gradient } from '../../Basics/Color'
@@ -38,13 +38,13 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
         result.style.setProperty('fill', "#eee");
       }
       else if (this.workflowConfig.columns.length == 0) {
-        var max = Math.max(1, this.workflowActivityMonitor.activities.max(a => a.caseActivityCount));
+        var max = Math.max(1, this.workflowActivityMonitor.activities.max(a => a.caseActivityCount) || 0);
         const color = this.gradient.getColor(stats.caseActivityCount / max);
         result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
         result.style.setProperty('fill', color.toString());
 
       } else {
-        var max = Math.max(0.01, this.workflowActivityMonitor.activities.max(a => a.customValues[0]));
+        var max = Math.max(0.01, this.workflowActivityMonitor.activities.max(a => a.customValues[0]) || 0);
         const color = this.gradient.getColor((stats.customValues[0] || 0) / max);
         result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
         result.style.setProperty('fill', color.toString());

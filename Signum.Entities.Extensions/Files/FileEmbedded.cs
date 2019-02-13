@@ -1,11 +1,22 @@
 using Signum.Utilities;
 using System;
+using System.IO;
 
 namespace Signum.Entities.Files
 {
     [Serializable]
     public class FileEmbedded : EmbeddedEntity, IFile
     {
+        public FileEmbedded()
+        {
+        }
+
+        public FileEmbedded(string readFileFrom)
+        {
+            this.FileName = Path.GetFileName(readFileFrom);
+            this.BinaryFile = File.ReadAllBytes(readFileFrom);
+        }
+
         [StringLengthValidator(Min = 3, Max = 200)]
         public string FileName { get; set; }
 

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
@@ -171,7 +171,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
         const list = this.props.ctx.value!;
         if (ge.row == undefined)
-          ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max() + 1;
+          ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max()! + 1;
         if (ge.startColumn == undefined)
           ge.startColumn = 0;
         if (ge.columns == undefined)
@@ -247,11 +247,11 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
       const offset = de.pageX - s.initialPageX!;
       const dCol = Math.round((offset / rect.width) * 12);
       let newCol = s.originalStartColumn! + dCol;
-      let start = list.filter(a => a != c && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max();
+      let start = list.filter(a => a != c && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max()!;
       if (!isFinite(start))
         start = 0;
 
-      let end = list.filter(a => a != c && a.row == row && a.startColumn > newCol).map(a => a.startColumn - c.columns).min();
+      let end = list.filter(a => a != c && a.row == row && a.startColumn > newCol).map(a => a.startColumn - c.columns).min()!;
       if (!isFinite(end))
         end = 12 - c.columns;
 
@@ -273,7 +273,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
       let col = Math.round((offsetX / rect.width) * 12);
 
       if (s.dragMode == "left") {
-        const max = list.filter(a => a != c && a.row == c.row && a.startColumn < c.startColumn).map(a => a.startColumn + a.columns).max();
+        const max = list.filter(a => a != c && a.row == c.row && a.startColumn < c.startColumn).map(a => a.startColumn + a.columns).max()!;
         col = Math.max(col, max);
 
         const cx = c.startColumn - col;
@@ -286,7 +286,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         }
       }
       else if (s.dragMode == "right") {
-        const min = list.filter(a => a != c && a.row == c.row && a.startColumn > c.startColumn).map(a => a.startColumn).min();
+        const min = list.filter(a => a != c && a.row == c.row && a.startColumn > c.startColumn).map(a => a.startColumn).min()!;
         col = Math.min(col, min);
         if (col != c.startColumn + c.columns) {
           c.columns = col - c.startColumn;

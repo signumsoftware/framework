@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import * as d3 from "d3";
 
 export interface Point {
@@ -60,7 +60,7 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
     var allValues = series.flatMap(s => s.values);
 
     var scaleX = d3.scaleLinear()
-      .domain([allValues.min(a => a.x), allValues.max(a => a.x)])
+      .domain([allValues.min(a => a.x)!, allValues.max(a => a.x)!])
       .range([2, width - 4]);
 
     return (
@@ -79,8 +79,8 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
 
   renderSerie(scaleX: d3.ScaleLinear<number, number>, height: number, s: LineChartSerie, index: number) {
 
-    var minValue: number = s.minValue != null ? s.minValue : s.values.min(a => a.y);
-    var maxValue: number = s.maxValue != null ? s.maxValue : s.values.max(a => a.y);
+    var minValue: number = s.minValue != null ? s.minValue : s.values.min(a => a.y)!;
+    var maxValue: number = s.maxValue != null ? s.maxValue : s.values.max(a => a.y)!;
 
     var scaleY = this.state.logMode ?
       d3.scaleLog().domain([Math.max(0.0001, minValue), maxValue]).range([height - 20, 2]) :

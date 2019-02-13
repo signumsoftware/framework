@@ -193,7 +193,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
           return [
             <DropdownItem header={isHeader} onClick={e => this.handleClick(e, res, topRes)}
               className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
-              {this.icon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={this.state.expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align" />
+              {this.icon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={this.state.expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align"  />
             </DropdownItem>
           ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : [])
         }
@@ -237,7 +237,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
     var icon = parseIcon(res.iconName);
 
-    return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} />
+    return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} fixedWidth />
   }
 }
 

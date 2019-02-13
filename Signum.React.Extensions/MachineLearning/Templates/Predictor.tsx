@@ -404,8 +404,8 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
 
   const nns = NeuralNetworkSettingsEntity.isInstance(algSet) ? algSet : undefined;
 
-  var maxLoss = eps.flatMap(a => [a.lossTraining, a.lossValidation]).filter(a => a != null).max();
-  var maxEvaluation = eps.flatMap(a => [a.evaluationTraining, a.evaluationValidation]).filter(a => a != null).max();
+  var maxLoss = eps.flatMap(a => [a.lossTraining, a.lossValidation]).max()!;
+  var maxEvaluation = eps.flatMap(a => [a.evaluationTraining, a.evaluationValidation]).max()!;
 
   return [
     {
