@@ -26,6 +26,7 @@ namespace Signum.Utilities
         public static Dictionary<string, INumberWriter> NumberWriters = new Dictionary<string, INumberWriter>
         {
             {"es", new SpanishNumberWriter()},
+            {"de", new GermanNumberWriter()},
         };
 
         public static char? GetGender(string name, CultureInfo? culture = null)

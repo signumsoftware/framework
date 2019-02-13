@@ -226,7 +226,9 @@ namespace Signum.Entities
 
     public class TelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        public static Regex TelephoneRegex = new Regex(@"^((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))? *[\p{Nd}][ \-\.\p{Nd}]+$");
+        public static string BasicRegex = @"((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))?([ \p{Nd}]+ */)? *[\p{Nd}][ \-\.\p{Nd}]+";
+
+        public static Regex TelephoneRegex = new Regex($@"^{BasicRegex}$");
 
         public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
@@ -241,7 +243,7 @@ namespace Signum.Entities
 
     public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        public static Regex MultipleTelephoneRegex = new Regex(@"^((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))? *[\p{Nd}][ \-\.\p{Nd}]+(,\s*((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))? *[\p{Nd}][ \-\.\p{Nd}]+)*");
+        public static Regex MultipleTelephoneRegex = new Regex($@"^{TelephoneValidatorAttribute.BasicRegex}(,\s*{TelephoneValidatorAttribute.BasicRegex})*");
 
         public MultipleTelephoneValidatorAttribute()
             : base(MultipleTelephoneRegex)

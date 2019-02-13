@@ -19,6 +19,7 @@ export interface EntityTableProps extends EntityListBaseProps {
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   scrollable?: boolean;
   isRowVisible?: (ctx: TypeContext<any /*T*/>) => boolean;
+  rowSubContext?: (ctx: TypeContext<any /*T*/>) => TypeContext<any>;
   tableClasses?: string;
   theadClasses?: string;
   createMessage?: string;
@@ -155,7 +156,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                   onRemove={this.canRemove(a.mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, a.i) : undefined}
                   draggable={this.canMove(a.mlec.value) && !readOnly ? this.getDragConfig(a.i, "v") : undefined}
                   columns={this.state.columns!}
-                  ctx={a.mlec} />)
+                  ctx={this.props.rowSubContext ? this.props.rowSubContext(a.mlec) : a.mlec} />)
             }
             {
               this.state.createAsLink && this.state.create && !readOnly &&

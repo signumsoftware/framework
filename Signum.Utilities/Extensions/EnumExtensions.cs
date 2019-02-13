@@ -114,6 +114,14 @@ namespace Signum.Utilities
                 .SingleOrDefaultEx();
         }
 
+        public static string GetCode<T>(string key)
+        {
+            return (EnumFieldCache.Get(typeof(T))
+                .Where(kvp => kvp.Key.NiceToString() == key)
+                .Select(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code))
+                .SingleOrDefaultEx();
+        }
+
         public static IComparable GetUnderlyingValue(Enum value)
         {
             Type type = Enum.GetUnderlyingType(value.GetType());

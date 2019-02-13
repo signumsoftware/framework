@@ -13,7 +13,7 @@ import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 
-interface FramePageProps extends RouteComponentProps<{ type: string; id?: string, waitData?: string }> {
+interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
 }
 
@@ -100,7 +100,8 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
 
   loadComponent(): Promise<void> {
-    return Navigator.getViewPromise(this.state.pack!.entity).promise
+    const viewName: string | undefined = QueryString.parse(this.props.location.search).viewName
+    return Navigator.getViewPromise(this.state.pack!.entity, viewName).promise
       .then(c => this.setState({ getComponent: c }));
   }
 

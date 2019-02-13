@@ -975,7 +975,7 @@ export class EnumType<T extends string> {
     return val;
   }
 
-  niceName(): string | undefined {
+  niceTypeName(): string | undefined {
     return this.typeInfo().niceName;
   }
 
@@ -1352,9 +1352,10 @@ export type GraphExplorerMode = "collect" | "set" | "clean";
 
 export class GraphExplorer {
 
-  static propagateAll(...args: any[]) {
+  static propagateAll(...args: any[]): GraphExplorer {
     const ge = new GraphExplorer("clean", {});
     args.forEach(o => ge.isModified(o, ""));
+    return ge;
   }
 
   static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {

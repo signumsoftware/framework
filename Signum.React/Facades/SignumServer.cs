@@ -21,7 +21,7 @@ namespace Signum.React.Facades
     {
         public static JsonSerializerSettings JsonSerializerSettings;
 
-        public static void AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
+        public static MvcJsonOptions AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
         {
             //Signum converters
             jsonOptions.SerializerSettings.Do(s =>
@@ -37,9 +37,11 @@ namespace Signum.React.Facades
                 s.Converters.Add(new ResultTableConverter());
                 s.Converters.Add(new TimeSpanConverter());
             });
+
+            return jsonOptions;
         }
 
-        public static void AddSignumGlobalFilters(this MvcOptions options)
+        public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)
         {
             options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new CleanThreadContextAndAssertFilter());
@@ -49,6 +51,8 @@ namespace Signum.React.Facades
             options.Filters.Add(new SignumAuthenticationFilter());
             options.Filters.Add(new SignumCultureSelectorFilter());
             options.Filters.Add(new VersionFilterAttribute());
+
+            return options;
         }
 
         public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)

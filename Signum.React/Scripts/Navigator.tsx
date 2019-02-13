@@ -111,38 +111,40 @@ export function setRenderIdFunction(newFunction: (entity: Entity) => React.React
   renderId = newFunction;
 }
 
-export function navigateRoute(entity: Entity): string;
-export function navigateRoute(lite: Lite<Entity>): string;
-export function navigateRoute(type: PseudoType, id: number | string): string;
-export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string | undefined = undefined): string {
+export function navigateRoute(entity: Entity, viewName?: string): string;
+export function navigateRoute(lite: Lite<Entity>, viewName?: string): string;
+export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: string): string {
   let typeName: string;
-  if (isEntity(typeOrEntity)) {
-    typeName = typeOrEntity.Type;
-    id = typeOrEntity.id;
+  let id: number | string | undefined;
+  if (isEntity(entityOrLite)) {
+    typeName = entityOrLite.Type;
+    id = entityOrLite.id;
   }
-  else if (isLite(typeOrEntity)) {
-    typeName = typeOrEntity.EntityType;
-    id = typeOrEntity.id;
+  else if (isLite(entityOrLite)) {
+    typeName = entityOrLite.EntityType;
+    id = entityOrLite.id;
   }
-  else {
-    typeName = getTypeName(typeOrEntity as PseudoType);
-  }
+  else
+    throw new Error("Entity or Lite expected");
+
+  if (id == null)
+    throw new Error("No Id");
 
   const es = getSettings(typeName);
   if (es && es.onNavigateRoute)
-    return es.onNavigateRoute(typeName, id!);
+    return es.onNavigateRoute(typeName, id!, viewName);
   else
-    return navigateRouteDefault(typeName, id!);
+    return navigateRouteDefault(typeName, id!, viewName);
 
 }
 
-export function navigateRouteDefault(typeName: string, id: number | string) {
-  return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id);
+export function navigateRouteDefault(typeName: string, id: number | string, viewName?: string) {
+  return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id + (viewName ? "?viewName=" + viewName : ""));
 
 }
 
-export function createRoute(type: PseudoType) {
-  return toAbsoluteUrl("~/create/" + getTypeName(type));
+export function createRoute(type: PseudoType, viewName?: string) {
+  return toAbsoluteUrl("~/create/" + getTypeName(type) + (viewName ? "?viewName=" + viewName : ""));
 }
 
 
@@ -808,7 +810,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   findOptions?: FindOptions;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
-  onNavigateRoute?: (typeName: string, id: string | number) => string;
+  onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
 

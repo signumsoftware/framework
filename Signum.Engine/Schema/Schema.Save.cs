@@ -530,10 +530,11 @@ namespace Signum.Engine.Maps
                             return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".FormatWith(idParamName + suffix);
                     };
 
-                    List<Expression> parameters = new List<Expression>();
-
-                    parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.SqlDbType, null, false,
-                        Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object")));
+                    List<Expression> parameters = new List<Expression>
+                    {
+                        pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.SqlDbType, null, false,
+                        Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object"))
+                    };
 
                     if (table.Ticks != null)
                     {

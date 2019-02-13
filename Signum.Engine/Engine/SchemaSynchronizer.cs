@@ -247,7 +247,7 @@ namespace Signum.Engine
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && 
                             (tab.SystemVersioned == null || 
                             !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) || 
-                            (alterColumnToNotNullableHistory = NullabilityChanges(tab, dif) && SafeConsole.Ask($"Table {tab.Name} has nullability changes. Disable and re-enable System Versioning?"))) ?
+                            (alterColumnToNotNullableHistory = NullabilityChanges(tab, dif) && (replacements.Interactive ? SafeConsole.Ask($"Table {tab.Name} has nullability changes. Disable and re-enable System Versioning?") : true))) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : null);
 
                             var dropPeriod = (dif.Period != null &&
@@ -379,7 +379,7 @@ namespace Signum.Engine
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple, modelIxs, dif.Indices,
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
+                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
@@ -400,7 +400,7 @@ namespace Signum.Engine
                         Dictionary<string, Index> modelIxs = modelIndices[tab].Where(kvp => kvp.Value.GetType() == typeof(Index)).ToDictionary();
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple, modelIxs, dif.Indices,
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
+                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.IndexName) : null);

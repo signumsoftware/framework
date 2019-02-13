@@ -14,7 +14,7 @@ export interface ModifiableEntity {
 }
 
 export interface Entity extends ModifiableEntity {
-  id: number | string;
+  id: number | string | undefined;
   ticks: string; //max value
   mixins?: { [name: string]: MixinEntity }
 }

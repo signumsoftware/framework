@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
 import { Dic } from '../Globals';
@@ -8,6 +8,7 @@ import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { Modal } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
+import { newLite } from '../Reflection';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps {
@@ -90,7 +91,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
         {se.httpError.exceptionId && <span>({
           Navigator.isViewable(ExceptionEntity) ?
-            <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
+            <a href={Navigator.navigateRoute(newLite(ExceptionEntity, se.httpError.exceptionId!))}>{se.httpError.exceptionId}</a> :
             <strong>{se.httpError.exceptionId}</strong>
         })</span>}
       </span>
