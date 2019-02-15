@@ -148,6 +148,9 @@ namespace Signum.Entities
 
             public void ClearEntity()
             {
+                if (this.entityOrNull != null)
+                    RefreshId();
+
                 if (id == null)
                     throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
