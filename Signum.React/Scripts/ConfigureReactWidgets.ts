@@ -1,6 +1,6 @@
-﻿import * as moment from "moment"
+import * as moment from "moment"
 
-import conf from 'react-widgets/lib/configure';
+import * as ReactWidgets from 'react-widgets';
 
 export function configure() {
 
@@ -62,7 +62,7 @@ export function configure() {
       return getMoment(culture, value, undefined).format(_format);
     }
   };
-  conf.setDateLocalizer(localizer);
+  ReactWidgets.setDateLocalizer(localizer);
 
 }
 
