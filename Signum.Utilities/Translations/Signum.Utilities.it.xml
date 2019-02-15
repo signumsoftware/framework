@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="AboutMessage">
-    <Member Name="OS_Unknown0" Description="Sconosciuto ({0})" />
-  </Type>
   <Type Name="CollectionMessage">
     <Member Name="And" Description=" e " />
     <Member Name="MoreThanOne0Found" Description="Più di una trovata {0},Più di un {0} trovato" />
