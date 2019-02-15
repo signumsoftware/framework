@@ -1277,6 +1277,7 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  entity?: Lite<Entity>;
 }
 
 
