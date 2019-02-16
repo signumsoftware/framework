@@ -39,12 +39,12 @@ export interface WordTemplateEntity extends Entities.Entity {
   query: Basics.QueryEntity;
   systemWordTemplate: SystemWordTemplateEntity | null;
   culture: Signum.CultureInfoEntity;
-  applicable: Templating.TemplateApplicableEval;
+  applicable: Templating.TemplateApplicableEval | null;
   disableAuthorization: boolean;
   template: Entities.Lite<Files.FileEntity>;
   fileName: string;
-  wordTransformer: WordTransformerSymbol;
-  wordConverter: WordConverterSymbol;
+  wordTransformer: WordTransformerSymbol | null;
+  wordConverter: WordConverterSymbol | null;
 }
 
 export module WordTemplateMessage {

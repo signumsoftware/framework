@@ -16,7 +16,6 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        
         public TypeEntity EntityType { get; set; }
 
         public PropertyRouteEntity? SubEntity { get; set; }

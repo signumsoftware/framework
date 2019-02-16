@@ -30,7 +30,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   parts: Entities.MList<PanelPartEmbedded>;
   guid: string;
   forNavbar: boolean;
-  key: string;
+  key: string | null;
 }
 
 export module DashboardMessage {
@@ -121,9 +121,9 @@ export type UserQueryPartRenderMode =
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";
-  label: string;
+  label: string | null;
   userQuery: UserQueries.UserQueryEntity;
-  href: string;
+  href: string | null;
 }
 
 export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");

@@ -57,7 +57,7 @@ namespace Signum.Entities.Dynamic
                     .Where(p => p.Name.HasText() && !IdentifierValidatorAttribute.PascalAscii.IsMatch(p.Name))
                     .Select(p => ValidationMessage._0DoesNotHaveAValid1IdentifierFormat.NiceToString(p.Name, IdentifierType.PascalAscii))
                     .ToString("\r\n")
-                    .EmtpyToNull();
+                    .DefaultToNull();
             }
             return base.PropertyValidation(pi);
         }
@@ -350,6 +350,7 @@ namespace Signum.Entities.Dynamic
         {
             switch (type)
             {
+                case "NotNull": return typeof(NotNull);
                 case "StringLength": return typeof(StringLength);
                 case "Decimals": return typeof(Decimals);
                 case "NumberIs": return typeof(NumberIs);
@@ -375,12 +376,15 @@ namespace Signum.Entities.Dynamic
             return CSharpRenderer.Value(obj);
         }
 
+        public class NotNull : DynamicValidator
+        {
+            [JsonProperty(PropertyName = "disabled", DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public bool Disabled;
+        }
+
 
         public class StringLength : DynamicValidator
         {
-            [JsonProperty(PropertyName = "allowNulls", DefaultValueHandling = DefaultValueHandling.Ignore)]
-            public bool AllowNulls;
-
             [JsonProperty(PropertyName = "multiLine", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public bool MultiLine;
 
@@ -400,7 +404,6 @@ namespace Signum.Entities.Dynamic
             {
                 return new string?[] 
                 {
-                    "AllowNulls="+ Value(this.AllowNulls),
                     MultiLine ? "MultiLine=true" : null,
                     Min.HasValue ? "Min=" + Value(Min.Value) : null,
                     Max.HasValue ? "Max=" + Value(Max.Value) : null,

@@ -13,7 +13,7 @@ namespace Signum.Engine.Authorization
         public readonly string UserName;
         public readonly string DomainName;
 
-        UserPrincipal userPrincipal;
+        UserPrincipal? userPrincipal;
 
         public AutoCreateUserContext(PrincipalContext principalContext, string userName, string domainName)
         {
@@ -64,7 +64,7 @@ namespace Signum.Engine.Authorization
                                 {
                                     if (this.AutoCreateUser != null)
                                     {
-                                        user = this.AutoCreateUser(new AutoCreateUserContext(pc, localName, domainName));
+                                        user = this.AutoCreateUser(new AutoCreateUserContext(pc, localName, domainName!));
                                         if(user != null && user.IsNew)
                                         {
                                             using (ExecutionMode.Global())

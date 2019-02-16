@@ -548,16 +548,17 @@ namespace Signum.Engine.Cache
             {
                 Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
             }
-
+#pragma warning disable CS8631
             public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             {
-                throw new InvalidOperationException(); /*CSBUG https://github.com/dotnet/roslyn/issues/33276*/
-                //var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
+               // throw new InvalidOperationException(); /*CSBUG https://github.com/dotnet/roslyn/issues/33276*/
+                var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
 
-                //var ids = dic.TryGetC(lite.Id).EmptyIfNull();
+                var ids = dic.TryGetC(lite.Id).EmptyIfNull();
 
-                //return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
+                return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
             }
+#pragma warning enable CS8631
 
             public Type Type
             {

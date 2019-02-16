@@ -37,7 +37,7 @@ namespace Signum.Engine.Templating
             return new SplittedToken
             {
                 Token = tok.Groups["token"].Value.Replace(@"\:", ":"),
-                Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").EmtpyToNull()
+                Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").DefaultToNull()
             };
         }
 

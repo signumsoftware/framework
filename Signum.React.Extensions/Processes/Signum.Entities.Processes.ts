@@ -75,7 +75,7 @@ export interface ProcessEntity extends Entities.Entity {
 export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
 export interface ProcessExceptionLineEntity extends Entities.Entity {
   Type: "ProcessExceptionLine";
-  elementInfo: string;
+  elementInfo: string | null;
   line: Entities.Lite<IProcessLineDataEntity>;
   process: Entities.Lite<ProcessEntity>;
   exception: Entities.Lite<Basics.ExceptionEntity>;

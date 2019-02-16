@@ -1101,7 +1101,6 @@ function autoFix(p: DynamicProperty) {
       c.min == 3;
 
     c.max = p.size;
-    c.allowNulls = p.isNullable == "Yes";
   }
 
   if (p.validators.length == 0)
@@ -1377,7 +1376,16 @@ export function registerValidator<T extends Validators.DynamicValidator>(options
   registeredValidators[options.name] = options as ValidatorOptions<Validators.DynamicValidator>;
 }
 
-registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList != null || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory") });
+registerValidator<Validators.NotNull>({
+  name: "NotNull",
+  allowed: p => !p.isMList,
+  render: (val, dc) =>
+    <div className="row">
+      <div className="col-sm-4">
+        <ValueComponent dc={dc} labelColumns={6} binding={Binding.create(val, v => v.disabled)} type="boolean" defaultValue={false} />
+      </div>
+    </div>
+});
 
 registerValidator<Validators.StringLength>({
   name: "StringLength",
@@ -1385,7 +1393,6 @@ registerValidator<Validators.StringLength>({
   render: (val, dc) =>
     <div className="row">
       <div className="col-sm-4">
-        <ValueComponent dc={dc} labelColumns={6} binding={Binding.create(val, v => v.allowNulls)} type="boolean" defaultValue={false} />
         <ValueComponent dc={dc} labelColumns={6} binding={Binding.create(val, v => v.multiLine)} type="boolean" defaultValue={false} />
       </div>
       <div className="col-sm-4">

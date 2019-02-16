@@ -122,7 +122,7 @@ export module SchedulerPermission {
 export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionLineEntity>("SchedulerTaskExceptionLine");
 export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
   Type: "SchedulerTaskExceptionLine";
-  elementInfo: string;
+  elementInfo: string | null;
   schedulerTaskLog: Entities.Lite<ScheduledTaskLogEntity>;
   exception: Entities.Lite<Basics.ExceptionEntity>;
 }

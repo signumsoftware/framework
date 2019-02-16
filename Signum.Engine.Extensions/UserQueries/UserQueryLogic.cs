@@ -230,6 +230,9 @@ namespace Signum.Engine.UserQueries
                             {
                                 foreach (var item in uq.Filters.ToList())
                                 {
+                                    if (item.Token == null)
+                                        continue;
+
                                     QueryTokenEmbedded token = item.Token;
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                     {
@@ -289,7 +292,7 @@ namespace Signum.Engine.UserQueries
                     {
                         retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);

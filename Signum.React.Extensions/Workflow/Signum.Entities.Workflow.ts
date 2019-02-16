@@ -39,7 +39,7 @@ export interface ActivityWithRemarks extends Entities.ModelEntity {
 export const BpmnEntityPairEmbedded = new Type<BpmnEntityPairEmbedded>("BpmnEntityPairEmbedded");
 export interface BpmnEntityPairEmbedded extends Entities.EmbeddedEntity {
   Type: "BpmnEntityPairEmbedded";
-  model: Entities.ModelEntity | null;
+  model: Entities.ModelEntity;
   bpmnElementId: string;
 }
 

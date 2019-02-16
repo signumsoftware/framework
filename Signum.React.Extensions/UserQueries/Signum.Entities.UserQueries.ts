@@ -30,7 +30,7 @@ export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
 export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
 export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryFilterEmbedded";
-  token: UserAssets.QueryTokenEmbedded;
+  token: UserAssets.QueryTokenEmbedded | null;
   isGroup: boolean;
   groupOperation: DynamicQuery.FilterGroupOperation | null;
   operation: DynamicQuery.FilterOperation | null;

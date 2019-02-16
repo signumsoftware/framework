@@ -230,7 +230,7 @@ namespace Signum.Entities.UserQueries
         string? displayName;
         public string? DisplayName
         {
-            get { return displayName.EmtpyToNull(); }
+            get { return displayName.DefaultToNull(); }
             set { Set(ref displayName, value); }
         }
 
@@ -445,7 +445,7 @@ namespace Signum.Entities.UserQueries
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Pinned",
-                Label.EmtpyToNull()?.Let(l => new XAttribute("Label", l)),
+                Label.DefaultToNull()?.Let(l => new XAttribute("Label", l)),
                 Column?.Let(l => new XAttribute("Column", l)),
                 Row?.Let(l => new XAttribute("Row", l)),
                 DisableOnNull == false ? null : new XAttribute("DisableOnNull", DisableOnNull),
@@ -469,7 +469,7 @@ namespace Signum.Entities.UserQueries
 
                     var filter = gr.Key;
 
-                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation!.Value.IsList());
+                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token!.Token.Type, filter.Operation!.Value.IsList());
 
                     return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
                 }

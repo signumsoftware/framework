@@ -394,7 +394,7 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
   passwordSetDate: string;
   passwordNeverExpires: boolean;
   role: Entities.Lite<RoleEntity>;
-  email: string;
+  email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
   anulationDate: string | null;
   state: UserState;

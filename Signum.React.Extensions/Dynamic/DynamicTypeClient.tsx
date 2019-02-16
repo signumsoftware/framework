@@ -172,9 +172,13 @@ export namespace Validators {
     type: string;
   }
 
+  export interface NotNull extends DynamicValidator {
+    type: 'NotNull';
+    disabled?: number;
+  }
+
   export interface StringLength extends DynamicValidator {
     type: 'StringLength';
-    allowNulls: boolean;
     multiLine: boolean;
     min?: number;
     max?: number;

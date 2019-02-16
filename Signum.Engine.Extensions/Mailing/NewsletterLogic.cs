@@ -102,7 +102,7 @@ namespace Signum.Engine.Mailing
             {
                 EmailTemplateParser.TryParse(text, qd, null, out string error);
 
-                return error.EmtpyToNull();
+                return error.DefaultToNull();
             }
             catch (Exception e)
             {

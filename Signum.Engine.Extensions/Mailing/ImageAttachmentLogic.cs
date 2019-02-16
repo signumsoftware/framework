@@ -69,7 +69,7 @@ namespace Signum.Engine.Mailing
                 try
                 {
                     WordAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, WordAttachment.FileName, out string errorMessage);
-                    return errorMessage.EmtpyToNull();
+                    return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)
                 {

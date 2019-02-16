@@ -12,14 +12,14 @@ namespace Signum.Entities.Help
         public CultureInfoEntity Culture { get; set; }
 
         [StringLengthValidator(Max = 200)]
-        public string? Title { get; set; }
+        public string Title { get; set; }
 
         [StringLengthValidator(Min = 3, MultiLine = true)]
         public string? Description { get; set; }
 
         public override string ToString()
         {
-            return Title?.ToString();
+            return Title;
         }
     }
 

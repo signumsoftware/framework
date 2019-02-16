@@ -502,8 +502,8 @@ namespace Signum.Engine.Dynamic
         private List<string> GetFieldAttributes(DynamicProperty property)
         {
             List<string> atts = new List<string>();
-            if (property.IsNullable != Entities.Dynamic.IsNullable.Yes)
-                atts.Add("NotNullable");
+            if (property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory)
+                atts.Add("ForceNotNullable");
 
             if (property.Size != null || property.Scale != null || property.ColumnType.HasText())
             {
@@ -571,10 +571,8 @@ namespace Signum.Engine.Dynamic
                 return "";
 
             string result = SimplifyType(property.Type);
-
-         
-            
-            if (property.IsNullable != Entities.Dynamic.IsNullable.No && IsValueType(property))
+            if (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
+                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory)
                 result = result + "?";
 
             if (property.IsLite)

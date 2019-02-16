@@ -214,9 +214,9 @@ namespace Signum.Engine.Chart
                             {
                                 foreach (var item in uc.Filters.ToList())
                                 {
-                                    QueryTokenEmbedded token = item.Token;
                                     if (item.Token != null)
                                     {
+                                        QueryTokenEmbedded token = item.Token;
                                         switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                         {
                                             case FixTokenResult.Nothing: break;
@@ -237,10 +237,10 @@ namespace Signum.Engine.Chart
                             {
                                 foreach (var item in uc.Columns.ToList())
                                 {
-                                    QueryTokenEmbedded token = item.Token!; /*CSBUG*/
                                     if (item.Token == null)
                                         continue;
 
+                                    QueryTokenEmbedded token = item.Token;
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
@@ -259,7 +259,7 @@ namespace Signum.Engine.Chart
                     {
                         retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);

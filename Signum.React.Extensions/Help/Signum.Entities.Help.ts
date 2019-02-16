@@ -137,7 +137,7 @@ export interface NamespaceHelpEntity extends Entities.Entity {
   Type: "NamespaceHelp";
   name: string;
   culture: Basics.CultureInfoEntity;
-  title: string;
+  title: string | null;
   description: string | null;
 }
 

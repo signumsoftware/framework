@@ -189,7 +189,7 @@ export interface PredictorEntity extends Entities.Entity, Processes.IProcessData
   name: string | null;
   settings: PredictorSettingsEmbedded;
   algorithm: PredictorAlgorithmSymbol;
-  resultSaver: PredictorResultSaverSymbol;
+  resultSaver: PredictorResultSaverSymbol | null;
   publication: PredictorPublicationSymbol | null;
   trainingException: Entities.Lite<Basics.ExceptionEntity>;
   user: Entities.Lite<Basics.IUserEntity>;
