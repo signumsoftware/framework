@@ -16,7 +16,9 @@ namespace Signum.Utilities.Reflection
 
         private static bool IsTupleDefinition(Type genericTypeDefinition)
         {
-            return genericTypeDefinition == TupleOf(genericTypeDefinition.GetGenericArguments().Length);
+            var numParameters = genericTypeDefinition.GetGenericArguments().Length;
+
+            return numParameters <= 8 && genericTypeDefinition == TupleOf(numParameters);
         }
 
         public static Type TupleOf(int numParameters)

@@ -459,7 +459,6 @@ namespace Signum.Engine.Operations
             Type? IOperation.ReturnType { get { return null; } }
             Type? IOperation.StateType { get { return null; } }
             public bool AvoidImplicitSave { get; set; }
-            public bool AvoidImplicitSave { get; set; }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }

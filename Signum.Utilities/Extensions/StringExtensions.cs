@@ -34,10 +34,10 @@ namespace Signum.Utilities
         }
 
 #pragma warning disable IDE0052 // Remove unread private members
-        static readonly Expression<Func<string, string>> EmtpyToNullExpression = a => a == null || a.Length == 0 ? null : a;
+        static readonly Expression<Func<string, string>> DefaultToNullExpression = a => a == null || a.Length == 0 ? null : a;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("EmtpyToNullExpression")]
-        public static string? EmtpyToNull(this string? str)
+        public static string? DefaultToNull(this string? str)
         {
             if (!str.HasText())
                 return null;
@@ -835,16 +835,6 @@ namespace Signum.Utilities
         public static string[] SplitNoEmpty(this string text, params char[] separators)
         {
             return text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        public static string EmptyToNull(this string text)
-        {
-            return string.IsNullOrEmpty(text) ? null : text;
-        }
-
-        public static string WhiteSpaceToNull(this string text)
-        {
-            return string.IsNullOrWhiteSpace(text) ? null : text;
         }
     }
 }
