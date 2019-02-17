@@ -248,7 +248,12 @@ namespace Signum.React.Json
                 using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
                 {
                     writer.WritePropertyName(lowerCaseName);
-                    serializer.Serialize(writer, pc.GetValue!(mod)!);
+                    var val = pc.GetValue!(mod);
+                    if (val is Lite<Entity> lite)
+                        new LiteJsonConverter().WriteJson(writer, lite, serializer);
+                    else
+                        serializer.Serialize(writer, pc.GetValue(mod));
+
                     if (writer.WriteState == WriteState.Property)
                         throw new InvalidOperationException($"Impossible to serialize '{mod}' to JSON. Maybe there is a cycle?");
                 }
