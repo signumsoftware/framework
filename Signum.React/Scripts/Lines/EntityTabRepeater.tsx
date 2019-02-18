@@ -16,6 +16,7 @@ export interface EntityTabRepeaterProps extends EntityListBaseProps {
   selectedIndex?: number;
   getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
   extraTabs?: (c: EntityTabRepeater) => React.ReactNode;
+  onSelectTab?: (newIndex: number) => void;
 }
 
 export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
@@ -70,12 +71,19 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
     return React.Children.count(buttons) ? buttons : undefined;
   }
 
+  handleSelectTab = (activeKey: string | number) => {
+    if (this.props.onSelectTab)
+      this.props.onSelectTab(activeKey as number);
+    else
+      this.setState({ selectedIndex: activeKey as number })
+  }
+
   renderTabs() {
     const ctx = this.state.ctx!;
     const readOnly = ctx.readOnly;
 
     return (
-      <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
+      <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={this.handleSelectTab}>
         {
           mlistItemContext(ctx).map((mlec, i) => {
             const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
