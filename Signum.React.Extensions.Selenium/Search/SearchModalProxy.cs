@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 
@@ -35,8 +35,6 @@ namespace Signum.React.Selenium
 
         public void SelectByPosition(int rowIndex)
         {
-            this.SearchControl.Search();
-
             this.SearchControl.Results.SelectRow(rowIndex);
 
             this.OkWaitClosed();
