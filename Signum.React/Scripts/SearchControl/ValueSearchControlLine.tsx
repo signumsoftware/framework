@@ -5,7 +5,7 @@ import { FindOptions } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
-import { StyleContext, TypeContext } from '../Typecontext'
+import { StyleContext, TypeContext } from '../TypeContext'
 import ValueSearchControl from './ValueSearchControl'
 import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
