@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine
+  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, 
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
@@ -22,6 +22,7 @@ import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
 import FileLine from "../../Files/FileLine";
+import {MultiFileLine} from "../../Files/MultiFileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "@framework/Reflection";
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
@@ -774,6 +775,72 @@ NodeUtils.register<FileImageLineNode>({
       </div>
     );
   }
+});
+
+export interface MultiFileLineNode extends LineBaseNode {
+  kind: "MultiFileLine",
+  download?: ExpressionOrValue<DownloadBehaviour>;
+  dragAndDrop?: ExpressionOrValue<boolean>;
+  dragAndDropMessage?: ExpressionOrValue<string>;
+  fileType?: ExpressionOrValue<string>;
+  accept?: ExpressionOrValue<string>;
+  maxSizeInBytes?: ExpressionOrValue<number>;
+}
+
+NodeUtils.register<MultiFileLineNode>({
+  kind: "MultiFileLine",
+  group: "Property",
+  hasCollection: true,
+  hasEntity: true,
+  order: 6,
+  validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+  renderTreeNode: NodeUtils.treeNodeKindField,
+  renderCode: (node, cc) => cc.elementCode("MultiFileLine", {
+    ctx: cc.subCtxCode(node.field, node.styleOptions),
+    labelText: node.labelText,
+    labelHtmlAttributes: node.labelHtmlAttributes,
+    formGroupHtmlAttributes: node.formGroupHtmlAttributes,
+    readOnly: node.readOnly,
+    dragAndDrop: node.dragAndDrop,
+    dragAndDropMessage: node.dragAndDropMessage,
+    fileType: bindExpr(key => registerSymbol("FileType", key), node.fileType),
+    accept: node.accept,
+    maxSizeInBytes: node.maxSizeInBytes,
+    onChange: node.onChange,
+  }),
+  render: (dn, ctx) => (
+    <MultiFileLine
+      ctx={ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions))}
+      labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+      labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
+      formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
+      readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+      dragAndDrop={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.dragAndDrop, NodeUtils.isBooleanOrNull)}
+      dragAndDropMessage={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
+      fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
+      accept={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
+      maxSizeInBytes={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.maxSizeInBytes, NodeUtils.isNumberOrNull)}
+      onChange={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
+    />
+  ),
+  renderDesigner: (dn) => {
+    const m = dn.route && dn.route.member;
+    return (<div>
+      <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+      <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.download)} type="string" defaultValue={null} options={DownloadBehaviours} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDrop)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxSizeInBytes)} type="number" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
+    </div>)
+  },
 });
 
 function getFileTypes() {
