@@ -7,7 +7,7 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
-import { AutocompleteConfig } from './AutocompleteConfig'
+import { AutocompleteConfig } from './AutoCompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
