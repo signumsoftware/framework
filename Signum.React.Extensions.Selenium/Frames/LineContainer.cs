@@ -238,6 +238,14 @@ namespace Signum.React.Selenium
             return new EntityListProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
+        public static EntityTableProxy EntityTable<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+            where T : IModifiableEntity
+        {
+            var lineLocator = lineContainer.LineLocator(property);
+
+            return new EntityTableProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+        }
+
         public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
             where T : IModifiableEntity
         {
