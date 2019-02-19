@@ -1,4 +1,4 @@
-﻿/// <reference path="filesclient.tsx" />
+﻿/// <reference path="FilesClient.tsx" />
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
