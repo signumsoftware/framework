@@ -37,7 +37,7 @@
     "@types/react-router": "4.4.4",
     "@types/react-router-dom": "4.3.1",
     "@types/react-transition-group": "2.0.16",
-    "@types/react-widgets": "4.3.1",
+    "@types/react-widgets": "4.4.9",
     "moment": "2.24.0",
     "numbro": "2.1.2",
     "popper.js": "1.14.7"
