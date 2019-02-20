@@ -705,7 +705,6 @@ NodeUtils.register<FileLineNode>({
 
 export interface FileImageLineNode extends EntityBaseNode {
   kind: "FileImageLine",
-  download?: ExpressionOrValue<DownloadBehaviour>;
   dragAndDrop?: ExpressionOrValue<boolean>;
   dragAndDropMessage?: ExpressionOrValue<string>;
   fileType?: ExpressionOrValue<string>;
@@ -765,7 +764,6 @@ NodeUtils.register<FileImageLineNode>({
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.imageHtmlAttributes)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.download)} type="string" defaultValue={null} options={DownloadBehaviours} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDrop)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
@@ -801,6 +799,7 @@ NodeUtils.register<MultiFileLineNode>({
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     readOnly: node.readOnly,
+    download: node.download,
     dragAndDrop: node.dragAndDrop,
     dragAndDropMessage: node.dragAndDropMessage,
     fileType: bindExpr(key => registerSymbol("FileType", key), node.fileType),
@@ -815,6 +814,7 @@ NodeUtils.register<MultiFileLineNode>({
       labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
       formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
       readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+      download={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.download, a => NodeUtils.isInListOrNull(a, DownloadBehaviours))}
       dragAndDrop={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.dragAndDrop, NodeUtils.isBooleanOrNull)}
       dragAndDropMessage={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
       fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
