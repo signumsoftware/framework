@@ -33,7 +33,8 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var pie = d3.pie<ChartRow>()
     .sort(pSort == "Ascending" ? ((a, b) => d3.descending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :
-      pSort == "Descending" ? ((a, b) => d3.ascending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) : null)
+      pSort == "Descending" ? ((a, b) => d3.ascending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :
+        (a, b) => 0)
     .value(r => size(valueColumn.getValue(r)));
 
   var arc = d3.arc<d3.PieArcDatum<ChartRow>>()
