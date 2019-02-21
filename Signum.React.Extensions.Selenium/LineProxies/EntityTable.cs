@@ -38,14 +38,14 @@ namespace Signum.React.Selenium
             return new LineContainer<T>(RowElement(index).WaitPresent(), this.ItemRoute);
         }
 
-        public IWebElement RemoveRowIndex(int index)
+        public IWebElement RemoveRowButton(int index)
         {
-            return RowElement(index).CombineCss(" a.remove").Find();
+            return RowElement(index).CombineCss(" .sf-remove").Find();
         }
 
         public void Remove(int index)
         {
-            this.RemoveRowIndex(index).Click();
+            this.RemoveRowButton(index).Click();
         }
 
         public EntityInfoProxy EntityInfo(int index)
