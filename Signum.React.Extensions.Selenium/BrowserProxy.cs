@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium.Remote;
 using System.Threading;
 using Signum.Utilities;
@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Engine.Basics;
 using OpenQA.Selenium;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace Signum.React.Selenium
 {
@@ -145,6 +146,13 @@ namespace Signum.React.Selenium
             string culture = Selenium.WaitElementPresent(By.Id("cultureDropdown")).GetAttribute("data-culture");
 
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+        }
+
+        public T Wait<T>(Expression<Func<T>> expression)
+        {
+            var condition = expression.Compile();
+
+            return Selenium.Wait(condition, () => expression.ToString());
         }
     }
 }
