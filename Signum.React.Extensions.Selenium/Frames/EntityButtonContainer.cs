@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium
 {

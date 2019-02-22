@@ -1,8 +1,8 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using System;
 
-namespace Signum.React.Selenium.ModalProxies
+namespace Signum.React.Selenium
 {
     public class MessageModalProxy : ModalProxy
     {
@@ -27,6 +27,12 @@ namespace Signum.React.Selenium.ModalProxies
         public void Click(MessageModalButton button)
         {
             this.GetButton(button).ButtonClick();
+        }
+
+        public void ClickWaitClose(MessageModalButton button)
+        {
+            this.GetButton(button).ButtonClick();
+            this.WaitNotVisible();
         }
 
         public static string GetMessageText(RemoteWebDriver selenium, MessageModalProxy modal)
