@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Tab } from '../Components/Tabs'
 import { FindOptions, FilterOption, isFilterGroupOption, FilterGroupOption, FilterConditionOption } from '../FindOptions'
 import { ModifiableEntity } from '../Signum.Entities'
@@ -63,7 +63,7 @@ export class ReplaceVisitor extends ReactVisitor {
 
       var node = this.replacement(element);
 
-      var validatedNode = React.Children.map(node, c => new ReactValidator().visitChild(c));
+      var validatedNode = React.Children.map(node, c => new ReactValidator().visitChild(c as React.ReactChild));
 
       return validatedNode;
     }

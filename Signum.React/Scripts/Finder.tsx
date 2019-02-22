@@ -499,6 +499,9 @@ export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undef
       pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
     }];
   }
+  else {
+    return undefined;
+  }
 }
 
 export function isAggregate(fop: FilterOptionParsed): boolean {
@@ -902,7 +905,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     case "Boolean": return parseBoolean(val);
     case "Integer": return nanToNull(parseInt(val));
     case "Decimal": return nanToNull(parseFloat(val));
-    case "DateTime": return (val == null ? null : moment(val).format());
+    case "DateTime": return val == null ? null : val;
     case "Lite":
       {
         const lite = convertToLite(val);
