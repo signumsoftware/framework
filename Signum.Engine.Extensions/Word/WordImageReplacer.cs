@@ -18,9 +18,9 @@ namespace Signum.Engine.Word
         public static bool AvoidAdaptSize = false; //Jpeg compression creates different images in TeamCity
 
         /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
-        public static void ReplaceImage(WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
+        public static void ReplaceImage(WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, bool allowMultiple = false, ImagePartType imagePartType = ImagePartType.Png)
         {
-            Blip blip = FindBlip(doc, titleOrDescription);
+            Blip blip = FindBlip(doc, titleOrDescription, allowMultiple);
 
             if (adaptSize && !AvoidAdaptSize)
             {
@@ -34,7 +34,8 @@ namespace Signum.Engine.Word
                 }
             }
 
-            doc.MainDocumentPart.DeletePart(blip.Embed);
+            if (!allowMultiple)
+                doc.MainDocumentPart.DeletePart(blip.Embed);
 
             ImagePart img = CreateImagePart(doc, bitmap, newImagePartId, imagePartType);
 
@@ -82,13 +83,19 @@ namespace Signum.Engine.Word
             throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
         }
 
-        static Blip FindBlip(WordprocessingDocument doc, string titleOrDescription)
+        static Blip FindBlip(WordprocessingDocument doc, string titleOrDescription, bool allowMultiple = false)
         {
-            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().SingleEx(r =>
+            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().First(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
+                var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
 
-                return prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
+                if (allowMultiple && match)
+                {
+                    prop.Title += Guid.NewGuid().ToString();
+                }
+
+                return match;
             });
 
             return drawing.Descendants<Blip>().SingleEx();
