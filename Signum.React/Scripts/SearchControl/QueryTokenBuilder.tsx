@@ -154,7 +154,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { subTo
           value={this.props.selectedToken}
           onChange={this.handleOnChange}
           valueField="fullKey"
-          textField={(qt: QueryToken) => { return qt && qt.niceName }}
+          textField="toString"
           valueComponent={QueryTokenItem}
           itemComponent={QueryTokenOptionalItem}
           defaultOpen={this.props.defaultOpen}
