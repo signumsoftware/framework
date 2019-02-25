@@ -89,17 +89,17 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
-    var entity = this.state.autocomplete!.getEntityFromItem(item);
-
-    this.convert(entity)
-      .then(entity => {
-        this.focusNext = true;
-        this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
-        this.setValue(entity);
-      })
+    this.state.autocomplete!.getEntityFromItem(item)
+      .then(entity => entity &&
+        this.convert(entity)
+          .then(entity => {
+            this.focusNext = true;
+            this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
+            this.setValue(entity);
+          }))
       .done();
 
-    return entity.toStr || "";
+    return "";
   }
 
   setValue(val: any) {
@@ -160,14 +160,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         minLength={ac.minLength}
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
-        itemAttrs={item => {
-          const entity = ac!.getEntityFromItem(item);
-          const key = isLite(entity) ? liteKey(entity) :
-            (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
-              undefined;
-
-          return ({ 'data-entity-key': key }) as React.HTMLAttributes<HTMLButtonElement>;
-        }}
+        itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={this.handleOnSelect} />
     );
   }
