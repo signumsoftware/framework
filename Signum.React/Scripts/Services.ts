@@ -393,6 +393,8 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
   React.useEffect(() => {
     var abortController = new AbortController();
 
+    updateData(defaultValue);
+
     makeCall(abortController.signal)
       .then(result => updateData(result))
       .done();
