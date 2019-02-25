@@ -4,7 +4,7 @@ import * as numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
-import { ajaxGet, ajaxPost } from './Services';
+import { ajaxGet, ajaxPost, useAPI } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
@@ -606,6 +606,20 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
   });
 }
 
+export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): QueryRequest {
+
+  return {
+    queryKey: fo.queryKey,
+    groupResults: fo.groupResults,
+    filters: toFilterRequests(fo.filterOptions),
+    columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
+      .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+    orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
+    pagination: fo.pagination,
+    systemTime: fo.systemTime,
+  };
+}
+
 export function validateNewEntities(fo: FindOptions): string | undefined {
 
   function getValues(fo: FilterOption): any[] {
@@ -963,6 +977,16 @@ export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<Q
     queryDescriptionCache[queryKey] = Object.freeze(qd);
     return qd;
   });
+}
+
+export module Hooks {
+
+  export function useQuery(fo: FindOptions): ResultTable | undefined {
+    return useAPI(undefined, [findOptionsPath(fo)], signal =>
+      getQueryDescription(fo.queryName)
+        .then(qd => parseFindOptions(fo, qd))
+        .then(fop => API.executeQuery(getQueryRequest(fop), signal)));
+  }
 }
 
 export module API {
