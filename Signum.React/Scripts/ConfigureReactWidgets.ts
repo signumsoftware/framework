@@ -52,7 +52,11 @@ export function configure() {
       if (value == undefined || value == "")
         return undefined;
 
-      return getMoment(culture, value, format).toDate();
+      var moment = getMoment(culture, value, format);
+      if (moment.isValid())
+        return moment.toDate();
+
+      return undefined;
     },
 
     format: function format(value: Date, _format: string, culture: string) {
