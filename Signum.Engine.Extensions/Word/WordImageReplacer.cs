@@ -67,7 +67,7 @@ namespace Signum.Engine.Word
             doc.MainDocumentPart.DeletePart(blips.First().Embed);
 
             var i = 0;
-            var bitmapStack = new Stack<Bitmap>(bitmaps);
+            var bitmapStack = new Stack<Bitmap>(bitmaps.Reverse());
             foreach (var blip in blips)
             {
                 ImagePart img = CreateImagePart(doc, bitmapStack.Pop(), newImagePartId + i, imagePartType);
