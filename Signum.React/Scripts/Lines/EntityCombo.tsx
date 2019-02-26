@@ -21,6 +21,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     state.remove = false;
     state.create = false;
     state.view = false;
+    state.viewOnCreate = true;
     state.find = false;
   }
 
