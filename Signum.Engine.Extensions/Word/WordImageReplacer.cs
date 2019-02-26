@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -20,7 +21,7 @@ namespace Signum.Engine.Word
         /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
         public static void ReplaceImage(WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, bool allowMultiple = false, ImagePartType imagePartType = ImagePartType.Png)
         {
-            Blip blip = FindBlip(doc, titleOrDescription, allowMultiple);
+            Blip blip = FindBlip(doc, titleOrDescription);
 
             if (adaptSize && !AvoidAdaptSize)
             {
@@ -34,12 +35,45 @@ namespace Signum.Engine.Word
                 }
             }
 
-            if (!allowMultiple)
-                doc.MainDocumentPart.DeletePart(blip.Embed);
+            doc.MainDocumentPart.DeletePart(blip.Embed);
 
             ImagePart img = CreateImagePart(doc, bitmap, newImagePartId, imagePartType);
 
             blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
+        }
+
+        /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
+        public static void ReplaceMultipleImages(WordprocessingDocument doc, string titleOrDescription, Bitmap[] bitmaps, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
+        {
+            Blip[] blips = FindAllBlips(doc, titleOrDescription);
+
+            if (blips.Count() != bitmaps.Length)
+                throw new ApplicationException("Images count does not match the images count in word");
+
+            if (adaptSize && !AvoidAdaptSize)
+            {
+                Array.ForEach(bitmaps, bitmap =>
+                {
+                    var part = doc.MainDocumentPart.GetPartById(blips.First().Embed);
+
+                    using (var stream = part.GetStream())
+                    {
+                        Bitmap oldBmp = (Bitmap)Bitmap.FromStream(stream);
+                        bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
+                    }
+                });
+            }
+
+            doc.MainDocumentPart.DeletePart(blips.First().Embed);
+
+            var i = 0;
+            var bitmapStack = new Stack<Bitmap>(bitmaps);
+            foreach (var blip in blips)
+            {
+                ImagePart img = CreateImagePart(doc, bitmapStack.Pop(), newImagePartId + i, imagePartType);
+                blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
+                i++;
+            }
         }
 
         public static void RemoveImage(WordprocessingDocument doc, string title, bool removeFullDrawing)
@@ -83,22 +117,33 @@ namespace Signum.Engine.Word
             throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
         }
 
-        static Blip FindBlip(WordprocessingDocument doc, string titleOrDescription, bool allowMultiple = false)
+        static Blip FindBlip(WordprocessingDocument doc, string titleOrDescription)
         {
-            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().First(r =>
+            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().Single(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
                 var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
-
-                if (allowMultiple && match)
-                {
-                    prop.Title += Guid.NewGuid().ToString();
-                }
 
                 return match;
             });
 
             return drawing.Descendants<Blip>().SingleEx();
+        }
+
+        static Blip[] FindAllBlips(WordprocessingDocument doc, string titleOrDescription)
+        {
+            var i = 0;
+            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().Where(r =>
+            {
+                var prop = r.Descendants<DocProperties>().SingleOrDefault();
+                var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
+                prop.Title += i;
+                i++;
+
+                return match;
+            });
+
+            return drawing.Select(d => d.Descendants<Blip>().SingleEx()).ToArray();
         }
     }
 
