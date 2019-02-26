@@ -17,7 +17,6 @@ export interface EntityStripProps extends EntityListBaseProps {
   onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
   showType?: boolean;
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  extraButtons?: (es: EntityStrip) => React.ReactNode;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {

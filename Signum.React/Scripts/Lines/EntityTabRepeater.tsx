@@ -65,6 +65,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
       <span className="ml-2">
         {this.renderCreateButton(false)}
         {this.renderFindButton(false)}
+        {this.props.extraButtons && this.props.extraButtons(this)}
       </span>
     );
 

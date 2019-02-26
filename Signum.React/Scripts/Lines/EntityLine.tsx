@@ -15,7 +15,6 @@ export interface EntityLineProps extends EntityBaseProps {
   renderItem?: React.ReactNode;
   showType?: boolean;
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  extraButtons?: (el: EntityLine) => React.ReactNode;
 }
 
 export interface EntityLineState extends EntityLineProps {

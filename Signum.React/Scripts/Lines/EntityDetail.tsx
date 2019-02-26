@@ -8,7 +8,6 @@ import { RenderEntity } from './RenderEntity'
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   avoidFieldSet?: boolean;
-  extraButtons?: (el: EntityDetail) => React.ReactNode;
   onEntityLoaded?: () => void;
 }
 
