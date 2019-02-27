@@ -61,7 +61,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     if (
       nextState.getComponent || this.state.getComponent ||
       nextState.extraButtons || this.state.extraButtons)
-      return false;
+      return true;
 
     return super.shouldComponentUpdate(nextProps, nextState);
   }
