@@ -237,18 +237,18 @@ export class ViewReplacer<T extends ModifiableEntity> {
         return this;
     }
 
-    insertTabAfter(tabId: string | number, ...newTabs: (Tab | undefined | false | null)[]): this {
+    insertTabAfter(eventKey: string | number, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == tabId,
+            e => e.type == Tab && e.props.eventKey == eventKey,
             e => [e, ...newTabs])
             .visit(this.result);
 
         return this;
     }
 
-    insertTabBefore(tabId: string | number, ...newTabs: (Tab | undefined | false | null)[]): this {
+    insertTabBefore(eventKey: string | number, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == tabId,
+            e => e.type == Tab && e.props.eventKey == eventKey,
             e => [...newTabs, e])
             .visit(this.result);
 
