@@ -71,7 +71,7 @@ export interface SearchControlLoadedProps {
   avoidChangeUrl: boolean;
   refreshKey: string | number | undefined;
 
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], search: () => void) => React.ReactElement<any> | undefined;
   onCreate?: () => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -124,8 +124,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qd = this.props.queryDescription;
 
     const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
-      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions) :
-        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions) :
+      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions, () => this.doSearchPage1()) :
+        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions, () => this.doSearchPage1()) :
           undefined;
 
     if (sfb) {
