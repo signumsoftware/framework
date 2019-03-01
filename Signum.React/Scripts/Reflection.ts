@@ -940,7 +940,15 @@ export class QueryTokenString<T> {
   expression<S>(expressionName: string): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + expressionName);
   }
+
+  any<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".Any");
+  }
 }
+
+type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveMListElement<ElementType> : never;
+
+type RemoveMListElement<Type> = Type extends MListElement<infer S> ? S : Type;
 
 function tokenSequence(lambdaToProperty: Function) {
   return getLambdaMembers(lambdaToProperty)

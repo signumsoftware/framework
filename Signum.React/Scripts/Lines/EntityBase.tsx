@@ -27,6 +27,7 @@ export interface EntityBaseProps extends LineBaseProps {
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
+  extraButtons?: (ec: EntityBase<EntityBaseProps, EntityBaseProps>) => React.ReactNode;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
@@ -56,7 +57,15 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         getTypeInfos(type).some(ti => Navigator.isFindable(ti));
   }
 
+  shouldComponentUpdate(nextProps: T, nextState: S): boolean {
+    if (
+      nextState.getComponent || this.state.getComponent ||
+      nextState.extraButtons || this.state.extraButtons)
+      return true;
 
+    return super.shouldComponentUpdate(nextProps, nextState);
+  }
+  
   calculateDefaultState(state: S) {
 
     const type = state.type!;

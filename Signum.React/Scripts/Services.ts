@@ -385,6 +385,9 @@ export class AbortableRequest<Q, A> {
   }
 }
 
+export function useForceUpdate(): () => void {
+  return React.useState()[1] as () => void;
+}
 
 export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>): T {
 
@@ -392,6 +395,8 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
 
   React.useEffect(() => {
     var abortController = new AbortController();
+
+    updateData(defaultValue);
 
     makeCall(abortController.signal)
       .then(result => updateData(result))
@@ -403,5 +408,4 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
   }, key);
 
   return data;
-
 }
