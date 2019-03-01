@@ -147,7 +147,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         if (e == undefined)
           return;
 
-        if (e.modified || !is(e, entity))
+        if (e.modified || !is(e, entity)
+          || ((entity as Lite<Entity>) && e.toStr != (entity as Lite<Entity>).toStr)
+          || ((entity as Entity) && e.toStr != (entity as Entity).toStr))
           this.convert(e).then(m => this.setValue(m)).done();
       }).done();
     }
