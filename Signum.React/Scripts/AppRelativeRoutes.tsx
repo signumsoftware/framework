@@ -28,7 +28,7 @@ export function useAppRelativeComputeMatch(RouteClass: typeof Route) {
   (RouteClass.prototype as any).computeMatch = function computeMatch(this: Route, props: RouteProps, context: RouterChildContext<any>) {
     let { path, ...p } = props;
 
-    const newPath = path && Navigator.toAbsoluteUrl(path);
+    const newPath = path && Navigator.toAbsoluteUrl(path as string);
 
     return baseMatch.call(this, { path: newPath, ...p }, context);
   };
@@ -54,7 +54,7 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
 
       if (match == null) {
         child = element
-        match = path ? matchPath(location.pathname, { path: Navigator.toAbsoluteUrl(path), exact, strict }) : route.match
+        match = path ? matchPath(location.pathname, { path: Navigator.toAbsoluteUrl(path as string), exact, strict }) : route.match
       }
     });
 

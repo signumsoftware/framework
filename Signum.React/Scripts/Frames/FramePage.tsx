@@ -100,8 +100,8 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
 
   loadComponent(): Promise<void> {
-    const viewName: string | undefined = QueryString.parse(this.props.location.search).viewName
-    return Navigator.getViewPromise(this.state.pack!.entity, viewName).promise
+    const viewName = QueryString.parse(this.props.location.search).viewName;
+    return Navigator.getViewPromise(this.state.pack!.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise
       .then(c => this.setState({ getComponent: c }));
   }
 
