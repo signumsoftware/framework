@@ -48,6 +48,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
             <span className="float-right">
               {this.renderCreateButton(false)}
               {this.renderFindButton(false)}
+              {this.props.extraButtons && this.props.extraButtons(this)}
             </span>
           </div>
         </legend>
