@@ -25,9 +25,14 @@ import FileLine from "../../Files/FileLine";
 import {MultiFileLine} from "../../Files/MultiFileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "@framework/Reflection";
+import { Button, BsColor, BsSize } from '@framework/Components';
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import FileImageLine from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
+import { ColorTypeahead } from '../../Basics/Templates/ColorTypeahead';
+import { IconTypeahead } from '../../Basics/Templates/IconTypeahead';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 
 export interface BaseNode {
   kind: string;
@@ -1335,6 +1340,82 @@ NodeUtils.register<ValueSearchControlLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
     </div>);
   }
+});
+
+
+export interface ButtonNode extends BaseNode {
+  kind: "Button",
+  name: string;
+  text?: ExpressionOrValue<string>;
+  active?: ExpressionOrValue<boolean>;
+  block?: ExpressionOrValue<boolean>;
+  color?: ExpressionOrValue<string>;
+  icon?: ExpressionOrValue<string>;
+  iconColor?: ExpressionOrValue<string>;
+  disabled?: ExpressionOrValue<boolean>;
+  outline?: ExpressionOrValue<boolean>;
+  onClick?: ExpressionOrValue<(e: React.MouseEvent<any>) => void>;
+  size?: ExpressionOrValue<string>;
+  className?: ExpressionOrValue<string>;
+}
+
+NodeUtils.register<ButtonNode>({
+  kind: "Button",
+  group: "Simple",
+  hasCollection: false,
+  hasEntity: false,
+  order: 0,
+  renderTreeNode: dn => <span><small>Button:</small> <strong>{dn.node.name}</strong></span>,
+  renderCode: (node, cc) => cc.elementCode("Button", {
+    active: node.active,
+    block: node.block,
+    color: node.color,
+    icon: node.icon,
+    iconColor: node.iconColor,
+    disabled: node.disabled,
+    outline: node.outline,
+    onClick: node.onClick,
+    size: node.size,
+    className: node.className,
+  }),
+  render: (dn, ctx) => {
+
+    var icon = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.icon, NodeUtils.isStringOrNull);
+    var pIcon = parseIcon(icon);
+    var iconColor = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.iconColor, NodeUtils.isStringOrNull);
+
+    return (
+      <Button
+        active={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
+        block={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
+        disabled={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
+        outline={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.outline, NodeUtils.isBooleanOrNull)}
+        onClick={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onClick, NodeUtils.isFunctionOrNull)}
+        className={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.className, NodeUtils.isStringOrNull)}
+        color={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
+        size={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize}
+      >
+        {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="mr-2" />}
+        {NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.text, NodeUtils.isStringOrNull)}
+      </Button>
+    );
+  },
+  renderDesigner: (dn) => {
+    return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.name)} type="string" defaultValue={null} allowsExpression={false} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.text)} type="string" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.color)} type="string" defaultValue={null} options={["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"] as BsColor[]} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.size)} type="string" defaultValue={null} options={["lg", "md", "sm", "xs"] as BsSize[]} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.icon)} type="string" defaultValue={null} onRenderValue={(val, e) => <IconTypeahead icon={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newIcon => e.updateValue(newIcon)} />} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <ColorTypeahead color={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newColor => e.updateValue(newColor)} />} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.active)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.block)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.outline)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"(e) => this.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.className)} type="string" defaultValue={null} />
+    </div>)
+  },
 });
 
 
