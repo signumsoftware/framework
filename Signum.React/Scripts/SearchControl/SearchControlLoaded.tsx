@@ -37,13 +37,13 @@ export interface ShowBarExtensionOption { }
 export interface SearchControlLoadedProps {
   findOptions: FindOptionsParsed;
   queryDescription: QueryDescription;
-  querySettings: Finder.QuerySettings;
+  querySettings: Finder.QuerySettings | undefined;
 
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
   extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
-  getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<any>;
+  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   tag?: string | {};
 
@@ -71,7 +71,7 @@ export interface SearchControlLoadedProps {
   avoidChangeUrl: boolean;
   refreshKey: string | number | undefined;
 
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], search: () => void) => React.ReactElement<any> | undefined;
   onCreate?: () => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -124,8 +124,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qd = this.props.queryDescription;
 
     const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
-      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions) :
-        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions) :
+      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions, () => this.doSearchPage1()) :
+        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions, () => this.doSearchPage1()) :
           undefined;
 
     if (sfb) {
@@ -170,16 +170,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const fo = this.props.findOptions;
     const qs = this.props.querySettings;
 
-    return {
-      queryKey: fo.queryKey,
-      groupResults: fo.groupResults,
-      filters: toFilterRequests(fo.filterOptions),
-      columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-        .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
-      orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
-      pagination: fo.pagination,
-      systemTime: fo.systemTime,
-    };
+    return Finder.getQueryRequest(fo, qs);
   }
 
   // MAIN
@@ -623,15 +614,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var s = Navigator.getSettings(tn);
 
+        var qs = this.props.querySettings;
+
+        var getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
+        
         if (isWindowsOpen || (s != null && s.avoidPopup)) {
-          window.open(Navigator.createRoute(tn));
+          var vp = getViewPromise && getViewPromise(null)
+
+          window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
         } else {
           Constructor.construct(tn).then(e => {
             if (e == undefined)
               return;
 
             Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-              .then(() => Navigator.navigate(e!, { getViewPromise: this.props.getViewPromise }))
+              .then(() => Navigator.navigate(e!, { getViewPromise: getViewPromise as any }))
               .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
               .done();
           }).done();
@@ -1105,15 +1102,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       e.preventDefault();
 
-      const s = Navigator.getSettings(lite.EntityType)
+      const s = Navigator.getSettings(lite.EntityType);
+
+      const qs = this.props.querySettings;
+
+      const getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
 
       const avoidPopup = s != undefined && s.avoidPopup;
 
       if (avoidPopup || e.ctrlKey || e.button == 1) {
-        window.open(Navigator.navigateRoute(lite));
+        var vp = getViewPromise && getViewPromise(null);
+        window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
       }
       else {
-        Navigator.navigate(lite)
+        Navigator.navigate(lite, { getViewPromise: getViewPromise })
           .then(() => {
             this.handleOnNavigated(lite);
           }).done();

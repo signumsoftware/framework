@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity } from '../Signum.Entities'
@@ -8,6 +8,7 @@ import { RenderEntity } from './RenderEntity'
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   avoidFieldSet?: boolean;
+  onEntityLoaded?: () => void;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {
@@ -55,6 +56,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
         {!hasValue && this.renderFindButton(false)}
         {hasValue && this.renderViewButton(false, s.ctx.value!)}
         {hasValue && this.renderRemoveButton(false, s.ctx.value!)}
+        {this.props.extraButtons && this.props.extraButtons(this)}
       </span>
     );
 
@@ -64,7 +66,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
   renderElements() {
     const s = this.state;
     return (
-      <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
+      <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} onEntityLoaded={this.props.onEntityLoaded} />
     );
   }
 }

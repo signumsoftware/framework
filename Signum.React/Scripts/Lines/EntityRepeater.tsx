@@ -55,6 +55,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
       <span className="float-right">
         {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
         {this.renderFindButton(false)}
+        {this.props.extraButtons && this.props.extraButtons(this)}
       </span>
     );
 

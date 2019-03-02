@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -32,7 +32,7 @@ namespace Signum.Entities
         void ClearEntity();
         void SetEntity(Entity ei);
         void SetToString(string toStr);
-        void RefreshId();
+        PrimaryKey RefreshId();
 
         string Key();
         string KeyLong();
@@ -148,6 +148,9 @@ namespace Signum.Entities
 
             public void ClearEntity()
             {
+                if (this.entityOrNull != null)
+                    RefreshId();
+
                 if (id == null)
                     throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
@@ -155,9 +158,11 @@ namespace Signum.Entities
                 this.entityOrNull = null;
             }
 
-            public void RefreshId()
+            public PrimaryKey RefreshId()
             {
-                id = entityOrNull.Id;
+                var newId = entityOrNull.Id;
+                id = newId;
+                return newId;
             }
 
             protected internal override void PreSaving(PreSavingContext ctx)

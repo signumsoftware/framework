@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { toFilterRequests } from '../Finder';
 
@@ -13,7 +13,8 @@ export interface AutocompleteConfig<T> {
   minLength?: number;
   renderItem(item: T, subStr?: string): React.ReactNode;
   renderList?(typeahead: Typeahead): React.ReactNode;
-  getEntityFromItem(item: T): Lite<Entity> | ModifiableEntity;
+  getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
+  getDataKeyFromItem(item: T): string | undefined;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
   abort(): void;
 }
@@ -44,8 +45,12 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
       return text;
   }
 
-  getEntityFromItem(item: Lite<T>) {
-    return item;
+  getEntityFromItem(item: Lite<T>): Promise<Lite<Entity> | ModifiableEntity> {
+    return Promise.resolve(item);
+  }
+
+  getDataKeyFromItem(item: Lite<T>): string | undefined {
+    return liteKey(item);
   }
 
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<T>> {
@@ -154,8 +159,12 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       return text;
   }
 
-  getEntityFromItem(item: ResultRow): Lite<Entity> | ModifiableEntity {
-    return item.entity!;
+  getEntityFromItem(item: ResultRow): Promise<Lite<Entity> | ModifiableEntity> {
+    return Promise.resolve(item.entity!);
+  }
+
+  getDataKeyFromItem(item: ResultRow): string | undefined {
+    return liteKey(item.entity!);
   }
 
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<ResultRow> {

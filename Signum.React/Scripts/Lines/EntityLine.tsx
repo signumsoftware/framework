@@ -7,7 +7,7 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
-import { AutocompleteConfig } from './AutocompleteConfig'
+import { AutocompleteConfig } from './AutoCompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -15,7 +15,6 @@ export interface EntityLineProps extends EntityBaseProps {
   renderItem?: React.ReactNode;
   showType?: boolean;
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  extraButtons?: (el: EntityLine) => React.ReactNode;
 }
 
 export interface EntityLineState extends EntityLineProps {
@@ -89,17 +88,19 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
-    var entity = this.state.autocomplete!.getEntityFromItem(item);
-
-    this.convert(entity)
-      .then(entity => {
-        this.focusNext = true;
-        this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
-        this.setValue(entity);
-      })
+    this.state.autocomplete!.getEntityFromItem(item)
+      .then(entity => entity &&
+        this.convert(entity)
+          .then(entity => {
+            this.focusNext = true;
+            this.state.autocomplete!.getItemFromEntity(entity).then(newItem => //newItem could be different to item on create new case
+              this.setState({ currentItem: { entity: entity, item: newItem } }));
+            
+            this.setValue(entity);
+          }))
       .done();
 
-    return entity.toStr || "";
+    return "";
   }
 
   setValue(val: any) {
@@ -160,14 +161,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         minLength={ac.minLength}
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
-        itemAttrs={item => {
-          const entity = ac!.getEntityFromItem(item);
-          const key = isLite(entity) ? liteKey(entity) :
-            (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
-              undefined;
-
-          return ({ 'data-entity-key': key }) as React.HTMLAttributes<HTMLButtonElement>;
-        }}
+        itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={this.handleOnSelect} />
     );
   }

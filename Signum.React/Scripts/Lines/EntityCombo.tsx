@@ -13,7 +13,6 @@ import { classes } from '../Globals';
 export interface EntityComboProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   data?: Lite<Entity>[];
-  extraButtons?: (ec: EntityCombo) => React.ReactNode;
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
@@ -22,6 +21,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     state.remove = false;
     state.create = false;
     state.view = false;
+    state.viewOnCreate = true;
     state.find = false;
   }
 

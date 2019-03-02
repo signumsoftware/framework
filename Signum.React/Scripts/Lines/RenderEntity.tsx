@@ -10,6 +10,7 @@ export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<any>;
+  onEntityLoaded?: () => void;
 }
 
 export interface RenderEntityState {
@@ -58,7 +59,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
       return Promise.resolve(undefined);
 
     const lite = nextProps.ctx.value as Lite<Entity>;
-    return Navigator.API.fetchAndRemember(lite).then(a => undefined);
+    return Navigator.API.fetchAndRemember(lite).then(a => { this.props.onEntityLoaded && this.props.onEntityLoaded(); });
   }
 
 

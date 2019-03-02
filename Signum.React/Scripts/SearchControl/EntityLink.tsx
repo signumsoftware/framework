@@ -8,7 +8,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   lite: Lite<Entity>;
   inSearch?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
-  getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+  getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   innerRef?: (node: HTMLAnchorElement | null) => void;
 }
 
@@ -45,7 +45,8 @@ export default class EntityLink extends React.Component<EntityLinkProps>{
     event.preventDefault();
 
     if (event.ctrlKey || event.button == 1 || avoidPopup) {
-      window.open(Navigator.navigateRoute(lite));
+      var vp = this.props.getViewPromise && this.props.getViewPromise(null);
+      window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
       return;
     }
 

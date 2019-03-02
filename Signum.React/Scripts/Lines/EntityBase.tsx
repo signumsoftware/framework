@@ -27,6 +27,7 @@ export interface EntityBaseProps extends LineBaseProps {
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
+  extraButtons?: (ec: EntityBase<EntityBaseProps, EntityBaseProps>) => React.ReactNode;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
@@ -56,7 +57,15 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         getTypeInfos(type).some(ti => Navigator.isFindable(ti));
   }
 
+  shouldComponentUpdate(nextProps: T, nextState: S): boolean {
+    if (
+      nextState.getComponent || this.state.getComponent ||
+      nextState.extraButtons || this.state.extraButtons)
+      return true;
 
+    return super.shouldComponentUpdate(nextProps, nextState);
+  }
+  
   calculateDefaultState(state: S) {
 
     const type = state.type!;
@@ -147,7 +156,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         if (e == undefined)
           return;
 
-        if (e.modified || !is(e, entity))
+        //Modifying the sub entity, saving and coming back should change the entity in the UI (ToString, or EntityDetails), 
+        //the parent entity is not really modified, but I'm not sure it his is a real problem in practice, till then the line is commented out
+        //if (e.modified || !is(e, entity)) 
           this.convert(e).then(m => this.setValue(m)).done();
       }).done();
     }

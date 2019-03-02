@@ -940,7 +940,15 @@ export class QueryTokenString<T> {
   expression<S>(expressionName: string): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + expressionName);
   }
+
+  any<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".Any");
+  }
 }
+
+type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveMListElement<ElementType> : never;
+
+type RemoveMListElement<Type> = Type extends MListElement<infer S> ? S : Type;
 
 function tokenSequence(lambdaToProperty: Function) {
   return getLambdaMembers(lambdaToProperty)
@@ -975,7 +983,7 @@ export class EnumType<T extends string> {
     return val;
   }
 
-  niceName(): string | undefined {
+  niceTypeName(): string | undefined {
     return this.typeInfo().niceName;
   }
 
@@ -1352,9 +1360,10 @@ export type GraphExplorerMode = "collect" | "set" | "clean";
 
 export class GraphExplorer {
 
-  static propagateAll(...args: any[]) {
+  static propagateAll(...args: any[]): GraphExplorer {
     const ge = new GraphExplorer("clean", {});
     args.forEach(o => ge.isModified(o, ""));
+    return ge;
   }
 
   static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {

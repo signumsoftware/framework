@@ -27,7 +27,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   requiresSaveOperation?: boolean;
   avoidPromptLooseChange?: boolean;
   extraComponentProps?: {}
-  getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+  getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   isNavigate?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
@@ -192,7 +192,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     const entity = this.state.pack.entity;
 
-    GraphExplorer.propagateAll(entity);
+    var ge = GraphExplorer.propagateAll(entity);
 
     return entity.modified && JSON.stringify(entity) != this.state.lastEntity;
   }
@@ -313,7 +313,10 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
   handlePopupFullScreen = (e: React.MouseEvent<any>) => {
     e.preventDefault();
-    Navigator.pushOrOpenInTab(Navigator.navigateRoute(this.state.pack!.entity as Entity), e);
+
+    var entity = this.state.pack!.entity;
+    var vp = this.props.getViewPromise && this.props.getViewPromise(entity);
+    Navigator.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }
 
   static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity | undefined> {

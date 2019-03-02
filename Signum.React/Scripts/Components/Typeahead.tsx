@@ -245,7 +245,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     return (
       <Manager tag={false}>
         <Target innerRef={inp => this.input = inp as HTMLInputElement}>
-          {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
+          {({ targetProps }) => <input type="text" autoComplete="asdfsdf" {...this.props.inputAttrs} {...targetProps as any}
             value={this.props.value}
             onFocus={this.handleFocus}
             onBlur={this.handleBlur}

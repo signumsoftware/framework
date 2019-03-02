@@ -1,4 +1,4 @@
-﻿import { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed } from './FindOptions'
+import { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed } from './FindOptions'
 export { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable };
 
 import EntityLink, { EntityLinkProps } from './SearchControl/EntityLink'
@@ -14,13 +14,22 @@ import ValueSearchControl, { ValueSearchControlProps } from './SearchControl/Val
 export { ValueSearchControl, ValueSearchControlProps };
 
 import ValueSearchControlLine, { ValueSearchControlLineProps } from './SearchControl/ValueSearchControlLine'
+import { QueryTokenString } from './Reflection';
 export { ValueSearchControlLine, ValueSearchControlLineProps };
 
-export function extractFilterValue(filters: FilterOptionParsed[], token: string, operation: FilterOperation): any {
-  var f = filters.filter(f => !isFilterGroupOptionParsed(f) && f.token!.fullKey == token && f.operation == operation).firstOrNull() as FilterConditionOptionParsed | undefined;
-  if (!f)
+export function extractFilterValue(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation): any {
+
+  var f = extractFilter(filters, token, operation);
+
+  return f && f.value;
+}
+
+export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation): FilterOptionParsed | null {
+  var f = filters.filter(f => !isFilterGroupOptionParsed(f) && f.token!.fullKey == token.toString() && f.operation == operation).firstOrNull() as FilterConditionOptionParsed | undefined;
+  if (!f) {
     return null;
+  }
 
   filters.remove(f);
-  return f.value;
+  return f;
 }

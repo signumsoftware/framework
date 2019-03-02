@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as PropTypes from 'prop-types'
 import * as H from 'history';
 import { Route, match } from 'react-router';
@@ -13,7 +13,7 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   innerRef?: (e: any) => void;
   strict?: boolean;
   exact?: boolean;
-  isActive?: (m: match<any>, l: H.Location) => boolean;
+  isActive?: (m: match<any> | null, l: H.Location) => boolean;
 }
 
 export class LinkContainer extends React.Component<LinkContainerProps> {
@@ -70,12 +70,12 @@ export class LinkContainer extends React.Component<LinkContainerProps> {
 
 
   render() {
-    const { exact, strict, isActive: getIsActive, children, replace, to, innerRef, ...props } = this.props // eslint-disable-line no-unused-vars
+    const { exact, strict, isActive: getIsActive, children, replace, to, innerRef, ...props } = this.props;// eslint-disable-line no-unused-vars
 
     if (!this.context.router)
       throw new Error('You should not use <LinkContainer> outside a <Router>');
 
-    const child = React.Children.only(children);
+    const child = React.Children.only(children) as React.ReactElement<any>;
 
     if (!child)
       throw new Error("LinkContainer should contain a child");
