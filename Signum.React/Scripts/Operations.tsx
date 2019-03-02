@@ -204,13 +204,15 @@ export class ContextualOperationContext<T extends Entity> {
 
 export class EntityOperationContext<T extends Entity> {
 
-  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any>): EntityOperationContext<T> {
+  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string): EntityOperationContext<T> {
+
+    var operationKey = (operation as OperationSymbol).key || operation as string;
     if (!ctx.frame)
       throw new Error("a frame is necessary");
-    var oi = getTypeInfo(ctx.value.Type).operations![operation.key!];
+    var oi = getTypeInfo(ctx.value.Type).operations![operationKey];
 
     var result = new EntityOperationContext<T>(ctx.frame, ctx.value, oi);
-    result.settings = getSettings(operation) as EntityOperationSettings<T>;
+    result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
     result.canExecute = undefined;
     return result;
   }
@@ -235,6 +237,13 @@ export class EntityOperationContext<T extends Entity> {
 
   defaultClick(...args: any[]) {
     defaultOnClick(this, ...args);
+  }
+
+  click() {
+    if (this.settings && this.settings.onClick)
+      this.settings.onClick(this);
+
+    defaultOnClick(this);
   }
 
   isAllowed() {
