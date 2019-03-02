@@ -266,7 +266,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         <ErrorBoundary>
           {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
         </ErrorBoundary>

@@ -157,7 +157,7 @@ NodeUtils.register<TabsNode>({
   }, node),
   render: (dn, parentCtx) => {
     return NodeUtils.withChildrensSubCtx(dn, parentCtx, <UncontrolledTabs
-      id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
+      id={parentCtx.getUniqueId(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
       defaultEventKey={dn.node.defaultEventKey} />);
   },
   renderDesigner: (dn) => (<div>

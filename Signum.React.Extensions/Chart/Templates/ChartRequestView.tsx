@@ -138,7 +138,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     if (cr == undefined || qd == undefined)
       return null;
 
-    const tc = new TypeContext<ChartRequestModel>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest!, ""));
+    const tc = new TypeContext<ChartRequestModel>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest!, "chartRequest"));
 
     return (
       <div>
@@ -148,7 +148,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             <FontAwesomeIcon icon="external-link-alt" />
           </a>
         </h2 >
-        <ValidationErrors entity={cr} />
+        <ValidationErrors entity={cr} prefix="chartRequest" />
         <div className="sf-chart-control SF-control-container" >
           <div>
             <FilterBuilder filterOptions={cr.filterOptions} queryDescription={this.state.queryDescription!}
