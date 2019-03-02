@@ -44,7 +44,6 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     notifyLogout = options.notifyLogout;
 
     window.addEventListener("storage", se => {
-
       if (se.key == 'requestLogout' + Services.SessionSharing.getAppName()) {
 
         var userName = se.newValue!.before("&&");
@@ -297,11 +296,38 @@ export function autoLogin(): Promise<UserEntity | undefined> {
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
 
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
-  return API.loginFromCookie().then(au => {
-    au && console.log("loginFromCookie");
-    return au;
-  });
+
+  var myCookie = getCookie("sfUser");
+
+  if (!myCookie) {
+    return new Promise<undefined>(resolve => resolve());
+  }
+  else {
+    return API.loginFromCookie().then(au => {
+      au && console.log("loginFromCookie");
+      return au;
+    });
+  }
 }
+
+function getCookie(name: string) {
+  var dc = document.cookie;
+  var prefix = name + "=";
+  var begin = dc.indexOf("; " + prefix);
+
+  if (begin == -1) {
+    begin = dc.indexOf(prefix);
+    if (begin != 0) return null;
+  }
+
+  var end = document.cookie.indexOf(";", begin + 2);
+  if (end == -1) {
+    end = dc.length;
+  }
+
+  return decodeURI(dc.substring(begin + prefix.length, end));
+}
+
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
 

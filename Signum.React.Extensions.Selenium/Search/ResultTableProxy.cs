@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenQA.Selenium;
@@ -55,19 +55,19 @@ namespace Signum.React.Selenium
 
         public WebElementLocator CellElement(int rowIndex, string token)
         {
-            var index = GetColumnIndexBase1(token);
+            var index = GetColumnIndex(token);
 
-            return RowElement(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index));
+            return RowElement(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
         }
 
         public WebElementLocator CellElement(Lite<IEntity> lite, string token)
         {
-            var index = GetColumnIndexBase1(token);
+            var index = GetColumnIndex(token);
 
-            return RowElement(lite).CombineCss("> td:nth-child({0})".FormatWith(index));
+            return RowElement(lite).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
         }
 
-        private int GetColumnIndexBase1(string token)
+        private int GetColumnIndex(string token)
         {
             var tokens = this.GetColumnTokens();
 
@@ -75,12 +75,13 @@ namespace Signum.React.Selenium
 
             if (index == -1)
                 throw new InvalidOperationException("Token {0} not found between {1}".FormatWith(token, tokens.NotNull().CommaAnd()));
-            return index + 1;
+
+            return index;
         }
 
         public WebElementLocator RowSelectorElement(int rowIndex)
         {
-            return this.Element.WithLocator(By.CssSelector("tr[data-row-index={0}] .sf-td-selection".FormatWith(rowIndex)));
+            return this.Element.WithLocator(By.CssSelector("tr[data-row-index='{0}'] .sf-td-selection".FormatWith(rowIndex)));
         }
 
         public void SelectRow(int rowIndex)
@@ -178,14 +179,14 @@ namespace Signum.React.Selenium
 
         public WebElementLocator EntityLink(Lite<IEntity> lite)
         {
-            var entityIndex = GetColumnIndexBase1("Entity");
-            return RowElement(lite).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex));
+            var entityIndex = GetColumnIndex("Entity");
+            return RowElement(lite).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex + 1));
         }
 
         public WebElementLocator EntityLink(int rowIndex)
         {
-            var entityIndex = GetColumnIndexBase1("Entity");
-            return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex));
+            var entityIndex = GetColumnIndex("Entity");
+            return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex + 1));
         }
 
 
@@ -238,7 +239,7 @@ namespace Signum.React.Selenium
 
         public Lite<Entity> EntityInIndex(int index)
         {
-            var result = this.Element.FindElement(By.CssSelector("tbody > tr:nth-child(" + index + ")")).GetAttribute("data-entity");
+            var result = this.Element.FindElement(By.CssSelector("tbody > tr:nth-child(" + (index + 1) + ")")).GetAttribute("data-entity");
 
             return Lite.Parse(result);
         }

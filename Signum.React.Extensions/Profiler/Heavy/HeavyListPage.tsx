@@ -135,8 +135,8 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
     let height = (fontSize + (2 * fontPadding)) * (data.length);
     this.chartContainer.style.height = height + "px";
 
-    let minStart = data.map(a => a.beforeStart).min();
-    let maxEnd = data.map(a => a.end).max();
+    let minStart = data.map(a => a.beforeStart).min()!;
+    let maxEnd = data.map(a => a.end).max()!;
 
     let x = d3.scaleLinear()
       .domain([minStart, maxEnd])

@@ -53,7 +53,7 @@ namespace Signum.React.Selenium
                 {
                     var newRoute = route.Add(mi);
 
-                    if (newRoute.Parent != route)
+                    if (newRoute.Parent != route && route != lineContainer.Route)
                         element = element.FindElement(By.CssSelector("[data-property-path='" + route.PropertyString() + "']"));
 
                     route = newRoute;
@@ -236,6 +236,14 @@ namespace Signum.React.Selenium
             var lineLocator = lineContainer.LineLocator(property);
 
             return new EntityListProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+        }
+
+        public static EntityTableProxy EntityTable<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+            where T : IModifiableEntity
+        {
+            var lineLocator = lineContainer.LineLocator(property);
+
+            return new EntityTableProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)

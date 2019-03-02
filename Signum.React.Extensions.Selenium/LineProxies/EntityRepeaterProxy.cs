@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
 
@@ -20,7 +20,7 @@ namespace Signum.React.Selenium
 
         public virtual WebElementLocator ItemElement(int index)
         {
-            return this.ItemsContainerElement.CombineCss(" > div > fieldset.sf-repeater-element:nth-child({0})".FormatWith(index));
+            return this.ItemsContainerElement.CombineCss(" > div > fieldset.sf-repeater-element:nth-child({0})".FormatWith(index + 1));
         }
 
         public void WaitItemLoaded(int index)
@@ -74,7 +74,7 @@ namespace Signum.React.Selenium
 
         public LineContainer<T> LastDetails<T>() where T : ModifiableEntity
         {
-            return this.Details<T>(this.ItemsCount() + 1);
+            return this.Details<T>(this.ItemsCount() - 1);
         }
     }
 }

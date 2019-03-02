@@ -68,8 +68,8 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
 
     const times = this.state.times!;
-    const maxValue = times.map(a => a.maxTime).max();
-    const maxTotal = times.map(a => a.totalTime).max();
+    const maxValue = times.map(a => a.maxTime).max()!;
+    const maxTotal = times.map(a => a.totalTime).max()!;
 
     const ratio = maxWith / maxValue;
 
@@ -134,12 +134,12 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
     const times = this.state.times!;
 
     const max = {
-      count: times.map(a => a.count).max(),
-      lastTime: times.map(a => a.lastTime).max(),
-      minTime: times.map(a => a.minTime).max(),
-      averageTime: times.map(a => a.averageTime).max(),
-      maxTime: times.map(a => a.maxTime).max(),
-      totalTime: times.map(a => a.totalTime).max(),
+      count: times.map(a => a.count).max()!,
+      lastTime: times.map(a => a.lastTime).max()!,
+      minTime: times.map(a => a.minTime).max()!,
+      averageTime: times.map(a => a.averageTime).max()!,
+      maxTime: times.map(a => a.maxTime).max()!,
+      totalTime: times.map(a => a.totalTime).max()!,
     };
 
     return (

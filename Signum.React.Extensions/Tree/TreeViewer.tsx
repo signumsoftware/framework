@@ -113,7 +113,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         Finder.parseFilterOptions(filterOptions, false, qd).then(fop => {
           this.setState({ filterOptions: fop }, () => {
             const qs = Finder.getSettings(typeName);
-            const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
+            const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions, () => this.search(true));
             this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
             if (sfb)
               this.setState({ showFilters: false });

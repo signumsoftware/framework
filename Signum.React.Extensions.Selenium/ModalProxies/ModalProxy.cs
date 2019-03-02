@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
-using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium
 {
@@ -86,6 +85,12 @@ namespace Signum.React.Selenium
         public void WaitNotVisible()
         {
             this.Element.GetDriver().Wait(() => this.Element.IsStale());
+        }
+
+        public void Close()
+        {
+            this.CloseButton.Find().Click();
+            this.WaitNotVisible();
         }
     }
 }

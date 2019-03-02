@@ -1,4 +1,4 @@
-﻿import * as d3 from "d3"
+import * as d3 from "d3"
 
 export interface Point {
   x?: number; //Realy not nullable, but d3.d.ts
@@ -40,6 +40,12 @@ export function colorScaleLog(max: number): d3.ScaleLogarithmic<string, string> 
     .range(colors).base(2);
 }
 
+export function center(rec: Rectangle): Point {
+  return {
+    x: rec.x! + rec.width / 2,
+    y: rec.y! + rec.height / 2
+  };
+}
 
 export function calculatePoint(rectangle: Rectangle, point: Point): Point {
 
