@@ -162,7 +162,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       frame: frame
     };
 
-    const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
+    const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, "framePage"));
 
     const wc: WidgetContext<Entity> = {
       ctx: ctx,
@@ -176,7 +176,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         {this.renderTitle()}
         {renderWidgets(wc)}
         {this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} />}
-        <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve} />
+        <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve} prefix="framePage" />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>

@@ -250,7 +250,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       frame: frame,
     };
 
-    const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
+    const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, ""), this.prefix!);
 
     const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pack };
 
@@ -260,7 +260,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       <div className="modal-body">
         {renderWidgets({ ctx: ctx, pack: pack })}
         {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
-        <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
+        <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>

@@ -488,18 +488,20 @@ export interface IBinding<T> {
 export class Binding<T> implements IBinding<T> {
 
   initialValue: T; // For deep compare
-
+  suffix: string;
   constructor(
     public parentObject: any,
-    public member: string | number) {
+    public member: string | number,
+    suffix?: string) {
     this.initialValue = this.parentObject[member];
+    this.suffix = suffix || ("." + member);
   }
 
   static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
 
     const memberName = Binding.getSingleMember(fieldAccessor);
 
-    return new Binding<T>(parentValue, memberName);
+    return new Binding<T>(parentValue, memberName, "." + memberName);
   }
 
   static getSingleMember(fieldAccessor: (from: any) => any) {
@@ -509,10 +511,6 @@ export class Binding<T> implements IBinding<T> {
       throw Error("invalid function 'fieldAccessor'");
 
     return members[0].name;
-  }
-
-  get suffix() {
-    return this.member == null ? "--unknown--" : this.member.toString();
   }
 
   getValue(): T {
@@ -593,7 +591,7 @@ export class MListElementBinding<T> implements IBinding<T>{
   constructor(
     public mListBinding: IBinding<MList<T>>,
     public index: number) {
-    this.suffix = this.index.toString();
+    this.suffix = "[" + this.index.toString() + "].element";
   }
 
   getValue() {
@@ -604,6 +602,7 @@ export class MListElementBinding<T> implements IBinding<T>{
 
     return mlist[this.index].element;
   }
+
   setValue(val: T) {
     var mlist = this.mListBinding.getValue()
     const mle = mlist[this.index];
@@ -624,14 +623,20 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
 
   if (lambdaMembers.length == 0)
     return new ReadonlyBinding<any>(parentValue, "");
-
+  var suffix = "";
   let val = parentValue;
   for (let i = 0; i < lambdaMembers.length - 1; i++) {
     const member = lambdaMembers[i];
     switch (member.type) {
 
-      case "Member": val = val[member.name]; break;
-      case "Mixin": val = val.mixins[member.name]; break;
+      case "Member":
+        val = val[member.name];
+        suffix += "." + member.name;
+        break;
+      case "Mixin":
+        val = val.mixins[member.name];
+        suffix += ".mixins[" + member.name + "].element";
+        break;
       default: throw new Error("Unexpected " + member.type);
 
     }
@@ -640,8 +645,8 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
   const lastMember = lambdaMembers[lambdaMembers.length - 1];
   switch (lastMember.type) {
 
-    case "Member": return new Binding(val, lastMember.name);
-    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], "");
+    case "Member": return new Binding(val, lastMember.name, suffix + "." + lastMember.name);
+    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "].element");
     default: throw new Error("Unexpected " + lastMember.type);
   }
 }

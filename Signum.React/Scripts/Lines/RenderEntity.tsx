@@ -160,7 +160,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
       refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
     };
 
-    const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
+    var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
+
+    const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
     return (
       <div data-property-path={ctx.propertyPath}>
