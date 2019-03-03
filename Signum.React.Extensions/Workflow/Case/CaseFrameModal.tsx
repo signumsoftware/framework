@@ -201,6 +201,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: false,
     };
 
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
@@ -245,6 +246,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: false,
     };
 
     var ti = this.getMainTypeInfo();

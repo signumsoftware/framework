@@ -144,6 +144,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: false,
     };
 
 
@@ -208,7 +209,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
-
+      allowChangeEntity: false,
     };
 
     var ti = this.getMainTypeInfo();
