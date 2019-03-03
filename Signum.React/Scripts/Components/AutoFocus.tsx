@@ -6,8 +6,9 @@ import { classes } from '../Globals';
 export function AutoFocus(p: React.Props<any>) {
   var ref = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
-    debugger;
-    var input = ref.current!.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+    var input = Array.from(ref.current!.querySelectorAll("button, [href], input, select, textarea"))
+      .firstOrNull(e => { var tabIndex = e.getAttribute("tabindex"); return tabIndex == null || tabIndex >= "0"; });
+
     if (input)
       (input as HTMLInputElement).focus();
   }, []);
