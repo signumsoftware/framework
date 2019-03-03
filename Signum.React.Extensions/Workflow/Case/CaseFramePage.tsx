@@ -17,6 +17,7 @@ import { IHasCaseActivity } from '../WorkflowClient';
 import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
+import { AutoFocus } from '@framework/Components/AutoFocus';
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -234,7 +235,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame"/>
         <ErrorBoundary>
-          {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+          {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}</AutoFocus>}
         </ErrorBoundary>
         <br />
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame" />
