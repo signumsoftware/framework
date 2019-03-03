@@ -153,14 +153,18 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
+      pack: undefined,
       revalidate: () => this.props.ctx.frame && this.props.ctx.frame.revalidate(),
       onClose: () => { throw new Error("Not implemented Exception"); },
       onReload: pack => { throw new Error("Not implemented Exception"); },
       setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
       refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
+      allowChangeEntity: false,
     };
 
-    const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
+    var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
+
+    const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
     return (
       <div data-property-path={ctx.propertyPath}>

@@ -325,33 +325,40 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo TryFindPropertyInfo(FieldInfo fi)
         {
-            using (HeavyProfiler.LogNoStackTrace("TryFindPropertyInfo", () => fi.Name))
+            try
             {
-                const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-                string propertyName = null;
-                if (fi.Name.StartsWith("<"))
+                using (HeavyProfiler.LogNoStackTrace("TryFindPropertyInfo", () => fi.Name))
                 {
-                    CheckSignumProcessed(fi);
-                    propertyName = fi.Name.After('<').Before('>');
-                }
-                else
-                    propertyName = fi.Name.FirstUpper();
+                    const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-                var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
+                    string propertyName = null;
+                    if (fi.Name.StartsWith("<"))
+                    {
+                        CheckSignumProcessed(fi);
+                        propertyName = fi.Name.After('<').Before('>');
+                    }
+                    else
+                        propertyName = fi.Name.FirstUpper();
 
-                if (result != null)
-                    return result;
-
-                foreach (Type i in fi.DeclaringType.GetInterfaces())
-                {
-                    result = fi.DeclaringType.GetProperty(i.FullName + "." + propertyName, flags);
+                    var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
 
                     if (result != null)
                         return result;
-                }
 
-                return null;
+                    foreach (Type i in fi.DeclaringType.GetInterfaces())
+                    {
+                        result = fi.DeclaringType.GetProperty(i.FullName + "." + propertyName, flags);
+
+                        if (result != null)
+                            return result;
+                    }
+
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(e.Message + $" (FieldInfo: {fi.FieldName()} DeclaringType: {fi.DeclaringType.TypeName()})", e);
             }
         }
 

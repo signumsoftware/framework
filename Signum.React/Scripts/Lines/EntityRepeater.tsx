@@ -30,7 +30,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
     if (this.props.avoidFieldSet == true)
       return (
         <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
-          {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
+          {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
           {this.renderButtons()}
           {this.renderElements()}
         </div>
@@ -38,7 +38,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     return (
       <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
-        {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
+        {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
         <legend>
           <div>
             <span>{this.state.labelText}</span>

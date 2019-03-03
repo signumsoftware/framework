@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { StyleContext } from '../Lines';
 import { classes } from '../Globals';
 import "./Lines.css"
@@ -20,11 +20,11 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
     if (onlyText) { //Text is scrollable in inputs
       if (ctx.readonlyAsPlainText) {
         return (
-          <input {...attrs} className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, this.props.className)} value={onlyText} />
+          <input {...attrs} className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, this.props.className)} tabIndex={-1} value={onlyText} />
         );
       } else {
         return (
-          <input {...attrs} {...{ readOnly: true }} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)} value={onlyText} />
+          <input {...attrs} {...{ readOnly: true }} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)} tabIndex={-1} value={onlyText} />
         );
       }
     }
