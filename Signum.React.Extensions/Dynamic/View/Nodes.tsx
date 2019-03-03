@@ -33,6 +33,8 @@ import { ColorTypeahead } from '../../Basics/Templates/ColorTypeahead';
 import { IconTypeahead } from '../../Basics/Templates/IconTypeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
+import { EntityOperationContext } from '@framework/Operations';
+import { OperationButton } from '@framework/Operations/EntityOperations';
 
 export interface BaseNode {
   kind: string;
@@ -1346,6 +1348,9 @@ NodeUtils.register<ValueSearchControlLineNode>({
 export interface ButtonNode extends BaseNode {
   kind: "Button",
   name: string;
+  operationName?: string;
+  onOperationClick?: ExpressionOrValue<(e: EntityOperationContext<any>) => void>;
+  canExecute?: ExpressionOrValue<string>;
   text?: ExpressionOrValue<string>;
   active?: ExpressionOrValue<boolean>;
   block?: ExpressionOrValue<boolean>;
@@ -1366,7 +1371,10 @@ NodeUtils.register<ButtonNode>({
   hasEntity: false,
   order: 0,
   renderTreeNode: dn => <span><small>Button:</small> <strong>{dn.node.name}</strong></span>,
-  renderCode: (node, cc) => cc.elementCode("Button", {
+  renderCode: (node, cc) => cc.elementCode(node.operationName ? "OperationButton" : "Button", {
+    eoc: node.operationName ? { __code__: `EntityOperationContext.fromTypeContext(${cc.subCtxCode().__code__}, ${node.operationName}))` } : undefined,
+    onOperationClick: node.onOperationClick,
+    canExecute: node.canExecute,
     active: node.active,
     block: node.block,
     color: node.color,
@@ -1384,6 +1392,31 @@ NodeUtils.register<ButtonNode>({
     var pIcon = parseIcon(icon);
     var iconColor = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.iconColor, NodeUtils.isStringOrNull);
 
+    var children = pIcon || iconColor ? <>
+      {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="mr-2" />}
+      {NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.text, NodeUtils.isStringOrNull)}
+    </> : undefined;
+
+    if (dn.node.operationName) {
+      const eoc = EntityOperationContext.fromTypeContext(ctx as TypeContext<Entity>, dn.node.operationName);
+      return (
+        <OperationButton
+          eoc={eoc}
+          canExecute={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.canExecute, NodeUtils.isStringOrNull)}
+          onOperationClick={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onOperationClick, NodeUtils.isFunctionOrNull)}
+          active={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
+          block={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
+          disabled={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
+          outline={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.outline, NodeUtils.isBooleanOrNull)}
+          onClick={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onClick, NodeUtils.isFunctionOrNull)}
+          className={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.className, NodeUtils.isStringOrNull)}
+          color={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
+          size={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize}
+          children={children}
+        />
+      );
+    }
+
     return (
       <Button
         active={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
@@ -1394,15 +1427,27 @@ NodeUtils.register<ButtonNode>({
         className={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.className, NodeUtils.isStringOrNull)}
         color={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
         size={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize}
-      >
-        {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="mr-2" />}
-        {NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.text, NodeUtils.isStringOrNull)}
-      </Button>
+        children={children}
+      />
     );
   },
   renderDesigner: (dn) => {
+
+    var ti = dn.route && getTypeInfo(dn.route.typeReference().name);
+
+    var operations = ti && ti.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key) || [];
+
     return (<div>
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.name)} type="string" defaultValue={null} allowsExpression={false} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.operationName)} type="string" defaultValue={null} allowsExpression={false} options={operations} refreshView={() => {
+        if (dn.node.operationName == null) {
+          delete dn.node.canExecute;
+          delete dn.node.onOperationClick;
+        }
+        dn.context.refreshView();
+      }} />
+      {dn.node.operationName && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.canExecute)} type="string" defaultValue={null} />}
+      {dn.node.operationName && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onOperationClick)} type={null} defaultValue={false} exampleExpression={"(eoc) => eoc.defaultClick()"} />}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.text)} type="string" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.color)} type="string" defaultValue={null} options={["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"] as BsColor[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.size)} type="string" defaultValue={null} options={["lg", "md", "sm", "xs"] as BsSize[]} />
@@ -1417,7 +1462,6 @@ NodeUtils.register<ButtonNode>({
     </div>)
   },
 });
-
 
 export namespace NodeConstructor {
 
