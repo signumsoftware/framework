@@ -121,6 +121,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     const activityFrame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
+      pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
       onReload: newPack => {
         if (newPack) {
           let newActivity = newPack.entity as CaseActivityEntity;
@@ -191,6 +192,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     const mainFrame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
+      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },
       onReload: newPack => {
         if (newPack) {
           pack.activity.case.mainEntity = newPack.entity as ICaseMainEntity;
