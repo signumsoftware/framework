@@ -435,6 +435,7 @@ export interface EntityFrame {
   revalidate: () => void;
   onClose: (ok?: boolean) => void;
   refreshCount: number;
+  allowChangeEntity: boolean;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

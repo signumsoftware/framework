@@ -61,13 +61,14 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
   }
 
   load(props: FramePageProps) {
+
     this.loadEntity(props)
-      .then(() => Navigator.setTitle(this.state.pack!.entity.toStr))
-      .then(() => this.loadComponent())
+      .then(pack => { Navigator.setTitle(pack.entity.toStr); return pack; })
+      .then(pack => this.loadComponent(pack))
       .done();
   }
 
-  loadEntity(props: FramePageProps): Promise<void> {
+  loadEntity(props: FramePageProps): Promise<EntityPack<Entity>> {
 
     if (QueryString.parse(this.props.location.search).waitData) {
       if (window.opener.dataForChildWindow == undefined) {
@@ -77,7 +78,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       var pack = window.opener.dataForChildWindow;
       window.opener.dataForChildWindow = undefined;
       this.setState({ pack: pack });
-      return Promise.resolve();
+      return Promise.resolve(pack);
     }
 
     const ti = this.getTypeInfo();
@@ -90,25 +91,31 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       };
 
       return Navigator.API.fetchEntityPack(lite)
-        .then(pack => this.setState({ pack }));
+        .then(pack => {
+          this.setState({ pack });
+          return Promise.resolve(pack);
+        });
 
     } else {
 
       return Constructor.construct(ti.name)
-        .then(pack => this.setState({ pack: pack as EntityPack<Entity> }));
+        .then(pack => {
+          this.setState({ pack: pack as EntityPack<Entity> });
+          return Promise.resolve(pack as EntityPack<Entity>);
+        });
     }
   }
 
 
-  loadComponent(): Promise<void> {
+  loadComponent(pack: EntityPack<Entity>): Promise<void> {
     const viewName = QueryString.parse(this.props.location.search).viewName;
-    return Navigator.getViewPromise(this.state.pack!.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise
+    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise
       .then(c => this.setState({ getComponent: c }));
   }
 
   onClose() {
-    if (Finder.isFindable(this.state.pack!.entity.Type, true))
-      Navigator.history.push(Finder.findOptionsPath({ queryName: this.state.pack!.entity.Type }));
+    if (Finder.isFindable(this.props.match.params.type, true))
+      Navigator.history.push(Finder.findOptionsPath({ queryName: this.props.match.params.type }));
     else
       Navigator.history.push("~/");
   }
@@ -146,7 +153,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         if (packEntity.entity.id != null && entity.id == null)
           Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
         else
-          this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1 });
+          this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1, getComponent: undefined }, () => this.loadComponent(packEntity).done());
       },
       onClose: () => this.onClose(),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -155,6 +162,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: true,
     };
 
     const ti = this.getTypeInfo();

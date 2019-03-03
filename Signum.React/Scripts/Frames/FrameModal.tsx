@@ -7,7 +7,7 @@ import ButtonBar from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
@@ -103,9 +103,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       refreshCount: 0,
     };
   }
-
-
-
+  
   setPack(pack: EntityPack<ModifiableEntity>): EntityPack<ModifiableEntity> {
     this.setState({
       pack: pack,
@@ -235,7 +233,16 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      onReload: pack => this.setPack(pack || this.state.pack!),
+      onReload: pack => {
+        var newPack = pack || this.state.pack!;
+        
+        if (is(this.state.pack!.entity as Entity, newPack.entity as Entity))
+          this.setPack(newPack);
+        else {
+          this.setPack(newPack);
+          this.setState({ getComponent: undefined }, () => this.loadComponent(newPack).done()); //For AutoFocus and potentialy another view
+        }
+      },
       pack: this.state.pack,
       onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -244,6 +251,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: this.props.isNavigate || false,
     };
 
     const pack = this.state.pack!;

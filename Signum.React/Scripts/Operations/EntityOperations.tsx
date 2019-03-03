@@ -10,12 +10,14 @@ import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
   operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-  CreateGroup, API, isEntityOperation, autoColorFunction, isSave
+  CreateGroup, API, isEntityOperation, autoColorFunction, isSave, AlternativeOperationSetting
 } from '../Operations'
-import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
+import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button, Dropdown } from "../Components";
 import { TitleManager } from "../../Scripts/Lines/EntityBase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonProps } from "../Components/Button";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import * as Constructor from "../Constructor"
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -109,13 +111,59 @@ function getGroup(eoc: EntityOperationContext<Entity>) {
   return undefined;
 }
 
-function getWithClose(eoc: EntityOperationContext<Entity>) {
-  let withClose = eoc.settings && eoc.settings.withClose;
+function getAlternatives(eoc: EntityOperationContext<Entity>): AlternativeOperationSetting<Entity>[] {
+  let alternatives = eoc.settings && eoc.settings.alternatives;
 
-  if (withClose != undefined)
-    return withClose;
+  if (alternatives)
+    return alternatives(eoc);
 
-  return isSave(eoc.operationInfo);
+  if (isSave(eoc.operationInfo)) {
+    return [
+      andClose(eoc),
+      andNew(eoc)
+    ]
+  }
+
+  return [];
+}
+
+export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
+
+  var text = eoc.settings && eoc.settings.text && eoc.settings.text() || eoc.operationInfo.niceName;
+
+  return ({
+    name:"andClose",
+    text: () => OperationMessage._0AndClose.niceToString(text),
+    icon: "check",
+    onClick: () => {
+      eoc.onExecuteSuccess = pack => {
+        eoc.frame.onReload(pack);
+        notifySuccess();
+        eoc.frame.onClose(true);
+      };
+      eoc.defaultClick();
+    }
+  });
+}
+
+export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
+
+  var text = eoc.settings && eoc.settings.text && eoc.settings.text() || eoc.operationInfo.niceName;
+  return ({
+    name: "andNew",
+    text: () => OperationMessage._0AndNew.niceToString(text),
+    icon: "plus",
+    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
+    onClick: () => {
+      eoc.onExecuteSuccess = pack => {
+        notifySuccess();
+        Constructor.construct(pack.entity.Type).then(newPack => {
+          eoc.frame.onReload(newPack);
+        }).done()
+      };
+      eoc.defaultClick();
+    }
+  });
 }
 
 interface OperationButtonProps extends ButtonProps {
@@ -136,9 +184,6 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
     const disabled = !!canExecute;
 
-    const withClose = getWithClose(eoc);
-
-
     let elem: HTMLElement | null;
 
     const tooltip = canExecute &&
@@ -148,7 +193,11 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         </UncontrolledTooltip>
       );
 
+    var alternatives = getAlternatives(eoc).filter(a => a.isVisible == true || a.isVisible == undefined);
+
     if (group) {
+      var dr
+
       return [
         <DropdownItem
           {...props}
@@ -159,39 +208,55 @@ export class OperationButton extends React.Component<OperationButtonProps> {
           data-operation={eoc.operationInfo.key}>
           {this.renderChildren()}
         </DropdownItem>,
-        tooltip
+        tooltip,
+        tooltip == null && alternatives.map(a => this.renderAlternative(a))
       ];
     }
 
-    var button = [
-      <Button color={bsColor}
-        {...props}
-        key="button"
-        innerRef={r => elem = r}
-        className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
-        onClick={disabled ? undefined : this.handleOnClick}
-        data-operation={eoc.operationInfo.key}>
-        {this.renderChildren()}
-      </Button>,
-      tooltip
-    ];
 
-    if (!withClose)
+    var button = <Button color={bsColor}
+      {...props}
+      key="button"
+      innerRef={r => elem = r}
+      className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
+      onClick={disabled ? undefined : this.handleOnClick}
+      data-operation={eoc.operationInfo.key}>
+      {this.renderChildren()}
+    </Button>;
+
+    if (tooltip)
+      return [
+        button,
+        tooltip
+      ];
+
+    
+    if (alternatives.length == 0)
       return button;
 
-    return [
-      <div className="btn-group"
-        ref={r => elem = r} key="buttonGroup">
+    return (
+      <UncontrolledDropdown group>
         {button}
-        <Button color={bsColor}
-          className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
-          onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
-          title={TitleManager.useTitle ? NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName) : undefined}>
-          <span>&times;</span>
-        </Button>
-      </div>,
-      tooltip
-    ];
+        <DropdownToggle caret split color={bsColor}/>
+        <DropdownMenu right>
+          {alternatives.map(a => this.renderAlternative(a))}
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    );
+  }
+
+  renderAlternative(aos: AlternativeOperationSetting<Entity>) {
+    
+    return (
+      <DropdownItem
+        color={aos.color}
+        className={aos.classes}
+        key={aos.name}
+        onClick={() => aos.onClick(this.props.eoc)}
+        data-alternative={aos.name}>
+        {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}
+      </DropdownItem>
+    );
   }
 
   renderChildren() {
@@ -211,15 +276,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     text = eoc.operationInfo.niceName;
 
     const s = eoc.settings;
-    if (s && s.icon) {
-      switch (s.iconAlign) {
-		case "right": return (<span>{text} <FontAwesomeIcon icon={s.icon} color={s.iconColor} fixedWidth /></span>);
-        default:      return (<span><FontAwesomeIcon icon={s.icon} color={s.iconColor} fixedWidth /> {text}</span>);
-      }
-    }
-    else {
-      return text;
-    }
+    return withIcon(text, s && s.icon, s && s.iconColor, s && s.iconAlign);
   }
 
   handleOnClick = (event: React.MouseEvent<any>) => {
@@ -233,12 +290,20 @@ export class OperationButton extends React.Component<OperationButtonProps> {
       eoc.settings.onClick(eoc);
     else
       defaultOnClick(eoc);
-
   }
 }
 
-
-
+function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end") {
+  if (icon) {
+    switch (iconAlign) {
+      case "end": return (<span>{text} <FontAwesomeIcon icon={icon} color={iconColor} fixedWidth /></span>);
+      default: return (<span><FontAwesomeIcon icon={icon} color={iconColor} fixedWidth /> {text}</span>);
+    }
+  }
+  else {
+    return text;
+  }
+}
 
 export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
   if (!eoc.operationInfo.canBeModified) {

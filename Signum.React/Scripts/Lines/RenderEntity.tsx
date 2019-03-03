@@ -159,6 +159,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
       onReload: pack => { throw new Error("Not implemented Exception"); },
       setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
       refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
+      allowChangeEntity: false,
     };
 
     var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
