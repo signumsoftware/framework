@@ -12,6 +12,7 @@ import ValidationErrors from './ValidationErrors'
 import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
+import { AutoFocus } from '../Components/AutoFocus';
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -181,7 +182,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+            {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}

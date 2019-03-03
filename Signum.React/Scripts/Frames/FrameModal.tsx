@@ -17,6 +17,8 @@ import { BsSize, Modal, ErrorBoundary } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
+import { AutoFocus } from '../Components/AutoFocus';
+
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   title?: string;
@@ -265,7 +267,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+            {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
