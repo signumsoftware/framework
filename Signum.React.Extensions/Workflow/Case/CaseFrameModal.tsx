@@ -270,6 +270,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         <ErrorBoundary>
           {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
         </ErrorBoundary>
+        <br />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
       </div>
     );
   }
