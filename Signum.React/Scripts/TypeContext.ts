@@ -429,6 +429,7 @@ export interface IHasChanges {
 export interface EntityFrame {
   frameComponent: React.Component<any, any>;
   entityComponent: React.Component<any, any> | null | undefined;
+  pack: EntityPack<ModifiableEntity> | undefined;
   onReload: (pack?: EntityPack<ModifiableEntity>) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;

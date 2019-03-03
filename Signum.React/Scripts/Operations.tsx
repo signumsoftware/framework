@@ -213,7 +213,8 @@ export class EntityOperationContext<T extends Entity> {
 
     var result = new EntityOperationContext<T>(ctx.frame, ctx.value, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
-    result.canExecute = undefined;
+    const pack = ctx.frame && ctx.frame.pack;
+    result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
     return result;
   }
 

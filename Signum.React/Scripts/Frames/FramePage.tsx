@@ -137,6 +137,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
+      pack: this.state.pack,
       onReload: pack => {
 
         var packEntity = (pack || this.state.pack) as EntityPack<Entity>;

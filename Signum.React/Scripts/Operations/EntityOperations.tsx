@@ -15,6 +15,7 @@ import {
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
 import { TitleManager } from "../../Scripts/Lines/EntityBase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ButtonProps } from "../Components/Button";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -117,7 +118,7 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
   return isSave(eoc.operationInfo);
 }
 
-interface OperationButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
+interface OperationButtonProps extends ButtonProps {
   eoc: EntityOperationContext<any /*Entity*/>;
   group?: EntityOperationGroup;
   canExecute?: string | null;
