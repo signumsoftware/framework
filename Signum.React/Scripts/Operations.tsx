@@ -243,8 +243,8 @@ export class EntityOperationContext<T extends Entity> {
   click() {
     if (this.settings && this.settings.onClick)
       this.settings.onClick(this);
-
-    defaultOnClick(this);
+    else
+      defaultOnClick(this);
   }
 
   isAllowed() {
