@@ -20,6 +20,7 @@ import { Modal, ErrorBoundary } from '@framework/Components';
 import { ModalHeaderButtons } from '@framework/Components/Modal';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
+import { AutoFocus } from '@framework/Components/AutoFocus';
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
   title?: string;
@@ -185,6 +186,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     var activityFrame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
+      pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
       onReload: newPack => {
         if (newPack) {
           pack.activity = newPack.entity as CaseActivityEntity;
@@ -199,6 +201,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: false,
     };
 
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
@@ -228,6 +231,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     const mainFrame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
+      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },
       onReload: newPack => {
         if (newPack) {
           pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
@@ -242,6 +246,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: false,
     };
 
     var ti = this.getMainTypeInfo();
@@ -266,10 +271,12 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         <ErrorBoundary>
-          {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+          {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}</AutoFocus>}
         </ErrorBoundary>
+        <br />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
       </div>
     );
   }

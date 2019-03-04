@@ -112,12 +112,14 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     const lastCompile = this.state.panelInformation && this.state.panelInformation.lastDynamicCompilationDateTime;
     const lastChange = this.state.panelInformation && this.state.panelInformation.lastDynamicChangeDateTime;
     const loadedAssembly = this.state.panelInformation && this.state.panelInformation.loadedCodeGenAssemblyDateTime;
+    const loadedControllerAssembly = this.state.panelInformation && this.state.panelInformation.loadedCodeGenControllerAssemblyDateTime;
 
     const validStyle = { color: "green" } as React.CSSProperties;
     const invalidStyle = { color: "red", fontWeight: "bold" } as React.CSSProperties;
 
     const isValidCompile = lastChange && lastCompile && moment(lastCompile).isBefore(moment(lastChange)) ? false : true;
     const isValidAssembly = lastChange && loadedAssembly && moment(loadedAssembly).isBefore(moment(lastChange)) ? false : true;
+    const isValidControllerAssembly = lastChange && loadedControllerAssembly && moment(loadedControllerAssembly).isBefore(moment(lastChange)) ? false : true;
 
     return (
       <table className="table table-condensed form-vertical" style={{ width: "30%" }}>
@@ -132,6 +134,10 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
         <tr>
           <th>Loaded CodeGen Assembly</th>
           <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
+        </tr>
+        <tr>
+          <th>Loaded CodeGen Controller Assembly</th>
+          <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? moment(loadedControllerAssembly).format("L LT") : "-"}</td>
         </tr>
       </table>
     );

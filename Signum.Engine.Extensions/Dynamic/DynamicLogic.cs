@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -47,6 +48,14 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
+        public static FileInfo GetLastCodeGenControllerAssemblyFileInfo()
+        {
+            return new DirectoryInfo(DynamicCode.CodeGenDirectory)
+                .GetFiles($"{DynamicCode.CodeGenControllerAssembly.Before(".")}*.dll")
+                .OrderByDescending(f => f.CreationTime)
+                .FirstOrDefault();
+        }
+
         public static FileInfo GetLoadedCodeGenAssemblyFileInfo()
         {
             if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
@@ -57,23 +66,65 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static void BindCodeGenAssembly()
+        public static FileInfo GetLoadedCodeGenControllerAssemblyFileInfo()
+        {
+            if (DynamicCode.CodeGenControllerAssemblyPath.IsNullOrEmpty())
+                return null;
+
+            return new DirectoryInfo(DynamicCode.CodeGenDirectory)
+                .GetFiles(Path.GetFileName(DynamicCode.CodeGenControllerAssemblyPath))
+                .FirstOrDefault();
+        }
+
+        private static void BindCodeGenAssemblies()
         {
             DynamicCode.CodeGenAssemblyPath = GetLastCodeGenAssemblyFileInfo()?.FullName;
+            DynamicCode.CodeGenControllerAssemblyPath = GetLastCodeGenControllerAssemblyFileInfo()?.FullName;
         }
 
         public static void CompileDynamicCode()
         {
+            DynamicLogic.BindCodeGenAssemblies();
+            Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+
+            var errors = new List<string>();
             try
             {
-                Dictionary<string, CodeFile> codeFiles = GetCodeFilesDictionary();
+                CompilationResult cr = null;
 
-                var cr = Compile(codeFiles, inMemory: false);
+                bool cleaned = false;
+                if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
+                {
+                    CleanCodeGenFolder();
+                    cleaned = true;
 
-                if (cr.Errors.Count != 0)
-                    throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                    {
+                        Dictionary<string, CodeFile> codeFiles = GetCodeFilesDictionary();
 
-                DynamicCode.CodeGenAssemblyPath = cr.OutputAssembly;
+                        cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false);
+                        //cr = Compile(codeFiles, inMemory: false);
+
+                        if (cr.Errors.Count == 0)
+                            DynamicCode.CodeGenAssemblyPath = cr.OutputAssembly;
+                        else
+                            errors.Add("Errors compiling  dynamic assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                    }
+                }
+
+                if (DynamicApiLogic.IsStarted && (DynamicCode.CodeGenControllerAssemblyPath.IsNullOrEmpty() || cleaned))
+                {
+                    Dictionary<string, CodeFile> codeFiles = DynamicApiLogic.GetCodeFiles().ToDictionary(a => a.FileContent);
+                    cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true);
+                    //cr = CompileDynamicApi(inMemory: false);
+
+                    if (cr.Errors.Count == 0)
+                        DynamicCode.CodeGenControllerAssemblyPath = cr.OutputAssembly;
+                    else
+                        errors.Add("Errors compiling  dynamic api controller assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                }
+
+                if (errors.Any())
+                    throw new InvalidOperationException(errors.ToString("\r\n"));
             }
             catch (Exception e)
             {
@@ -178,40 +229,43 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        public static CompilationResult Compile(Dictionary<string, CodeFile> codeFiles, bool inMemory)
+        public static void CleanCodeGenFolder()
+        {
+            try
+            {
+                Directory.EnumerateFiles(DynamicCode.CodeGenDirectory)
+                    .ToList()
+                    .ForEach(a => File.Delete(a));
+            }
+            catch (Exception)
+            {
+                // Maybe we have no access to delete CodeGenAssembly*.dll or CodeGenControllerAssembly*.dll
+            }
+        }
+
+        public static CompilationResult Compile(Dictionary<string, CodeFile> codeFiles, 
+            bool inMemory, 
+            string assemblyName, 
+            bool needsCodeGenAssembly)
         {
             using (HeavyProfiler.Log("COMPILE"))
             {
-                Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
-
-                try
+                if (!inMemory)
                 {
-                    Directory.EnumerateFiles(DynamicCode.CodeGenDirectory)
-                        .Where(a => a != DynamicCode.CodeGenAssemblyPath)
-                        .ToList()
-                        .ForEach(a => File.Delete(a));
+                    codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent, Encoding.UTF8));
                 }
-                catch (Exception)
-                {
-                    // Maybe we have Access denied exception to CodeGenAssembly*.dll
-                }
-
-                var utf8 = Encoding.UTF8;
-
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent, utf8));
 
                 var references = DynamicCode.GetCoreMetadataReferences()
-                    .Concat(DynamicCode.GetMetadataReferences(needsCodeGenAssembly: false));
+                    .Concat(DynamicCode.GetMetadataReferences(needsCodeGenAssembly));
 
-                var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(DynamicCode.CodeGenAssembly))
+                var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(assemblyName))
                       .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                       .AddReferences(references)
                       .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName))));
 
-                DynamicCode.CodeGenGeneratedAssembly = $"{DynamicCode.CodeGenAssembly.Before(".")}.{Guid.NewGuid()}.dll";
-                var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenGeneratedAssembly);
+                var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, $"{assemblyName.Before(".")}.{Guid.NewGuid()}.dll");
 
-                using (var stream = (Stream)new MemoryStream())
+                using (var stream = new MemoryStream())
                 {
                     var emitResult = compilation.Emit(stream);
 

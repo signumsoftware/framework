@@ -61,6 +61,7 @@ export interface EvalEntityError {
 export interface DynamicPanelInformation {
   lastDynamicCompilationDateTime?: string;
   loadedCodeGenAssemblyDateTime?: string;
+  loadedCodeGenControllerAssemblyDateTime?: string;
   lastDynamicChangeDateTime?: string;
 }
 
