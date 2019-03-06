@@ -2,7 +2,7 @@ import * as React from "react"
 import * as H from "history"
 import { Route, Switch } from "react-router"
 import { Dic, classes, } from './Globals';
-import { ajaxGet, ajaxPost, useAPI } from './Services';
+import { ajaxGet, ajaxPost } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, OperationType, TypeReference, IsByAll } from './Reflection';
@@ -1082,8 +1082,4 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
   }
 
   return undefined;
-}
-
-export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
-  return useAPI<T | null | undefined>(undefined, [lite && liteKey(lite)], signal => lite == null ? Promise.resolve(lite) : API.fetchAndForget(lite));
 }
