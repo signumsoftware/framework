@@ -197,17 +197,17 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.getViewPromise, false))
       .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
-      .then(e => {
-        if (!e)
+      .then(pack => {
+        if (!pack)
           return Promise.resolve(undefined);
 
         var fo = this.state.findOptions;
         if (!fo || !fo.filterOptions)
-          return e.entity as Entity;
+          return pack.entity as Entity;
 
         return Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], false, qd))
-          .then(filters => Finder.setFilters(e!.entity as Entity, filters));
+          .then(filters => Finder.setFilters(pack!.entity as Entity, filters));
       });
   }
 
