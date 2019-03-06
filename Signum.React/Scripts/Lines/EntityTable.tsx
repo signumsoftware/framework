@@ -78,14 +78,14 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
           {this.renderButtons()}
           {this.renderTable(ctx)}
         </div>
       );
 
     return (
-      <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+      <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         <legend>
           <div>
             <span>{this.state.labelText}</span>

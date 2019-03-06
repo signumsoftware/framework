@@ -47,11 +47,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="Scripts\Hooks.ts" />
-    <TypeScriptCompile Remove="Scripts\SearchControl\PinnedFilterBuilder.tsx" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="package.json" />
   </ItemGroup>
   

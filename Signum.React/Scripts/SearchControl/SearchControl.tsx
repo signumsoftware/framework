@@ -41,7 +41,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   allowChangeColumns?: boolean;
   allowChangeOrder?: boolean;
   create?: boolean;
-  navigate?: boolean;
+  navigate?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
   avoidAutoRefresh?: boolean;
   avoidChangeUrl?: boolean;

@@ -1271,6 +1271,7 @@ export interface QuerySettings {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  inPlaceNavigation?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], refresh: () => void) => React.ReactElement<any> | undefined;
@@ -1432,7 +1433,9 @@ export const entityFormatRules: EntityFormatRule[] = [
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc && sc.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}>
+        getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}
+        inPlaceNavigation={sc && sc.props.navigate == "InPlace"}
+      >
         {EntityControlMessage.View.niceToString()}
       </EntityLink>
   },

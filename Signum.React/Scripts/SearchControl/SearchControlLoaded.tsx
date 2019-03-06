@@ -31,6 +31,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { TitleManager } from '../../Scripts/Lines/EntityBase';
+import { AutoFocus } from '../Components/AutoFocus';
 
 export interface ShowBarExtensionOption { }
 
@@ -65,7 +66,7 @@ export interface SearchControlLoadedProps {
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
   create: boolean;
-  navigate: boolean;
+  navigate: boolean | "InPlace";
   largeToolbarButtons: boolean;
   avoidAutoRefresh: boolean;
   avoidChangeUrl: boolean;
@@ -392,30 +393,32 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       <div className="sf-search-control SF-control-container" ref="container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
-        {p.showHeader == true && 
+        {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-            this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFilters={true}
+              this.state.showFilters ? <FilterBuilder
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFilters={true}
 
-            /> :
-              sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                <PinnedFilterBuilder
-                  filterOptions={fo.filterOptions}
-                  onFiltersChanged={this.handlePinnedFilterChanged} />
+              /> :
+                sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                  <AutoFocus>
+                    <PinnedFilterBuilder
+                      filterOptions={fo.filterOptions}
+                      onFiltersChanged={this.handlePinnedFilterChanged} />
+                  </AutoFocus>
             }
           </div>
         }
-        {p.showHeader == "PinnedFilters" && <PinnedFilterBuilder
+        {p.showHeader == "PinnedFilters" && <AutoFocus><PinnedFilterBuilder
           filterOptions={fo.filterOptions}
-          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />}
+          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} /></AutoFocus>}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -617,21 +620,29 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var qs = this.props.querySettings;
 
         var getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
-        
-        if (isWindowsOpen || (s != null && s.avoidPopup)) {
+
+        if (isWindowsOpen || (s != null && s.avoidPopup && this.props.navigate != "InPlace")) {
           var vp = getViewPromise && getViewPromise(null)
 
           window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
         } else {
-          Constructor.construct(tn).then(e => {
-            if (e == undefined)
-              return;
 
-            Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-              .then(() => Navigator.navigate(e!, { getViewPromise: getViewPromise as any }))
-              .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
-              .done();
-          }).done();
+          if (this.props.navigate == "InPlace") {
+
+            var vp = getViewPromise && getViewPromise(null);
+            Navigator.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
+
+          } else {
+            Constructor.construct(tn).then(e => {
+              if (e == undefined)
+                return;
+
+              Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
+                .then(() => Navigator.navigate(e!, { getViewPromise: getViewPromise as any }))
+                .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+                .done();
+            }).done();
+          }
         }
       }).done();
     }
@@ -1110,15 +1121,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const avoidPopup = s != undefined && s.avoidPopup;
 
-      if (avoidPopup || e.ctrlKey || e.button == 1) {
+      if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.navigate != "InPlace") {
         var vp = getViewPromise && getViewPromise(null);
         window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
       }
       else {
-        Navigator.navigate(lite, { getViewPromise: getViewPromise })
-          .then(() => {
-            this.handleOnNavigated(lite);
-          }).done();
+        if (this.props.navigate == "InPlace") {
+          var vp = getViewPromise && getViewPromise(null);
+          Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+        } else {
+          Navigator.navigate(lite, { getViewPromise: getViewPromise })
+            .then(() => {
+              this.handleOnNavigated(lite);
+            }).done();
+        }
       }
     }
   }

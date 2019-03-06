@@ -254,12 +254,12 @@ export class TypeContext<T> extends StyleContext {
     return new TypeContext(parent, styleOptions, PropertyRoute.root(value.Type), new ReadonlyBinding<T>(value, ""));
   }
 
-  constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute /*| undefined*/, binding: IBinding<T>) {
+  constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute /*| undefined*/, binding: IBinding<T>, prefix?: string) {
     super(parent, styleOptions);
     this.propertyRoute = propertyRoute;
     this.binding = binding;
 
-    this.prefix = compose(parent && (parent as TypeContext<any>).prefix, binding.suffix);
+    this.prefix = prefix || ((parent && (parent as TypeContext<any>).prefix || "") + binding.suffix);
   }
 
   subCtx(styleOptions: StyleOptions): TypeContext<T>
@@ -268,7 +268,7 @@ export class TypeContext<T> extends StyleContext {
   subCtx(field: string, styleOptions?: StyleOptions): TypeContext<any>
   subCtx(arg: ((val: T) => any) | IType | string | StyleOptions, styleOptions?: StyleOptions): TypeContext<any> {
     if (typeof arg == "object" && !isType(arg))
-      return new TypeContext<T>(this, arg, this.propertyRoute, this.binding);
+      return new TypeContext<T>(this, arg, this.propertyRoute, this.binding, this.prefix);
 
     const lambdaMembers =
       typeof arg == "function" ? getLambdaMembers(arg) :
@@ -293,7 +293,7 @@ export class TypeContext<T> extends StyleContext {
 
     var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
 
-    const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
+    const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, ""));
 
     return result;
   }
@@ -307,7 +307,7 @@ export class TypeContext<T> extends StyleContext {
 
     var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
 
-    const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
+    const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, ""));
 
     return result;
   }
@@ -323,8 +323,10 @@ export class TypeContext<T> extends StyleContext {
     return this.propertyRoute.addLambda(property).member!.niceName;
   }
 
-  compose(suffix: string): string {
-    return compose(this.prefix, suffix);
+  getUniqueId(suffix?: string): string {
+    var path = suffix == null ? this.prefix : (this.prefix + "." + suffix);
+
+    return path.replace(/.\[\]/, "_");
   }
 
   tryFindParentCtx<S extends ModifiableEntity>(type: Type<S>): TypeContext<S> | undefined;
@@ -390,6 +392,19 @@ export class TypeContext<T> extends StyleContext {
   get errorClassBorder(): string | undefined {
     return !!this.error ? "border has-error" : undefined;
   }
+
+  errorAttributes(): React.HTMLAttributes<any> | undefined {
+
+    if (!this.error)
+      return undefined;
+
+    debugger;
+
+    return {
+      title: this.error,
+      "data-error-path": this.prefix
+    } as any;
+  }
 }
 
 export interface ButtonsContext {
@@ -414,30 +429,21 @@ export interface IHasChanges {
 export interface EntityFrame {
   frameComponent: React.Component<any, any>;
   entityComponent: React.Component<any, any> | null | undefined;
+  pack: EntityPack<ModifiableEntity> | undefined;
   onReload: (pack?: EntityPack<ModifiableEntity>) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
   onClose: (ok?: boolean) => void;
   refreshCount: number;
-}
-
-
-function compose(prefix: string | undefined, suffix: string | undefined): string {
-  if (!prefix || prefix == "")
-    return suffix || "";
-
-  if (!suffix || suffix == "")
-    return prefix || "";
-
-  return prefix + "_" + suffix;
+  allowChangeEntity: boolean;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
 
-  return ctx.value!.map((mle, i) =>
-    new TypeContext<T>(ctx, undefined,
-      ctx.propertyRoute.addMember("Indexer", ""),
-      new MListElementBinding<T>(ctx.binding, i)));
+  return ctx.value!.map((mle, i) => new TypeContext<T>(ctx, undefined,
+    ctx.propertyRoute.addMember("Indexer", ""),
+    new MListElementBinding<T>(ctx.binding, i),
+  ));
 }
 
 

@@ -7,6 +7,7 @@ import { TitleManager } from "../../Scripts/Lines/EntityBase";
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {
   lite: Lite<Entity>;
   inSearch?: boolean;
+  inPlaceNavigation?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   innerRef?: (node: HTMLAnchorElement | null) => void;
@@ -15,7 +16,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
 export default class EntityLink extends React.Component<EntityLinkProps>{
 
   render() {
-    const { lite, inSearch, children, onNavigated, getViewPromise, ...htmlAtts } = this.props;
+    const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, ...htmlAtts } = this.props;
 
     if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
       return <span data-entity={liteKey(lite)}>{this.props.children || getToString(lite)}</span>;
@@ -36,22 +37,24 @@ export default class EntityLink extends React.Component<EntityLinkProps>{
 
   handleClick = (event: React.MouseEvent<any>) => {
 
+    event.preventDefault();
     const lite = this.props.lite;
-
     const s = Navigator.getSettings(lite.EntityType)
-
     const avoidPopup = s != undefined && s.avoidPopup;
 
-    event.preventDefault();
-
-    if (event.ctrlKey || event.button == 1 || avoidPopup) {
+    if (event.ctrlKey || event.button == 1 || avoidPopup && !this.props.inPlaceNavigation) {
       var vp = this.props.getViewPromise && this.props.getViewPromise(null);
       window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
       return;
     }
-
-    Navigator.navigate(lite, { getViewPromise: this.props.getViewPromise }).then(() => {
-      this.props.onNavigated && this.props.onNavigated(lite);
-    }).done();
+    
+    if (this.props.inPlaceNavigation) {
+      var vp = this.props.getViewPromise && this.props.getViewPromise(null);
+      Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+    } else {
+      Navigator.navigate(lite, { getViewPromise: this.props.getViewPromise }).then(() => {
+        this.props.onNavigated && this.props.onNavigated(lite);
+      }).done();
+    }
   }
 }
