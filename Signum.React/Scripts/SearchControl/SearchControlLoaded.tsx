@@ -66,7 +66,7 @@ export interface SearchControlLoadedProps {
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
   create: boolean;
-  navigate: boolean;
+  navigate: boolean | "InPlace";
   largeToolbarButtons: boolean;
   avoidAutoRefresh: boolean;
   avoidChangeUrl: boolean;
@@ -620,21 +620,29 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var qs = this.props.querySettings;
 
         var getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
-        
-        if (isWindowsOpen || (s != null && s.avoidPopup)) {
+
+        if (isWindowsOpen || (s != null && s.avoidPopup && this.props.navigate != "InPlace")) {
           var vp = getViewPromise && getViewPromise(null)
 
           window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
         } else {
-          Constructor.construct(tn).then(e => {
-            if (e == undefined)
-              return;
 
-            Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-              .then(() => Navigator.navigate(e!, { getViewPromise: getViewPromise as any }))
-              .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
-              .done();
-          }).done();
+          if (this.props.navigate == "InPlace") {
+
+            var vp = getViewPromise && getViewPromise(null);
+            Navigator.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
+
+          } else {
+            Constructor.construct(tn).then(e => {
+              if (e == undefined)
+                return;
+
+              Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
+                .then(() => Navigator.navigate(e!, { getViewPromise: getViewPromise as any }))
+                .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+                .done();
+            }).done();
+          }
         }
       }).done();
     }
@@ -1113,15 +1121,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const avoidPopup = s != undefined && s.avoidPopup;
 
-      if (avoidPopup || e.ctrlKey || e.button == 1) {
+      if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.navigate != "InPlace") {
         var vp = getViewPromise && getViewPromise(null);
         window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
       }
       else {
-        Navigator.navigate(lite, { getViewPromise: getViewPromise })
-          .then(() => {
-            this.handleOnNavigated(lite);
-          }).done();
+        if (this.props.navigate == "InPlace") {
+          var vp = getViewPromise && getViewPromise(null);
+          Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+        } else {
+          Navigator.navigate(lite, { getViewPromise: getViewPromise })
+            .then(() => {
+              this.handleOnNavigated(lite);
+            }).done();
+        }
       }
     }
   }
