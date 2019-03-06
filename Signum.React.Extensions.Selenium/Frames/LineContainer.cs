@@ -53,7 +53,7 @@ namespace Signum.React.Selenium
                 {
                     var newRoute = route.Add(mi);
 
-                    if (newRoute.Parent != route)
+                    if (newRoute.Parent != route && route != lineContainer.Route)
                         element = element.FindElement(By.CssSelector("[data-property-path='" + route.PropertyString() + "']"));
 
                     route = newRoute;

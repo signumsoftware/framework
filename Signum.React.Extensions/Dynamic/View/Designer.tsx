@@ -25,11 +25,12 @@ export interface ExpressionOrValueProps {
   avoidDelete?: boolean;
   hideLabel?: boolean;
   exampleExpression?: string;
+  onRenderValue?: (value: number | string| null | undefined, e: ExpressionOrValueComponent) => React.ReactElement<any>;
 }
 
 export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps> {
 
-  updateValue(value: string | boolean | undefined) {
+  updateValue(value: string | boolean | null | undefined) {
     var p = this.props;
 
     var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
@@ -153,6 +154,9 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
   }
 
   renderValue(value: number | string | null | undefined) {
+
+    if (this.props.onRenderValue)
+      return this.props.onRenderValue(value, this);
 
     if (this.props.type == null)
       return <p className="form-control-static form-control-xs">{DynamicViewMessage.UseExpression.niceToString()}</p>;

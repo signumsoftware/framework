@@ -1,4 +1,4 @@
-﻿import * as QueryString from 'query-string'
+import * as QueryString from 'query-string'
 import { RestLogEntity, RestApiKeyEntity } from './Signum.Entities.Rest'
 import { EntitySettings } from "@framework/Navigator";
 import * as Navigator from "@framework/Navigator";
@@ -18,7 +18,7 @@ export function loginFromApiKey(): Promise<AuthClient.AuthenticatedUser | undefi
   const query = QueryString.parse(window.location.search);
 
   if ('apiKey' in query) {
-    return API.loginFromApiKey(query.apiKey);
+    return API.loginFromApiKey(query.apiKey as string);
   }
 
   return Promise.resolve(undefined);

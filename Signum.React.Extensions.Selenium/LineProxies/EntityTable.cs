@@ -20,7 +20,7 @@ namespace Signum.React.Selenium
 
         public virtual WebElementLocator RowElement(int index)
         {
-            return this.TableElement.CombineCss(" > tbody > tr:nth-child({0})".FormatWith(index));
+            return this.TableElement.CombineCss(" > tbody > tr:nth-child({0})".FormatWith(index + 1));
         }
 
         public void WaitItemLoaded(int index)
@@ -38,14 +38,14 @@ namespace Signum.React.Selenium
             return new LineContainer<T>(RowElement(index).WaitPresent(), this.ItemRoute);
         }
 
-        public IWebElement RemoveRowIndex(int index)
+        public IWebElement RemoveRowButton(int index)
         {
-            return RowElement(index).CombineCss(" a.remove").Find();
+            return RowElement(index).CombineCss(" .sf-remove").Find();
         }
 
         public void Remove(int index)
         {
-            this.RemoveRowIndex(index).Click();
+            this.RemoveRowButton(index).Click();
         }
 
         public EntityInfoProxy EntityInfo(int index)
@@ -55,16 +55,13 @@ namespace Signum.React.Selenium
 
         public LineContainer<T> CreateRow<T>() where T : ModifiableEntity
         {
-            var count = this.RowsCount();
-
             CreateEmbedded<T>();
-
-            return this.Row<T>(count + 1);
+            return this.LastRow<T>();
         }
 
         public LineContainer<T> LastRow<T>() where T : ModifiableEntity
         {
-            return this.Row<T>(this.RowsCount() + 1);
+            return this.Row<T>(this.RowsCount() - 1);
         }
     }
 }

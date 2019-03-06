@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Entities from '@framework/Signum.Entities'
@@ -10,6 +10,7 @@ import * as Reflection from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import * as Components from '@framework/Components'
 import * as AuthClient from '../../Authorization/AuthClient'
+import * as Services from '@framework/Services'
 
 
 export const globalModules: any = {
@@ -24,5 +25,6 @@ export const globalModules: any = {
   Entities,
   AuthClient,
   Operations,
-  Constructor
+  Constructor,
+  Services,
 };

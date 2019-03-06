@@ -12,10 +12,12 @@ namespace Signum.Entities.Dynamic
     {
         public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
+        public static string CodeGenControllerNamespace = "Signum.React.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
         public static string CodeGenAssembly = "CodeGenAssembly.dll";
-        public static string CodeGenGeneratedAssembly = "CodeGenAssembly.dll";
+        public static string CodeGenControllerAssembly = "CodeGenControllerAssembly.dll";
         public static string CodeGenAssemblyPath;
+        public static string CodeGenControllerAssemblyPath;
         public static Action OnApplicationServerRestarted;
 
         public static HashSet<Type> RegisteredDynamicTypes = new HashSet<Type>();
@@ -32,6 +34,7 @@ namespace Signum.Entities.Dynamic
             "System.Collections.Generic",
             "System.Linq.Expressions",
             "Signum.Utilities",
+            "Signum.Utilities.Reflection",
             "DocumentFormat.OpenXml",
             "DocumentFormat.OpenXml.Packaging",
             "DocumentFormat.OpenXml.Spreadsheet",
@@ -70,6 +73,7 @@ namespace Signum.Entities.Dynamic
         public static HashSet<string> CoreAssemblyNames = new HashSet<string>
         {
             "mscorlib.dll",
+            "netstandard.dll",
             "System.Runtime.dll",
             "System.Collections.dll",
             "System.IO.dll",

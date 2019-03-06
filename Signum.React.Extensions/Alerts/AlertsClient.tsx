@@ -7,6 +7,7 @@ import SelectorModal from '@framework/SelectorModal'
 import ValueLineModal from '@framework/ValueLineModal'
 import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
+import { andClose } from '@framework/Operations/EntityOperations';
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
@@ -27,7 +28,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
   }, { isVisible: couldHaveAlerts(ctx.lite.EntityType), icon: "bell", iconColor: "orange" }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
-    withClose: true,
+    alternatives: eoc => [andClose(eoc)],
   }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {

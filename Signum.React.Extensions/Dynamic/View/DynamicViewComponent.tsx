@@ -19,6 +19,7 @@ import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from '@framework/Components';
 import "./DynamicView.css"
+import { AutoFocus } from '@framework/Components/AutoFocus';
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
@@ -116,7 +117,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         }
       </div>
       <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-        {NodeUtils.renderWithViewOverrides(rootNode, ctx, vos)}
+        <AutoFocus>{NodeUtils.renderWithViewOverrides(rootNode, ctx, vos)}</AutoFocus>
       </div>
     </div>);
   }
