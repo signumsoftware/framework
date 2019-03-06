@@ -1,0 +1,43 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>React Function Component</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>reactFunction</Shortcut>
+    <Description>Code snippet for adding an React Function Component that can use React Hooks</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import * as React from 'react';
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>ComponentName</ID>
+        <ToolTip>Component Class Name</ToolTip>
+        <Default>MyComponent</Default>
+      </Literal>
+      <Literal>
+        <ID>EntityType</ID>
+        <ToolTip>Type of the Entity</ToolTip>
+        <Default>Entity</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+export function class $ComponentName$(p : { ctx: TypeContext<$EntityType$> }) {
+  return (
+    <div>
+      $end$
+    </div>
+  );
+}
+     ]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

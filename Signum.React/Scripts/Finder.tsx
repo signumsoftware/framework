@@ -4,7 +4,7 @@ import * as numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
-import { ajaxGet, ajaxPost, useAPI } from './Services';
+import { ajaxGet, ajaxPost } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
@@ -977,16 +977,6 @@ export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<Q
     queryDescriptionCache[queryKey] = Object.freeze(qd);
     return qd;
   });
-}
-
-export module Hooks {
-
-  export function useQuery(fo: FindOptions): ResultTable | undefined {
-    return useAPI(undefined, [findOptionsPath(fo)], signal =>
-      getQueryDescription(fo.queryName)
-        .then(qd => parseFindOptions(fo, qd))
-        .then(fop => API.executeQuery(getQueryRequest(fop), signal)));
-  }
 }
 
 export module API {
