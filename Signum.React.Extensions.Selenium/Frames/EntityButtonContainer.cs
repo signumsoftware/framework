@@ -13,7 +13,8 @@ namespace Signum.React.Selenium
         IWebElement ContainerElement();
     }
 
-    public interface IEntityButtonContainer<T> : IEntityButtonContainer
+    public interface IEntityButtonContainer<T> : IEntityButtonContainer, ILineContainer<T>
+        where T : IModifiableEntity
     {
     }
 
