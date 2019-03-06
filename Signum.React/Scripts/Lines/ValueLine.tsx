@@ -331,7 +331,9 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
-        <input type="text" {...vl.state.valueHtmlAttributes}
+        <input type="text"
+          autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+          {...vl.state.valueHtmlAttributes}
           className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
           value={s.ctx.value || ""}
           onBlur={handleBlur || htmlAtts && htmlAtts.onBlur}
@@ -471,7 +473,10 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
       this.props.value != undefined ? numbro(this.props.value).format(this.props.format) :
         "";
 
-    return <input ref={this.props.innerRef} {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
+    return <input ref={this.props.innerRef} {...this.props.htmlAttributes}
+      type="text"
+      autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+      className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
       onBlur={this.handleOnBlur}
       onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
       onInput={isIE11() ? this.handleOnChange : undefined}
@@ -633,7 +638,10 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
       this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
         "";
 
-    return <input ref={this.props.innerRef} {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
+    return <input ref={this.props.innerRef} {...this.props.htmlAttributes}
+      type="text"
+      autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+      className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
       onBlur={this.handleOnBlur}
       onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
       onInput={isIE11() ? this.handleOnChange : undefined}

@@ -31,6 +31,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { TitleManager } from '../../Scripts/Lines/EntityBase';
+import { AutoFocus } from '../Components/AutoFocus';
 
 export interface ShowBarExtensionOption { }
 
@@ -71,7 +72,7 @@ export interface SearchControlLoadedProps {
   avoidChangeUrl: boolean;
   refreshKey: string | number | undefined;
 
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], search: () => void) => React.ReactElement<any> | undefined;
   onCreate?: () => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -124,8 +125,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qd = this.props.queryDescription;
 
     const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
-      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions) :
-        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions) :
+      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions, () => this.doSearchPage1()) :
+        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions, () => this.doSearchPage1()) :
           undefined;
 
     if (sfb) {
@@ -170,16 +171,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const fo = this.props.findOptions;
     const qs = this.props.querySettings;
 
-    return {
-      queryKey: fo.queryKey,
-      groupResults: fo.groupResults,
-      filters: toFilterRequests(fo.filterOptions),
-      columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-        .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
-      orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
-      pagination: fo.pagination,
-      systemTime: fo.systemTime,
-    };
+    return Finder.getQueryRequest(fo, qs);
   }
 
   // MAIN
@@ -401,30 +393,32 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       <div className="sf-search-control SF-control-container" ref="container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
-        {p.showHeader == true && 
+        {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-            this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFilters={true}
+              this.state.showFilters ? <FilterBuilder
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFilters={true}
 
-            /> :
-              sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                <PinnedFilterBuilder
-                  filterOptions={fo.filterOptions}
-                  onFiltersChanged={this.handlePinnedFilterChanged} />
+              /> :
+                sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                  <AutoFocus>
+                    <PinnedFilterBuilder
+                      filterOptions={fo.filterOptions}
+                      onFiltersChanged={this.handlePinnedFilterChanged} />
+                  </AutoFocus>
             }
           </div>
         }
-        {p.showHeader == "PinnedFilters" && <PinnedFilterBuilder
+        {p.showHeader == "PinnedFilters" && <AutoFocus><PinnedFilterBuilder
           filterOptions={fo.filterOptions}
-          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />}
+          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} /></AutoFocus>}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}

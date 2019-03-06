@@ -15,7 +15,8 @@ export interface EntityTabRepeaterProps extends EntityListBaseProps {
   avoidFieldSet?: boolean;
   selectedIndex?: number;
   getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
-
+  extraTabs?: (c: EntityTabRepeater) => React.ReactNode;
+  onSelectTab?: (newIndex: number) => void;
 }
 
 export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
@@ -39,7 +40,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
     if (this.props.avoidFieldSet == true)
       return (
         <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
-          {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+          {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes} {...ctx.errorAttributes() }>
           {this.renderButtons()}
           {this.renderTabs()}
         </div>
@@ -47,7 +48,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
     return (
       <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
-        {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes} {...ctx.errorAttributes() }>
         <legend>
           <div>
             <span>{this.state.labelText}</span>
@@ -64,10 +65,18 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
       <span className="ml-2">
         {this.renderCreateButton(false)}
         {this.renderFindButton(false)}
+        {this.props.extraButtons && this.props.extraButtons(this)}
       </span>
     );
 
     return React.Children.count(buttons) ? buttons : undefined;
+  }
+
+  handleSelectTab = (activeKey: string | number) => {
+    if (this.props.onSelectTab)
+      this.props.onSelectTab(activeKey as number);
+    else
+      this.setState({ selectedIndex: activeKey as number })
   }
 
   renderTabs() {
@@ -75,7 +84,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
     const readOnly = ctx.readOnly;
 
     return (
-      <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
+      <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={this.handleSelectTab}>
         {
           mlistItemContext(ctx).map((mlec, i) => {
             const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
@@ -91,8 +100,8 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                   onDrop={drag && drag.onDrop}>
                   {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
                   &nbsp;
-										{this.canRemove(mlec.value) && !readOnly &&
-                    <span className={classes("sf-line-button", "sf-create")}
+                {this.canRemove(mlec.value) && !readOnly &&
+                    <span className={classes("sf-line-button", "sf-remove")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
                       title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
@@ -112,6 +121,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
             </Tab>
           })
         }
+        {this.props.extraTabs && this.props.extraTabs(this)}
       </Tabs>
     );
   }

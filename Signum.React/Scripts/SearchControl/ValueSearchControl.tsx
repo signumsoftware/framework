@@ -29,7 +29,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   avoidNotifyPendingRequest?: boolean;
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
-  onRender?: (value: any, vsc: ValueSearchControl) => React.ReactNode;
+  onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
 }
 
 export interface ValueSearchControlState {
@@ -67,8 +67,13 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   }
 
   componentWillReceiveProps(newProps: ValueSearchControlProps) {
+
+    function toString(token: string | QueryTokenString<any> | undefined) {
+      return token && token.toString();
+    }
+
     if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
-      this.props.valueToken == newProps.valueToken) {
+      toString(this.props.valueToken) == toString(newProps.valueToken)) {
 
       if (this.props.refreshKey != newProps.refreshKey)
         this.refreshValue(newProps)
@@ -133,6 +138,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   render() {
 
     const p = this.props;
+    const s = this.state;
 
     const fo = p.findOptions;
 
@@ -154,9 +160,11 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     let className = classes(
       p.valueToken == undefined && "count-search",
-      p.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
+      p.valueToken == undefined && (this.state.value > 0 ? "count-with-results" : "count-no-results"),
+      s.token && (s.token.type.isLite || s.token!.type.isEmbedded) && "sf-entity-line-entity",
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
+      
       p.isBadge == false ? "" :
         "badge badge-pill " + (this.props.badgeColor ? ("badge-" + this.props.badgeColor) : (p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted")),
       p.customClass

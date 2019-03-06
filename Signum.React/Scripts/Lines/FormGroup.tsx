@@ -17,12 +17,13 @@ export class FormGroup extends React.Component<FormGroupProps> {
     const ctx = this.props.ctx;
     const tCtx = ctx as TypeContext<any>;
     const errorClass = tCtx.errorClass;
+    const errorAtts = tCtx.errorAttributes && tCtx.errorAttributes();
 
     if (ctx.formGroupStyle == "None") {
       const c = this.props.children as React.ReactElement<any>;
 
       return (
-        <span {...this.props.htmlAttributes} className={errorClass}>
+        <span {...this.props.htmlAttributes} className={errorClass} {...errorAtts}>
           {c}
         </span>
       );
@@ -42,7 +43,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
     );
 
     const formGroupClasses = classes(this.props.ctx.formGroupClass, this.props.ctx.formGroupStyle == "LabelColumns" ? "row" : undefined, errorClass);
-    return <div {...this.props.htmlAttributes} className={addClass(this.props.htmlAttributes, formGroupClasses)}>
+    return <div {...this.props.htmlAttributes} className={addClass(this.props.htmlAttributes, formGroupClasses)} {...errorAtts}>
       {ctx.formGroupStyle != "BasicDown" && label}
       {
         ctx.formGroupStyle != "LabelColumns" ? this.props.children :

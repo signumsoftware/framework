@@ -14,22 +14,11 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Hoy" />
   </Type>
+  <Type Name="CollectionAnyAllType" />
   <Type Name="CollectionElementType">
-    <Member Name="All" Description="Todos" />
-    <Member Name="All2" Description="Todos (2)" />
-    <Member Name="All3" Description="Todos (3)" />
-    <Member Name="Any" Description="Alguno" />
-    <Member Name="Any2" Description="Alguno (2)" />
-    <Member Name="Any3" Description="Alguno (3)" />
-    <Member Name="AnyNo" Description="Alguno no" />
-    <Member Name="AnyNo2" Description="Alguno no (2)" />
-    <Member Name="AnyNo3" Description="Alguno no (3)" />
     <Member Name="Element" Description="Elemento" />
     <Member Name="Element2" Description="Elemento (2)" />
     <Member Name="Element3" Description="Elemento (3)" />
-    <Member Name="NoOne" Description="Ninguno" />
-    <Member Name="NoOne2" Description="Ninguno (2)" />
-    <Member Name="NoOne3" Description="Ninguno (3)" />
   </Type>
   <Type Name="ColorEmbedded" Description="Color">
     <Member Name="Argb" Description="Argb" />
@@ -56,11 +45,8 @@
   </Type>
   <Type Name="DeleteLogParametersEmbedded" Description="Parámetros eliminación de registros">
     <Member Name="ChunkSize" Description="Tamaño" />
-    <Member Name="DateLimit" Description="Fecha límite" />
-    <Member Name="DeleteLogsWithMoreThan" Description="Eliminar registros con más de" />
     <Member Name="MaxChunks" Description="Max trozos" />
     <Member Name="PauseTime" Description="Tiempo de pausa" />
-    <Member Name="TypeOverrides" Description="Sobrescritura de tipo" />
   </Type>
   <Type Name="DeleteLogsTypeOverridesEmbedded" Description="Borrar registros de sobrescritura de tipo">
     <Member Name="DeleteLogsWithMoreThan" Description="Eliminar registros con más de" />
@@ -124,6 +110,7 @@
     <Member Name="UserHostName" Description="Nombre de Host del usuario" />
     <Member Name="Version" Description="Versión" />
   </Type>
+  <Type Name="FilterGroupOperation" />
   <Type Name="FilterOperation" Description="Operación de filtro">
     <Member Name="Contains" Description="contiene" />
     <Member Name="DistinctTo" Description="distinto de" />
@@ -381,11 +368,11 @@
     <Member Name="Key" Description="Clave" />
   </Type>
   <Type Name="SynchronizerMessage">
-    <Member Name="_0HasBeenRenamedIn1" Description="    ¿'{0}' ha sido renombrada en {1}?" />
     <Member Name="EndOfSyncScript" Description="--- FIN DEL SCRIPT DE SINCRONIZACION" />
-    <Member Name="NNone" Description="- n: Ninguno" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACIÓN GENERADO EL {0}" />
   </Type>
+  <Type Name="SystemTimeMode" />
+  <Type Name="SystemTimeProperty" />
   <Type Name="TypeEntity" Description="Tipo">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
@@ -397,7 +384,6 @@
     <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} y {1} pueden no ajustarse al mismo tiempo" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} no tiene un formato válido {1}" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
-    <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} tiene una precisión de {1} en lugar de {2}" />
     <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} tiene más de {1} decimales " />
     <Member Name="_0HasSomeRepeatedElements1" Description="{0} tiene elementos repetidos: {1}" />
     <Member Name="_0HasToBeBetween1And2" Description="{0} tiene que ser entre {1} y {2}" />

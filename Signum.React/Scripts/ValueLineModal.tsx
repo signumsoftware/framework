@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
 import { TypeReference, Binding } from './Reflection'
@@ -39,7 +39,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
   }
 
   render() {
-    const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value));
+    const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value), "valueLineModal");
 
     const { title, message, initialValue, ...props } = this.props.options;
     var vlp: ValueLineProps = {

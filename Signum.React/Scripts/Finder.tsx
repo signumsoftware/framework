@@ -4,7 +4,7 @@ import * as numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
-import { ajaxGet, ajaxPost } from './Services';
+import { ajaxGet, ajaxPost, useAPI } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
@@ -499,6 +499,9 @@ export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undef
       pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
     }];
   }
+  else {
+    return undefined;
+  }
 }
 
 export function isAggregate(fop: FilterOptionParsed): boolean {
@@ -601,6 +604,20 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     return parseFilterValues(result.filterOptions)
       .then(() => result)
   });
+}
+
+export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): QueryRequest {
+
+  return {
+    queryKey: fo.queryKey,
+    groupResults: fo.groupResults,
+    filters: toFilterRequests(fo.filterOptions),
+    columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
+      .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+    orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
+    pagination: fo.pagination,
+    systemTime: fo.systemTime,
+  };
 }
 
 export function validateNewEntities(fo: FindOptions): string | undefined {
@@ -902,7 +919,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     case "Boolean": return parseBoolean(val);
     case "Integer": return nanToNull(parseInt(val));
     case "Decimal": return nanToNull(parseFloat(val));
-    case "DateTime": return (val == null ? null : moment(val).format());
+    case "DateTime": return val == null ? null : val;
     case "Lite":
       {
         const lite = convertToLite(val);
@@ -960,6 +977,16 @@ export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<Q
     queryDescriptionCache[queryKey] = Object.freeze(qd);
     return qd;
   });
+}
+
+export module Hooks {
+
+  export function useQuery(fo: FindOptions): ResultTable | undefined {
+    return useAPI(undefined, [findOptionsPath(fo)], signal =>
+      getQueryDescription(fo.queryName)
+        .then(qd => parseFindOptions(fo, qd))
+        .then(fop => API.executeQuery(getQueryRequest(fop), signal)));
+  }
 }
 
 export module API {
@@ -1257,7 +1284,7 @@ export interface QuerySettings {
   inPlaceNavigation?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], refresh: () => void) => React.ReactElement<any> | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;

@@ -28,7 +28,11 @@ namespace Signum.Entities
         [Description("{0} didn't return an entity")]
         TheOperation0DidNotReturnAnEntity,
         Logs,
-        PreviousOperationLog
+        PreviousOperationLog,
+        [Description("{0} & Close")]
+        _0AndClose,
+        [Description("{0} & New")]
+        _0AndNew,
     }
 
     public enum SynchronizerMessage
@@ -94,8 +98,6 @@ Lose changes?")]
         ThereAreChangesContinue,
         ThereAreErrors,
         Message,
-        [Description(@"{0} and Close")]
-        _0AndClose,
         [Description("New {0}")]
         New0_G,
         [Description("{0} {1}")]

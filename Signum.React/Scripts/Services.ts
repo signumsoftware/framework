@@ -1,5 +1,6 @@
 import { ModelState } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
+import * as React from 'react'
 
 export interface AjaxOptions {
   url: string;
@@ -382,4 +383,29 @@ export class AbortableRequest<Q, A> {
       throw ex
     }) as Promise<A>;
   }
+}
+
+export function useForceUpdate(): () => void {
+  return React.useState()[1] as () => void;
+}
+
+export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>): T {
+
+  const [data, updateData] = React.useState<T>(defaultValue)
+
+  React.useEffect(() => {
+    var abortController = new AbortController();
+
+    updateData(defaultValue);
+
+    makeCall(abortController.signal)
+      .then(result => updateData(result))
+      .done();
+
+    return () => {
+      abortController.abort();
+    }
+  }, key);
+
+  return data;
 }
