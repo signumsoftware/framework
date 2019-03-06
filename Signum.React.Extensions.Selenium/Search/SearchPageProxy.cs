@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
@@ -27,6 +27,15 @@ namespace Signum.React.Selenium
                 popup = popup.GetDriver().CapturePopup(() => SelectorModalProxy.Select(popup, typeof(T)));
 
             return new FrameModalProxy<T>(popup);
+        }
+
+        public FramePageProxy<T> CreateInPlace<T>() where T : ModifiableEntity
+        {
+            SearchControl.CreateButton.Find().Click();
+
+            var result = new FramePageProxy<T>(this.Selenium);
+ 
+            return result;
         }
 
         public FramePageProxy<T> CreateInTab<T>() where T : ModifiableEntity

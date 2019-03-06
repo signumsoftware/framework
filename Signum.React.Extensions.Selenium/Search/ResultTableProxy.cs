@@ -189,6 +189,11 @@ namespace Signum.React.Selenium
             return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex + 1));
         }
 
+        public FramePageProxy<T> EntityClickInPlace<T>(Lite<T> lite) where T : Entity
+        {
+            EntityLink(lite).Find().Click();
+            return new FramePageProxy<T>(this.Selenium);
+        }
 
         public FrameModalProxy<T> EntityClick<T>(Lite<T> lite) where T : Entity
         {
