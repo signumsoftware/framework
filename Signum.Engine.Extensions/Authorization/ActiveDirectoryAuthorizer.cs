@@ -45,18 +45,18 @@ namespace Signum.Engine.Authorization
             using (AuthLogic.Disable())
             {
                 var config = this.GetConfig();
-                var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DefaultDomainName;
-                var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
-                
+                var domainName = userName.TryAfterLast('@');
+                var localName = userName.TryBeforeLast('@') ?? userName;
+
                 UserEntity user;
 
-                if (domainName != null && (config.AllowOtherDomains || config.DefaultDomainName?.ToLower() == domainName.ToLower()))
+                if (config.DomainName.HasText() && (domainName == null || config.DomainName.ToLower() == domainName?.ToLower()))
                 {
                     try
                     {
-                        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
+                        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, config.DomainName))
                         {
-                            if (pc.ValidateCredentials(localName + "@" + domainName, password))
+                            if (pc.ValidateCredentials(localName + "@" + config.DomainName, password))
                             {
                                 user = AuthLogic.RetrieveUser(userName);
 
