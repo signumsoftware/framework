@@ -10,61 +10,31 @@ import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
+import { useForceUpdate } from '@framework/Hooks'
 
-export default class EmailTemplate extends React.Component<{ ctx: TypeContext<EmailTemplateEntity> }> {
+export default function EmailTemplate(p : { ctx: TypeContext<EmailTemplateEntity> }){
+  const forceUpdate = useForceUpdate();
 
-  render() {
-    const ctx = this.props.ctx;
-    const ctx3 = ctx.subCtx({ labelColumns: { sm: 3 } });
-
-    return (
-      <div>
-        <ValueLine ctx={ctx3.subCtx(e => e.name)} />
-        <EntityCombo ctx={ctx3.subCtx(e => e.systemEmail)} />
-        <EntityLine ctx={ctx3.subCtx(e => e.query)} onChange={() => this.forceUpdate()}
-          remove={ctx.value.from == undefined &&
-            (ctx.value.recipients == null || ctx.value.recipients.length == 0) &&
-            (ctx.value.messages == null || ctx.value.messages.length == 0)} />
-        <div className="row">
-          <div className="col-sm-4">
-            <ValueLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
-          </div>
-          <div className="col-sm-4">
-            <ValueLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox={true} />
-          </div>
-          <div className="col-sm-4">
-            <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
-          </div>
-        </div>
-        {ctx3.value.query && <EntityDetail ctx={ctx3.subCtx(e => e.applicable)}
-          getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />}
-
-        {ctx3.value.query && this.renderQueryPart()}
-      </div>
-    );
-  }
-
-  renderQueryPart() {
-    const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
+  function renderQueryPart() {
+    const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
     const ecXs = ec.subCtx({ formSize: "ExtraSmall" });
     return (
       <div>
-        <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => this.forceUpdate()} getComponent={this.renderContact} />
-        <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => this.forceUpdate()} getComponent={this.renderRecipient} />
+        <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()} getComponent={renderContact} />
+        <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()} getComponent={renderRecipient} />
         <EntityRepeater ctx={ecXs.subCtx(e => e.attachments)} />
         <EntityLine ctx={ec.subCtx(e => e.masterTemplate)} />
         <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} />
 
         <div className="sf-email-replacements-container">
-          <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEmbedded>) =>
-            <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query!.key!} invalidate={() => this.forceUpdate()} />} />
+          <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEmbedded>) =>
+            <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query!.key!} invalidate={() => forceUpdate()} />} />
         </div>
       </div>
     );
   }
 
-  renderContact = (ec: TypeContext<EmailTemplateContactEmbedded>) => {
-
+  function renderContact(ec: TypeContext<EmailTemplateContactEmbedded>) {
     const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
     return (
@@ -76,10 +46,10 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
             </FormGroup>
           </div>
           <div className="col-sm-10">
-            {this.props.ctx.value.query &&
+            {p.ctx.value.query &&
               <QueryTokenEmbeddedBuilder
                 ctx={sc.subCtx(a => a.token)}
-                queryKey={this.props.ctx.value.query.key}
+                queryKey={p.ctx.value.query.key}
                 subTokenOptions={SubTokensOptions.CanElement}
                 helpText="Expression pointing to an EmailOwnerData (recommended)" />
             }
@@ -97,8 +67,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
     );
   };
 
-  renderRecipient = (ec: TypeContext<EmailTemplateRecipientEmbedded>) => {
-
+  function renderRecipient(ec: TypeContext<EmailTemplateRecipientEmbedded>) {
     const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
     return (
@@ -108,10 +77,10 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
             <ValueLine ctx={sc.subCtx(a => a.kind)} />
           </div>
           <div className="col-sm-10">
-            {this.props.ctx.value.query &&
+            {p.ctx.value.query &&
               <QueryTokenEmbeddedBuilder
                 ctx={sc.subCtx(a => a.token)}
-                queryKey={this.props.ctx.value.query.key}
+                queryKey={p.ctx.value.query.key}
                 subTokenOptions={SubTokensOptions.CanElement}
                 helpText="Expression pointing to an EmailOwnerData (recommended)" />
             }
@@ -128,6 +97,34 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
       </div>
     );
   };
+  const ctx = p.ctx;
+  const ctx3 = ctx.subCtx({ labelColumns: { sm: 3 } });
+
+  return (
+    <div>
+      <ValueLine ctx={ctx3.subCtx(e => e.name)} />
+      <EntityCombo ctx={ctx3.subCtx(e => e.systemEmail)} />
+      <EntityLine ctx={ctx3.subCtx(e => e.query)} onChange={() => forceUpdate()}
+        remove={ctx.value.from == undefined &&
+          (ctx.value.recipients == null || ctx.value.recipients.length == 0) &&
+          (ctx.value.messages == null || ctx.value.messages.length == 0)} />
+      <div className="row">
+        <div className="col-sm-4">
+          <ValueLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
+        </div>
+        <div className="col-sm-4">
+          <ValueLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox={true} />
+        </div>
+        <div className="col-sm-4">
+          <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
+        </div>
+      </div>
+      {ctx3.value.query && <EntityDetail ctx={ctx3.subCtx(e => e.applicable)}
+        getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />}
+
+      {ctx3.value.query && renderQueryPart()}
+    </div>
+  );
 }
 
 export interface EmailTemplateMessageComponentProps {
@@ -136,50 +133,21 @@ export interface EmailTemplateMessageComponentProps {
   invalidate: () => void;
 }
 
-export class EmailTemplateMessageComponent extends React.Component<EmailTemplateMessageComponentProps, { showPreview: boolean }>{
-  constructor(props: EmailTemplateMessageComponentProps) {
-    super(props);
-    this.state = { showPreview: false }
-  }
+export function EmailTemplateMessageComponent(p : EmailTemplateMessageComponentProps){
+  const forceUpdate = useForceUpdate();
+  const [showPreview, setShowPreview] = React.useState(false);
 
-  handlePreviewClick = (e: React.FormEvent<any>) => {
+  function handlePreviewClick(e: React.FormEvent<any>) {
     e.preventDefault();
-    this.setState({
-      showPreview: !this.state.showPreview
-    });
+    setShowPreview(!showPreview);
   }
 
-  handleCodeMirrorChange = () => {
-    if (this.state.showPreview)
-      this.forceUpdate();
+  function handleCodeMirrorChange() {
+    if (showPreview)
+      forceUpdate();
   }
 
-
-  render() {
-
-    const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
-    return (
-      <div className="sf-email-template-message">
-        <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={this.props.invalidate} />
-        <div>
-          <TemplateControls queryKey={this.props.queryKey} onInsert={this.handleOnInsert} forHtml={true} />
-          <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
-          <div className="code-container">
-            <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={this.handleCodeMirrorChange} />
-          </div>
-          <br />
-          <a href="#" onClick={this.handlePreviewClick}>
-            {this.state.showPreview ?
-              EmailTemplateMessage.HidePreview.niceToString() :
-              EmailTemplateMessage.ShowPreview.niceToString()}
-          </a>
-          {this.state.showPreview && <IFrameRenderer style={{ width: "100%" }} html={ec.value.text} />}
-        </div>
-      </div>
-    );
-  }
-
-  handleOnInsert = (newCode: string) => {
+  function handleOnInsert(newCode: string) {
     ValueLineModal.show({
       type: { name: "string" },
       initialValue: newCode,
@@ -188,4 +156,24 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
       initiallyFocused: true,
     }).done();
   }
+  const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
+  return (
+    <div className="sf-email-template-message">
+      <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
+      <div>
+        <TemplateControls queryKey={p.queryKey} onInsert={handleOnInsert} forHtml={true} />
+        <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
+        <div className="code-container">
+          <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
+        </div>
+        <br />
+        <a href="#" onClick={handlePreviewClick}>
+          {showPreview ?
+            EmailTemplateMessage.HidePreview.niceToString() :
+            EmailTemplateMessage.ShowPreview.niceToString()}
+        </a>
+        {showPreview && <IFrameRenderer style={{ width: "100%" }} html={ec.value.text} />}
+      </div>
+    </div>
+  );
 }

@@ -1,29 +1,28 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, TypeContext } from '@framework/Lines'
 import CSSCodeMirror from '../../Codemirror/CSSCodeMirror'
 import { DynamicCSSOverrideEntity } from '../Signum.Entities.Dynamic'
+import { useForceUpdate } from '@framework/Hooks'
 
-export default class DynamicCSSOverrideComponent extends React.Component<{ ctx: TypeContext<DynamicCSSOverrideEntity> }> {
+export default function DynamicCSSOverrideComponent(p : { ctx: TypeContext<DynamicCSSOverrideEntity> }){
+  const forceUpdate = useForceUpdate();
+  function handleCodeChange(newScript: string) {
+    const entity = p.ctx.value;
+    entity.script = newScript;
+    entity.modified = true;
+    forceUpdate();
+  }
 
-    handleCodeChange = (newScript: string) => {
-        const entity = this.props.ctx.value;
-        entity.script = newScript;
-        entity.modified = true;
-        this.forceUpdate();
-    }
+  var ctx = p.ctx;
 
-    render() {
-        var ctx = this.props.ctx;
-
-        return (
-            <div>
-                <ValueLine ctx={ctx.subCtx(dt => dt.name)} />
-                <br />
-                <div className="code-container">
-                    <CSSCodeMirror script={ctx.value.script || ""} onChange={this.handleCodeChange} />
-                </div>
-            </div>
-        );
-    }
+  return (
+    <div>
+      <ValueLine ctx={ctx.subCtx(dt => dt.name)} />
+      <br />
+      <div className="code-container">
+        <CSSCodeMirror script={ctx.value.script || ""} onChange={handleCodeChange} />
+      </div>
+    </div>
+  );
 }
 

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -11,9 +11,8 @@ export interface MailingMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-export default class MailingMenu extends React.Component<MailingMenuProps> {
-  handleClick = (et: Lite<EmailTemplateEntity>) => {
-
+export default function MailingMenu(p : MailingMenuProps){
+  function handleClick(et: Lite<EmailTemplateEntity>) {
     Navigator.API.fetchAndForget(et)
       .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.systemEmail!))
       .then(ct => {
@@ -25,36 +24,33 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
         if (!s.createFromQuery)
           throw new Error("No 'createFromQuery' defined in the WordModelSettings of '" + ct + "'");
 
-        return s.createFromQuery(et, this.props.searchControl.getQueryRequest())
+        return s.createFromQuery(et, p.searchControl.getQueryRequest())
           .then(m => m && MailingClient.createAndViewEmail(et, m));
       })
       .done();
   }
 
-  render() {
+  const emailTemplates = p.searchControl.props.queryDescription.emailTemplates;
 
-    const emailTemplates = this.props.searchControl.props.queryDescription.emailTemplates;
+  if (!emailTemplates || !emailTemplates.length)
+    return null;
 
-    if (!emailTemplates || !emailTemplates.length)
-      return null;
+  const label = <span><FontAwesomeIcon icon={["far", "envelope"]} /> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
-    const label = <span><FontAwesomeIcon icon={["far", "envelope"]} /> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
-
-    return (
-      <UncontrolledDropdown id="mailingDropDown" className="sf-mailing-dropdown">
-        <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
-        <DropdownMenu>
-          {
-            emailTemplates.map((wt, i) =>
-              <DropdownItem key={i}
-                onClick={() => this.handleClick(wt)}>
-                {wt.toStr}
-              </DropdownItem>)
-          }
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    );
-  }
+  return (
+    <UncontrolledDropdown id="mailingDropDown" className="sf-mailing-dropdown">
+      <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
+      <DropdownMenu>
+        {
+          emailTemplates.map((wt, i) =>
+            <DropdownItem key={i}
+              onClick={() => handleClick(wt)}>
+              {wt.toStr}
+            </DropdownItem>)
+        }
+      </DropdownMenu>
+    </UncontrolledDropdown>
+  );
 }
 
 

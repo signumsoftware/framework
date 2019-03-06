@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -12,8 +12,8 @@ export interface WordSearchMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-export default class WordSearchMenu extends React.Component<WordSearchMenuProps> {
-  handleOnClick = (wt: Lite<WordTemplateEntity>) => {
+export default function WordSearchMenu(p : WordSearchMenuProps){
+  function handleOnClick(wt: Lite<WordTemplateEntity>) {
     Navigator.API.fetchAndForget(wt)
       .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!))
       .then(async ct => {
@@ -24,38 +24,35 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps>
         if (!s.createFromQuery)
           throw new Error("No 'createFromQuery' defined in the WordModelSettings of '" + ct + "'");
 
-        const m = await s.createFromQuery(wt, this.props.searchControl.getQueryRequest());
+        const m = await s.createFromQuery(wt, p.searchControl.getQueryRequest());
         return m && WordClient.API.createAndDownloadReport({ template: wt, entity: m });
       })
       .then(response => response && saveFile(response))
       .done();
   }
 
-  render() {
-    var wordReports = this.props.searchControl.props.queryDescription.wordTemplates;
+  var wordReports = p.searchControl.props.queryDescription.wordTemplates;
 
-    if (!wordReports || !wordReports.length ||
-      (this.props.searchControl.props.showBarExtensionOption && this.props.searchControl.props.showBarExtensionOption.showWordReport == false))
-      return null;
+  if (!wordReports || !wordReports.length ||
+    (p.searchControl.props.showBarExtensionOption && p.searchControl.props.showBarExtensionOption.showWordReport == false))
+    return null;
 
-    const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
+  const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
-    return (
-      <UncontrolledDropdown id="wordTemplateDropDown" className="sf-word-dropdown">
-        <DropdownToggle>{label}</DropdownToggle>
-        <DropdownMenu>
-          {
-            wordReports.map((wt, i) =>
-              <DropdownItem key={i}
-                onClick={() => this.handleOnClick(wt)}>
-                {wt.toStr}
-              </DropdownItem>)
-          }
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    );
-  }
-
+  return (
+    <UncontrolledDropdown id="wordTemplateDropDown" className="sf-word-dropdown">
+      <DropdownToggle>{label}</DropdownToggle>
+      <DropdownMenu>
+        {
+          wordReports.map((wt, i) =>
+            <DropdownItem key={i}
+              onClick={() => handleOnClick(wt)}>
+              {wt.toStr}
+            </DropdownItem>)
+        }
+      </DropdownMenu>
+    </UncontrolledDropdown>
+  );
 }
 
 declare module '@framework/SearchControl/SearchControlLoaded' {

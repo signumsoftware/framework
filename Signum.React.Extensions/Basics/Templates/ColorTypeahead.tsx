@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic } from '@framework/Globals'
@@ -6,29 +6,28 @@ import { FormGroup } from '@framework/Lines'
 import { Typeahead } from '@framework/Components'
 import { TypeContext } from '@framework/TypeContext'
 import { namedColors } from '../Color'
+import { useForceUpdate } from '@framework/Hooks'
 
 
-export class ColorTypeaheadLine extends React.Component<{ ctx: TypeContext<string | null | undefined>; onChange?: () => void }>{
-
-  handleOnChange = (newColor: string | undefined | null) => {
-    this.props.ctx.value = newColor;
-    if (this.props.onChange)
-      this.props.onChange();
-    this.forceUpdate();
+export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefined>; onChange?: () => void }){
+  const forceUpdate = useForceUpdate();
+  function handleOnChange(newColor: string | undefined | null) {
+    p.ctx.value = newColor;
+    if (p.onChange)
+      p.onChange();
+    forceUpdate();
 
   }
 
-  render() {
-    var ctx = this.props.ctx;
+  var ctx = p.ctx;
 
-    return (
-      <FormGroup ctx={ctx} labelText={ctx.niceName()} >
-        <ColorTypeahead color={ctx.value}
-          formControlClass={ctx.formControlClass}
-          onChange={this.handleOnChange} />
-      </FormGroup>
-    );
-  }
+  return (
+    <FormGroup ctx={ctx} labelText={ctx.niceName()} >
+      <ColorTypeahead color={ctx.value}
+        formControlClass={ctx.formControlClass}
+        onChange={handleOnChange} />
+    </FormGroup>
+  );
 }
 
 interface ColorTypeaheadProps {
@@ -37,9 +36,9 @@ interface ColorTypeaheadProps {
   formControlClass: string | undefined;
 }
 
-export class ColorTypeahead extends React.Component<ColorTypeaheadProps>{
-
-  handleGetItems = (query: string) => {
+export function ColorTypeahead(p : ColorTypeaheadProps){
+  const forceUpdate = useForceUpdate();
+  function handleGetItems(query: string) {
     if (!query)
       return Promise.resolve([
         "black",
@@ -59,14 +58,13 @@ export class ColorTypeahead extends React.Component<ColorTypeaheadProps>{
     return Promise.resolve(result);
   }
 
-  handleSelect = (item: unknown | string) => {
-    this.props.onChange(item as string);
-    this.forceUpdate();
+  function handleSelect(item: unknown | string) {
+    p.onChange(item as string);
+    forceUpdate();
     return item as string;
   }
 
-  handleRenderItem = (item: unknown, query: string) => {
-
+  function handleRenderItem(item: unknown, query: string) {
     return (
       <span>
         <FontAwesomeIcon icon="square" className="icon" color={item as string} />
@@ -75,21 +73,19 @@ export class ColorTypeahead extends React.Component<ColorTypeaheadProps>{
     );
   }
 
-  render() {
-    return (
-      <div style={{ position: "relative" }}>
-        <Typeahead
-          value={this.props.color || ""}
-          inputAttrs={{ className: classes(this.props.formControlClass, "sf-entity-autocomplete") }}
-          getItems={this.handleGetItems}
-          onSelect={this.handleSelect}
-          onChange={this.handleSelect}
-          renderItem={this.handleRenderItem}
-          minLength={0}
-        />
-      </div>
-    );
-  }
+  return (
+    <div style={{ position: "relative" }}>
+      <Typeahead
+        value={p.color || ""}
+        inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+        getItems={handleGetItems}
+        onSelect={handleSelect}
+        onChange={handleSelect}
+        renderItem={handleRenderItem}
+        minLength={0}
+      />
+    </div>
+  );
 }
 
 

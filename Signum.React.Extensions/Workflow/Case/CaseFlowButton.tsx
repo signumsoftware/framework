@@ -7,19 +7,16 @@ interface CaseFlowButtonProps {
   caseActivity: CaseActivityEntity;
 }
 
-export default class CaseFlowButton extends React.Component<CaseFlowButtonProps>{
-  handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+export default function CaseFlowButton(p : CaseFlowButtonProps){
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-    var ca = this.props.caseActivity;
+    var ca = p.caseActivity;
     Navigator.navigate(ca.case, { extraComponentProps: { caseActivity: ca } }).done();
   }
 
-  render() {
-    return (
-      <button className="btn btn-light float-right flip" onClick={this.handleClick}>
-        <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
-      </button>
-    );
-  }
-
+  return (
+    <button className="btn btn-light float-right flip" onClick={handleClick}>
+      <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+    </button>
+  );
 }

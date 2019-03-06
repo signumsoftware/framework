@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic } from '@framework/Globals'
 import { Binding } from '@framework/Reflection'
@@ -8,103 +8,103 @@ import { DesignerNode, ExpressionOrValue, isExpression } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { HtmlAttributesExpression } from './HtmlAttributesExpression'
 import { Typeahead } from '@framework/Components';
+import { useForceUpdate } from '@framework/Hooks'
 
 interface HtmlAttributesLineProps {
   binding: Binding<HtmlAttributesExpression | undefined>;
   dn: DesignerNode<BaseNode>;
 }
 
-export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>{
-  renderMember(expr: HtmlAttributesExpression | undefined): React.ReactNode {
+export function HtmlAttributesLine(p: HtmlAttributesLineProps) {
+  function renderMember(expr: HtmlAttributesExpression | undefined): React.ReactNode {
     return (<span
       className={expr === undefined ? "design-default" : "design-changed"}>
-      {this.props.binding.member}
+      {p.binding.member}
     </span>);
   }
 
-  handleRemove = (e: React.MouseEvent<any>) => {
+  function handleRemove(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.props.binding.deleteValue();
-    this.props.dn.context.refreshView();
+    p.binding.deleteValue();
+    p.dn.context.refreshView();
   }
 
-  handleCreate = (e: React.MouseEvent<any>) => {
+  function handleCreate(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.modifyExpression({} as HtmlAttributesExpression);
+    modifyExpression({} as HtmlAttributesExpression);
   }
 
-  handleView = (e: React.MouseEvent<any>) => {
+  function handleView(e: React.MouseEvent<any>) {
     e.preventDefault();
-    var hae = JSON.parse(JSON.stringify(this.props.binding.getValue())) as HtmlAttributesExpression;
-    this.modifyExpression(hae);
+    var hae = JSON.parse(JSON.stringify(p.binding.getValue())) as HtmlAttributesExpression;
+    modifyExpression(hae);
   }
 
-  modifyExpression(hae: HtmlAttributesExpression) {
+  function modifyExpression(hae: HtmlAttributesExpression) {
 
     if (hae.style == undefined)
       hae.style = {};
 
-    DesignerModal.show("HtmlAttributes", () => <HtmlExpressionComponent dn={this.props.dn} htmlAttributes={hae} />).then(result => {
+    DesignerModal.show("HtmlAttributes", () => <HtmlExpressionComponent dn={p.dn} htmlAttributes={hae} />).then(result => {
       if (result) {
         if ((hae as Object).hasOwnProperty("style") && Dic.getKeys(hae.style!).length == 0)
           delete hae.style;
 
         if (Dic.getKeys(hae).length == 0)
-          this.props.binding.deleteValue();
+          p.binding.deleteValue();
         else
-          this.props.binding.setValue(hae);
+          p.binding.setValue(hae);
       }
 
-      this.props.dn.context.refreshView();
+      p.dn.context.refreshView();
     }).done();
   }
 
-  render() {
-    const val = this.props.binding.getValue();
 
-    return (
-      <div className="form-group form-group-xs">
-        <label className="control-label label-xs">
-          {this.renderMember(val)}
-
-          {val && " "}
-          {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
-            onClick={this.handleRemove}
-            title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
-          </a>}
-        </label>
-        <div>
-          {val ?
-            <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
-            :
-            <a href="#" title={EntityControlMessage.Create.niceToString()}
-              className="sf-line-button sf-create"
-              onClick={this.handleCreate}>
-              <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
-            </a>}
-        </div>
-      </div>
-    );
-  }
-  getDescription(hae: HtmlAttributesExpression) {
+  function getDescription(hae: HtmlAttributesExpression) {
 
     var { style, ...cleanHae } = hae;
 
 
-    var keys = Dic.map(cleanHae, (key, value) => key + ":" + this.getValue(value));
+    var keys = Dic.map(cleanHae, (key, value) => key + ":" + getValue(value));
 
     if (style)
       keys.push("style: {\n" +
-        Dic.map(style, (key, value) => "   " + key + ":" + this.getValue(value)).join("\n") +
+        Dic.map(style, (key, value) => "   " + key + ":" + getValue(value)).join("\n") +
         "\n}");
 
     return keys.join("\n");
   }
 
-  getValue(value: any) {
+  function getValue(value: any) {
     return (isExpression(value) ? "{" + value.__code__ + "}" : value)
   }
+  const val = p.binding.getValue();
+
+  return (
+    <div className="form-group form-group-xs">
+      <label className="control-label label-xs">
+        {renderMember(val)}
+
+        {val && " "}
+        {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
+          onClick={handleRemove}
+          title={EntityControlMessage.Remove.niceToString()}>
+          <FontAwesomeIcon icon="times" />
+        </a>}
+      </label>
+      <div>
+        {val ?
+          <a href="#" onClick={handleView}><pre style={{ padding: "0px", border: "none" }}>{getDescription(val)}</pre></a>
+          :
+          <a href="#" title={EntityControlMessage.Create.niceToString()}
+            className="sf-line-button sf-create"
+            onClick={handleCreate}>
+            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+          </a>}
+      </div>
+    </div>
+  );
 }
 
 export interface HtmlExpressionComponentProps {
@@ -146,22 +146,19 @@ const cssPropertyList = ["color", "opacity", "background", "background-attachmen
   "rest-after", "rest-before", "voice-balance", "voice-duration", "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "marquee-direction",
   "marquee-play-count", "marquee-speed", "marquee-style"].sort();
 
-export class HtmlExpressionComponent extends React.Component<HtmlExpressionComponentProps>{
-  render() {
-
-    return (
-      <div className="form-sm code-container">
+export function HtmlExpressionComponent(p : HtmlExpressionComponentProps){
+  return (
+    <div className="form-sm code-container">
+      <fieldset>
+        <legend>HTML Attributes</legend>
+        <ExpressionOrValueStrip object={p.htmlAttributes} filterKey={key => key != "style"} dn={p.dn} possibleKeys={htmlAttributeList} />
         <fieldset>
-          <legend>HTML Attributes</legend>
-          <ExpressionOrValueStrip object={this.props.htmlAttributes} filterKey={key => key != "style"} dn={this.props.dn} possibleKeys={htmlAttributeList} />
-          <fieldset>
-            <legend>CSS Properties</legend>
-            <ExpressionOrValueStrip object={this.props.htmlAttributes.style!} filterKey={key => true} dn={this.props.dn} possibleKeys={cssPropertyList} />
-          </fieldset>
+          <legend>CSS Properties</legend>
+          <ExpressionOrValueStrip object={p.htmlAttributes.style!} filterKey={key => true} dn={p.dn} possibleKeys={cssPropertyList} />
         </fieldset>
-      </div>
-    );
-  }
+      </fieldset>
+    </div>
+  );
 }
 
 
@@ -173,67 +170,65 @@ export interface ExpressionOrValueStripProps {
   filterKey: (key: string) => boolean;
 }
 
-export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStripProps>{
+export function ExpressionOrValueStrip(p : ExpressionOrValueStripProps){
+  const forceUpdate = useForceUpdate();
 
-  render() {
-
-    return (
-      <div>
-        {this.renderList()}
-        {this.renderTypeahead()}
-      </div>
-    );
-  }
-
-  handleOnRemove = (e: React.MouseEvent<any>, key: string) => {
+  function handleOnRemove(e: React.MouseEvent<any>, key: string) {
     e.preventDefault();
-    delete this.props.object[key];
-    this.forceUpdate();
+    delete p.object[key];
+    forceUpdate();
   }
 
 
-  renderList() {
+  function renderList() {
     return (
       <ul className="expression-list">
         {
-          Dic.getKeys(this.props.object).filter(this.props.filterKey).map(key => <li key={key}>
+          Dic.getKeys(p.object).filter(p.filterKey).map(key => <li key={key}>
             <a href="#" className="sf-line-button sf-remove"
-              onClick={e => this.handleOnRemove(e, key)}
+              onClick={e => handleOnRemove(e, key)}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="times" />
             </a>
-            <ExpressionOrValueComponent dn={this.props.dn} refreshView={() => this.forceUpdate()}
-              binding={new Binding(this.props.object, key)} type="string" defaultValue={null} avoidDelete={true} />
+            <ExpressionOrValueComponent dn={p.dn} refreshView={() => forceUpdate()}
+              binding={new Binding(p.object, key)} type="string" defaultValue={null} avoidDelete={true} />
           </li>)
         }
       </ul>
     );
   }
 
-  handleGetItems = (query: string) => {
-    const result = this.props.possibleKeys
+  function handleGetItems(query: string) {
+    const result = p.possibleKeys
       .filter(k => k.toLowerCase().contains(query.toLowerCase()) &&
-        !(this.props.object as Object).hasOwnProperty(k))
+        !(p.object as Object).hasOwnProperty(k))
       .orderBy(a => a.length)
       .filter((k, i) => i < 5);
 
     return Promise.resolve(result);
   }
 
-  handleSelect = (item: unknown) => {
-    this.props.object[item as string] = undefined;
-    this.forceUpdate();
+  function handleSelect(item: unknown) {
+    p.object[item as string] = undefined;
+    forceUpdate();
     return "";
   }
 
-  renderTypeahead() {
+  function renderTypeahead() {
     return (
       <div style={{ position: "relative" }}>
         <Typeahead
           inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
-          getItems={this.handleGetItems}
-          onSelect={this.handleSelect} />
+          getItems={handleGetItems}
+          onSelect={handleSelect} />
       </div>
     );
   }
+
+  return (
+    <div>
+      {renderList()}
+      {renderTypeahead()}
+    </div>
+  );
 }
