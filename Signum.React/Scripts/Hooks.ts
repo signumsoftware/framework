@@ -40,9 +40,9 @@ export function useQuery(fo: FindOptions | null): ResultTable | undefined | null
 }
 
 
-export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null): T | null | undefined {
+export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
   return useAPI(undefined, [lite && liteKey(lite)], signal =>
-    lite == null ? Promise.resolve<T | null>(null) :
+    lite == null ? Promise.resolve<T | null | undefined>(lite) :
       Navigator.API.fetchAndForget(lite));
 }
 
