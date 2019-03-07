@@ -77,7 +77,8 @@ namespace Signum.Engine.Dynamic
 
                 new ConstructFrom<DynamicTypeEntity>(DynamicTypeOperation.Clone)
                 {
-                    Construct = (e, _) => {
+                    Construct = (e, _) =>
+                    {
 
                         var def = e.GetDefinition();
                         var result = new DynamicTypeEntity { TypeName = null, BaseType = e.BaseType };
@@ -90,7 +91,16 @@ namespace Signum.Engine.Dynamic
                 {
                     CanBeNew = true,
                     CanBeModified = true,
-                    Execute = (e, _) => {
+                    Execute = (e, _) =>
+                    {
+                        var newDef = e.GetDefinition();
+                        var duplicatePropertyNames = newDef.Properties
+                                .GroupToDictionary(a => a.Name.ToLower())
+                                .Where(a => a.Value.Count() > 1)
+                                .ToList();
+
+                        if (duplicatePropertyNames.Any())
+                            throw new InvalidOperationException(ValidationMessage._0HasSomeRepeatedElements1.NiceToString(e.TypeName, duplicatePropertyNames.Select(a => a.Key.FirstUpper()).Comma(", ")));
 
                         if (!e.IsNew)
                         {
@@ -98,11 +108,9 @@ namespace Signum.Engine.Dynamic
                             if (e.TypeName != old.TypeName)
                                 DynamicSqlMigrationLogic.AddDynamicRename(TypeNameKey, old.TypeName, e.TypeName);
 
-
                             if (e.BaseType == DynamicBaseType.ModelEntity)
                                 return;
 
-                            var newDef = e.GetDefinition();
                             var oldDef = old.GetDefinition();
                             var newName = GetTableName(e, newDef);
                             var oldName = GetTableName(old, oldDef);
@@ -175,7 +183,8 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        public static void WriteDynamicStarter(StringBuilder sb, int indent) {
+        public static void WriteDynamicStarter(StringBuilder sb, int indent)
+        {
 
             var types = GetTypes();
             foreach (var item in types)
@@ -193,19 +202,19 @@ namespace Signum.Engine.Dynamic
 
             var result = new List<CodeFile>();
 
-            var entities =  types.Select(dt =>
-            {
-                var def = dt.GetDefinition();
+            var entities = types.Select(dt =>
+           {
+               var def = dt.GetDefinition();
 
-                var dcg = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces);
+               var dcg = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces);
 
-                var content = dcg.GetFileCode();
-                return new CodeFile
-                {
-                    FileName = dt.TypeName + ".cs",
-                    FileContent = content
-                };
-            }).ToList();
+               var content = dcg.GetFileCode();
+               return new CodeFile
+               {
+                   FileName = dt.TypeName + ".cs",
+                   FileContent = content
+               };
+           }).ToList();
             result.AddRange(entities);
 
             var logics = types.Select(dt =>
@@ -374,7 +383,7 @@ namespace Signum.Engine.Dynamic
         {
             if (Def.ToStringExpression == null)
                 return null;
-            
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"static Expression<Func<{this.GetTypeNameWithSuffix()}, string>> ToStringExpression = e => {Def.ToStringExpression};");
             sb.AppendLine("[ExpressionField(\"ToStringExpression\")]");
@@ -388,7 +397,7 @@ namespace Signum.Engine.Dynamic
         public virtual string GetTypeNameWithSuffix()
         {
             return this.TypeName + (this.BaseType == DynamicBaseType.MixinEntity ? "Mixin" :
-                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded": 
+                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded" :
                 this.BaseType == DynamicBaseType.ModelEntity ? "Model" : "Entity");
         }
 
@@ -525,7 +534,7 @@ namespace Signum.Engine.Dynamic
                     property.Scale != null ? "Scale = " + Literal(property.Scale) : null,
                     property.ColumnType.HasText() ?  "SqlDbType = " + Literal(Enum.TryParse(property.ColumnType, out SqlDbType dbType) ? dbType : SqlDbType.Udt) : null,
                     property.ColumnType.HasText() && !Enum.TryParse<SqlDbType>(property.ColumnType, out var _) ?  "UserDefinedTypeName = " + Literal(property.ColumnType) : null,
-                     
+
                 }.NotNull().ToString(", ");
 
                 atts.Add($"SqlDbType({props})");
@@ -541,13 +550,15 @@ namespace Signum.Engine.Dynamic
                 case Entities.Dynamic.UniqueIndex.YesAllowNull: atts.Add("UniqueIndex(AllowMultipleNulls = true)"); break;
             }
 
-            if (property.IsMList != null) {
+            if (property.IsMList != null)
+            {
 
                 var mlist = property.IsMList;
                 if (mlist.PreserveOrder)
                     atts.Add("PreserveOrder" + (mlist.OrderName.HasText() ? "(" + Literal(mlist.OrderName) + ")" : ""));
 
-                if (mlist.TableName.HasText()) {
+                if (mlist.TableName.HasText())
+                {
                     var parts = ParseTableName(mlist.TableName);
                     atts.Add("TableName(" + parts + ")");
                 }
@@ -584,14 +595,14 @@ namespace Signum.Engine.Dynamic
 
             string result = SimplifyType(property.Type);
 
-         
-            
+
+
             if (property.IsNullable != Entities.Dynamic.IsNullable.No && IsValueType(property))
                 result = result + "?";
 
             if (property.IsLite)
                 result = "Lite<" + result + ">";
-            
+
             if (property.IsMList != null)
                 result = "MList<" + result + ">";
 
