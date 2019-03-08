@@ -52,7 +52,7 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
     oldPathPromise.then(oldPath => {
       if (oldPath != newPath) {
         var query = QueryString.parse(props.location.search);
-        var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
+        var uc = query.userChart == null ? undefined : (parseLite(query.userChart as string) as Lite<UserChartEntity>);
         ChartClient.Decoder.parseChartRequest(props.match.params.queryName, query)
           .then(cr => this.setState({ chartRequest: cr, userChart: uc }))
           .done();

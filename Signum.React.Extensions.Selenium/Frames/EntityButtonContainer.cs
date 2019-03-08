@@ -2,7 +2,6 @@ using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium
 {
@@ -13,7 +12,8 @@ namespace Signum.React.Selenium
         IWebElement ContainerElement();
     }
 
-    public interface IEntityButtonContainer<T> : IEntityButtonContainer
+    public interface IEntityButtonContainer<T> : IEntityButtonContainer, ILineContainer<T>
+        where T : IModifiableEntity
     {
     }
 

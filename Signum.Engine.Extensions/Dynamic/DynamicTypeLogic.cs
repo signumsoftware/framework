@@ -77,7 +77,8 @@ namespace Signum.Engine.Dynamic
 
                 new ConstructFrom<DynamicTypeEntity>(DynamicTypeOperation.Clone)
                 {
-                    Construct = (e, _) => {
+                    Construct = (e, _) =>
+                    {
 
                         var def = e.GetDefinition();
                         var result = new DynamicTypeEntity { TypeName = null!, BaseType = e.BaseType };
@@ -90,7 +91,16 @@ namespace Signum.Engine.Dynamic
                 {
                     CanBeNew = true,
                     CanBeModified = true,
-                    Execute = (e, _) => {
+                    Execute = (e, _) =>
+                    {
+                        var newDef = e.GetDefinition();
+                        var duplicatePropertyNames = newDef.Properties
+                                .GroupToDictionary(a => a.Name.ToLower())
+                                .Where(a => a.Value.Count() > 1)
+                                .ToList();
+
+                        if (duplicatePropertyNames.Any())
+                            throw new InvalidOperationException(ValidationMessage._0HasSomeRepeatedElements1.NiceToString(e.TypeName, duplicatePropertyNames.Select(a => a.Key.FirstUpper()).Comma(", ")));
 
                         if (!e.IsNew)
                         {
@@ -98,11 +108,9 @@ namespace Signum.Engine.Dynamic
                             if (e.TypeName != old.TypeName)
                                 DynamicSqlMigrationLogic.AddDynamicRename(TypeNameKey, old.TypeName, e.TypeName);
 
-
                             if (e.BaseType == DynamicBaseType.ModelEntity)
                                 return;
 
-                            var newDef = e.GetDefinition();
                             var oldDef = old.GetDefinition();
                             var newName = GetTableName(e, newDef);
                             var oldName = GetTableName(old, oldDef);
@@ -175,7 +183,8 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        public static void WriteDynamicStarter(StringBuilder sb, int indent) {
+        public static void WriteDynamicStarter(StringBuilder sb, int indent)
+        {
 
             var types = GetTypes();
             foreach (var item in types)
@@ -529,13 +538,15 @@ namespace Signum.Engine.Dynamic
                 case Entities.Dynamic.UniqueIndex.YesAllowNull: atts.Add("UniqueIndex(AllowMultipleNulls = true)"); break;
             }
 
-            if (property.IsMList != null) {
+            if (property.IsMList != null)
+            {
 
                 var mlist = property.IsMList;
                 if (mlist.PreserveOrder)
                     atts.Add("PreserveOrder" + (mlist.OrderName.HasText() ? "(" + Literal(mlist.OrderName) + ")" : ""));
 
-                if (mlist.TableName.HasText()) {
+                if (mlist.TableName.HasText())
+                {
                     var parts = ParseTableName(mlist.TableName);
                     atts.Add("TableName(" + parts + ")");
                 }
@@ -557,12 +568,12 @@ namespace Signum.Engine.Dynamic
             var objName = ObjectName.Parse(value);
 
             return new List<string?>
-            {
+                {
                      Literal(objName.Name),
-                objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
-                objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
                 objName.Schema.Database?.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
-            }.NotNull().ToString(", ");
+                }.NotNull().ToString(", ");
         }
 
         public virtual string GetPropertyType(DynamicProperty property)
@@ -872,7 +883,7 @@ namespace Signum.Engine.Dynamic
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public List<DynamicTypeCustomCode> BeforeSchema { get; private set; }
-        
+
         public DynamicBeforeSchemaGenerator(string @namespace, List<DynamicTypeCustomCode> beforeSchema, HashSet<string> usings)
         {
             this.Usings = usings;

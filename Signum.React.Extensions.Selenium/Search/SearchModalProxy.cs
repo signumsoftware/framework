@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 
@@ -11,10 +11,12 @@ namespace Signum.React.Selenium
         public FiltersProxy Filters { get { return SearchControl.Filters; } }
         public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
 
-        public SearchModalProxy(IWebElement element)
+        public SearchModalProxy(IWebElement element , bool waitInitialSearch = true)
             : base(element)
         {
-            this.SearchControl = new SearchControlProxy(element);
+            this.SearchControl = new SearchControlProxy(element.FindElement(By.CssSelector(".sf-search-control")));
+            if (waitInitialSearch)
+                this.SearchControl.WaitInitialSearchCompleted();
         }
 
         public void SelectLite(Lite<IEntity> lite)
@@ -35,8 +37,6 @@ namespace Signum.React.Selenium
 
         public void SelectByPosition(int rowIndex)
         {
-            this.SearchControl.Search();
-
             this.SearchControl.Results.SelectRow(rowIndex);
 
             this.OkWaitClosed();

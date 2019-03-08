@@ -32,7 +32,7 @@ export function isExpression(value: any): value is Expression<any> {
 
 export interface NodeOptions<N extends BaseNode> {
   kind: string;
-  group: "Container" | "Property" | "Collection" | "Search" | null;
+  group: "Container" | "Property" | "Collection" | "Search" | "Simple" | null;
   order: number | null;
   isContainer?: boolean;
   hasEntity?: boolean;

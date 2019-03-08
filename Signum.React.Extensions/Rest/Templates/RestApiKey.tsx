@@ -1,34 +1,36 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RestApiKeyEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, EntityLine } from "@framework/Lines";
 import { classes } from "@framework/Globals";
 import { API } from "../RestClient";
+import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
 
-export default class RestApiKeyComponent extends React.Component<{ ctx: TypeContext<RestApiKeyEntity> }> {
-  apiKey?: ValueLine | null;
+export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEntity> }){
 
-  render() {
-    const ctx = this.props.ctx;
-    return (
-      <div>
-        <EntityLine ctx={ctx.subCtx(e => e.user)} />
-        <ValueLine ctx={ctx.subCtx(e => e.apiKey)}
-          ref={apiKey => this.apiKey = apiKey}
-          extraButtons={vl =>
-            <a href="#" className={classes("sf-line-button", "sf-view", "btn btn-light")}
-              onClick={this.generateApiKey}>
-              <FontAwesomeIcon icon="key" />
-            </a>} />
-      </div>
-    );
-  }
+  const forceUpdate = useForceUpdate();
 
-  generateApiKey = (e: React.MouseEvent<any>) => {
+  function generateApiKey(e: React.MouseEvent<any>) {
     e.preventDefault();
     API.generateRestApiKey()
-      .then(key => this.apiKey!.setValue(key))
+      .then(key => {
+        p.ctx.value.apiKey = key;
+        forceUpdate();
+      })
       .done();
   }
+
+  const ctx = p.ctx;
+  return (
+    <div>
+      <EntityLine ctx={ctx.subCtx(e => e.user)} />
+      <ValueLine ctx={ctx.subCtx(e => e.apiKey)}
+        extraButtons={vl =>
+          <a href="#" className={classes("sf-line-button", "sf-view", "btn btn-light")}
+            onClick={generateApiKey}>
+            <FontAwesomeIcon icon="key" />
+          </a>} />
+    </div>
+  );
 }
 

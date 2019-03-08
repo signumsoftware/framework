@@ -8,70 +8,29 @@ import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponen
 import ValueLineModal from '@framework/ValueLineModal'
 import { TemplateApplicableEval } from "../Signum.Entities.Templating";
 import { QueryEntity } from "@framework/Signum.Entities.Basics";
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 interface TemplateApplicableProps {
   ctx: TypeContext<TemplateApplicableEval>;
   query: QueryEntity;
 }
 
-interface TemplateApplicableState {
-  typeName?: string;
-}
+export default function TemplateApplicable(p: TemplateApplicableProps) {
 
-export default class TemplateApplicable extends React.Component<TemplateApplicableProps, TemplateApplicableState> {
+  const typeName = useAPI(undefined, [p.query.key], signal => Finder.getQueryDescription(p.query.key)
+    .then(qd => qd.columns["Entity"].type.name.split(",")[0] || "Entity"));
 
-  constructor(props: TemplateApplicableProps) {
-    super(props);
-    this.state = {};
-  }
+  const forceUpdate = useForceUpdate();
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
-
-  loadData(props: TemplateApplicableProps) {
-    Finder.getQueryDescription(this.props.query.key)
-      .then(qd => this.setState({ typeName: qd.columns["Entity"].type.name.split(",")[0] || "Entity" }))
-      .done();
-  }
-
-
-  handleCodeChange = (newScript: string) => {
-    const evalEntity = this.props.ctx.value;
+  function handleCodeChange(newScript: string) {
+    const evalEntity = p.ctx.value;
     evalEntity.modified = true;
     evalEntity.script = newScript;
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  render() {
-    var ctx = this.props.ctx;
-    if (!this.state.typeName)
-      return null;
 
-    return (
-      <div>
-
-        <div>
-          <br />
-          <div className="row">
-            <div className="col-sm-7">
-              <div className="code-container">
-                <TypeHelpButtonBarComponent typeName={this.state.typeName} mode="CSharp" ctx={this.props.ctx} />
-                <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + this.state.typeName + "Entity e)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.script || ""} onChange={this.handleCodeChange} />
-                <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
-              </div>
-            </div>
-            <div className="col-sm-5">
-              <TypeHelpComponent initialType={this.state.typeName} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
-            </div>
-          </div>
-        </div>}
-            </div>
-    );
-  }
-
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
     if (!pr)
       return;
 
@@ -84,4 +43,30 @@ export default class TemplateApplicable extends React.Component<TemplateApplicab
       initiallyFocused: true,
     }).done();
   }
+
+  var ctx = p.ctx;
+  if (!typeName)
+    return null;
+
+  return (
+    <div>
+
+      <div>
+        <br />
+        <div className="row">
+          <div className="col-sm-7">
+            <div className="code-container">
+              <TypeHelpButtonBarComponent typeName={typeName} mode="CSharp" ctx={p.ctx} />
+              <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + typeName + "Entity e)\n{"}</pre>
+              <CSharpCodeMirror script={ctx.value.script || ""} onChange={handleCodeChange} />
+              <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+            </div>
+          </div>
+          <div className="col-sm-5">
+            <TypeHelpComponent initialType={typeName} mode="CSharp" onMemberClick={handleTypeHelpClick} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

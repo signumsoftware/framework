@@ -9,72 +9,17 @@ import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { UncontrolledTabs, Tab } from '@framework/Components';
 import { LabelWithHelp } from '../../MachineLearning/Templates/NeuralNetworkSettings';
+import { useForceUpdate } from '@framework/Hooks'
 
-export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }> {
-  render() {
-    let ctx = this.props.ctx;
+export default function EmailMessage(p : { ctx: TypeContext<EmailMessageEntity> }){
+  const forceUpdate = useForceUpdate();
 
-    if (ctx.value.state != "Created")
-      ctx = ctx.subCtx({ readOnly: true });
-
-    const ctx4 = ctx.subCtx({ labelColumns: 4 });
-
-    return (
-      <UncontrolledTabs id="emailTabs">
-        <Tab title={EmailMessageEntity.niceName()} eventKey="mainTab">
-          <fieldset>
-            <legend>Properties</legend>
-            <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={ctx4.subCtx(f => f.state)} />
-                <ValueLine ctx={ctx4.subCtx(f => f.sent)} />
-                <ValueLine ctx={ctx4.subCtx(f => f.bodyHash)} />
-                <ValueLine ctx={ctx4.subCtx(f => f.creationDate)} />
-              </div>
-              <div className="col-sm-8">
-                <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
-                <EntityLine ctx={ctx.subCtx(f => f.template)} />
-                <EntityLine ctx={ctx.subCtx(f => f.package)} />
-                <EntityLine ctx={ctx.subCtx(f => f.exception)} />
-              </div>
-            </div>
-            <hr/>
-            <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={ctx4.subCtx(f => f.receptionNotified)} />
-              </div>
-              <div className="col-sm-8">
-                <ValueLine ctx={ctx.subCtx(f => f.uniqueIdentifier)} />
-              </div>
-            </div>
-          </fieldset>
-
-          <EntityDetail ctx={ctx.subCtx(f => f.from)} />
-          <EntityRepeater ctx={ctx.subCtx(f => f.recipients)} />
-          <EntityRepeater ctx={ctx.subCtx(f => f.attachments)} getComponent={this.renderAttachment} />
-
-          <ValueLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
-          <ValueLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => this.forceUpdate()} />
-          {ctx.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={ctx.subCtx(f => f.body)} /></div> :
-              <div>
-                <ValueLine ctx={ctx.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
-              </div>
-          }
-          <EmailMessageComponent ctx={ctx} invalidate={() => this.forceUpdate()} />
-        </Tab>
-        {this.renderEmailReceptionMixin()}
-      </UncontrolledTabs>
-    );
-  }
-
-
-  renderEmailReceptionMixin() {
-
-    var erm = tryGetMixin(this.props.ctx.value, EmailReceptionMixin);
+  function renderEmailReceptionMixin() {
+    var erm = tryGetMixin(p.ctx.value, EmailReceptionMixin);
     if (!erm || !erm.receptionInfo)
       return null;
 
-    const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
+    const ri = p.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
 
     return (
       <Tab title={ri.niceName()} eventKey="receptionMixin">
@@ -93,7 +38,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
   };
 
 
-  renderAttachment = (ec: TypeContext<EmailAttachmentEmbedded>) => {
+  function renderAttachment(ec: TypeContext<EmailAttachmentEmbedded>) {
     const sc = ec.subCtx({ formGroupStyle: "SrOnly" });
     return (
       <div>
@@ -102,6 +47,59 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
       </div>
     );
   };
+  let ctx = p.ctx;
+
+  if (ctx.value.state != "Created")
+    ctx = ctx.subCtx({ readOnly: true });
+
+  const ctx4 = ctx.subCtx({ labelColumns: 4 });
+
+  return (
+    <UncontrolledTabs id="emailTabs">
+      <Tab title={EmailMessageEntity.niceName()} eventKey="mainTab">
+        <fieldset>
+          <legend>Properties</legend>
+          <div className="row">
+            <div className="col-sm-4">
+              <ValueLine ctx={ctx4.subCtx(f => f.state)} />
+              <ValueLine ctx={ctx4.subCtx(f => f.sent)} />
+              <ValueLine ctx={ctx4.subCtx(f => f.bodyHash)} />
+              <ValueLine ctx={ctx4.subCtx(f => f.creationDate)} />
+            </div>
+            <div className="col-sm-8">
+              <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
+              <EntityLine ctx={ctx.subCtx(f => f.template)} />
+              <EntityLine ctx={ctx.subCtx(f => f.package)} />
+              <EntityLine ctx={ctx.subCtx(f => f.exception)} />
+            </div>
+          </div>
+          <hr/>
+          <div className="row">
+            <div className="col-sm-4">
+              <ValueLine ctx={ctx4.subCtx(f => f.receptionNotified)} />
+            </div>
+            <div className="col-sm-8">
+              <ValueLine ctx={ctx.subCtx(f => f.uniqueIdentifier)} />
+            </div>
+          </div>
+        </fieldset>
+
+        <EntityDetail ctx={ctx.subCtx(f => f.from)} />
+        <EntityRepeater ctx={ctx.subCtx(f => f.recipients)} />
+        <EntityRepeater ctx={ctx.subCtx(f => f.attachments)} getComponent={renderAttachment} />
+
+        <ValueLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
+        <ValueLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />
+        {ctx.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={ctx.subCtx(f => f.body)} /></div> :
+            <div>
+              <ValueLine ctx={ctx.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
+            </div>
+        }
+        <EmailMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />
+      </Tab>
+      {renderEmailReceptionMixin()}
+    </UncontrolledTabs>
+  );
 }
 
 export interface EmailMessageComponentProps {
@@ -109,39 +107,32 @@ export interface EmailMessageComponentProps {
   invalidate: () => void;
 }
 
-export class EmailMessageComponent extends React.Component<EmailMessageComponentProps, { showPreview: boolean }>{
-  constructor(props: EmailMessageComponentProps) {
-    super(props);
-    this.state = { showPreview: true }
-  }
+export function EmailMessageComponent(p : EmailMessageComponentProps){
+  const forceUpdate = useForceUpdate();
+  const [showPreview, setShowPreview] = React.useState(true);
 
-  handlePreviewClick = (e: React.FormEvent<any>) => {
+  function handlePreviewClick(e: React.FormEvent<any>) {
     e.preventDefault();
-    this.setState({
-      showPreview: !this.state.showPreview
-    });
+    setShowPreview(!showPreview);
   }
 
-  handleCodeMirrorChange = () => {
-    if (this.state.showPreview)
-      this.forceUpdate();
+  function handleCodeMirrorChange() {
+    if (showPreview)
+      forceUpdate();
   }
 
-
-  render() {
-    const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
-    return (
-      <div className="sf-email-template-message">
-        <div>
-          <br />
-          <a href="#" onClick={this.handlePreviewClick}>
-            {this.state.showPreview ?
-              EmailTemplateMessage.HidePreview.niceToString() :
-              EmailTemplateMessage.ShowPreview.niceToString()}
-          </a>
-          {this.state.showPreview && <IFrameRenderer style={{ width: "100%", height: "150px" }} html={ec.value.body} />}
-        </div>
+  const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
+  return (
+    <div className="sf-email-template-message">
+      <div>
+        <br />
+        <a href="#" onClick={handlePreviewClick}>
+          {showPreview ?
+            EmailTemplateMessage.HidePreview.niceToString() :
+            EmailTemplateMessage.ShowPreview.niceToString()}
+        </a>
+        {showPreview && <IFrameRenderer style={{ width: "100%", height: "150px" }} html={ec.value.body} />}
       </div>
-    );
-  }
+    </div>
+  );
 }

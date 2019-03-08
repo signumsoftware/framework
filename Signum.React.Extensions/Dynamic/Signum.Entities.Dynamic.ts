@@ -9,6 +9,25 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
 interface IDynamicTypeConditionEvaluator {}
+interface IDynamicApiEvaluator {}
+
+export const DynamicApiEntity = new Type<DynamicApiEntity>("DynamicApi");
+export interface DynamicApiEntity extends Entities.Entity {
+  Type: "DynamicApi";
+  name?: string | null;
+  eval: DynamicApiEval;
+}
+
+export const DynamicApiEval = new Type<DynamicApiEval>("DynamicApiEval");
+export interface DynamicApiEval extends EvalEmbedded<IDynamicApiEvaluator> {
+  Type: "DynamicApiEval";
+}
+
+export module DynamicApiOperation {
+  export const Clone : Entities.ConstructSymbol_From<DynamicApiEntity, DynamicApiEntity> = registerSymbol("Operation", "DynamicApiOperation.Clone");
+  export const Save : Entities.ExecuteSymbol<DynamicApiEntity> = registerSymbol("Operation", "DynamicApiOperation.Save");
+  export const Delete : Entities.DeleteSymbol<DynamicApiEntity> = registerSymbol("Operation", "DynamicApiOperation.Delete");
+}
 
 export const DynamicBaseType = new EnumType<DynamicBaseType>("DynamicBaseType");
 export type DynamicBaseType =

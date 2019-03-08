@@ -18,7 +18,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator StripItemSelector(int index)
         {
-            return this.ItemsContainerElement.CombineCss(" > li.sf-strip-element:nth-child({0})".FormatWith(index));
+            return this.ItemsContainerElement.CombineCss(" > li.sf-strip-element:nth-child({0})".FormatWith(index + 1));
         }
 
         public int ItemsCount()

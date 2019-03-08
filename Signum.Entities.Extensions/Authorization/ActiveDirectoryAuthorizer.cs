@@ -1,4 +1,6 @@
-﻿using System;
+using Signum.Entities;
+using Signum.Utilities;
+using System;
 using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
@@ -6,6 +8,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     {
+        [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string DomainName { get; set; }
     }
 

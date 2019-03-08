@@ -8,7 +8,6 @@ using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using Signum.Utilities;
-using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium
 {

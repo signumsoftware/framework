@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Engine.Basics;
 using OpenQA.Selenium;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace Signum.React.Selenium
 {
@@ -25,13 +26,18 @@ namespace Signum.React.Selenium
         }
 
 
-        public SearchPageProxy SearchPage(object queryName)
+        public SearchPageProxy SearchPage(object queryName, bool waitInitialSearch = true)
         {
             var url = Url(FindRoute(queryName));
 
             Selenium.Url = url;
 
-            return new SearchPageProxy(Selenium);
+            var result = new SearchPageProxy(Selenium);
+
+            if (waitInitialSearch)
+                result.SearchControl.WaitInitialSearchCompleted();
+
+            return result;
         }
 
         public virtual string FindRoute(object queryName)
@@ -145,6 +151,13 @@ namespace Signum.React.Selenium
             string culture = Selenium.WaitElementPresent(By.Id("cultureDropdown")).GetAttribute("data-culture");
 
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+        }
+
+        public T Wait<T>(Expression<Func<T>> expression)
+        {
+            var condition = expression.Compile();
+
+            return Selenium.Wait(condition, () => expression.ToString());
         }
     }
 }

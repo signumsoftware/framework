@@ -360,8 +360,6 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
         eoc.frame.onReload(packWithIssues.entityPack);
         (eoc.frame.entityComponent as any).setIssues(packWithIssues.issues);
         notifySuccess();
-        if (eoc.closeRequested)
-          eoc.frame.onClose(true);
       })
       .catch(ifError(ValidationError, e => {
 
@@ -421,7 +419,10 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
-  eoc.closeRequested = true;
+  eoc.onExecuteSuccess = pack => {
+    notifySuccess();
+    eoc.frame.onClose(true);
+  }
 
   getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
     .then(dest => dest && eoc.defaultClick(dest))

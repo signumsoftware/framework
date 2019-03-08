@@ -89,6 +89,7 @@ export module CaseActivityMessage {
   export const LastCaseActivity = new MessageKey("CaseActivityMessage", "LastCaseActivity");
   export const CurrentUserHasNotification = new MessageKey("CaseActivityMessage", "CurrentUserHasNotification");
   export const NoNewOrOpenedOrInProgressNotificationsFound = new MessageKey("CaseActivityMessage", "NoNewOrOpenedOrInProgressNotificationsFound");
+  export const NoActorsFoundToInsertCaseActivityNotifications = new MessageKey("CaseActivityMessage", "NoActorsFoundToInsertCaseActivityNotifications");
 }
 
 export module CaseActivityOperation {

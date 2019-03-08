@@ -379,8 +379,8 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             renderContent={e =>
               <div>
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-warning btn-sm sf-button" value="PreSaving" onClick={this.handlePreSavingClick} />
-                  <input type="button" className="btn btn-success btn-sm sf-button" value="PostRetrieved" onClick={this.handlePostRetrievedClick} />
+                  <input type="button" className="btn btn-warning btn-sm sf-button" value="Pre Saving" onClick={this.handlePreSavingClick} />
+                  <input type="button" className="btn btn-success btn-sm sf-button" value="Post Retrieving" onClick={this.handlePostRetrievingClick} />
                   <input type="button" className="btn btn-danger btn-sm sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
                 </div>
                 <div className="code-container">
@@ -501,17 +501,17 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
   }
 
   handlePreSavingClick = () => {
-    this.popupCodeSnippet(`protected internal override void PreSaving(ref bool graphModified)
+    this.popupCodeSnippet(`protected override void PreSaving(PreSavingContext ctx)
 {
+    base.PreSaving(ctx);
     //Your code here
-    base.PreSaving(ref graphModified);
 }`);
   }
 
-  handlePostRetrievedClick = () => {
-    this.popupCodeSnippet(`protected internal override void PostRetrieving()
+  handlePostRetrievingClick = () => {
+    this.popupCodeSnippet(`protected override void PostRetrieving()
 {
-    base.PostRetriving();
+    //Your code here
 }`);
   }
 

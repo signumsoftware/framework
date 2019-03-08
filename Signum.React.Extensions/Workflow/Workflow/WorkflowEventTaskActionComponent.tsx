@@ -1,50 +1,28 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { WorkflowEventTaskActionEval } from '../Signum.Entities.Workflow'
 import { TypeContext, PropertyRoute } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
+import { useForceUpdate } from '@framework/Hooks'
 
 export interface WorkflowEventTaskActionComponentProps {
   ctx: TypeContext<WorkflowEventTaskActionEval>;
   mainEntityType: TypeEntity;
 }
 
-export default class WorkflowEventTaskActionComponent extends React.Component<WorkflowEventTaskActionComponentProps> {
-  render() {
-    var ctx = this.props.ctx;
+export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskActionComponentProps){
+  const forceUpdate = useForceUpdate();
 
-    return (
-      <fieldset>
-        <legend>{"Action"}</legend>
-        <div className="row">
-          <div className="col-sm-7">
-            <div className="code-container">
-              <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn btn-success btn-sm sf-button" value="Create case" onClick={this.handleCreateCaseClick} />
-              </div>
-              <pre style={{ border: "0px", margin: "0px" }}>{"public void CustomAction() \n{"}</pre>
-              <CSharpCodeMirror script={ctx.value.script || ""} onChange={this.handleCodeChange} />
-              <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
-            </div>
-          </div>
-          <div className="col-sm-5">
-            <TypeHelpComponent initialType={this.props.mainEntityType.cleanName} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
-          </div>
-        </div>
-      </fieldset>
-    );
-  }
-
-  handleCodeChange = (newScript: string) => {
-    const evalEntity = this.props.ctx.value;
+  function handleCodeChange(newScript: string) {
+    const evalEntity = p.ctx.value;
     evalEntity.script = newScript;
     evalEntity.modified = true;
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
     if (!pr)
       return;
 
@@ -58,10 +36,10 @@ export default class WorkflowEventTaskActionComponent extends React.Component<Wo
     }).done();
   }
 
-  handleCreateCaseClick = () => {
+  function handleCreateCaseClick() {
     ValueLineModal.show({
       type: { name: "string" },
-      initialValue: `CreateCase(new ${this.props.mainEntityType.cleanName}Entity(){ initial properties here... });`,
+      initialValue: `CreateCase(new ${p.mainEntityType.cleanName}Entity(){ initial properties here... });`,
       valueLineType: "TextArea",
       title: "Create case Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
@@ -69,4 +47,26 @@ export default class WorkflowEventTaskActionComponent extends React.Component<Wo
       valueHtmlAttributes: { style: { height: "115px" } },
     }).done();
   }
+  var ctx = p.ctx;
+
+  return (
+    <fieldset>
+      <legend>{"Action"}</legend>
+      <div className="row">
+        <div className="col-sm-7">
+          <div className="code-container">
+            <div className="btn-group" style={{ marginBottom: "3px" }}>
+              <input type="button" className="btn btn-success btn-sm sf-button" value="Create case" onClick={handleCreateCaseClick} />
+            </div>
+            <pre style={{ border: "0px", margin: "0px" }}>{"public void CustomAction() \n{"}</pre>
+            <CSharpCodeMirror script={ctx.value.script || ""} onChange={handleCodeChange} />
+            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+          </div>
+        </div>
+        <div className="col-sm-5">
+          <TypeHelpComponent initialType={p.mainEntityType.cleanName} mode="CSharp" onMemberClick={handleTypeHelpClick} />
+        </div>
+      </div>
+    </fieldset>
+  );
 }

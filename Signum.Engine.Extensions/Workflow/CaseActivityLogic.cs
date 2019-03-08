@@ -554,12 +554,13 @@ namespace Signum.Engine.Workflow
                         User = u.ToLite()
                     })).ToList();
 
+                    if (!notifications.Any())
+                        throw new ApplicationException(CaseActivityMessage.NoActorsFoundToInsertCaseActivityNotifications.NiceToString());
+
                     notifications.BulkInsert();
                 }
             }
         }
-
-      
 
         class CaseActivityGraph : Graph<CaseActivityEntity, CaseActivityState>
         {

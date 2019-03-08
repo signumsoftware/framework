@@ -15,7 +15,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator OptionElement(int index)
         {
-            return this.ListElement.Find().WithLocator(By.CssSelector("option:nth-child({0})".FormatWith(index)));
+            return this.ListElement.Find().WithLocator(By.CssSelector("option:nth-child({0})".FormatWith(index + 1)));
         }
 
         public WebElementLocator ListElement

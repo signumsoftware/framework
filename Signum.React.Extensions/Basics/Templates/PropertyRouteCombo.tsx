@@ -1,8 +1,9 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic } from '@framework/Globals'
 import { TypeEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 import { TypeContext } from '@framework/Lines'
 import { getTypeInfo, MemberInfo, PropertyRoute } from "@framework/Reflection";
+import { useForceUpdate } from '@framework/Hooks'
 
 
 export interface PropertyRouteComboProps {
@@ -13,32 +14,32 @@ export interface PropertyRouteComboProps {
   onChange?: () => void;
 }
 
-export default class PropertyRouteCombo extends React.Component<PropertyRouteComboProps> {
+export default function PropertyRouteCombo(p : PropertyRouteComboProps){
+  const forceUpdate = useForceUpdate();
 
-  static defaultProps: Partial<PropertyRouteComboProps> = {
-    filter: a => a.name != "Id"
-  };
 
-  handleChange = (e: React.FormEvent<any>) => {
+  function handleChange(e: React.FormEvent<any>) {
     var currentValue = (e.currentTarget as HTMLSelectElement).value;
-    this.props.ctx.value = currentValue ? PropertyRouteEntity.New({ path: currentValue, rootType: this.props.type }) : null;
-    this.forceUpdate();
-    if (this.props.onChange)
-      this.props.onChange();
+    p.ctx.value = currentValue ? PropertyRouteEntity.New({ path: currentValue, rootType: p.type }) : null;
+    forceUpdate();
+    if (p.onChange)
+      p.onChange();
   }
 
-  render() {
-    var ctx = this.props.ctx;
+  var ctx = p.ctx;
 
-    var routes = this.props.routes || Dic.getValues(getTypeInfo(this.props.type.cleanName).members).filter(this.props.filter!).map(mi => PropertyRoute.parse(this.props.type.cleanName, mi.name));
+  var routes = p.routes || Dic.getValues(getTypeInfo(p.type.cleanName).members).filter(p.filter!).map(mi => PropertyRoute.parse(p.type.cleanName, mi.name));
 
-    return (
-      <select className={ctx.formControlClass} value={ctx.value && ctx.value.path || ""} onChange={this.handleChange} >
-        <option value=""> - </option>
-        {routes.map(r => r.propertyPath()).map(path =>
-          <option key={path} value={path}>{path}</option>
-        )}
-      </select>
-    );;
-  }
+  return (
+    <select className={ctx.formControlClass} value={ctx.value && ctx.value.path || ""} onChange={handleChange} >
+      <option value=""> - </option>
+      {routes.map(r => r.propertyPath()).map(path =>
+        <option key={path} value={path}>{path}</option>
+      )}
+    </select>
+  );;
 }
+
+PropertyRouteCombo.defaultProps = {
+  filter: a => a.name != "Id"
+} as Partial<PropertyRouteComboProps>;

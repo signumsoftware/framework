@@ -402,7 +402,6 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
 
 export module UserOperation {
   export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol("Operation", "UserOperation.Create");
-  export const SaveNew : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SaveNew");
   export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");
   export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Enable");
   export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Disable");

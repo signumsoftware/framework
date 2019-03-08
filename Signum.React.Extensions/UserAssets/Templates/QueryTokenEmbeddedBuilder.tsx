@@ -13,52 +13,45 @@ interface QueryTokenEmbeddedBuilderProps {
   helpText?: React.ReactChild;
 }
 
-export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEmbeddedBuilderProps> {
-
-  handleTokenChanged = (newToken: QueryToken | undefined) => {
+export default function QueryTokenEntityBuilder(p : QueryTokenEmbeddedBuilderProps){
+  function handleTokenChanged(newToken: QueryToken | undefined) {
     if (newToken == undefined)
-      this.props.ctx.value = undefined;
+      p.ctx.value = undefined;
     else
-      this.props.ctx.value = QueryTokenEmbedded.New({
+      p.ctx.value = QueryTokenEmbedded.New({
         tokenString: newToken.fullKey,
         token: newToken
       });
 
-    if (this.props.onTokenChanged)
-      this.props.onTokenChanged(newToken);
-
-    this.setState({ queryToken: newToken });
+    if (p.onTokenChanged)
+      p.onTokenChanged(newToken);
   }
 
-  render() {
+  const qte = p.ctx.value;
 
+  const tokenBuilder = (
+    <div className={p.ctx.rwWidgetClass}>
+      <QueryTokenBuilder queryToken={qte && qte.token}
+        onTokenChange={handleTokenChanged} queryKey={p.queryKey} subTokenOptions={p.subTokenOptions}
+        readOnly={p.ctx.readOnly} />
+    </div>
+  );
 
-    const qte = this.props.ctx.value;
-
-    const tokenBuilder = (
-      <div className={this.props.ctx.rwWidgetClass}>
-        <QueryTokenBuilder queryToken={qte && qte.token}
-          onTokenChange={this.handleTokenChanged} queryKey={this.props.queryKey} subTokenOptions={this.props.subTokenOptions}
-          readOnly={this.props.ctx.readOnly} />
-      </div>
-    );
-
-    return (
-      <FormGroup ctx={this.props.ctx} helpText={this.props.helpText}>
-        {
-          !qte || !qte.parseException ? tokenBuilder :
-            <div>
-              <code>{qte.tokenString}</code>
-              <br />
-              {tokenBuilder}
-              <br />
-              <p className="alert alert-danger">
-                {qte.parseException}
-              </p>
-            </div>
-        }
-      </FormGroup>
-    );
-  }
+  return (
+    <FormGroup ctx={p.ctx} helpText={p.helpText}>
+      {
+        !qte || !qte.parseException ? tokenBuilder :
+          <div>
+            <code>{qte.tokenString}</code>
+            <br />
+            {tokenBuilder}
+            <br />
+            <p className="alert alert-danger">
+              {qte.parseException}
+            </p>
+          </div>
+      }
+    </FormGroup>
+  );
 }
 

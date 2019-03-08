@@ -366,7 +366,8 @@ namespace Signum.Entities.UserQueries
                 return new XElement("Filter",
                    new XAttribute("Indentation", Indentation),
                    new XAttribute("GroupOperation", GroupOperation),
-                   Token == null ? null : new XAttribute("Token", Token.Token.FullKey()));
+                   Token == null ? null : new XAttribute("Token", Token.Token.FullKey()),
+                   Pinned?.ToXml(ctx));
 
             }
             else

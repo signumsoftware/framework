@@ -108,7 +108,6 @@ namespace Signum.Entities.Authorization
     public static class UserOperation
     {
         public static ConstructSymbol<UserEntity>.Simple Create;
-        public static ExecuteSymbol<UserEntity> SaveNew;
         public static ExecuteSymbol<UserEntity> Save;
         public static ExecuteSymbol<UserEntity> Enable;
         public static ExecuteSymbol<UserEntity> Disable;

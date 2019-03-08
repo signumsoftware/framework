@@ -35,9 +35,21 @@ namespace Signum.React.Dynamic
         public List<CompilationErrorTS> Compile(bool inMemory)
         {
             SystemEventLogLogic.Log("DynamicController.Compile");
+            var compileResult = new List<DynamicLogic.CompilationResult>();
+
+            if (!inMemory)
+                DynamicLogic.CleanCodeGenFolder();
+
             Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
-            var result = DynamicLogic.Compile(codeFiles, inMemory: inMemory);
-            return (from ce in result.Errors
+            compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false));
+
+            Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionary(a => a.FileContent);
+            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true));
+
+            codeFiles.AddRange(apiFiles);
+
+            return (from cr in compileResult
+                    from ce in cr.Errors
                     let fileName = Path.GetFileName(ce.FileName)
                     select (new CompilationErrorTS
                     {
@@ -108,6 +120,7 @@ namespace Signum.React.Dynamic
             {
                 lastDynamicCompilationDateTime = DynamicLogic.GetLastCodeGenAssemblyFileInfo()?.CreationTime,
                 loadedCodeGenAssemblyDateTime = DynamicLogic.GetLoadedCodeGenAssemblyFileInfo()?.CreationTime,
+                loadedCodeGenControllerAssemblyDateTime = DynamicLogic.GetLoadedCodeGenControllerAssemblyFileInfo()?.CreationTime,
                 lastDynamicChangeDateTime = Database.Query<OperationLogEntity>()
                         .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target!.EntityType))
                         .Max(a => a.End),
@@ -125,6 +138,7 @@ namespace Signum.React.Dynamic
     {
         public DateTime? lastDynamicCompilationDateTime;
         public DateTime? loadedCodeGenAssemblyDateTime;
+        public DateTime? loadedCodeGenControllerAssemblyDateTime;
         public DateTime? lastDynamicChangeDateTime;
     }
 }
