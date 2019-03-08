@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
 import { Arrow, Popper as ReactPopper, } from 'react-popper';
@@ -11,7 +11,7 @@ interface PopperContentProps {
   placement?: PopperJS.Placement;
   placementPrefix?: string,
   hideArrow?: boolean;
-  tag?: string,
+  tag?: React.ReactType,
   isOpen: boolean;
   offset?: string | number;
   fallbackPlacement?: string | string[];

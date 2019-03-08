@@ -325,6 +325,8 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo? TryFindPropertyInfo(FieldInfo fi)
         {
+            try
+            {
             using (HeavyProfiler.LogNoStackTrace("TryFindPropertyInfo", () => fi.Name))
             {
                 const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
@@ -352,6 +354,11 @@ namespace Signum.Entities.Reflection
                 }
 
                 return null;
+            }
+        }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(e.Message + $" (FieldInfo: {fi.FieldName()} DeclaringType: {fi.DeclaringType.TypeName()})", e);
             }
         }
 
@@ -450,7 +457,7 @@ namespace Signum.Entities.Reflection
             }
             return null;
         }
-        
+
         public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);

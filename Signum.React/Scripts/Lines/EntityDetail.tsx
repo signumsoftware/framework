@@ -8,7 +8,7 @@ import { RenderEntity } from './RenderEntity'
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   avoidFieldSet?: boolean;
-  extraButtons?: (el: EntityDetail) => React.ReactNode;
+  onEntityLoaded?: () => void;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {
@@ -26,7 +26,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
     if (this.props.avoidFieldSet == true)
       return (
         <div className={classes("sf-entity-line-details", s.ctx.errorClass)}
-          {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
+          {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes, ...s.ctx.errorAttributes() }}>
           {this.renderButtons()}
           {this.renderElements()}
         </div>
@@ -34,7 +34,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
     return (
       <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass)}
-        {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
+        {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes, ...s.ctx.errorAttributes() }}>
         <legend>
           <div>
             <span>{s.labelText}</span>
@@ -66,7 +66,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
   renderElements() {
     const s = this.state;
     return (
-      <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
+      <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} onEntityLoaded={this.props.onEntityLoaded} />
     );
   }
 }

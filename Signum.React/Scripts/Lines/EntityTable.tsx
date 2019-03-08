@@ -78,14 +78,14 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
           {this.renderButtons()}
           {this.renderTable(ctx)}
         </div>
       );
 
     return (
-      <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+      <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         <legend>
           <div>
             <span>{this.state.labelText}</span>
@@ -158,8 +158,10 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                   columns={this.state.columns!}
                   ctx={this.props.rowSubContext ? this.props.rowSubContext(a.mlec) : a.mlec} />)
             }
-            {
-              this.state.createAsLink && this.state.create && !readOnly &&
+          </tbody>
+          {
+            this.state.createAsLink && this.state.create && !readOnly &&
+            <tfoot>
               <tr>
                 <td colSpan={1 + this.state.columns!.length} className={isEmpty ? "border-0" : undefined}>
                   {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
@@ -170,8 +172,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                     </a>}
                 </td>
               </tr>
-            }
-          </tbody>
+            </tfoot>
+          }
         </table>
       </div>);
   }

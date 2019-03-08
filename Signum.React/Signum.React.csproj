@@ -45,7 +45,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="Scripts\SearchControl\PinnedFilterBuilder.tsx" />
+    <Content Remove="package.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="package.json" />
   </ItemGroup>
   
 </Project>

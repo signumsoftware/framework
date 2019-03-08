@@ -17,6 +17,7 @@ import { getConstructFromManyContextualItems, getEntityOperationsContextualItems
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { bool } from "prop-types";
 
 export function start() {
   ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -100,7 +101,6 @@ export function operationInfos(ti: TypeInfo) {
 export abstract class OperationSettings {
 
   text?: () => string;
-  content?: () => any;
   operationSymbol: OperationSymbol;
 
   constructor(operationSymbol: OperationSymbol) {
@@ -115,8 +115,8 @@ export abstract class OperationSettings {
  */
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
-  isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
+  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
   constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
     super(operationSymbol);
@@ -127,8 +127,8 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 
 export interface ConstructorOperationOptions<T extends Entity> {
   text?: () => string;
-  isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
+  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
 export class ConstructorOperationContext<T extends Entity> {
@@ -154,10 +154,10 @@ export class ConstructorOperationContext<T extends Entity> {
  */
 export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
 
-  isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
+  isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
-  confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
-  onClick?: (ctx: ContextualOperationContext<T>) => void;
+  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
+  onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -172,10 +172,10 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 
 export interface ContextualOperationOptions<T extends Entity> {
   text?: () => string;
-  isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
+  isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
-  confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
-  onClick?: (ctx: ContextualOperationContext<T>) => void;
+  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
+  onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -204,14 +204,17 @@ export class ContextualOperationContext<T extends Entity> {
 
 export class EntityOperationContext<T extends Entity> {
 
-  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any>): EntityOperationContext<T> {
+  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string): EntityOperationContext<T> {
+
+    var operationKey = (operation as OperationSymbol).key || operation as string;
     if (!ctx.frame)
       throw new Error("a frame is necessary");
-    var oi = getTypeInfo(ctx.value.Type).operations![operation.key!];
+    var oi = getTypeInfo(ctx.value.Type).operations![operationKey];
 
     var result = new EntityOperationContext<T>(ctx.frame, ctx.value, oi);
-    result.settings = getSettings(operation) as EntityOperationSettings<T>;
-    result.canExecute = undefined;
+    result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
+    const pack = ctx.frame && ctx.frame.pack;
+    result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
     return result;
   }
 
@@ -221,7 +224,6 @@ export class EntityOperationContext<T extends Entity> {
   operationInfo: OperationInfo;
   settings?: EntityOperationSettings<T>;
   canExecute?: string;
-  closeRequested?: boolean;
   event?: React.MouseEvent<any>;
   onExecuteSuccess?: (pack: EntityPack<T>) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
@@ -237,9 +239,34 @@ export class EntityOperationContext<T extends Entity> {
     defaultOnClick(this, ...args);
   }
 
+  click() {
+    if (this.settings && this.settings.onClick)
+      this.settings.onClick(this);
+    else
+      defaultOnClick(this);
+  }
+
   isAllowed() {
     return isOperationInfoAllowed(this.operationInfo);
   }
+
+  textOrNiceName() {
+    return this.settings && this.settings.text && this.settings.text() || this.operationInfo.niceName
+  }
+}
+
+export interface AlternativeOperationSetting<T extends Entity> {
+  name: string;
+  text: () => string;
+  color?: BsColor;
+  classes?: string;
+  icon?: IconProp;
+  iconAlign?: "start" | "end";
+  iconColor?: string;
+  isVisible?: boolean;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  onClick: (eoc: EntityOperationContext<T>) => void;
+  keyboardhortcut?: KeyboardShortcut;
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
@@ -247,18 +274,19 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   contextual?: ContextualOperationSettings<T>;
   contextualFromMany?: ContextualOperationSettings<T>;
 
-  isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-  confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (ctx: EntityOperationContext<T>) => void;
+  isVisible?: (eoc: EntityOperationContext<T>) => boolean;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
   classes?: string;
   icon?: IconProp;
-  iconAlign?: "left" | "right";
+  iconAlign?: "start" | "end";
   iconColor?: string;
-  withClose?: boolean;
+  alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
+  keyboardhortcut?: KeyboardShortcut;
 
   constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
     super(operationSymbol)
@@ -284,9 +312,17 @@ export interface EntityOperationOptions<T extends Entity> {
   color?: BsColor;
   classes?: string;
   icon?: IconProp;
-  iconAlign?: "left" | "right";
+  iconAlign?: "start" | "end";
   iconColor?: string;
-  withClose?: boolean;
+  keyboardShortcut?: KeyboardShortcut;
+  alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
+}
+
+export interface KeyboardShortcut{
+  ctrl?: boolean;
+  alt?: boolean;
+  shift?: boolean;
+  key?: string;
 }
 
 export const CreateGroup: EntityOperationGroup = {

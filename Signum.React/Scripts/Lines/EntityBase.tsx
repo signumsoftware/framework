@@ -27,6 +27,7 @@ export interface EntityBaseProps extends LineBaseProps {
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
+  extraButtons?: (ec: EntityBase<EntityBaseProps, EntityBaseProps>) => React.ReactNode;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
@@ -56,7 +57,15 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         getTypeInfos(type).some(ti => Navigator.isFindable(ti));
   }
 
+  shouldComponentUpdate(nextProps: T, nextState: S): boolean {
+    if (
+      nextState.getComponent || this.state.getComponent ||
+      nextState.extraButtons || this.state.extraButtons)
+      return true;
 
+    return super.shouldComponentUpdate(nextProps, nextState);
+  }
+  
   calculateDefaultState(state: S) {
 
     const type = state.type!;
@@ -188,17 +197,17 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.getViewPromise, false))
       .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
-      .then(e => {
-        if (!e)
+      .then(pack => {
+        if (!pack)
           return Promise.resolve(undefined);
 
         var fo = this.state.findOptions;
         if (!fo || !fo.filterOptions)
-          return e.entity as Entity;
+          return pack.entity as Entity;
 
         return Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], false, qd))
-          .then(filters => Finder.setFilters(e!.entity as Entity, filters));
+          .then(filters => Finder.setFilters(pack!.entity as Entity, filters));
       });
   }
 

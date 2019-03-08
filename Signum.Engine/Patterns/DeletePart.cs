@@ -26,7 +26,7 @@ namespace Signum.Engine
             return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
         }
 
-        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity)
+        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity, Func<T, bool> handleOnSaving = null)
             where T : Entity
             where L : Entity
         {
@@ -42,6 +42,21 @@ namespace Signum.Engine
                     groups.ForEach(l => Database.DeleteList(l));
                 });
             };
+            if (handleOnSaving != null)
+                fi.SchemaBuilder.Schema.EntityEvents<T>().Saving += e =>
+                {
+                    if (!e.IsNew && handleOnSaving(e))
+                    {
+                        var lite = e.InDB().Select(relatedEntity).Select(a => a.ToLite()).SingleEx();
+                        if(!lite.Is(relatedEntity.Evaluate(e)))
+                        {
+                            Transaction.PreRealCommit += dic =>
+                            {
+                                lite.Delete();
+                            };
+                        }
+                    }
+                };
             return fi;
         }
 

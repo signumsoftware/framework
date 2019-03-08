@@ -6,6 +6,7 @@ import { getQueryNiceName } from '../Reflection'
 import SearchControl, { SearchControlProps } from './SearchControl'
 import { Modal } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
+import { AutoFocus } from '../Components/AutoFocus';
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
   findOptions: FindOptions;

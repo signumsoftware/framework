@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 
 namespace Signum.Utilities.NaturalLanguage
@@ -160,6 +161,7 @@ namespace Signum.Utilities.NaturalLanguage
             OmitDecimalZeros = true,
         };
 
+        CultureInfo de = CultureInfo.GetCultureInfo("de");
 
         public string ToNumber(decimal number, NumberWriterSettings settings)
         {
@@ -170,7 +172,7 @@ namespace Signum.Utilities.NaturalLanguage
             /// <returns>String number</returns>
             /// 
 
-            string[] numberString = number.ToString().Split(',');
+            string[] numberString = number.ToString(de).Split(',');
 
             string euro = numberString[0];            
 

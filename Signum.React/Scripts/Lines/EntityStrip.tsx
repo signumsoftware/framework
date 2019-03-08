@@ -17,7 +17,6 @@ export interface EntityStripProps extends EntityListBaseProps {
   onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
   showType?: boolean;
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  extraButtons?: (es: EntityStrip) => React.ReactNode;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -78,14 +77,12 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
+    this.state.autocomplete!.getEntityFromItem(item)
+      .then(entity => entity && this.convert(entity)
+        .then(e => this.addElement(e))
+      ).done();
 
-    var entity = this.state.autocomplete!.getEntityFromItem(item);
-
-    this.convert(entity)
-      .then(e => this.addElement(e))
-      .done();
     return "";
-
   }
 
   handleViewElement = (event: React.MouseEvent<any>, index: number) => {
@@ -147,14 +144,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         getItems={q => ac!.getItems(q)}
         getItemsDelay={ac.getItemsDelay}
         renderItem={(e, str) => ac!.renderItem(e, str)}
-        itemAttrs={item => {
-          const entity = ac!.getEntityFromItem(item);
-          const key = isLite(entity) ? liteKey(entity) :
-            (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
-              undefined;
-
-          return ({ 'data-entity-key': key }) as any;
-        }}
+        itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={this.handleOnSelect} />
     );
   }

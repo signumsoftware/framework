@@ -89,6 +89,9 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
         </div>
       );
 
+
+    var qs = Finder.getSettings(fo.queryName);
+
     return (
       <div id="divSearchPage">
         <h3 className="display-6 sf-query-title">
@@ -108,6 +111,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
           showFilters={SearchPage.showFilters(fo)}
           showGroupButton={true}
           avoidChangeUrl={false}
+          navigate={qs && qs.inPlaceNavigation ? "InPlace" : undefined}
           maxResultsHeight={"none"}
           onHeighChanged={this.onResize}
           onSearch={result => this.changeUrl()}

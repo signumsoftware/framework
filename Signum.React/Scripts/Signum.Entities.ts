@@ -367,7 +367,6 @@ export module NormalWindowMessage {
   export const ThereAreChangesContinue = new MessageKey("NormalWindowMessage", "ThereAreChangesContinue");
   export const ThereAreErrors = new MessageKey("NormalWindowMessage", "ThereAreErrors");
   export const Message = new MessageKey("NormalWindowMessage", "Message");
-  export const _0AndClose = new MessageKey("NormalWindowMessage", "_0AndClose");
   export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
   export const Type0Id1 = new MessageKey("NormalWindowMessage", "Type0Id1");
 }
@@ -385,6 +384,8 @@ export module OperationMessage {
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
+  export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
+  export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");

@@ -606,6 +606,20 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
   });
 }
 
+export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): QueryRequest {
+
+  return {
+    queryKey: fo.queryKey,
+    groupResults: fo.groupResults,
+    filters: toFilterRequests(fo.filterOptions),
+    columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
+      .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+    orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
+    pagination: fo.pagination,
+    systemTime: fo.systemTime,
+  };
+}
+
 export function validateNewEntities(fo: FindOptions): string | undefined {
 
   function getValues(fo: FilterOption): any[] {
@@ -1257,9 +1271,10 @@ export interface QuerySettings {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  inPlaceNavigation?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], refresh: () => void) => React.ReactElement<any> | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
@@ -1418,7 +1433,9 @@ export const entityFormatRules: EntityFormatRule[] = [
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc && sc.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}>
+        getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}
+        inPlaceNavigation={sc && sc.props.navigate == "InPlace"}
+      >
         {EntityControlMessage.View.niceToString()}
       </EntityLink>
   },

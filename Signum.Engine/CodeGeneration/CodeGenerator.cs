@@ -12,6 +12,7 @@ namespace Signum.Engine.CodeGeneration
         public static EntityCodeGenerator Entities = new EntityCodeGenerator();
         public static LogicCodeGenerator Logic = new LogicCodeGenerator();
         public static ReactCodeGenerator React = new ReactCodeGenerator();
+        public static ReactHookConverter Hook = new ReactHookConverter();
 
         public static void GenerateCodeConsole()
         {
@@ -22,6 +23,7 @@ namespace Signum.Engine.CodeGeneration
                     {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                     {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
                     {"React", React.GenerateReactFromEntities, "React (from entites)"},
+                    {"Hook", Hook.ConvertFilesToHooks, "Hook (from entites)"},
                 }.Choose();
 
                 if (action == null)

@@ -3,7 +3,7 @@ import * as H from "history"
 import { Route, Switch } from "react-router"
 import { Dic, classes, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
@@ -865,7 +865,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
   }
 }
 
-export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<any /* { ctx: TypeContext<T> }*/> };
+export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<any /* { ctx: TypeContext<T> }*/> | React.FunctionComponent<any /*{ ctx: TypeContext<T> }*/> };
 
 export class ViewPromise<T extends ModifiableEntity> {
   promise!: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
@@ -901,11 +901,20 @@ export class ViewPromise<T extends ModifiableEntity> {
   applyViewOverrides(typeName: string, viewName?: string): ViewPromise<T> {
     this.promise = this.promise.then(func =>
       viewDispatcher.getViewOverrides(typeName, viewName).then(vos => {
+
+        if (vos.length == 0)
+          return func;
+
         return (ctx: TypeContext<T>) => {
           var result = func(ctx);
-          var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
-          monkeyPatchComponent<T>(component, vos!);
-          return result;
+          var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }> | React.FunctionComponent<{ ctx: TypeContext<T> }>;
+          if (component.prototype.render) {
+            monkeyPatchClassComponent<T>(component as React.ComponentClass<{ ctx: TypeContext<T> }>, vos!);
+            return result;
+          } else {
+            var newFunc = surroundFunctionComponent(component as React.FunctionComponent<{ ctx: TypeContext<T> }>, vos)
+            return React.createElement(newFunc, result.props);
+          }
         };
       }));
 
@@ -919,7 +928,7 @@ export class ViewPromise<T extends ModifiableEntity> {
   }
 }
 
-function monkeyPatchComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
 
   if (!component.prototype.render)
     throw new Error("render function not defined in " + component);
@@ -934,6 +943,9 @@ function monkeyPatchComponent<T extends ModifiableEntity>(component: React.Compo
     const ctx = this.props.ctx;
 
     const view = baseRender.call(this);
+    if (view == null)
+      return null;
+
 
     const replacer = new ViewReplacer<T>(view, ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
@@ -943,6 +955,21 @@ function monkeyPatchComponent<T extends ModifiableEntity>(component: React.Compo
   component.prototype.render.withViewOverrides = true;
 }
 
+function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+  var result = function NewComponent(props: { ctx: TypeContext<T> }) {
+    var view = functionComponent(props);
+    if (view == null)
+      return null;
+
+    const replacer = new ViewReplacer<T>(view, props.ctx);
+    viewOverrides.forEach(vo => vo.override(replacer));
+    return replacer.result;
+  };
+
+  Object.defineProperty(result, "name", { value: functionComponent.name + "VO" });
+
+  return result;
+}
 
 export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
   return entityWhen == "Always" ||

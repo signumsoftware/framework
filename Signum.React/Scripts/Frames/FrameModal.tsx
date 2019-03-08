@@ -7,7 +7,7 @@ import ButtonBar from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
@@ -17,6 +17,9 @@ import { BsSize, Modal, ErrorBoundary } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
+import { AutoFocus } from '../Components/AutoFocus';
+import { instanceOf } from 'prop-types';
+
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   title?: string;
@@ -101,9 +104,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       refreshCount: 0,
     };
   }
-
-
-
+  
   setPack(pack: EntityPack<ModifiableEntity>): EntityPack<ModifiableEntity> {
     this.setState({
       pack: pack,
@@ -233,7 +234,17 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      onReload: pack => this.setPack(pack || this.state.pack!),
+      onReload: pack => {
+        var newPack = pack || this.state.pack!;
+        
+        if (is(this.state.pack!.entity as Entity, newPack.entity as Entity))
+          this.setPack(newPack);
+        else {
+          this.setPack(newPack);
+          this.setState({ getComponent: undefined }, () => this.loadComponent(newPack).done()); //For AutoFocus and potentialy another view
+        }
+      },
+      pack: this.state.pack,
       onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
@@ -241,6 +252,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
+      allowChangeEntity: this.props.isNavigate || false,
     };
 
     const pack = this.state.pack!;
@@ -250,7 +262,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       frame: frame,
     };
 
-    const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
+    const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, ""), this.prefix!);
 
     const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pack };
 
@@ -260,16 +272,27 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       <div className="modal-body">
         {renderWidgets({ ctx: ctx, pack: pack })}
         {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
-        <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
+        <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
+  }
+
+  getComponentWithRef(ctx: TypeContext<ModifiableEntity>) {
+    var component = this.state.getComponent!(ctx)!;
+
+    var type = component.type as React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> | React.FunctionComponent<{ ctx: TypeContext<ModifiableEntity> }>;
+    if (type.prototype.render) {
+      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
+    } else {
+      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
+    }
   }
 
   validationErrors?: ValidationErrors | null;
@@ -285,7 +308,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     return (
       <span>
         <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
-                {this.renderExpandLink()}
+        {this.renderExpandLink()}
         <br />
         <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
       </span>
@@ -357,6 +380,13 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       isNavigate={true} />);
   }
 }
+
+export class FunctionalAdapter extends React.Component {
+  render() {
+    return this.props.children;
+  }
+}
+
 
 
 
