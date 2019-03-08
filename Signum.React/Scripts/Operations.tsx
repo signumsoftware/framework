@@ -224,7 +224,6 @@ export class EntityOperationContext<T extends Entity> {
   operationInfo: OperationInfo;
   settings?: EntityOperationSettings<T>;
   canExecute?: string;
-  closeRequested?: boolean;
   event?: React.MouseEvent<any>;
   onExecuteSuccess?: (pack: EntityPack<T>) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
@@ -249,6 +248,10 @@ export class EntityOperationContext<T extends Entity> {
 
   isAllowed() {
     return isOperationInfoAllowed(this.operationInfo);
+  }
+
+  textOrNiceName() {
+    return this.settings && this.settings.text && this.settings.text() || this.operationInfo.niceName
   }
 }
 
