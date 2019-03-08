@@ -9,9 +9,7 @@ namespace Signum.Entities.Authorization
     public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string DefaultDomainName { get; set; }
-
-        public bool AllowOtherDomains { get; set; }
+        public string DomainName { get; set; }
     }
 
     public enum ActiveDirectoryAuthorizerMessage

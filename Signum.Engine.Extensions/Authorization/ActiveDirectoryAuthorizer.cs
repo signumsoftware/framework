@@ -45,12 +45,12 @@ namespace Signum.Engine.Authorization
             using (AuthLogic.Disable())
             {
                 var config = this.GetConfig();
-                var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DefaultDomainName;
+                var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
                 var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
                 
                 UserEntity user;
 
-                if (domainName != null && (config.AllowOtherDomains || config.DefaultDomainName?.ToLower() == domainName.ToLower()))
+                if (domainName != null)
                 {
                     try
                     {
