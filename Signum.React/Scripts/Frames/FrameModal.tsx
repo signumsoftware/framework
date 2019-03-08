@@ -18,6 +18,7 @@ import { ModalHeaderButtons } from '../Components/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
+import { instanceOf } from 'prop-types';
 
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
@@ -275,12 +276,23 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}</AutoFocus>}
+            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
+  }
+
+  getComponentWithRef(ctx: TypeContext<ModifiableEntity>) {
+    var component = this.state.getComponent!(ctx)!;
+
+    var type = component.type as React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> | React.FunctionComponent<{ ctx: TypeContext<ModifiableEntity> }>;
+    if (type.prototype.render) {
+      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
+    } else {
+      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
+    }
   }
 
   validationErrors?: ValidationErrors | null;
@@ -296,7 +308,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     return (
       <span>
         <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
-                {this.renderExpandLink()}
+        {this.renderExpandLink()}
         <br />
         <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
       </span>
@@ -368,6 +380,13 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       isNavigate={true} />);
   }
 }
+
+export class FunctionalAdapter extends React.Component {
+  render() {
+    return this.props.children;
+  }
+}
+
 
 
 
