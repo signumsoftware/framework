@@ -18,7 +18,7 @@ import { ModelEntity } from "@framework/Signum.Entities";
 import { QueryRequest } from "@framework/FindOptions";
 import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
-import { ButtonsContext } from "@framework/TypeContext";
+import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
 import { DropdownItem } from '@framework/Components';
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
@@ -91,7 +91,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
       if (!ctx.searchControl.props.showBarExtension || !Navigator.isViewable(WordTemplateEntity))
         return undefined;
 
-      return <WordSearchMenu searchControl={ctx.searchControl} />;
+      return { button: <WordSearchMenu searchControl={ctx.searchControl} /> };
     });
 
   if (options.entityButton) {
@@ -99,10 +99,10 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
   }
 }
 
-export function getEntityWordButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
+export function getEntityWordButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
 
   if (Navigator.isViewable(WordTemplateEntity) && ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
-    return [<WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />]
+    return [{ button: <WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} /> }];
 
   return undefined;
 }

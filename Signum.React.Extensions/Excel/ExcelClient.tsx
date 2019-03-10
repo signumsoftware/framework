@@ -25,7 +25,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
       !Navigator.isViewable(ExcelReportEntity))
       return undefined;
 
-    return <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} />;
+    return { button: <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} /> };
   });
 
   if (options.plainExcel) {

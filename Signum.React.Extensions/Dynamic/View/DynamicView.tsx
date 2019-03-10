@@ -11,7 +11,7 @@ import { NodeConstructor, BaseNode } from './Nodes'
 import { DesignerNode, DesignerContext } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
 import ShowCodeModal from './ShowCodeModal'
-import { ButtonsContext, IRenderButtons } from '@framework/TypeContext'
+import { ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import "./DynamicView.css"
 
 interface DynamicViewEntityComponentProps {
@@ -36,9 +36,9 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     ShowCodeModal.showCode(this.props.ctx.value.entityType!.cleanName, this.state.rootNode!);
   }
 
-  renderButtons(bc: ButtonsContext) {
+  renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      <button key="showCode" type="button" className="btn btn-success float-right" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button>
+      { button: <button key="showCode" type="button" className="btn btn-success float-right" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button> }
     ];
   }
 
