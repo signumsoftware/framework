@@ -73,6 +73,7 @@ export interface SearchControlLoadedProps {
   refreshKey: string | number | undefined;
 
   simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], search: () => void) => React.ReactElement<any> | undefined;
+  enableAutoFocus: boolean;
   onCreate?: () => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -396,19 +397,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-              this.state.showFilters ? <FilterBuilder
-                queryDescription={qd}
-                filterOptions={fo.filterOptions}
-                lastToken={this.state.lastToken}
-                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-                onTokenChanged={this.handleFilterTokenChanged}
-                onFiltersChanged={this.handleFiltersChanged}
-                onHeightChanged={this.handleHeightChanged}
-                showPinnedFilters={true}
+            this.state.showFilters ? <FilterBuilder
+              queryDescription={qd}
+              filterOptions={fo.filterOptions}
+              lastToken={this.state.lastToken}
+              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+              onTokenChanged={this.handleFilterTokenChanged}
+              onFiltersChanged={this.handleFiltersChanged}
+              onHeightChanged={this.handleHeightChanged}
+              showPinnedFilters={true}
 
-              /> :
-                sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                  <AutoFocus>
+            /> :
+              sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                <AutoFocus disabled={!this.props.enableAutoFocus}>
                     <PinnedFilterBuilder
                       filterOptions={fo.filterOptions}
                       onFiltersChanged={this.handlePinnedFilterChanged} />
@@ -416,9 +417,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             }
           </div>
         }
-        {p.showHeader == "PinnedFilters" && <AutoFocus><PinnedFilterBuilder
-          filterOptions={fo.filterOptions}
-          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} /></AutoFocus>}
+        {p.showHeader == "PinnedFilters" && <AutoFocus disabled={!this.props.enableAutoFocus}>
+          <PinnedFilterBuilder
+            filterOptions={fo.filterOptions}
+            onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />
+        </AutoFocus>}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}

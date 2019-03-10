@@ -47,6 +47,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
   refreshKey?: string | number;
+  enableAutoFocus?: boolean;
   simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
@@ -208,6 +209,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
           avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
           refreshKey={p.refreshKey}
 
+          enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}
           simpleFilterBuilder={p.simpleFilterBuilder}
 
           onCreate={p.onCreate}

@@ -109,6 +109,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
           showGroupButton={true}
           avoidChangeUrl={false}
           maxResultsHeight={"none"}
+          enableAutoFocus={true}
           onHeighChanged={this.onResize}
           onSearch={result => this.changeUrl()}
         />
