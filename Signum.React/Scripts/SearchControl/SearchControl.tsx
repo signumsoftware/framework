@@ -10,6 +10,7 @@ import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoad
 import { ErrorBoundary } from '../Components';
 import { MaxHeightProperty } from 'csstype';
 import "./Search.css"
+import { ButtonBarElement } from '../TypeContext';
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
@@ -20,7 +21,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
-  extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
+  extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   tag?: string | {};

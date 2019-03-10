@@ -8,7 +8,7 @@ import MessageModal from '../Modals/MessageModal'
 import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import {
-  operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, autoColorFunction, isEntityOperation
+  operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation
 } from '../Operations'
 import { DropdownItem } from "../Components/DropdownItem";
 import { UncontrolledTooltip } from "../Components/Tooltip";
