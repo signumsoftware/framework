@@ -13,6 +13,7 @@ import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
+import { FunctionalAdapter } from './FrameModal';
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -190,12 +191,23 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}</AutoFocus>}
+            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
+  }
+
+  getComponentWithRef(ctx: TypeContext<Entity>) {
+    var component = this.state.getComponent!(ctx)!;
+
+    var type = component.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }>;
+    if (type.prototype.render) {
+      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
+    } else {
+      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
+    }
   }
 
   validationErrors?: ValidationErrors | null;

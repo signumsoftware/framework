@@ -1,10 +1,10 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { match, RouterChildContext, matchPath } from "react-router-dom";
 import * as H from "history";
 import * as PropTypes from "prop-types";
 
 export interface ComponentModule {
-  default: React.ComponentClass<any>;
+  default: React.ComponentClass<any> | React.FunctionComponent<any>;
 }
 
 interface ImportComponentProps {

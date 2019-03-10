@@ -1,9 +1,9 @@
 ﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
   <Header>
-    <Title>React Class Component Basic</Title>
+    <Title>React Function Component</Title>
     <Author>Signum Software</Author>
-    <Shortcut>reactClass</Shortcut>
-    <Description>Code snippet for adding an React class component with implicit props</Description>
+    <Shortcut>reactFunction</Shortcut>
+    <Description>Code snippet for adding an React Function Component that can use React Hooks</Description>
     <SnippetTypes>
       <SnippetType>Expansion</SnippetType>
     </SnippetTypes>
@@ -30,14 +30,12 @@
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
-export class $ComponentName$ extends React.Component<{ ctx: TypeContext<$EntityType$> }> {
-  render() {
-    return (
-      <div>
-        $end$
-      </div>
-    );
-  }
+export function $ComponentName$(p : { ctx: TypeContext<$EntityType$> }) {
+  return (
+    <div>
+      $end$
+    </div>
+  );
 }
      ]]>
     </Code>

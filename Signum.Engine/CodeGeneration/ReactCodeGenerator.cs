@@ -105,7 +105,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetViewFileName(Module m, Type t)
         {
-            return BaseFileName(m)  + "Templates\\" + GetViewName(t) + ".tsx";
+            return BaseFileName(m)  + "Templates\\" + GetComponentName(t) + ".tsx";
         }
 
         protected virtual string ControllerFileName(Module m)
@@ -392,7 +392,7 @@ namespace Signum.Engine.CodeGeneration
             var v = GetVarName(type);
 
             return "Navigator.addSettings(new EntitySettings({0}, {1} => import('./Templates/{2}')));".FormatWith(
-                type.Name, v, GetViewName(type));
+                type.Name, v, GetComponentName(type));
         }
 
         protected virtual string GetVarName(Type type)
@@ -408,7 +408,7 @@ namespace Signum.Engine.CodeGeneration
         }
 
 
-        protected virtual string GetViewName(Type type)
+        protected virtual string GetComponentName(Type type)
         {
             return Reflector.CleanTypeName(type);
         }
@@ -424,27 +424,56 @@ namespace Signum.Engine.CodeGeneration
 
             var v = GetVarName(type);
 
-            sb.AppendLine();
-            sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetViewName(type), type.Name));
-            sb.AppendLine("");
-            sb.AppendLine("  render() {");
-            sb.AppendLine("    var ctx = this.props.ctx;");
-            sb.AppendLine("    return (");
-            sb.AppendLine("      <div>");
 
-            foreach (var pi in GetProperties(type))
+            if (this.GenerateFunctionalComponent(type))
             {
-                string prop = WriteProperty(pi, v);
-                if (prop != null)
-                    sb.AppendLine(prop.Indent(8));
+                sb.AppendLine();
+                sb.AppendLine("export default function {0}(p: {{ ctx: TypeContext<{1}> }}) {{".FormatWith(GetComponentName(type), type.Name));
+                sb.AppendLine("");
+                sb.AppendLine("  var ctx = p.ctx;");
+                sb.AppendLine("  return (");
+                sb.AppendLine("    <div>");
+
+                foreach (var pi in GetProperties(type))
+                {
+                    string prop = WriteProperty(pi, v);
+                    if (prop != null)
+                        sb.AppendLine(prop.Indent(6));
+                }
+
+                sb.AppendLine("     </div>");
+                sb.AppendLine("  );");
+                sb.AppendLine("}");
+            }
+            else
+            {
+                sb.AppendLine();
+                sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetComponentName(type), type.Name));
+                sb.AppendLine("");
+                sb.AppendLine("  render() {");
+                sb.AppendLine("    var ctx = this.props.ctx;");
+                sb.AppendLine("    return (");
+                sb.AppendLine("      <div>");
+
+                foreach (var pi in GetProperties(type))
+                {
+                    string prop = WriteProperty(pi, v);
+                    if (prop != null)
+                        sb.AppendLine(prop.Indent(8));
+                }
+
+                sb.AppendLine("       </div>");
+                sb.AppendLine("    );");
+                sb.AppendLine("  }");
+                sb.AppendLine("}");
             }
 
-            sb.AppendLine("       </div>");
-            sb.AppendLine("    );");
-            sb.AppendLine("  }");
-            sb.AppendLine("}");
-
             return sb.ToString();
+        }
+
+        protected virtual bool GenerateFunctionalComponent(Type type)
+        {
+            return true;
         }
 
         protected virtual string WriteProperty(PropertyInfo pi, string v)

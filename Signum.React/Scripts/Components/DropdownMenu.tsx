@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import { Popper } from 'react-popper';
 import { classes } from '../Globals';
@@ -73,6 +73,7 @@ export class DropdownMenu extends React.Component<DropdownMenuProps> {
         {...attrs}
         aria-hidden={!context.isOpen}
         className={clss}
+        x-placement={(attrs as any).placement}
       />
     );
   }

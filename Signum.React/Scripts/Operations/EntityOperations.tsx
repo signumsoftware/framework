@@ -128,13 +128,11 @@ function getAlternatives(eoc: EntityOperationContext<Entity>): AlternativeOperat
 }
 
 export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
-
-  var text = eoc.settings && eoc.settings.text && eoc.settings.text() || eoc.operationInfo.niceName;
-
+  
   return ({
-    name:"andClose",
-    text: () => OperationMessage._0AndClose.niceToString(text),
-    icon: "check",
+    name: "andClose",
+    text: () => OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
+    icon: "times",
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         eoc.frame.onReload(pack);
@@ -147,11 +145,10 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
 }
 
 export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
-
-  var text = eoc.settings && eoc.settings.text && eoc.settings.text() || eoc.operationInfo.niceName;
+  
   return ({
     name: "andNew",
-    text: () => OperationMessage._0AndNew.niceToString(text),
+    text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
     isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
     onClick: () => {
@@ -370,8 +367,6 @@ export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationConte
       .then(eoc.onExecuteSuccess || (pack => {
         eoc.frame.onReload(pack);
         notifySuccess();
-        if (eoc.closeRequested)
-          eoc.frame.onClose(true);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
@@ -388,8 +383,6 @@ export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext
       .then(eoc.onExecuteSuccess || (pack => {
         eoc.frame.onReload(pack);
         notifySuccess();
-        if (eoc.closeRequested)
-          eoc.frame.onClose(true);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();

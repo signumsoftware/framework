@@ -11,6 +11,7 @@ import { onWidgets, WidgetContext } from './Frames/Widgets'
 import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
 import { DropdownItem, DropdownToggle, DropdownMenu, UncontrolledDropdown } from './Components';
 import { TitleManager } from './Lines/EntityBase';
+import { useAPI } from './Hooks';
 
 export function start() {
 
@@ -110,65 +111,42 @@ export interface QuickLinkWidgetProps {
   ctx: WidgetContext<ModifiableEntity>
 }
 
-export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { links?: QuickLink[] }> {
+export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
-  constructor(props: QuickLinkWidgetProps) {
-    super(props);
-    this.state = { links: undefined };
-  }
+  const entity = p.ctx.pack.entity;
 
-  componentWillMount() {
-    this.makeRequest(this.props);
-  }
+  const links = useAPI(undefined, [p], signal => {
+    if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind)
+      return Promise.resolve([]);
+    else
+      return getQuickLinks({
+        lite: toLiteFat(entity as Entity),
+        widgetContext: p.ctx as WidgetContext<Entity>
+      });
+  });
 
-  componentWillReceiveProps(newProps: QuickLinkWidgetProps) {
-    if (!is(newProps.ctx.pack.entity as Entity, this.props.ctx.pack.entity as Entity)) {
-      this.makeRequest(newProps);
-    }
-  }
+  if (links != undefined && links.length == 0)
+    return null;
 
-  makeRequest(props: QuickLinkWidgetProps) {
-    this.setState({ links: undefined });
-
-    const entity = props.ctx.pack.entity;
-
-    if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind) {
-      this.setState({ links: [] });
-    } else {
-      getQuickLinks({
-        lite: toLiteFat(props.ctx.pack.entity as Entity),
-        widgetContext: props.ctx as WidgetContext<Entity>
-      }).then(links => this.setState({ links }))
-        .done();
-    }
-  }
-
-  render() {
-    const links = this.state.links;
-
-    if (links != undefined && links.length == 0)
-      return null;
-
-    return (
-      <UncontrolledDropdown id="quickLinksWidget">
-        <DropdownToggle tag="span" data-toggle="dropdown">
-          <a
-            className={classes("badge badge-secondary badge-pill", "sf-widgets-active", "sf-quicklinks")}
-            title={TitleManager.useTitle ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
-            role="button"
-            href="#"
-            data-toggle="dropdown"
-            onClick={e => e.preventDefault()} >
-            {links && <FontAwesomeIcon icon="star" />}
-            {links ? "\u00A0" + links.length : "…"}
-          </a>
-        </DropdownToggle>
-        <DropdownMenu right>
-          {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    );
-  }
+  return (
+    <UncontrolledDropdown id="quickLinksWidget">
+      <DropdownToggle tag="span" data-toggle="dropdown">
+        <a
+          className={classes("badge badge-secondary badge-pill", "sf-widgets-active", "sf-quicklinks")}
+          title={TitleManager.useTitle ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
+          role="button"
+          href="#"
+          data-toggle="dropdown"
+          onClick={e => e.preventDefault()} >
+          {links && <FontAwesomeIcon icon="star" />}
+          {links ? "\u00A0" + links.length : "…"}
+        </a>
+      </DropdownToggle>
+      <DropdownMenu right>
+        {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
+      </DropdownMenu>
+    </UncontrolledDropdown>
+  );
 }
 
 
@@ -275,6 +253,9 @@ export class QuickLinkExplore extends QuickLink {
   }
 
   exploreOrPopup = (e: React.MouseEvent<any>) => {
+    if (e.button == 2)
+      return;
+
     if (e.ctrlKey || e.button == 1)
       window.open(Finder.findOptionsPath(this.findOptions));
     else
@@ -305,6 +286,9 @@ export class QuickLinkNavigate extends QuickLink {
   }
 
   navigateOrPopup = (e: React.MouseEvent<any>) => {
+    if (e.button == 2)
+      return;
+
     const es = Navigator.getSettings(this.lite.EntityType);
     if (e.ctrlKey || e.button == 1 || es && es.avoidPopup)
       window.open(Navigator.navigateRoute(this.lite));
