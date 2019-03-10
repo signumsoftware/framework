@@ -1,6 +1,6 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { notifySuccess } from '@framework/Operations/EntityOperations'
-import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
+import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { OperationSymbol } from '@framework/Signum.Entities'
 import { API } from '../AuthClient'
@@ -23,9 +23,9 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
       .done();
   }
 
-  renderButtons(bc: ButtonsContext) {
+  renderButtons(bc: ButtonsContext): ButtonBarElement[]{
     return [
-      <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
+      { button: <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
     ];
   }
 

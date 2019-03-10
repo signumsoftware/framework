@@ -29,7 +29,7 @@ export function start(options: { routes: JSX.Element[] }) {
       (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showUserQuery == false))
       return undefined;
 
-    return <UserQueryMenu searchControl={ctx.searchControl} />;
+    return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
   });
 
   QuickLinks.registerGlobalQuickLink(ctx => {
