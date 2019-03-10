@@ -102,6 +102,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
     text: () => OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
     icon: "times",
     keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
+    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         eoc.frame.onReload(pack);
@@ -114,7 +115,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
 }
 
 export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
-  
+
   return ({
     name: "andNew",
     text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
@@ -158,6 +159,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         </UncontrolledTooltip>
       );
 
+    var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
     if (group) {
       return [
@@ -172,7 +174,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
           {this.renderChildren()}
         </DropdownItem>,
         tooltip,
-        tooltip == null && eoc.alternatives && eoc.alternatives.map(a => this.renderAlternative(a))
+        tooltip == null && alternatives && alternatives.map(a => this.renderAlternative(a))
       ];
     }
 
@@ -194,8 +196,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         tooltip
       ];
 
-
-    if (eoc.alternatives == undefined || eoc.alternatives.length == 0)
+    if (alternatives == undefined || alternatives.length == 0)
       return button;
 
     return (
@@ -203,7 +204,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         {button}
         <DropdownToggle caret split color={eoc.color}/>
         <DropdownMenu right>
-          {eoc.alternatives.map(a => this.renderAlternative(a))}
+          {alternatives.map(a => this.renderAlternative(a))}
         </DropdownMenu>
       </UncontrolledDropdown>
     );
