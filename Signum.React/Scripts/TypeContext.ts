@@ -414,8 +414,14 @@ export interface ButtonsContext {
   tag?: string;
 }
 
+export interface ButtonBarElement {
+  button: React.ReactElement<any>;
+  order?: number;
+  shortcut?: (e: KeyboardEvent) => boolean;
+}
+
 export interface IRenderButtons {
-  renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[];
+  renderButtons(ctx: ButtonsContext): (ButtonBarElement | undefined)[];
 }
 
 export interface IOperationVisible {

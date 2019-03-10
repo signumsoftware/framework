@@ -4,7 +4,6 @@ import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownTogg
 import { DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
-import * as OrderUtils from '../Frames/OrderUtils'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
@@ -32,6 +31,7 @@ import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { TitleManager } from '../../Scripts/Lines/EntityBase';
 import { AutoFocus } from '../Components/AutoFocus';
+import { ButtonBarElement } from '../TypeContext';
 
 export interface ShowBarExtensionOption { }
 
@@ -43,7 +43,7 @@ export interface SearchControlLoadedProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
-  extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
+  extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   tag?: string | {};
@@ -73,6 +73,7 @@ export interface SearchControlLoadedProps {
   refreshKey: string | number | undefined;
 
   simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], search: () => void) => React.ReactElement<any> | undefined;
+  enableAutoFocus: boolean;
   onCreate?: () => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -396,19 +397,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-              this.state.showFilters ? <FilterBuilder
-                queryDescription={qd}
-                filterOptions={fo.filterOptions}
-                lastToken={this.state.lastToken}
-                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-                onTokenChanged={this.handleFilterTokenChanged}
-                onFiltersChanged={this.handleFiltersChanged}
-                onHeightChanged={this.handleHeightChanged}
-                showPinnedFilters={true}
+            this.state.showFilters ? <FilterBuilder
+              queryDescription={qd}
+              filterOptions={fo.filterOptions}
+              lastToken={this.state.lastToken}
+              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+              onTokenChanged={this.handleFilterTokenChanged}
+              onFiltersChanged={this.handleFiltersChanged}
+              onHeightChanged={this.handleHeightChanged}
+              showPinnedFilters={true}
 
-              /> :
-                sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                  <AutoFocus>
+            /> :
+              sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                <AutoFocus disabled={!this.props.enableAutoFocus}>
                     <PinnedFilterBuilder
                       filterOptions={fo.filterOptions}
                       onFiltersChanged={this.handlePinnedFilterChanged} />
@@ -416,9 +417,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             }
           </div>
         }
-        {p.showHeader == "PinnedFilters" && <AutoFocus><PinnedFilterBuilder
-          filterOptions={fo.filterOptions}
-          onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} /></AutoFocus>}
+        {p.showHeader == "PinnedFilters" && <AutoFocus disabled={!this.props.enableAutoFocus}>
+          <PinnedFilterBuilder
+            filterOptions={fo.filterOptions}
+            onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />
+        </AutoFocus>}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -526,65 +529,76 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       this.state.resultTable == null && !this.props.searchOnLoad ||
       this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey));
 
-    var leftButtons = [
+    var leftButtons = ([
 
-      p.showFilterButton && OrderUtils.setOrder(-5, <button
-        className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
-        style={!s.showFilters && p.findOptions.filterOptions.length > 0 ? { border: "1px solid #b3b3b3" } : undefined}
-        onClick={this.handleToggleFilters}
-        title={TitleManager.useTitle ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
-        <FontAwesomeIcon icon="filter" />
-      </button>),
+      p.showFilterButton && {
+        order: -5,
+        button: <button
+          className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
+          style={!s.showFilters && p.findOptions.filterOptions.length > 0 ? { border: "1px solid #b3b3b3" } : undefined}
+          onClick={this.handleToggleFilters}
+          title={TitleManager.useTitle ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
+          <FontAwesomeIcon icon="filter" />
+        </button>
+      },
 
-      p.showGroupButton && OrderUtils.setOrder(-4, <button
-        className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
-        onClick={this.handleToggleGroupBy}
-        title={TitleManager.useTitle ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
-        Ʃ
-            </button>),
+      p.showGroupButton && {
+        order: -4,
+        button: < button
+          className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
+          onClick={this.handleToggleGroupBy}
+          title={TitleManager.useTitle ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
+          Ʃ
+            </button>
+      },
 
-      p.showSystemTimeButton && OrderUtils.setOrder(-3.5, <button
-        className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
-        onClick={this.handleSystemTimeClick}
-        title={TitleManager.useTitle ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
-        <FontAwesomeIcon icon="history" />
-      </button>),
+      p.showSystemTimeButton && {
+        order: -3.5,
+        button: < button
+          className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
+          onClick={this.handleSystemTimeClick}
+          title={TitleManager.useTitle ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
+          <FontAwesomeIcon icon="history" />
+        </button>
+      },
 
-      OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick}>
-        <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
-      </button>),
+      {
+        order: -3,
+        button: < button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick} >
+          <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+        </button>
+      },
 
       this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
-      p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-create ml-2" title={TitleManager.useTitle ? this.createTitle() : undefined} onClick={this.handleCreate}>
-        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
-      </button>),
+      p.create && {
+        order: -2,
+        button: < button className="sf-query-button btn btn-light sf-create ml-2" title={TitleManager.useTitle ? this.createTitle() : undefined} onClick={this.handleCreate} >
+          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
+        </button>
+      },
 
 
       ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
-    ]
+    ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
-      .map(a => a as React.ReactElement<any>)
-      .orderBy(a => OrderUtils.getOrder(a))
-      .map(a => OrderUtils.cloneElementWithoutOrder(a!));
+      .map(a => a as ButtonBarElement);
 
-    var rightButtons = [
+    var rightButtons = ([
       ...(this.props.hideButtonBar ? [] : Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this })),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
       <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
         <FontAwesomeIcon icon="external-link-alt" />
       </button>
-    ]
+    ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
-      .map(a => a as React.ReactElement<any>)
-      .orderBy(a => OrderUtils.getOrder(a))
-      .map(a => OrderUtils.cloneElementWithoutOrder(a!));
+      .map(a => a as ButtonBarElement);
 
     return (
       <div className={classes("sf-query-button-bar d-flex justify-content-between", !this.props.largeToolbarButtons && "btn-toolbar-small")}>
-        {React.createElement("div", { className: "btn-toolbar"}, ...leftButtons)}
-        {React.createElement("div", { className: "btn-toolbar", style: { justifyContent: "flex-end" } }, ...rightButtons)}
+        {React.createElement("div", { className: "btn-toolbar" }, ...leftButtons.map(a => a.button))}
+        {React.createElement("div", { className: "btn-toolbar", style: { justifyContent: "flex-end" } }, ...rightButtons.map(a => a.button))}
       </div>
     );
   }
@@ -714,26 +728,28 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   }
 
-  renderSelectedButton() {
+  renderSelectedButton(): ButtonBarElement | null {
 
     if (this.state.selectedRows == undefined)
       return null;
 
     const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
 
-    return OrderUtils.setOrder(-1,
-      <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
-        isOpen={this.state.isSelectOpen}
-        toggle={this.handleSelectedToggle}
-        disabled={this.state.selectedRows!.length == 0}>
-        <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
-        <DropdownMenu>
-          {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-            this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
-              this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-        </DropdownMenu>
-      </Dropdown>
-    );
+    return {
+      order: -1,
+      button:
+        <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
+          isOpen={this.state.isSelectOpen}
+          toggle={this.handleSelectedToggle}
+          disabled={this.state.selectedRows!.length == 0}>
+          <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
+          <DropdownMenu>
+            {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
+              this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
+                this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          </DropdownMenu>
+        </Dropdown>
+    };
   }
 
   // CONTEXT MENU
