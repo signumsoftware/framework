@@ -1,38 +1,11 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorRegressionMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
 
-export default class PredictorRegressionMetrics extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
+export default function PredictorRegressionMetrics(p : { ctx: TypeContext<PredictorEntity> }){
 
-  render() {
-    const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly" });
-
-    return (
-      <fieldset>
-        <legend>Regression</legend>
-        <table className="table table-sm" style={{ width: "initial" }}>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Training</th>
-              <th>Validation</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.renderRow(ctx, a => a.meanError)}
-            {this.renderRow(ctx, a => a.meanAbsoluteError)}
-            {this.renderRow(ctx, a => a.meanSquaredError)}
-            {this.renderRow(ctx, a => a.rootMeanSquareError)}
-            {this.renderRow(ctx, a => a.meanPercentageError)}
-            {this.renderRow(ctx, a => a.meanAbsolutePercentageError)}
-          </tbody>
-        </table>
-      </fieldset>
-    );
-  }
-
-  renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorRegressionMetricsEmbedded) => number | null | undefined) {
+  function renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorRegressionMetricsEmbedded) => number | null | undefined) {
     const ctxT = ctx.subCtx(a => a.regressionTraining!);
     const ctxV = ctx.subCtx(a => a.regressionValidation!);
     var unit = ctxT.subCtx(property).propertyRoute.member!.unit;
@@ -45,4 +18,28 @@ export default class PredictorRegressionMetrics extends React.Component<{ ctx: T
       </tr>
     );
   }
+  const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly" });
+
+  return (
+    <fieldset>
+      <legend>Regression</legend>
+      <table className="table table-sm" style={{ width: "initial" }}>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Training</th>
+            <th>Validation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {renderRow(ctx, a => a.meanError)}
+          {renderRow(ctx, a => a.meanAbsoluteError)}
+          {renderRow(ctx, a => a.meanSquaredError)}
+          {renderRow(ctx, a => a.rootMeanSquareError)}
+          {renderRow(ctx, a => a.meanPercentageError)}
+          {renderRow(ctx, a => a.meanAbsolutePercentageError)}
+        </tbody>
+      </table>
+    </fieldset>
+  );
 }

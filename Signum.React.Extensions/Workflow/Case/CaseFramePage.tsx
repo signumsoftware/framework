@@ -18,6 +18,7 @@ import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
+import { FunctionalAdapter } from '@framework/Frames/FrameModal';
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -100,7 +101,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
   entityComponent?: React.Component<any, any> | null;
 
-  setComponent(c: React.Component<any, any>) {
+  setComponent(c: React.Component<any, any> | null) {
     if (c && this.entityComponent != c) {
       this.entityComponent = c;
       this.forceUpdate();
@@ -236,7 +237,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame"/>
         <ErrorBoundary>
-          {this.state.getComponent && <AutoFocus>{React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}</AutoFocus>}
+          {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
         </ErrorBoundary>
         <br />
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame" />
@@ -244,4 +245,14 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 
+  getComponentWithRef(ctx: TypeContext<ICaseMainEntity>) {
+    var component = this.state.getComponent!(ctx)!;
+
+    var type = component.type as React.ComponentClass<{ ctx: TypeContext<ICaseMainEntity> }> | React.FunctionComponent<{ ctx: TypeContext<ICaseMainEntity> }>;
+    if (type.prototype.render) {
+      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
+    } else {
+      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
+    }
+  }
 }

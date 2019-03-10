@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Operations;
+using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
@@ -17,21 +17,13 @@ namespace Signum.Engine.Authorization
                 Construct = args => new UserEntity { State = UserState.New }
             }.Register();
 
-            new Execute(UserOperation.SaveNew)
+            new Execute(UserOperation.Save)
             {
-                FromStates = { UserState.New },
+                FromStates = { UserState.Saved, UserState.New },
                 ToStates = { UserState.Saved },
                 CanBeNew = true,
                 CanBeModified = true,
                 Execute = (u, _) => { u.State = UserState.Saved; }
-            }.Register();
-
-            new Execute(UserOperation.Save)
-            {
-                FromStates = { UserState.Saved },
-                ToStates = { UserState.Saved },
-                CanBeModified = true,
-                Execute = (u, _) => { },
             }.Register();
 
             new Execute(UserOperation.Disable)

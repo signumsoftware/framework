@@ -3,32 +3,9 @@ import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorClassificationMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
 
-export default class PredictorClassificationMetrics extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
-  render() {
-    const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly" });
+export default function PredictorClassificationMetrics(p : { ctx: TypeContext<PredictorEntity> }){
 
-    return (
-      <fieldset>
-        <legend>Classification</legend>
-        <table className="table table-sm">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Training</th>
-              <th>Validation</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.renderRow(ctx, a => a.totalCount)}
-            {this.renderRow(ctx, a => a.missCount)}
-            {this.renderRow(ctx, a => a.missRate)}
-          </tbody>
-        </table>
-      </fieldset>
-    );
-  }
-
-  renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorClassificationMetricsEmbedded) => number | null | undefined) {
+  function renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorClassificationMetricsEmbedded) => number | null | undefined) {
     const ctxT = ctx.subCtx(a => a.classificationTraining!);
     const ctxV = ctx.subCtx(a => a.classificationValidation!);
 
@@ -40,4 +17,25 @@ export default class PredictorClassificationMetrics extends React.Component<{ ct
       </tr>
     );
   }
+  const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly" });
+
+  return (
+    <fieldset>
+      <legend>Classification</legend>
+      <table className="table table-sm">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Training</th>
+            <th>Validation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {renderRow(ctx, a => a.totalCount)}
+          {renderRow(ctx, a => a.missCount)}
+          {renderRow(ctx, a => a.missRate)}
+        </tbody>
+      </table>
+    </fieldset>
+  );
 }

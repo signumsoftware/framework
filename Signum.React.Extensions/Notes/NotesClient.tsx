@@ -7,7 +7,6 @@ import * as QuickLinks from '@framework/QuickLinks'
 
 export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
-  Navigator.addSettings(new EntitySettings(NoteTypeEntity, e => import('./Templates/NoteType')));
 
   const couldHaveNotes = options.couldHaveNotes || (typeName => true);
 

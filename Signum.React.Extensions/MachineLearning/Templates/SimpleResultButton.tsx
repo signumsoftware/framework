@@ -10,38 +10,22 @@ interface SimpleResultButtonProps {
   ctx: TypeContext<PredictorEntity>;
 }
 
-export default class SimpleResultButton extends React.Component<SimpleResultButtonProps> {
-  render() {
-    const p = this.props.ctx.value;
-    var col = p.mainQuery.columns.single(a => a.element.usage == "Output");
+export default function SimpleResultButton(p : SimpleResultButtonProps){
 
-    return (
-      <div>
-        <a href="#" className="btn btn-sm btn-info" onClick={this.handleOnClick} >
-          <FontAwesomeIcon icon="chart-line" />&nbsp;
-          {is(col.element.encoding, DefaultColumnEncodings.OneHot) ? "Confusion matrix" : "Regression Scatterplot"}
-        </a>
-      </div>
-    );
-  }
-
-  handleOnClick = (e: React.MouseEvent<any>) => {
+  function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-
-    this.getChartUrl()
-      .then(url => window.open(url))
-      .done();
+    window.open(getChartUrl());
   }
 
-  async getChartUrl(): Promise<string> {
-    const predictor = this.props.ctx.value;
+  function getChartUrl(): string {
+    const predictor = p.ctx.value;
 
     var outCol = predictor.mainQuery.columns.single(a => a.element.usage == "Output").element;
     var outToken = outCol.token!.token!;
 
 
     if (is(outCol.encoding, DefaultColumnEncodings.OneHot))
-      return await ChartClient.Encoder.chartPath({
+      return ChartClient.Encoder.chartPath({
         queryName: PredictSimpleResultEntity,
         filterOptions: [{ token: PredictSimpleResultEntity.token(e => e.predictor), value: predictor }],
         chartScript: "Punchcard",
@@ -52,7 +36,7 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         ],
       });
     else
-      return await  ChartClient.Encoder.chartPath({
+      return ChartClient.Encoder.chartPath({
         queryName: PredictSimpleResultEntity,
         filterOptions: [{ token: PredictSimpleResultEntity.token(e => e.predictor), value: predictor }],
         chartScript: "Scatterplot",
@@ -63,4 +47,15 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         ],
       });
   }
+  const pred = p.ctx.value;
+  var col = pred.mainQuery.columns.single(a => a.element.usage == "Output");
+
+  return (
+    <div>
+      <a href="#" className="btn btn-sm btn-info" onClick={handleOnClick} >
+        <FontAwesomeIcon icon="chart-line" />&nbsp;
+        {is(col.element.encoding, DefaultColumnEncodings.OneHot) ? "Confusion matrix" : "Regression Scatterplot"}
+      </a>
+    </div>
+  );
 }

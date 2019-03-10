@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
 import { FormGroup } from '@framework/Lines'
@@ -7,6 +7,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
+import { useForceUpdate } from '@framework/Hooks'
 
 export interface IconTypeaheadLineProps {
   ctx: TypeContext<string | null | undefined>;
@@ -14,27 +15,25 @@ export interface IconTypeaheadLineProps {
   extraIcons?: string[];
 }
 
-export class IconTypeaheadLine extends React.Component<IconTypeaheadLineProps>{
-
-  handleChange = (newIcon: string | undefined | null) => {
-    this.props.ctx.value = newIcon;
-    if (this.props.onChange)
-      this.props.onChange();
-    this.forceUpdate();
+export function IconTypeaheadLine(p : IconTypeaheadLineProps){
+  const forceUpdate = useForceUpdate();
+  function handleChange(newIcon: string | undefined | null) {
+    p.ctx.value = newIcon;
+    if (p.onChange)
+      p.onChange();
+    forceUpdate();
   }
 
-  render() {
-    var ctx = this.props.ctx;
+  var ctx = p.ctx;
 
-    return (
-      <FormGroup ctx={ctx} labelText={ctx.niceName()} >
-        <IconTypeahead icon={ctx.value}
-          extraIcons={this.props.extraIcons}
-          formControlClass={ctx.formControlClass}
-          onChange={this.handleChange} />
-      </FormGroup>
-    );
-  }
+  return (
+    <FormGroup ctx={ctx} labelText={ctx.niceName()} >
+      <IconTypeahead icon={ctx.value}
+        extraIcons={p.extraIcons}
+        formControlClass={ctx.formControlClass}
+        onChange={handleChange} />
+    </FormGroup>
+  );
 }
 
 export interface IconTypeaheadProps {
@@ -44,29 +43,25 @@ export interface IconTypeaheadProps {
   formControlClass: string | undefined;
 }
 
-export class IconTypeahead extends React.Component<IconTypeaheadProps>{
+export function IconTypeahead(p: IconTypeaheadProps) {
+  const forceUpdate = useForceUpdate();
 
-  icons: string[];
-  constructor(props: IconTypeaheadProps) {
-    super(props);
-
-    var lib = library as any as {
-      definitions: {
-        [iconPrefix: string]: {
-          [iconName: string]: any;
-        }
+  var lib = library as any as {
+    definitions: {
+      [iconPrefix: string]: {
+        [iconName: string]: any;
       }
-    };
+    }
+  };
 
-    var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${prefix} fa-${name}`));
-    this.icons = ([] as string[]).concat(props.extraIcons || []).concat(fontAwesome);
-  }
+  var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${prefix} fa-${name}`));
+  var icons = ([] as string[]).concat(p.extraIcons || []).concat(fontAwesome);
 
-  handleGetItems = (query: string) => {
+  function handleGetItems(query: string) {
     if (!query)
-      return Promise.resolve(([] as string[]).concat(this.props.extraIcons || []).concat(["far fa-", "fas fa-"]));
+      return Promise.resolve(([] as string[]).concat(p.extraIcons || []).concat(["far fa-", "fas fa-"]));
 
-    const result = this.icons
+    const result = icons
       .filter(k => k.toLowerCase().contains(query.toLowerCase()))
       .orderBy(a => a.length)
       .filter((k, i) => i < 5);
@@ -74,14 +69,13 @@ export class IconTypeahead extends React.Component<IconTypeaheadProps>{
     return Promise.resolve(result);
   }
 
-  handleSelect = (item: string | unknown) => {
-    this.props.onChange(item as string);
-    this.forceUpdate();
+  function handleSelect(item: string | unknown) {
+    p.onChange(item as string);
+    forceUpdate();
     return item as string;
   }
 
-  handleRenderItem = (item: unknown, query: string) => {
-
+  function handleRenderItem(item: unknown, query: string) {
     var icon = parseIcon(item as string);
 
     return (
@@ -92,19 +86,17 @@ export class IconTypeahead extends React.Component<IconTypeaheadProps>{
     );
   }
 
-  render() {
-    return (
-      <div style={{ position: "relative" }}>
-        <Typeahead
-          value={this.props.icon || ""}
-          inputAttrs={{ className: classes(this.props.formControlClass, "sf-entity-autocomplete") }}
-          getItems={this.handleGetItems}
-          onSelect={this.handleSelect}
-          onChange={this.handleSelect}
-          renderItem={this.handleRenderItem}
-          minLength={0}
-        />
-      </div>
-    );
-  }
+  return (
+    <div style={{ position: "relative" }}>
+      <Typeahead
+        value={p.icon || ""}
+        inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+        getItems={handleGetItems}
+        onSelect={handleSelect}
+        onChange={handleSelect}
+        renderItem={handleRenderItem}
+        minLength={0}
+      />
+    </div>
+  );
 }

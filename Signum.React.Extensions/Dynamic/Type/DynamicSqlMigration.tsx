@@ -11,43 +11,38 @@ import SqlCodeMirror from '../../Codemirror/SqlCodeMirror'
 
 
 interface DynamicSqlMigrationComponentProps {
-    ctx: TypeContext<DynamicSqlMigrationEntity>;
+  ctx: TypeContext<DynamicSqlMigrationEntity>;
 }
 
-export default class DynamicSqlMigrationComponent extends React.Component<DynamicSqlMigrationComponentProps> {
+export default function DynamicSqlMigrationComponent(p : DynamicSqlMigrationComponentProps){
+  function handleScriptChange(newScript: string) {
+    const ctxValue = p.ctx.value;
+    ctxValue.script = newScript;
+    ctxValue.modified = true;
+  }
 
-    handleScriptChange = (newScript: string) => {
+  const ctx = p.ctx;
+  const ctx4 = ctx.subCtx({ labelColumns: { sm: 4 } });
+  const executed = ctx.value.executedBy != null;
 
-        const ctxValue = this.props.ctx.value;
-        ctxValue.script = newScript;
-        ctxValue.modified = true;
-    }
+  return (
+    <div>
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx4.subCtx(sm => sm.creationDate)} readOnly={true} />
+          <ValueLine ctx={ctx4.subCtx(sm => sm.executionDate)} readOnly={true} />
+        </div>
 
-    render() {
+        <div className="col-sm-6">
+          <EntityLine ctx={ctx4.subCtx(sm => sm.createdBy)} readOnly={true} />
+          <EntityLine ctx={ctx4.subCtx(sm => sm.executedBy)} readOnly={true} />
+        </div>
+      </div>
 
-        const ctx = this.props.ctx;
-        const ctx4 = ctx.subCtx({ labelColumns: { sm: 4 } });
-        const executed = ctx.value.executedBy != null;
-
-        return (
-            <div>
-                <div className="row">
-                    <div className="col-sm-6">
-                        <ValueLine ctx={ctx4.subCtx(sm => sm.creationDate)} readOnly={true} />
-                        <ValueLine ctx={ctx4.subCtx(sm => sm.executionDate)} readOnly={true} />
-                    </div>
-
-                    <div className="col-sm-6">
-                        <EntityLine ctx={ctx4.subCtx(sm => sm.createdBy)} readOnly={true} />
-                        <EntityLine ctx={ctx4.subCtx(sm => sm.executedBy)} readOnly={true} />
-                    </div>
-                </div>
-
-                <ValueLine ctx={ctx.subCtx(sm => sm.comment)} readOnly={executed} />
-                <div className="code-container">
-                    <SqlCodeMirror script={ctx.value.script || ""} onChange={this.handleScriptChange} isReadOnly={executed} />
-                </div>
-            </div>
-        );
-    }
+      <ValueLine ctx={ctx.subCtx(sm => sm.comment)} readOnly={executed} />
+      <div className="code-container">
+        <SqlCodeMirror script={ctx.value.script || ""} onChange={handleScriptChange} isReadOnly={executed} />
+      </div>
+    </div>
+  );
 }

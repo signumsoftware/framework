@@ -9,22 +9,13 @@ interface WorkflowHelpComponentProps {
   mode: TypeHelpMode;
 }
 
-export default class WorkflowHelpComponent extends React.Component<WorkflowHelpComponentProps> {
-  render() {
-    return (
-      <input type="button"
-        className="btn btn-success btn-sm sf-button"
-        style={{ marginBottom: "3px" }}
-        value={WorkflowActivityMessage.ActivityIs.niceToString()}
-        onClick={() => this.handleActivityIsClick()} />
-    );
-  }
+export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
 
-  handleActivityIsClick = () => {
+  function handleActivityIsClick() {
     Finder.find<WorkflowEntity>({
       queryName: WorkflowEntity,
       parentToken: WorkflowEntity.token().entity(a => a.mainEntityType!.cleanName),
-      parentValue: this.props.typeName,
+      parentValue: p.typeName,
     }).then(w => {
       if (!w)
         return;
@@ -38,7 +29,7 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
         if (!acts)
           return;
 
-        var text = acts.map(a => this.props.mode == "CSharp" ?
+        var text = acts.map(a => p.mode == "CSharp" ?
           `WorkflowActivityInfo.Current.Is("${w.toStr}", "${a.toStr}")` :
           `modules.WorkflowClient.inWorkflow(ctx, "${w.toStr}", "${a.toStr}")`
         ).join(" ||\r\n");
@@ -57,4 +48,11 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
 
     }).done();
   }
+  return (
+    <input type="button"
+      className="btn btn-success btn-sm sf-button"
+      style={{ marginBottom: "3px" }}
+      value={WorkflowActivityMessage.ActivityIs.niceToString()}
+      onClick={() => handleActivityIsClick()} />
+  );
 }

@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import * as moment from 'moment'
 import { TypeContext, EntityFrame } from '@framework/TypeContext'
@@ -14,64 +14,55 @@ interface CaseButtonBarProps {
   pack: EntityPack<CaseActivityEntity>;
 }
 
-export default class CaseButtonBar extends React.Component<CaseButtonBarProps>{
-  render() {
-    var ca = this.props.pack.entity;
+export default function CaseButtonBar(p : CaseButtonBarProps){
+  var ca = p.pack.entity;
 
-    if (ca.doneDate != null) {
-      return (
-        <div className="workflow-buttons">
-          {CaseActivityMessage.DoneBy0On1.niceToString().formatHtml(
-            <strong>{ca.doneBy && ca.doneBy.toStr}</strong>,
-            ca.doneDate && <strong>{moment(ca.doneDate).format("L LT")} ({moment(ca.doneDate).fromNow()})</strong>)
-          }
-        </div>
-      );
-    }
-
-    const ctx = new TypeContext(undefined, undefined, PropertyRoute.root(CaseActivityEntity), new ReadonlyBinding(ca, "act"));
+  if (ca.doneDate != null) {
     return (
-      <div>
-        <div className="workflow-buttons">
-          <ButtonBar frame={this.props.frame} pack={this.props.pack} />
-          <ValueLine ctx={ctx.subCtx(a => a.note)} formGroupStyle="None" placeholderLabels={true} />
-        </div>
-        {(ca.workflowActivity as WorkflowActivityEntity).userHelp &&
-          <UserHelpComponent activity={ca.workflowActivity as WorkflowActivityEntity} />}
+      <div className="workflow-buttons">
+        {CaseActivityMessage.DoneBy0On1.niceToString().formatHtml(
+          <strong>{ca.doneBy && ca.doneBy.toStr}</strong>,
+          ca.doneDate && <strong>{moment(ca.doneDate).format("L LT")} ({moment(ca.doneDate).fromNow()})</strong>)
+        }
       </div>
     );
   }
+
+  const ctx = new TypeContext(undefined, undefined, PropertyRoute.root(CaseActivityEntity), new ReadonlyBinding(ca, "act"));
+  return (
+    <div>
+      <div className="workflow-buttons">
+        <ButtonBar frame={p.frame} pack={p.pack} />
+        <ValueLine ctx={ctx.subCtx(a => a.note)} formGroupStyle="None" placeholderLabels={true} />
+      </div>
+      {(ca.workflowActivity as WorkflowActivityEntity).userHelp &&
+        <UserHelpComponent activity={ca.workflowActivity as WorkflowActivityEntity} />}
+    </div>
+  );
 }
 
 interface UserHelpProps {
   activity: WorkflowActivityEntity;
 }
 
-export class UserHelpComponent extends React.Component<UserHelpProps, { open: boolean }> {
+export function UserHelpComponent(p : UserHelpProps){
 
-  constructor(props: UserHelpProps) {
-    super(props);
-    this.state = { open: false };
-  }
+  var [open, setOpen] = React.useState(false);
 
-  render() {
-    return (
-      <div style={{ marginTop: "10px" }}>
-        <a href="#" onClick={this.handleHelpClick} className="case-help-button">
-          {this.state.open ?
-            DynamicViewMessage.HideHelp.niceToString() :
-            DynamicViewMessage.ShowHelp.niceToString()}
-        </a>
-        {this.state.open &&
-          <div dangerouslySetInnerHTML={{ __html: this.props.activity.userHelp! }} />}
-      </div>
-    );
-  }
-
-  handleHelpClick = (e: React.MouseEvent<any>) => {
+  function handleHelpClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.setState({ open: !this.state.open });
+    setOpen(!open);
   }
 
-
+  return (
+    <div style={{ marginTop: "10px" }}>
+      <a href="#" onClick={handleHelpClick} className="case-help-button">
+        {open ?
+          DynamicViewMessage.HideHelp.niceToString() :
+          DynamicViewMessage.ShowHelp.niceToString()}
+      </a>
+      {open &&
+        <div dangerouslySetInnerHTML={{ __html: p.activity.userHelp! }} />}
+    </div>
+  );
 }

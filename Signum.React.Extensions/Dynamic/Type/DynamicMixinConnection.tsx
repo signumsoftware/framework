@@ -9,27 +9,26 @@ import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Si
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, getQueryNiceName } from '@framework/Reflection'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { Typeahead } from '@framework/Components';
+import { useForceUpdate } from '@framework/Hooks'
 
 interface DynamicMixinConnectionComponentProps {
   ctx: TypeContext<DynamicMixinConnectionEntity>;
 }
 
-export default class DynamicMixinConnectionComponent extends React.Component<DynamicMixinConnectionComponentProps> {
+export default function DynamicMixinConnectionComponent(p : DynamicMixinConnectionComponentProps){
+  const forceUpdate = useForceUpdate();
+  const ctx = p.ctx;
 
-  render() {
-    const ctx = this.props.ctx;
-
-    return (
-      <div>
-        <MixinCombo
-          binding={Binding.create(ctx.value, a => a.mixinName)}
-          labelText={ctx.niceName(a => a.mixinName)}
-          labelColumns={2}
-          onChange={() => this.forceUpdate()} />
-        <EntityLine ctx={ctx.subCtx(dt => dt.entityType)} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <MixinCombo
+        binding={Binding.create(ctx.value, a => a.mixinName)}
+        labelText={ctx.niceName(a => a.mixinName)}
+        labelColumns={2}
+        onChange={() => forceUpdate()} />
+      <EntityLine ctx={ctx.subCtx(dt => dt.entityType)} />
+    </div>
+  );
 }
 
 export interface MixinComboProps {
@@ -39,9 +38,9 @@ export interface MixinComboProps {
   onChange?: () => void;
 }
 
-export class MixinCombo extends React.Component<MixinComboProps>{
-
-  handleGetItems = (query: string) => {
+export function MixinCombo(p : MixinComboProps){
+  const forceUpdate = useForceUpdate();
+  function handleGetItems(query: string) {
     return Finder.fetchEntitiesWithFilters(
       DynamicTypeEntity,
       [
@@ -51,30 +50,29 @@ export class MixinCombo extends React.Component<MixinComboProps>{
       .then(lites => lites && lites.map(a => a.toStr));
   }
 
-  handleOnChange = (newValue: string) => {
-    this.props.binding.setValue(newValue);
-    this.forceUpdate();
+  function handleOnChange(newValue: string) {
+    p.binding.setValue(newValue);
+    forceUpdate();
 
-    if (this.props.onChange)
-      this.props.onChange();
+    if (p.onChange)
+      p.onChange();
   }
 
-  render() {
-    let lc = this.props.labelColumns;
-    return (
-      <div className="form-group form-group-sm row" >
-        <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
-          {this.props.labelText}
-        </label>
-        <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
-          <div style={{ position: "relative" }}>
-            <Typeahead
-              inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
-              getItems={this.handleGetItems}
-              value={this.props.binding.getValue() || ""}
-              onChange={this.handleOnChange} />
-          </div>
+  let lc = p.labelColumns;
+  return (
+    <div className="form-group form-group-sm row" >
+      <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
+        {p.labelText}
+      </label>
+      <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
+        <div style={{ position: "relative" }}>
+          <Typeahead
+            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
+            getItems={handleGetItems}
+            value={p.binding.getValue() || ""}
+            onChange={handleOnChange} />
         </div>
-      </div>);
-  }
+      </div>
+    </div>
+  );
 }

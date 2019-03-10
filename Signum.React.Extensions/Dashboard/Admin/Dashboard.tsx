@@ -13,52 +13,19 @@ import { IconTypeaheadLine } from "../../Basics/Templates/IconTypeahead";
 import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString } from '@framework/Signum.Entities';
+import { useForceUpdate } from '@framework/Hooks'
 
-export default class Dashboard extends React.Component<{ ctx: TypeContext<DashboardEntity> }> {
+export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
+  const forceUpdate = useForceUpdate();
+  function handleEntityTypeChange() {
+    if (!p.ctx.value.entityType)
+      p.ctx.value.embeddedInEntity = null;
 
-  handleEntityTypeChange = () => {
-    if (!this.props.ctx.value.entityType)
-      this.props.ctx.value.embeddedInEntity = null;
-
-    this.forceUpdate()
+    forceUpdate()
   }
 
-  render() {
-    const ctx = this.props.ctx;
-    const sc = ctx.subCtx({ formGroupStyle: "Basic" });
-    return (
-      <div>
-        <div>
-          <div className="row">
-            <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(cp => cp.displayName)} />
-            </div>
-            <div className="col-sm-3">
-              <ValueLine ctx={sc.subCtx(cp => cp.dashboardPriority)} />
-            </div>
-            <div className="col-sm-3">
-              <ValueLine ctx={sc.subCtx(cp => cp.autoRefreshPeriod)} />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-sm-4">
-              <EntityLine ctx={sc.subCtx(cp => cp.owner)} create={false} />
-            </div>
-            <div className="col-sm-4">
-              <EntityLine ctx={sc.subCtx(cp => cp.entityType)} onChange={this.handleEntityTypeChange} />
-            </div>
-            {sc.value.entityType && <div className="col-sm-4">
-              <ValueLine ctx={sc.subCtx(f => f.embeddedInEntity)} />
-            </div>}
-          </div>
-        </div>
-        <ValueLine ctx={sc.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
-        <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={this.renderPart} onCreate={this.handleOnCreate} />
-      </div>
-    );
-  }
 
-  handleOnCreate = () => {
+  function handleOnCreate() {
     const pr = DashboardEntity.memberInfo(a => a.parts![0].element.content);
 
     return SelectorModal.chooseType(getTypeInfos(pr.type))
@@ -80,8 +47,7 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
   }
 
 
-  renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
-
+  function renderPart(tc: TypeContext<PanelPartEmbedded>) {
     const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "ExtraSmall", placeholderLabels: true });
 
     var icon = parseIcon(tc.value.iconName);
@@ -96,13 +62,13 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
             <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) || tcs.niceName(pp => pp.title)} />
             <div className="row">
               <div className="col-sm-4">
-                <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => this.forceUpdate()} />
+                <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-4">
-                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => this.forceUpdate()} />
+                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-4">
-                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
+                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>
@@ -116,6 +82,39 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
       </EntityGridItem>
     );
   }
+
+  const ctx = p.ctx;
+  const sc = ctx.subCtx({ formGroupStyle: "Basic" });
+  return (
+    <div>
+      <div>
+        <div className="row">
+          <div className="col-sm-6">
+            <ValueLine ctx={sc.subCtx(cp => cp.displayName)} />
+          </div>
+          <div className="col-sm-3">
+            <ValueLine ctx={sc.subCtx(cp => cp.dashboardPriority)} />
+          </div>
+          <div className="col-sm-3">
+            <ValueLine ctx={sc.subCtx(cp => cp.autoRefreshPeriod)} />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-sm-4">
+            <EntityLine ctx={sc.subCtx(cp => cp.owner)} create={false} />
+          </div>
+          <div className="col-sm-4">
+            <EntityLine ctx={sc.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange} />
+          </div>
+          {sc.value.entityType && <div className="col-sm-4">
+            <ValueLine ctx={sc.subCtx(f => f.embeddedInEntity)} />
+          </div>}
+        </div>
+      </div>
+      <ValueLine ctx={sc.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
+      <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
+    </div>
+  );
 }
 
 
