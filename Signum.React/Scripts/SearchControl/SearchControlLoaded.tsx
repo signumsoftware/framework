@@ -809,13 +809,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
+  
+
   renderContextualMenu() {
 
     const cm = this.state.contextualMenu!;
     const p = this.props;
+    
+    var fo = this.state.resultFindOptions;
+    function isColumnFilterable(columnIndex: number) {
+      var token = fo && fo.columnOptions[columnIndex].token;
+      return token && token.filterType != "Embedded" && token.filterType != undefined;
+    }
 
     const menuItems: React.ReactElement<any>[] = [];
-    if (this.canFilter() && cm.columnIndex != undefined)
+    if (this.canFilter() && cm.columnIndex && isColumnFilterable(cm.columnIndex))
       menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
 
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
