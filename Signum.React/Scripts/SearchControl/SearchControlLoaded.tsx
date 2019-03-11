@@ -529,6 +529,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       this.state.resultTable == null && !this.props.searchOnLoad ||
       this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey));
 
+    var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
+    var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
+
+
     var leftButtons = ([
 
       p.showFilterButton && {
@@ -577,15 +581,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
-
-
+      
       ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
+      ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
 
     var rightButtons = ([
-      ...(this.props.hideButtonBar ? [] : Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this })),
+      ...(this.props.hideButtonBar ? [] : buttonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
       <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >

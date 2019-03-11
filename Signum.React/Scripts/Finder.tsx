@@ -1252,14 +1252,11 @@ export module ButtonBarQuery {
 
 }
 
-
 export let defaultPagination: Pagination = {
   mode: "Paginate",
   elementsPerPage: 20,
   currentPage: 1,
 };
-
-
 
 export interface QuerySettings {
   queryName: PseudoType | QueryKey;
