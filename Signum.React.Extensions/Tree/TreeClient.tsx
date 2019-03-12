@@ -56,7 +56,7 @@ export function start(options: { routes: JSX.Element[] }) {
     if (!ctx.searchControl.props.showBarExtension || ti == null || !isTree(ti))
       return undefined;
 
-    return <TreeButton searchControl={ctx.searchControl} />;
+    return { button: <TreeButton searchControl={ctx.searchControl} /> };
   });
 }
 

@@ -1,9 +1,8 @@
-﻿import * as React from 'react'
-import * as OrderUtils from '@framework/Frames/OrderUtils'
+import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, IRenderButtons } from '@framework/Lines'
-import { TypeContext, ButtonsContext } from '@framework/TypeContext'
+import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.Entities.MachineLearning'
 import { predict } from '../PredictorClient';
 
@@ -45,7 +44,10 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
     );
   }
 
-  renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
-    return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+  renderButtons(ctx: ButtonsContext): (ButtonBarElement | undefined)[] {
+    return [{
+      order: 10000,
+      button: <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
+    }];
   }
 }
