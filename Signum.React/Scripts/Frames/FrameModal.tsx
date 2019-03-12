@@ -34,6 +34,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   isNavigate?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
+  createNew?: () => Promise<ModifiableEntity>;
 }
 
 interface FrameModalState {
@@ -386,7 +387,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       requiresSaveOperation={undefined}
       avoidPromptLooseChange={options.avoidPromptLooseChange}
       extraComponentProps={options.extraComponentProps}
-      isNavigate={true} />);
+      createNew={options.createNew}
+      isNavigate={true}
+    />);
   }
 }
 

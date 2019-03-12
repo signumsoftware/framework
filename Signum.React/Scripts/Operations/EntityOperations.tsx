@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage } from '../Signum.Entities';
+import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
@@ -18,6 +18,7 @@ import { ButtonProps } from "../Components/Button";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
 import { func } from "prop-types";
+import FrameModal from "../Frames/FrameModal";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -125,9 +126,17 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
-        Constructor.construct(pack.entity.Type).then(newPack => {
-          eoc.frame.onReload(newPack);
-        }).done()
+
+        var createNew = (eoc.frame.frameComponent as FrameModal).props.createNew;
+
+        if (createNew)
+          createNew()
+            .then(e => eoc.frame.onReload({ entity: e, canExecute: pack.canExecute } as EntityPack<Entity>))
+            .done();
+        else
+          Constructor.construct(pack.entity.Type)
+            .then(newPack => eoc.frame.onReload(newPack))
+            .done();
       };
       eoc.defaultClick();
     }

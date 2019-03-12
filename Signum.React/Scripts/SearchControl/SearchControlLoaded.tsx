@@ -397,19 +397,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-            this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFilters={true}
+              this.state.showFilters ? <FilterBuilder
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFilters={true}
 
-            /> :
-              sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                <AutoFocus disabled={!this.props.enableAutoFocus}>
+              /> :
+                sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                  <AutoFocus disabled={!this.props.enableAutoFocus}>
                     <PinnedFilterBuilder
                       filterOptions={fo.filterOptions}
                       onFiltersChanged={this.handlePinnedFilterChanged} />
@@ -652,611 +652,615 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 return;
 
               Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                .then(() => Navigator.navigate(e!, { getViewPromise: getViewPromise as any }))
-                .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
-                .done();
-            }).done();
-          }
-        }
+                .then(() => Navigator.navigate(e!, {
+                  getViewPromise: getViewPromise as any,
+                  createNew: () => Constructor.construct(tn).then(ne =>
+                    Finder.setFilters(ne!.entity as Entity, this.props.findOptions.filterOptions))
+                }))
+        .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+        .done();
+    }).done();
+  }
+}
       }).done();
     }
   }
 
-  handleFullScreenClick = (ev: React.MouseEvent<any>) => {
+handleFullScreenClick = (ev: React.MouseEvent<any>) => {
 
-    ev.preventDefault();
+  ev.preventDefault();
 
-    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription);
+  var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription);
 
-    const path = Finder.findOptionsPath(findOptions);
+  const path = Finder.findOptionsPath(findOptions);
 
-    if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
-      window.open(path);
-    else
-      Navigator.history.push(path);
+  if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
+    window.open(path);
+  else
+    Navigator.history.push(path);
+};
+
+createTitle() {
+
+  const tis = this.entityColumnTypeInfos();
+
+  const types = tis.map(ti => ti.niceName).join(", ");
+  const gender = tis.first().gender;
+
+  return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
+}
+
+getSelectedEntities(): Lite < Entity > [] {
+
+  if (this.props.findOptions.groupResults)
+    throw new Error("Results are grouped")
+
+  return this.state.selectedRows!.map(a => a.entity!);
+}
+
+// SELECT BUTTON
+
+handleSelectedToggle = () => {
+  this.setState({ isSelectOpen: !this.state.isSelectOpen }, () => {
+    if (this.state.isSelectOpen && this.state.currentMenuItems == undefined)
+      this.loadMenuItems();
+  });
+}
+
+loadMenuItems() {
+  if (this.props.showContextMenu == "Basic" || this.props.findOptions.groupResults)
+    this.setState({ currentMenuItems: [] });
+  else {
+    const options: ContextualItemsContext<Entity> = {
+      lites: this.getSelectedEntities(),
+      queryDescription: this.props.queryDescription,
+      markRows: this.markRows,
+      container: this,
+    };
+
+    renderContextualItems(options)
+      .then(menuItems => this.setState({ currentMenuItems: menuItems }))
+      .done();
+  }
+}
+
+markRows = (dic: MarkedRowsDictionary) => {
+  var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
+    this.doSearch(true);
+
+  promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
+
+}
+
+renderSelectedButton(): ButtonBarElement | null {
+
+  if (this.state.selectedRows == undefined)
+    return null;
+
+  const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
+
+  return {
+    order: -1,
+    button:
+      <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
+        isOpen={this.state.isSelectOpen}
+        toggle={this.handleSelectedToggle}
+        disabled={this.state.selectedRows!.length == 0}>
+        <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
+        <DropdownMenu>
+          {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
+            this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
+              this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+        </DropdownMenu>
+      </Dropdown>
+  };
+}
+
+// CONTEXT MENU
+
+handleContextOnHide = () => {
+  this.setState({ contextualMenu: undefined });
+}
+
+
+handleQuickFilter = () => {
+  const cm = this.state.contextualMenu!;
+  const fo = this.props.findOptions;
+
+  const token = fo.columnOptions[cm.columnIndex!].token;
+
+  const op: FilterOperation | undefined =
+    token && token.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
+      token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
+        undefined as FilterOperation | undefined;
+
+  const rt = this.state.resultTable;
+
+  fo.filterOptions.push({
+    token: token,
+    operation: op,
+    value: cm.rowIndex == undefined || rt == null || token == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
+    frozen: false
+  });
+
+  if (!this.state.showFilters)
+    this.state.showFilters = true;
+
+  this.handleFiltersChanged();
+
+  this.forceUpdate(() => this.handleHeightChanged());
+}
+
+handleInsertColumn = () => {
+
+  const token = withoutAllAny(this.state.lastToken);
+
+  const newColumn: ColumnOptionParsed = {
+    token: token,
+    displayName: token && token.niceName,
   };
 
-  createTitle() {
+  const cm = this.state.contextualMenu!;
+  this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
+  this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
 
-    const tis = this.entityColumnTypeInfos();
+  this.forceUpdate();
+}
 
-    const types = tis.map(ti => ti.niceName).join(", ");
-    const gender = tis.first().gender;
+handleEditColumn = () => {
 
-    return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
+  const cm = this.state.contextualMenu!;
+  const fo = this.props.findOptions;
+  this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] }, () => this.handleHeightChanged());
+
+  this.forceUpdate();
+}
+
+handleRemoveColumn = () => {
+  const s = this.state;
+  const cm = this.state.contextualMenu!;
+  const fo = this.props.findOptions;
+  const col = fo.columnOptions[cm.columnIndex!];
+  fo.columnOptions.removeAt(cm.columnIndex!);
+  if (fo.groupResults && col.token) {
+    fo.orderOptions.extract(a => a.token.fullKey == col.token!.fullKey);
   }
 
-  getSelectedEntities(): Lite<Entity>[] {
+  this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+}
 
-    if (this.props.findOptions.groupResults)
-      throw new Error("Results are grouped")
+renderContextualMenu() {
 
-    return this.state.selectedRows!.map(a => a.entity!);
+  const cm = this.state.contextualMenu!;
+  const p = this.props;
+
+  const menuItems: React.ReactElement<any>[] = [];
+  if (this.canFilter() && cm.columnIndex != undefined)
+    menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
+
+  if (cm.rowIndex == undefined && p.allowChangeColumns) {
+
+    if (menuItems.length)
+      menuItems.push(<DropdownItem divider />);
+
+    menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
+    menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
+    menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
   }
 
-  // SELECT BUTTON
+  if (cm.rowIndex != undefined) {
 
-  handleSelectedToggle = () => {
-    this.setState({ isSelectOpen: !this.state.isSelectOpen }, () => {
-      if (this.state.isSelectOpen && this.state.currentMenuItems == undefined)
-        this.loadMenuItems();
-    });
-  }
-
-  loadMenuItems() {
-    if (this.props.showContextMenu == "Basic" || this.props.findOptions.groupResults)
-      this.setState({ currentMenuItems: [] });
-    else {
-      const options: ContextualItemsContext<Entity> = {
-        lites: this.getSelectedEntities(),
-        queryDescription: this.props.queryDescription,
-        markRows: this.markRows,
-        container: this,
-      };
-
-      renderContextualItems(options)
-        .then(menuItems => this.setState({ currentMenuItems: menuItems }))
-        .done();
-    }
-  }
-
-  markRows = (dic: MarkedRowsDictionary) => {
-    var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
-      this.doSearch(true);
-
-    promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
-
-  }
-
-  renderSelectedButton(): ButtonBarElement | null {
-
-    if (this.state.selectedRows == undefined)
-      return null;
-
-    const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
-
-    return {
-      order: -1,
-      button:
-        <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
-          isOpen={this.state.isSelectOpen}
-          toggle={this.handleSelectedToggle}
-          disabled={this.state.selectedRows!.length == 0}>
-          <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
-          <DropdownMenu>
-            {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-              this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
-                this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-          </DropdownMenu>
-        </Dropdown>
-    };
-  }
-
-  // CONTEXT MENU
-
-  handleContextOnHide = () => {
-    this.setState({ contextualMenu: undefined });
-  }
-
-
-  handleQuickFilter = () => {
-    const cm = this.state.contextualMenu!;
-    const fo = this.props.findOptions;
-
-    const token = fo.columnOptions[cm.columnIndex!].token;
-
-    const op: FilterOperation | undefined =
-      token && token.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
-        token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
-          undefined as FilterOperation | undefined;
-
-    const rt = this.state.resultTable;
-
-    fo.filterOptions.push({
-      token: token,
-      operation: op,
-      value: cm.rowIndex == undefined || rt == null || token == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
-      frozen: false
-    });
-
-    if (!this.state.showFilters)
-      this.state.showFilters = true;
-
-    this.handleFiltersChanged();
-
-    this.forceUpdate(() => this.handleHeightChanged());
-  }
-
-  handleInsertColumn = () => {
-
-    const token = withoutAllAny(this.state.lastToken);
-
-    const newColumn: ColumnOptionParsed = {
-      token: token,
-      displayName: token && token.niceName,
-    };
-
-    const cm = this.state.contextualMenu!;
-    this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
-    this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
-
-    this.forceUpdate();
-  }
-
-  handleEditColumn = () => {
-
-    const cm = this.state.contextualMenu!;
-    const fo = this.props.findOptions;
-    this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] }, () => this.handleHeightChanged());
-
-    this.forceUpdate();
-  }
-
-  handleRemoveColumn = () => {
-    const s = this.state;
-    const cm = this.state.contextualMenu!;
-    const fo = this.props.findOptions;
-    const col = fo.columnOptions[cm.columnIndex!];
-    fo.columnOptions.removeAt(cm.columnIndex!);
-    if (fo.groupResults && col.token) {
-      fo.orderOptions.extract(a => a.token.fullKey == col.token!.fullKey);
-    }
-
-    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
-  }
-
-  renderContextualMenu() {
-
-    const cm = this.state.contextualMenu!;
-    const p = this.props;
-
-    const menuItems: React.ReactElement<any>[] = [];
-    if (this.canFilter() && cm.columnIndex != undefined)
-      menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
-
-    if (cm.rowIndex == undefined && p.allowChangeColumns) {
-
-      if (menuItems.length)
+    if (this.state.currentMenuItems == undefined) {
+      menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
+    } else {
+      if (menuItems.length && this.state.currentMenuItems.length)
         menuItems.push(<DropdownItem divider />);
 
-      menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
-      menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
-      menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
+      menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
     }
+  }
 
-    if (cm.rowIndex != undefined) {
+  if (menuItems.length == 0)
+    return null;
 
-      if (this.state.currentMenuItems == undefined) {
-        menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
-      } else {
-        if (menuItems.length && this.state.currentMenuItems.length)
-          menuItems.push(<DropdownItem divider />);
+  return (
+    <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+      {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+    </ContextMenu>
+  );
+}
 
-        menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
+//SELECTED ROWS
+
+allSelected() {
+  return this.state.resultTable != undefined && this.state.resultTable.rows.length != 0 && this.state.resultTable.rows.length == this.state.selectedRows!.length;
+}
+
+handleToggleAll = () => {
+
+  if (!this.state.resultTable)
+    return;
+
+  this.setState({
+    selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [],
+    currentMenuItems: undefined,
+  }, () => {
+    this.notifySelectedRowsChanged()
+  });
+}
+
+handleHeaderClick = (e: React.MouseEvent<any>) => {
+
+  const token = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
+  const fo = this.props.findOptions;
+  const prev = fo.orderOptions.filter(a => a.token.fullKey == token).firstOrNull();
+
+  if (prev != undefined) {
+    prev.orderType = prev.orderType == "Ascending" ? "Descending" : "Ascending";
+    if (!e.shiftKey)
+      fo.orderOptions = [prev];
+
+  } else {
+
+    const column = fo.columnOptions.filter(a => a.token && a.token.fullKey == token).first("Column");
+
+    const newOrder: OrderOptionParsed = { token: column.token!, orderType: "Ascending" };
+
+    if (e.shiftKey)
+      fo.orderOptions.push(newOrder);
+    else
+      fo.orderOptions = [newOrder];
+  }
+
+  this.forceUpdate();
+
+  if (fo.pagination.mode != "All" || this.props.showHeader != true)
+    this.doSearchPage1();
+}
+
+//HEADER DRAG AND DROP
+
+handleHeaderDragStart = (de: React.DragEvent<any>, dragIndex: number) => {
+  de.dataTransfer.setData('text', "start"); //cannot be empty string
+  de.dataTransfer.effectAllowed = "move";
+  this.setState({ dragColumnIndex: dragIndex });
+}
+
+handleHeaderDragEnd = (de: React.DragEvent<any>) => {
+  this.setState({ dragColumnIndex: undefined, dropBorderIndex: undefined });
+}
+
+
+getOffset(pageX: number, rect: ClientRect, margin: number) {
+
+  if (margin > rect.width / 2)
+    margin = rect.width / 2;
+
+  const width = rect.width;
+  const offsetX = pageX - rect.left;
+
+  if (offsetX < margin)
+    return 0;
+
+  if (offsetX > (width - margin))
+    return 1;
+
+  return undefined;
+}
+
+handlerHeaderDragOver = (de: React.DragEvent<any>, columnIndex: number) => {
+  de.preventDefault();
+
+  const th = de.currentTarget as HTMLElement;
+
+  const size = th.scrollWidth;
+
+  const offset = this.getOffset((de.nativeEvent as DragEvent).pageX, th.getBoundingClientRect(), 50);
+
+  let dropBorderIndex = offset == undefined ? undefined : columnIndex + offset;
+
+  if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex! + 1)
+    dropBorderIndex = undefined;
+
+  //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
+
+  if (this.state.dropBorderIndex != dropBorderIndex)
+    this.setState({ dropBorderIndex: dropBorderIndex });
+}
+
+handleHeaderDrop = (de: React.DragEvent<any>) => {
+  de.preventDefault();
+
+  const dropBorderIndex = this.state.dropBorderIndex!;
+  if (dropBorderIndex == null)
+    return;
+
+  const columns = this.props.findOptions.columnOptions;
+  const dragColumnIndex = this.state.dragColumnIndex!;
+
+  const temp = columns[dragColumnIndex!];
+  columns.removeAt(dragColumnIndex!);
+  const rebasedDropIndex = dropBorderIndex > dragColumnIndex ? dropBorderIndex - 1 : dropBorderIndex;
+  columns.insertAt(rebasedDropIndex, temp);
+
+  this.setState({
+    dropBorderIndex: undefined,
+    dragColumnIndex: undefined
+  });
+}
+
+renderHeaders(): React.ReactNode {
+
+  return (
+    <tr>
+      {this.props.allowSelection && <th className="sf-th-selection">
+        <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+      </th>
       }
-    }
+      {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity"></th>}
+      {this.props.findOptions.columnOptions.map((co, i) =>
+        <th key={i}
+          draggable={true}
+          className={classes(
+            i == this.state.dragColumnIndex && "sf-draggin",
+            co == this.state.editingColumn && "sf-current-column",
+            !this.canOrder(co) && "noOrder",
+            co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
+            this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
+              this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
+          data-column-name={co.token && co.token.fullKey}
+          data-column-index={i}
+          onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}
+          onDragStart={e => this.handleHeaderDragStart(e, i)}
+          onDragEnd={this.handleHeaderDragEnd}
+          onDragOver={e => this.handlerHeaderDragOver(e, i)}
+          onDragEnter={e => this.handlerHeaderDragOver(e, i)}
+          onDrop={this.handleHeaderDrop}>
+          <span className={"sf-header-sort " + this.orderClassName(co)} />
+          {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <FontAwesomeIcon icon="key" /></span>}
+          <span> {co.displayName}</span></th>
+      )}
+    </tr>
+  );
+}
 
-    if (menuItems.length == 0)
-      return null;
+canOrder(column: ColumnOptionParsed) {
+  if (!column.token || !this.props.allowChangeOrder)
+    return false;
 
-    return (
-      <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-        {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-      </ContextMenu>
-    );
+  const t = column.token;
+
+  if (t.type.isCollection)
+    return false;
+
+  if (t.type.isEmbedded || isTypeModel(t.type.name))
+    return t.hasOrderAdapter == true;
+
+  return true;
+}
+
+orderClassName(column: ColumnOptionParsed) {
+
+  if (column.token == undefined)
+    return "";
+
+  const orders = this.props.findOptions.orderOptions;
+
+  const o = orders.filter(a => a.token.fullKey == column.token!.fullKey).firstOrNull();
+  if (o == undefined)
+    return "";
+
+
+  let asc = (o.orderType == "Ascending" ? "asc" : "desc");
+
+  if (orders.indexOf(o))
+    asc += " l" + orders.indexOf(o);
+
+  return asc;
+}
+
+//ROWS
+
+handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const cb = event.currentTarget;
+
+  const index = parseInt(cb.getAttribute("data-index")!);
+
+  const row = this.state.resultTable!.rows[index];
+
+  var selectedRows = this.state.selectedRows!;
+
+  if (cb.checked) {
+    if (!selectedRows.contains(row))
+      selectedRows.push(row);
+  } else {
+    selectedRows.remove(row);
   }
 
-  //SELECTED ROWS
+  this.notifySelectedRowsChanged();
 
-  allSelected() {
-    return this.state.resultTable != undefined && this.state.resultTable.rows.length != 0 && this.state.resultTable.rows.length == this.state.selectedRows!.length;
+  this.setState({ currentMenuItems: undefined });
+}
+
+handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
+
+  if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
+    return;
+
+  if (this.props.onDoubleClick) {
+    e.preventDefault();
+    this.props.onDoubleClick(e, row);
+    return;
   }
 
-  handleToggleAll = () => {
+  var qs = this.props.querySettings;
+  if (qs && qs.onDoubleClick) {
+    e.preventDefault();
+    qs.onDoubleClick(e, row);
+    return;
+  }
 
-    if (!this.state.resultTable)
+  var resFo = this.state.resultFindOptions;
+  if (resFo && resFo.groupResults) {
+
+    var keyFilters = resFo.columnOptions
+      .map((col, i) => ({ col, value: row.columns[i] }))
+      .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
+      .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
+
+    var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
+
+    var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
+      .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
+
+    Finder.explore({
+      queryName: resFo.queryKey,
+      filterOptions: originalFilters.concat(keyFilters),
+      columnOptions: extraColumns,
+      columnOptionsMode: "Add",
+      systemTime: resFo.systemTime && { ...resFo.systemTime },
+    }).done();
+
+    return;
+  }
+
+  if (this.props.navigate) {
+    var lite = row.entity!;
+
+    if (!Navigator.isNavigable(lite.EntityType, undefined, true))
       return;
 
-    this.setState({
-      selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [],
-      currentMenuItems: undefined,
-    }, () => {
-      this.notifySelectedRowsChanged()
-    });
-  }
+    e.preventDefault();
 
-  handleHeaderClick = (e: React.MouseEvent<any>) => {
-
-    const token = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
-    const fo = this.props.findOptions;
-    const prev = fo.orderOptions.filter(a => a.token.fullKey == token).firstOrNull();
-
-    if (prev != undefined) {
-      prev.orderType = prev.orderType == "Ascending" ? "Descending" : "Ascending";
-      if (!e.shiftKey)
-        fo.orderOptions = [prev];
-
-    } else {
-
-      const column = fo.columnOptions.filter(a => a.token && a.token.fullKey == token).first("Column");
-
-      const newOrder: OrderOptionParsed = { token: column.token!, orderType: "Ascending" };
-
-      if (e.shiftKey)
-        fo.orderOptions.push(newOrder);
-      else
-        fo.orderOptions = [newOrder];
-    }
-
-    this.forceUpdate();
-
-    if (fo.pagination.mode != "All" || this.props.showHeader != true)
-      this.doSearchPage1();
-  }
-
-  //HEADER DRAG AND DROP
-
-  handleHeaderDragStart = (de: React.DragEvent<any>, dragIndex: number) => {
-    de.dataTransfer.setData('text', "start"); //cannot be empty string
-    de.dataTransfer.effectAllowed = "move";
-    this.setState({ dragColumnIndex: dragIndex });
-  }
-
-  handleHeaderDragEnd = (de: React.DragEvent<any>) => {
-    this.setState({ dragColumnIndex: undefined, dropBorderIndex: undefined });
-  }
-
-
-  getOffset(pageX: number, rect: ClientRect, margin: number) {
-
-    if (margin > rect.width / 2)
-      margin = rect.width / 2;
-
-    const width = rect.width;
-    const offsetX = pageX - rect.left;
-
-    if (offsetX < margin)
-      return 0;
-
-    if (offsetX > (width - margin))
-      return 1;
-
-    return undefined;
-  }
-
-  handlerHeaderDragOver = (de: React.DragEvent<any>, columnIndex: number) => {
-    de.preventDefault();
-
-    const th = de.currentTarget as HTMLElement;
-
-    const size = th.scrollWidth;
-
-    const offset = this.getOffset((de.nativeEvent as DragEvent).pageX, th.getBoundingClientRect(), 50);
-
-    let dropBorderIndex = offset == undefined ? undefined : columnIndex + offset;
-
-    if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex! + 1)
-      dropBorderIndex = undefined;
-
-    //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
-
-    if (this.state.dropBorderIndex != dropBorderIndex)
-      this.setState({ dropBorderIndex: dropBorderIndex });
-  }
-
-  handleHeaderDrop = (de: React.DragEvent<any>) => {
-    de.preventDefault();
-
-    const dropBorderIndex = this.state.dropBorderIndex!;
-    if (dropBorderIndex == null)
-      return;
-
-    const columns = this.props.findOptions.columnOptions;
-    const dragColumnIndex = this.state.dragColumnIndex!;
-
-    const temp = columns[dragColumnIndex!];
-    columns.removeAt(dragColumnIndex!);
-    const rebasedDropIndex = dropBorderIndex > dragColumnIndex ? dropBorderIndex - 1 : dropBorderIndex;
-    columns.insertAt(rebasedDropIndex, temp);
-
-    this.setState({
-      dropBorderIndex: undefined,
-      dragColumnIndex: undefined
-    });
-  }
-
-  renderHeaders(): React.ReactNode {
-
-    return (
-      <tr>
-        {this.props.allowSelection && <th className="sf-th-selection">
-          <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
-        </th>
-        }
-        {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity"></th>}
-        {this.props.findOptions.columnOptions.map((co, i) =>
-          <th key={i}
-            draggable={true}
-            className={classes(
-              i == this.state.dragColumnIndex && "sf-draggin",
-              co == this.state.editingColumn && "sf-current-column",
-              !this.canOrder(co) && "noOrder",
-              co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
-              this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
-                this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
-            data-column-name={co.token && co.token.fullKey}
-            data-column-index={i}
-            onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}
-            onDragStart={e => this.handleHeaderDragStart(e, i)}
-            onDragEnd={this.handleHeaderDragEnd}
-            onDragOver={e => this.handlerHeaderDragOver(e, i)}
-            onDragEnter={e => this.handlerHeaderDragOver(e, i)}
-            onDrop={this.handleHeaderDrop}>
-            <span className={"sf-header-sort " + this.orderClassName(co)} />
-            {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <FontAwesomeIcon icon="key" /></span>}
-            <span> {co.displayName}</span></th>
-        )}
-      </tr>
-    );
-  }
-
-  canOrder(column: ColumnOptionParsed) {
-    if (!column.token || !this.props.allowChangeOrder)
-      return false;
-
-    const t = column.token;
-
-    if (t.type.isCollection)
-      return false;
-
-    if (t.type.isEmbedded || isTypeModel(t.type.name))
-      return t.hasOrderAdapter == true;
-
-    return true;
-  }
-
-  orderClassName(column: ColumnOptionParsed) {
-
-    if (column.token == undefined)
-      return "";
-
-    const orders = this.props.findOptions.orderOptions;
-
-    const o = orders.filter(a => a.token.fullKey == column.token!.fullKey).firstOrNull();
-    if (o == undefined)
-      return "";
-
-
-    let asc = (o.orderType == "Ascending" ? "asc" : "desc");
-
-    if (orders.indexOf(o))
-      asc += " l" + orders.indexOf(o);
-
-    return asc;
-  }
-
-  //ROWS
-
-  handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-
-    const cb = event.currentTarget;
-
-    const index = parseInt(cb.getAttribute("data-index")!);
-
-    const row = this.state.resultTable!.rows[index];
-
-    var selectedRows = this.state.selectedRows!;
-
-    if (cb.checked) {
-      if (!selectedRows.contains(row))
-        selectedRows.push(row);
-    } else {
-      selectedRows.remove(row);
-    }
-
-    this.notifySelectedRowsChanged();
-
-    this.setState({ currentMenuItems: undefined });
-  }
-
-  handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
-
-    if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
-      return;
-
-    if (this.props.onDoubleClick) {
-      e.preventDefault();
-      this.props.onDoubleClick(e, row);
-      return;
-    }
-
-    var qs = this.props.querySettings;
-    if (qs && qs.onDoubleClick) {
-      e.preventDefault();
-      qs.onDoubleClick(e, row);
-      return;
-    }
-
-    var resFo = this.state.resultFindOptions;
-    if (resFo && resFo.groupResults) {
-
-      var keyFilters = resFo.columnOptions
-        .map((col, i) => ({ col, value: row.columns[i] }))
-        .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
-        .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
-
-      var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
-
-      var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
-        .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
-
-      Finder.explore({
-        queryName: resFo.queryKey,
-        filterOptions: originalFilters.concat(keyFilters),
-        columnOptions: extraColumns,
-        columnOptionsMode: "Add",
-        systemTime: resFo.systemTime && { ...resFo.systemTime },
-      }).done();
-
-      return;
-    }
-
-    if (this.props.navigate) {
-      var lite = row.entity!;
-
-      if (!Navigator.isNavigable(lite.EntityType, undefined, true))
-        return;
-
-      e.preventDefault();
-
-      const s = Navigator.getSettings(lite.EntityType);
-
-      const qs = this.props.querySettings;
-
-      const getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
-
-      const avoidPopup = s != undefined && s.avoidPopup;
-
-      if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.navigate != "InPlace") {
-        var vp = getViewPromise && getViewPromise(null);
-        window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
-      }
-      else {
-        if (this.props.navigate == "InPlace") {
-          var vp = getViewPromise && getViewPromise(null);
-          Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
-        } else {
-          Navigator.navigate(lite, { getViewPromise: getViewPromise })
-            .then(() => {
-              this.handleOnNavigated(lite);
-            }).done();
-        }
-      }
-    }
-  }
-
-  renderRows(): React.ReactNode {
-
-    const columnsCount = this.props.findOptions.columnOptions.length +
-      (this.props.allowSelection ? 1 : 0) +
-      (this.props.navigate ? 1 : 0);
-
-
-    if (!this.state.resultTable) {
-      return <tr><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
-    }
-
-    var resultTable = this.state.resultTable;
-
-    if (resultTable.rows.length == 0) {
-      return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFound.niceToString()}</td></tr>;
-    }
+    const s = Navigator.getSettings(lite.EntityType);
 
     const qs = this.props.querySettings;
 
-    const columns = this.props.findOptions.columnOptions.map(co => ({
-      columnOption: co,
-      cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co, this),
-      resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
-    }));
+    const getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
 
-    const ctx: Finder.CellFormatterContext = {
-      refresh: () => this.doSearch(true).done(),
-      systemTime: this.props.findOptions.systemTime,
-    };
+    const avoidPopup = s != undefined && s.avoidPopup;
 
-    const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
-
-    return this.state.resultTable.rows.map((row, i) => {
-
-      const mark = row.entity && this.getMarkedRow(row.entity);
-
-      var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
-
-      const message = mark && mark.message;
-
-      const id = message && "result_row_" + i;
-
-      return (
-        <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
-          onDoubleClick={e => this.handleDoubleClick(e, row)}
-          id={id}
-          {...ra}
-          className={classes(mark && mark.className, ra && ra.className)}>
-          {this.props.allowSelection &&
-            <td style={{ textAlign: "center" }}>
-              <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
-            </td>
-          }
-
-          {this.props.navigate && !this.props.findOptions.groupResults &&
-            <td>
-              {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
-            </td>
-          }
-
-          {
-            columns.map((c, j) =>
-              <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
-              </td>)
-          }
-
-          {message && id && <UncontrolledTooltip placement="bottom" target={id}>
-            {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
-          </UncontrolledTooltip>}
-        </tr>
-      );
-    });
-  }
-
-  handleOnNavigated = (lite: Lite<Entity>) => {
-
-    if (this.props.onNavigated)
-      this.props.onNavigated(lite);
-
-    if (this.props.avoidAutoRefresh)
-      return;
-
-    this.doSearch(true);
-  }
-
-  getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
-
-    if (!entity || !this.state.markedRows)
-      return undefined;
-
-    const m = this.state.markedRows[liteKey(entity)];
-
-    if (typeof m === "string") {
-      if (m == "")
-        return { className: "sf-entity-ctxmenu-success", message: undefined };
-      else
-        return { className: "table-danger", message: m };
+    if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.navigate != "InPlace") {
+      var vp = getViewPromise && getViewPromise(null);
+      window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
     }
     else {
-      return m;
+      if (this.props.navigate == "InPlace") {
+        var vp = getViewPromise && getViewPromise(null);
+        Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+      } else {
+        Navigator.navigate(lite, { getViewPromise: getViewPromise })
+          .then(() => {
+            this.handleOnNavigated(lite);
+          }).done();
+      }
     }
+  }
+}
+
+renderRows(): React.ReactNode {
+
+  const columnsCount = this.props.findOptions.columnOptions.length +
+    (this.props.allowSelection ? 1 : 0) +
+    (this.props.navigate ? 1 : 0);
+
+
+  if (!this.state.resultTable) {
+    return <tr><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
+  }
+
+  var resultTable = this.state.resultTable;
+
+  if (resultTable.rows.length == 0) {
+    return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFound.niceToString()}</td></tr>;
+  }
+
+  const qs = this.props.querySettings;
+
+  const columns = this.props.findOptions.columnOptions.map(co => ({
+    columnOption: co,
+    cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co, this),
+    resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
+  }));
+
+  const ctx: Finder.CellFormatterContext = {
+    refresh: () => this.doSearch(true).done(),
+    systemTime: this.props.findOptions.systemTime,
+  };
+
+  const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
+
+  return this.state.resultTable.rows.map((row, i) => {
+
+    const mark = row.entity && this.getMarkedRow(row.entity);
+
+    var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
+
+    const message = mark && mark.message;
+
+    const id = message && "result_row_" + i;
+
+    return (
+      <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
+        onDoubleClick={e => this.handleDoubleClick(e, row)}
+        id={id}
+        {...ra}
+        className={classes(mark && mark.className, ra && ra.className)}>
+        {this.props.allowSelection &&
+          <td style={{ textAlign: "center" }}>
+            <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
+          </td>
+        }
+
+        {this.props.navigate && !this.props.findOptions.groupResults &&
+          <td>
+            {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
+          </td>
+        }
+
+        {
+          columns.map((c, j) =>
+            <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
+              {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
+            </td>)
+        }
+
+        {message && id && <UncontrolledTooltip placement="bottom" target={id}>
+          {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
+        </UncontrolledTooltip>}
+      </tr>
+    );
+  });
+}
+
+handleOnNavigated = (lite: Lite<Entity>) => {
+
+  if (this.props.onNavigated)
+    this.props.onNavigated(lite);
+
+  if (this.props.avoidAutoRefresh)
+    return;
+
+  this.doSearch(true);
+}
+
+getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
+
+  if(!entity || !this.state.markedRows)
+return undefined;
+
+const m = this.state.markedRows[liteKey(entity)];
+
+if (typeof m === "string") {
+  if (m == "")
+    return { className: "sf-entity-ctxmenu-success", message: undefined };
+  else
+    return { className: "table-danger", message: m };
+}
+else {
+  return m;
+}
   }
 }
 
