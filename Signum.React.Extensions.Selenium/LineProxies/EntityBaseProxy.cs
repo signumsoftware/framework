@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using OpenQA.Selenium;
 using Signum.Engine.Basics;
@@ -40,7 +40,7 @@ namespace Signum.React.Selenium
             }, "create clicked");
         }
 
-        public FrameModalProxy<T> CreatePopup<T>() where T : ModifiableEntity
+        public FrameModalProxy<T> CreateModal<T>() where T : ModifiableEntity
         {
 
             string changes = GetChanges();
@@ -49,7 +49,9 @@ namespace Signum.React.Selenium
 
             popup = ChooseTypeCapture(typeof(T), popup);
 
-            return new FrameModalProxy<T>(popup, this.ItemRoute)
+            var itemRoute = this.ItemRoute.Type == typeof(T) ? this.ItemRoute : PropertyRoute.Root(typeof(T));
+
+            return new FrameModalProxy<T>(popup, itemRoute)
             {
                 Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
