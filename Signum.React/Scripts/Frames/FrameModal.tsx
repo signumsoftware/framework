@@ -276,23 +276,12 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
+            {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
-  }
-
-  getComponentWithRef(ctx: TypeContext<ModifiableEntity>) {
-    var component = this.state.getComponent!(ctx)!;
-
-    var type = component.type as React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> | React.FunctionComponent<{ ctx: TypeContext<ModifiableEntity> }>;
-    if (type.prototype.render) {
-      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
-    } else {
-      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
-    }
   }
 
   validationErrors?: ValidationErrors | null;
@@ -382,11 +371,17 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 }
 
 export class FunctionalAdapter extends React.Component {
+
   render() {
     return this.props.children;
   }
+  
+  static withRef(element: React.ReactElement<any>, ref: (c: React.Component | null) => void) {
+    var type = element.type as React.ComponentClass | React.FunctionComponent;
+    if (type.prototype.render) {
+      return React.cloneElement(element, { ref: ref });
+    } else {
+      return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
+    }
+  }
 }
-
-
-
-
