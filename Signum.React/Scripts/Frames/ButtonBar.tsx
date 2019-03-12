@@ -13,19 +13,26 @@ export default class ButtonBar extends React.Component<ButtonBarProps>{
 
   static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<ButtonBarElement | undefined> | undefined> = [];
 
+  container!: HTMLDivElement;
+
   componentDidMount() {
-    window.addEventListener("keydown", this.hanldleKeyDown);
+    this.container = (this.props.frame.frameComponent as any).getMainDiv()!;
+    this.container.addEventListener("keydown", this.hanldleKeyDown);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("keydown", this.hanldleKeyDown);
+    this.container.removeEventListener("keydown", this.hanldleKeyDown);
   }
 
   hanldleKeyDown = (e: KeyboardEvent) => {
+
     var s = this.shortcuts;
     if (s != null) {
       for (var i = 0; i < s.length; i++) {
         if (s[i](e)) {
+          debugger;
+          e.cancelBubble = true;
+          if (e.stopPropagation) e.stopPropagation();
           e.preventDefault();
           return;
         }
