@@ -48,6 +48,15 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     this.state = this.calculateState(props);
   }
 
+  private _mainDiv?: HTMLDivElement | null;
+  private setMainDivRef = (ref: HTMLDivElement | null) => {
+    this._mainDiv = ref;
+  }
+
+  getMainDiv(): HTMLDivElement | null | undefined {
+    return this._mainDiv;
+  }
+
   componentWillMount() {
     WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
@@ -208,7 +217,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
 
     return (
-      <div className="modal-body">
+      <div className="modal-body" ref={this.setMainDivRef}>
         <CaseFromSenderInfo current={pack.activity} />
         {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
