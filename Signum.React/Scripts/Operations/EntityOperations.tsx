@@ -130,7 +130,8 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
 
         if (createNew)
           createNew()
-            .then(e => eoc.frame.onReload({ entity: e, canExecute: {} } as EntityPack<Entity>))
+            .then(e => Navigator.toEntityPack(e))
+            .then(newPack => eoc.frame.onReload(newPack))
             .done();
         else
           Constructor.construct(pack.entity.Type)
