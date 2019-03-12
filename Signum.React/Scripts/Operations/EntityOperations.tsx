@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack } from '../Signum.Entities';
+import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
@@ -18,7 +18,6 @@ import { ButtonProps } from "../Components/Button";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
 import { func } from "prop-types";
-import FrameModal from "../Frames/FrameModal";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -127,7 +126,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = (eoc.frame.frameComponent as FrameModal).props.createNew;
+        var createNew = eoc.frame.frameComponent.props.createNew as (() => Promise<ModifiableEntity> | undefined);
 
         if (createNew)
           createNew()
