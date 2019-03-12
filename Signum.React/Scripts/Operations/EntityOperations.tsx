@@ -127,10 +127,10 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
         notifySuccess();
 
         var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<ModifiableEntity>) | undefined);
-
+        debugger;
         if (createNew)
           createNew()
-            .then(e => eoc.frame.onReload({ entity: e, canExecute: pack.canExecute } as EntityPack<Entity>))
+            .then(e => eoc.frame.onReload({ entity: e, canExecute: {} } as EntityPack<Entity>))
             .done();
         else
           Constructor.construct(pack.entity.Type)
