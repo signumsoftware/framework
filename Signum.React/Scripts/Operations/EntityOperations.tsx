@@ -126,7 +126,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.props.createNew as (() => Promise<ModifiableEntity> | undefined);
+        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<ModifiableEntity>) | undefined);
 
         if (createNew)
           createNew()
