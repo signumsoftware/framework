@@ -61,15 +61,6 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     this.state = this.calculateState(props);
   }
 
-  private _mainDiv?: HTMLDivElement | null;
-  private setMainDivRef = (ref: HTMLDivElement | null) => {
-    this._mainDiv = ref;
-  }
-
-  getMainDiv(): HTMLDivElement | null | undefined {
-    return this._mainDiv;
-  }
-
   componentWillMount() {
     Navigator.toEntityPack(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
@@ -279,7 +270,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     const embeddedWidgets = renderEmbeddedWidgets(wc);
 
     return (
-      <div className="modal-body" ref={this.setMainDivRef}>
+      <div className="modal-body">
         {renderWidgets({ ctx: ctx, pack: pack })}
         {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
         <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
