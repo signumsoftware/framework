@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -113,7 +113,7 @@ namespace Signum.Utilities.ExpressionTrees
 
 
         [MethodExpander(typeof(DistinctNullExpander))]
-        public static bool DistinctNull<T>(T a, T b) where T : class
+        public static bool DistinctNull<T>(T? a, T? b) where T : class
         {
             return (a == null && b != null) ||
                   (a != null && b == null) ||

@@ -27,7 +27,7 @@ namespace Signum.Entities
     [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
     public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable
     {
-        static Func<bool> isRetrievingFunc = null;
+        static Func<bool>? isRetrievingFunc = null;
         static public bool IsRetrieving
         {
             get { return isRetrievingFunc != null && isRetrievingFunc(); }

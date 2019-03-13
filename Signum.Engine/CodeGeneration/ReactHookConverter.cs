@@ -14,7 +14,7 @@ namespace Signum.Engine.CodeGeneration
         {
             while (true)
             {
-                IEnumerable<string> files = GetFiles();
+                IEnumerable<string>? files = GetFiles();
 
                 if (files == null)
                     return;
@@ -32,7 +32,7 @@ namespace Signum.Engine.CodeGeneration
             }
         }
 
-        public virtual IEnumerable<string> GetFiles()
+        public virtual IEnumerable<string>? GetFiles()
         {
             string folder = GetFolder();
 
@@ -49,11 +49,11 @@ namespace Signum.Engine.CodeGeneration
             return folder;
         }
 
-        public virtual IEnumerable<string> SelectFiles(string folder, IEnumerable<string> files)
+        public virtual IEnumerable<string>? SelectFiles(string folder, IEnumerable<string> files)
         {
             var result = files.Select(a => a.After(folder)).ChooseConsoleMultiple();
 
-            if (result.IsEmpty())
+            if (result == null)
                 return null;
 
             return result.Select(a => folder + a);
@@ -105,13 +105,13 @@ namespace Signum.Engine.CodeGeneration
 
             var pairs = matches.Select(m => new { isStart = true, m })
                 .Concat(endMatch.Select(m => new { isStart = false, m }))
-                .OrderBy(p => p.m.Index)
-                .BiSelect((start, end) => new { start, end })
+                .OrderBy(p => p.m!.Index)
+                .BiSelectC((start, end) => (start: start!, end: end!))
                 .Where(a => a.start.isStart && !a.end.isStart)
-                .Select(a => new { start = a.start.m, end = a.end.m })
+                .Select(a => (start: a.start.m, end: a.end.m))
                 .ToList();
 
-            string render = null;
+            string? render = null;
 
             foreach (var p in pairs.AsEnumerable().Reverse())
             {

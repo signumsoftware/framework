@@ -1238,9 +1238,9 @@ namespace Signum.Engine.Maps
 
     public static partial class FieldReferenceExtensions
     {
-        static MethodInfo miGetIdForLite = ReflectionTools.GetMethodInfo(() => GetIdForLite(null, new Forbidden()));
-        static MethodInfo miGetIdForEntity = ReflectionTools.GetMethodInfo(() => GetIdForEntity(null, new Forbidden()));
-        static MethodInfo miGetIdForLiteCleanEntity = ReflectionTools.GetMethodInfo(() => GetIdForLiteCleanEntity(null, new Forbidden()));
+        static MethodInfo miGetIdForLite = ReflectionTools.GetMethodInfo(() => GetIdForLite(null!, new Forbidden()));
+        static MethodInfo miGetIdForEntity = ReflectionTools.GetMethodInfo(() => GetIdForEntity(null!, new Forbidden()));
+        static MethodInfo miGetIdForLiteCleanEntity = ReflectionTools.GetMethodInfo(() => GetIdForLiteCleanEntity(null!, new Forbidden()));
 
         public static void AssertIsLite(this IFieldReference fr)
         {
@@ -1299,8 +1299,8 @@ namespace Signum.Engine.Maps
             return forbidden.Contains(ie) ? (PrimaryKey?)null : ie.Id;
         }
 
-        static MethodInfo miGetTypeForLite = ReflectionTools.GetMethodInfo(() => GetTypeForLite(null, new Forbidden()));
-        static MethodInfo miGetTypeForEntity = ReflectionTools.GetMethodInfo(() => GetTypeForEntity(null, new Forbidden()));
+        static MethodInfo miGetTypeForLite = ReflectionTools.GetMethodInfo(() => GetTypeForLite(null!, new Forbidden()));
+        static MethodInfo miGetTypeForEntity = ReflectionTools.GetMethodInfo(() => GetTypeForEntity(null!, new Forbidden()));
 
         public static Expression GetTypeFactory(this IFieldReference fr, Expression value, Expression forbidden)
         {
@@ -1368,7 +1368,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        static MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null));
+        static MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null!));
 
         Type CheckType(Type type)
         {
@@ -1394,7 +1394,7 @@ namespace Signum.Engine.Maps
         }
 
         static MethodInfo miUnWrapToString = ReflectionTools.GetMethodInfo(() => PrimaryKey.UnwrapToString(null));
-        static MethodInfo miConvertType = ReflectionTools.GetMethodInfo(() => ConvertType(null));
+        static MethodInfo miConvertType = ReflectionTools.GetMethodInfo(() => ConvertType(null!));
 
         static IComparable? ConvertType(Type type)
         {
@@ -1432,7 +1432,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        static MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null));
+        static MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null!));
         object CheckNull(object obj)
         {
             if (obj == null)

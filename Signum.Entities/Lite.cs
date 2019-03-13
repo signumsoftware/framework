@@ -75,7 +75,7 @@ namespace Signum.Entities
                 this.Modified = ModifiedState.Clean;
             }
 
-            public LiteImp(T entity, string toStr)
+            public LiteImp(T entity, string? toStr)
             {
                 if (typeof(T).IsAbstract)
                     throw new InvalidOperationException(typeof(T).Name + " is abstract");

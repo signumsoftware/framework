@@ -31,7 +31,7 @@ namespace Signum.Engine.Operations
 
 
         static Expression<Func<Entity, OperationLogEntity>> CurrentOperationLogExpression =
-            e => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End.Value).FirstOrDefault();
+            e => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault();
         [ExpressionField]
         public static OperationLogEntity PreviousOperationLog(this Entity e)
         {
@@ -51,7 +51,7 @@ namespace Signum.Engine.Operations
         static ResetLazy<Dictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<Dictionary<OperationSymbol, List<Type>>>(() =>
         {
             return (from t in operations.OverridenTypes
-                    from d in operations.GetDefinition(t).Keys
+                    from d in operations.GetDefinition(t)!.Keys
                     group t by d into g
                     select KVP.Create(g.Key, g.ToList())).ToDictionary();
         });

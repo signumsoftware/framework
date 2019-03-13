@@ -45,7 +45,7 @@ namespace Signum.Engine
         }
 
 
-        public static ResetLazy<T> WithoutInvalidations<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
+        public static ResetLazy<T> WithoutInvalidations<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication)
         {
             ResetLazy<T> result = new ResetLazy<T>(() =>
             {

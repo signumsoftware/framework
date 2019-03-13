@@ -13,7 +13,7 @@ namespace Signum.Engine.Linq
 {
     public class QueryFilterer : ExpressionVisitor
     {
-        static GenericInvoker<Func<Schema, LambdaExpression>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression>>(s => s.GetInDatabaseFilter<TypeEntity>());
+        static GenericInvoker<Func<Schema, LambdaExpression?>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression?>>(s => s.GetInDatabaseFilter<TypeEntity>());
         static MethodInfo miWhere = ReflectionTools.GetMethodInfo((IQueryable<object> q) => q.Where(a => true)).GetGenericMethodDefinition();
 
         bool filter;
@@ -35,8 +35,7 @@ namespace Signum.Engine.Linq
                     {
                         if (typeof(Entity).IsAssignableFrom(queryType))
                         {
-                            LambdaExpression rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
-
+                            LambdaExpression? rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
                             if (rawFilter != null)
                             {
                                 Expression clean = ExpressionCleaner.Clean(rawFilter)!;
@@ -49,8 +48,7 @@ namespace Signum.Engine.Linq
                         {
                             Type entityType = queryType.GetGenericArguments()[0];
 
-                            LambdaExpression rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
-
+                            LambdaExpression? rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
                             if (rawFilter != null)
                             {
                                 var param = Expression.Parameter(queryType, "mle");

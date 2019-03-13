@@ -1,6 +1,7 @@
 import * as Navigator from './Navigator';
 
 import * as React from 'react'
+import { FunctionalAdapter } from './Frames/FrameModal';
 
 export interface IModalProps {
   onExited?: (val: any) => void;
@@ -12,6 +13,7 @@ export interface GlobalModalContainerState {
 }
 
 let current: GlobalModalContainer;
+let modalInstances: React.Component[] = [];
 
 export class GlobalModalContainer extends React.Component<{}, GlobalModalContainerState> {
   constructor(props: {}) {

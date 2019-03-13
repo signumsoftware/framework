@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get { return this.property.ToString(); }
         }
-        static MethodInfo miSystemPeriod = ReflectionTools.GetMethodInfo((object o) => SystemTimeExtensions.SystemPeriod(null));
+        static MethodInfo miSystemPeriod = ReflectionTools.GetMethodInfo((object o) => SystemTimeExtensions.SystemPeriod(null!));
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {

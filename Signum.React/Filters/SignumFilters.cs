@@ -43,7 +43,7 @@ namespace Signum.React.Filters
     {
         public SignumAuthenticationFilter() : base("Signum_User"){ }
 
-        public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult>>();
+        public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
         private static SignumAuthenticationResult? Authenticate(ResourceExecutingContext actionContext)
         {

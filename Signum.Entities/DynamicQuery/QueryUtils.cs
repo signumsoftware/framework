@@ -298,7 +298,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public static Func<bool> MergeEntityColumns = null;
+        public static Func<bool>? MergeEntityColumns = null;
         static List<QueryToken> SubTokensBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options)
         {
             if (token == null)

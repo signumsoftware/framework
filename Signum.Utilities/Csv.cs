@@ -18,7 +18,7 @@ namespace Signum.Utilities
         // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
         public static Encoding DefaultEncoding => Encoding.UTF8; 
 
-        public static CultureInfo DefaultCulture = null;
+        public static CultureInfo? DefaultCulture = null;
 
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
             Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>>? toStringFactory = null)

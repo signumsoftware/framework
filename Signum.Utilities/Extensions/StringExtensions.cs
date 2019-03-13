@@ -34,7 +34,7 @@ namespace Signum.Utilities
         }
 
 #pragma warning disable IDE0052 // Remove unread private members
-        static readonly Expression<Func<string, string>> DefaultToNullExpression = a => a == null || a.Length == 0 ? null : a;
+        static readonly Expression<Func<string, string?>> DefaultToNullExpression = a => a == null || a.Length == 0 ? null : a;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("EmtpyToNullExpression")]
         public static string? DefaultToNull(this string? str)

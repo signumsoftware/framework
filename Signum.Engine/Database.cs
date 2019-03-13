@@ -1119,7 +1119,7 @@ namespace Signum.Engine
 
         class MListElementsExpander : IMethodExpander
         {
-            static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null)).GetGenericMethodDefinition();
+            static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null!)).GetGenericMethodDefinition();
             static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null, a => false)).GetGenericMethodDefinition();
             static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
 
@@ -1212,8 +1212,8 @@ namespace Signum.Engine
 
         public class InDbExpander : IMethodExpander
         {
-            static readonly MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).Select(a => a)).GetGenericMethodDefinition();
-            static readonly MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).SingleEx()).GetGenericMethodDefinition();
+            static readonly MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null!).Select(a => a)).GetGenericMethodDefinition();
+            static readonly MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null!).SingleEx()).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {

@@ -26,7 +26,7 @@ namespace Signum.Entities
         where T : Attribute
     {
         //Consider using ImmutableAVLTree instead
-        readonly static Dictionary<Type, TypeAttributePack?> fieldAndProperties = new Dictionary<Type, TypeAttributePack>();
+        readonly static Dictionary<Type, TypeAttributePack?> fieldAndProperties = new Dictionary<Type, TypeAttributePack?>();
 
         static TypeAttributePack? GetFieldsAndProperties(Type type)
         {

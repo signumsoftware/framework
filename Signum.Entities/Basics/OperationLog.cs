@@ -23,7 +23,7 @@ namespace Signum.Entities.Basics
         public DateTime? End { get; set; }
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =
-            log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
+            log => (double?)(log.End - log.Start)!.Value.TotalMilliseconds;
 #pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression"), Unit("ms")]
 #pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property

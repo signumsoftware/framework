@@ -90,7 +90,7 @@ namespace Signum.Engine
         }
 
         static GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>> giRequest =
-            new GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>>((rr, id) => rr.Request<Entity>(id));
+            new GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>>((rr, id) => rr.Request<Entity>(id)!);
         public T? Request<T>(PrimaryKey? id) where T : Entity
         {
             if (id == null)

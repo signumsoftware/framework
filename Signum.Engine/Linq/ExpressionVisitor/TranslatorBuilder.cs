@@ -166,7 +166,7 @@ namespace Signum.Engine.Linq
 
             static readonly FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity i) => i.id);
 
-            static readonly MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeEntity>(null, null)).GetGenericMethodDefinition();
+            static readonly MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeEntity>(null, null!)).GetGenericMethodDefinition();
             static readonly MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeEntity>(null)).GetGenericMethodDefinition();
             static readonly MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeEntity>(null, null)).GetGenericMethodDefinition();
             static readonly MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeEntity>(null)).GetGenericMethodDefinition();
@@ -460,7 +460,7 @@ namespace Signum.Engine.Linq
                     return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)), liteConstructor);
             }
 
-            static readonly MethodInfo miLiteCreateParse = ReflectionTools.GetMethodInfo(() => LiteCreateParse(null, null, null, null));
+            static readonly MethodInfo miLiteCreateParse = ReflectionTools.GetMethodInfo(() => LiteCreateParse(null!, null, null!, null!));
 
             static Lite<Entity>? LiteCreateParse(Schema schema, PrimaryKey? typeId, string id, string toString)
             {
@@ -472,7 +472,7 @@ namespace Signum.Engine.Linq
                 return Lite.Create(type, PrimaryKey.Parse(id, type), toString);
             }
 
-            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
+            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, null));
 
             protected internal override Expression VisitMListElement(MListElementExpression mle)
             {
@@ -529,7 +529,7 @@ namespace Signum.Engine.Linq
                 return Expression.Call(miTryParse, type, id);
             }
 
-            static readonly MethodInfo miTryParse = ReflectionTools.GetMethodInfo(() => TryParse(null, null));
+            static readonly MethodInfo miTryParse = ReflectionTools.GetMethodInfo(() => TryParse(null!, null!));
 
             
 
@@ -597,8 +597,8 @@ namespace Signum.Engine.Linq
             return FieldReader.GetExpression(Expression.Property(row, miReader), position, type);
         }
 
-        static readonly MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null, 0, null)).GetGenericMethodDefinition();
-        static readonly MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();
+        static readonly MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null!, 0, null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null!, 0)).GetGenericMethodDefinition();
 
         public Expression LookupEager(Expression row, ChildProjectionExpression cProj)
         {
