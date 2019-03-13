@@ -35,15 +35,6 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     this.state = this.calculateState(props);
   }
 
-  private _mainDiv!: HTMLDivElement | null;
-  private setMainDivRef = (ref: HTMLDivElement | null) => {
-    this._mainDiv = ref;
-  }
-
-  getMainDiv(): HTMLDivElement | null {
-    return this._mainDiv;
-  }
-
   getCaseActivity(): CaseActivityEntity | undefined {
     return this.state.pack && this.state.pack.activity;
   }
@@ -161,7 +152,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
 
     return (
-      <div className="normal-control" ref={this.setMainDivRef}>
+      <div className="normal-control">
         {this.renderTitle()}
         <CaseFromSenderInfo current={pack.activity} />
         {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
