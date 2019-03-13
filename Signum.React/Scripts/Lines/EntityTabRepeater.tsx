@@ -99,16 +99,14 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                   onDragOver={drag && drag.onDragOver}
                   onDrop={drag && drag.onDrop}>
                   {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
-                  &nbsp;
                 {this.canRemove(mlec.value) && !readOnly &&
-                    <span className={classes("sf-line-button", "sf-remove")}
+                    <span className={classes("sf-line-button", "sf-remove", "ml-2")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
                       title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
                     </span>
                   }
-                  &nbsp;
-                {drag && <span className={classes("sf-line-button", "sf-move")}
+                {drag && <span className={classes("sf-line-button", "sf-move", "ml-2")}
                     draggable={true}
                     onDragStart={drag.onDragStart}
                     onDragEnd={drag.onDragEnd}

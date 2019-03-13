@@ -102,7 +102,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
     text: () => OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
     icon: "times",
     keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
-    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
+    isVisible: true,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         eoc.frame.onReload(pack);

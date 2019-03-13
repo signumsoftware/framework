@@ -200,23 +200,12 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
+            {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
-  }
-
-  getComponentWithRef(ctx: TypeContext<Entity>) {
-    var component = this.state.getComponent!(ctx)!;
-
-    var type = component.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }>;
-    if (type.prototype.render) {
-      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
-    } else {
-      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
-    }
   }
 
   validationErrors?: ValidationErrors | null;

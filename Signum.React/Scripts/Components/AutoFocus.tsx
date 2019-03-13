@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { BsSize, BsColor } from './Basic';
-import { classes } from '../Globals';
 
 
 export function AutoFocus(p: { disabled?: boolean, delay?: number, children: React.ReactNode }) {
