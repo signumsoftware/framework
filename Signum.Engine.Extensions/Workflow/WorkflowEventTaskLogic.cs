@@ -14,6 +14,7 @@ using Signum.Entities.Workflow;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -136,8 +137,9 @@ namespace Signum.Engine.Workflow
                         return;
                     }
 
-                    model = model!;
-
+                    if (model == null)
+                        throw new ArgumentNullException(nameof(model));
+                    
                     if (schedule != null)
                     {
                         var task = (WorkflowEventTaskEntity)schedule.Task;

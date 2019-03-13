@@ -204,10 +204,10 @@ namespace Signum.React.Selenium
             return Lite.Create(this.EntityType, this.IdOrNull!.Value, toString);
         }
 
-        public static EntityInfoProxy Parse(string dataEntity)
+        public static EntityInfoProxy? Parse(string dataEntity)
         {
             if (dataEntity == "null" || dataEntity == "undefined")
-                return null!;
+                return null;
 
             return new EntityInfoProxy(dataEntity);
         }

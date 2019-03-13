@@ -83,7 +83,7 @@ namespace Signum.Engine.Workflow
         }
 
         static Expression<Func<CaseEntity, CaseActivityEntity>> DecompositionSurrogateActivityExpression =
-            childCase => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous.Entity).First();
+            childCase => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous!.Entity).First();
         [ExpressionField]
         public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase)
         {

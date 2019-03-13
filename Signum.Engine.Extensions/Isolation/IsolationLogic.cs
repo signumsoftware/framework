@@ -153,7 +153,7 @@ namespace Signum.Engine.Isolation
                     var newBody = Expression.Call(
                       miSetMixin.MakeGenericMethod(typeof(T), typeof(IsolationMixin), typeof(Lite<IsolationEntity>)),
                       constructor.Body,
-                      Expression.Quote(isolationProperty),
+                      Expression.Quote(IsolationLambda),
                       Expression.Constant(IsolationEntity.Current));
 
                     return Expression.Lambda(newBody, constructor.Parameters);
@@ -164,7 +164,7 @@ namespace Signum.Engine.Isolation
         }
 
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
-        static Expression<Func<IsolationMixin, Lite<IsolationEntity>>> isolationProperty = (IsolationMixin m) => m.Isolation;
+        static Expression<Func<IsolationMixin, Lite<IsolationEntity>?>> IsolationLambda = (IsolationMixin m) => m.Isolation;
 
         public static void Register<T>(IsolationStrategy strategy) where T : Entity
         {

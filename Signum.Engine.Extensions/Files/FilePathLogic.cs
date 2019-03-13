@@ -17,15 +17,15 @@ namespace Signum.Engine.Files
     public static class FilePathLogic
     {
         static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
-            fp => fp == null ? null: new WebImage { FullWebPath = fp.FullWebPath() };
+            fp => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
-        public static WebImage WebImage(this FilePathEntity fp)
+        public static WebImage? WebImage(this FilePathEntity fp)
         {
             return WebImageExpression.Evaluate(fp);
         }
 
         static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath() };
+           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
         public static WebDownload WebDownload(this FilePathEntity fp)
         {

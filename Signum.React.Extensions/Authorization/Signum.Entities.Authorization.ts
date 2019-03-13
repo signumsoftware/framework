@@ -19,7 +19,7 @@ export module ActiveDirectoryAuthorizerMessage {
 export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
-  domainName: string;
+  domainName: string | null;
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {

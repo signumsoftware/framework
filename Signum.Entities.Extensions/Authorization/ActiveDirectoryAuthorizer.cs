@@ -8,8 +8,8 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string DomainName { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? DomainName { get; set; }
     }
 
     public enum ActiveDirectoryAuthorizerMessage

@@ -36,7 +36,7 @@ namespace Signum.Engine.Dynamic
             return null;
         }
 
-        public static Func<List<CodeFile>> GetCodeFiles = null;
+        public static Func<List<CodeFile>> GetCodeFiles;
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
 
@@ -90,7 +90,7 @@ namespace Signum.Engine.Dynamic
             var errors = new List<string>();
             try
             {
-                CompilationResult cr = null;
+                CompilationResult? cr = null;
 
                 bool cleaned = false;
                 if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())

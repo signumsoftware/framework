@@ -47,7 +47,7 @@ namespace Signum.Entities.Isolation
 
         //null: no override
         //Tuple<T>(null): override to null
-        public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>?>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>>>("CurrentIsolation");
+        public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>?>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>?>>("CurrentIsolation");
         public static IDisposable Disable()
         {
             return UnsafeOverride(null);
@@ -110,10 +110,10 @@ namespace Signum.Entities.Isolation
 
     public static class IsolationExtensions
     {
-        static Expression<Func<IEntity, Lite<IsolationEntity>>> IsolationExpression =
+        static Expression<Func<IEntity, Lite<IsolationEntity>?>> IsolationExpression =
              entity => ((Entity)entity).Mixin<IsolationMixin>().Isolation;
         [ExpressionField]
-        public static Lite<IsolationEntity> Isolation(this IEntity entity)
+        public static Lite<IsolationEntity>? Isolation(this IEntity entity)
         {
             return IsolationExpression.Evaluate(entity);
         }

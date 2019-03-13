@@ -43,7 +43,7 @@ namespace Signum.Entities.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, double?>> DurationRatioExpression =
-        @this => @this.Duration / (@this.WorkflowActivity as WorkflowActivityEntity).EstimatedDuration;
+        @this => @this.Duration / ((WorkflowActivityEntity)@this.WorkflowActivity).EstimatedDuration;
         [ExpressionField]
         public double? DurationRatio
         {
@@ -51,7 +51,7 @@ namespace Signum.Entities.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeRatioExpression =
-            @this => @this.DurationRealTime / (@this.WorkflowActivity as WorkflowActivityEntity).EstimatedDuration;
+            @this => @this.DurationRealTime / ((WorkflowActivityEntity)@this.WorkflowActivity).EstimatedDuration;
         [ExpressionField]
         public double? DurationRealTimeRatio
         {
@@ -67,7 +67,7 @@ namespace Signum.Entities.Workflow
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
         (@this.WorkflowActivity is WorkflowEventEntity) ? CaseActivityState.PendingNext :
-        (@this.WorkflowActivity as WorkflowActivityEntity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
+        ((WorkflowActivityEntity)@this.WorkflowActivity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision :
         CaseActivityState.PendingNext;
 #pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("StateExpression")]

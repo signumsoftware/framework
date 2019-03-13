@@ -74,7 +74,7 @@ namespace Signum.Entities.Processes
         }
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
-         log => (double?)(log.ExecutionEnd - log.ExecutionStart).Value.TotalMilliseconds;
+         log => (double?)(log.ExecutionEnd - log.ExecutionStart)!.Value.TotalMilliseconds;
 #pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression")]
 #pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property

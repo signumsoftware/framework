@@ -41,7 +41,7 @@ namespace Signum.React.Selenium
         {
             var attr = MainControl.Find().GetAttribute("data-main-entity");
 
-            return EntityInfoProxy.Parse(attr);
+            return EntityInfoProxy.Parse(attr)!;
         }
 
         public T RetrieveEntity()

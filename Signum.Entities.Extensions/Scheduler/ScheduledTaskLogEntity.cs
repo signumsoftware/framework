@@ -24,7 +24,7 @@ namespace Signum.Entities.Scheduler
         public DateTime? EndTime { get; set; }
 
         static Expression<Func<ScheduledTaskLogEntity, double?>> DurationExpression =
-            log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
+            log => (double?)(log.EndTime - log.StartTime)!.Value.TotalMilliseconds;
 #pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression"), Unit("ms")]
 #pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property

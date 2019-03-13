@@ -10,7 +10,7 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     {
-        public static Func<string, string> ValidatePassword = p =>
+        public static Func<string, string?> ValidatePassword = p =>
         {
             if (p.Length >= 5)
                 return null;
@@ -87,7 +87,7 @@ namespace Signum.Entities.Authorization
             Owner = u.ToLite(),
             CultureInfo = u.CultureInfo,
             DisplayName = u.UserName,
-            Email = u.Email,
+            Email = u.Email!,
         };
         [ExpressionField]
         public EmailOwnerData EmailOwnerData

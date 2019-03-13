@@ -96,7 +96,7 @@ namespace Signum.Entities.Mailing
 {EmailMessageState.Received,     false,         false,         false,                    false },
             };
 
-        static Expression<Func<EmailMessageEntity, string>> ToStringExpression = e => e.Subject;
+        static Expression<Func<EmailMessageEntity, string>> ToStringExpression = e => e.Subject!;
         [ExpressionField]
         public override string ToString()
         {

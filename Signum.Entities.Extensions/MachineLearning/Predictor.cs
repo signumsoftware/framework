@@ -63,7 +63,7 @@ namespace Signum.Entities.MachineLearning
         public PredictorRegressionMetricsEmbedded? RegressionValidation { get; set; }
 
 
-        static Expression<Func<PredictorEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<PredictorEntity, string>> ToStringExpression = @this => @this.Name!;
         [ExpressionField]
         public override string ToString()
         {

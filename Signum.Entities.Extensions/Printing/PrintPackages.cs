@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -11,7 +11,7 @@ namespace Signum.Entities.Printing
         [StringLengthValidator(Max = 200)]
         public string? Name { get; set; }
 
-        static Expression<Func<PrintPackageEntity, string>> ToStringExpression = e => e.Name;
+        static Expression<Func<PrintPackageEntity, string>> ToStringExpression = e => e.Name ?? "- No Name -";
         [ExpressionField]
         public override string ToString()
         {

@@ -27,7 +27,7 @@ namespace Signum.Engine.Mailing.Pop3
         }
 
         static Expression<Func<Pop3ReceptionEntity, IQueryable<EmailMessageEntity>>> EmailMessagesExpression =
-            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Is(r));
+            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r));
         [ExpressionField]
         public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r)
         {

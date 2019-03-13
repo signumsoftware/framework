@@ -35,7 +35,7 @@ namespace Signum.Engine.Alerts
             return MyActiveAlertsExpression.Evaluate(e);
         }
 
-        public static Func<IUserEntity> DefaultRecipient = () => null;
+        public static Func<IUserEntity?> DefaultRecipient = () => null;
 
         public static HashSet<AlertTypeEntity> SystemAlertTypes = new HashSet<AlertTypeEntity>();
         public static bool Started = false;

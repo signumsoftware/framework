@@ -99,15 +99,15 @@ namespace Signum.Entities.Disconnected
 
         static Expression<Func<DisconnectedExportEntity, int>> CalculateTotalExpression =
             stat =>
-                stat.Lock.Value +
-                stat.CreateDatabase.Value +
-                stat.CreateSchema.Value +
-                stat.DisableForeignKeys.Value +
-                stat.Copies.Sum(a => a.CopyTable.Value) +
-                stat.EnableForeignKeys.Value +
-                stat.ReseedIds.Value +
-                stat.BackupDatabase.Value +
-                stat.DropDatabase.Value;
+                stat.Lock!.Value +
+                stat.CreateDatabase!.Value +
+                stat.CreateSchema!.Value +
+                stat.DisableForeignKeys!.Value +
+                stat.Copies.Sum(a => a.CopyTable!.Value) +
+                stat.EnableForeignKeys!.Value +
+                stat.ReseedIds!.Value +
+                stat.BackupDatabase!.Value +
+                stat.DropDatabase!.Value;
         [ExpressionField]
         public int CalculateTotal()
         {

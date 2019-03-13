@@ -14,7 +14,7 @@ interface IDynamicApiEvaluator {}
 export const DynamicApiEntity = new Type<DynamicApiEntity>("DynamicApi");
 export interface DynamicApiEntity extends Entities.Entity {
   Type: "DynamicApi";
-  name?: string | null;
+  name: string;
   eval: DynamicApiEval;
 }
 

@@ -81,7 +81,7 @@ namespace Signum.React.Selenium
 
         public EntityInfoProxy EntityInfo()
         {
-            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"));
+            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"))!;
         }
 
         public FrameModalProxy<T> WaitLoaded()

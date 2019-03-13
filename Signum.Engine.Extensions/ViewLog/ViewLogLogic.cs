@@ -42,7 +42,7 @@ namespace Signum.Engine.ViewLog
 
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
-        public static Func<BaseQueryRequest?, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
+        public static Func<BaseQueryRequest, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
       
 
         public static void Start(SchemaBuilder sb, HashSet<Type> registerExpression)
@@ -112,7 +112,7 @@ namespace Signum.Engine.ViewLog
                     {
 
                         viewLog.EndDate = TimeZoneManager.Now;
-                         viewLog.Data = GetData(request, sw);
+                         viewLog.Data = GetData(request!, sw);
                         using (ExecutionMode.Global())
                             viewLog.Save();
                         tr.Commit();
