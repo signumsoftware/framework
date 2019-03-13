@@ -191,7 +191,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
   }
 
 
-  validationErrors?: ValidationErrors | null;
+  validationErrors: ValidationErrors[] = [];
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -213,7 +213,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.setState({ refreshCount: this.state.refreshCount + 1 });
       },
       onClose: () => this.onClose(),
-      revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
+      revalidate: () => this.validationErrors.forEach(a => a.forceUpdate()),
       setError: (ms, initialPrefix) => {
         GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
         this.forceUpdate()
@@ -244,12 +244,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame"/>
+        <ValidationErrors entity={mainEntity} ref={ve => ve && this.validationErrors.push(ve)} prefix="caseFrame"/>
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
         </ErrorBoundary>
         <br />
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame" />
+        <ValidationErrors entity={mainEntity} ref={ve => ve && this.validationErrors.push(ve)} prefix="caseFrame" />
       </div>
     );
   }
