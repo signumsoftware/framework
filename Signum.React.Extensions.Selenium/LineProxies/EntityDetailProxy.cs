@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 
@@ -28,7 +28,9 @@ namespace Signum.React.Selenium
 
         public LineContainer<T> Details<T>() where T : ModifiableEntity
         {
-            return new LineContainer<T>(this.Element.FindElement(By.CssSelector("div[data-property-path]")), Route);
+            var subRoute = Route.Type == typeof(T) ? Route : PropertyRoute.Root(typeof(T));
+
+            return new LineContainer<T>(this.Element.FindElement(By.CssSelector("div[data-property-path]")), subRoute);
         }
 
         public EntityInfoProxy EntityInfo()
