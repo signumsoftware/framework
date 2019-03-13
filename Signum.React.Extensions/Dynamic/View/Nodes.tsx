@@ -1219,7 +1219,6 @@ NodeUtils.register<SearchControlNode>({
     <FetchQueryDescription queryName={dn.node.findOptions && dn.node.findOptions.queryName} >
       {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd && qd.columns["Entity"].type.name} />}
     </FetchQueryDescription>
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.viewName)} type="string" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilters)} type="boolean" defaultValue={null} />

@@ -35,6 +35,15 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     this.state = this.calculateState(props);
   }
 
+  private _mainDiv!: HTMLDivElement | null;
+  private setMainDivRef = (ref: HTMLDivElement | null) => {
+    this._mainDiv = ref;
+  }
+
+  getMainDiv(): HTMLDivElement | null {
+    return this._mainDiv;
+  }
+
   getCaseActivity(): CaseActivityEntity | undefined {
     return this.state.pack && this.state.pack.activity;
   }
@@ -152,7 +161,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
 
     return (
-      <div className="normal-control">
+      <div className="normal-control" ref={this.setMainDivRef}>
         {this.renderTitle()}
         <CaseFromSenderInfo current={pack.activity} />
         {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
@@ -181,8 +190,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 
-
-  validationErrors?: ValidationErrors | null;
+  validationErrorsTop?: ValidationErrors | null;
+  validationErrorsBottom?: ValidationErrors | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -204,7 +213,10 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.setState({ refreshCount: this.state.refreshCount + 1 });
       },
       onClose: () => this.onClose(),
-      revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
+      revalidate: () => {
+        this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
+        this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
+      },
       setError: (ms, initialPrefix) => {
         GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
         this.forceUpdate()
@@ -235,12 +247,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame"/>
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix="caseFrame"/>
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
         </ErrorBoundary>
         <br />
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix="caseFrame" />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsBottom = ve} prefix="caseFrame" />
       </div>
     );
   }
