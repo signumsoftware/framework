@@ -1,16 +1,15 @@
 import * as React from "react"
-import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage } from '../Signum.Entities';
+import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
-import { ButtonsContext, IOperationVisible } from '../TypeContext';
+import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
 import * as Navigator from '../Navigator';
-import * as OrderUtils from '../Frames/OrderUtils';
 import Notify from '../Frames/Notify';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
   operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-  CreateGroup, API, isEntityOperation, autoColorFunction, isSave, AlternativeOperationSetting
+  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button, Dropdown } from "../Components";
 import { TitleManager } from "../../Scripts/Lines/EntityBase";
@@ -18,9 +17,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonProps } from "../Components/Button";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
+import { func } from "prop-types";
 
 
-export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
+export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
   const ti = getTypeInfo(ctx.pack.entity.Type);
 
   if (ti == undefined)
@@ -57,29 +57,24 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
     })
     .map(eoc => eoc!);
 
-  const groups = operations.groupBy(eoc => {
+  operations.forEach(eoc => eoc.complete());
 
-    const group = getGroup(eoc);
-
-    if (group == undefined)
-      return "";
-
-    return group.key;
-  });
+  const groups = operations.groupBy(eoc => eoc.group && eoc.group.key || "");
 
   const result = groups.flatMap((gr, i) => {
     if (gr.key == "") {
       return gr.elements.map((eoc, j) => ({
         order: eoc.settings && eoc.settings.order != undefined ? eoc.settings.order : 0,
-        button: <OperationButton eoc={eoc} key={i + "-" + j} />
-      }));
+        shortcut: e => eoc.onKeyDown(e),
+        button: <OperationButton eoc={eoc} key={i + "-" + j} />,
+      }) as ButtonBarElement);
     } else {
 
-      const group = getGroup(gr.elements[0])!;
-
-
+      const group = gr.elements[0].group!;
+      
       return [{
         order: group.order != undefined ? group.order : 100,
+        shortcut: e => gr.elements.some(eoc => eoc.onKeyDown(e)),
         button: (
           <UncontrolledDropdown key={i}>
             <DropdownToggle data-key={group.key} color={group.color || "light"} className={group.cssClass} caret>
@@ -93,38 +88,11 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             </DropdownMenu>
           </UncontrolledDropdown >
         )
-      }];
+      } as ButtonBarElement];
     }
   });
 
-  return result.map(a => OrderUtils.setOrder(a.order, a.button));
-}
-
-function getGroup(eoc: EntityOperationContext<Entity>) {
-  if (eoc.settings != undefined && eoc.settings.group !== undefined) {
-    return eoc.settings.group;
-  }
-
-  if (eoc.operationInfo.operationType == OperationType.ConstructorFrom)
-    return CreateGroup;
-
-  return undefined;
-}
-
-function getAlternatives(eoc: EntityOperationContext<Entity>): AlternativeOperationSetting<Entity>[] {
-  let alternatives = eoc.settings && eoc.settings.alternatives;
-
-  if (alternatives)
-    return alternatives(eoc);
-
-  if (isSave(eoc.operationInfo)) {
-    return [
-      andClose(eoc),
-      andNew(eoc)
-    ]
-  }
-
-  return [];
+  return result;
 }
 
 export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
@@ -133,6 +101,8 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
     name: "andClose",
     text: () => OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
     icon: "times",
+    keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
+    isVisible: true,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         eoc.frame.onReload(pack);
@@ -145,18 +115,28 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
 }
 
 export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
-  
+
   return ({
     name: "andNew",
     text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
+    keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
     isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
-        Constructor.construct(pack.entity.Type).then(newPack => {
-          eoc.frame.onReload(newPack);
-        }).done()
+
+        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<ModifiableEntity>) | undefined);
+
+        if (createNew)
+          createNew()
+            .then(e => Navigator.toEntityPack(e))
+            .then(newPack => eoc.frame.onReload(newPack))
+            .done();
+        else
+          Constructor.construct(pack.entity.Type)
+            .then(newPack => eoc.frame.onReload(newPack))
+            .done();
       };
       eoc.defaultClick();
     }
@@ -176,9 +156,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
     if (canExecute === undefined)
       canExecute = eoc.canExecute;
-
-    const bsColor = eoc.settings && eoc.settings.color || autoColorFunction(eoc.operationInfo);
-
+    
     const disabled = !!canExecute;
 
     let elem: HTMLElement | null;
@@ -190,30 +168,30 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         </UncontrolledTooltip>
       );
 
-    var alternatives = getAlternatives(eoc).filter(a => a.isVisible == true || a.isVisible == undefined);
+    var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
     if (group) {
-      var dr
-
       return [
         <DropdownItem
           {...props}
           key="di"
           innerRef={r => elem = r}
           disabled={disabled}
+          title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
           onClick={disabled ? undefined : this.handleOnClick}
           data-operation={eoc.operationInfo.key}>
           {this.renderChildren()}
         </DropdownItem>,
         tooltip,
-        tooltip == null && alternatives.map(a => this.renderAlternative(a))
+        tooltip == null && alternatives && alternatives.map(a => this.renderAlternative(a))
       ];
     }
 
 
-    var button = <Button color={bsColor}
+    var button = <Button color={eoc.color}
       {...props}
       key="button"
+      title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
       innerRef={r => elem = r}
       className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
       onClick={disabled ? undefined : this.handleOnClick}
@@ -227,14 +205,13 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         tooltip
       ];
 
-    
-    if (alternatives.length == 0)
+    if (alternatives == undefined || alternatives.length == 0)
       return button;
 
     return (
       <UncontrolledDropdown group>
         {button}
-        <DropdownToggle caret split color={bsColor}/>
+        <DropdownToggle caret split color={eoc.color}/>
         <DropdownMenu right>
           {alternatives.map(a => this.renderAlternative(a))}
         </DropdownMenu>
@@ -249,6 +226,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         color={aos.color}
         className={aos.classes}
         key={aos.name}
+        title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}
         onClick={() => aos.onClick(this.props.eoc)}
         data-alternative={aos.name}>
         {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}

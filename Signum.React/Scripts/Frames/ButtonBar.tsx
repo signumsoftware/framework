@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as OrderUtils from '../Frames/OrderUtils'
-import { IRenderButtons, ButtonsContext } from '../TypeContext'
+import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
 
 export interface ButtonBarProps extends ButtonsContext {
   align?: "left" | "right";
@@ -12,7 +11,29 @@ export default class ButtonBar extends React.Component<ButtonBarProps>{
     ButtonBar.onButtonBarRender.clear();
   }
 
-  static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactElement<any> | undefined> | undefined> = [];
+  static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<ButtonBarElement | undefined> | undefined> = [];
+
+  componentDidMount() {
+    window.addEventListener("keydown", this.hanldleKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this.hanldleKeyDown);
+  }
+
+  hanldleKeyDown = (e: KeyboardEvent) => {
+    var s = this.shortcuts;
+    if (s != null) {
+      for (var i = 0; i < s.length; i++) {
+        if (s[i](e)) {
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+  }
+
+  shortcuts: ((e: KeyboardEvent) => boolean)[] = [];
 
   render() {
     const ctx: ButtonsContext = this.props;
@@ -21,13 +42,13 @@ export default class ButtonBar extends React.Component<ButtonBarProps>{
     const buttons = ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || [])
       .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])
       .filter(a => a != null)
-      .orderBy(a => OrderUtils.getOrder(a!))
-      .map((a, i) => OrderUtils.cloneElementWithoutOrder(a!, { key: i }));
+      .orderBy(a => a!.order || 0);
 
-    return (
-      <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "justify-content-end" : undefined)} >
-        {buttons}
-      </div>
+    this.shortcuts = buttons.filter(a => a!.shortcut != null).map(a => a!.shortcut!);
+    
+    return React.cloneElement(<div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "justify-content-end" : undefined)} />,
+      undefined,
+      ...buttons.map(a => a!.button)
     );
   }
 }

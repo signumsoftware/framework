@@ -102,6 +102,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             showGroupButton={this.props.findMode == "Explore"}
             largeToolbarButtons={true}
             maxResultsHeight={"none"}
+            enableAutoFocus={true}
             onHeighChanged={this.onResize}
             onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
             {...this.props.searchControlProps}
