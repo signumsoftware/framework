@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
 import { notifySuccess } from '@framework/Operations/EntityOperations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
@@ -24,7 +24,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
 
   renderButtons(bc: ButtonsContext) {
     return [
-      <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
+      { button: <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
     ];
   }
 

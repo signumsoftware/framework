@@ -5,7 +5,6 @@ import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
-import * as OrderUtils from '@framework/Frames/OrderUtils'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl, SearchControlLoaded } from "@framework/Search";
@@ -117,8 +116,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                 }],
               }}
               extraButtons={sc => [
-                OrderUtils.setOrder(-1.1, <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} />),
-                OrderUtils.setOrder(-1.2, <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} />),
+                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
+                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
               ]}
             />
           </Tab>
@@ -148,8 +147,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                 }]
               }}
               extraButtons={sc => [
-                OrderUtils.setOrder(-1.1, <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} />),
-                OrderUtils.setOrder(-1.2, <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} />),
+                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
+                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
               ]}
             />
           </Tab>

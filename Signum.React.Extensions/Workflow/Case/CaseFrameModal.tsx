@@ -196,7 +196,10 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.setState({ refreshCount: this.state.refreshCount + 1 });
       },
       onClose: (ok?: boolean) => this.props.onExited!(ok ? this.getCaseActivity() : undefined),
-      revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
+      revalidate: () => {
+        this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
+        this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
+      },
       setError: (modelState, initialPrefix) => {
         GraphExplorer.setModelState(pack.activity, modelState, initialPrefix || "");
         this.forceUpdate();
@@ -219,7 +222,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     );
   }
 
-  validationErrors?: ValidationErrors | null;
+  validationErrorsTop?: ValidationErrors | null;
+  validationErrorsBottom?: ValidationErrors | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -241,7 +245,10 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.setState({ refreshCount: this.state.refreshCount + 1 });
       },
       onClose: () => this.props.onExited!(null),
-      revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
+      revalidate: () => {
+        this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
+        this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
+      },
       setError: (ms, initialPrefix) => {
         GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
         this.forceUpdate()
@@ -272,25 +279,14 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
         <ErrorBoundary>
-          {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
+          {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
         </ErrorBoundary>
         <br />
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsBottom = ve} prefix={this.prefix} />
       </div>
     );
-  }
-
-  getComponentWithRef(ctx: TypeContext<ICaseMainEntity>) {
-    var component = this.state.getComponent!(ctx)!;
-
-    var type = component.type as React.ComponentClass<{ ctx: TypeContext<ICaseMainEntity> }> | React.FunctionComponent<{ ctx: TypeContext<ICaseMainEntity> }>;
-    if (type.prototype.render) {
-      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
-    } else {
-      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
-    }
   }
 
   renderTitle() {

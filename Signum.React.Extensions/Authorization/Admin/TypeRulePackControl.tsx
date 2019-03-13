@@ -5,7 +5,7 @@ import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { notifySuccess } from '@framework/Operations/EntityOperations'
-import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame } from '@framework/TypeContext'
+import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
@@ -69,16 +69,16 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     this.props.ctx.frame!.frameComponent.forceUpdate();
   }
 
-  renderButtons(bc: ButtonsContext) {
+  renderButtons(bc: ButtonsContext): ButtonBarElement[] {
 
     GraphExplorer.propagateAll(bc.pack.entity);
 
     const hasChanges = bc.pack.entity.modified;
 
     return [
-      <Button color="primary" disabled={!hasChanges} onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>,
-      <Button color="warning" disabled={!hasChanges} onClick={() => this.handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button>,
-      <Button color="info" disabled={hasChanges} onClick={() => this.handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button>
+      { button: <Button color="primary" disabled={!hasChanges} onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
+      { button: <Button color="warning" disabled={!hasChanges} onClick={() => this.handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button color="info" disabled={hasChanges} onClick={() => this.handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
     ];
   }
 

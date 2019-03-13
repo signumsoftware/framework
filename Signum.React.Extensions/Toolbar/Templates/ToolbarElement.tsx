@@ -9,7 +9,7 @@ import * as Dashboard from '../../Dashboard/Admin/Dashboard'
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
 import { useForceUpdate } from '@framework/Hooks'
 
-export default function ToolbarElement(p : { ctx: TypeContext<ToolbarElementEmbedded> }){
+export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }) {
   const forceUpdate = useForceUpdate();
   function handleTypeChanges() {
     var a = p.ctx.value;
@@ -40,7 +40,7 @@ export default function ToolbarElement(p : { ctx: TypeContext<ToolbarElementEmbe
   var content = ctx2.value.content;
 
   var icon = Dashboard.parseIcon(ctx4.value.iconName);
-  
+
   return (
     <div>
       <div className="row">
@@ -55,15 +55,15 @@ export default function ToolbarElement(p : { ctx: TypeContext<ToolbarElementEmbe
       {ctx4.value.type != "Divider" &&
         <div className="row">
           <div className="col-sm-5">
-            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"].concat(content && content.EntityType == "UserQuery" ? ["count"] : [] as string[])} />
+            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"].concat(content && (content.EntityType == "UserQuery" || content.EntityType == "Query") ? ["count"] : [] as string[])} />
             <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
           </div>
           <div className="col-sm-1">
             {icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
           </div>
           <div className="col-sm-5">
-          <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
-          {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
+            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
+            {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
               <div>
                 <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)} />

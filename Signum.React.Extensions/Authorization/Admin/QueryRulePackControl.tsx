@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { QueryEntity } from '@framework/Signum.Entities.Basics';
 import { notifySuccess } from '@framework/Operations/EntityOperations'
-import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
+import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'
 import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, AuthMessage, QueryAllowed } from '../Signum.Entities.Authorization'
@@ -22,9 +22,9 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
       .done();
   }
 
-  renderButtons(bc: ButtonsContext) {
+  renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
+      { button: <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
     ];
   }
 

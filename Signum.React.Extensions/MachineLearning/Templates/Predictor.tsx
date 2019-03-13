@@ -1,10 +1,9 @@
 import * as React from 'react'
-import * as OrderUtils from '@framework/Frames/OrderUtils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
 import { ValueLine, EntityLine, EntityDetail, EntityCombo, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '@framework/Lines'
 import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
-import { TypeContext, ButtonsContext } from '@framework/TypeContext'
+import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import FileLine from '../../Files/FileLine'
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning'
 import * as Finder from '@framework/Finder'
@@ -56,9 +55,12 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     }
   }
 
-  renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
+  renderButtons(ctx: ButtonsContext): ButtonBarElement[] {
     if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
-      return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+      return [{
+        order: 10000,
+        button: <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
+      }];
     } else {
       return [];
     }
