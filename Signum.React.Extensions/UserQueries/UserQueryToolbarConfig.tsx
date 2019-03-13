@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { FindOptions, ValueSearchControl } from '@framework/Search'
@@ -7,6 +7,8 @@ import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
+import { useAPI, useFetchAndForget } from '../../../Framework/Signum.React/Scripts/Hooks';
+import { CountIcon } from '../Toolbar/QueryToolbarConfig';
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {
@@ -14,11 +16,11 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     super(type);
   }
 
-  countIcon?: CountUserQueryIcon | null;
+  countIcon?: CountIcon | null;
   getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
     if (element.iconName == "count")
-      return <CountUserQueryIcon ref={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+      return <CountUserQueryIcon innerRef={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
     return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : ["far", "list-alt"], element.iconColor || "dodgerblue");
   }
@@ -42,69 +44,22 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
   }
 }
 
+
 interface CountUserQueryIconProps {
   userQuery: Lite<UserQueryEntity>;
   color?: string;
   autoRefreshPeriod?: number;
-}
-
-interface CountUserQueryIconState {
-  findOptions?: FindOptions;
+  innerRef: (e: CountIcon | null) => void;
 }
 
 
-export class CountUserQueryIcon extends React.Component<CountUserQueryIconProps, CountUserQueryIconState>{
+export function CountUserQueryIcon(p: CountUserQueryIconProps) {
 
-  constructor(props: CountUserQueryIconProps) {
-    super(props);
-    this.state = {};
-  }
+  var userQuery = useFetchAndForget(p.userQuery)
+  var findOptions = useAPI(undefined, [userQuery], signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined));
 
-  componentWillMount() {
-    Navigator.API.fetchAndForget(this.props.userQuery)
-      .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-      .then(fo => this.setState({ findOptions: fo }))
-      .done();
-  }
+  if (findOptions == null)
+    return <span className="icon" style={{ color: p.color }}>…</span>;
 
-  componentWillUnmount() {
-    if (this.handler)
-      clearTimeout(this.handler);
-
-    this._isMounted = false;
-  }
-
-  _isMounted = true;
-  handler: number | undefined;
-  handleValueChanged = () => {
-    if (this.props.autoRefreshPeriod && this._isMounted) {
-
-      if (this.handler)
-        clearTimeout(this.handler);
-
-      this.handler = setTimeout(() => {
-        this.refreshValue();
-      }, this.props.autoRefreshPeriod * 1000);
-    }
-  }
-
-  refreshValue() {
-    this.valueSearchControl && this.valueSearchControl.refreshValue();
-  }
-
-  valueSearchControl?: ValueSearchControl | null;
-
-  render() {
-
-    if (!this.state.findOptions)
-      return <span className="icon" style={{ color: this.props.color }}>…</span>;
-
-    return <ValueSearchControl ref={vsc => this.valueSearchControl = vsc}
-      findOptions={this.state.findOptions}
-      customClass="icon"
-      customStyle={{ color: this.props.color }}
-      onValueChange={this.handleValueChanged}
-      avoidNotifyPendingRequest={true}
-    />;
-  }
+  return <CountIcon ref={p.innerRef} findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} />
 }
