@@ -619,6 +619,7 @@ export interface NavigateOptions {
   avoidPromptLooseChange?: boolean;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
   extraComponentProps?: {};
+  createNew?: () => Promise<ModifiableEntity>;
 }
 
 export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {

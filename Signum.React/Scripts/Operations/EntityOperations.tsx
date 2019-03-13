@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage } from '../Signum.Entities';
+import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
@@ -125,9 +125,18 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
-        Constructor.construct(pack.entity.Type).then(newPack => {
-          eoc.frame.onReload(newPack);
-        }).done()
+
+        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<ModifiableEntity>) | undefined);
+
+        if (createNew)
+          createNew()
+            .then(e => Navigator.toEntityPack(e))
+            .then(newPack => eoc.frame.onReload(newPack))
+            .done();
+        else
+          Constructor.construct(pack.entity.Type)
+            .then(newPack => eoc.frame.onReload(newPack))
+            .done();
       };
       eoc.defaultClick();
     }

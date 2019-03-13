@@ -31,6 +31,15 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     this.state = this.calculateState(props);
   }
 
+  private _mainDiv!: HTMLDivElement | null;
+  private setMainDivRef = (ref: HTMLDivElement | null) => {
+    this._mainDiv = ref;
+  }
+
+  getMainDiv(): HTMLDivElement | null {
+    return this._mainDiv;
+  }
+
   componentWillMount() {
     this.load(this.props);
   }
@@ -183,7 +192,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     const embeddedWidgets = renderEmbeddedWidgets(wc);
 
     return (
-      <div className="normal-control">
+      <div className="normal-control" ref={this.setMainDivRef}>
         {this.renderTitle()}
         {renderWidgets(wc)}
         {this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} />}
