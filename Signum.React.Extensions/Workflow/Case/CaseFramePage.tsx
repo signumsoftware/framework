@@ -190,8 +190,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 
-
-  validationErrors: ValidationErrors[] = [];
+  validationErrorsTop?: ValidationErrors | null;
+  validationErrorsBottom?: ValidationErrors | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -213,7 +213,10 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.setState({ refreshCount: this.state.refreshCount + 1 });
       },
       onClose: () => this.onClose(),
-      revalidate: () => this.validationErrors.forEach(a => a.forceUpdate()),
+      revalidate: () => {
+        this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
+        this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
+      },
       setError: (ms, initialPrefix) => {
         GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
         this.forceUpdate()
@@ -244,12 +247,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
         {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
-        <ValidationErrors entity={mainEntity} ref={ve => ve && this.validationErrors.push(ve)} prefix="caseFrame"/>
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix="caseFrame"/>
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
         </ErrorBoundary>
         <br />
-        <ValidationErrors entity={mainEntity} ref={ve => ve && this.validationErrors.push(ve)} prefix="caseFrame" />
+        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsBottom = ve} prefix="caseFrame" />
       </div>
     );
   }
