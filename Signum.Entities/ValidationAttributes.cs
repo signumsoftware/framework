@@ -555,6 +555,41 @@ namespace Signum.Entities
         }
     }
 
+
+    public class NumberPowerOfTwoValidatorAttribute : ValidatorAttribute
+    {
+        static bool IsPowerOfTwo(long n)
+        {
+            if (n == 0)
+                return false;
+
+            while (n != 1)
+            {
+                if (n % 2 != 0)
+                    return false;
+
+                n = n / 2;
+            }
+            return true;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (!IsPowerOfTwo(Convert.ToInt64(value)))
+                return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ValidationMessage.PowerOf.NiceToString(), 2);
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return ValidationMessage.Be.NiceToString() + ValidationMessage.PowerOf.NiceToString() + " " + 2; }
+        }
+    }
+
     public class NoRepeatValidatorAttribute : ValidatorAttribute
     {
         protected override string OverrideError(object value)
@@ -1097,5 +1132,6 @@ namespace Signum.Entities
         _0IsEmpty,
         [Description("At least one value is needed")]
         _AtLeastOneValueIsNeeded,
+        PowerOf,
     }
 }
