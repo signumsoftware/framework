@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { openModal, IModalProps } from '../Modals'
+import { openModal, IModalProps, IHandleKeyboard } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
@@ -48,7 +48,7 @@ interface FrameModalState {
 
 let modalCount = 0;
 
-export default class FrameModal extends React.Component<FrameModalProps, FrameModalState>  {
+export default class FrameModal extends React.Component<FrameModalProps, FrameModalState> implements IHandleKeyboard  {
   prefix = "modal" + (modalCount++);
 
   static defaultProps: FrameModalProps = {
@@ -77,6 +77,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       .done();
   }
 
+  handleKeyDown(e: KeyboardEvent) {
+    this.buttonBar && this.buttonBar.hanldleKeyDown(e);
+  }
 
   getTypeName() {
     return (this.props.entityOrPack as Lite<Entity>).EntityType ||
@@ -229,6 +232,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       this.forceUpdate();
     }
   }
+
+  buttonBar?: ButtonBar | null;
 
   renderBody() {
 

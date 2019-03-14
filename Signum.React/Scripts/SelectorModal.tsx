@@ -1,4 +1,3 @@
-﻿
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
