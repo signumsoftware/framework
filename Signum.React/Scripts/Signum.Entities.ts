@@ -550,6 +550,7 @@ export module ValidationMessage {
   export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
   export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
+  export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
 }
 
 export module VoidEnumMessage {
