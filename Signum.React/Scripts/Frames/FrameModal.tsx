@@ -277,7 +277,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     return (
       <div className="modal-body">
         {renderWidgets({ ctx: ctx, pack: pack })}
-        {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
+        {this.entityComponent && <ButtonBar ref={bb => this.buttonBar = bb} frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
         <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>

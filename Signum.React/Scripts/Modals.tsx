@@ -4,6 +4,12 @@ import * as React from 'react'
 import { FunctionalAdapter } from './Frames/FrameModal';
 import { Modal } from 'react-overlays';
 
+declare global {
+  interface KeyboardEvent {
+    openedModals?: boolean;
+  }
+}
+
 export interface IModalProps {
   onExited?: (val: any) => void;
 }
@@ -39,7 +45,7 @@ export class GlobalModalContainer extends React.Component<{}, GlobalModalContain
 
   hanldleKeyDown = (e: KeyboardEvent) => {
     if (modalInstances.length) {
-      e.preventDefault();
+      e.openedModals = true;
       var topMost = modalInstances[modalInstances.length - 1];
 
       if (topMost.handleKeyDown) {

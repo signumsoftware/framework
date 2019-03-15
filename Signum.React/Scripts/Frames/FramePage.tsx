@@ -67,8 +67,8 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
   }
 
   hanldleKeyDown = (e: KeyboardEvent) => {
-    if (!e.defaultPrevented)
-      this.buttonBar && this.buttonBar.hanldleKeyDown(e);
+    if (!e.openedModals && this.buttonBar)
+      this.buttonBar.hanldleKeyDown(e);
   }
 
   load(props: FramePageProps) {
