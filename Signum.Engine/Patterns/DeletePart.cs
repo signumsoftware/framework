@@ -26,7 +26,7 @@ namespace Signum.Engine
             return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
         }
 
-        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity, Func<T, bool> handleOnSaving = null)
+        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity, Expression<Func<T, bool>> filter = null, Func<T, bool> handleOnSaving = null)
             where T : Entity
             where L : Entity
         {
@@ -35,7 +35,9 @@ namespace Signum.Engine
                 if (ShouldAvoidDeletePart(typeof(L)))
                     return null;
 
-                var toDelete = query.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
+                var filteredQuery = filter == null ? query : query.Where(filter);
+
+                var toDelete = filteredQuery.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
                 return new Disposable(() =>
                 {
                     var groups = toDelete.GroupsOf(Connector.Current.Schema.Settings.MaxNumberOfParameters).ToList();
