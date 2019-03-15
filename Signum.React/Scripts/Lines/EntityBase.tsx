@@ -111,6 +111,13 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
   }
 
+  doView(entity: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | undefined> | undefined {
+    const pr = this.state.ctx.propertyRoute;
+    return this.props.onView ?
+      this.props.onView(entity, pr) :
+      this.defaultView(entity, pr);
+  }
+
 
   defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {
     return Navigator.view(value, {
@@ -145,9 +152,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       window.open(route);
     }
     else {
-      const promise = this.props.onView ?
-        this.props.onView(entity, ctx.propertyRoute) :
-        this.defaultView(entity, ctx.propertyRoute);
+      const promise = this.doView(entity);
 
       if (!promise)
         return;
@@ -229,9 +234,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       if (!this.state.viewOnCreate)
         return Promise.resolve(e);
 
-      return this.props.onView ?
-        this.props.onView(e, this.state.ctx.propertyRoute) :
-        this.defaultView(e, this.state.ctx.propertyRoute);
+      return this.doView(e);
 
     }).then(e => {
 

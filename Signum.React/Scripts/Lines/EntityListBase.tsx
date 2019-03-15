@@ -54,6 +54,13 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     );
   }
 
+  doView(entity: ModifiableEntity | Lite<Entity>) {
+    const pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
+    return this.props.onView ?
+      this.props.onView(entity, pr) :
+      this.defaultView(entity, pr);
+  }
+
   moveDown(index: number) {
     const list = this.props.ctx.value!;
     list.moveDown(index);
@@ -92,11 +99,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         if (!this.state.viewOnCreate)
           return Promise.resolve(e);
 
-        const pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
-
-        return this.state.onView ?
-          this.state.onView(e, pr) :
-          this.defaultView(e, pr);
+        return this.doView(e);
 
       }).then(e => {
 
