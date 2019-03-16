@@ -35,6 +35,10 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     this.load(this.props);
   }
 
+  componentDidMount() {
+    window.addEventListener("keydown", this.hanldleKeyDown);
+  }
+
   getTypeInfo(): TypeInfo {
     return getTypeInfo(this.props.match.params.type);
   }
@@ -59,6 +63,12 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
   componentWillUnmount() {
     Navigator.setTitle();
+    window.removeEventListener("keydown", this.hanldleKeyDown);
+  }
+
+  hanldleKeyDown = (e: KeyboardEvent) => {
+    if (!e.openedModals && this.buttonBar)
+      this.buttonBar.hanldleKeyDown(e);
   }
 
   load(props: FramePageProps) {
@@ -131,6 +141,8 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     }
   }
 
+  buttonBar?: ButtonBar | null;
+
   render() {
 
     if (!this.state.pack) {
@@ -186,7 +198,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       <div className="normal-control">
         {this.renderTitle()}
         {renderWidgets(wc)}
-        {this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} />}
+        {this.entityComponent && <ButtonBar ref={bb => this.buttonBar = bb} frame={frame} pack={this.state.pack} />}
         <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve} prefix="framePage" />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
