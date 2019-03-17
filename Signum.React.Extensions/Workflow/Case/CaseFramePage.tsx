@@ -53,8 +53,18 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     });
   }
 
+  componentDidMount() {
+    window.addEventListener("keydown", this.hanldleKeyDown);
+  }
+
   componentWillUnmount() {
     Navigator.setTitle();
+    window.removeEventListener("keydown", this.hanldleKeyDown);
+  }
+
+  hanldleKeyDown = (e: KeyboardEvent) => {
+    if (!e.openedModals && this.buttonBar)
+      this.buttonBar.hanldleKeyDown(e);
   }
 
   load(props: CaseFramePageProps) {
@@ -107,6 +117,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       this.forceUpdate();
     }
   }
+
+  buttonBar?: ButtonBar | null;
 
   render() {
 
@@ -237,7 +249,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     return (
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
-        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
+        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = (bb as any as ButtonBar)} frame={mainFrame} pack={mainPack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix="caseFrame"/>
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
