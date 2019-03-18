@@ -12,6 +12,7 @@ using Signum.Utilities.Reflection;
 using System.Globalization;
 using Signum.Entities.Basics;
 using System.IO;
+using Signum.Entities;
 
 namespace Signum.Entities
 {
@@ -754,6 +755,36 @@ namespace Signum.Entities
             }
         }
     }
+
+    public class YearGreaterThanValidator : ValidatorAttribute
+    {
+        public int MinYear { get; set; }
+
+        public YearGreaterThanValidator(int minYear)
+        {
+            this.MinYear = minYear;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (((DateTime)value).Year < MinYear)
+                return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return ValidationMessage.BeInThePast.NiceToString();
+            }
+        }
+    }
+
 
     public class TimeSpanPrecisionValidatorAttribute : ValidatorAttribute
     {
