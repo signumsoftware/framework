@@ -79,7 +79,24 @@ namespace Signum.Entities
         {
             get { return ValidationMessage.BeNotNull.NiceToString(); }
         }
+
+        
     }
+
+    public static class NotNullaValidatorExtensions
+    {
+        public static string IsSetOnlyWhen(this (PropertyInfo pi, object nullableValue) tuple, bool shouldBeSet)
+        {
+            if (tuple.nullableValue == null && shouldBeSet)
+                return ValidationMessage._0IsNotSet.NiceToString(tuple.pi.NiceName());
+
+            else if (tuple.nullableValue != null && !shouldBeSet)
+                return ValidationMessage._0ShouldBeNull.NiceToString(tuple.pi.NiceName());
+
+            return null;
+        }
+    }
+    
 
     public class StringLengthValidatorAttribute : ValidatorAttribute
     {
