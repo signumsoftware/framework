@@ -58,6 +58,7 @@
     <TypeScriptCompile Remove="Chart\D3Scripts\ReactChartBase.tsx" />
     <TypeScriptCompile Remove="Dynamic\Api\DynamicApi.tsx" />
     <TypeScriptCompile Remove="Dynamic\DynamicApiClient.tsx" />
+    <TypeScriptCompile Remove="Toolbar\QueryToolbarConfig.tsx" />
   </ItemGroup>
   
 </Project>

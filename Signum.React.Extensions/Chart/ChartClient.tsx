@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
       (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showChartButton == false))
       return undefined;
 
-    return <ChartButton searchControl={ctx.searchControl} />;
+    return { button: <ChartButton searchControl={ctx.searchControl} /> };
   });
 
   UserChartClient.start({ routes: options.routes });

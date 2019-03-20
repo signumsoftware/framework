@@ -83,7 +83,7 @@ function monkeyPatchCreateContextualMenuItem() {
       coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
         coc.operationInfo.niceName;
 
-    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Operations.autoColorFunction(coc.operationInfo);
+    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Operations.Defaults.getColor(coc.operationInfo);
     const icon = coc.settings && coc.settings.icon;
 
     const disabled = !!coc.canExecute;

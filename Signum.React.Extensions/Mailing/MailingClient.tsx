@@ -114,7 +114,7 @@ export function start(options: {
       if (!ctx.searchControl.props.showBarExtension)
         return undefined;
 
-      return <MailingMenu searchControl={ctx.searchControl} />;
+      return { button: <MailingMenu searchControl={ctx.searchControl} /> };
     });
   registerExportAssertLink(EmailTemplateEntity);
   registerExportAssertLink(EmailMasterTemplateEntity);

@@ -89,11 +89,15 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
   render() {
 
+
     const rootNode = this.getZeroNode().createChild(this.state.rootNode);
     const ctx = this.props.ctx;
 
     if (this.state.viewOverrides == null)
       return null;
+
+    var topMostEntity = ctx.frame && ctx.frame.pack && ctx.frame.pack.entity;
+    
 
     var vos = this.state.viewOverrides.filter(a => a.viewName == this.state.dynamicView.viewName);
 
@@ -117,7 +121,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         }
       </div>
       <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-        <AutoFocus>{NodeUtils.renderWithViewOverrides(rootNode, ctx, vos)}</AutoFocus>
+        <AutoFocus disabled={topMostEntity != ctx.value}>{NodeUtils.renderWithViewOverrides(rootNode, ctx, vos)}</AutoFocus>
       </div>
     </div>);
   }
