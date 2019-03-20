@@ -113,6 +113,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
           avoidChangeUrl={false}
           navigate={qs && qs.inPlaceNavigation ? "InPlace" : undefined}
           maxResultsHeight={"none"}
+          enableAutoFocus={true}
           onHeighChanged={this.onResize}
           onSearch={result => this.changeUrl()}
         />

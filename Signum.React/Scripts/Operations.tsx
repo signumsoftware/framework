@@ -12,10 +12,10 @@ import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
-import { getEntityOperationButtons, defaultOnClick } from './Operations/EntityOperations';
+import { getEntityOperationButtons, defaultOnClick, andClose, andNew } from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
-import { BsColor } from "./Components/Basic";
+import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { bool } from "prop-types";
 
@@ -215,6 +215,7 @@ export class EntityOperationContext<T extends Entity> {
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
     const pack = ctx.frame && ctx.frame.pack;
     result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
+    result.complete();
     return result;
   }
 
@@ -229,10 +230,24 @@ export class EntityOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
   onDeleteSuccess?: () => void;
 
+  color?: BsColor;
+  group?: EntityOperationGroup;
+  keyboardShortcut?: KeyboardShortcut;
+  alternatives?: AlternativeOperationSetting<T>[];
+
   constructor(frame: EntityFrame, entity: T, operationInfo: OperationInfo) {
     this.frame = frame;
     this.entity = entity;
     this.operationInfo = operationInfo;
+  }
+
+  complete() {
+    var s = this.settings;
+    this.color = s && s.color || Defaults.getColor(this.operationInfo);
+    this.group = s && s.group && s.group !== undefined ? (s.group || undefined) : Defaults.getGroup(this.operationInfo);
+    this.keyboardShortcut = s && s.keyboardShortcut !== undefined ? (s.keyboardShortcut || undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
+    this.alternatives = s && s.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
+
   }
 
   defaultClick(...args: any[]) {
@@ -253,6 +268,30 @@ export class EntityOperationContext<T extends Entity> {
   textOrNiceName() {
     return this.settings && this.settings.text && this.settings.text() || this.operationInfo.niceName
   }
+
+  onKeyDown(e: KeyboardEvent): boolean {
+    if (this.keyboardShortcut) {
+      if (isShortcut(e, this.keyboardShortcut)) {
+        this.click();
+        return true;
+      }
+    }
+
+    if (this.alternatives != null) {
+
+      for (var i = 0; i < this.alternatives.length; i++) {
+        const a = this.alternatives[i];
+        if (a.isVisible != false && a.keyboardShortcut) {
+          if (isShortcut(e, a.keyboardShortcut)) {
+            a.onClick(this);
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 }
 
 export interface AlternativeOperationSetting<T extends Entity> {
@@ -266,7 +305,7 @@ export interface AlternativeOperationSetting<T extends Entity> {
   isVisible?: boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick: (eoc: EntityOperationContext<T>) => void;
-  keyboardhortcut?: KeyboardShortcut;
+  keyboardShortcut?: KeyboardShortcut;
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
@@ -286,7 +325,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   iconAlign?: "start" | "end";
   iconColor?: string;
   alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
-  keyboardhortcut?: KeyboardShortcut;
+  keyboardShortcut?: KeyboardShortcut | null;
 
   constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
     super(operationSymbol)
@@ -314,15 +353,45 @@ export interface EntityOperationOptions<T extends Entity> {
   icon?: IconProp;
   iconAlign?: "start" | "end";
   iconColor?: string;
-  keyboardShortcut?: KeyboardShortcut;
+  keyboardShortcut?: KeyboardShortcut | null;
   alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
 }
 
 export interface KeyboardShortcut{
-  ctrl?: boolean;
-  alt?: boolean;
-  shift?: boolean;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
   key?: string;
+  keyCode?: number; //lowercase
+}
+
+export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
+
+  function toLower(a: string | undefined) {
+    return a && a.toLowerCase();
+  }
+
+  return (toLower(e.key) == toLower(ks.key) || e.keyCode == ks.keyCode) &&
+    e.ctrlKey == (ks.ctrlKey || false) &&
+    e.altKey == (ks.altKey || false) &&
+    e.shiftKey == (ks.shiftKey || false);
+}
+
+
+
+export function getShortcutToString(ks: KeyboardShortcut) {
+  
+  function getKeyName(keyCode: number) {
+
+    var pair = Dic.map(KeyCodes as any, (key: string, value: number) => ({ key, value })).singleOrNull(a => a.value == ks.keyCode);
+    return pair ? pair.key.firstUpper() : "(KeyCode=" + keyCode + ")";
+  }
+
+  return (ks.ctrlKey ? "Ctrl+" : "") +
+    (ks.altKey ? "Alt+" : "") +
+    (ks.shiftKey ? "Shift+" : "") +
+    (ks.key ? ks.key.firstUpper() : getKeyName(ks.keyCode!));
+
 }
 
 export const CreateGroup: EntityOperationGroup = {
@@ -346,25 +415,48 @@ export interface EntityOperationGroup {
 }
 
 
-export function setIsSaveFunction(isSaveFunction: (oi: OperationInfo) => boolean) {
-  isSave = isSaveFunction;
-}
 
-export let isSave = (oi: OperationInfo): boolean => {
-  return oi.key.endsWith(".Save");
-}
 
-export function autoColorFunction(oi: OperationInfo): BsColor {
-  return oi.operationType == OperationType.Delete ? "danger" :
-    oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
-}
 
+export namespace Defaults {
+
+  export function isSave(oi: OperationInfo): boolean {
+    return oi.key.endsWith(".Save");
+  }
+
+  export function getColor(oi: OperationInfo): BsColor {
+    return oi.operationType == OperationType.Delete ? "danger" :
+      oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
+  }
+
+  export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {
+    return oi.operationType == OperationType.ConstructorFrom ?CreateGroup: undefined;
+  }
+
+  export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
+    return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
+      oi.operationType == OperationType.Execute && isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
+  }
+
+  export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
+    if (isSave(eoc.operationInfo)) {
+      return [
+        andClose(eoc),
+        andNew(eoc)
+      ]
+    }
+
+    return undefined;
+  }
+}
 
 export function isEntityOperation(operationType: OperationType) {
   return operationType == OperationType.ConstructorFrom ||
     operationType == OperationType.Execute ||
     operationType == OperationType.Delete;
 }
+
+
 
 export namespace API {
 

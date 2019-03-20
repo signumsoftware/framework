@@ -92,7 +92,6 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
       .then(entity => entity &&
         this.convert(entity)
           .then(entity => {
-            this.focusNext = true;
             this.state.autocomplete!.getItemFromEntity(entity).then(newItem => //newItem could be different to item on create new case
               this.setState({ currentItem: { entity: entity, item: newItem } }));
             
@@ -104,8 +103,14 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
   }
 
   setValue(val: any) {
+    if (val != null)
+      this.focusNext = true;
+
     super.setValue(val);
     this.refreshItem(this.props);
+
+    if (val == null)
+      this.writeInTypeahead("");
   }
 
   renderInternal() {

@@ -5,6 +5,7 @@ import { PropertyRoute, getTypeInfo, ReadonlyBinding } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
 import { ViewPromise } from "../Navigator";
 import { ErrorBoundary } from '../Components';
+import { FunctionalAdapter } from '../Frames/FrameModal';
 
 export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -169,11 +170,10 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     return (
       <div data-property-path={ctx.propertyPath}>
         <ErrorBoundary>
-          {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+          {FunctionalAdapter.withRef(getComponent(newCtx), c => this.setComponent(c))}
         </ErrorBoundary>
       </div>
     );
   }
-
 }
 

@@ -7,7 +7,8 @@ import { EntityBase } from './Lines/EntityBase';
 import { Type } from './Reflection';
 
 export function useForceUpdate(): () => void {
-  return React.useState()[1] as () => void;
+  var [count, setCount] = React.useState(0);
+  return () => setCount(count + 1);
 }
 
 export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>): T {
