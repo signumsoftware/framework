@@ -12,6 +12,7 @@ import {
 } from '../Operations'
 import { DropdownItem } from "../Components/DropdownItem";
 import { UncontrolledTooltip } from "../Components/Tooltip";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -195,7 +196,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         simplifyName(coc.operationInfo.niceName);
 
     const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
-    const icon = coc.settings && coc.settings.icon || coc.entityOperationSettings && coc.entityOperationSettings.icon;
+    const icon = coallesceIcon(coc.settings && coc.settings.icon, coc.entityOperationSettings && coc.entityOperationSettings.icon);
     const iconColor = coc.settings && coc.settings.iconColor || coc.entityOperationSettings && coc.entityOperationSettings.iconColor;
 
     const disabled = !!coc.canExecute;
@@ -215,7 +216,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         data-operation={coc.operationInfo.key}>
         {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon || color) && " "}
+        {(icon  != null || color != null) && " "}
         {text}
       </DropdownItem>,
       coc.canExecute ? <UncontrolledTooltip placement="right" target={() => innerRef!}>{coc.canExecute}</UncontrolledTooltip> : undefined
@@ -273,5 +274,15 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
     }
   }).done();
 
+
+
+}
+
+
+export function coallesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
+  if (icon != null)
+    return icon;
+
+  return icon2;
 }
 
