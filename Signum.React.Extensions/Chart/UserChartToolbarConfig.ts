@@ -4,6 +4,7 @@ import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'
 import { UserChartEntity } from './Signum.Entities.Chart'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
+import { coallesceIcon } from '@framework/Operations/ContextualOperations';
 
 export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
   constructor() {
@@ -12,7 +13,7 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
   }
 
   getIcon(element: ToolbarResponse<UserChartEntity>) {
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : "chart-bar", element.iconColor || "darkviolet");
+    return ToolbarConfig.coloredIcon(coallesceIcon(parseIcon(element.iconName), "chart-bar"), element.iconColor || "darkviolet");
   }
 
   navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {

@@ -314,11 +314,11 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
           getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
             niceName;
 
-    const icon = !allowed ? null :
-      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? null :
+    const icon: IconProp | undefined = !allowed ? undefined :
+      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? undefined :
         getDB(allowed) == basicAllowed ? "database" :
           getUI(allowed) == basicAllowed ? "window-restore" :
-            null;
+            undefined;
 
     return <ColorRadio
       checked={isActive(allowed, basicAllowed)}

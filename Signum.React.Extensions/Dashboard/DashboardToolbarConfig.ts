@@ -2,6 +2,7 @@ import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
 import { parseIcon } from './Admin/Dashboard';
+import { coallesceIcon } from '@framework/Operations/ContextualOperations';
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
 
@@ -11,7 +12,7 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
   }
 
   getIcon(element: ToolbarResponse<DashboardEntity>) {
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : "th-large", element.iconColor || "darkslateblue");
+    return ToolbarConfig.coloredIcon(coallesceIcon(parseIcon(element.iconName), "th-large"), element.iconColor || "darkslateblue");
   }
 
   navigateTo(element: ToolbarResponse<DashboardEntity>): Promise<string> {

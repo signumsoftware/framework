@@ -11,6 +11,7 @@ import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '@
 import { NavLink } from '@framework/Components/NavItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
+import { coallesceIcon } from '@framework/Operations/ContextualOperations';
 
 export interface ToolbarRendererProps {
   location?: ToolbarLocation;
@@ -121,7 +122,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
           return (
             <NavItem>
               <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
-                {ToolbarConfig.coloredIcon(res.iconName ? parseIcon(res.iconName) : undefined, res.iconColor)}{res.label}
+                {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </NavLink>
             </NavItem>
           );
@@ -201,7 +202,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         if (res.url) {
           return [
             <DropdownItem header={isHeader} onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} className={menuItemN}>
-              {ToolbarConfig.coloredIcon(res.iconName ? parseIcon(res.iconName) : undefined, res.iconColor)}{res.label}
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </DropdownItem>
           ];
         }

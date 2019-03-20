@@ -8,6 +8,7 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entit
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { parseIcon } from '../Admin/Dashboard';
+import { coallesceIcon } from '@framework/Operations/ContextualOperations';
 
 export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
   render() {
@@ -217,7 +218,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
 
     const titleText = p.title || getToString(content);
     const defaultIcon = renderer.defaultIcon(content);
-    const icon = p.iconName ? parseIcon(p.iconName) : defaultIcon && defaultIcon.icon;
+    const icon = coallesceIcon(parseIcon(p.iconName), defaultIcon && defaultIcon.icon);
     const color = p.iconColor || defaultIcon && defaultIcon.iconColor;
 
     const title = !icon ? titleText :

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { FindOptions, ValueSearchControl } from '@framework/Search'
@@ -7,6 +7,7 @@ import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
+import { coallesceIcon } from '@framework/Operations/ContextualOperations';
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {
@@ -20,7 +21,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     if (element.iconName == "count")
       return <CountUserQueryIcon ref={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : ["far", "list-alt"], element.iconColor || "dodgerblue");
+    return ToolbarConfig.coloredIcon(coallesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor || "dodgerblue");
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {

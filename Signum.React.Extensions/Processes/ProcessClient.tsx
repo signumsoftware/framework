@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '@framework/Globals';
@@ -109,7 +109,7 @@ function monkeyPatchCreateContextualMenuItem() {
         data-operation={coc.operationInfo.key}>
         {icon ? <FontAwesomeIcon icon={icon} className="icon" color={coc.settings && coc.settings.iconColor} /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon || color) && " "}
+        {(icon != null || color != null) && " "}
         {text}
         <span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog" /></span>
 
