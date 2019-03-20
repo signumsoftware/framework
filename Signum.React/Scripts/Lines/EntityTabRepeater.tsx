@@ -15,7 +15,7 @@ export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createMessage?: string;
   avoidFieldSet?: boolean;
   selectedIndex?: number;
-  getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
+  getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   extraTabs?: (c: EntityTabRepeater) => React.ReactNode;
   onSelectTab?: (newIndex: number) => void;
 }
