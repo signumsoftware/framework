@@ -23,7 +23,7 @@ export interface EntityBaseProps extends LineBaseProps {
   remove?: boolean | ((item: any /*T*/) => boolean);
 
   onView?: (entity: any /*T*/, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
-  onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
+  onCreate?: (pr: PropertyRoute) => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
@@ -198,10 +198,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       .then(ti => ti ? ti.name : undefined);
   }
 
-  defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
+  defaultCreate(pr: PropertyRoute): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
     return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.getViewPromise, false))
-      .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
+      .then(typeName => typeName ? Constructor.construct(typeName, pr) : undefined)
       .then(pack => {
         if (!pack)
           return Promise.resolve(undefined);
@@ -220,8 +220,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     event.preventDefault();
 
+    var pr = this.state.ctx.propertyRoute;
     const promise = this.props.onCreate ?
-      this.props.onCreate() : this.defaultCreate();
+      this.props.onCreate(pr) : this.defaultCreate(pr);
 
     if (!promise)
       return;

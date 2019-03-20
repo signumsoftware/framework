@@ -1,7 +1,7 @@
 import * as moment from 'moment';
 import * as numbro from 'numbro';
 import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, newMListElement } from './Signum.Entities'; //ONLY TYPES!
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
@@ -817,10 +817,11 @@ export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRou
 
 function copyProperties(result: any, original: any, pr: PropertyRoute){
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
+    .filter(p => p.key != "Id")
     .forEach(t => {
       var memberName = t.key.firstLower();
       var orinalProp = (original as any)[memberName];
-      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", memberName));
+      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", t.key));
       (result as any)[memberName] = clonedProp;
     });
 }
@@ -829,7 +830,7 @@ function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MLis
 
   var elemPr = PropertyRoute.mlistItem(propertyRoute);
 
-  return mlist.map(mle => newMListElement(cloneIfNeeded(mle.element, elemPr) as T));
+  return mlist.map(mle => ({ rowId: null, element: cloneIfNeeded(mle.element, elemPr) as T }));
 }
 
 function cloneIfNeeded(original: any, pr: PropertyRoute) {
