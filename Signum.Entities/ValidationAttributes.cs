@@ -1058,6 +1058,8 @@ namespace Signum.Entities
         _0HasSomeRepeatedElements1,
         [Description("{0} should be {1} {2}")]
         _0ShouldBe12,
+        [Description("{0} should be {1} instead of {2}")]
+        _0ShouldBe1InsteadOf2,
         [Description("{0} has to be between {1} and {2}")]
         _0HasToBeBetween1And2,
         [Description("{0} has to be lowercase")]
