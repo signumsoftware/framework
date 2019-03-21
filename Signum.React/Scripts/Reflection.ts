@@ -1,7 +1,7 @@
 import * as moment from 'moment';
 import * as numbro from 'numbro';
 import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES!
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
@@ -726,15 +726,17 @@ export interface LambdaMember {
 
 export type MemberType = "Member" | "Mixin" | "Indexer";
 
-export function New(type: PseudoType, props?: any): ModifiableEntity {
+export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute): ModifiableEntity {
 
   const ti = getTypeInfo(type);
 
   const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
-
+  
   if (ti) {
 
     var e = result as Entity;
+
+    var pr = PropertyRoute.root(ti);
 
     const mixins = Dic.getKeys(ti.members)
       .filter(a => a.startsWith("["))
@@ -743,17 +745,22 @@ export function New(type: PseudoType, props?: any): ModifiableEntity {
 
         var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
 
+        initializeCollections(m, pr.addMember("Mixin", gr.key));
+
         if (!e.mixins)
           e.mixins = {};
 
         e.mixins[gr.key] = m;
       });
 
-    Dic.getValues(ti.members)
-      .filter(a => a.type.isCollection && !a.name.contains("."))
-      .forEach(m => (result as any)[m.name.firstLower()] = []);
+    initializeCollections(e, pr);
+  }
+  else {
+    if (!propertyRoute) {
+      throw new Error("propertyRoute is mandatory for non-Entities");
+    }
 
-    //TODO: Collections in Embeddeds...
+    initializeCollections(result, propertyRoute);
   }
 
   if (props)
@@ -761,6 +768,89 @@ export function New(type: PseudoType, props?: any): ModifiableEntity {
 
   return result;
 }
+
+function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
+  Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
+    .filter(t => t.memberInfo.type.isCollection)
+    .forEach(t => (m as any)[t.key.firstLower()] = []);
+}
+
+
+export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute) {
+  const ti = getTypeInfo(original.Type);
+
+  const result = { Type: original.Type, isNew: true, modified: true } as any as ModifiableEntity;
+
+  if (ti) {
+
+    var e = result as Entity;
+
+    var pr = PropertyRoute.root(ti);
+
+    const mixins = Dic.getKeys(ti.members)
+      .filter(a => a.startsWith("["))
+      .groupBy(a => a.after("[").before("]"))
+      .forEach(gr => {
+        
+        var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
+
+        copyProperties(m, (original as Entity).mixins![gr.key], pr.addMember("Mixin", gr.key));
+        
+        if (!e.mixins)
+          e.mixins = {};
+
+        e.mixins[gr.key] = m;
+      });
+
+    copyProperties(e, original, pr);
+  }
+  else {
+    if (!propertyRoute) {
+      throw new Error("propertyRoute is mandatory for non-Entities");
+    }
+
+    copyProperties(result, original, propertyRoute);
+  }
+  
+  return result;
+}
+
+function copyProperties(result: any, original: any, pr: PropertyRoute){
+  Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
+    .filter(p => p.key != "Id")
+    .forEach(t => {
+      var memberName = t.key.firstLower();
+      var orinalProp = (original as any)[memberName];
+      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", t.key));
+      (result as any)[memberName] = clonedProp;
+    });
+}
+
+function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MList<T> {
+
+  var elemPr = PropertyRoute.mlistItem(propertyRoute);
+
+  return mlist.map(mle => ({ rowId: null, element: cloneIfNeeded(mle.element, elemPr) as T }));
+}
+
+function cloneIfNeeded(original: any, pr: PropertyRoute) {
+  
+  var tr = pr.typeReference();
+  if (tr.isCollection)
+    return cloneCollection(original, pr);
+
+  if (original == null)
+    return null;
+
+  if (tr.isEmbedded)
+    return clone(original, pr);
+
+  if (tr.name == IsByAll || getTypeInfos(tr.name).length > 0)
+    return JSON.parse(JSON.stringify(original));
+
+  return original; //string, number, boolean, etc...
+}
+
 
 export interface IType {
   typeName: string;
@@ -781,8 +871,15 @@ export function newLite(type: PseudoType, id: number | string | undefined): Lite
 
 export class Type<T extends ModifiableEntity> implements IType {
 
-  New(props?: Partial<T>): T {
-    return New(this.typeName, props) as T;
+  New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
+
+    if (props && props.Type) {
+      if (props.Type != this.typeName)
+        throw new Error("Cloning with another type");
+      return clone(props as ModifiableEntity, propertyRoute) as T;
+    }
+
+    return New(this.typeName, props, propertyRoute) as T;
   }
 
 

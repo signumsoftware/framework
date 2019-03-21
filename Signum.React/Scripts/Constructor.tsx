@@ -4,12 +4,13 @@ import { Type, getTypeInfo, OperationType, New, OperationInfo } from './Reflecti
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
+import { PropertyRoute } from './Lines';
 
 export const customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
-export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T> | undefined>;
-export function construct(type: string): Promise<EntityPack<ModifiableEntity> | undefined>;
-export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity> | undefined> {
+export function construct<T extends ModifiableEntity>(type: Type<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
+export function construct(type: string, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
+export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
 
   const typeName = (type as Type<any>).typeName || type as string;
 
@@ -60,7 +61,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
     }
   }
 
-  const result = New(typeName);
+  const result = New(typeName, undefined, pr);
 
   assertCorrect(result);
 

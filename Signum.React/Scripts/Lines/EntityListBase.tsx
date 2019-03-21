@@ -83,9 +83,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     event.preventDefault();
     event.stopPropagation();
+    var pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
 
-    const promise = this.props.onCreate ?
-      this.props.onCreate() : this.defaultCreate();
+    const promise = this.props.onCreate ? this.props.onCreate(pr) : this.defaultCreate(pr);
 
     if (promise == null)
       return;
