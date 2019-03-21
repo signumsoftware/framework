@@ -198,7 +198,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }, continuation);
   }
 
-  abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
+  abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
 
   doSearch(dataChanged?: boolean): Promise<void> {
 
