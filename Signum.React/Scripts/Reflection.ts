@@ -756,15 +756,19 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
     initializeCollections(e, pr);
   }
   else {
-    if (!propertyRoute) {
-      throw new Error("propertyRoute is mandatory for non-Entities");
+    if (propertyRoute) {
+      initializeCollections(result, propertyRoute);
+    } else {
+      //Collections not initialized, but since Embedded typically don't have then, it's not worth the hassle 
     }
-
-    initializeCollections(result, propertyRoute);
   }
 
-  if (props)
+  if (props) {
     Dic.assign(result, props);
+    result.Type = getTypeName(type);
+    result.modified = true;
+    result.isNew = true;
+  }
 
   return result;
 }
@@ -873,7 +877,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
 
-    if (props && props.Type) {
+    if (props && props.Type && (propertyRoute|| getTypeInfo(props.Type))) {
       if (props.Type != this.typeName)
         throw new Error("Cloning with another type");
       return clone(props as ModifiableEntity, propertyRoute) as T;
@@ -1202,10 +1206,6 @@ export class PropertyRoute {
       throw Error(`No TypeInfo for "${getTypeName(type)}" found. Consider calling ReflectionServer.RegisterLike on the server side.`);
     }
     return new PropertyRoute(undefined, "Root", typeInfo, undefined, undefined);
-  }
-
-  static lambda<T extends Entity>(type: Type<T>, lambda: (t: T) => any) {
-    return PropertyRoute.root(type).addLambda(lambda);
   }
 
   static member(parent: PropertyRoute, member: MemberInfo) {
