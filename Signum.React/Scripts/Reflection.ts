@@ -1204,6 +1204,10 @@ export class PropertyRoute {
     return new PropertyRoute(undefined, "Root", typeInfo, undefined, undefined);
   }
 
+  static lambda<T extends Entity>(type: Type<T>, lambda: (t: T) => any) {
+    return PropertyRoute.root(type).addLambda(lambda);
+  }
+
   static member(parent: PropertyRoute, member: MemberInfo) {
     return new PropertyRoute(parent, "Field", undefined, member, undefined);
   }
