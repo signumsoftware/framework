@@ -52,7 +52,7 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null): T |
 
   const forceUpdate = useForceUpdate();
   React.useEffect(() => {
-    if (lite != null && lite.entity != null)
+    if (lite && !lite.entity)
       Navigator.API.fetchAndRemember(lite)
         .then(() => forceUpdate())
         .done();
