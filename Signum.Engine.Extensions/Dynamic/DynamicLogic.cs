@@ -42,6 +42,8 @@ namespace Signum.Engine.Dynamic
 
         public static FileInfo GetLastCodeGenAssemblyFileInfo()
         {
+            Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+
             return new DirectoryInfo(DynamicCode.CodeGenDirectory)
                 .GetFiles($"{DynamicCode.CodeGenAssembly.Before(".")}*.dll")
                 .OrderByDescending(f => f.CreationTime)
@@ -50,6 +52,8 @@ namespace Signum.Engine.Dynamic
 
         public static FileInfo GetLastCodeGenControllerAssemblyFileInfo()
         {
+            Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+
             return new DirectoryInfo(DynamicCode.CodeGenDirectory)
                 .GetFiles($"{DynamicCode.CodeGenControllerAssembly.Before(".")}*.dll")
                 .OrderByDescending(f => f.CreationTime)
