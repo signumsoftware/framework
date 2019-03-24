@@ -196,7 +196,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         simplifyName(coc.operationInfo.niceName);
 
     const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Defaults.getColor(coc.operationInfo);
-    const icon = coallesceIcon(coc.settings && coc.settings.icon, coc.entityOperationSettings && coc.entityOperationSettings.icon);
+    const icon = coalesceIcon(coc.settings && coc.settings.icon, coc.entityOperationSettings && coc.entityOperationSettings.icon);
     const iconColor = coc.settings && coc.settings.iconColor || coc.entityOperationSettings && coc.entityOperationSettings.iconColor;
 
     const disabled = !!coc.canExecute;
@@ -279,7 +279,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
 }
 
 
-export function coallesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
+export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
   if (icon != null)
     return icon;
 

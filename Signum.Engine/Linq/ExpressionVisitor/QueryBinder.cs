@@ -3389,7 +3389,7 @@ namespace Signum.Engine.Linq
         {
             if (colExpression is EntityExpression)
                 return Combiner<EntityExpression>(left, right, (col, l, r) =>
-                    new EntityExpression(col.Type, new PrimaryKeyExpression(CoallesceFlexible(
+                    new EntityExpression(col.Type, new PrimaryKeyExpression(CoalesceFlexible(
                         l.ExternalId.Value.Nullify(),
                         r.ExternalId.Value.Nullify())), null, null, null, null, null, false));
 
@@ -3398,7 +3398,7 @@ namespace Signum.Engine.Linq
                     new ImplementedByExpression(col.Type,
                         col.Strategy,
                         col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(col.Type,
-                            new PrimaryKeyExpression(CoallesceFlexible(
+                            new PrimaryKeyExpression(CoalesceFlexible(
                             l.Implementations[a.Key].ExternalId.Value.Nullify(),
                             r.Implementations[a.Key].ExternalId.Value.Nullify())), null, null, null, null, null, false))));
 
@@ -3406,7 +3406,7 @@ namespace Signum.Engine.Linq
                 return Combiner<ImplementedByAllExpression>(left, right, (col, l, r) =>
                     new ImplementedByAllExpression(col.Type,
                         Expression.Coalesce(l.Id, r.Id),
-                        new TypeImplementedByAllExpression(new PrimaryKeyExpression(CoallesceFlexible(
+                        new TypeImplementedByAllExpression(new PrimaryKeyExpression(CoalesceFlexible(
                             l.TypeId.TypeColumn.Value.Nullify(),
                             r.TypeId.TypeColumn.Value.Nullify()))), null));
 
@@ -3424,7 +3424,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        private BinaryExpression CoallesceFlexible(Expression left, Expression right)
+        private BinaryExpression CoalesceFlexible(Expression left, Expression right)
         {
             if (left.Type.UnNullify() == right.Type.UnNullify())
             {

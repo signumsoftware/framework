@@ -386,7 +386,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [Fact]
-        public void UpdateIbaCoallesce()
+        public void UpdateIbaCoalesce()
         {
             using (Transaction tr = new Transaction())
             {
@@ -401,7 +401,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
 
         [Fact]
-        public void UpdateIbaLiteCoallesce()
+        public void UpdateIbaLiteCoalesce()
         {
             using (Transaction tr = new Transaction())
             {
