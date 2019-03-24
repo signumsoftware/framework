@@ -13,6 +13,8 @@ import { classes } from '../Globals';
 export interface EntityComboProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   data?: Lite<Entity>[];
+  labelTextWithData?: (data: Lite<Entity>[] | undefined | null) => React.ReactChild;
+  refreshKey?: string;
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
@@ -24,6 +26,8 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     state.viewOnCreate = true;
     state.find = false;
   }
+
+  entityComboSelect?: EntityComboSelect | null;
 
   renderInternal() {
     const s = this.state;
@@ -41,17 +45,23 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     );
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText}
+      <FormGroup ctx={s.ctx}
+        labelText={s.labelTextWithData == null ? s.labelText : s.labelTextWithData(this.props.data || this.entityComboSelect && this.entityComboSelect.state.data)}
+        helpText={s.helpText}
         htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
         labelHtmlAttributes={s.labelHtmlAttributes} >
         <div className="SF-entity-combo">
           <div className={EntityBase.hasChildrens(buttons) ? s.ctx.inputGroupClass : undefined}>
-            <EntityComboSelect ctx={s.ctx}
+            <EntityComboSelect
+              ref={ecs => this.entityComboSelect = ecs}
+              ctx={s.ctx}
               onChange={this.handleOnChange}
               type={s.type!}
               data={s.data}
               findOptions={s.findOptions}
+              onDataLoaded={s.labelTextWithData == null ? undefined : () => this.forceUpdate()}
               mandatoryClass={this.mandatoryClass}
+              refreshKey={s.refreshKey}
             />
             {EntityBase.hasChildrens(buttons) ? buttons : undefined}
           </div>
@@ -60,8 +70,23 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     );
   }
 
-  handleOnChange = (lite: Lite<Entity> | null) => {
+  doView(entity: ModifiableEntity | Lite<Entity>) {
+    var promise = super.doView(entity);
 
+    if (this.props.refreshKey == null) {
+      if (promise == null)
+        this.setState({ refreshKey: new Date().getTime().toString() });
+      else
+        promise = promise.then(a => {
+          this.setState({ refreshKey: new Date().getTime().toString() });
+          return a;
+        });
+    }
+
+    return promise;
+  }
+
+  handleOnChange = (lite: Lite<Entity> | null) => {
     if (lite == null)
       this.setValue(lite);
     else
@@ -78,7 +103,8 @@ export interface EntityComboSelectProps {
   findOptions?: FindOptions;
   data?: Lite<Entity>[];
   mandatoryClass: string | null; 
-
+  onDataLoaded?: (data: Lite<Entity>[] | undefined) => void;
+  refreshKey?: string;
 }
 
 //Extracted to another component
@@ -102,7 +128,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
       this.setState({ data: newProps.data });
     } else {
       if (EntityComboSelect.getFindOptions(newProps.findOptions) != EntityComboSelect.getFindOptions(this.props.findOptions) ||
-        newProps.type.name != this.props.type.name)
+        newProps.type.name != this.props.type.name ||
+        newProps.refreshKey != this.props.refreshKey)
         this.reloadData(newProps);
     }
   }
@@ -183,13 +210,19 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
       Finder.expandParentColumn(fo);
       var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
       Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
-        .then(data => this.setState({ data: fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr) } as any))
+        .then(data => this.setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
         .done();
     }
     else
       Finder.API.fetchAllLites({ types: this.props.type!.name })
-        .then(data => this.setState({ data: data.orderBy(a => a) } as any))
+        .then(data => this.setData(data.orderBy(a => a)))
         .done();
+  }
+
+  setData(data: Lite<Entity>[]) {
+    this.setState({ data: data });
+    if (this.props.onDataLoaded)
+      this.props.onDataLoaded(data);
   }
 }
 

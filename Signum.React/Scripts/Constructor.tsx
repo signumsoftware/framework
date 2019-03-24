@@ -1,21 +1,26 @@
-﻿import { Dic } from './Globals';
+import { Dic } from './Globals';
 import { Entity, ModifiableEntity, SelectorMessage, EntityPack } from './Signum.Entities';
-import { Type, getTypeInfo, OperationType, New, OperationInfo } from './Reflection';
+import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 
-export const customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
+export const customConstructors: { [typeName: string]: (pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
-export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T> | undefined>;
-export function construct(type: string): Promise<EntityPack<ModifiableEntity> | undefined>;
-export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity> | undefined> {
+export function construct<T extends ModifiableEntity>(type: Type<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
+export function construct(type: string, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
+export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
 
   const typeName = (type as Type<any>).typeName || type as string;
 
+  const ti = getTypeInfo(typeName);
+  if (ti)
+    pr = PropertyRoute.root(ti);
+ 
+  
   const c = customConstructors[typeName];
   if (c)
-    return asPromise(c(typeName)).then<EntityPack<ModifiableEntity> | undefined>(e => {
+    return asPromise(c(pr)).then<EntityPack<ModifiableEntity> | undefined>(e => {
       if (e == undefined)
         return undefined;
 
@@ -23,7 +28,6 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
       return Navigator.toEntityPack(e);
     });
 
-  const ti = getTypeInfo(typeName);
 
   if (ti) {
 
@@ -60,7 +64,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
     }
   }
 
-  const result = New(typeName);
+  const result = New(typeName, undefined, pr);
 
   assertCorrect(result);
 
@@ -84,6 +88,6 @@ function assertCorrect(m: ModifiableEntity) {
     throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (typeName: string) => T | Promise<T | undefined>) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (pr?: PropertyRoute) => T | Promise<T | undefined>) {
   customConstructors[type.typeName] = constructor;
 }

@@ -487,6 +487,7 @@ export module ValidationMessage {
   export const _0HasMoreThan1DecimalPlaces = new MessageKey("ValidationMessage", "_0HasMoreThan1DecimalPlaces");
   export const _0HasSomeRepeatedElements1 = new MessageKey("ValidationMessage", "_0HasSomeRepeatedElements1");
   export const _0ShouldBe12 = new MessageKey("ValidationMessage", "_0ShouldBe12");
+  export const _0ShouldBe1InsteadOf2 = new MessageKey("ValidationMessage", "_0ShouldBe1InsteadOf2");
   export const _0HasToBeBetween1And2 = new MessageKey("ValidationMessage", "_0HasToBeBetween1And2");
   export const _0HasToBeLowercase = new MessageKey("ValidationMessage", "_0HasToBeLowercase");
   export const _0HasToBeUppercase = new MessageKey("ValidationMessage", "_0HasToBeUppercase");
@@ -550,6 +551,7 @@ export module ValidationMessage {
   export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
   export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
+  export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
 }
 
 export module VoidEnumMessage {

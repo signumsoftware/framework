@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
@@ -51,11 +51,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
       <div className="modal-body">
         <div>
-          {this.props.message &&
-            <p>
-              {this.props.message}
-            </p>
-          }
+          {this.props.message && (typeof this.props.message == "string" ? <p>{this.props.message}</p> : this.props.message)}
           {this.props.options.map((o, i) =>
             <button key={i} type="button" onClick={() => this.handleButtonClicked(o.value)} name={o.value}
               className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>

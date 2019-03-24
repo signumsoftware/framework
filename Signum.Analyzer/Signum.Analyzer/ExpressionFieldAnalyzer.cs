@@ -77,7 +77,11 @@ namespace Signum.Analyzer
                         return;
                     }
 
-                    var type = context.SemanticModel.GetDeclaredSymbol(member.FirstAncestorOrSelf<TypeDeclarationSyntax>());
+                    var typeSyntax = member.FirstAncestorOrSelf<TypeDeclarationSyntax>();
+                    if (typeSyntax == null)
+                        return;
+
+                    var type = context.SemanticModel.GetDeclaredSymbol(typeSyntax);
                     var fieldSymbol = type.GetMembers().OfType<IFieldSymbol>().SingleOrDefault(a => a.Name == fieldName);
 
                     if (fieldSymbol == null)

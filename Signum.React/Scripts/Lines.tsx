@@ -2,9 +2,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRen
 export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons };
 
 import { PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
-export { Binding, ReadonlyBinding }
-
-export { PropertyRoute };
+export { Binding, ReadonlyBinding, PropertyRoute };
 
 import { LineBase, LineBaseProps, tasks, ChangeEvent } from './Lines/LineBase'
 export { LineBase, LineBaseProps, tasks, ChangeEvent }
