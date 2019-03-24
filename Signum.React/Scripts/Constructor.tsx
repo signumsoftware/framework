@@ -5,7 +5,7 @@ import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 
-export const customConstructors: { [typeName: string]: (pr: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
+export const customConstructors: { [typeName: string]: (pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
 export function construct<T extends ModifiableEntity>(type: Type<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
 export function construct(type: string, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
@@ -16,8 +16,7 @@ export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise
   const ti = getTypeInfo(typeName);
   if (ti)
     pr = PropertyRoute.root(ti);
-  if (pr == null)
-    throw new Error("PropertyRoute is mandatory for non-Entities");
+ 
   
   const c = customConstructors[typeName];
   if (c)
@@ -89,6 +88,6 @@ function assertCorrect(m: ModifiableEntity) {
     throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (pr: PropertyRoute) => T | Promise<T | undefined>) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (pr?: PropertyRoute) => T | Promise<T | undefined>) {
   customConstructors[type.typeName] = constructor;
 }
