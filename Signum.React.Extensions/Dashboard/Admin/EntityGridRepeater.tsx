@@ -151,10 +151,12 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
+    
     event.preventDefault();
 
+    const pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
     const promise = this.props.onCreate ?
-      this.props.onCreate() : this.defaultCreate();
+      this.props.onCreate(pr) : this.defaultCreate(pr);
 
     if (!promise)
       return;
