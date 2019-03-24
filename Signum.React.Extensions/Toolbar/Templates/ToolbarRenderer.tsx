@@ -11,7 +11,7 @@ import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '@
 import { NavLink } from '@framework/Components/NavItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
-import { coallesceIcon } from '@framework/Operations/ContextualOperations';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 
 export interface ToolbarRendererProps {
   location?: ToolbarLocation;

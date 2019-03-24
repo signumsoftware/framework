@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import "./AuthAdmin.css"
-import { coallesceIcon } from '@framework/Operations/ContextualOperations';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 
 interface ColorRadioProps {
   checked: boolean;
@@ -17,7 +17,7 @@ export function ColorRadio(p : ColorRadioProps){
     <a onClick={e => { e.preventDefault(); p.onClicked(e); }} title={p.title}
       className="sf-auth-chooser"
       style={{ color: p.checked ? p.color : "#aaa" }}>
-      <FontAwesomeIcon icon={coallesceIcon(p.icon, ["far", (p.checked ? "dot-circle" : "circle")])!} />
+      <FontAwesomeIcon icon={coalesceIcon(p.icon, ["far", (p.checked ? "dot-circle" : "circle")])!} />
     </a>
   );
 }

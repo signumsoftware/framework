@@ -5,6 +5,7 @@ import { QueryEntity } from '@framework/Signum.Entities.Basics'
 import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { ValueSearchControl, FindOptions } from '@framework/Search';
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {
@@ -22,7 +23,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     if (element.iconName == "count")
       return <CountIcon ref={ci => this.countIcon = ci} findOptions={{ queryName: element.content!.toStr! }} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : ["far", "list-alt"], element.iconColor || "dodgerblue");
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName) , ["far", "list-alt"]), element.iconColor || "dodgerblue");
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
