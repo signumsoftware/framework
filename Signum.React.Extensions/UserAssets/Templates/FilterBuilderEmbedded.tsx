@@ -155,6 +155,13 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
         fo.filters.forEach(f => pushFilter(f, indent + 1));
       } else {
 
+        if (Array.isArray(fo.value) && fo.token) {
+          fo.value = fo.value.map(v => v == null || v == "" ? "" :
+            fo.token!.filterType == "Embedded" || fo.token!.filterType == "Lite" ? liteKey(v) :
+              toStringValue(v, fo.token!.filterType))
+            .join("|");
+        } 
+
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
           token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
           operation: fo.operation,
@@ -206,22 +213,22 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
       if (isList(f.operation!))
-        return <MultiLineOrExpression ctx={ctx} onRenderItem={ctx => this.handleCreateAppropiateControl(ctx, fc)} onChange={fc.handleValueChange} />;
+        return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => this.handleCreateAppropiateControl(ctx, fc, onChange)} onChange={fc.handleValueChange} />;
 
-      return this.handleCreateAppropiateControl(ctx, fc);
+      return this.handleCreateAppropiateControl(ctx, fc, () => { });
     }
   }
 
-  handleCreateAppropiateControl = (ctx: TypeContext<any>, fc: FilterConditionComponent): React.ReactElement<any> => {
+  handleCreateAppropiateControl = (ctx: TypeContext<any>, fc: FilterConditionComponent, onChange: () => void): React.ReactElement<any> => {
 
     const token = fc.props.filter.token!;
 
     switch (token.filterType) {
       case "Lite":
       case "Embedded":
-        return <EntityLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={token.filterType} type={token.type} />;
+        return <EntityLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} />;
       default:
-        return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={token.filterType} type={token.type} />
+        return <ValueLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} />
 
     }
   }
@@ -231,7 +238,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 interface MultiLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;
   onChange: () => void;
-  onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>
+  onRenderItem: (ctx: TypeContext<any>, onChange: () => void) => React.ReactElement<any>;
 }
 
 export class MultiLineOrExpression extends React.Component<MultiLineOrExpressionProps, { values: string[] }> {
@@ -257,7 +264,7 @@ export class MultiLineOrExpression extends React.Component<MultiLineOrExpression
         this.props.onChange();
     }
 
-    return <MultiValue values={this.state.values} onChange={handleChangeValue} readOnly={this.props.ctx.readOnly} onRenderItem={this.props.onRenderItem} />;
+    return <MultiValue values={this.state.values} onChange={handleChangeValue} readOnly={this.props.ctx.readOnly} onRenderItem={ctx => this.props.onRenderItem(ctx, handleChangeValue)} />;
   }
 }
 
