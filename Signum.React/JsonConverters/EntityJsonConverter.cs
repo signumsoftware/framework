@@ -341,13 +341,16 @@ namespace Signum.React.Json
                     {
                         if (!markedAsModified && parentRoute.RootType.IsEntity())
                         {
-                            try
+                            if (!pi.HasAttribute<IgnoreAttribute>())
                             {
-                                //Call attention of developer
-                                throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
-                            }
-                            catch (Exception)
-                            {
+                                try
+                                {
+                                    //Call attention of developer
+                                    throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
+                                }
+                                catch (Exception)
+                                {
+                                }
                             }
 
                         }
