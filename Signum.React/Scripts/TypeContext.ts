@@ -38,6 +38,7 @@ export class StyleContext {
       labelColumns: { sm: 2 },
       readOnly: false,
       placeholderLabels: false,
+      titleLabels: false,
       readonlyAsPlainText: false,
       frame: undefined,
     });
@@ -134,6 +135,10 @@ export class StyleContext {
     return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
   }
 
+  get titleLabels(): boolean {
+    return this.styleOptions.titleLabels != undefined ? this.styleOptions.titleLabels : this.parent.titleLabels;
+  }
+
   get readonlyAsPlainText(): boolean {
     return this.styleOptions.readonlyAsPlainText != undefined ? this.styleOptions.readonlyAsPlainText : this.parent.readonlyAsPlainText;
   }
@@ -203,6 +208,7 @@ export interface StyleOptions {
   formGroupStyle?: FormGroupStyle;
   formSize?: FormSize;
   placeholderLabels?: boolean;
+  titleLabels?: boolean;
   readonlyAsPlainText?: boolean;
   labelColumns?: BsColumns | number;
   valueColumns?: BsColumns | number;
