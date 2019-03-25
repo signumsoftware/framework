@@ -9,6 +9,8 @@ using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using OpenQA.Selenium;
+using System.Linq;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.React.Selenium
 {
