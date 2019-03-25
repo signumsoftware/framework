@@ -48,13 +48,16 @@ export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undef
 }
 
 
-export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null): T | null | undefined {
+export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
 
   const forceUpdate = useForceUpdate();
   React.useEffect(() => {
     if (lite && !lite.entity)
       Navigator.API.fetchAndRemember(lite)
-        .then(() => forceUpdate())
+        .then(() => {
+          onLoaded && onLoaded();
+          forceUpdate();
+        })
         .done();
   }, [lite && liteKey(lite)]);
 
