@@ -114,7 +114,7 @@ namespace Signum.Test
         }
 
         [Fact]
-        public void MetaCoallesce()
+        public void MetaCoalesce()
         {
             var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()

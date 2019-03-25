@@ -658,7 +658,7 @@ namespace Signum.Engine.Linq
                     }
                     else if (b.NodeType == ExpressionType.Coalesce)
                     {
-                        result = ConvertToSqlCoallesce(b);
+                        result = ConvertToSqlCoalesce(b);
                     }
 
                     return Add(result);
@@ -732,7 +732,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        private Expression ConvertToSqlCoallesce(BinaryExpression b)
+        private Expression ConvertToSqlCoalesce(BinaryExpression b)
         {
             Expression left = b.Left;
             Expression right = b.Right;

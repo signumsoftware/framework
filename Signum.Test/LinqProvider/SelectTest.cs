@@ -159,7 +159,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
-        public void SelectCoallesceMember()
+        public void SelectCoalesceMember()
         {
             var list = (from l in Database.Query<LabelEntity>()
                         select (l.Owner.Entity ?? l).Name).ToList();
@@ -167,7 +167,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
-        public void SelectCoallesceToLite()
+        public void SelectCoalesceToLite()
         {
             var list = (from l in Database.Query<LabelEntity>()
                         select (l.Owner.Entity ?? l).ToLite()).ToList();
@@ -175,7 +175,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
-        public void SelectCoallesceGetType()
+        public void SelectCoalesceGetType()
         {
             var list = (from l in Database.Query<LabelEntity>()
                         select (l.Owner.Entity ?? l).GetType()).ToList();
