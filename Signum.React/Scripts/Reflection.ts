@@ -1059,7 +1059,7 @@ type RemoveMListElement<Type> = Type extends MListElement<infer S> ? S : Type;
 function tokenSequence(lambdaToProperty: Function) {
   return getLambdaMembers(lambdaToProperty)
     .filter(a => a.name != "entity") //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
-    .map(a => a.name.firstUpper())
+    .map(a => a.name == "toStr" ? "ToString" : a.name.firstUpper())
     .join(".");
 }
 
