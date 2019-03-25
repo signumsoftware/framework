@@ -221,7 +221,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               <FontAwesomeIcon icon="times" />
             </a>}
             &nbsp;
-                        {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
+          {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
