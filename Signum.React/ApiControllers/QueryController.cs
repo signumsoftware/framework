@@ -300,8 +300,8 @@ namespace Signum.React.ApiControllers
 
 
 
-            var val = value is JToken ?
-                 ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
+            var val = value is JToken jtok ?
+                 jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
                  value;
 
             return new FilterCondition(parsedToken, operation, val);
