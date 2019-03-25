@@ -17,6 +17,8 @@ export function AutoFocus(p: { disabled?: boolean, delay?: number, children: Rea
           (input as HTMLInputElement).focus();
 
       }, p.delay == null ? 200 : p.delay);
+
+      return () => clearTimeout(timer);
     }
   }, [p.disabled]);
 
