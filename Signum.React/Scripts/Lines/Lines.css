@@ -329,7 +329,7 @@ input[type=checkbox].form-control-xs {
     height: 22px;
 }
 
-.rw-widget-xs > .rw-widget > .rw-widget-picker {
+.rw-widget-xs .rw-widget > .rw-widget-picker {
     height: 24px;
     line-height: 10px;
     margin-top: -2px;
