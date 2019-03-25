@@ -28,7 +28,7 @@ interface FramePageState {
 export default class FramePage extends React.Component<FramePageProps, FramePageState> {
   constructor(props: FramePageProps) {
     super(props);
-    this.state = this.calculateState(props);
+    this.state = this.newState(props);
   }
 
   componentWillMount() {
@@ -43,7 +43,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     return getTypeInfo(this.props.match.params.type);
   }
 
-  calculateState(props: FramePageProps): FramePageState {
+  newState(props: FramePageProps): FramePageState {
     return {
       getComponent: undefined,
       pack: undefined,
@@ -55,7 +55,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     const newParams = newProps.match.params;
     const oldParams = this.props.match.params;
     if(newParams.type != oldParams.type || newParams.id != oldParams.id) {
-      this.setState(this.calculateState(newProps), () => {
+      this.setState(this.newState(newProps), () => {
         this.load(newProps);
       }); 
     }
@@ -75,7 +75,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
     this.loadEntity(props)
       .then(pack => { Navigator.setTitle(pack.entity.toStr); return pack; })
-      .then(pack => this.loadComponent(pack))
+      .then(pack => this.loadComponent(pack).then(getComponent => this.setState({ getComponent: getComponent })))
       .done();
   }
 
@@ -118,10 +118,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
   }
 
 
-  loadComponent(pack: EntityPack<Entity>): Promise<void> {
+  loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
     const viewName = QueryString.parse(this.props.location.search).viewName;
-    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise
-      .then(c => this.setState({ getComponent: c }));
+    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise;
   }
 
   onClose() {
@@ -166,7 +165,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         if (packEntity.entity.id != null && entity.id == null)
           Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
         else
-          this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1, getComponent: undefined }, () => this.loadComponent(packEntity).done());
+          this.loadComponent(packEntity)
+            .then(getComponent => this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1, getComponent: getComponent }))
+            .done();
       },
       onClose: () => this.onClose(),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
