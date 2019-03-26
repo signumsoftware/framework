@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Engine.Basics;
 using Signum.Utilities;
@@ -12,16 +12,19 @@ namespace Signum.React.Selenium
         public void Select(string value)
         {
             Select(this.Element, value);
+            this.WaitNotVisible();
         }
 
         public void Select(Enum enumValue)
         {
             Select(this.Element, enumValue.ToString());
+            this.WaitNotVisible();
         }
 
         public void Select<T>()
         {
             Select(this.Element, TypeLogic.GetCleanName(typeof(T)));
+            this.WaitNotVisible();
         }
 
         public static bool IsSelector(IWebElement element)
