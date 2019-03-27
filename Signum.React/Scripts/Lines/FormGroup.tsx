@@ -45,7 +45,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
 
     const formGroupClasses = classes(this.props.ctx.formGroupClass, this.props.ctx.formGroupStyle == "LabelColumns" ? "row" : undefined, errorClass);
     return <div
-      title={ctx.styleOptions.titleLabels && typeof labelText == "string" ? labelText : undefined}
+      title={ctx.titleLabels && typeof labelText == "string" ? labelText : undefined}
       {...this.props.htmlAttributes}
       className={addClass(this.props.htmlAttributes, formGroupClasses)}
       {...errorAtts}>
