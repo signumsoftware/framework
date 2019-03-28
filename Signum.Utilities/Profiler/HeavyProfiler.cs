@@ -35,7 +35,7 @@ namespace Signum.Utilities
             }
         }
 
-        static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
+        static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy");
 
         public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
@@ -112,7 +112,7 @@ namespace Signum.Utilities
         private static Tracer CreateNewEntry(string role, Func<string> additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
-         
+
             if (enabled == false || TimeLimit.Value < beforeStart)
             {
                 enabled = false;
@@ -174,7 +174,7 @@ namespace Signum.Utilities
                 var cur = newCurrent;
                 cur.End = PerfCounter.Ticks;
                 var parent = newCurrent.Parent;
-              
+
 
                 current.Value = parent;
             }
@@ -303,7 +303,7 @@ namespace Signum.Utilities
     public class HeavyProfilerEntry
     {
         public List<HeavyProfilerEntry> Entries;
-        public HeavyProfilerEntry Parent; 
+        public HeavyProfilerEntry Parent;
         public string Role;
 
         public int Index;
@@ -410,7 +410,7 @@ namespace Signum.Utilities
         {
             var frames = (from i in 0.To(StackTrace.FrameCount)
                           let sf = StackTrace.GetFrame(i)
-                          let mi = sf.GetMethod()                          
+                          let mi = sf.GetMethod()
                           select new XElement("StackFrame",
                               new XAttribute("Method", mi.DeclaringType?.FullName + "." + mi.Name),
                               new XAttribute("Line", sf.GetFileName() + ":" + sf.GetFileLineNumber())
@@ -464,7 +464,7 @@ namespace Signum.Utilities
 
             if (xLog.Element("Log") != null)
                 result.Entries = xLog.Elements("Log").Select(x => ImportXml(x, result)).ToList();
-         
+
             return result;
         }
 
@@ -504,11 +504,24 @@ namespace Signum.Utilities
 
     public class PerfCounter
     {
-        [DllImport("kernel32.dll")]
-        private static extern bool QueryPerformanceFrequency(out long lpFrequency);
+        //[DllImport("kernel32.dll")]
+        //private static extern bool QueryPerformanceFrequency(out long lpFrequency);
 
-        [DllImport("kernel32.dll")]
-        private static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
+        //[DllImport("kernel32.dll")]
+        //private static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
+
+        private static bool QueryPerformanceFrequency(out long lpFrequency)
+        {
+            lpFrequency = Stopwatch.Frequency;
+            return Stopwatch.IsHighResolution;
+        }
+
+        private static bool QueryPerformanceCounter(out long lpPerformanceCount)
+        {
+            lpPerformanceCount = Stopwatch.GetTimestamp();
+            return Stopwatch.IsHighResolution;
+        }
+
 
         public static readonly long FrequencyMilliseconds;
 
@@ -517,7 +530,7 @@ namespace Signum.Utilities
             if (!QueryPerformanceFrequency(out long freq))
                 throw new InvalidOperationException("Low performance performance counter");
 
-            FrequencyMilliseconds = freq / 1000; 
+            FrequencyMilliseconds = freq / 1000;
         }
 
         public static long Ticks
