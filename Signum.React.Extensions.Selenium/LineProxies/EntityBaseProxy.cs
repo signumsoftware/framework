@@ -145,13 +145,24 @@ namespace Signum.React.Selenium
             return this.Element.GetAttribute("data-changes");
         }
 
-        protected EntityInfoProxy EntityInfoInternal(int? index)
+        public void WaitEntityInfoChanges(Action action, string actionDescription, int? index = null)
+        {
+            var changes = EntityInfoString(index);
+
+            action();
+
+            Element.GetDriver().Wait(() => GetChanges() != changes, () => "Waiting for entity info changes after {0} in {1}".FormatWith(actionDescription, this.Route.ToString()));
+        }
+
+        protected string EntityInfoString(int? index)
         {
             var element = index == null ? Element :
                 this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
 
-            return EntityInfoProxy.Parse(element.GetAttribute("data-entity"));
+            return element.GetAttribute("data-entity");
         }
+
+        protected EntityInfoProxy EntityInfoInternal(int? index) => EntityInfoProxy.Parse(EntityInfoString(index));
 
         public void AutoCompleteWaitChanges(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
