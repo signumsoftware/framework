@@ -397,6 +397,10 @@ Array.prototype.clone = function (this: any[]) {
   return this.slice(0);
 };
 
+Array.prototype.notNull = function (this: any[]) {
+  return this.filter(a => a != null);
+};
+
 Array.prototype.joinComma = function (this: any[], lastSeparator: string) {
   const array = this as any[];
 
