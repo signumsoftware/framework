@@ -11,6 +11,7 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
+import { KeyCodes } from '../Components/Basic';
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
   valueLineType?: ValueLineType;
@@ -23,6 +24,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLine) => React.ReactNode;
   initiallyFocused?: boolean;
+  incrementWithArrow?: boolean | number;
 }
 
 export interface OptionItem {
@@ -145,17 +147,19 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     const c = e.keyCode;
     return ((c >= 48 && c <= 57) /*0-9*/ ||
       (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
-      (c == 8) /*BackSpace*/ ||
-      (c == 9) /*Tab*/ ||
-      (c == 12) /*Clear*/ ||
-      (c == 27) /*Escape*/ ||
-      (c == 37) /*Left*/ ||
-      (c == 39) /*Right*/ ||
-      (c == 46) /*Delete*/ ||
-      (c == 36) /*Home*/ ||
-      (c == 35) /*End*/ ||
-      (c == 109) /*NumPad -*/ ||
-      (c == 189) /*-*/ ||
+      (c == KeyCodes.backspace) ||
+      (c == KeyCodes.tab) ||
+      (c == KeyCodes.clear) ||
+      (c == KeyCodes.esc) ||
+      (c == KeyCodes.left) ||
+      (c == KeyCodes.right) ||
+      (c == KeyCodes.up) ||
+      (c == KeyCodes.down) ||
+      (c == KeyCodes.delete) ||
+      (c == KeyCodes.home) ||
+      (c == KeyCodes.end) ||
+      (c == KeyCodes.numpadMinus) /*NumPad -*/ ||
+      (c == KeyCodes.minus) /*-*/ ||
       (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
       (e.ctrlKey && c == 88) /*Ctrl + x*/ ||
       (e.ctrlKey && c == 67) /*Ctrl + c*/);
@@ -427,9 +431,22 @@ function numericTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>
   const handleOnChange = (newValue: number | null) => {
     vl.setValue(newValue);
   };
+  
+  var incNumber = typeof vl.state.incrementWithArrow == "number" ? vl.state.incrementWithArrow : 1;
+
+  const handleKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (e.keyCode == KeyCodes.down) {
+      e.preventDefault();
+      vl.setValue((s.ctx.value || 0) - incNumber);
+    } else if (e.keyCode == KeyCodes.up) {
+      e.preventDefault();
+      vl.setValue((s.ctx.value || 0) + incNumber);
+    }
+  }
 
   const htmlAttributes = {
     placeholder: getPlaceholder(vl),
+    onKeyDown: vl.state.incrementWithArrow || vl.state.incrementWithArrow == undefined && vl.state.valueLineType == "Number" ? handleKeyDown : undefined, 
     ...vl.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
 
