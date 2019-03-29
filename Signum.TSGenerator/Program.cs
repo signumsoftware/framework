@@ -11,8 +11,8 @@ namespace Signum.TSGenerator
     {
         public static int Main(string[] args)
         {
-            string projectFile = args[0];
-            string[] references = File.ReadAllLines(args[1]);
+            string projectFile = args[0].Replace("\\win-x64\\", "\\");
+            string[] references = File.ReadAllLines(args[1]).Select(r=>r.Replace("\\win-x64\\", "\\")).ToArray();
             string[] content = File.ReadAllLines(args[2]);
 
             var log = Console.Out;
@@ -22,6 +22,9 @@ namespace Signum.TSGenerator
             log.WriteLine("Starting SignumTSGenerator");
 
             var currentDir = Directory.GetCurrentDirectory();
+
+            log.WriteLine($"CurrentDir {currentDir}");
+
             var files = content
                 .Where(file => Path.GetExtension(file) == ".t4s")
                 .Select(file => Path.Combine(currentDir, file))
@@ -32,7 +35,7 @@ namespace Signum.TSGenerator
             {
                 try
                 {
-                    //log.WriteLine($"Reading {file}");
+                    log.WriteLine($"Reading {file}");
 
                     string result = obj.Process(file, references, projectFile);
 
