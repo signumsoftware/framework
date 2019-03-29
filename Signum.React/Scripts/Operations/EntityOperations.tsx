@@ -261,10 +261,8 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
     if (this.props.onOperationClick)
       this.props.onOperationClick(eoc);
-    else if (eoc.settings && eoc.settings.onClick)
-      eoc.settings.onClick(eoc);
     else
-      defaultOnClick(eoc);
+      eoc.click();
   }
 }
 
