@@ -426,7 +426,7 @@ namespace Signum.Entities.UserQueries
             Column = p.Attribute("Column")?.Value.ToInt();
             Row = p.Attribute("Row")?.Value.ToInt();
             DisableOnNull = p.Attribute("DisableOnNull")?.Value.ToBool() ?? false;
-            DisableOnNull = p.Attribute("SplitText")?.Value.ToBool() ?? false;
+            SplitText = p.Attribute("SplitText")?.Value.ToBool() ?? false;
             return this;
         }
 
