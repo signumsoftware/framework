@@ -131,7 +131,7 @@ namespace Signum.Engine.DynamicQuery
                 ResetLazy<HashSet<K>> allKeys = null)
             where T : Entity
             where M : ModifiableEntity
-        
+
         {
             var mei = new ExtensionDictionaryInfo<M, KVP, K, V>
             {
@@ -139,7 +139,7 @@ namespace Signum.Engine.DynamicQuery
                 KeySelector = keySelector,
                 ValueSelector = valueSelector,
 
-                AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector) , keySelector)
+                AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector)
             };
 
             RegisteredExtensionsDictionaries.Add(PropertyRoute.Construct(embeddedSelector), mei);
@@ -295,10 +295,14 @@ namespace Signum.Engine.DynamicQuery
                     result.Format = ColumnDescriptionFactory.GetFormat(cleanMeta.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cleanMeta.PropertyRoutes);
                 }
-                else if(me?.Meta is DirtyMeta dirtyMeta)
+                else if (me?.Meta is DirtyMeta dirtyMeta)
                 {
                     result.PropertyRoute = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Only()).Distinct().Only();
-                    result.Implementations = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
+                    var metaImps = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
+                    if (metaImps.HasValue && metaImps.Value.Types.All(t => t.IsAssignableFrom(Type)))
+                    {
+                        result.Implementations = metaImps;
+                    }
                     result.Format = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
                     result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
                 }
