@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -109,6 +109,7 @@ namespace Signum.Engine.Scheduler
                     });
 
                 sb.Include<ScheduledTaskLogEntity>()
+                    .WithIndex(s => s.ScheduledTask, includeFields: s=> s.StartTime)
                     .WithQuery(() => cte => new
                     {
                         Entity = cte,
