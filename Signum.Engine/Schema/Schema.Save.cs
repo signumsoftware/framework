@@ -84,11 +84,16 @@ namespace Signum.Engine.Maps
 
         internal object[] BulkInsertDataRow(object/*Entity or IView*/ entity)
         {
-            var parameters = IdentityBehaviour ?
-                inserterIdentity.Value.InsertParameters((Entity)entity, new Forbidden(), "") :
-                inserterDisableIdentity.Value.InsertParameters(entity, new Forbidden(), "");
+            List<DbParameter> parameters = GetInsertParameters(entity);
 
             return parameters.Select(a => a.Value).ToArray();
+        }
+
+        internal List<DbParameter> GetInsertParameters(object entity)
+        {
+            return IdentityBehaviour ?
+                inserterIdentity.Value.InsertParameters((Entity)entity, new Forbidden(), "") :
+                inserterDisableIdentity.Value.InsertParameters(entity, new Forbidden(), "");
         }
 
         class InsertCacheDisableIdentity

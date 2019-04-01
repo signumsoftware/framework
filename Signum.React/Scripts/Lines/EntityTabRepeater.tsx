@@ -11,10 +11,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TitleManager } from './EntityBase';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
-  createAsLink?: boolean;
+  createAsLink?: boolean | ((er: EntityTabRepeater) => React.ReactElement<any>);
+  createMessage?: string;
   avoidFieldSet?: boolean;
   selectedIndex?: number;
-  getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
+  getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   extraTabs?: (c: EntityTabRepeater) => React.ReactNode;
   onSelectTab?: (newIndex: number) => void;
 }
@@ -63,7 +64,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
   renderButtons() {
     const buttons = (
       <span className="ml-2">
-        {this.renderCreateButton(false)}
+        {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
         {this.renderFindButton(false)}
         {this.props.extraButtons && this.props.extraButtons(this)}
       </span>
@@ -99,16 +100,14 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                   onDragOver={drag && drag.onDragOver}
                   onDrop={drag && drag.onDrop}>
                   {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
-                  &nbsp;
                 {this.canRemove(mlec.value) && !readOnly &&
-                    <span className={classes("sf-line-button", "sf-remove")}
+                    <span className={classes("sf-line-button", "sf-remove", "ml-2")}
                       onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
                       title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       <FontAwesomeIcon icon="times" />
                     </span>
                   }
-                  &nbsp;
-                {drag && <span className={classes("sf-line-button", "sf-move")}
+                {drag && <span className={classes("sf-line-button", "sf-move", "ml-2")}
                     draggable={true}
                     onDragStart={drag.onDragStart}
                     onDragEnd={drag.onDragEnd}
@@ -120,6 +119,15 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
               <RenderEntity ctx={mlec} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
             </Tab>
           })
+        }
+        {
+          this.state.createAsLink && this.state.create && !readOnly &&
+          (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
+            <a href="#" title={TitleManager.useTitle ? EntityControlMessage.Create.niceToString() : undefined}
+              className="sf-line-button sf-create nav-link"
+              onClick={this.handleCreateClick}>
+              <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
+            </a>)
         }
         {this.props.extraTabs && this.props.extraTabs(this)}
       </Tabs>

@@ -1,17 +1,26 @@
 import * as React from 'react';
-import { BsSize, BsColor } from './Basic';
-import { classes } from '../Globals';
 
 
-export function AutoFocus(p: React.Props<any>) {
+export function AutoFocus(p: { disabled?: boolean, delay?: number, children: React.ReactNode }) {
   var ref = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
-    var input = Array.from(ref.current!.querySelectorAll("button, [href], input, select, textarea"))
-      .firstOrNull(e => { var tabIndex = e.getAttribute("tabindex"); return tabIndex == null || tabIndex >= "0"; });
+    if (!p.disabled) {
 
-    if (input)
-      (input as HTMLInputElement).focus();
-  }, []);
+      var timer = setTimeout(() => {
+        
+        var input = Array.from(ref.current!.querySelectorAll("input, select, textarea"))
+          .firstOrNull(e => {
+            var html = e as HTMLInputElement; return html.tabIndex >= 0 && html.disabled != true;
+          });
+
+        if (input)
+          (input as HTMLInputElement).focus();
+
+      }, p.delay == null ? 200 : p.delay);
+
+      return () => clearTimeout(timer);
+    }
+  }, [p.disabled]);
 
   return (
     <div ref={ref}>

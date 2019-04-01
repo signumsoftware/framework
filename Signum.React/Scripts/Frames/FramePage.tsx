@@ -28,18 +28,22 @@ interface FramePageState {
 export default class FramePage extends React.Component<FramePageProps, FramePageState> {
   constructor(props: FramePageProps) {
     super(props);
-    this.state = this.calculateState(props);
+    this.state = this.newState(props);
   }
 
   componentWillMount() {
     this.load(this.props);
   }
 
+  componentDidMount() {
+    window.addEventListener("keydown", this.hanldleKeyDown);
+  }
+
   getTypeInfo(): TypeInfo {
     return getTypeInfo(this.props.match.params.type);
   }
 
-  calculateState(props: FramePageProps): FramePageState {
+  newState(props: FramePageProps): FramePageState {
     return {
       getComponent: undefined,
       pack: undefined,
@@ -51,7 +55,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     const newParams = newProps.match.params;
     const oldParams = this.props.match.params;
     if(newParams.type != oldParams.type || newParams.id != oldParams.id) {
-      this.setState(this.calculateState(newProps), () => {
+      this.setState(this.newState(newProps), () => {
         this.load(newProps);
       }); 
     }
@@ -59,13 +63,19 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
   componentWillUnmount() {
     Navigator.setTitle();
+    window.removeEventListener("keydown", this.hanldleKeyDown);
+  }
+
+  hanldleKeyDown = (e: KeyboardEvent) => {
+    if (!e.openedModals && this.buttonBar)
+      this.buttonBar.hanldleKeyDown(e);
   }
 
   load(props: FramePageProps) {
 
     this.loadEntity(props)
       .then(pack => { Navigator.setTitle(pack.entity.toStr); return pack; })
-      .then(pack => this.loadComponent(pack))
+      .then(pack => this.loadComponent(pack).then(getComponent => this.setState({ getComponent: getComponent })))
       .done();
   }
 
@@ -108,10 +118,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
   }
 
 
-  loadComponent(pack: EntityPack<Entity>): Promise<void> {
+  loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
     const viewName = QueryString.parse(this.props.location.search).viewName;
-    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise
-      .then(c => this.setState({ getComponent: c }));
+    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise;
   }
 
   onClose() {
@@ -130,6 +139,8 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       this.forceUpdate();
     }
   }
+
+  buttonBar?: ButtonBar | null;
 
   render() {
 
@@ -154,7 +165,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         if (packEntity.entity.id != null && entity.id == null)
           Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
         else
-          this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1, getComponent: undefined }, () => this.loadComponent(packEntity).done());
+          this.loadComponent(packEntity)
+            .then(getComponent => this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1, getComponent: getComponent }))
+            .done();
       },
       onClose: () => this.onClose(),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -186,28 +199,17 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       <div className="normal-control">
         {this.renderTitle()}
         {renderWidgets(wc)}
-        {this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} />}
+        {this.entityComponent && <ButtonBar ref={bb => this.buttonBar = bb} frame={frame} pack={this.state.pack} />}
         <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve} prefix="framePage" />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
+            {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
-  }
-
-  getComponentWithRef(ctx: TypeContext<Entity>) {
-    var component = this.state.getComponent!(ctx)!;
-
-    var type = component.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }>;
-    if (type.prototype.render) {
-      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
-    } else {
-      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
-    }
   }
 
   validationErrors?: ValidationErrors | null;

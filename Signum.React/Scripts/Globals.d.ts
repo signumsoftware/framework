@@ -66,6 +66,7 @@ interface Array<T> {
   moveDown(this: Array<T>, index: number): number;
   insertAt(this: Array<T>, index: number, element: T): void;
 
+  notNull(this: Array<T>): NonNullable<T>[];
   clone(this: Array<T>, ): T[];
   joinComma(this: Array<T>, lastSeparator: string): string;
   extract(this: Array<T>, filter: (element: T) => boolean): T[];

@@ -22,11 +22,6 @@ ul.sf-widgets>li
     margin-left: 4px;
 }
 
-ul.sf-widgets > li > a:not(.sf-widget-active)
-{
-    background-color:#ddd;
-}
-
 ul.dropdown-menu li a span.sf-alert-active
 {
     font-weight:bold;

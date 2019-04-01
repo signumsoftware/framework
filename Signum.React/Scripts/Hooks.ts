@@ -2,12 +2,13 @@ import * as React from 'react'
 import { FindOptions, ResultTable } from './Search';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
-import { Entity, Lite, liteKey } from './Signum.Entities';
+import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
 import { EntityBase } from './Lines/EntityBase';
-import { Type } from './Reflection';
+import { Type, QueryTokenString } from './Reflection';
 
 export function useForceUpdate(): () => void {
-  return React.useState()[1] as () => void;
+  var [count, setCount] = React.useState(0);
+  return () => setCount(count + 1);
 }
 
 export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>): T {
@@ -39,6 +40,25 @@ export function useQuery(fo: FindOptions | null): ResultTable | undefined | null
         .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)));
 }
 
+export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): AddToLite<R> | null | undefined {
+  var resultTable = useQuery(entity == null ? null : {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: [{ token: token }],
+    columnOptionsMode: "Replace",
+  });
+
+  if (entity == null)
+    return null;
+
+  if (resultTable == null)
+    return undefined;
+
+  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null; 
+}
+
+type AddToLite<T> = T extends Entity ? Lite<T> : T;
 
 export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
   return useAPI(undefined, [lite && liteKey(lite)], signal =>
@@ -47,13 +67,16 @@ export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undef
 }
 
 
-export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null): T | null | undefined {
+export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
 
   const forceUpdate = useForceUpdate();
   React.useEffect(() => {
-    if (lite != null && lite.entity != null)
+    if (lite && !lite.entity)
       Navigator.API.fetchAndRemember(lite)
-        .then(() => forceUpdate())
+        .then(() => {
+          onLoaded && onLoaded();
+          forceUpdate();
+        })
         .done();
   }, [lite && liteKey(lite)]);
 

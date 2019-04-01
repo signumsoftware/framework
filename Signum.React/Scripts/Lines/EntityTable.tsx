@@ -40,12 +40,12 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
     scrollable: false
   };
 
-  static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
-    return columns.filter(a => a != null).map(a => a!) as EntityTableColumn<ModifiableEntity, any>[];
+  static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
+    return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, any>[];
   }
 
-  static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
-    return columns.filter(a => a != null).map(a => a!) as EntityTableColumn<ModifiableEntity, RS>[];
+  static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
+    return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, RS>[];
   }
 
   calculateDefaultState(state: EntityTableProps) {
@@ -221,7 +221,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               <FontAwesomeIcon icon="times" />
             </a>}
             &nbsp;
-                        {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
+          {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}

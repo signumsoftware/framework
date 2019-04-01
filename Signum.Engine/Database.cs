@@ -71,6 +71,17 @@ namespace Signum.Engine
                 throw;
             }
         }
+
+        public static int InsertView<T>(this T viewObject) where T : IView
+        {
+            var view = Schema.Current.View<T>();
+            var parameters = view.GetInsertParameters(viewObject);
+
+            var sql = $@"INSERT {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(), ", ")})
+VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
+
+            return Executor.ExecuteNonQuery(sql, parameters);
+        }
         #endregion
 
         #region Retrieve

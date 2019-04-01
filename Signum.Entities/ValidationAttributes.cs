@@ -12,6 +12,7 @@ using Signum.Utilities.Reflection;
 using System.Globalization;
 using Signum.Entities.Basics;
 using System.IO;
+using Signum.Entities;
 
 namespace Signum.Entities
 {
@@ -78,7 +79,24 @@ namespace Signum.Entities
         {
             get { return ValidationMessage.BeNotNull.NiceToString(); }
         }
+
+        
     }
+
+    public static class NotNullaValidatorExtensions
+    {
+        public static string IsSetOnlyWhen(this (PropertyInfo pi, object nullableValue) tuple, bool shouldBeSet)
+        {
+            if (tuple.nullableValue == null && shouldBeSet)
+                return ValidationMessage._0IsNotSet.NiceToString(tuple.pi.NiceName());
+
+            else if (tuple.nullableValue != null && !shouldBeSet)
+                return ValidationMessage._0ShouldBeNull.NiceToString(tuple.pi.NiceName());
+
+            return null;
+        }
+    }
+    
 
     public class StringLengthValidatorAttribute : ValidatorAttribute
     {
@@ -555,6 +573,41 @@ namespace Signum.Entities
         }
     }
 
+
+    public class NumberPowerOfTwoValidatorAttribute : ValidatorAttribute
+    {
+        static bool IsPowerOfTwo(long n)
+        {
+            if (n == 0)
+                return false;
+
+            while (n != 1)
+            {
+                if (n % 2 != 0)
+                    return false;
+
+                n = n / 2;
+            }
+            return true;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (!IsPowerOfTwo(Convert.ToInt64(value)))
+                return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ValidationMessage.PowerOf.NiceToString(), 2);
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return ValidationMessage.Be.NiceToString() + ValidationMessage.PowerOf.NiceToString() + " " + 2; }
+        }
+    }
+
     public class NoRepeatValidatorAttribute : ValidatorAttribute
     {
         protected override string OverrideError(object value)
@@ -719,6 +772,36 @@ namespace Signum.Entities
             }
         }
     }
+
+    public class YearGreaterThanValidator : ValidatorAttribute
+    {
+        public int MinYear { get; set; }
+
+        public YearGreaterThanValidator(int minYear)
+        {
+            this.MinYear = minYear;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (((DateTime)value).Year < MinYear)
+                return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return ValidationMessage.BeInThePast.NiceToString();
+            }
+        }
+    }
+
 
     public class TimeSpanPrecisionValidatorAttribute : ValidatorAttribute
     {
@@ -975,6 +1058,8 @@ namespace Signum.Entities
         _0HasSomeRepeatedElements1,
         [Description("{0} should be {1} {2}")]
         _0ShouldBe12,
+        [Description("{0} should be {1} instead of {2}")]
+        _0ShouldBe1InsteadOf2,
         [Description("{0} has to be between {1} and {2}")]
         _0HasToBeBetween1And2,
         [Description("{0} has to be lowercase")]
@@ -1097,5 +1182,6 @@ namespace Signum.Entities
         _0IsEmpty,
         [Description("At least one value is needed")]
         _AtLeastOneValueIsNeeded,
+        PowerOf,
     }
 }

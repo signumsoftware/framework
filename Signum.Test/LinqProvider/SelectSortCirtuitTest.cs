@@ -20,13 +20,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
-        public void SortCircuitCoallesce()
+        public void SortCircuitCoalesce()
         {
             var list = Database.Query<AlbumEntity>().Where(a => ("Hola" ?? Throw<string>()) == null).Select(a => a.Year).ToList();
         }
 
         [Fact]
-        public void SortCircuitCoallesceNullable()
+        public void SortCircuitCoalesceNullable()
         {
             var list = Database.Query<AlbumEntity>().Where(a => (((DateTime?)DateTime.Now) ?? Throw<DateTime>()) == DateTime.Today).Select(a => a.Year).ToList();
         }

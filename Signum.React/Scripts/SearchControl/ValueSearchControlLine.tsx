@@ -26,13 +26,14 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   badgeColor?: BsColor;
   isFormControl?: boolean;
   findButton?: boolean;
-  onViewEntity?: (entity: Lite<Entity>) => void;
-  onExplored?: () => void;
   viewEntityButton?: boolean;
   avoidAutoRefresh?: boolean;
   refreshKey?: string | number;
   extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode;
   searchControlProps?: Partial<SearchControlProps>;
+  onExplored?: () => void;
+  onViewEntity?: (entity: Lite<Entity>) => void;
+  onValueChanged?: (value: any) => void;
 }
 
 
@@ -90,14 +91,14 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     let isQuery = this.props.valueToken == undefined || token && token.queryTokenType == "Aggregate";
 
-    let isBadge = coallesce(this.props.isBadge, this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
-    let isFormControl = coallesce(this.props.isFormControl, this.props.valueToken != undefined);
+    let isBadge = coalesce(this.props.isBadge, this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
+    let isFormControl = coalesce(this.props.isFormControl, this.props.valueToken != undefined);
 
     let unit = isFormControl && token && token.unit && <span className="input-group-text">{token.unit}</span>;
 
 
     let value = this.valueSearchControl && this.valueSearchControl.state.value;
-    let find = value != undefined && coallesce(this.props.findButton, isQuery) &&
+    let find = value != undefined && coalesce(this.props.findButton, isQuery) &&
       <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.valueSearchControl!.handleClick}
         title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
@@ -105,7 +106,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
       </a>;
 
 
-    let view = value != undefined && coallesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
+    let view = value != undefined && coalesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
       <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.handleViewEntityClick}
         title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
@@ -129,7 +130,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             isLink={this.props.isLink}
             formControlClass={isFormControl ? this.props.ctx.formControlClass : undefined}
             valueToken={this.props.valueToken}
-            onValueChange={() => this.forceUpdate()}
+            onValueChange={v => { this.forceUpdate(); this.props.onValueChanged && this.props.onValueChanged(v); }}
             onTokenLoaded={() => this.forceUpdate()}
             onExplored={this.props.onExplored}
             searchControlProps={this.props.searchControlProps}
@@ -164,7 +165,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
   }
 }
 
-function coallesce<T>(propValue: T | undefined, defaultValue: T): T {
+function coalesce<T>(propValue: T | undefined, defaultValue: T): T {
   if (propValue !== undefined)
     return propValue;
 

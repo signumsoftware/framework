@@ -293,6 +293,10 @@ select.form-control-xs:not([size]):not([multiple]),
     padding: 0 2px
 }
 
+input[type=checkbox].form-control-xs {
+    margin-top: 4px;
+}
+
 .form-control-xs,
 .input-group-xs > .form-control,
 .input-group-xs > .input-group-prepend > .input-group-text,
@@ -314,10 +318,7 @@ select.form-control-xs:not([size]):not([multiple]),
     line-height: 1.5;
 }
 
-.label-sm {
-    font-size: 0.875rem;
-    margin-bottom: 0px;
-}
+
 
 .label-xs {
     font-size: 0.875rem;
@@ -328,9 +329,11 @@ select.form-control-xs:not([size]):not([multiple]),
     height: 22px;
 }
 
-.rw-widget-xs .rw-widget-picker {
+.rw-widget-xs .rw-widget > .rw-widget-picker {
     height: 24px;
     line-height: 10px;
+    margin-top: -2px;
+    border: #ccc 0.5px solid;
 }
 
 .rw-widget-xs .rw-select {
@@ -346,6 +349,13 @@ select.form-control-xs:not([size]):not([multiple]),
     font-size: 0.875rem;
     /*line-height: 1.5;*/
     border-radius: 0.2rem;
+}
+
+/*form sm (adjustments)*/
+
+.label-sm {
+    font-size: 0.875rem;
+    margin-bottom: 0px;
 }
 
 .rw-widget-sm .rw-input {

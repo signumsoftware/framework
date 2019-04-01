@@ -298,7 +298,7 @@ namespace Signum.Engine
 
                             var addSystemVersioning = (tab.SystemVersioned != null &&
                                 (dif.Period == null || 
-                                !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
+                                !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName?.ToString()), tab.SystemVersioned?.TableName?.ToString()) || 
                                 alterColumnToNotNullableHistory) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a => a.GoBefore = true) : null);
 
@@ -823,7 +823,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                         Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 
                         List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
-                        Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr, table.Name.Name);
+                        int nullVal = 0;
+                        Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr ?? $"NULL{nullVal++}", table.Name.Name);
 
                         string key = Replacements.KeyEnumsForTable(table.Name.Name);
 

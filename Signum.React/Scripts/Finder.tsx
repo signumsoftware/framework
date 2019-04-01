@@ -32,6 +32,7 @@ import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import ButtonBar from "./Frames/ButtonBar";
 import { json, namespace } from "d3";
+import { ButtonBarElement } from "./TypeContext";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -1239,10 +1240,10 @@ export module ButtonBarQuery {
     findOptions: FindOptionsParsed;
   }
 
-  export const onButtonBarElements: ((ctx: ButtonBarQueryContext) => React.ReactElement<any> | undefined)[] = [];
+  export const onButtonBarElements: ((ctx: ButtonBarQueryContext) => ButtonBarElement | undefined)[] = [];
 
-  export function getButtonBarElements(ctx: ButtonBarQueryContext): React.ReactElement<any>[] {
-    return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
+  export function getButtonBarElements(ctx: ButtonBarQueryContext): ButtonBarElement[] {
+    return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a as ButtonBarElement);
   }
 
   export function clearButtonBarElements() {
@@ -1251,14 +1252,11 @@ export module ButtonBarQuery {
 
 }
 
-
 export let defaultPagination: Pagination = {
   mode: "Paginate",
   elementsPerPage: 20,
   currentPage: 1,
 };
-
-
 
 export interface QuerySettings {
   queryName: PseudoType | QueryKey;

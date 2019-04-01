@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { openModal, IModalProps } from '../Modals'
+import { openModal, IModalProps, IHandleKeyboard } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
@@ -34,6 +34,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   isNavigate?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
+  createNew?: () => Promise<ModifiableEntity>;
 }
 
 interface FrameModalState {
@@ -47,7 +48,7 @@ interface FrameModalState {
 
 let modalCount = 0;
 
-export default class FrameModal extends React.Component<FrameModalProps, FrameModalState>  {
+export default class FrameModal extends React.Component<FrameModalProps, FrameModalState> implements IHandleKeyboard  {
   prefix = "modal" + (modalCount++);
 
   static defaultProps: FrameModalProps = {
@@ -76,6 +77,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       .done();
   }
 
+  handleKeyDown(e: KeyboardEvent) {
+    this.buttonBar && this.buttonBar.hanldleKeyDown(e);
+  }
 
   getTypeName() {
     return (this.props.entityOrPack as Lite<Entity>).EntityType ||
@@ -229,6 +233,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     }
   }
 
+  buttonBar?: ButtonBar | null;
+
   renderBody() {
 
     const frame: EntityFrame = {
@@ -271,28 +277,17 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     return (
       <div className="modal-body">
         {renderWidgets({ ctx: ctx, pack: pack })}
-        {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
+        {this.entityComponent && <ButtonBar ref={bb => this.buttonBar = bb} frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
         <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{this.getComponentWithRef(ctx)}</AutoFocus>}
+            {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
       </div>
     );
-  }
-
-  getComponentWithRef(ctx: TypeContext<ModifiableEntity>) {
-    var component = this.state.getComponent!(ctx)!;
-
-    var type = component.type as React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> | React.FunctionComponent<{ ctx: TypeContext<ModifiableEntity> }>;
-    if (type.prototype.render) {
-      return React.cloneElement(component, { ref: (c: React.Component<any, any> | null) => this.setComponent(c) });
-    } else {
-      return <FunctionalAdapter ref={(c: React.Component<any, any> | null) => this.setComponent(c)}>{component}</FunctionalAdapter>
-    }
   }
 
   validationErrors?: ValidationErrors | null;
@@ -377,16 +372,24 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       requiresSaveOperation={undefined}
       avoidPromptLooseChange={options.avoidPromptLooseChange}
       extraComponentProps={options.extraComponentProps}
-      isNavigate={true} />);
+      createNew={options.createNew}
+      isNavigate={true}
+    />);
   }
 }
 
 export class FunctionalAdapter extends React.Component {
+
   render() {
     return this.props.children;
   }
+  
+  static withRef(element: React.ReactElement<any>, ref: (c: React.Component | null) => void) {
+    var type = element.type as React.ComponentClass | React.FunctionComponent | string;
+    if (typeof type == "string" || type.prototype.render) {
+      return React.cloneElement(element, { ref: ref });
+    } else {
+      return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
+    }
+  }
 }
-
-
-
-

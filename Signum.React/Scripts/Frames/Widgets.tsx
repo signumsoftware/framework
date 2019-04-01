@@ -8,7 +8,7 @@ export interface WidgetContext<T extends ModifiableEntity> {
   pack: EntityPack<T>;
 }
 
-export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any>> = [];
+export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any> | undefined> = [];
 
 export function clearWidgets() {
   onWidgets.clear();

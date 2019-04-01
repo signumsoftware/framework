@@ -8,7 +8,7 @@ import MessageModal from '../Modals/MessageModal'
 import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import {
-  operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, autoColorFunction, isEntityOperation
+  operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults
 } from '../Operations'
 import { DropdownItem } from "../Components/DropdownItem";
 import { UncontrolledTooltip } from "../Components/Tooltip";
@@ -194,7 +194,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
       coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
         simplifyName(coc.operationInfo.niceName);
 
-    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
+    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Defaults.getColor(coc.operationInfo);
     const icon = coc.settings && coc.settings.icon || coc.entityOperationSettings && coc.entityOperationSettings.icon;
     const iconColor = coc.settings && coc.settings.iconColor || coc.entityOperationSettings && coc.entityOperationSettings.iconColor;
 
