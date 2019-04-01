@@ -7,6 +7,7 @@ import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useFetchAndForget } from '../../../Framework/Signum.React/Scripts/Hooks';
 import { CountIcon } from '../Toolbar/QueryToolbarConfig';
 
@@ -22,7 +23,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     if (element.iconName == "count")
       return <CountUserQueryIcon innerRef={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : ["far", "list-alt"], element.iconColor || "dodgerblue");
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor || "dodgerblue");
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {

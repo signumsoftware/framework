@@ -35,7 +35,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   getIcon(element: ToolbarResponse<T>) {
-    return ToolbarConfig.coloredIcon(element.iconName == null ? undefined : parseIcon(element.iconName), element.iconColor);
+    return ToolbarConfig.coloredIcon(parseIcon(element.iconName), element.iconColor);
   }
 
   static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
