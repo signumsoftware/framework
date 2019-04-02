@@ -76,7 +76,7 @@ namespace Signum.Entities
             {
                 var message = Error(t) + @". Set implementations for {0}.".FormatWith(route);
 
-                if(t.IsInterface || t.IsAbstract)
+                if (t.IsInterface || t.IsAbstract)
                 {
                     message += @"\r\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
                 }
@@ -184,7 +184,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         {
             info.AddValue("arrayOrType", arrayOrType == null ? "ALL" :
                 arrayOrType is Type ? ((Type)arrayOrType).AssemblyQualifiedName :
-                arrayOrType is Type[] ? ((Type[])arrayOrType).ToString(a => a.AssemblyQualifiedName, "|") : null);
+                arrayOrType is Type[]? ((Type[])arrayOrType).ToString(a => a.AssemblyQualifiedName, "|") : null);
         }
     }
 
@@ -298,7 +298,10 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public bool Identity { get; set; }
 
+        public bool SequentialGuid;
+
         bool identityBehaviour;
+
         public bool IdentityBehaviour
         {
             get { return identityBehaviour; }
@@ -307,17 +310,18 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
                 identityBehaviour = value;
                 if (Type == typeof(Guid))
                 {
-                    this.Default = identityBehaviour ? NewSequentialId : null;
+                    this.Default = identityBehaviour ? SequentialGuid ? NewSequentialId : NewId : null;
                 }
             }
         }
 
-        public PrimaryKeyAttribute(Type type, string name = "ID")
+        public PrimaryKeyAttribute(Type type, string name = "ID", bool sequentialGuid = true)
         {
             this.Type = type;
             this.Name = name;
             this.Identity = type == typeof(Guid) ? false : true;
             this.IdentityBehaviour = true;
+            this.SequentialGuid = sequentialGuid;
         }
     }
 
