@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,12 +58,19 @@ namespace Signum.Engine.Scheduler
             return ExceptionLinesExpression.Evaluate(e);
         }
 
-        public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>>();
+        public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask = 
+            new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
 
         public class ScheduledTaskPair
         {
             public ScheduledTaskEntity ScheduledTask;
             public DateTime NextDate;
+
+            public ScheduledTaskPair(ScheduledTaskEntity scheduledTask, DateTime nextDate)
+            {
+                ScheduledTask = scheduledTask;
+                NextDate = nextDate;
+            }
         }
 
         static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
@@ -302,10 +309,10 @@ namespace Signum.Engine.Scheduler
                         bool isMiss = next < now;
 
                         return new ScheduledTaskPair
-                        {
-                            ScheduledTask = st,
-                            NextDate = isMiss ? now : next,
-                        };
+                        (
+                            scheduledTask: st,
+                            nextDate: isMiss ? now : next
+                        );
                     }));
 
                     SetTimer();
@@ -380,7 +387,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
+        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
         {
             using (ExecutionContext.SuppressFlow())
                 Task.Run(() =>
@@ -400,9 +407,9 @@ namespace Signum.Engine.Scheduler
                 });
         }
 
-        public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
+        public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity? user)
         {
-            IUserEntity entityIUser = user ?? (IUserEntity)scheduledTask.User.Retrieve();
+            IUserEntity entityIUser = (user ?? (IUserEntity?)scheduledTask?.User.Retrieve())!;
 
             var isolation = entityIUser.TryIsolation();
             if (isolation == null)
@@ -435,7 +442,7 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var ctx = new ScheduledTaskContext { Log = stl };
+                    var ctx = new ScheduledTaskContext(stl);
                     RunningTasks.TryAdd(stl, ctx);
 
                     using (UserHolder.UserSession(entityIUser))
@@ -519,6 +526,7 @@ namespace Signum.Engine.Scheduler
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class SchedulerState
     {
         public bool Running;
@@ -542,9 +550,15 @@ namespace Signum.Engine.Scheduler
         public DateTime StartTime;
         public string Remarks;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class ScheduledTaskContext
     {
+        public ScheduledTaskContext(ScheduledTaskLogEntity log)
+        {
+            Log = log;
+        }
+
         public ScheduledTaskLogEntity Log { internal get; set; }
 
         public StringBuilder StringBuilder { get; } = new StringBuilder();

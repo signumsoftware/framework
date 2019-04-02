@@ -17,10 +17,9 @@ namespace Signum.Entities.Files
             this.BinaryFile = File.ReadAllBytes(readFileFrom);
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string FileName { get; set; }
 
-        [NotNullValidator]
         public byte[] BinaryFile { get; set; }
 
         public override string ToString()
@@ -29,7 +28,7 @@ namespace Signum.Entities.Files
         }
 
 
-        public string FullWebPath()
+        public string? FullWebPath()
         {
             return null;
         }

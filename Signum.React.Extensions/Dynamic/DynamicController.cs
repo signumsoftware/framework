@@ -116,12 +116,13 @@ namespace Signum.React.Dynamic
         [HttpPost("api/dynamic/getPanelInformation")]
         public DynamicPanelInformation GetPanelInformation()
         {
-            return new DynamicPanelInformation() {
+            return new DynamicPanelInformation
+            {
                 lastDynamicCompilationDateTime = DynamicLogic.GetLastCodeGenAssemblyFileInfo()?.CreationTime,
                 loadedCodeGenAssemblyDateTime = DynamicLogic.GetLoadedCodeGenAssemblyFileInfo()?.CreationTime,
                 loadedCodeGenControllerAssemblyDateTime = DynamicLogic.GetLoadedCodeGenControllerAssemblyFileInfo()?.CreationTime,
                 lastDynamicChangeDateTime = Database.Query<OperationLogEntity>()
-                        .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target.EntityType))
+                        .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target!.EntityType))
                         .Max(a => a.End),
             };
         } 

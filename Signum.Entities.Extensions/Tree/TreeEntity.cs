@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Types;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
@@ -33,14 +33,15 @@ namespace Signum.Entities.Tree
             get { return RouteToStringExpression.Evaluate(this); }
         }
 
-        [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
+        [ForceNotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
         public string ParentRoute { get; set; }
 
         static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
-
         [Ignore]
         short? level;
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("LevelExpression"), InTypeScript(true)]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public short? Level
         {
             get { return level; }
@@ -53,15 +54,15 @@ namespace Signum.Entities.Tree
         }
 
         [Ignore, ImplementedByAll]
-        public Lite<TreeEntity> ParentOrSibling { get; set; }
+        public Lite<TreeEntity>? ParentOrSibling { get; set; }
 
         [Ignore]
         public bool IsSibling { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 255)]
+        [StringLengthValidator(Min = 1, Max = 255)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
+        [StringLengthValidator(Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
         public string FullName { get; private set; }
 
         public void SetFullName(string newFullName)
@@ -127,13 +128,14 @@ namespace Signum.Entities.Tree
     public class MoveTreeModel : ModelEntity
     {
         [ImplementedByAll]
-        public Lite<TreeEntity> NewParent { get; set; }
+        public Lite<TreeEntity>? NewParent { get; set; }
+
         public InsertPlace InsertPlace { get; set; }
 
         [ImplementedByAll]
-        public Lite<TreeEntity> Sibling { get; set; }
+        public Lite<TreeEntity>? Sibling { get; set; }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if(pi.Name == nameof(Sibling) && Sibling == null &&
                 (InsertPlace == InsertPlace.After || InsertPlace == InsertPlace.Before))

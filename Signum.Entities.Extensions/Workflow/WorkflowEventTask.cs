@@ -13,12 +13,11 @@ namespace Signum.Entities.Workflow
 {
     [Serializable,  EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowEventTaskEntity : Entity, ITaskEntity
-    {
-        [NotNullValidator]
+    {   
         public Lite<WorkflowEntity> Workflow { get; set; }
 
         [Ignore]
-        internal WorkflowEntity fullWorkflow { get; set; }
+        internal WorkflowEntity? fullWorkflow { get; set; }
 
         public static Func<Lite<WorkflowEntity>, WorkflowEntity> GetWorkflowEntity;
         public WorkflowEntity GetWorkflow()
@@ -26,17 +25,16 @@ namespace Signum.Entities.Workflow
             return fullWorkflow ?? GetWorkflowEntity(this.Workflow);
         }
 
-        [NotNullValidator, UniqueIndex]
+        [UniqueIndex]
         public Lite<WorkflowEventEntity> Event { get; set; }
 
         public TriggeredOn TriggeredOn { get; set; }
 
         [NotifyChildProperty]
-        public WorkflowEventTaskConditionEval Condition { get; set; }
+        public WorkflowEventTaskConditionEval? Condition { get; set; }
 
-        [NotNullValidator]
         [NotifyChildProperty]
-        public WorkflowEventTaskActionEval Action { get; set; }
+        public WorkflowEventTaskActionEval? Action { get; set; }
 
 
         static Expression<Func<WorkflowEventTaskEntity, string>> ToStringExpression = @this => @this.Workflow + " : " + @this.Event;
@@ -46,7 +44,7 @@ namespace Signum.Entities.Workflow
             return ToStringExpression.Evaluate(this);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Condition))
             {
@@ -64,20 +62,19 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowEventTaskModel : ModelEntity
     {
-        public static Func<WorkflowEventEntity, WorkflowEventTaskModel> GetModel;
-        public static Action<WorkflowEventEntity, WorkflowEventTaskModel> ApplyModel;
+        public static Func<WorkflowEventEntity, WorkflowEventTaskModel?> GetModel;
+        public static Action<WorkflowEventEntity, WorkflowEventTaskModel?> ApplyModel;
 
         public bool Suspended { get; set; }
-        public IScheduleRuleEntity Rule { get; set; }
+        public IScheduleRuleEntity? Rule { get; set; }
 
         public TriggeredOn TriggeredOn { get; set; }
 
         [NotifyChildProperty]
-        public WorkflowEventTaskConditionEval Condition { get; set; }
+        public WorkflowEventTaskConditionEval? Condition { get; set; }
 
-        [NotNullValidator]
         [NotifyChildProperty]
-        public WorkflowEventTaskActionEval Action { get; set; }
+        public WorkflowEventTaskActionEval? Action { get; set; }
     }
 
     public enum TriggeredOn
@@ -99,7 +96,7 @@ namespace Signum.Entities.Workflow
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        public Lite<WorkflowEventTaskEntity> WorkflowEventTask { get; set; }
+        public Lite<WorkflowEventTaskEntity>? WorkflowEventTask { get; set; }
 
         public bool Result { get; set; }
     }
@@ -109,7 +106,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowEventTaskEntity)this.GetParentEntity();
+            var parent = (WorkflowEventTaskEntity)this.GetParentEntity()!;
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -141,7 +138,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowEventTaskEntity)this.GetParentEntity();
+            var parent = (WorkflowEventTaskEntity)this.GetParentEntity()!;
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");

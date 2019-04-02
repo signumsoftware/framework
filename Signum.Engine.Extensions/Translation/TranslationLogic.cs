@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -32,18 +32,21 @@ namespace Signum.Engine.Translation
                 PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
                 
                 if (countLocalizationHits)
-                    DescriptionManager.NotLocalizedMemeber += DescriptionManager_NotLocalizedMemeber;
+                    DescriptionManager.NotLocalizedMember += DescriptionManager_NotLocalizedMemeber;
             }
         }
 
-        private static void DescriptionManager_NotLocalizedMemeber(CultureInfo ci, Type type, MemberInfo mi)
+        private static void DescriptionManager_NotLocalizedMemeber(CultureInfo ci, MemberInfo mi)
         {
             if (UserEntity.Current == null)
                 return;
-            
-            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(mi?.ReflectedType ?? type);
 
-            if (mi == null)
+            var pi = mi as PropertyInfo;
+            var type = pi?.ReflectedType ?? mi as Type;
+
+            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(type!);
+
+            if (pi == null)
                 typeOccurrences.Ocurrences++;
             else
                 typeOccurrences.Members.AddOrUpdate(mi, 1, (id, count) => count + 1);
@@ -128,7 +131,7 @@ namespace Signum.Engine.Translation
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null)));
+            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null!)));
 
             return result;
         }

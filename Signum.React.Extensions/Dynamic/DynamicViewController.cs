@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
@@ -36,7 +36,7 @@ namespace Signum.React.Dynamic
         }
 
         [HttpGet("api/dynamic/selector/{typeName}")]
-        public DynamicViewSelectorEntity GetDynamicViewSelector(string typeName)
+        public DynamicViewSelectorEntity? GetDynamicViewSelector(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);
             return DynamicViewLogic.DynamicViewSelectors.Value.TryGetC(type);

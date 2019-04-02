@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -72,7 +72,7 @@ namespace Signum.Engine.Files
         byte[] ReadAllBytes(IFilePath fp);
         Stream OpenRead(IFilePath fp);
         void MoveFile(IFilePath ofp, IFilePath nfp);
-        string ConfigErrors();
+        string? ConfigErrors();
         PrefixPair GetPrefixPair(IFilePath efp);
     }
 
@@ -110,8 +110,10 @@ namespace Signum.Engine.Files
 
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
-        public FileTypeAlgorithm()
+        public FileTypeAlgorithm(Func<IFilePath, PrefixPair> getPrefixPair)
         {
+            this.GetPrefixPair = getPrefixPair;
+            
             WeakFileReference = false;
             CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
 
@@ -124,18 +126,17 @@ namespace Signum.Engine.Files
               "{0}({1}){2}".FormatWith(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
 
         
-        public string ConfigErrors()
+        public string? ConfigErrors()
         {
-            string error = null;
-
+            string? error = null;
             if (GetPrefixPair == null)
                 error = "GetPrefixPair";
 
             if (!WeakFileReference && CalculateSuffix == null)
-                error = ", ".CombineIfNotEmpty(error, "CalculateSufix");
+                error = ", ".Combine(error, "CalculateSufix");
 
             if (RenameOnCollision && RenameAlgorithm == null)
-                error = ", ".CombineIfNotEmpty(error, "RenameAlgorithm");
+                error = ", ".Combine(error, "RenameAlgorithm");
 
             if (error.HasText())
                 error += " not set";
@@ -170,7 +171,7 @@ namespace Signum.Engine.Files
 
         public virtual void SaveFileInDisk(IFilePath fp)
         {
-            string fullPhysicalPath = null;
+            string? fullPhysicalPath = null;
             try
             {
                 string path = Path.GetDirectoryName(fp.FullPhysicalPath());
@@ -178,7 +179,7 @@ namespace Signum.Engine.Files
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath(), fp.BinaryFile);
-                fp.BinaryFile = null;
+                fp.BinaryFile = null!;
             }
             catch (IOException ex)
             {
@@ -223,7 +224,7 @@ namespace Signum.Engine.Files
             return this.GetPrefixPair(efp);
         }
 
-        public Action<IFilePath> OnValidateFile { get; set; }
+        public Action<IFilePath>? OnValidateFile { get; set; }
         public int? MaxSizeInBytes { get; set; }
         public bool OnlyImages { get; set; }
 
@@ -238,7 +239,7 @@ namespace Signum.Engine.Files
 
             if (MaxSizeInBytes != null)
             {
-                if (fp.BinaryFile.Length > MaxSizeInBytes)
+                if (fp.BinaryFile!.Length > MaxSizeInBytes)
                     throw new ApplicationException(FileMessage.File0IsTooBigTheMaximumSizeIs1.NiceToString(fp.FileName, ((long)fp.BinaryFile.Length).ToComputerSize()));
             }
 

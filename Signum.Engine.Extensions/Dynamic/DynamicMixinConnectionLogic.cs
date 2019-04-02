@@ -51,11 +51,7 @@ namespace Signum.Engine.Dynamic
                 var mixins = !Administrator.ExistsTable<DynamicMixinConnectionEntity>()?  new List<DynamicMixinConnectionEntity>() : ExecutionMode.Global().Using(a => Database.Query<DynamicMixinConnectionEntity>().ToList());
                 var dlg = new DynamicMixinConnectionLogicGenerator(DynamicCode.CodeGenEntitiesNamespace, mixins, DynamicCode.Namespaces);
                 var content = dlg.GetFileCode();
-                result.Add(new CodeFile
-                {
-                    FileName = "CodeGenMixinLogic.cs",
-                    FileContent = content
-                });
+                result.Add(new CodeFile("CodeGenMixinLogic.cs", content));
             }
             finally
             {
@@ -71,8 +67,6 @@ namespace Signum.Engine.Dynamic
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public List<DynamicMixinConnectionEntity> Mixins { get; private set; }
-
-        public Dictionary<string, string> AlreadyTranslated { get; set; }
 
         public DynamicMixinConnectionLogicGenerator(string @namespace, List<DynamicMixinConnectionEntity> mixins, HashSet<string> usings)
         {

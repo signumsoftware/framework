@@ -11,16 +11,16 @@ namespace Signum.Entities.Mailing
     public class SendEmailTaskEntity : Entity, ITaskEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<EmailTemplateEntity> EmailTemplate { get; set; }
 
         [ImplementedByAll]
         public Lite<Entity> UniqueTarget { get; set; }
 
-        public Lite<UserQueryEntity> TargetsFromUserQuery { get; set; }
+        public Lite<UserQueryEntity>? TargetsFromUserQuery { get; set; }
 
         public ModelConverterSymbol ModelConverter { get; set; }
 

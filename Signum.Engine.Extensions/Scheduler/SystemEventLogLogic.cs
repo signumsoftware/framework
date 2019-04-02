@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Scheduler;
@@ -47,7 +47,7 @@ namespace Signum.Engine.Scheduler
             Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static bool Log(string eventType, ExceptionEntity exception = null)
+        public static bool Log(string eventType, ExceptionEntity? exception = null)
         {
             if (!Started)
                 return false;

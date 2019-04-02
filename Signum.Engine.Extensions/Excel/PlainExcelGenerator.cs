@@ -205,7 +205,7 @@ namespace Signum.Engine.Excel
                     from r in results
                     select (from c in members
                             let template = formats.TryGetC(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
-                            select CellBuilder.Cell(c.Getter(r), template)).ToRow()
+                            select CellBuilder.Cell(c.Getter!(r), template)).ToRow()
                 }.ToSheetData());
 
                 workbookPart.Workbook.Save();

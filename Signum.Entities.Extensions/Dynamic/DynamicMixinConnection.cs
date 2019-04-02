@@ -8,10 +8,10 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicMixinConnectionEntity : Entity
     {
-        [NotNullValidator]
+        
         public Lite<TypeEntity> EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 100)]
+        [StringLengthValidator(Max = 100)]
         public string MixinName { get; set; }
 
         static Expression<Func<DynamicMixinConnectionEntity, string>> ToStringExpression = @this => @this.EntityType + " - " + @this.MixinName;

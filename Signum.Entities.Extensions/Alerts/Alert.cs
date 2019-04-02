@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
@@ -10,7 +10,7 @@ namespace Signum.Entities.Alerts
     public class AlertEntity : Entity
     {
         [ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
+        public Lite<Entity>? Target { get; set; }
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
@@ -19,25 +19,25 @@ namespace Signum.Entities.Alerts
 
         public DateTime? AttendedDate { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Title { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Title { get; set; }
 
         [StringLengthValidator(Min = 1, MultiLine = true)]
         public string Text { get; set; }
 
-        public Lite<IUserEntity> CreatedBy { get; set; }
+        public Lite<IUserEntity>? CreatedBy { get; set; }
 
-        public Lite<IUserEntity> Recipient { get; set; }
+        public Lite<IUserEntity>? Recipient { get; set; }
 
-        public Lite<IUserEntity> AttendedBy { get; set; }
+        public Lite<IUserEntity>? AttendedBy { get; set; }
 
-        public AlertTypeEntity AlertType { get; set; }
+        public AlertTypeEntity? AlertType { get; set; }
 
         public AlertState State { get; set; }
 
         public override string ToString()
         {
-            return Text.FirstNonEmptyLine().Etc(100);
+            return Text.FirstNonEmptyLine()?.Etc(100)!;
         }
 
         static Expression<Func<AlertEntity, bool>> AttendedExpression =

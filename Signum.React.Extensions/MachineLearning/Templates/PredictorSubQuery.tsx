@@ -83,7 +83,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
     if (isInputOutput(ctx.value.usage)) {
       initializeColumn(p.ctx.findParent(PredictorEntity), col);
     } else {
-      col.encoding = null;
+      col.encoding = null!;
       col.nullHandling = null;
     }
 

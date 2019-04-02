@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,11 +18,11 @@ namespace Signum.Engine.Help
 
     public abstract class BaseHelp
     {
-        public abstract string IsAllowed();
+        public abstract string? IsAllowed();
 
         public void AssertAllowed()
         {
-            string error = IsAllowed();
+            string? error = IsAllowed();
             if (error != null)
                 throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().FormatWith(this.GetType(), error));
         }
@@ -34,7 +34,7 @@ namespace Signum.Engine.Help
     {
         public readonly string UniqueName;
         public readonly string Title;
-        public readonly string Description;
+        public readonly string? Description;
         public readonly CultureInfo Culture;
         public readonly AppendixHelpEntity Entity;
 
@@ -47,7 +47,7 @@ namespace Signum.Engine.Help
             Entity = entity;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return null;
         }
@@ -61,14 +61,14 @@ namespace Signum.Engine.Help
     public class NamespaceHelp : BaseHelp
     {
         public readonly string Namespace;
-        public readonly string Before;
+        public readonly string? Before;
         public readonly string Title;
-        public readonly string Description;
+        public readonly string? Description;
         public readonly CultureInfo Culture;
         public readonly NamespaceHelpEntity Entity;
         public readonly Type[] Types;
 
-        public NamespaceHelp(string @namespace, CultureInfo culture, NamespaceHelpEntity entity, Type[] types)
+        public NamespaceHelp(string @namespace, CultureInfo culture, NamespaceHelpEntity? entity, Type[] types)
         {
             Culture = culture;
             Namespace = @namespace;
@@ -77,7 +77,7 @@ namespace Signum.Engine.Help
 
             var clean = @namespace.Replace(".Entities", "");
 
-            Title = entity?.Let(a => a.Title.DefaultText(null)) ?? clean.TryAfterLast('.') ?? clean;
+            Title = entity?.Let(a => a.Title.DefaultToNull()) ?? clean.TryAfterLast('.') ?? clean;
 
             Before = clean.TryBeforeLast('.');
 
@@ -90,7 +90,7 @@ namespace Signum.Engine.Help
         }
 
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             Schema s = Schema.Current;
 
@@ -115,13 +115,13 @@ namespace Signum.Engine.Help
         public readonly Lazy<EntityHelpEntity> Entity;
 
         public readonly string Info;
-        public readonly string Description;
+        public readonly string? Description;
 
         public readonly Dictionary<PropertyRoute, PropertyHelp> Properties;
         public readonly Dictionary<OperationSymbol, OperationHelp> Operations;
         public readonly Dictionary<object, QueryHelp> Queries;
 
-        public EntityHelp(Type type, CultureInfo culture, EntityHelpEntity entity)
+        public EntityHelp(Type type, CultureInfo culture, EntityHelpEntity? entity)
         {
             Type = type;
             Culture = culture;
@@ -188,7 +188,7 @@ namespace Signum.Engine.Help
             }));
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return Schema.Current.IsAllowed(Type, inUserInterface: true);
         }
@@ -212,11 +212,11 @@ namespace Signum.Engine.Help
         }
 
         public readonly string Info;
-        public string UserDescription;
+        public string? UserDescription;
         public readonly PropertyRoute PropertyRoute;
-        public PropertyInfo PropertyInfo { get { return PropertyRoute.PropertyInfo; } }
+        public PropertyInfo PropertyInfo { get { return PropertyRoute.PropertyInfo!; } }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return PropertyRoute.IsAllowed();
         }
@@ -232,7 +232,7 @@ namespace Signum.Engine.Help
         public readonly OperationSymbol OperationSymbol;
         public readonly Type Type;
         public readonly string Info;
-        public string UserDescription;
+        public string? UserDescription;
 
         public OperationHelp(OperationSymbol operationSymbol, Type type)
         {
@@ -242,7 +242,7 @@ namespace Signum.Engine.Help
             this.Info = HelpGenerator.GetOperationHelp(type, operationSymbol);
         }
         
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return OperationLogic.OperationAllowed(OperationSymbol, this.Type, inUserInterface: true) ? null :
                 OperationMessage.Operation01IsNotAuthorized.NiceToString(this.OperationSymbol.NiceToString(), this.OperationSymbol.Key);
@@ -261,11 +261,11 @@ namespace Signum.Engine.Help
 
         public readonly bool HasEntity;
         public readonly Lazy<QueryHelpEntity> Entity;
-        public readonly string UserDescription;
+        public readonly string? UserDescription;
         public readonly string Info;
         public readonly Dictionary<string, QueryColumnHelp> Columns;
 
-        public QueryHelp(object queryName, CultureInfo ci, QueryHelpEntity entity)
+        public QueryHelp(object queryName, CultureInfo ci, QueryHelpEntity? entity)
         {
             QueryName = queryName;
             Culture = ci;
@@ -313,7 +313,7 @@ namespace Signum.Engine.Help
             return "Query " + QueryUtils.GetKey(this.QueryName);
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return QueryLogic.Queries.QueryAllowed(this.QueryName, false) ? null :
                 "Access to query {0} not allowed".FormatWith(QueryUtils.GetKey(this.QueryName)); 
@@ -325,7 +325,7 @@ namespace Signum.Engine.Help
         public ColumnDescriptionFactory Column;
         public string NiceName; 
         public string Info;
-        public string UserDescription;
+        public string? UserDescription;
 
         public QueryColumnHelp(ColumnDescriptionFactory column, string niceName, string info)
         {
@@ -334,7 +334,7 @@ namespace Signum.Engine.Help
             this.Info = info;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             return Column.IsAllowed();
         }

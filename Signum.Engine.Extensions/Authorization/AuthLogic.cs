@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -21,23 +21,23 @@ namespace Signum.Engine.Authorization
     public static class AuthLogic
     {
         public static event Action<UserEntity> UserLogingIn;
-        public static event Func<string> LoginMessage;
+        public static event Func<string?> LoginMessage;
         public static ICustomAuthorizer Authorizer;
 
-        public static string SystemUserName { get; private set; }
-        static ResetLazy<UserEntity> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
+        public static string? SystemUserName { get; private set; }
+        static ResetLazy<UserEntity?> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
             Database.Query<UserEntity>().Where(u => u.UserName == SystemUserName)
             .SingleEx(() => "SystemUser with name '{0}'".FormatWith(SystemUserName)));
-        public static UserEntity SystemUser
+        public static UserEntity? SystemUser
         {
             get { return systemUserLazy.Value; }
         }
 
-        public static string AnonymousUserName { get; private set; }
-        static ResetLazy<UserEntity> anonymousUserLazy = GlobalLazy.WithoutInvalidations(() => AnonymousUserName == null ? null :
+        public static string? AnonymousUserName { get; private set; }
+        static ResetLazy<UserEntity?> anonymousUserLazy = GlobalLazy.WithoutInvalidations(() => AnonymousUserName == null ? null :
             Database.Query<UserEntity>().Where(u => u.UserName == AnonymousUserName)
             .SingleEx(() => "AnonymousUser with name '{0}'".FormatWith(AnonymousUserName)));
-        public static UserEntity AnonymousUser
+        public static UserEntity? AnonymousUser
         {
             get { return anonymousUserLazy.Value; }
         }
@@ -55,10 +55,10 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null!, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, string systemUserName, string anonymousUserName)
+        public static void Start(SchemaBuilder sb, string? systemUserName, string? anonymousUserName)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -239,14 +239,14 @@ namespace Signum.Engine.Authorization
 
         static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
 
-        public static IDisposable Disable()
+        public static IDisposable? Disable()
         {
             if (tempDisabled.Value) return null;
             tempDisabled.Value = true;
             return new Disposable(() => tempDisabled.Value = false);
         }
 
-        public static IDisposable Enable()
+        public static IDisposable? Enable()
         {
             if (!tempDisabled.Value) return null;
             tempDisabled.Value = false;
@@ -345,7 +345,7 @@ namespace Signum.Engine.Authorization
         }
 
         public static event Func<bool, XElement> ExportToXml;
-        public static event Func<XElement, Dictionary<string, Lite<RoleEntity>>, Replacements, SqlPreCommand> ImportFromXml;
+        public static event Func<XElement, Dictionary<string, Lite<RoleEntity>>, Replacements, SqlPreCommand?> ImportFromXml;
 
         public static XDocument ExportRules(bool exportAll = false)
         {
@@ -362,7 +362,7 @@ namespace Signum.Engine.Authorization
                      ExportToXml.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
-        public static SqlPreCommand ImportRulesScript(XDocument doc, bool interactive)
+        public static SqlPreCommand? ImportRulesScript(XDocument doc, bool interactive)
         {
             Replacements replacements = new Replacements { Interactive = interactive };
 
@@ -407,7 +407,7 @@ namespace Signum.Engine.Authorization
                     new SqlPreCommandSimple("-- Alien role {0} not configured!!".FormatWith(n))
                 ).Combine(Spacing.Simple);
 
-            SqlPreCommand result = ImportFromXml.GetInvocationListTyped()
+            SqlPreCommand? result = ImportFromXml.GetInvocationListTyped()
                 .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
 
             if (replacements.Values.Any(a => a.Any()))
@@ -434,7 +434,7 @@ namespace Signum.Engine.Authorization
                 SubRoles = x.Attribute("Contains").Value.SplitNoEmpty(',' )
             }).ToList();
 
-            var roles = roleInfos.ToDictionary(a => a.Name, a => new RoleEntity { Name = a.Name, MergeStrategy = a.MergeStrategy });
+            var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity { Name = a.Name!, MergeStrategy = a.MergeStrategy }); /*CSBUG*/
 
             foreach (var ri in roleInfos)
             {
@@ -485,7 +485,7 @@ namespace Signum.Engine.Authorization
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
                        new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
                        roleInsertsDeletes,
-                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT")).OpenSqlFileRetry();
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
                     Console.WriteLine("Press [Enter] when executed...");
                     Console.ReadLine();
@@ -522,7 +522,7 @@ namespace Signum.Engine.Authorization
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
                        new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
                        roleRelationships,
-                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT")).OpenSqlFileRetry();
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
                     Console.WriteLine("Press [Enter] when executed...");
                     Console.ReadLine();
@@ -568,7 +568,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Action syncRoles = null;
+            Action? syncRoles = null;
             Action import = () =>
             {
                 Console.Write("Reading {0}...".FormatWith(fileName));
@@ -576,7 +576,7 @@ namespace Signum.Engine.Authorization
                 Console.WriteLine("Ok");
 
                 Console.WriteLine("Generating SQL script to import auth rules (without modifying the role graph or entities):");
-                SqlPreCommand command;
+                SqlPreCommand? command;
                 try
                 {
                     command = ImportRulesScript(doc, interactive: true);
@@ -633,7 +633,7 @@ namespace Signum.Engine.Authorization
             action?.Invoke();
         }
 
-        public static string OnLoginMessage()
+        public static string? OnLoginMessage()
         {
             if (AuthLogic.LoginMessage != null)
                 return AuthLogic.LoginMessage();

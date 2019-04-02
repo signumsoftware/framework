@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Engine.Maps;
 using Signum.Entities.Files;
@@ -17,15 +17,15 @@ namespace Signum.Engine.Files
     public static class FilePathLogic
     {
         static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
-            fp => fp == null ? null: new WebImage { FullWebPath = fp.FullWebPath() };
+            fp => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
-        public static WebImage WebImage(this FilePathEntity fp)
+        public static WebImage? WebImage(this FilePathEntity fp)
         {
             return WebImageExpression.Evaluate(fp);
         }
 
         static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath() };
+           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
         public static WebDownload WebDownload(this FilePathEntity fp)
         {
@@ -34,7 +34,7 @@ namespace Signum.Engine.Files
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -102,7 +102,7 @@ namespace Signum.Engine.Files
                return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
         }
 
-        public static IDisposable FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
+        public static IDisposable? FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
         {
             if (!unsafeMode.Value)
             {
@@ -123,7 +123,7 @@ namespace Signum.Engine.Files
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
-        public static IDisposable UnsafeMode()
+        public static IDisposable? UnsafeMode()
         {
             if (unsafeMode.Value) return null;
             unsafeMode.Value = true;

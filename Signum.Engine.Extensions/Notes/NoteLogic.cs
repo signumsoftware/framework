@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -83,7 +83,7 @@ namespace Signum.Engine.Notes
         }
 
 
-        public static NoteEntity CreateNote<T>(this Lite<T> entity, string text, NoteTypeEntity noteType,  Lite<UserEntity> user = null, string title = null) where T : class, IEntity
+        public static NoteEntity? CreateNote<T>(this Lite<T> entity, string text, NoteTypeEntity noteType, Lite<UserEntity>? user = null, string? title = null) where T : class, IEntity
         {
             if (started == false)
                 return null;

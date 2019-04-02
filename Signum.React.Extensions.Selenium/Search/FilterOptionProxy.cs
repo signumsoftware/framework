@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
@@ -47,12 +47,12 @@ namespace Signum.React.Selenium
 
         public ValueLineProxy ValueLine()
         {
-            return new ValueLineProxy(this.Element, null);
+            return new ValueLineProxy(this.Element, null!);
         }
 
         public EntityLineProxy EntityLine()
         {
-            return new EntityLineProxy(this.Element, null);
+            return new EntityLineProxy(this.Element, null!);
         }
 
         internal void SetValue(object value)

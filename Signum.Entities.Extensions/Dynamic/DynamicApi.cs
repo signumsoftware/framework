@@ -13,7 +13,7 @@ namespace Signum.Entities.Dynamic
     public class DynamicApiEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]

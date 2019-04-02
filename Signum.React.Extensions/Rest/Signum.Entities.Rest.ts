@@ -11,15 +11,15 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const QueryStringValueEmbedded = new Type<QueryStringValueEmbedded>("QueryStringValueEmbedded");
 export interface QueryStringValueEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryStringValueEmbedded";
-  key?: string | null;
-  value?: string | null;
+  key: string;
+  value: string;
 }
 
 export const RestApiKeyEntity = new Type<RestApiKeyEntity>("RestApiKey");
 export interface RestApiKeyEntity extends Entities.Entity {
   Type: "RestApiKey";
-  user?: Entities.Lite<Authorization.UserEntity> | null;
-  apiKey?: string | null;
+  user: Entities.Lite<Authorization.UserEntity>;
+  apiKey: string;
 }
 
 export module RestApiKeyOperation {
@@ -37,17 +37,17 @@ export interface RestLogEntity extends Entities.Entity {
   replayDate: string | null;
   requestBody: string;
   queryString: Entities.MList<QueryStringValueEmbedded>;
-  user: Entities.Lite<Basics.IUserEntity> | null;
-  userHostAddress: string | null;
-  userHostName: string | null;
-  referrer: string | null;
-  controller: string;
-  controllerName: string | null;
+  user: Entities.Lite<Basics.IUserEntity>;
+  userHostAddress: string;
+  userHostName: string;
+  referrer: string;
+  controller: string | null;
+  controllerName: string;
   action: string;
-  machineName: string | null;
-  applicationName: string | null;
-  exception: Entities.Lite<Basics.ExceptionEntity> | null;
-  responseBody: string | null;
+  machineName: string;
+  applicationName: string;
+  exception: Entities.Lite<Basics.ExceptionEntity>;
+  responseBody: string;
   replayState: RestLogReplayState | null;
   changedPercentage: number | null;
   allowReplay: boolean;

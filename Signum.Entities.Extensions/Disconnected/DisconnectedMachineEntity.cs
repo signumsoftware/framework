@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.ComponentModel;
@@ -12,7 +12,7 @@ namespace Signum.Entities.Disconnected
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string MachineName { get; set; }
 
         public DisconnectedMachineState State { get; set; }
@@ -38,15 +38,15 @@ namespace Signum.Entities.Disconnected
             return ToStringExpression.Evaluate(this);
         }
 
-        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>> CurrentVariable =
-            Statics.SessionVariable<Lite<DisconnectedMachineEntity>>("disconectedMachine");
-        public static Lite<DisconnectedMachineEntity> Current
+        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>?> CurrentVariable =
+            Statics.SessionVariable<Lite<DisconnectedMachineEntity>?>("disconectedMachine");
+        public static Lite<DisconnectedMachineEntity>? Current
         {
             get { return CurrentVariable.Value; }
             set { CurrentVariable.Value = value; }
         }
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(SeedMax) && SeedMax <= SeedMin)
                 return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi, NicePropertyName(() => SeedMin));
@@ -87,7 +87,7 @@ namespace Signum.Entities.Disconnected
 
         public long? LastOnlineTicks { get; set; }
 
-        public Lite<DisconnectedMachineEntity> DisconnectedMachine { get; set; }
+        public Lite<DisconnectedMachineEntity>? DisconnectedMachine { get; set; }
     }
 
     [Serializable]

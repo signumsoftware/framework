@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -71,7 +71,7 @@ namespace Signum.React.Profiler
         }
 
         [HttpGet("api/profilerHeavy/stackTrace/{fullIndex}")]
-        public List<StackTraceTS> StackTrace(string fullIndex)
+        public List<StackTraceTS>? StackTrace(string fullIndex)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
 
@@ -94,7 +94,7 @@ namespace Signum.React.Profiler
 
             if (e.StackTrace != null)
                 return (from i in 0.To(e.StackTrace.FrameCount)
-                        let sf = e.StackTrace.GetFrame(i)
+                        let sf = e.StackTrace!.GetFrame(i)
                         let mi = sf.GetMethod()
                         let t = mi.DeclaringType
                         select new StackTraceTS
@@ -111,7 +111,7 @@ namespace Signum.React.Profiler
         }
 
         [HttpGet("api/profilerHeavy/download")]
-        public FileStreamResult Download(string indices = null)
+        public FileStreamResult Download(string? indices = null)
         {
             XDocument doc = indices == null ?
              HeavyProfiler.ExportXml() :
@@ -176,7 +176,7 @@ namespace Signum.React.Profiler
             public string Color;
             public int Depth;
             public int AsyncDepth;
-            public string AdditionalData;
+            public string? AdditionalData;
             public string FullIndex;
             public bool IsFinished;
 
@@ -218,7 +218,7 @@ namespace Signum.React.Profiler
 
         public class StackTraceTS
         {
-            public string Color;
+            public string? Color;
             public string Namespace;
             public string Type;
             public string Method;

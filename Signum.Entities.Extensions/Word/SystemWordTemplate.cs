@@ -7,7 +7,7 @@ namespace Signum.Entities.Word
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public class SystemWordTemplateEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Max = 200), UniqueIndex]
+        [StringLengthValidator(Max = 200), UniqueIndex]
         public string FullClassName { get; set; }
 
         static readonly Expression<Func<SystemWordTemplateEntity, string>> ToStringExpression = e => e.FullClassName;

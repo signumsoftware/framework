@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium.Remote;
 using Signum.Engine;
 using Signum.Entities;
@@ -26,7 +26,7 @@ namespace Signum.React.Selenium
             return this.Element;
         }
 
-        public Action OnDisposed;
+        public Action? OnDisposed;
         public void Dispose()
         {
             OnDisposed?.Invoke();
@@ -41,7 +41,7 @@ namespace Signum.React.Selenium
         {
             var attr = MainControl.Find().GetAttribute("data-main-entity");
 
-            return EntityInfoProxy.Parse(attr);
+            return EntityInfoProxy.Parse(attr)!;
         }
 
         public T RetrieveEntity()

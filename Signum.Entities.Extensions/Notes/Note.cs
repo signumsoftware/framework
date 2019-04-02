@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.ComponentModel;
@@ -8,19 +8,18 @@ namespace Signum.Entities.Notes
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class NoteEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Title { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Title { get; set; }
 
         [ImplementedByAll]
-        [NotNullValidator]
         public Lite<Entity> Target { get; set; }
 
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
+        [StringLengthValidator(Min = 1, MultiLine = true)]
         public string Text { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<IUserEntity> CreatedBy { get; set; } = UserHolder.Current.ToLite();
 
         public override string ToString()
@@ -28,7 +27,7 @@ namespace Signum.Entities.Notes
             return " - ".Combine(Title, Text.FirstNonEmptyLine()).Etc(100);
         }
 
-        public NoteTypeEntity NoteType { get; set; }
+        public NoteTypeEntity? NoteType { get; set; }
     }
 
     [AutoInit]

@@ -18,9 +18,9 @@ export type MessageLengthExceeded =
 export const MultipleSMSModel = new Type<MultipleSMSModel>("MultipleSMSModel");
 export interface MultipleSMSModel extends Entities.ModelEntity {
   Type: "MultipleSMSModel";
-  message?: string | null;
-  from?: string | null;
-  certified?: boolean;
+  message: string;
+  from: string;
+  certified: boolean;
 }
 
 export module SMSCharactersMessage {
@@ -38,26 +38,26 @@ export module SMSCharactersMessage {
 export const SMSConfigurationEmbedded = new Type<SMSConfigurationEmbedded>("SMSConfigurationEmbedded");
 export interface SMSConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "SMSConfigurationEmbedded";
-  defaultCulture?: Basics.CultureInfoEntity | null;
+  defaultCulture: Basics.CultureInfoEntity;
 }
 
 export const SMSMessageEntity = new Type<SMSMessageEntity>("SMSMessage");
 export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
   Type: "SMSMessage";
-  template?: Entities.Lite<SMSTemplateEntity> | null;
-  message?: string | null;
-  editableMessage?: boolean;
-  from?: string | null;
-  sendDate?: string | null;
-  state?: SMSMessageState;
-  destinationNumber?: string | null;
-  messageID?: string | null;
-  certified?: boolean;
-  sendPackage?: Entities.Lite<SMSSendPackageEntity> | null;
-  updatePackage?: Entities.Lite<SMSUpdatePackageEntity> | null;
-  updatePackageProcessed?: boolean;
-  referred?: Entities.Lite<Entities.Entity> | null;
-  exception?: Entities.Lite<Signum.ExceptionEntity> | null;
+  template: Entities.Lite<SMSTemplateEntity>;
+  message: string;
+  editableMessage: boolean;
+  from: string;
+  sendDate: string | null;
+  state: SMSMessageState;
+  destinationNumber: string;
+  messageID: string | null;
+  certified: boolean;
+  sendPackage: Entities.Lite<SMSSendPackageEntity>;
+  updatePackage: Entities.Lite<SMSUpdatePackageEntity>;
+  updatePackageProcessed: boolean;
+  referred: Entities.Lite<Entities.Entity>;
+  exception: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export module SMSMessageOperation {
@@ -84,7 +84,7 @@ export type SMSMessageState =
   "Failed";
 
 export interface SMSPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
-  name?: string | null;
+  name: string | null;
 }
 
 export const SMSSendPackageEntity = new Type<SMSSendPackageEntity>("SMSSendPackage");
@@ -95,17 +95,17 @@ export interface SMSSendPackageEntity extends SMSPackageEntity {
 export const SMSTemplateEntity = new Type<SMSTemplateEntity>("SMSTemplate");
 export interface SMSTemplateEntity extends Entities.Entity {
   Type: "SMSTemplate";
-  name?: string | null;
-  certified?: boolean;
-  editableMessage?: boolean;
-  associatedType?: Signum.TypeEntity | null;
+  name: string;
+  certified: boolean;
+  editableMessage: boolean;
+  associatedType: Signum.TypeEntity | null;
   messages: Entities.MList<SMSTemplateMessageEmbedded>;
-  from?: string | null;
-  messageLengthExceeded?: MessageLengthExceeded;
-  removeNoSMSCharacters?: boolean;
-  active?: boolean;
-  startDate?: string;
-  endDate?: string | null;
+  from: string;
+  messageLengthExceeded: MessageLengthExceeded;
+  removeNoSMSCharacters: boolean;
+  active: boolean;
+  startDate: string;
+  endDate: string | null;
 }
 
 export module SMSTemplateMessage {
@@ -119,9 +119,8 @@ export module SMSTemplateMessage {
 export const SMSTemplateMessageEmbedded = new Type<SMSTemplateMessageEmbedded>("SMSTemplateMessageEmbedded");
 export interface SMSTemplateMessageEmbedded extends Entities.EmbeddedEntity {
   Type: "SMSTemplateMessageEmbedded";
-  template?: SMSTemplateEntity | null;
-  cultureInfo?: Basics.CultureInfoEntity | null;
-  message?: string | null;
+  cultureInfo: Basics.CultureInfoEntity;
+  message: string;
 }
 
 export module SMSTemplateOperation {

@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Files;
@@ -38,7 +38,7 @@ namespace Signum.Engine.Mailing
             {
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
                 {
-                    var fileName = a.FileName.IsEmpty() ? a.File.FileName : GetTemplateString(a.FileName, ref a.FileNameNode, ctx);
+                    var fileName = string.IsNullOrEmpty(a.FileName) ? a.File.FileName : GetTemplateString(a.FileName, ref a.FileNameNode, ctx);
                     
                     return new List<EmailAttachmentEmbedded>
                     {
@@ -53,7 +53,7 @@ namespace Signum.Engine.Mailing
             });
         }
 
-        private static string GetTemplateString(string title, ref object titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
+        private static string GetTemplateString(string title, ref object? titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
         {
             var block = titleNode != null ? (EmailTemplateParser.BlockNode)titleNode :
                 (EmailTemplateParser.BlockNode)(titleNode = EmailTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
@@ -61,15 +61,15 @@ namespace Signum.Engine.Mailing
             return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { SystemEmail = ctx.SystemEmail });
         }
 
-        static string ImageAttachmentFileName_StaticPropertyValidation(ImageAttachmentEntity WordAttachment, PropertyInfo pi)
+        static string? ImageAttachmentFileName_StaticPropertyValidation(ImageAttachmentEntity WordAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)WordAttachment.GetParentEntity();
+            var template = (EmailTemplateEntity)WordAttachment.GetParentEntity()!;
             if (template != null && WordAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
                     WordAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, WordAttachment.FileName, out string errorMessage);
-                    return errorMessage.DefaultText(null);
+                    return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)
                 {

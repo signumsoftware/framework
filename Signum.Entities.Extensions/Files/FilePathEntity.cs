@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -35,7 +35,7 @@ namespace Signum.Entities.Files
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
+        [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -71,13 +71,12 @@ namespace Signum.Entities.Files
             get { return FileLengthStringExpression.Evaluate(this); }
         }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
+        [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }
 
         [Ignore]
         public string CalculatedDirectory { get; set; }
 
-        [NotNullValidator]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
@@ -111,7 +110,7 @@ namespace Signum.Entities.Files
 
         public static Func<string, string> ToAbsolute = str => str;
 
-        public string FullWebPath()
+        public string? FullWebPath()
         {
             var pp = this.GetPrefixPair();
 

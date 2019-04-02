@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Omnibox;
@@ -84,7 +84,7 @@ namespace Signum.Entities.Help
 
         public Type Type { get; set; }
         public string SearchString { get; set; }
-        public OmniboxMatch SecondMatch { get; set; }
+        public OmniboxMatch? SecondMatch { get; set; }
 
         public override string ToString()
         {

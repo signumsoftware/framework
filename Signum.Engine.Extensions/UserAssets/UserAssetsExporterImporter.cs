@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -95,7 +95,7 @@ namespace Signum.Engine.UserAssets
                 return QueryLogic.GetQueryEntity(qn);
             }
 
-            QueryEntity IFromXmlContext.TryGetQuery(string queryKey)
+            QueryEntity? IFromXmlContext.TryGetQuery(string queryKey)
             {
                 var qn = QueryLogic.TryToQueryName(queryKey);
 
@@ -103,11 +103,6 @@ namespace Signum.Engine.UserAssets
                     return null;
 
                 return QueryLogic.GetQueryEntity(qn);
-            }
-            
-            public PermissionSymbol GetPermission(string permissionKey)
-            {
-                return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
 
             public IUserAssetEntity GetEntity(Guid guid)
@@ -168,7 +163,7 @@ namespace Signum.Engine.UserAssets
                 return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
             }
 
-            public PermissionSymbol TryPermission(string permissionKey)
+            public PermissionSymbol? TryPermission(string permissionKey)
             {
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
@@ -216,7 +211,7 @@ namespace Signum.Engine.UserAssets
                 return QueryLogic.GetQueryEntity(qn);
             }
 
-            QueryEntity IFromXmlContext.TryGetQuery(string queryKey)
+            QueryEntity? IFromXmlContext.TryGetQuery(string queryKey)
             {
                 var qn = QueryLogic.TryToQueryName(queryKey);
 
@@ -286,7 +281,7 @@ namespace Signum.Engine.UserAssets
                 return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
             }
 
-            public PermissionSymbol TryPermission(string permissionKey)
+            public PermissionSymbol? TryPermission(string permissionKey)
             {
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }

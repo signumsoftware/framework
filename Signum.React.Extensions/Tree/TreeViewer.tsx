@@ -516,8 +516,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     var partial: Partial<MoveTreeModel> =
       over.position == "Middle" ? { newParent: over.node.lite, insertPlace: "LastNode" } :
-        over.position == "Top" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "Before", sibling: over.node.lite } :
-          over.position == "Bottom" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "After", sibling: over.node.lite } :
+        over.position == "Top" ? { newParent: nodeParent ? nodeParent.lite : undefined, insertPlace: "Before", sibling: over.node.lite } :
+          over.position == "Bottom" ? { newParent: nodeParent ? nodeParent.lite : undefined, insertPlace: "After", sibling: over.node.lite } :
             {};
 
     var toExpand = over.position == "Middle" ? over.node : nodeParent;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Processes;
 using Signum.Entities.Basics;
 
@@ -7,14 +7,14 @@ namespace Signum.Entities.SMS
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class SMSMessageEntity : Entity, IProcessLineDataEntity
     {
-        public Lite<SMSTemplateEntity> Template { get; set; }
+        public Lite<SMSTemplateEntity>? Template { get; set; }
 
-        [StringLengthValidator(AllowNulls=false, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string Message { get; set; }
 
         public bool EditableMessage { get; set; } = true;
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string From { get; set; }
 
         [SecondsPrecisionValidator]
@@ -22,18 +22,18 @@ namespace Signum.Entities.SMS
 
         public SMSMessageState State { get; set; } = SMSMessageState.Created;
 
-        [StringLengthValidator(AllowNulls = false, Min = 9), MultipleTelephoneValidator]
+        [StringLengthValidator(Min = 9), MultipleTelephoneValidator]
         public string DestinationNumber { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string MessageID { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? MessageID { get; set; }
 
         public bool Certified { get; set; }
 
-        public Lite<SMSSendPackageEntity> SendPackage { get; set; }
+        public Lite<SMSSendPackageEntity>? SendPackage { get; set; }
 
-        Lite<SMSUpdatePackageEntity> updatePackage;
-        public Lite<SMSUpdatePackageEntity> UpdatePackage
+        Lite<SMSUpdatePackageEntity>? updatePackage;
+        public Lite<SMSUpdatePackageEntity>? UpdatePackage
         {
             get { return updatePackage; }
             set
@@ -48,7 +48,7 @@ namespace Signum.Entities.SMS
         [ImplementedBy()]
         public Lite<Entity> Referred { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         public override string ToString()
         {
@@ -81,10 +81,9 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class MultipleSMSModel : ModelEntity
     {
-        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.SMSMaxTextLength)]
+        [StringLengthValidator(Max = SMSCharacters.SMSMaxTextLength)]
         public string Message { get; set; }
 
-        [StringLengthValidator(AllowNulls = false)]
         public string From { get; set; }
 
         public bool Certified { get; set; }

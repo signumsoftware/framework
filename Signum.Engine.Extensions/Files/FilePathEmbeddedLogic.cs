@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Entities.Files;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -12,32 +12,32 @@ namespace Signum.Engine.Files
 {
     public static class FilePathEmbeddedLogic
     {
-        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebImage>> WebImageExpression =
+        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebImage?>> WebImageExpression =
             (efp, ft) => efp == null ? null : new WebImage
             {
                 FullWebPath = efp.FullWebPath()
             };
         [ExpressionField]
-        public static WebImage WebImage(this FilePathEmbedded efp, FileTypeSymbol fileType)
+        public static WebImage? WebImage(this FilePathEmbedded efp, FileTypeSymbol fileType)
         {
             return WebImageExpression.Evaluate(efp, fileType);
         }
 
-        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebDownload>> WebDownloadExpression =
+        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebDownload?>> WebDownloadExpression =
            (efp, ft) => efp == null ? null : new WebDownload
            {
                FullWebPath = efp.FullWebPath(),
                FileName = efp.FileName
            };
         [ExpressionField]
-        public static WebDownload WebDownload(this FilePathEmbedded fp, FileTypeSymbol fileType)
+        public static WebDownload? WebDownload(this FilePathEmbedded fp, FileTypeSymbol fileType)
         {
             return WebDownloadExpression.Evaluate(fp, fileType);
         }
         
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathEmbeddedLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathEmbeddedLogic.Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -81,7 +81,7 @@ namespace Signum.Engine.Files
             var alg = efp.FileType.GetAlgorithm();
             alg.ValidateFile(efp);
             alg.SaveFile(efp);
-            efp.BinaryFile = null;
+            efp.BinaryFile = null!;
             return efp;
         }
 

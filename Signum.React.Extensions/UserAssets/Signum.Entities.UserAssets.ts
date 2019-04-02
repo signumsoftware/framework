@@ -21,7 +21,7 @@ export type EntityAction =
   "New";
 
 export interface IUserAssetEntity extends Entities.Entity {
-  guid?: string;
+  guid: string;
 }
 
 export const QueryTokenEmbedded = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
@@ -48,11 +48,11 @@ export module UserAssetPermission {
 export const UserAssetPreviewLineEmbedded = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
 export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   Type: "UserAssetPreviewLineEmbedded";
-  type?: Basics.TypeEntity | null;
-  text?: string | null;
-  action?: EntityAction;
-  overrideEntity?: boolean;
-  guid?: string;
+  type: Basics.TypeEntity | null;
+  text: string;
+  action: EntityAction;
+  overrideEntity: boolean;
+  guid: string;
 }
 
 export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");

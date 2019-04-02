@@ -54,7 +54,7 @@ namespace Signum.React.Selenium
             Disposing?.Invoke(OkPressed);
         }
 
-        public Action<bool> Disposing;
+        public Action<bool>? Disposing;
 
         public WebElementLocator OkButton
         {

@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
@@ -24,7 +24,7 @@ namespace Signum.Engine.Templating
         public struct SplittedToken
         {
             public string Token;
-            public string Format; 
+            public string? Format; 
         }
 
         public static SplittedToken? SplitToken(string formattedToken)
@@ -37,7 +37,7 @@ namespace Signum.Engine.Templating
             return new SplittedToken
             {
                 Token = tok.Groups["token"].Value.Replace(@"\:", ":"),
-                Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").DefaultText(null)
+                Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").DefaultToNull()
             };
         }
 
@@ -80,7 +80,7 @@ namespace Signum.Engine.Templating
             var filter = TemplateUtils.TokenOperationValueRegex.Match(expr);
             if (!filter.Success)
             {
-                return new ConditionCompare(ValueProviderBase.TryParse(expr, variable, parser));
+                return new ConditionCompare(ValueProviderBase.TryParse(expr, variable, parser)!);
             }
             else
             {
@@ -98,28 +98,28 @@ namespace Signum.Engine.Templating
             return tokenOrFormat.Replace(":", @"\:");
         }
 
-        public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
+        public static object? DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
             return rows.Select(r => r[column]).Distinct(SemiStructuralEqualityComparer.Comparer).SingleEx(
                 () => "No values for column {0}".FormatWith(column.Column.Token.FullKey()),
                 () => "Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
         }
 
-        internal class SemiStructuralEqualityComparer : IEqualityComparer<object>
+        internal class SemiStructuralEqualityComparer : IEqualityComparer<object?>
         {
             public static readonly SemiStructuralEqualityComparer Comparer = new SemiStructuralEqualityComparer();
 
-            ConcurrentDictionary<Type, List<Func<object, object>>> Cache = new ConcurrentDictionary<Type, List<Func<object, object>>>();
+            ConcurrentDictionary<Type, List<Func<object, object?>>> Cache = new ConcurrentDictionary<Type, List<Func<object, object?>>>();
 
-            public List<Func<object, object>> GetFieldGetters(Type type)
+            public List<Func<object, object?>> GetFieldGetters(Type type)
             {
                 return Cache.GetOrAdd(type, t =>
                     t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(f => !f.HasAttribute<IgnoreAttribute>())
-                    .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)).ToList());
+                    .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)!).ToList());
             }
 
-            bool IEqualityComparer<object>.Equals(object x, object y)
+            bool IEqualityComparer<object?>.Equals(object? x, object? y)
             {
                 if (x == null || y == null)
                     return x == null && y == null;
@@ -141,7 +141,7 @@ namespace Signum.Engine.Templating
                 return true;
             }
 
-            public int GetHashCode(object obj)
+            public int GetHashCode(object? obj)
             {
                 if (obj == null)
                     return 0;
@@ -191,11 +191,11 @@ namespace Signum.Engine.Templating
     {
         public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public static List<MemberInfo> GetMembers(Type modelType, string fieldOrPropertyChain, Action<bool, string> addError)
+        public static List<MemberInfo>? GetMembers(Type modelType, string? fieldOrPropertyChain, Action<bool, string> addError)
         {
             var members = new List<MemberInfo>();
             var type = modelType;
-            foreach (var field in fieldOrPropertyChain.Trim().Split('.'))
+            foreach (var field in (fieldOrPropertyChain ?? "").Trim().Split('.'))
             {
                 var info = (MemberInfo)type.GetField(field, Flags) ??
                            (MemberInfo)type.GetProperty(field, Flags);
@@ -218,12 +218,22 @@ namespace Signum.Engine.Templating
     public class SynchronizationContext
     {
         public ScopedDictionary<string, ValueProviderBase> Variables;
-        public Type ModelType;
+        public Type? ModelType;
         public Replacements Replacements;
         public StringDistance StringDistance;
         public QueryDescription QueryDescription;
 
         public bool HasChanges;
+
+        public SynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription queryDescription, Type? modelType)
+        {
+            Variables = new ScopedDictionary<string, ValueProviderBase>(null);
+            ModelType = modelType;
+            Replacements = replacements;
+            StringDistance = stringDistance;
+            QueryDescription = queryDescription;
+            HasChanges = false;
+        }
 
         internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
         {
@@ -258,14 +268,14 @@ namespace Signum.Engine.Templating
                 SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
                 Console.WriteLine(" " + remainingText);
 
-                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
+                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
                 switch (result)
                 {
                     case FixTokenResult.Nothing:
                     case FixTokenResult.Fix:
                         this.HasChanges = true;
                         parsedToken.QueryToken = token;
-                        parsedToken.String = token.FullKey();
+                        parsedToken.String = token!.FullKey();
                         break;
                     case FixTokenResult.SkipEntity:
                     case FixTokenResult.RemoveToken:
@@ -275,9 +285,9 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public void SynchronizeValue(Type type, ref string value, bool isList)
+        public void SynchronizeValue(Type type, ref string? value, bool isList)
         {
-            string val = value;
+            string? val = value;
             FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, type, ref val, allowRemoveToken: false, isList: isList);
             switch (result)
             {
@@ -292,7 +302,7 @@ namespace Signum.Engine.Templating
         }
 
 
-        internal List<MemberInfo> GetMembers(string fieldOrPropertyChain, Type initialType)
+        internal List<MemberInfo>? GetMembers(string fieldOrPropertyChain, Type initialType)
         {
             List<MemberInfo> fields = new List<MemberInfo>();
 
@@ -301,7 +311,7 @@ namespace Signum.Engine.Templating
             {
                 var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>().Concat(type.GetProperties(ParsedModel.Flags)).ToDictionary(a => a.Name);
 
-                string s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
+                string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
 
                 if (s == null)
                     return null;
@@ -320,7 +330,7 @@ namespace Signum.Engine.Templating
         {
             Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
 
-            return new Disposable(() => Variables = Variables.Previous);
+            return new Disposable(() => Variables = Variables.Previous!);
         }
     }
 

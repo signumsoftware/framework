@@ -10,13 +10,13 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicTypeConditionEntity : Entity
     {
-        [NotNullValidator]
+        
         public DynamicTypeConditionSymbolEntity SymbolName { get; set; }
 
-        [NotNullValidator]
+        
         public TypeEntity EntityType { get; set; }
 
-        [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public DynamicTypeConditionEval Eval { get; set; }
 
         static Expression<Func<DynamicTypeConditionEntity, string>> ToStringExpression = @this => (@this.EntityType == null ? "" : @this.EntityType.CleanName + " : ") + @this.SymbolName;
@@ -40,7 +40,7 @@ namespace Signum.Entities.Dynamic
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()).EntityType.ToType().FullName;
+            var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()!).EntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +

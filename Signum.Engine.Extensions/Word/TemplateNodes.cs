@@ -18,7 +18,7 @@ namespace Signum.Engine.Word
     public interface INodeProvider
     {
         OpenXmlLeafTextElement NewText(string text);
-        OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default, bool initialBr = false);
+        OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default, bool initialBr = false);
         bool IsRun(OpenXmlElement element);
         bool IsText(OpenXmlElement element);
         string GetText(OpenXmlElement run);
@@ -36,7 +36,7 @@ namespace Signum.Engine.Word
             return (W.Run)element;
         }
 
-        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
             var textNode = new W.Text(text) {Space = spaceMode};
 
@@ -96,7 +96,7 @@ namespace Signum.Engine.Word
             return (D.Run)element;
         }
 
-        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
             var textElement = new D.Text(text);
 
@@ -156,7 +156,7 @@ namespace Signum.Engine.Word
             return (S.Run)element;
         }
 
-        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
             var textElement = new S.Text(text);
             var result = new S.Run(runProps, textElement);
@@ -214,8 +214,8 @@ namespace Signum.Engine.Word
     {
         public INodeProvider NodeProvider;
 
-        OpenXmlCompositeElement runProperties;
-        public OpenXmlCompositeElement RunProperties
+        OpenXmlCompositeElement? runProperties;
+        public OpenXmlCompositeElement? RunProperties
         {
             get { return this.runProperties; }
             set
@@ -236,6 +236,7 @@ namespace Signum.Engine.Word
 
         internal MatchNode(MatchNode original)
         {
+            this.NodeProvider = original.NodeProvider;
             this.Match = original.Match;
 
             this.SetAttributes(original.GetAttributes().ToList());
@@ -276,8 +277,8 @@ namespace Signum.Engine.Word
     {
         public INodeProvider NodeProvider;
 
-        OpenXmlCompositeElement runProperties;
-        public OpenXmlCompositeElement RunProperties
+        OpenXmlCompositeElement? runProperties;
+        public OpenXmlCompositeElement? RunProperties
         {
             get { return this.runProperties; }
             set
@@ -349,20 +350,20 @@ namespace Signum.Engine.Word
 
         internal protected override void RenderNode(WordTemplateParameters p)
         {
-            object obj = ValueProvider.GetValue(p);
-            string text = obj is Enum ? ((Enum)obj).NiceToString() :
-                obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
+            object? obj = ValueProvider.GetValue(p);
+            string? text = obj is Enum en ? en.NiceToString() :
+                obj is IFormattable fo ? fo.ToString(Format ?? ValueProvider.Format, p.Culture) :
                 obj?.ToString();
 
             if (text != null && text.Contains('\n'))
             {
-                var replacements = text.Lines().Select((line, i) => this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), line, initialBr: i > 0));
+                var replacements = text.Lines().Select((line, i) => this.NodeProvider.NewRun((OpenXmlCompositeElement?)this.RunProperties?.CloneNode(true), line, initialBr: i > 0));
 
                 this.ReplaceBy(replacements);
             }
             else
             {
-                this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), text));
+                this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement?)this.RunProperties?.CloneNode(true), text));
             }
         }
 
@@ -370,7 +371,7 @@ namespace Signum.Engine.Word
         {
             var str = "@" + this.ValueProvider.ToString(variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
 
-            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), str));
+            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement?)this.RunProperties?.CloneNode(true), str));
         }
 
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
@@ -446,7 +447,7 @@ namespace Signum.Engine.Word
         {
             string str = "@declare" + ValueProvider.ToString(variables, null);
 
-            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), str));
+            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement?)this.RunProperties?.CloneNode(true), str));
 
             ValueProvider.Declare(variables);
         }
@@ -543,11 +544,11 @@ namespace Signum.Engine.Word
             var chainLast = ((OpenXmlElement)last.MatchNode).Follow(a => a.Parent).Reverse().ToList();
 
             var result = chainFirst.Zip(chainLast, (f, l) => new { f, l }).First(a => a.f != a.l);
-            AssertNotImportant(chainFirst, result.f, errorHintParent, first.MatchNode, last.MatchNode);
-            AssertNotImportant(chainLast, result.l, errorHintParent, last.MatchNode, first.MatchNode);
-
-            first.AscendantNode = result.f;
-            last.AscendantNode = result.l;
+            AssertNotImportant(chainFirst, result.f!, errorHintParent, first.MatchNode, last.MatchNode); /*CSBUG*/
+            AssertNotImportant(chainLast, result.l!, errorHintParent, last.MatchNode, first.MatchNode);
+            
+            first.AscendantNode = result.f!;
+            last.AscendantNode = result.l!;
         }
 
         private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement, MatchNode errorHintParent, MatchNode errorHint1, MatchNode errorHint2)
@@ -618,7 +619,7 @@ namespace Signum.Engine.Word
         public MatchNodePair ForeachToken;
         public MatchNodePair EndForeachToken;
 
-        public BlockNode ForeachBlock;
+        public BlockNode? ForeachBlock;
 
         public ForeachNode(INodeProvider nodeProvider, ValueProviderBase valueProvider) : base(nodeProvider)
         {
@@ -632,14 +633,14 @@ namespace Signum.Engine.Word
             this.ValueProvider = original.ValueProvider;
             this.ForeachToken = original.ForeachToken.CloneNode();
             this.EndForeachToken = original.EndForeachToken.CloneNode();
-            this.ForeachBlock = (BlockNode)original.ForeachBlock?.Let(a => a.CloneNode(true));
+            this.ForeachBlock = (BlockNode?)original.ForeachBlock?.Let(a => a.CloneNode(true));
         }
 
         public override void FillTokens(List<QueryToken> tokens)
         {
             ValueProvider.FillQueryTokens(tokens);
 
-            this.ForeachBlock.FillTokens(tokens);
+            this.ForeachBlock!.FillTokens(tokens);
         }
 
         public override OpenXmlElement CloneNode(bool deep)
@@ -654,8 +655,8 @@ namespace Signum.Engine.Word
             this.ForeachBlock = new BlockNode(this.NodeProvider);
             this.ForeachBlock.MoveChilds(NodesBetween(ForeachToken, EndForeachToken));
 
-            ForeachToken.AscendantNode.ReplaceBy(this);
-            EndForeachToken.AscendantNode.Remove();
+            ForeachToken.AscendantNode!.ReplaceBy(this);
+            EndForeachToken.AscendantNode!.Remove();
         }
 
         public override void WriteTo(XmlWriter xmlWriter)
@@ -673,7 +674,7 @@ namespace Signum.Engine.Word
 
             this.ValueProvider.Foreach(p, () =>
             {
-                var clone = (BlockNode)this.ForeachBlock.CloneNode(true);
+                var clone = (BlockNode)this.ForeachBlock!.CloneNode(true);
 
                 var index = parent.ChildElements.IndexOf(this);
 
@@ -694,7 +695,7 @@ namespace Signum.Engine.Word
             {
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                 ValueProvider.Declare(newVars);
-                this.ForeachBlock.RenderTemplate(newVars);
+                this.ForeachBlock!.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.ForeachBlock.ChildElements);
             }
             parent.InsertAt(this.EndForeachToken.ReplaceMatchNode("@endforeach"), index++);
@@ -709,11 +710,11 @@ namespace Signum.Engine.Word
             {
                 ValueProvider.Declare(sc.Variables);
 
-                this.ForeachBlock.Synchronize(sc);
+                this.ForeachBlock!.Synchronize(sc);
             }
         }
 
-        public override string InnerText => $@"{this.ForeachToken.MatchNode.InnerText}{this.ForeachBlock.InnerText}{this.EndForeachToken.MatchNode.InnerText}";
+        public override string InnerText => $@"{this.ForeachToken.MatchNode.InnerText}{this.ForeachBlock!.InnerText}{this.EndForeachToken.MatchNode.InnerText}";
     }
 
     public struct MatchNodePair
@@ -725,11 +726,11 @@ namespace Signum.Engine.Word
         }
 
         public MatchNode MatchNode;
-        public OpenXmlElement AscendantNode;
+        public OpenXmlElement? AscendantNode;
 
         public OpenXmlElement CommonParent(MatchNodePair other)
         {
-            if (this.AscendantNode.Parent != other.AscendantNode.Parent)
+            if (this.AscendantNode!.Parent != other.AscendantNode!.Parent)
                 throw new InvalidOperationException("Parents do not match");
 
             return this.AscendantNode.Parent;
@@ -755,9 +756,9 @@ namespace Signum.Engine.Word
             }
         }
 
-        internal OpenXmlElement ReplaceMatchNode(string text)
+        internal OpenXmlElement? ReplaceMatchNode(string text)
         {
-            var run = this.MatchNode.NodeProvider.NewRun((OpenXmlCompositeElement)this.MatchNode.RunProperties?.CloneNode(true), text);
+            var run = this.MatchNode.NodeProvider.NewRun((OpenXmlCompositeElement?)this.MatchNode.RunProperties?.CloneNode(true), text);
 
             if (this.MatchNode == AscendantNode)
                 return run;
@@ -780,8 +781,8 @@ namespace Signum.Engine.Word
         public MatchNodePair NotAnyToken;
         public MatchNodePair EndAnyToken;
 
-        public BlockNode AnyBlock;
-        public BlockNode NotAnyBlock;
+        public BlockNode? AnyBlock;
+        public BlockNode? NotAnyBlock;
 
         public AnyNode(INodeProvider nodeProvider, ConditionBase condition) : base(nodeProvider)
         {
@@ -797,8 +798,8 @@ namespace Signum.Engine.Word
             this.NotAnyToken = original.NotAnyToken.CloneNode();
             this.EndAnyToken = original.EndAnyToken.CloneNode();
 
-            this.AnyBlock = (BlockNode)original.AnyBlock?.Let(a => a.CloneNode(true));
-            this.NotAnyBlock = (BlockNode)original.NotAnyBlock?.Let(a => a.CloneNode(true));
+            this.AnyBlock = (BlockNode?)original.AnyBlock?.Let(a => a.CloneNode(true));
+            this.NotAnyBlock = (BlockNode?)original.NotAnyBlock?.Let(a => a.CloneNode(true));
         }
 
         public override OpenXmlElement CloneNode(bool deep)
@@ -830,8 +831,8 @@ namespace Signum.Engine.Word
                 this.AnyBlock = new BlockNode(this.NodeProvider);
                 this.AnyBlock.MoveChilds(NodesBetween(AnyToken, EndAnyToken));
 
-                this.AnyToken.AscendantNode.ReplaceBy(this);
-                this.EndAnyToken.AscendantNode.Remove();
+                this.AnyToken.AscendantNode!.ReplaceBy(this);
+                this.EndAnyToken.AscendantNode!.Remove();
             }
             else
             {
@@ -848,9 +849,9 @@ namespace Signum.Engine.Word
                 this.NotAnyBlock = new BlockNode(this.NodeProvider);
                 this.NotAnyBlock.MoveChilds(NodesBetween(this.NotAnyToken, this.EndAnyToken));
 
-                this.AnyToken.AscendantNode.ReplaceBy(this);
-                this.NotAnyToken.AscendantNode.Remove();
-                this.EndAnyToken.AscendantNode.Remove();
+                this.AnyToken.AscendantNode!.ReplaceBy(this);
+                this.NotAnyToken.AscendantNode!.Remove();
+                this.EndAnyToken.AscendantNode!.Remove();
             }
         }
 
@@ -858,7 +859,7 @@ namespace Signum.Engine.Word
         {
             this.Condition.FillQueryTokens(tokens);
 
-            this.AnyBlock.FillTokens(tokens);
+            this.AnyBlock!.FillTokens(tokens);
             if (this.NotAnyBlock != null)
                 this.NotAnyBlock.FillTokens(tokens);
         }
@@ -871,8 +872,8 @@ namespace Signum.Engine.Word
             {
                 if (filtered.Any())
                 {
-                    this.ReplaceBy(this.AnyBlock);
-                    this.AnyBlock.RenderNode(p);
+                    this.ReplaceBy(this.AnyBlock!);
+                    this.AnyBlock!.RenderNode(p);
                 }
                 else if (NotAnyBlock != null)
                 {
@@ -892,7 +893,7 @@ namespace Signum.Engine.Word
             {
                 this.Condition.Declare(sc.Variables);
 
-                AnyBlock.Synchronize(sc);
+                AnyBlock!.Synchronize(sc);
             }
 
             if (NotAnyBlock != null)
@@ -918,7 +919,7 @@ namespace Signum.Engine.Word
             {
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                 Condition.Declare(newVars);
-                this.AnyBlock.RenderTemplate(newVars);
+                this.AnyBlock!.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.AnyBlock.ChildElements);
             }
 
@@ -928,14 +929,14 @@ namespace Signum.Engine.Word
 
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                 Condition.Declare(newVars);
-                this.NotAnyBlock.RenderTemplate(newVars);
+                this.NotAnyBlock!.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.NotAnyBlock.ChildElements);
             }
 
             parent.InsertAt(this.EndAnyToken.ReplaceMatchNode("@endany"), index++);
         }
 
-        public override string InnerText => $@"{this.AnyToken.MatchNode.InnerText}{this.AnyBlock.InnerText}{this.NotAnyToken.MatchNode?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.MatchNode.InnerText}";
+        public override string InnerText => $@"{this.AnyToken.MatchNode.InnerText}{this.AnyBlock!.InnerText}{this.NotAnyToken.MatchNode?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.MatchNode.InnerText}";
     }
 
 
@@ -948,8 +949,8 @@ namespace Signum.Engine.Word
         public MatchNodePair ElseToken;
         public MatchNodePair EndIfToken;
 
-        public BlockNode IfBlock;
-        public BlockNode ElseBlock;
+        public BlockNode? IfBlock;
+        public BlockNode? ElseBlock;
 
         internal IfNode(INodeProvider nodeProvider, ConditionBase condition) : base(nodeProvider)
         {
@@ -965,8 +966,8 @@ namespace Signum.Engine.Word
             this.ElseToken = original.ElseToken.CloneNode();
             this.EndIfToken = original.EndIfToken.CloneNode();
 
-            this.IfBlock = (BlockNode)original.IfBlock?.Let(a => a.CloneNode(true));
-            this.ElseBlock = (BlockNode)original.ElseBlock?.Let(a => a.CloneNode(true));
+            this.IfBlock = (BlockNode?)original.IfBlock?.Let(a => a.CloneNode(true));
+            this.ElseBlock = (BlockNode?)original.ElseBlock?.Let(a => a.CloneNode(true));
         }
 
         public override OpenXmlElement CloneNode(bool deep)
@@ -983,8 +984,8 @@ namespace Signum.Engine.Word
                 this.IfBlock = new BlockNode(this.NodeProvider);
                 this.IfBlock.MoveChilds(NodesBetween(IfToken, EndIfToken));
 
-                IfToken.AscendantNode.ReplaceBy(this);
-                EndIfToken.AscendantNode.Remove();
+                IfToken.AscendantNode!.ReplaceBy(this);
+                EndIfToken.AscendantNode!.Remove();
             }
             else
             {
@@ -1001,9 +1002,9 @@ namespace Signum.Engine.Word
                 this.ElseBlock = new BlockNode(this.NodeProvider);
                 this.ElseBlock.MoveChilds(NodesBetween(this.ElseToken, this.EndIfToken));
 
-                this.IfToken.AscendantNode.ReplaceBy(this);
-                this.ElseToken.AscendantNode.Remove();
-                this.EndIfToken.AscendantNode.Remove();
+                this.IfToken.AscendantNode!.ReplaceBy(this);
+                this.ElseToken.AscendantNode!.Remove();
+                this.EndIfToken.AscendantNode!.Remove();
             }
         }
 
@@ -1026,7 +1027,7 @@ namespace Signum.Engine.Word
         {
             this.Condition.FillQueryTokens(tokens);
 
-            this.IfBlock.FillTokens(tokens);
+            this.IfBlock!.FillTokens(tokens);
             if (this.ElseBlock != null)
                 this.ElseBlock.FillTokens(tokens);
         }
@@ -1035,8 +1036,8 @@ namespace Signum.Engine.Word
         {
             if (this.Condition.Evaluate(p))
             {
-                this.ReplaceBy(this.IfBlock);
-                this.IfBlock.RenderNode(p);
+                this.ReplaceBy(this.IfBlock!);
+                this.IfBlock!.RenderNode(p);
             }
             else if (ElseBlock != null)
             {
@@ -1055,7 +1056,7 @@ namespace Signum.Engine.Word
             {
                 this.Condition.Declare(sc.Variables);
 
-                IfBlock.Synchronize(sc);
+                IfBlock!.Synchronize(sc);
             }
 
             if (ElseBlock != null)
@@ -1081,7 +1082,7 @@ namespace Signum.Engine.Word
             {
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                 this.Condition.Declare(newVars);
-                this.IfBlock.RenderTemplate(newVars);
+                this.IfBlock!.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.IfBlock.ChildElements);
             }
 
@@ -1091,14 +1092,14 @@ namespace Signum.Engine.Word
 
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                 this.Condition.Declare(newVars);
-                this.ElseBlock.RenderTemplate(newVars);
+                this.ElseBlock!.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.ElseBlock.ChildElements);
             }
 
             parent.InsertAt(this.EndIfToken.ReplaceMatchNode("@endif"), index++);
         }
 
-        public override string InnerText => $@"{this.IfToken.MatchNode.InnerText}{this.IfBlock.InnerText}{this.ElseToken.MatchNode?.InnerText}{this.ElseBlock?.InnerText}{this.EndIfToken.MatchNode.InnerText}";
+        public override string InnerText => $@"{this.IfToken.MatchNode.InnerText}{this.IfBlock!.InnerText}{this.ElseToken.MatchNode?.InnerText}{this.ElseBlock?.InnerText}{this.EndIfToken.MatchNode.InnerText}";
     }
 
     public static class OpenXmlElementExtensions

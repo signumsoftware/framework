@@ -1,16 +1,15 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using System;
 
 namespace Signum.Entities.Rest
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class RestApiKeyEntity : Entity
-    {
-        [NotNullValidator]
+    {   
         public Lite<UserEntity> User { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 20, Max = 100)]
-        [UniqueIndex(AllowMultipleNulls = true)]
+        [StringLengthValidator(Min = 20, Max = 100)]
+        [UniqueIndex]
         public string ApiKey { get; set; }
     }
 

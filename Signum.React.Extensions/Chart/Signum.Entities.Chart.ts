@@ -30,17 +30,17 @@ export type IChartBase = ChartRequestModel | UserChartEntity;
 export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
   Type: "ChartColor";
-  related?: Entities.Lite<Entities.Entity> | null;
-  color?: Basics.ColorEmbedded | null;
+  related: Entities.Lite<Entities.Entity>;
+  color: Basics.ColorEmbedded | null;
 }
 
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");
 export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
-  token?: UserAssets.QueryTokenEmbedded | null;
-  displayName?: string | null;
-  orderByIndex?: number | null;
-  orderByType?: DynamicQuery.OrderType | null;
+  token: UserAssets.QueryTokenEmbedded | null;
+  displayName: string | null;
+  orderByIndex: number | null;
+  orderByType: DynamicQuery.OrderType | null;
 }
 
 export const ChartColumnType = new EnumType<ChartColumnType>("ChartColumnType");
@@ -94,15 +94,15 @@ export module ChartMessage {
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
   Type: "ChartPaletteModel";
-  type?: Basics.TypeEntity | null;
+  type: Basics.TypeEntity;
   colors: Entities.MList<ChartColorEntity>;
 }
 
 export const ChartParameterEmbedded = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
 export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartParameterEmbedded";
-  name?: string | null;
-  value?: string | null;
+  name: string;
+  value: string | null;
 }
 
 export const ChartParameterType = new EnumType<ChartParameterType>("ChartParameterType");
@@ -158,9 +158,9 @@ export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserChart";
   query: Basics.QueryEntity;
-  entityType: Entities.Lite<Basics.TypeEntity> | null;
+  entityType: Entities.Lite<Basics.TypeEntity>;
   hideQuickLink: boolean;
-  owner: Entities.Lite<Entities.Entity> | null;
+  owner: Entities.Lite<Entities.Entity>;
   displayName: string;
   chartScript: ChartScriptSymbol;
   parameters: Entities.MList<ChartParameterEmbedded>;

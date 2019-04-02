@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -86,7 +86,7 @@ namespace Signum.Engine.ViewLog
             return Administrator.DeleteWhereScript(t, f, arg.Id);
         }
 
-        static IDisposable Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest request)
+        static IDisposable? Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)
         {
             if (request == null || !LogQuery(request, type))
                 return null;
@@ -112,7 +112,7 @@ namespace Signum.Engine.ViewLog
                     {
 
                         viewLog.EndDate = TimeZoneManager.Now;
-                         viewLog.Data = GetData(request, sw);
+                         viewLog.Data = GetData(request!, sw);
                         using (ExecutionMode.Global())
                             viewLog.Save();
                         tr.Commit();

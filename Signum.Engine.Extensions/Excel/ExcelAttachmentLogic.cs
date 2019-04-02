@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
 using Signum.Engine.Maps;
 using Signum.Engine.UserQueries;
@@ -42,7 +42,7 @@ namespace Signum.Engine.Excel
 
             EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var finalEntity = ea.Related?.Retrieve() ?? (Entity)ctx.Entity ?? ctx.SystemEmail.UntypedEntity as Entity;
+                var finalEntity = ea.Related?.Retrieve() ?? (Entity?)ctx.Entity ?? ctx.SystemEmail!.UntypedEntity as Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
@@ -66,7 +66,7 @@ namespace Signum.Engine.Excel
             });
         }
 
-        private static string GetTemplateString(string title, ref object titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
+        private static string GetTemplateString(string? title, ref object? titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
         {
             var block = titleNode != null ? (EmailTemplateParser.BlockNode)titleNode :
                 (EmailTemplateParser.BlockNode)(titleNode = EmailTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
@@ -74,15 +74,15 @@ namespace Signum.Engine.Excel
             return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { SystemEmail = ctx.SystemEmail });
         }
 
-        static string ExcelAttachmentFileName_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
+        static string? ExcelAttachmentFileName_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity();
+            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity()!;
             if (template != null && excelAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
                     excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.FileName, out string errorMessage);
-                    return errorMessage.DefaultText(null);
+                    return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)
                 {
@@ -93,15 +93,15 @@ namespace Signum.Engine.Excel
             return null;
         }
 
-        static string ExcelAttachmentTitle_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
+        static string? ExcelAttachmentTitle_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity();
+            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity()!;
             if (template != null && excelAttachment.TitleNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
                     excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.Title, out string errorMessage);
-                    return errorMessage.DefaultText(null);
+                    return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)
                 {

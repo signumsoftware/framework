@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -52,7 +52,8 @@ namespace Signum.Engine.Dynamic
                 }.Register();
 
                 DynamicViews = sb.GlobalLazy(() =>
-                    Database.Query<DynamicViewEntity>().SelectCatch(dv => new { Type = dv.EntityType.ToType(), dv }).AgGroupToDictionary(a => a.Type, gr => gr.Select(a => a.dv).ToDictionaryEx(a => a.ViewName)),
+                    Database.Query<DynamicViewEntity>().SelectCatch(dv => new { Type = dv.EntityType.ToType(), dv })
+                    .AgGroupToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToDictionaryEx(a => a.ViewName)),
                     new InvalidateWith(typeof(DynamicViewEntity)));
 
                 sb.Include<DynamicViewSelectorEntity>()
@@ -106,32 +107,14 @@ namespace Signum.Engine.Dynamic
                     where queries.TryGetQuery(t.Type) != null
                     let parentColumn = GetParentColumnExpression(t.Fields, c)?.Let(s => "Entity." + s)
                     where parentColumn != null
-                    select new SuggestedFindOptions
-                    {
-                        queryKey = QueryLogic.GetQueryEntity(t.Type).Key,
-                        parentToken = parentColumn,
-                    }).ToList();
+                    select new SuggestedFindOptions(
+                        queryKey: QueryLogic.GetQueryEntity(t.Type).Key,
+                        parentToken: parentColumn
+                    )).ToList();
 
         }
 
-        static string GetParentColumnExpression(Table t, IColumn c)
-        {
-            var res = GetParentColumnExpression(t.Fields, c);
-            if (res != null)
-                return "Entity." + res;
-
-            if (t.Mixins != null)
-                foreach (var m in t.Mixins)
-                {
-                    res = GetParentColumnExpression(m.Value.Fields, c);
-                    if (res != null)
-                        return "Entity." + res;
-                }
-
-            return null;
-        }
-
-        static string GetParentColumnExpression(Dictionary<string, EntityField> fields, IColumn c)
+        static string? GetParentColumnExpression(Dictionary<string, EntityField> fields, IColumn c)
         {
             var simple = fields.Values.SingleOrDefault(f => f.Field == c);
             if (simple != null)
@@ -156,6 +139,12 @@ namespace Signum.Engine.Dynamic
     {
         public string queryKey;
         public string parentToken;
+
+        public SuggestedFindOptions(string queryKey, string parentToken)
+        {
+            this.queryKey = queryKey;
+            this.parentToken = parentToken;
+        }
     }
 
 }

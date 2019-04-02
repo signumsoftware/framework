@@ -60,7 +60,7 @@ namespace Signum.Engine.Chart
                     new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink)
-                .SelectCatch(a => KVP.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a.ToLite()))
+                .SelectCatch(a => KVP.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType!.Id), a.ToLite()))
                 .GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));
             }
@@ -177,7 +177,7 @@ namespace Signum.Engine.Chart
             TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             if (!replacements.Interactive)
                 return null;
@@ -188,13 +188,13 @@ namespace Signum.Engine.Chart
 
             using (replacements.WithReplacedDatabaseName())
             {
-                SqlPreCommand cmd = list.Select(uq => ProcessUserChart(replacements, table, uq)).Combine(Spacing.Double);
+                SqlPreCommand? cmd = list.Select(uq => ProcessUserChart(replacements, table, uq)).Combine(Spacing.Double);
 
                 return cmd;
             }
         }
         
-        static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)
+        static SqlPreCommand? ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)
         {
             Console.Write(".");
             using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "UserChart: " + uc.DisplayName)))
@@ -214,9 +214,9 @@ namespace Signum.Engine.Chart
                             {
                                 foreach (var item in uc.Filters.ToList())
                                 {
-                                    QueryTokenEmbedded token = item.Token;
                                     if (item.Token != null)
                                     {
+                                        QueryTokenEmbedded token = item.Token;
                                         switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                         {
                                             case FixTokenResult.Nothing: break;
@@ -237,10 +237,10 @@ namespace Signum.Engine.Chart
                             {
                                 foreach (var item in uc.Columns.ToList())
                                 {
-                                    QueryTokenEmbedded token = item.Token;
                                     if (item.Token == null)
                                         continue;
 
+                                    QueryTokenEmbedded token = item.Token;
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
@@ -258,8 +258,8 @@ namespace Signum.Engine.Chart
                     foreach (var item in uc.Filters.Where(f => !f.IsGroup).ToList())
                     {
                         retry:
-                        string val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
+                        string? val = item.ValueString;
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
@@ -276,7 +276,7 @@ namespace Signum.Engine.Chart
 
                     foreach (var item in uc.Parameters)
                     {
-                        string val = item.Value;
+                        string? val = item.Value;
                         retry:
                         switch (FixParameter(item, ref val))
                         {
@@ -325,7 +325,7 @@ namespace Signum.Engine.Chart
             }
         }
 
-        private static FixTokenResult FixParameter(ChartParameterEmbedded item, ref string val)
+        private static FixTokenResult FixParameter(ChartParameterEmbedded item, ref string? val)
         {
             var error = item.PropertyCheck(nameof(item.Value));
             if (error == null)

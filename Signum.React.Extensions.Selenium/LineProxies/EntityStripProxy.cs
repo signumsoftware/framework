@@ -41,7 +41,7 @@ namespace Signum.React.Selenium
             RemoveElementIndex(index).Find().Click();
         }
 
-        public EntityInfoProxy EntityInfo(int index)
+        public EntityInfoProxy? EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }

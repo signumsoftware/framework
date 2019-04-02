@@ -105,7 +105,7 @@ namespace Signum.Engine.Toolbar
             {
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
                     return null;
                 };
 
@@ -114,7 +114,7 @@ namespace Signum.Engine.Toolbar
                     var entity = (T)arg;
 
                     var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
-                        .Where(mle => mle.Element.Content.Entity == entity));
+                        .Where(mle => mle.Element.Content!.Entity == entity));
 
                     return parts;
                 };
@@ -124,7 +124,7 @@ namespace Signum.Engine.Toolbar
             {
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
                     return null;
                 };
 
@@ -133,7 +133,7 @@ namespace Signum.Engine.Toolbar
                     var entity = (T)arg;
 
                     var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
-                        .Where(mle => mle.Element.Content.Entity == entity));
+                        .Where(mle => mle.Element.Content!.Entity == entity));
 
                     return parts;
                 };
@@ -152,7 +152,7 @@ namespace Signum.Engine.Toolbar
             return result;
         }
 
-        public static ToolbarResponse GetCurrentToolbarResponse(ToolbarLocation location)
+        public static ToolbarResponse? GetCurrentToolbarResponse(ToolbarLocation location)
         {
             var curr = GetCurrent(location);
 
@@ -195,7 +195,7 @@ namespace Signum.Engine.Toolbar
             return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
         }
 
-        private static ToolbarResponse ToResponse(ToolbarElementEmbedded element)
+        private static ToolbarResponse? ToResponse(ToolbarElementEmbedded element)
         {
             if(element.Content != null && !(element.Content is Lite<ToolbarMenuEntity>))
             {
@@ -268,12 +268,12 @@ namespace Signum.Engine.Toolbar
     public class ToolbarResponse
     {
         public ToolbarElementType type;
-        public string label;
-        public Lite<Entity> content;
-        public string url;
-        public List<ToolbarResponse> elements;
-        public string iconName;
-        public string iconColor;
+        public string? label;
+        public Lite<Entity>? content;
+        public string? url;
+        public List<ToolbarResponse>? elements;
+        public string? iconName;
+        public string? iconColor;
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? autoRefreshPeriod;

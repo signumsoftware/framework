@@ -41,7 +41,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
     API.getWorkflowModel(toLite(props.ctx.value.workflow))
       .then(pair => this.setState({
         initialXmlDiagram: pair.model.diagramXml,
-        entities: pair.model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model)
+        entities: pair.model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model!)
       }))
       .done();
 

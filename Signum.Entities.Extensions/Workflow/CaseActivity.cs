@@ -13,21 +13,21 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class CaseActivityEntity : Entity
     {
-        [NotNullValidator]
+        
         public CaseEntity Case { get; set; }
         
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
         public IWorkflowNodeEntity WorkflowActivity { get; set; }
         
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 255)]
+        [StringLengthValidator(Min = 3, Max = 255)]
         public string OriginalWorkflowActivityName { get; set; }
 
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
 
-        public Lite<CaseActivityEntity> Previous { get; set; }
+        public Lite<CaseActivityEntity>? Previous { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string Note { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? Note { get; set; }
         
         public DateTime? DoneDate { get; set; }
 
@@ -43,7 +43,7 @@ namespace Signum.Entities.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, double?>> DurationRatioExpression =
-        @this => @this.Duration / (@this.WorkflowActivity as WorkflowActivityEntity).EstimatedDuration;
+        @this => @this.Duration / ((WorkflowActivityEntity)@this.WorkflowActivity).EstimatedDuration;
         [ExpressionField]
         public double? DurationRatio
         {
@@ -51,25 +51,27 @@ namespace Signum.Entities.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeRatioExpression =
-            @this => @this.DurationRealTime / (@this.WorkflowActivity as WorkflowActivityEntity).EstimatedDuration;
+            @this => @this.DurationRealTime / ((WorkflowActivityEntity)@this.WorkflowActivity).EstimatedDuration;
         [ExpressionField]
         public double? DurationRealTimeRatio
         {
             get { return DurationRealTimeRatioExpression.Evaluate(this); }
         }
 
-        public Lite<UserEntity> DoneBy { get; set; }
+        public Lite<UserEntity>? DoneBy { get; set; }
         public DoneType? DoneType { get; set; }
 
 
-        public ScriptExecutionEmbedded ScriptExecution { get; set; }
+        public ScriptExecutionEmbedded? ScriptExecution { get; set; }
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
         (@this.WorkflowActivity is WorkflowEventEntity) ? CaseActivityState.PendingNext :
-        (@this.WorkflowActivity as WorkflowActivityEntity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
+        ((WorkflowActivityEntity)@this.WorkflowActivity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision :
         CaseActivityState.PendingNext;
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("StateExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public CaseActivityState State
         {
             get
@@ -202,13 +204,13 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class ActivityWithRemarks : ModelEntity
     {
-        public Lite<WorkflowActivityEntity> workflowActivity { get; set; }
-        public Lite<CaseEntity> @case { get; set; }
-        public Lite<CaseActivityEntity> caseActivity { get; set; }
-        public Lite<CaseNotificationEntity> notification { get; set; }
-        public string remarks { get; set; }
-        public int alerts { get; set; }
-        public List<CaseTagTypeEntity> tags { get; set; }
+        public Lite<WorkflowActivityEntity>? WorkflowActivity { get; set; }
+        public Lite<CaseEntity> Case { get; set; }
+        public Lite<CaseActivityEntity>? CaseActivity { get; set; }
+        public Lite<CaseNotificationEntity>? Notification { get; set; }
+        public string? Remarks { get; set; }
+        public int Alerts { get; set; }
+        public List<CaseTagTypeEntity> Tags { get; set; }
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
@@ -216,11 +218,11 @@ namespace Signum.Entities.Workflow
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [NotNullValidator]
+        
         public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
 
-        [NotNullValidator]
+        
         public Lite<WorkflowEventEntity> BoundaryEvent { get; set; }
     }
 }

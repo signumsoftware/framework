@@ -53,7 +53,7 @@ namespace Signum.Entities.Chart
                 token is DateToken)
                 return true;
 
-            PropertyRoute route = token.GetPropertyRoute();
+            PropertyRoute? route = token.GetPropertyRoute();
 
             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
@@ -176,91 +176,7 @@ namespace Signum.Entities.Chart
             });
             return result;
         }
-
-        public static Func<Type, PrimaryKey, Color?> GetChartColor = (type, id) => null;
-
         
-
-        private static Func<ResultRow, object> Converter(this ChartColumnEmbedded ct, int columnIndex)
-        {
-            if (ct == null || ct.Token == null)
-                return null;
-
-            var type = ct.Token.Token.Type.UnNullify();
-
-            if (type.IsLite())
-            {
-                return r =>
-                {
-                    Lite<Entity> l = (Lite<Entity>)r[columnIndex];
-                    return new
-                    {
-                        key = l?.Key(),
-                        toStr = l?.ToString(),
-                        color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
-                    };
-                };
-            }
-            else if (type.IsEnum)
-            {
-                var enumEntity = EnumEntity.Generate(type);
-
-                return r =>
-                {
-                    Enum e = (Enum)r[columnIndex];
-                    return new
-                    {
-                        key = e?.ToString(),
-                        toStr = e?.NiceToString(),
-                        color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
-                    };
-                };
-            }
-            else if (typeof(DateTime) == type)
-            {
-                var format = ct.Token.Token.Format;
-
-                return r =>
-                {
-                    DateTime? e = (DateTime?)r[columnIndex];
-                    if (e != null)
-                        e = e.Value.ToUserInterface();
-
-                    return new
-                    {
-                        key = e,
-                        keyForFilter = e?.ToString("s"),
-                        toStr = format.HasText() ? e?.ToString(format) : e?.ToString()
-                    };
-                };
-            }
-            else if (ct.Token.Token.Format.HasText())
-            {
-                var format = ct.Token.Token.Format;
-
-                return r =>
-                {
-                    IFormattable e = (IFormattable)r[columnIndex];
-                    return new
-                    {
-                        key = e,
-                        toStr = format.HasText() ? e?.ToString(format, null) : e?.ToString()
-                    };
-                };
-            }
-            else
-                return r =>
-                {
-                    object value = r[columnIndex];
-                    return new
-                    {
-                        key = value,
-                        toStr = value,
-                    };
-                }; ;
-        }
-
-
         internal static void FixParameters(IChartBase chart, ChartColumnEmbedded chartColumn)
         {
             int index = chart.Columns.IndexOf(chartColumn);

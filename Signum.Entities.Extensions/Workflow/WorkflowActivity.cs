@@ -14,43 +14,45 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [NotNullValidator]
+        
         public WorkflowLaneEntity Lane { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string? GetName() => Name;
+
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Comments { get; set; }
+        [StringLengthValidator(Min = 3, Max = 400, MultiLine = true)]
+        public string? Comments { get; set; }
 
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
 
         [Ignore, QueryableProperty]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<WorkflowEventEntity> BoundaryTimers { get; set; } = new MList<WorkflowEventEntity>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
-        public string ViewName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 255)]
+        public string? ViewName { get; set; }
 
         [NotifyChildProperty]
-        public WorkflowScriptPartEmbedded Script { get; set; }
+        public WorkflowScriptPartEmbedded? Script { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         [NotifyChildProperty]
-        public SubWorkflowEmbedded SubWorkflow { get; set; }
+        public SubWorkflowEmbedded? SubWorkflow { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string UserHelp { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? UserHelp { get; set; }
 
         static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
@@ -61,7 +63,7 @@ namespace Signum.Entities.Workflow
 
 
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(SubWorkflow))
             {
@@ -97,7 +99,7 @@ namespace Signum.Entities.Workflow
             model.Name = this.Name;
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
-            model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel()
+            model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel
             {
                 Name = we.Name,
                 MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
@@ -145,9 +147,9 @@ namespace Signum.Entities.Workflow
             return new Disposable(() => CurrentVariable.Value = old);
         }
 
-        public WorkflowActivityEntity WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
-        public CaseActivityEntity CaseActivity { get; internal set; }
-        public WorkflowConnectionEntity Connection { get; internal set; }
+        public WorkflowActivityEntity? WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
+        public CaseActivityEntity? CaseActivity { get; internal set; }
+        public WorkflowConnectionEntity? Connection { get; internal set; }
 
         public bool Is(string workflowName, string activityName)
         {
@@ -158,9 +160,9 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowScriptPartEmbedded : EmbeddedEntity
     {
-        public Lite<WorkflowScriptEntity> Script { get; set; }
+        public Lite<WorkflowScriptEntity>? Script { get; set; }
 
-        public WorkflowScriptRetryStrategyEntity RetryStrategy { get; set; }
+        public WorkflowScriptRetryStrategyEntity? RetryStrategy { get; set; }
 
         public WorkflowScriptPartEmbedded Clone()
         {
@@ -190,11 +192,10 @@ namespace Signum.Entities.Workflow
 
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
-    {
-        [NotNullValidator]
+    {   
         public WorkflowEntity Workflow { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
 
         public SubWorkflowEmbedded Clone()
@@ -212,8 +213,8 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var decomposition = (SubWorkflowEmbedded)this.GetParentEntity();
-            var activity = (WorkflowActivityEntity)decomposition.GetParentEntity();
+            var decomposition = (SubWorkflowEmbedded)this.GetParentEntity()!;
+            var activity = (WorkflowActivityEntity)decomposition.GetParentEntity()!;
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -259,12 +260,12 @@ namespace Signum.Entities.Workflow
     {
         public Lite<WorkflowActivityEntity>  WorkflowActivity { get; set; }
 
-        public WorkflowEntity Workflow { get; set; }
+        public WorkflowEntity? Workflow { get; set; }
 
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public WorkflowActivityType Type { get; set; }
@@ -272,24 +273,24 @@ namespace Signum.Entities.Workflow
         public bool RequiresOpen { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<WorkflowEventModel> BoundaryTimers { get; set; } = new MList<WorkflowEventModel>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
-        public WorkflowScriptPartEmbedded Script { get; set; }
+        public WorkflowScriptPartEmbedded? Script { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
-        public string ViewName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 255)]
+        public string? ViewName { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Comments { get; set; }
+        [StringLengthValidator(Min = 3, Max = 400, MultiLine = true)]
+        public string? Comments { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string UserHelp { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? UserHelp { get; set; }
 
-        public SubWorkflowEmbedded SubWorkflow { get; set; }
+        public SubWorkflowEmbedded? SubWorkflow { get; set; }
     }
 
     public enum WorkflowActivityMessage

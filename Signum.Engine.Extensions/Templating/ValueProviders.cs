@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -20,7 +20,7 @@ namespace Signum.Engine.Templating
 {
     public interface ITemplateParser
     {
-        Type ModelType { get; }
+        Type? ModelType { get; }
         PropertyInfo ModelProperty { get; }
         QueryDescription QueryDescription { get; }
         ScopedDictionary<string, ValueProviderBase> Variables { get; }
@@ -29,28 +29,28 @@ namespace Signum.Engine.Templating
 
     public abstract class ValueProviderBase
     {
-        public string Variable { get; set; }
+        public string? Variable { get; set; }
 
         public bool IsForeach { get; set; }
 
-        public abstract object GetValue(TemplateParameters p);
+        public abstract object? GetValue(TemplateParameters p);
 
-        public abstract string Format { get; }
+        public abstract string? Format { get; }
         
-        public abstract Type Type { get; }
+        public abstract Type? Type { get; }
 
         public abstract void FillQueryTokens(List<QueryToken> list);
 
         public abstract void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables);
 
-        public string ToString(ScopedDictionary<string, ValueProviderBase> variables, string format)
+        public string ToString(ScopedDictionary<string, ValueProviderBase> variables, string? format)
         {
             StringBuilder sb = new StringBuilder();
             ToStringBrackets(sb, variables, format);
             return sb.ToString();
         }
 
-        public void ToStringBrackets(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string format)
+        public void ToStringBrackets(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string? format)
         {
             sb.Append("[");
 
@@ -78,7 +78,7 @@ namespace Signum.Engine.Templating
 
         public virtual void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var collection = (IEnumerable)this.GetValue(p);
+            var collection = (IEnumerable)this.GetValue(p)!;
 
             foreach (var item in collection)
             {
@@ -95,7 +95,7 @@ namespace Signum.Engine.Templating
  
     
 
-        public static ValueProviderBase TryParse(string typeToken, string variable, ITemplateParser tp)
+        public static ValueProviderBase? TryParse(string typeToken, string variable, ITemplateParser tp)
         {
             var type = typeToken.TryBefore(":") ?? "";
             var token = typeToken.TryAfter(":") ?? typeToken;
@@ -163,7 +163,7 @@ namespace Signum.Engine.Templating
 
     public abstract class TemplateParameters
     {
-        public TemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows)
+        public TemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows)
         {
             this.Entity = entity;
             this.Culture = culture;
@@ -171,7 +171,7 @@ namespace Signum.Engine.Templating
             this.Rows = rows;
         }
 
-        public readonly IEntity Entity;
+        public readonly IEntity? Entity;
         public readonly CultureInfo Culture;
         public readonly Dictionary<QueryToken, ResultColumn> Columns;
         public IEnumerable<ResultRow> Rows { get; private set; }
@@ -206,17 +206,17 @@ namespace Signum.Engine.Templating
             this.IsExplicit = isExplicit;
         }
 
-        public override object GetValue(TemplateParameters p)
+        public override object? GetValue(TemplateParameters p)
         {
             if (p.Rows.IsEmpty())
                 return null;
 
-            return  p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken]);
+            return  p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
         }
 
         public override void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken]], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
+            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken!]], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
             if (groups.Count == 1 && groups[0].Key == null)
                 return;
 
@@ -227,14 +227,14 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return ParsedToken.QueryToken.Format; }
+            get { return ParsedToken.QueryToken!.Format; }
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
         {
-            list.Add(ParsedToken.QueryToken);
+            list.Add(ParsedToken.QueryToken!);
         }
 
         public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
@@ -252,7 +252,7 @@ namespace Signum.Engine.Templating
             Declare(sc.Variables);
         }
 
-        public override Type Type
+        public override Type? Type
         {
             get { return ParsedToken.QueryToken?.Type; }
         }
@@ -261,8 +261,8 @@ namespace Signum.Engine.Templating
     public class TranslateInstanceValueProvider : ValueProviderBase
     {
         public readonly ParsedToken ParsedToken;
-        public readonly QueryToken EntityToken;
-        public readonly PropertyRoute Route;
+        public readonly QueryToken? EntityToken;
+        public readonly PropertyRoute? Route;
         public readonly bool IsExplicit;
         
 
@@ -277,12 +277,12 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public override object GetValue(TemplateParameters p)
+        public override object? GetValue(TemplateParameters p)
         {
-            var entity = (Lite<Entity>)p.Rows.DistinctSingle(p.Columns[EntityToken]);
-            var fallback = (string)p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken]);
+            var entity = (Lite<Entity>)p.Rows.DistinctSingle(p.Columns[EntityToken!])!;
+            var fallback = (string)p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!])!;
 
-            return entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
+            return entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route!, fallback);
         }
 
         public override void Foreach(TemplateParameters parameters, Action forEachElement)
@@ -297,7 +297,7 @@ namespace Signum.Engine.Templating
             if (entityToken == null)
                 entityToken = QueryUtils.Parse("Entity", QueryLogic.Queries.QueryDescription(token.QueryName), 0);
 
-            if (!entityToken.Type.CleanType().IsAssignableFrom(Route.RootType))
+            if (!entityToken.Type.CleanType().IsAssignableFrom(Route!.RootType))
                 addError(false, "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName()));
 
             return entityToken;
@@ -318,15 +318,15 @@ namespace Signum.Engine.Templating
             return true;
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
         {
-            list.Add(ParsedToken.QueryToken);
-            list.Add(EntityToken);
+            list.Add(ParsedToken.QueryToken!);
+            list.Add(EntityToken!);
         }
 
         public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
@@ -344,7 +344,7 @@ namespace Signum.Engine.Templating
             Declare(sc.Variables);
         }
 
-        public override Type Type
+        public override Type ?Type
         {
             get { return typeof(string); }
         }
@@ -354,11 +354,16 @@ namespace Signum.Engine.Templating
     public class ParsedToken
     {
         public string String;
-        public QueryToken QueryToken;
+        public QueryToken? QueryToken { get; set; }
+
+        public ParsedToken(string @string)
+        {
+            String = @string;
+        }
 
         public static ParsedToken TryParseToken(string tokenString, SubTokensOptions options, QueryDescription qd, ScopedDictionary<string, ValueProviderBase> variables, Action<bool, string> addError)
         {
-            ParsedToken result = new ParsedToken { String = tokenString };
+            ParsedToken result = new ParsedToken(tokenString);
 
             if (tokenString.StartsWith("$"))
             {
@@ -405,14 +410,14 @@ namespace Signum.Engine.Templating
             var pair = (from kvp in variables
                         let tp = kvp.Value as TokenValueProvider
                         where tp != null
-                        let fullKey = tp.ParsedToken.QueryToken.FullKey()
+                        let fullKey = tp.ParsedToken.QueryToken!.FullKey()
                         where token == fullKey || token.StartsWith(fullKey + ".")
                         orderby fullKey.Length descending
                         select new { kvp.Key, fullKey }).FirstOrDefault();
 
             if (pair != null)
             {
-                return pair.Key + token.RemoveStart(pair.fullKey.Length);
+                return pair.Key + token.RemoveStart(pair.fullKey!.Length); /*CSBUG*/
             }
 
             return token;
@@ -429,10 +434,10 @@ namespace Signum.Engine.Templating
 
     public class ModelValueProvider : ValueProviderBase
     {
-        string fieldOrPropertyChain;
-        List<MemberInfo> Members;
+        string? fieldOrPropertyChain;
+        List<MemberInfo>? Members;
 
-        public ModelValueProvider(string fieldOrPropertyChain, Type modelType, PropertyInfo modelProperty, Action<bool, string> addError)
+        public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, PropertyInfo modelProperty, Action<bool, string> addError)
         {
             if (modelType == null)
             {
@@ -443,10 +448,10 @@ namespace Signum.Engine.Templating
             this.Members = ParsedModel.GetMembers(modelType, fieldOrPropertyChain, addError);
         }
 
-        public override object GetValue(TemplateParameters p)
+        public override object? GetValue(TemplateParameters p)
         {
             object value = p.GetModel();
-            foreach (var m in Members)
+            foreach (var m in Members!)
             {
                 value = Getter(m, value);
                 if (value == null)
@@ -473,12 +478,12 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return Reflector.FormatString(this.Type); }
+            get { return Reflector.FormatString(this.Type!); }
         }
 
-        public override Type Type
+        public override Type? Type
         {
             get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
         }
@@ -497,7 +502,7 @@ namespace Signum.Engine.Templating
         {
             if (Members == null)
             {
-                Members = sc.GetMembers(fieldOrPropertyChain, sc.ModelType);
+                Members = sc.GetMembers(fieldOrPropertyChain!, sc.ModelType!);
 
                 if (Members != null)
                     fieldOrPropertyChain = Members.ToString(a => a.Name, ".");
@@ -511,27 +516,29 @@ namespace Signum.Engine.Templating
     {
         public class GlobalVariable
         {
-            public Func<TemplateParameters, object> GetValue;
+            public Func<TemplateParameters, object?> GetValue;
             public Type Type;
-            public string Format;
+            public string? Format;
+
+            public GlobalVariable(Func<TemplateParameters, object?> getValue, Type type, string? format)
+            {
+                GetValue = getValue;
+                Type = type;
+                Format = format;
+            }
         }
 
         public static Dictionary<string, GlobalVariable> GlobalVariables = new Dictionary<string, GlobalVariable>();
 
-        public static void RegisterGlobalVariable<T>(string key, Func<TemplateParameters, T> globalVariable, string format = null)
+        public static void RegisterGlobalVariable<T>(string key, Func<TemplateParameters, T> globalVariable, string? format = null)
         {
-            GlobalVariables.Add(key, new GlobalVariable
-            {
-                GetValue = a => globalVariable(a),
-                Type = typeof(T),
-                Format = format,
-            });
+            GlobalVariables.Add(key, new GlobalVariable(a => globalVariable(a), typeof(T), format));
         }
 
 
         string globalKey;
-        string remainingFieldsOrProperties;
-        List<MemberInfo> Members;
+        string? remainingFieldsOrProperties;
+        List<MemberInfo>? Members;
 
         public GlobalValueProvider(string fieldOrPropertyChain, Action<bool, string> addError)
         {
@@ -547,9 +554,9 @@ namespace Signum.Engine.Templating
                 this.Members = ParsedModel.GetMembers(gv.Type, remainingFieldsOrProperties, addError);
         }
 
-        public override object GetValue(TemplateParameters p)
+        public override object? GetValue(TemplateParameters p)
         {
-            object value = GlobalVariables[globalKey].GetValue(p);
+            object? value = GlobalVariables[globalKey].GetValue(p);
             
             if (value == null)
                 return null;
@@ -567,17 +574,17 @@ namespace Signum.Engine.Templating
             return value;
         }
 
-        public override string Format
+        public override string? Format
         {
             get
             {
                 return Members == null ?
-                    GlobalVariables.TryGetC(globalKey)?.Format ?? Reflector.FormatString(Type) :
-                    Reflector.FormatString(Type);
+                    GlobalVariables.TryGetC(globalKey)?.Format ?? Reflector.FormatString(Type!) :
+                    Reflector.FormatString(Type!);
             }
         }
 
-        public override Type Type
+        public override Type? Type
         {
             get
             {
@@ -621,8 +628,7 @@ namespace Signum.Engine.Templating
 
     public class DateValueProvider : ValueProviderBase
     {
-
-        string dateTimeExpression; 
+        string? dateTimeExpression; 
         public DateValueProvider(string dateTimeExpression, Action<bool, string> addError)
         {
             try
@@ -636,9 +642,9 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public override Type Type => typeof(DateTime?);
+        public override Type? Type => typeof(DateTime?);
 
-        public override object GetValue(TemplateParameters p)
+        public override object? GetValue(TemplateParameters p)
         {
             return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
         }
@@ -650,7 +656,7 @@ namespace Signum.Engine.Templating
         public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
         {
             sb.Append("d:");
-            sb.Append(TemplateUtils.ScapeColon(this.dateTimeExpression));
+            sb.Append(TemplateUtils.ScapeColon(this.dateTimeExpression!));
         }
 
         public override void Synchronize(SynchronizationContext sc, string remainingText)
@@ -659,24 +665,24 @@ namespace Signum.Engine.Templating
 
         }
 
-        public override string Format => "G";
+        public override string? Format => "G";
 
     }
 
     public class ContinueValueProvider : ValueProviderBase
     {
-        string fieldOrPropertyChain;
-        List<MemberInfo> Members;
+        string? fieldOrPropertyChain;
+        List<MemberInfo>? Members;
         ValueProviderBase Parent; 
 
-        public ContinueValueProvider(string fieldOrPropertyChain, ValueProviderBase parent, Action<bool, string> addError)
+        public ContinueValueProvider(string? fieldOrPropertyChain, ValueProviderBase parent, Action<bool, string> addError)
         {
             this.Parent = parent;
 
-            this.Members = ParsedModel.GetMembers(ParentType(), fieldOrPropertyChain, addError);
+            this.Members = ParsedModel.GetMembers(ParentType()!, fieldOrPropertyChain, addError);
         }
 
-        private Type ParentType()
+        private Type? ParentType()
         {
             if (Parent.IsForeach)
                 return Parent.Type?.ElementType();
@@ -684,12 +690,12 @@ namespace Signum.Engine.Templating
             return Parent.Type;
         }
 
-        public override object GetValue(TemplateParameters p)
+        public override object? GetValue(TemplateParameters p)
         {
-            if (!p.RuntimeVariables.TryGetValue(Parent.Variable, out object value))
+            if (!p.RuntimeVariables.TryGetValue(Parent.Variable!, out object value))
                 throw new InvalidOperationException("Variable {0} not found".FormatWith(Parent.Variable));
 
-            foreach (var m in Members)
+            foreach (var m in Members!)
             {
                 value = Getter(m, value);
                 if (value == null)
@@ -703,7 +709,6 @@ namespace Signum.Engine.Templating
         {
             try
             {
-
                 if (member is PropertyInfo pi)
                     return pi.GetValue(value, null);
 
@@ -717,12 +722,12 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return Reflector.FormatString(this.Type); }
+            get { return Reflector.FormatString(this.Type!); }
         }
 
-        public override Type Type
+        public override Type? Type
         {
             get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
         }
@@ -742,7 +747,7 @@ namespace Signum.Engine.Templating
         {
             if (Members == null)
             {
-                Members = sc.GetMembers(fieldOrPropertyChain, ParentType());
+                Members = sc.GetMembers(fieldOrPropertyChain!, ParentType()!);
 
                 if (Members != null)
                     fieldOrPropertyChain = Members.ToString(a => a.Name, ".");

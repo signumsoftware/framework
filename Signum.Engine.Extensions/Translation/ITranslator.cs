@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -80,7 +80,7 @@ namespace Signum.Engine.Translation
                 dic.SetRange(subList, subResult);
             }
 
-            return list.Select(dic.GetOrThrow).ToList();
+            return list.Select(s => dic.GetOrThrow(s)!).ToList();
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
@@ -102,9 +102,9 @@ namespace Signum.Engine.Translation
             if (from.PluralDescription.HasText() && to.PluralDescription.HasText())
                 yield return KVP.Create(from.PluralDescription, to.PluralDescription);
 
-            foreach (var item in from.Members)
+            foreach (var item in from.Members!)
             {
-                var toMember = to.Members.TryGetC(item.Key);
+                var toMember = to.Members!.TryGetC(item.Key);
 
                 if (toMember.HasText())
                     yield return KVP.Create(item.Value, toMember);
@@ -133,8 +133,7 @@ namespace Signum.Engine.Translation
         {
             var result = Inner.TranslateBatch(list, from, to);
 
-            TranslationReplacementPack pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
-
+            TranslationReplacementPack? pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
             if (pack == null)
                 return result;
 
@@ -181,7 +180,7 @@ namespace Signum.Engine.Translation
     //        request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; es-ES; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3";
     //        request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-    //        string response = null;
+    //        string? response = null;
     //        using (StreamReader readStream = new StreamReader(request.GetResponse().GetResponseStream(), Encoding.UTF8))
     //        {
     //            response = readStream.ReadToEnd();

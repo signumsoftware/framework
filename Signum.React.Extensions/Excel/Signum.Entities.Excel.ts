@@ -13,10 +13,10 @@ import * as Files from '../Files/Signum.Entities.Files'
 export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttachment");
 export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
   Type: "ExcelAttachment";
-  fileName?: string | null;
-  title?: string | null;
-  userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
-  related?: Entities.Lite<Entities.Entity> | null;
+  fileName: string;
+  title: string | null;
+  userQuery: Entities.Lite<UserQueries.UserQueryEntity>;
+  related: Entities.Lite<Entities.Entity>;
 }
 
 export module ExcelMessage {
@@ -36,9 +36,9 @@ export module ExcelMessage {
 export const ExcelReportEntity = new Type<ExcelReportEntity>("ExcelReport");
 export interface ExcelReportEntity extends Entities.Entity {
   Type: "ExcelReport";
-  query?: Basics.QueryEntity | null;
-  displayName?: string | null;
-  file?: Files.FileEmbedded | null;
+  query: Basics.QueryEntity;
+  displayName: string;
+  file: Files.FileEmbedded;
 }
 
 export module ExcelReportOperation {

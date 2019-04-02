@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Migrations;
@@ -29,8 +29,8 @@ namespace Signum.Engine.Dynamic
             return IsAppliedExpression.Evaluate(r);
         }
 
-        public static StringBuilder CurrentLog = null;
-        public static string LastLog;
+        public static StringBuilder? CurrentLog = null;
+        public static string? LastLog;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -94,13 +94,13 @@ namespace Signum.Engine.Dynamic
                                     return new Replacements.Selection(ctx.OldValue, null);
                                 };
 
-                            var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement);
+                            var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement)!;
 
                             return new DynamicSqlMigrationEntity
                             {
                                 CreationDate = TimeZoneManager.Now,
                                 CreatedBy = UserEntity.Current.ToLite(),
-                                Script = script?.ToString(),
+                                Script = script.ToString(),
                             };
                         }
                         finally
@@ -135,7 +135,7 @@ namespace Signum.Engine.Dynamic
                         {
                             CurrentLog = new StringBuilder();
                             LastLog = null;
-                            Console.SetOut(new SynchronizedStringWriter(CurrentLog));
+                            Console.SetOut(new SynchronizedStringWriter(CurrentLog!));
 
                             string title = e.CreationDate + (e.Comment.HasText() ? " ({0})".FormatWith(e.Comment) : null);
 
@@ -177,10 +177,10 @@ namespace Signum.Engine.Dynamic
         private static string AutoReplacementEnums(Replacements.AutoReplacementContext ctx)
         {
             StringDistance sd = new StringDistance();
-            return ctx.NewValues.WithMin(nv => sd.LevenshteinDistance(nv, ctx.OldValue));
+            return ctx.NewValues!.WithMin(nv => sd.LevenshteinDistance(nv, ctx.OldValue));
         }
 
-        public static string DynamicAutoReplacementsSimple(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames, string replacementKey)
+        public static string? DynamicAutoReplacementsSimple(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames, string replacementKey)
         {
             var list = lastRenames.Where(a => a.ReplacementKey == replacementKey).ToList();
 
@@ -191,13 +191,13 @@ namespace Signum.Engine.Dynamic
                     currentName = r.NewName;
             }
 
-            if (ctx.NewValues.Contains(currentName))
+            if (ctx.NewValues!.Contains(currentName))
                 return currentName;
 
             return null;
         }
 
-        public static string DynamicAutoReplacementsOperations(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
+        public static string? DynamicAutoReplacementsOperations(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
         {
             var typeReplacements = lastRenames.Where(a => a.ReplacementKey == DynamicTypeLogic.TypeNameKey).ToList();
 
@@ -213,13 +213,13 @@ namespace Signum.Engine.Dynamic
             }
 
             var newName = typeName + "Operation." + ctx.OldValue.After("Operation.");
-            if (ctx.NewValues.Contains(newName))
+            if (ctx.NewValues!.Contains(newName))
                 return newName;
 
             return null;
         }
 
-        public static string DynamicAutoReplacementsProperties(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
+        public static string? DynamicAutoReplacementsProperties(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
         {
             var prefix = ctx.ReplacementKey.Before(":");
             var tableNames = GetAllRenames(ctx.ReplacementKey.After(":"), DynamicTypeLogic.TypeNameKey, lastRenames);
@@ -235,12 +235,12 @@ namespace Signum.Engine.Dynamic
                     currentName = currentName.Split('.').Select(p => p == r.OldName ? r.NewName : p).ToString(".");
             }
 
-            if (ctx.NewValues.Contains(currentName))
+            if (ctx.NewValues!.Contains(currentName))
                 return currentName;
 
             return null;
         }
-        public static string DynamicAutoReplacementsColumns(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
+        public static string? DynamicAutoReplacementsColumns(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
         {
             var prefix = ctx.ReplacementKey.Before(":");
             var tableNames = GetAllRenames(ctx.ReplacementKey.After(":"), Replacements.KeyTables, lastRenames);
@@ -256,7 +256,7 @@ namespace Signum.Engine.Dynamic
                     currentName = currentName.Split('_').Select(p => p == r.OldName ? r.NewName : p).ToString("_");
             }
 
-            if (ctx.NewValues.Contains(currentName))
+            if (ctx.NewValues!.Contains(currentName))
                 return currentName;
 
             return null;
@@ -280,7 +280,7 @@ namespace Signum.Engine.Dynamic
             return allTypeNames;
         }
 
-        public static string GetLog()
+        public static string? GetLog()
         {
             var ll = LastLog;
             var sb = CurrentLog;

@@ -76,12 +76,12 @@ namespace Signum.Engine.Dynamic
                     try
                     {
                         if (!Administrator.ExistsTable<DynamicExpressionEntity>())
-                            return new Dictionary<string, Dictionary<string, Tuple<string, string>>>();
+                            return new Dictionary<string, Dictionary<string, Tuple<string?, string?>>>();
 
                         using (ExecutionMode.Global())
                             return Database.Query<DynamicExpressionEntity>()
                             .Where(a => a.Format != null || a.Unit != null)
-                            .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => new Tuple<string, string>(a.Format, a.Unit)));
+                            .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new Tuple<string?, string?>(a.Format, a.Unit)));
                     }
                     finally
                     {
@@ -114,11 +114,7 @@ namespace Signum.Engine.Dynamic
                     var dtcg = new DynamicExpressionCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, expressions, DynamicCode.Namespaces);
 
                     var content = dtcg.GetFileCode();
-                    result.Add(new CodeFile
-                    {
-                        FileName = "CodeGenExpressionStarter.cs",
-                        FileContent = content,
-                    });
+                    result.Add(new CodeFile("CodeGenExpressionStarter.cs", content));
                     return result;
                 }
             }
@@ -133,7 +129,6 @@ namespace Signum.Engine.Dynamic
     {
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
-        public string TypeName { get; private set; }
         public List<DynamicExpressionEntity> Expressions { get; private set; }
 
         public DynamicExpressionCodeGenerator(string @namespace, List<DynamicExpressionEntity> expressions, HashSet<string> usings)
@@ -218,7 +213,7 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        private string GetNiceNameCode(DynamicExpressionEntity value)
+        private string? GetNiceNameCode(DynamicExpressionEntity value)
         {
             switch (value.Translation)
             {

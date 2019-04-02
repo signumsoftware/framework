@@ -28,7 +28,7 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        private static Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
+        private static Assembly? AssemblyResolveHandler(object sender, ResolveEventArgs args)
         {
             if (args.Name.StartsWith(DynamicCode.CodeGenAssembly.Before(".")))
                 return Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
@@ -36,7 +36,7 @@ namespace Signum.Engine.Dynamic
             return null;
         }
 
-        public static Func<List<CodeFile>> GetCodeFiles = null;
+        public static Func<List<CodeFile>> GetCodeFiles;
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
 
@@ -50,7 +50,7 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static FileInfo GetLastCodeGenControllerAssemblyFileInfo()
+        public static FileInfo? GetLastCodeGenControllerAssemblyFileInfo()
         {
             Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
 
@@ -60,7 +60,7 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static FileInfo GetLoadedCodeGenAssemblyFileInfo()
+        public static FileInfo? GetLoadedCodeGenAssemblyFileInfo()
         {
             if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
                 return null;
@@ -70,7 +70,7 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static FileInfo GetLoadedCodeGenControllerAssemblyFileInfo()
+        public static FileInfo? GetLoadedCodeGenControllerAssemblyFileInfo()
         {
             if (DynamicCode.CodeGenControllerAssemblyPath.IsNullOrEmpty())
                 return null;
@@ -94,7 +94,7 @@ namespace Signum.Engine.Dynamic
             var errors = new List<string>();
             try
             {
-                CompilationResult cr = null;
+                CompilationResult? cr = null;
 
                 bool cleaned = false;
                 if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
@@ -213,8 +213,14 @@ namespace Signum.Engine.Dynamic
 
         public class CompilationResult
         {
-            public string OutputAssembly;
+            public string? OutputAssembly;
             public List<CompilationError> Errors;
+
+            public CompilationResult(string? outputAssembly, List<CompilationError> errors)
+            {
+                OutputAssembly = outputAssembly;
+                Errors = errors;
+            }
         }
 
         public class CompilationError
@@ -225,6 +231,16 @@ namespace Signum.Engine.Dynamic
             public string ErrorNumber;
             public string ErrorText;
             public string FileContent;
+
+            public CompilationError(Diagnostic d)
+            {
+                this.Column = d.Location.GetLineSpan().StartLinePosition.Character;
+                this.Line = d.Location.GetLineSpan().StartLinePosition.Line + 1;
+                this.FileContent = d.Location.SourceTree.ToString();
+                this.FileName = d.Location.SourceTree.FilePath;
+                this.ErrorNumber = d.Descriptor.Id;
+                this.ErrorText = d.GetMessage(null);
+            }
 
             public override string ToString()
             {
@@ -282,21 +298,13 @@ namespace Signum.Engine.Dynamic
                         }
                     }
 
-                    return new CompilationResult
-                    {
-                        OutputAssembly = emitResult.Success ? outputAssembly : null,
-                        Errors = emitResult.Diagnostics.Where(a => a.Severity == DiagnosticSeverity.Error)
-                        .Select(d => new CompilationError
-                        {
-                            Column = d.Location.GetLineSpan().StartLinePosition.Character,
-                            Line = d.Location.GetLineSpan().StartLinePosition.Line + 1,
-                            FileContent = d.Location.SourceTree.ToString(),
-                            FileName = d.Location.SourceTree.FilePath,
-                            ErrorNumber = d.Descriptor.Id,
-                            ErrorText = d.GetMessage(null)
-                        })
-                        .ToList()
-                    };
+                    var errors = emitResult.Diagnostics.Where(a => a.Severity == DiagnosticSeverity.Error)
+                        .Select(d => new CompilationError(d)).ToList();
+
+                    return new CompilationResult(
+                        outputAssembly: emitResult.Success ? outputAssembly : null,
+                        errors: errors
+                    );
                 }
             }
         }
@@ -308,13 +316,9 @@ namespace Signum.Engine.Dynamic
             var code = dscg.GetFileCode();
 
             var starter = new List<CodeFile>
-                    {
-                        new CodeFile
-                        {
-                            FileName = "CodeGenStarter.cs",
-                            FileContent = code,
-                        }
-                    };
+            {
+                new CodeFile( "CodeGenStarter.cs",code)
+            };
 
             return starter;
         }
@@ -367,5 +371,11 @@ namespace Signum.Engine.Dynamic
     {
         public string FileName; //Just for debugging
         public string FileContent;
+
+        public CodeFile(string fileName, string fileContent)
+        {
+            FileName = fileName;
+            FileContent = fileContent;
+        }
     }
 }

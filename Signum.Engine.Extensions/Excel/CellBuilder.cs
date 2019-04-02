@@ -62,7 +62,7 @@ namespace Signum.Engine.Excel
             return DefaultTemplateCells.TryGetS(tc) ?? DefaultStyle.General;
         }
 
-        public Dictionary<DefaultStyle, UInt32Value> DefaultStyles;
+        public Dictionary<DefaultStyle, UInt32Value> DefaultStyles = null!;
 
         public Cell Cell<T>(T value)
         {
@@ -76,18 +76,18 @@ namespace Signum.Engine.Excel
             return Cell(value, template, styleIndex);
         }
 
-        public Cell Cell(object value, Type type)
+        public Cell Cell(object? value, Type type)
         {
             DefaultStyle template = GetDefaultStyle(type);
             return Cell(value, template);
         }
 
-        public Cell Cell(object value, DefaultStyle template)
+        public Cell Cell(object? value, DefaultStyle template)
         {
             return Cell(value, template, DefaultStyles[template]);
         }
 
-        public Cell Cell(object value, DefaultStyle template, UInt32Value styleIndex)
+        public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex)
         {
             string excelValue = value == null ? "" :
                         (template == DefaultStyle.Date || template == DefaultStyle.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
@@ -130,7 +130,7 @@ namespace Signum.Engine.Excel
         }
 
         public Dictionary<string, UInt32Value> CustomDecimalStyles = new Dictionary<string, UInt32Value>();
-        public UInt32Value CellFormatCount;
+        public UInt32Value CellFormatCount = null!;
             
 
         internal (DefaultStyle defaultStyle, UInt32Value styleIndex) GetDefaultStyleAndIndex(ResultColumn c)
@@ -155,9 +155,12 @@ namespace Signum.Engine.Excel
             return (defaultStyle, DefaultStyles.GetOrThrow(defaultStyle));
         }
 
-        private string GetCustomFormatExpression(string columnUnit, string columnFormat)
+        private string GetCustomFormatExpression(string? columnUnit, string? columnFormat)
         {
-            var excelUnitPrefix = columnUnit== "$" ? "[$$-409]":columnUnit == "£" ? "[$£-809]" : columnUnit == "¥" ? "[$¥-804]" : "";
+            var excelUnitPrefix = 
+                columnUnit == "$" ? "[$$-409]" : 
+                columnUnit == "£" ? "[$£-809]" : 
+                columnUnit == "¥" ? "[$¥-804]" : "";
 
             var excelUnitSuffix = excelUnitPrefix == "" && !string.IsNullOrEmpty(columnUnit) ? $"\" {columnUnit}\"" : "";
 
@@ -167,7 +170,7 @@ namespace Signum.Engine.Excel
 
         }
 
-        private string GetExcelFormat(string columnFormat)
+        private string GetExcelFormat(string? columnFormat)
         {
             if (columnFormat == null)
             {

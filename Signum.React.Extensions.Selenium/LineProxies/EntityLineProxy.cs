@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 
@@ -27,7 +27,7 @@ namespace Signum.React.Selenium
             }
         }
 
-        public Lite<Entity> GetLite()
+        public Lite<Entity>? GetLite()
         {
             return EntityInfo()?.ToLite();
         }
@@ -52,7 +52,7 @@ namespace Signum.React.Selenium
             return base.ViewInternal<T>();
         }
 
-        public EntityInfoProxy EntityInfo()
+        public EntityInfoProxy? EntityInfo()
         {
             return EntityInfoInternal(null);
         }

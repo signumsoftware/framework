@@ -14,10 +14,10 @@ namespace Signum.Entities.Mailing
     public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotifyCollectionChanged, NotNullValidator, NotifyChildProperty]
+        [NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
         [UniqueIndex]
@@ -33,7 +33,7 @@ namespace Signum.Entities.Mailing
             return ToStringExpression.Evaluate(this);
         }
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(Messages))
             {
@@ -92,10 +92,10 @@ namespace Signum.Entities.Mailing
         }
 
 
-        [NotNullValidator]
+        
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string Text { get; set; }
 
         public override string ToString()
@@ -103,7 +103,7 @@ namespace Signum.Entities.Mailing
             return CultureInfo?.ToString();
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
             {

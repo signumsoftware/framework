@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using Signum.Entities.Migrations;
 using Signum.Utilities;
 using System;
@@ -12,9 +12,9 @@ namespace Signum.Engine.Migrations
     {
         public List<MigrationInfo> Migrations = new List<MigrationInfo>();
 
-        public void Add(Action action, string uniqueName = null)
+        public void Add(Action action, string? uniqueName = null)
         {
-            Migrations.Add(new MigrationInfo { Action = action, UniqueName = uniqueName ?? GetUniqueName(action) });
+            Migrations.Add(new MigrationInfo(action, uniqueName ?? GetUniqueName(action)));
         }
 
         private string GetUniqueName(Action action)
@@ -116,7 +116,7 @@ namespace Signum.Engine.Migrations
             mi.IsExecuted = true;
         }
 
-        private void Draw(MigrationInfo current)
+        private void Draw(MigrationInfo? current)
         {
             Console.WriteLine();
 
@@ -142,6 +142,12 @@ namespace Signum.Engine.Migrations
             public Action Action;
             public string UniqueName;
             public bool IsExecuted;
+
+            public MigrationInfo(Action action, string uniqueName)
+            {
+                Action = action;
+                UniqueName = uniqueName;
+            }
 
             public override string ToString()
             {

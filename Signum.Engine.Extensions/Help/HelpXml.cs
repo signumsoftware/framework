@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -174,7 +174,7 @@ namespace Signum.Engine.Help
 
                     foreach (var item in cols.Elements(_Column))
                     {
-                        string name = item.Attribute(_Name).Value;
+                        string? name = item.Attribute(_Name).Value;
                         name = SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(queryName));
 
                         if (name == null)
@@ -269,8 +269,7 @@ namespace Signum.Engine.Help
                         string name = item.Attribute(_Name).Value;
 
                         var property = SelectInteractive(name, properties, "properties for {0}".FormatWith(type.Name));
-
-                        if (name == null)
+                        if (property == null)
                             continue;
 
                         var col = property.IsNew ? null : entity.Properties.SingleOrDefaultEx(c => c.Property.Is(property));
@@ -297,10 +296,9 @@ namespace Signum.Engine.Help
                     foreach (var item in opers.Elements(_Operation))
                     {
                         string name = item.Attribute(_Name).Value;
-
                         var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(type.Name));
 
-                        if (name == null)
+                        if (operation == null)
                             continue;
 
                         var col = entity.Operations.SingleOrDefaultEx(c => c.Operation.Is(operation));
@@ -357,21 +355,21 @@ namespace Signum.Engine.Help
         public static string NamespacesDirectory = "Namespace";
         public static string AppendicesDirectory = "Appendix";
 
-        public static T SelectInteractive<T>(string str, Dictionary<string, T> dictionary, string context) where T :class
+        public static T? SelectInteractive<T>(string str, Dictionary<string, T> dictionary, string context) where T :class
         {
-            T result = dictionary.TryGetC(str);
+            T? result = dictionary.TryGetC(str);
             
             if(result != null)
                 return result;
 
             StringDistance sd = new StringDistance();
 
-            var list = dictionary.Keys.Select(s => new { s, lcs = sd.LongestCommonSubsequence(str, s) }).OrderByDescending(s => s.lcs).Select(a => a.s).ToList();
+            var list = dictionary.Keys.Select(s => new { s, lcs = sd.LongestCommonSubsequence(str, s) }).OrderByDescending(s => s.lcs!).Select(a => a.s!).ToList();
 
             var cs = new ConsoleSwitch<int, string>("{0} has been renamed in {1}".FormatWith(str, context));
             cs.Load(list);
-            string selected = cs.Choose();
 
+            string? selected = cs.Choose();
             if (selected == null)
                 return null;
 

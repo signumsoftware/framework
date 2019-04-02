@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Utilities;
@@ -8,17 +8,17 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
     public class QueryHelpEntity : Entity
     {
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
-        [NotNullValidator]
+        
         public CultureInfoEntity Culture { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+        [StringLengthValidator(Min = 3, MultiLine = true)]
+        public string? Description { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<QueryColumnHelpEmbedded> Columns { get; set; } = new MList<QueryColumnHelpEmbedded>();
 
         public bool IsEmpty
@@ -26,7 +26,7 @@ namespace Signum.Entities.Help
             get { return string.IsNullOrEmpty(this.Description) && Columns.IsEmpty(); }
         }
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(IsEmpty) && IsEmpty)
                 return "IsEmpty is true";
@@ -45,11 +45,11 @@ namespace Signum.Entities.Help
     [Serializable]
     public class QueryColumnHelpEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ColumnName { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+        [StringLengthValidator(Min = 3, MultiLine = true)]
+        public string? Description { get; set; }
 
         public override string ToString()
         {

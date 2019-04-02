@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -59,12 +59,12 @@ namespace Signum.Engine.Mailing
                      n.Id,
                      n.Name,
                      n.Subject,
-                     Text = n.Text.Etc(100),
+                     Text = n.Text.Try(a => a.Etc(100)),
                      n.State,
                      NumDeliveries = n.Deliveries().Count(),
                      LastProcess = p,
                      NumErrors = n.Deliveries().Count(d => d.Exception(p) != null)
-                 });           
+                 });
 
                 QueryLogic.Queries.Register(typeof(NewsletterDeliveryEntity), () =>
                     from e in Database.Query<NewsletterDeliveryEntity>()
@@ -92,9 +92,9 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static string ValidateTokens(NewsletterEntity newsletter, string text)
+        static string? ValidateTokens(NewsletterEntity newsletter, string? text)
         {
-            var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
+            var queryName = QueryLogic.ToQueryName(newsletter.Query!.Key);
 
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
@@ -102,7 +102,7 @@ namespace Signum.Engine.Mailing
             {
                 EmailTemplateParser.TryParse(text, qd, null, out string error);
 
-                return error.DefaultText(null);
+                return error.DefaultToNull();
             }
             catch (Exception e)
             {
@@ -113,7 +113,7 @@ namespace Signum.Engine.Mailing
 
         static void Newsletter_PreSaving(NewsletterEntity newsletter, PreSavingContext ctx)
         {
-            var queryname = QueryLogic.ToQueryName(newsletter.Query.Key);
+            var queryname = QueryLogic.ToQueryName(newsletter.Query!.Key);
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryname);
 
             newsletter.Subject = EmailTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
@@ -206,7 +206,9 @@ namespace Signum.Engine.Mailing
 
     class NewsletterProcessAlgorithm : IProcessAlgorithm
     {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         class SendLine
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             public IGrouping<Lite<Entity>, ResultRow> Rows;
             public Lite<NewsletterDeliveryEntity> NewsletterDelivery;
@@ -218,9 +220,9 @@ namespace Signum.Engine.Mailing
 
         public void Execute(ExecutingProcess executingProcess)
         {
-            NewsletterEntity newsletter = (NewsletterEntity)executingProcess.Data;
+            NewsletterEntity newsletter = (NewsletterEntity)executingProcess.Data!;
 
-            var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
+            var queryName = QueryLogic.ToQueryName(newsletter.Query!.Key);
 
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
@@ -267,10 +269,10 @@ namespace Signum.Engine.Mailing
             var deliveryColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
             var emailOwnerColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
             
-            var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]).Select(g => new SendLine
+            var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]!).Select(g => new SendLine
                 {
-                    NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn),
-                    Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn),
+                    NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn)!,
+                    Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn)!,
                     Rows = g,
                 }).ToList();
             
@@ -303,18 +305,18 @@ namespace Signum.Engine.Mailing
                             if (newsletter.From.HasText())
                                 message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
                             else
-                                message.From = smtpConfig.DefaultFrom.ToMailAddress();
+                                message.From = smtpConfig.DefaultFrom!.ToMailAddress();
                             
                             message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
 
                             message.Subject = ((EmailTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
-                                new EmailTemplateParameters(null, null, dicTokenColumn, s.Rows)
+                                new EmailTemplateParameters(null, null!, dicTokenColumn, s.Rows)
                                 {
                                     IsHtml = false,
                                 });
 
                             message.Body = ((EmailTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
-                                new EmailTemplateParameters(null, null, dicTokenColumn, s.Rows)
+                                new EmailTemplateParameters(null, null!, dicTokenColumn, s.Rows)
                                 {
                                     IsHtml = true,
                                 });

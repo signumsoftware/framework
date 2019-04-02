@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -27,7 +27,7 @@ namespace Signum.Engine.Mailing.Pop3
         }
 
         static Expression<Func<Pop3ReceptionEntity, IQueryable<EmailMessageEntity>>> EmailMessagesExpression =
-            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Is(r));
+            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r));
         [ExpressionField]
         public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r)
         {
@@ -88,7 +88,7 @@ namespace Signum.Engine.Mailing.Pop3
                         e.Template,
                         e.State,
                         e.Sent,
-                        SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
+                        SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate,
                         e.Package,
                         e.Exception,
                     });
@@ -176,9 +176,9 @@ namespace Signum.Engine.Mailing.Pop3
 
 
                         var lastsEmails = Database.Query<EmailMessageEntity>()
-                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Entity.Pop3Configuration.Is(config))
-                            .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo.UniqueId })
-                            .OrderByDescending(c => c.CreationDate).Take(10).ToDictionary(e => e.UniqueId);
+                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Entity.Pop3Configuration.Is(config))
+                            .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId })
+                            .OrderByDescending(c => c.CreationDate).Take(10).ToDictionary(e => e.UniqueId!); /*CSBUG*/
 
 
                         List<MessageUid> messagesToSave;
@@ -251,7 +251,7 @@ namespace Signum.Engine.Mailing.Pop3
                  where ri != null && ri.UniqueId == mi.Uid
                  select em)
                  .UnsafeUpdate()
-                 .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo.DeletionDate, em => now)
+                 .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo!.DeletionDate, em => now)
                  .Execute();
             }
         }
@@ -338,7 +338,7 @@ namespace Signum.Engine.Mailing.Pop3
                 using (OperationLogic.AllowSave<EmailMessageEntity>())
                 using (Transaction tr = Transaction.ForceNew())
                 {
-                    string rawContent = null;
+                    string? rawContent = null;
                     try
                     {
                         var email = client.GetMessage(mi, reception.ToLite());
@@ -349,7 +349,7 @@ namespace Signum.Engine.Mailing.Pop3
                         {
                             email.Recipients.Add(new EmailRecipientEmbedded
                             {
-                                EmailAddress = config.Username,
+                                EmailAddress = config.Username!,
                                 Kind = EmailRecipientKind.To,
                             });
                         }
@@ -374,7 +374,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                         email.Save();
 
-                        sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
+                        sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate;
 
                         tr.Commit();
                     }

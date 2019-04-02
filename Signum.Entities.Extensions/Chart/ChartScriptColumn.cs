@@ -93,7 +93,7 @@ namespace Signum.Entities.Chart
             a => a.Value.GetCustomAttribute<CodeAttribute>().Code,
             a => (ChartColumnType)a.Key);
 
-        public static string TryParse(string code, out ChartColumnType type)
+        public static string? TryParse(string code, out ChartColumnType type)
         {
             if (fromCodes.TryGetValue(code, out type))
                 return null;
@@ -101,13 +101,12 @@ namespace Signum.Entities.Chart
             return "{0} is not a valid type code, use {1} instead".FormatWith(code, fromCodes.Keys.CommaOr());
         }
 
-        public static string TryParseComposed(string code, out ChartColumnType type)
+        public static string? TryParseComposed(string code, out ChartColumnType type)
         {
             type = default(ChartColumnType);
             foreach (var item in code.Split(','))
             {
-                string error = TryParse(item, out ChartColumnType temp);
-
+                string? error = TryParse(item, out ChartColumnType temp);
                 if (error.HasText())
                     return error;
 

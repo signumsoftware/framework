@@ -10,8 +10,8 @@ export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
   Type: "CultureInfo";
   name: string;
-  nativeName: string | null;
-  englishName: string | null;
+  nativeName: string;
+  englishName: string;
   hidden: boolean;
 }
 
@@ -22,9 +22,9 @@ export module CultureInfoOperation {
 export const DateSpanEmbedded = new Type<DateSpanEmbedded>("DateSpanEmbedded");
 export interface DateSpanEmbedded extends Entities.EmbeddedEntity {
   Type: "DateSpanEmbedded";
-  years?: number;
-  months?: number;
-  days?: number;
+  years: number;
+  months: number;
+  days: number;
 }
 
 export module DisabledMessage {
@@ -34,7 +34,7 @@ export module DisabledMessage {
 export const DisabledMixin = new Type<DisabledMixin>("DisabledMixin");
 export interface DisabledMixin extends Entities.MixinEntity {
   Type: "DisabledMixin";
-  isDisabled?: boolean;
+  isDisabled: boolean;
 }
 
 export module DisableOperation {
@@ -45,10 +45,10 @@ export module DisableOperation {
 export const TimeSpanEmbedded = new Type<TimeSpanEmbedded>("TimeSpanEmbedded");
 export interface TimeSpanEmbedded extends Entities.EmbeddedEntity {
   Type: "TimeSpanEmbedded";
-  days?: number;
-  hours?: number;
-  minutes?: number;
-  seconds?: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
 }
 
 export const TypeConditionSymbol = new Type<TypeConditionSymbol>("TypeCondition");

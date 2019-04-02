@@ -12,10 +12,10 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const AppendixHelpEntity = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
   Type: "AppendixHelp";
-  uniqueName?: string | null;
-  culture?: Basics.CultureInfoEntity | null;
-  title?: string | null;
-  description?: string | null;
+  uniqueName: string;
+  culture: Basics.CultureInfoEntity;
+  title: string;
+  description: string | null;
 }
 
 export module AppendixHelpOperation {
@@ -25,13 +25,13 @@ export module AppendixHelpOperation {
 export const EntityHelpEntity = new Type<EntityHelpEntity>("EntityHelp");
 export interface EntityHelpEntity extends Entities.Entity {
   Type: "EntityHelp";
-  type?: Signum.TypeEntity | null;
-  culture?: Basics.CultureInfoEntity | null;
-  description?: string | null;
+  type: Signum.TypeEntity;
+  culture: Basics.CultureInfoEntity;
+  description: string | null;
   properties: Entities.MList<PropertyRouteHelpEmbedded>;
   operations: Entities.MList<OperationHelpEmbedded>;
   queries: Entities.MList<QueryHelpEntity>;
-  isEmpty?: boolean;
+  isEmpty: boolean;
 }
 
 export module EntityHelpOperation {
@@ -135,10 +135,10 @@ export module HelpSyntaxMessage {
 export const NamespaceHelpEntity = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity {
   Type: "NamespaceHelp";
-  name?: string | null;
-  culture?: Basics.CultureInfoEntity | null;
-  title?: string | null;
-  description?: string | null;
+  name: string;
+  culture: Basics.CultureInfoEntity;
+  title: string | null;
+  description: string | null;
 }
 
 export module NamespaceHelpOperation {
@@ -148,32 +148,32 @@ export module NamespaceHelpOperation {
 export const OperationHelpEmbedded = new Type<OperationHelpEmbedded>("OperationHelpEmbedded");
 export interface OperationHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "OperationHelpEmbedded";
-  operation?: Entities.OperationSymbol | null;
-  description?: string | null;
+  operation: Entities.OperationSymbol;
+  description: string | null;
 }
 
 export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("PropertyRouteHelpEmbedded");
 export interface PropertyRouteHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "PropertyRouteHelpEmbedded";
-  property?: Signum.PropertyRouteEntity | null;
-  description?: string | null;
+  property: Signum.PropertyRouteEntity;
+  description: string | null;
 }
 
 export const QueryColumnHelpEmbedded = new Type<QueryColumnHelpEmbedded>("QueryColumnHelpEmbedded");
 export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnHelpEmbedded";
-  columnName?: string | null;
-  description?: string | null;
+  columnName: string;
+  description: string | null;
 }
 
 export const QueryHelpEntity = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
   Type: "QueryHelp";
-  query?: Signum.QueryEntity | null;
-  culture?: Basics.CultureInfoEntity | null;
-  description?: string | null;
+  query: Signum.QueryEntity;
+  culture: Basics.CultureInfoEntity;
+  description: string | null;
   columns: Entities.MList<QueryColumnHelpEmbedded>;
-  isEmpty?: boolean;
+  isEmpty: boolean;
 }
 
 export module QueryHelpOperation {

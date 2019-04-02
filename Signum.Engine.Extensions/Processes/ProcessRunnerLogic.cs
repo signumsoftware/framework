@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -142,7 +142,7 @@ namespace Signum.Engine.Processes
                     var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
                     SystemEventLogLogic.Log("Start ProcessRunner");
-                    ExceptionEntity exception = null;
+                    ExceptionEntity? exception = null;
                     using (AuthLogic.Disable())
                     {
                         try
@@ -227,7 +227,7 @@ namespace Signum.Engine.Processes
 
                                             foreach (var pair in afordable)
                                             {
-                                                ProcessEntity pro = pair.Process.Retrieve();
+                                                ProcessEntity pro = pair.Process!.Retrieve();
 
                                                 IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
 
@@ -318,7 +318,7 @@ namespace Signum.Engine.Processes
                 }, TaskCreationOptions.LongRunning);
         }
 
-        internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
+        internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
         {
             using (HeavyProfiler.Log("WakeUp", () => "WakeUp! "+ reason + ToString(args)))
             {
@@ -326,7 +326,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        private static string ToString(SqlNotificationEventArgs args)
+        private static string? ToString(SqlNotificationEventArgs? args)
         {
             if (args == null)
                 return null;
@@ -391,7 +391,7 @@ namespace Signum.Engine.Processes
             this.CurrentProcess = process;
         }
 
-        public IProcessDataEntity Data
+        public IProcessDataEntity? Data
         {
             get { return CurrentProcess.Data; }
         }
@@ -403,7 +403,7 @@ namespace Signum.Engine.Processes
 
         public static int DecimalPlaces = 3;
 
-        public void ProgressChanged(int position, int count, string status = null)
+        public void ProgressChanged(int position, int count, string? status = null)
         {
             if (position > count)
                 throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".FormatWith(position, count));
@@ -416,7 +416,7 @@ namespace Signum.Engine.Processes
             ProgressChanged(progress, status);
         }
 
-        public void ProgressChanged(decimal progress, string status = null)
+        public void ProgressChanged(decimal progress, string? status = null)
         {
             if (progress != CurrentProcess.Progress || status != CurrentProcess.Status)
             {
@@ -434,7 +434,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public void WriteMessage(string status)
+        public void WriteMessage(string? status)
         {
             if (status != CurrentProcess.Status)
             {
@@ -477,7 +477,7 @@ namespace Signum.Engine.Processes
                 using (ProcessLogic.OnApplySession(CurrentProcess))
                 {
                     if (UserEntity.Current == null)
-                        UserEntity.Current = AuthLogic.SystemUser;
+                        UserEntity.Current = AuthLogic.SystemUser!;
                     try
                     {
                         Algorithm.Execute(this);
@@ -528,6 +528,7 @@ namespace Signum.Engine.Processes
 
 
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class ProcessLogicState
     {
         public int MaxDegreeOfParallelism;
@@ -537,7 +538,6 @@ namespace Signum.Engine.Processes
         public bool JustMyProcesses;
         public DateTime? NextPlannedExecution;
         public List<ExecutionState> Executing;
-
     }
 
     public class ExecutionState
@@ -549,4 +549,5 @@ namespace Signum.Engine.Processes
         public string MachineName;
         public string ApplicationName; 
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

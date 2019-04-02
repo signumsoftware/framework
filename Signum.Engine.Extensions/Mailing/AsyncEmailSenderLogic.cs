@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Threading;
@@ -58,7 +58,7 @@ namespace Signum.Engine.Mailing
                 Task.Factory.StartNew(() =>
                 {
                     SystemEventLogLogic.Log("Start AsyncEmailSender");
-                    ExceptionEntity exception = null;
+                    ExceptionEntity? exception = null;
                     try
                     {
                         running = true;
@@ -209,7 +209,7 @@ namespace Signum.Engine.Mailing
             return queuedItems > 0;
         }
 
-        internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
+        internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
         {
             using (HeavyProfiler.Log("EmailAsyncSender WakeUp", () => "WakeUp! " + reason + ToString(args)))
             {
@@ -217,7 +217,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private static string ToString(SqlNotificationEventArgs args)
+        private static string? ToString(SqlNotificationEventArgs? args)
         {
             if (args == null)
                 return null;

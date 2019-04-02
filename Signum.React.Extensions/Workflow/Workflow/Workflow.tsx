@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig, EnumCheckboxList } from '@framework/Lines'
@@ -48,7 +48,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
   updateState(model: WorkflowModel) {
     this.setState({
       initialXmlDiagram: model.diagramXml,
-      entities: model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model)
+      entities: model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model!)
     });
   }
 

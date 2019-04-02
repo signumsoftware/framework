@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Signum.Entities.Authorization;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
                     if (u.PasswordNeverExpires)
                         return null;
 
-                    PasswordExpiresIntervalEntity ivp = null;
+                    PasswordExpiresIntervalEntity? ivp = null;
                     using (AuthLogic.Disable())
                         ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
 

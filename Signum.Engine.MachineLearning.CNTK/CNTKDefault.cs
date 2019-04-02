@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.MachineLearning;
 using Signum.Utilities;
 
@@ -7,7 +7,7 @@ namespace Signum.Engine.MachineLearning.CNTK
     public static class CNTKDefault
     {
         static readonly object Zero = 0;
-        public static object GetDefaultValue(PredictorCodification c)
+        public static object? GetDefaultValue(PredictorCodification c)
         {
             switch (c.Column.NullHandling)
             {

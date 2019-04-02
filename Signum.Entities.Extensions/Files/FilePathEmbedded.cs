@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.IO;
 using System.Linq.Expressions;
@@ -32,7 +32,7 @@ namespace Signum.Entities.Files
         }
 
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
+        [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -68,13 +68,13 @@ namespace Signum.Entities.Files
             get { return FileLengthStringExpression.Evaluate(this); }
         }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260, DisabledInModelBinder = true)]
+        [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }
 
         [Ignore]
         public string CalculatedDirectory { get; set; }
 
-        [NotNullable]
+        [ForceNotNullable]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
@@ -106,7 +106,7 @@ namespace Signum.Entities.Files
             return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
 
-        public string FullWebPath()
+        public string? FullWebPath()
         {
             var pp = this.GetPrefixPair();
 

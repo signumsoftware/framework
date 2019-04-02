@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -169,7 +169,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
         public abstract QueryDescription GetDescription(object queryName);
 
-        public abstract Lite<Entity> RetrieveLite(Type type, PrimaryKey id);
+        public abstract Lite<Entity>? RetrieveLite(Type type, PrimaryKey id);
 
         public List<Lite<Entity>> Autocomplete(Type type, string subString, int count)
         {

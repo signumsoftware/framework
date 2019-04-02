@@ -156,16 +156,16 @@ namespace Signum.Engine.Templating
 
     public class ConditionCompare : ConditionBase
     {
-        public readonly ValueProviderBase ValueProvider;
+        public readonly ValueProviderBase? ValueProvider;
         private FilterOperation? Operation;
-        private string Value;
+        private string? Value;
 
-        public ConditionCompare(ValueProviderBase valueProvider)
+        public ConditionCompare(ValueProviderBase? valueProvider)
         {
             this.ValueProvider = valueProvider;
         }
 
-        public ConditionCompare(ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError)
+        public ConditionCompare(ValueProviderBase? valueProvider, string operation, string value, Action<bool, string> addError)
         {
             this.ValueProvider = valueProvider;
             this.Operation = FilterValueConverter.ParseOperation(operation);
@@ -185,18 +185,18 @@ namespace Signum.Engine.Templating
 
         public override void FillQueryTokens(List<QueryToken> tokens)
         {
-            this.ValueProvider.FillQueryTokens(tokens);
+            this.ValueProvider!.FillQueryTokens(tokens);
         }
 
         public override bool Evaluate(TemplateParameters p)
         {
-            var obj = ValueProvider.GetValue(p);
+            var obj = ValueProvider!.GetValue(p);
 
             if (Operation == null)
                 return ToBool(obj);
             else
             {
-                var type = this.ValueProvider.Type;
+                var type = this.ValueProvider.Type!;
 
                 Expression token = Expression.Constant(obj, type);
 
@@ -210,7 +210,7 @@ namespace Signum.Engine.Templating
         }
 
 
-        protected static bool ToBool(object obj)
+        protected static bool ToBool(object? obj)
         {
             if (obj == null)
                 return false;
@@ -226,20 +226,20 @@ namespace Signum.Engine.Templating
 
         public override void Synchronize(SynchronizationContext sc, string remainingText)
         {
-            this.ValueProvider.Synchronize(sc, remainingText);
+            this.ValueProvider!.Synchronize(sc, remainingText);
 
             if (Operation != null)
-                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation.Value.IsList());
+                sc.SynchronizeValue(this.ValueProvider!.Type!, ref Value, Operation.Value.IsList());
         }
 
         public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
-            this.ValueProvider.Declare(variables);
+            this.ValueProvider!.Declare(variables);
         }
 
         public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
         {
-            this.ValueProvider.ToStringInternal(sb, variables);
+            this.ValueProvider!.ToStringInternal(sb, variables);
             if (this.Operation != null)
                 sb.Append(FilterValueConverter.ToStringOperation(Operation.Value) + Value);
         }
@@ -249,7 +249,7 @@ namespace Signum.Engine.Templating
             sb.Append("[");
             this.ToStringInternal(sb, variables);
             sb.Append("]");
-            if (this.ValueProvider.Variable.HasText())
+            if (this.ValueProvider!.Variable.HasText())
                 sb.Append(" as " + this.ValueProvider.Variable);
         }
         public override IEnumerable<object> GetFilteredRows(TemplateParameters p)
@@ -260,7 +260,7 @@ namespace Signum.Engine.Templating
             }
             else
             {
-                var collection = (IEnumerable)this.ValueProvider.GetValue(p);
+                var collection = (IEnumerable)this.ValueProvider!.GetValue(p)!;
 
                 return collection.Cast<object>();
             }
@@ -268,23 +268,23 @@ namespace Signum.Engine.Templating
 
         public override Func<ResultRow, bool> GetResultFilter(TemplateParameters p)
         {
-            var tvp = (TokenValueProvider)ValueProvider;
+            var tvp = (TokenValueProvider)ValueProvider!;
 
             if (Operation == null)
             {
-                var column = p.Columns[tvp.ParsedToken.QueryToken];
+                var column = p.Columns[tvp.ParsedToken.QueryToken!];
 
                 return r => ToBool(r[column]);
             }
             else
             {
-                var type = this.ValueProvider.Type;
+                var type = this.ValueProvider!.Type!;
 
-                object val = FilterValueConverter.Parse(Value, type, Operation.Value.IsList());
+                object? val = FilterValueConverter.Parse(Value, type, Operation.Value.IsList());
 
                 Expression value = Expression.Constant(val, type);
 
-                ResultColumn col = p.Columns[tvp.ParsedToken.QueryToken];
+                ResultColumn col = p.Columns[tvp.ParsedToken.QueryToken!];
 
                 var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
 

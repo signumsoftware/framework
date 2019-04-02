@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Utilities;
 using Signum.Entities.Omnibox;
@@ -33,7 +33,7 @@ namespace Signum.Entities.UserQueries
                 {
                     ToStr = ident,
                     ToStrMatch = match,
-                    Distance = match.Distance,
+                    Distance = match!.Distance,
                     UserQuery = (Lite<UserQueryEntity>)uq,
                 };
             }
@@ -53,9 +53,9 @@ namespace Signum.Entities.UserQueries
     public class UserQueryOmniboxResult : OmniboxResult
     {
         public string ToStr { get; set; }
-        public OmniboxMatch ToStrMatch { get; set; }
+        public OmniboxMatch? ToStrMatch { get; set; }
 
-        public Lite<UserQueryEntity> UserQuery { get; set; }
+        public Lite<UserQueryEntity>? UserQuery { get; set; }
 
         public override string ToString()
         {

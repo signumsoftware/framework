@@ -60,14 +60,16 @@ namespace Signum.Engine.SMS
             get { return getConfiguration(); }
         }
 
-        public static ISMSProvider Provider { get; set; }
+        public static ISMSProvider? Provider { get; set; }
+
+        public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null!, null!)));
         }
 
-        public static void Start(SchemaBuilder sb, ISMSProvider provider, Func<SMSConfigurationEmbedded> getConfiguration)
+        public static void Start(SchemaBuilder sb, ISMSProvider? provider, Func<SMSConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -117,7 +119,7 @@ namespace Signum.Engine.SMS
         static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
         static Dictionary<Type, LambdaExpression> cultureProviders = new Dictionary<Type, LambdaExpression>();
 
-        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo>> cultureExpression) where T : Entity
+        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo?>> cultureExpression) where T : Entity
         {
             phoneNumberProviders[typeof(T)] = phoneExpression;
             cultureProviders[typeof(T)] = cultureExpression;
@@ -129,15 +131,15 @@ namespace Signum.Engine.SMS
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
                         .Select(pr => new { Exp = phoneExpression.Evaluate(pr), Referred = pr.ToLite() }).AsEnumerable().NotNull().Distinct().ToList();
 
-                    var splitNumbers = (from p in numbers.Where(p => p.Exp.Contains(','))
-                                        from n in p.Exp.Split('n')
-                                        select new { Exp = n.Trim(), p.Referred }).Concat(numbers.Where(p => !p.Exp.Contains(','))).Distinct().ToList();
+                    var splitNumbers = (from p in numbers.Where(p => p.Exp!.Contains(','))
+                                        from n in p.Exp!.Split('n')
+                                        select new { Exp = n.Trim(), p.Referred }).Concat(numbers.Where(p => !p.Exp!.Contains(','))).Distinct().ToList();
 
                     numbers = splitNumbers;
 
                     MultipleSMSModel model = args.GetArg<MultipleSMSModel>();
 
-                    IntegrityCheck ic = model.IntegrityCheck();
+                    IntegrityCheck? ic = model.IntegrityCheck();
 
                     if (!model.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
@@ -149,9 +151,9 @@ namespace Signum.Engine.SMS
                     using (OperationLogic.AllowSave<SMSMessageEntity>())
                         numbers.Select(n => new SMSMessageEntity
                         {
-                            DestinationNumber = n.Exp,
+                            DestinationNumber = n.Exp!,
                             SendPackage = packLite,
-                            Referred = n.Referred,
+                            Referred = n.Referred!,/*CSBUG*/
 
                             Message = model.Message,
                             From = model.From,
@@ -178,7 +180,7 @@ namespace Signum.Engine.SMS
             return phoneFunc.Evaluate(entity);
         }
 
-        public static CultureInfo GetCulture<T>(T entity) where T : IEntity
+        public static CultureInfo? GetCulture<T>(T entity) where T : IEntity
         {
             var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
                 .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".FormatWith(typeof(T).NiceName()));
@@ -206,6 +208,7 @@ namespace Signum.Engine.SMS
         }
 
         public static void RegisterDataObjectProvider<T, A>(Expression<Func<T, A>> func) where T : Entity
+            where A : object
         {
             dataObjectProviders[typeof(T)] = func;
 
@@ -215,9 +218,9 @@ namespace Signum.Engine.SMS
                 {
                     var template = args.GetArg<SMSTemplateEntity>();
 
-                    if (TypeLogic.EntityToType[template.AssociatedType] != typeof(T))
+                    if (TypeLogic.EntityToType[template.AssociatedType!] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
-                            .FormatWith(template.AssociatedType.FullClassName, typeof(T).FullName));
+                            .FormatWith(template.AssociatedType!.FullClassName, typeof(T).FullName));
 
                     var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders
                         .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".FormatWith(typeof(T).NiceName()));
@@ -234,15 +237,15 @@ namespace Signum.Engine.SMS
                               Culture = cultureFunc.Evaluate(p)
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
-                    var splitdNumbers = (from p in numbers.Where(p => p.Phone.Contains(','))
-                                         from n in p.Phone.Split(',')
+                    var splitdNumbers = (from p in numbers.Where(p => p.Phone!.Contains(','))
+                                         from n in p.Phone!.Split(',')
                                          select new
                                          {
                                              Phone = n.Trim(),
                                              p.Data,
                                              p.Referred,
                                              p.Culture
-                                         }).Concat(numbers.Where(p => !p.Phone.Contains(','))).Distinct().ToList();
+                                         }).Concat(numbers.Where(p => !p.Phone!.Contains(','))).Distinct().ToList();
 
                     numbers = splitdNumbers;
 
@@ -253,13 +256,13 @@ namespace Signum.Engine.SMS
                     {
                         numbers.Select(n => new SMSMessageEntity
                         {
-                            Message = template.ComposeMessage(n.Data, n.Culture),
+                            Message = template.ComposeMessage(n.Data!, n.Culture!),
                             EditableMessage = template.EditableMessage,
                             From = template.From,
-                            DestinationNumber = n.Phone,
+                            DestinationNumber = n.Phone!,
                             SendPackage = packLite,
                             State = SMSMessageState.Created,
-                            Referred = n.Referred
+                            Referred = n.Referred!
                         }).SaveList();
                     }
 
@@ -311,7 +314,7 @@ namespace Signum.Engine.SMS
 
         static Regex literalFinder = new Regex(@"{(?<name>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)}");
 
-        public static string ComposeMessage(this SMSTemplateEntity template, object o, CultureInfo culture)
+        public static string ComposeMessage(this SMSTemplateEntity template, object obj, CultureInfo? culture)
         {
             var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
             var templateMessage = template.GetCultureMessage(culture ?? defaultCulture) ??
@@ -319,7 +322,7 @@ namespace Signum.Engine.SMS
 
             var message = templateMessage.Message;
 
-            if (o == null)
+            if (obj == null)
                 return message;
 
             var matches = literalFinder.Matches(message);
@@ -327,23 +330,25 @@ namespace Signum.Engine.SMS
             if (matches.Count == 0)
                 return message;
 
-            Type t = o.GetType();
+            Type t = obj.GetType();
 
             var combinations = (from Match m in literalFinder.Matches(message)
                                 select new Combination
                                 {
                                     Name = m.Groups["name"].Value,
-                                    Value = t.GetProperty(m.Groups["name"].Value)?.Let(fi => fi.GetValue(o, null))?.ToString()
+                                    Value = t.GetProperty(m.Groups["name"].Value)?.Let(fi => fi.GetValue(obj, null))?.ToString()
                                 }).ToList();
 
             return CombineText(template, templateMessage, combinations);
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         internal class Combination
         {
             public string Name;
             public string Value;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         static string CombineText(SMSTemplateEntity template, SMSTemplateMessageEmbedded templateMessage, List<Combination> combinations)
         {
@@ -450,9 +455,6 @@ namespace Signum.Engine.SMS
         
         public static void SendSMS(SMSMessageEntity message)
         {
-            if (Provider == null)
-                throw new InvalidOperationException("Provider was not established");
-
             if (!message.DestinationNumber.Contains(','))
             {
                 SendOneMessage(message);
@@ -484,7 +486,7 @@ namespace Signum.Engine.SMS
 
         private static void SendOneMessage(SMSMessageEntity message)
         {
-            message.MessageID = Provider.SMSSendAndGetTicket(message);
+            message.MessageID = GetProvider().SMSSendAndGetTicket(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
             using (OperationLogic.AllowSave<SMSMessageEntity>())
@@ -502,7 +504,7 @@ namespace Signum.Engine.SMS
         public static List<SMSMessageEntity> CreateAndSendMultipleSMSMessages(MultipleSMSModel template, List<string> phones)
         {
             var messages = new List<SMSMessageEntity>();
-            var IDs = Provider.SMSMultipleSendAction(template, phones);
+            var IDs = GetProvider().SMSMultipleSendAction(template, phones);
             var sendDate = TimeZoneManager.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
@@ -580,7 +582,7 @@ namespace Signum.Engine.SMS
                 {
                     var func = args.TryGetArgC<Func<SMSMessageEntity, SMSMessageState>>();
                     if (func == null)
-                        func = SMSLogic.Provider.SMSUpdateStatusAction;
+                        func = SMSLogic.GetProvider().SMSUpdateStatusAction;
 
                     sms.State = func(sms);
 

@@ -10,13 +10,13 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ViewName { get; set; } = "Default";
 
-        [NotNullValidator]
+        
         public TypeEntity EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(Min = 3)]
         public string ViewContent { get; set; }
 
 
@@ -41,10 +41,10 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewSelectorEntity : Entity
     {
-        [NotNullValidator, UniqueIndex]
+        [UniqueIndex]
         public TypeEntity EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
         static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
@@ -67,13 +67,13 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewOverrideEntity : Entity
     {
-        [NotNullValidator]
+        
         public TypeEntity EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string ViewName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? ViewName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
         static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "DynamicViewOverride " + @this.EntityType;

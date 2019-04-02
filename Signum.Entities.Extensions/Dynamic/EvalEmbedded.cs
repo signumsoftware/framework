@@ -22,7 +22,7 @@ namespace Signum.Entities.Dynamic
         }
 
         [Ignore, NonSerialized]
-        CompilationResult compilationResult;
+        CompilationResult? compilationResult;
 
         [HiddenProperty]
         public T Algorithm
@@ -30,11 +30,8 @@ namespace Signum.Entities.Dynamic
             get
             {
                 CompileIfNecessary();
-
-                if (compilationResult == null)
-                    return null;
-
-                if (compilationResult.CompilationErrors != null)
+                
+                if (compilationResult!.CompilationErrors != null)
                     throw new InvalidOperationException(compilationResult.CompilationErrors);
 
                 return compilationResult.Algorithm;
@@ -142,7 +139,7 @@ namespace Signum.Entities.Dynamic
             get { return compilationResult != null; }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Script) && compilationResult != null)
                 return compilationResult.CompilationErrors;

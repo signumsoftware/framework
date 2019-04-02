@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Threading;
@@ -64,7 +64,7 @@ namespace Signum.Engine.Workflow
                 Task.Factory.StartNew(() =>
                 {
                     SystemEventLogLogic.Log("Start WorkflowScriptRunner");
-                    ExceptionEntity exception = null;
+                    ExceptionEntity? exception = null;
                     try
                     {
                         running = true;
@@ -78,7 +78,7 @@ namespace Signum.Engine.Workflow
 
                         GC.KeepAlive(timer);
 
-                        using (UserHolder.UserSession(AuthLogic.SystemUser))
+                        using (UserHolder.UserSession(AuthLogic.SystemUser!))
                         {
                             if (CacheLogic.WithSqlDependency)
                             {
@@ -101,7 +101,7 @@ namespace Signum.Engine.Workflow
                                         while (queuedItems > 0 || RecruitQueuedItems())
                                         {
                                             var items = Database.Query<CaseActivityEntity>().Where(m => m.DoneDate == null && 
-                                                m.ScriptExecution.ProcessIdentifier == processIdentifier)
+                                                m.ScriptExecution!.ProcessIdentifier == processIdentifier)
                                                 .Take(WorkflowLogic.Configuration.ChunkSizeRunningScripts).ToList();
                                             queuedItems = items.Count;
                                             foreach (var caseActivity in items)
@@ -122,8 +122,8 @@ namespace Signum.Engine.Workflow
                                                     try
                                                     {
                                                         var ca = caseActivity.ToLite().Retrieve();
-                                                        var retry = ((WorkflowActivityEntity)ca.WorkflowActivity).Script.RetryStrategy;
-                                                        var nextDate = retry?.NextDate(ca.ScriptExecution.RetryCount);
+                                                        var retry = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.RetryStrategy;
+                                                        var nextDate = retry?.NextDate(ca.ScriptExecution!.RetryCount);
                                                         if(nextDate == null)
                                                         {
                                                             ca.Execute(CaseActivityOperation.ScriptFailureJump);
@@ -142,7 +142,7 @@ namespace Signum.Engine.Workflow
                                                 queuedItems--;
                                             }
                                             queuedItems = Database.Query<CaseActivityEntity>()
-                                            .Where(m => m.ScriptExecution.ProcessIdentifier == processIdentifier && m.DoneDate == null)
+                                            .Where(m => m.ScriptExecution!.ProcessIdentifier == processIdentifier && m.DoneDate == null)
                                             .Count();
                                         }
                                     }
@@ -198,16 +198,16 @@ namespace Signum.Engine.Workflow
 
             queuedItems = Database.Query<CaseActivityEntity>()
                 .Where(ca => ca.DoneDate == null &&
-                             ((firstDate == null || firstDate < ca.ScriptExecution.NextExecution) &&
-                            ca.ScriptExecution.NextExecution < TimeZoneManager.Now))
+                             ((firstDate == null || firstDate < ca.ScriptExecution!.NextExecution) &&
+                            ca.ScriptExecution!.NextExecution < TimeZoneManager.Now))
                 .UnsafeUpdate()
-                .Set(m => m.ScriptExecution.ProcessIdentifier, m => processIdentifier)
+                .Set(m => m.ScriptExecution!.ProcessIdentifier, m => processIdentifier)
                 .Execute();
 
             return queuedItems > 0;
         }
 
-        internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
+        internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
         {
             using (HeavyProfiler.Log("WorkflowScriptRunner WakeUp", () => "WakeUp! " + reason + ToString(args)))
             {
@@ -215,7 +215,7 @@ namespace Signum.Engine.Workflow
             }
         }
 
-        private static string ToString(SqlNotificationEventArgs args)
+        private static string? ToString(SqlNotificationEventArgs? args)
         {
             if (args == null)
                 return null;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Processes;
@@ -13,7 +13,7 @@ namespace Signum.Engine.MachineLearning
     {
         public void Execute(ExecutingProcess ep)
         {   
-            var conf = (AutoconfigureNeuralNetworkEntity)ep.Data;
+            var conf = (AutoconfigureNeuralNetworkEntity)ep.Data!;
 
             var initial = conf.InitialPredictor.RetrieveAndForget();
             Random r = conf.Seed == null ? 
@@ -117,7 +117,7 @@ namespace Signum.Engine.MachineLearning
         {
             PredictorLogic.TrainSync(p, onReportProgres: (str, val) => onProgress(val));
 
-            return p.ResultValidation.Loss.Value;
+            return p.ResultValidation!.Loss.Value;
         }
 
         //private static double EvaluateMock(ExecutingProcess ep, PredictorEntity p, Action<decimal?> onProgress)

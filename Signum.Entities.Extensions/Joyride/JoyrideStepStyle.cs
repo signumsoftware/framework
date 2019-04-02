@@ -10,26 +10,26 @@ namespace Signum.Entities.Joyride
     public class JoyrideStepStyleEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string BackgroundColor { get; set; }
+        [StringLengthValidator(Min = 3, Max = 50)]
+        public string? BackgroundColor { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string Color { get; set; }
+        [StringLengthValidator(Min = 3, Max = 50)]
+        public string? Color { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string MainColor { get; set; }
+        [StringLengthValidator(Min = 3, Max = 50)]
+        public string? MainColor { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string BorderRadius { get; set; }
+        [StringLengthValidator(Min = 3, Max = 50)]
+        public string? BorderRadius { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string TextAlign { get; set; }
+        [StringLengthValidator(Min = 3, Max = 50)]
+        public string? TextAlign { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string Width { get; set; }
+        [StringLengthValidator(Min = 3, Max = 50)]
+        public string? Width { get; set; }
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();

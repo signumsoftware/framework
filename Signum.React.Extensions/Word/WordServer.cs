@@ -38,7 +38,7 @@ namespace Signum.React.Word
                 {
                     var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
                     if (applicable.HasItems())
-                        ep.Extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                        ep.extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
                 }
             };
 

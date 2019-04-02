@@ -73,7 +73,7 @@ namespace Signum.Engine.Migrations
             }
         }
 
-        public static Exception ExecuteLoadProcess(Action action, string description)
+        public static Exception? ExecuteLoadProcess(Action action, string description)
         {
             string showDescription = description ?? action.Method.Name.SpacePascal(true);
             Console.WriteLine("------- Executing {0} ".FormatWith(showDescription).PadRight(Console.WindowWidth - 2, '-'));
@@ -93,8 +93,8 @@ namespace Signum.Engine.Migrations
                 {
                     log.End = TimeZoneManager.Now;
                     log.Save();
+                    Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
                 }
-                Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
 
                 return null;
             }

@@ -28,7 +28,6 @@ namespace Signum.Engine.Dashboard
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-
                 GetDashboard = GetDashboardDefault;
 
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
@@ -123,7 +122,7 @@ namespace Signum.Engine.Dashboard
                     new InvalidateWith(typeof(DashboardEntity)));
 
                 DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
-                .SelectCatch(d => KVP.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType.Id), d.ToLite()))
+                .SelectCatch(d => KVP.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
                 .GroupToDictionary(),
                     new InvalidateWith(typeof(DashboardEntity)));
             }
@@ -158,7 +157,7 @@ namespace Signum.Engine.Dashboard
             }
         }
 
-        public static DashboardEntity GetHomePageDashboard()
+        public static DashboardEntity? GetHomePageDashboard()
         {
             var result = GetDashboard(false, null);
 
@@ -174,9 +173,9 @@ namespace Signum.Engine.Dashboard
             return GetDashboard(true, key);
         }
 
-        public static Func<bool, string, DashboardEntity> GetDashboard;
+        public static Func<bool, string?, DashboardEntity> GetDashboard;
 
-        static DashboardEntity GetDashboardDefault(bool forNavbar, string key)
+        static DashboardEntity GetDashboardDefault(bool forNavbar, string? key)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
 
@@ -191,11 +190,11 @@ namespace Signum.Engine.Dashboard
             return result;
         }
 
-        public static DashboardEntity GetEmbeddedDashboard(Type entityType)
+        public static DashboardEntity? GetEmbeddedDashboard(Type entityType)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
 
-            var result = DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(Dashboards.Value.GetOrThrow)
+            var result = DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(lite => Dashboards.Value.GetOrThrow(lite))
                 .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && isAllowed(d))
                 .OrderByDescending(a => a.DashboardPriority).FirstOrDefault();
 

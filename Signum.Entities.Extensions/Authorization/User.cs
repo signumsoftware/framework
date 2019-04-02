@@ -10,7 +10,7 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     {
-        public static Func<string, string> ValidatePassword = p =>
+        public static Func<string, string?> ValidatePassword = p =>
         {
             if (p.Length >= 5)
                 return null;
@@ -18,7 +18,7 @@ namespace Signum.Entities.Authorization
             return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
         };
 
-        public static string OnValidatePassword(string password)
+        public static string? OnValidatePassword(string password)
         {
             if (ValidatePassword != null)
                 return ValidatePassword(password);
@@ -27,12 +27,11 @@ namespace Signum.Entities.Authorization
         }
 
         [UniqueIndex(AvoidAttachToUniqueIndexes = true)]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
+        [StringLengthValidator(Min = 2, Max = 100)]
         public string UserName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 128)]
+        [SqlDbType(Size = 128)]
         byte[] passwordHash;
-        [NotNullValidator]
         public byte[] PasswordHash
         {
             get { return passwordHash; }
@@ -47,19 +46,19 @@ namespace Signum.Entities.Authorization
 
         public bool PasswordNeverExpires { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<RoleEntity> Role { get; set; }
 
-        [EMailValidator]
-        public string Email { get; set; }
+        [StringLengthValidator(Max = 200), EMailValidator]
+        public string? Email { get; set; }
 
-        public CultureInfoEntity CultureInfo { get; set; }
+        public CultureInfoEntity? CultureInfo { get; set; }
 
         public DateTime? AnulationDate { get; set; }
 
         public UserState State { get; set; } = UserState.New;
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(State))
             {
@@ -88,7 +87,7 @@ namespace Signum.Entities.Authorization
             Owner = u.ToLite(),
             CultureInfo = u.CultureInfo,
             DisplayName = u.UserName,
-            Email = u.Email,
+            Email = u.Email!,
         };
         [ExpressionField]
         public EmailOwnerData EmailOwnerData

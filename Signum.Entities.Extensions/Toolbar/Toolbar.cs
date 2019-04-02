@@ -18,9 +18,9 @@ namespace Signum.Entities.Toolbar
     public class ToolbarEntity : Entity, IUserAssetEntity
     {
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        public Lite<IEntity> Owner { get; set; }
+        public Lite<IEntity>? Owner { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public ToolbarLocation Location { get; set; }
@@ -28,7 +28,7 @@ namespace Signum.Entities.Toolbar
         public int? Priority { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
         [UniqueIndex]
@@ -81,20 +81,20 @@ namespace Signum.Entities.Toolbar
     {
         public ToolbarElementType Type { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
-        public string Label { get; set; }
+        [StringLengthValidator(Min = 1, Max = 100)]
+        public string? Label { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string IconName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? IconName { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string IconColor { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? IconColor { get; set; }
 
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
-        public Lite<Entity> Content { get; set; }
+        public Lite<Entity>? Content { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
-        public string Url { get; set; }
+        [StringLengthValidator(Min = 1, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
+        public string? Url { get; set; }
 
         public bool OpenInPopup { get; set; }
 
@@ -131,8 +131,8 @@ namespace Signum.Entities.Toolbar
 
             Content = string.IsNullOrEmpty(content) ? null :
                 Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLiteFat() :
-                (Lite<Entity>)ctx.TryGetQuery(content)?.ToLite() ??
-                (Lite<Entity>)ctx.TryPermission(content)?.ToLite() ??
+                (Lite<Entity>?)ctx.TryGetQuery(content)?.ToLite() ??
+                (Lite<Entity>?)ctx.TryPermission(content)?.ToLite() ??
                 throw new InvalidOperationException($"Content '{content}' not found");
 
             Url = x.Attribute("Url")?.Value;
@@ -146,7 +146,7 @@ namespace Signum.Entities.Toolbar
                 { ToolbarElementType.Item,      null,           null,      null,           null },
             };
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if(this.Type == ToolbarElementType.Item || this.Type == ToolbarElementType.Header)
             {
@@ -178,16 +178,16 @@ namespace Signum.Entities.Toolbar
     public class ToolbarMenuEntity : Entity, IUserAssetEntity
     {
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        public Lite<IEntity> Owner { get; set; }
+        public Lite<IEntity>? Owner { get; set; }
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
         public XElement ToXml(IToXmlContext ctx)

@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
@@ -22,7 +22,7 @@ namespace Signum.Engine.Word
         public List<TemplateError> Errors = new List<TemplateError>();
         public QueryDescription QueryDescription { get; private set; }
         public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
-        public Type ModelType { get; private set; }
+        public Type? ModelType { get; private set; }
 
         static PropertyInfo piSystemWordTemplate = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
         public PropertyInfo ModelProperty => piSystemWordTemplate;
@@ -30,7 +30,7 @@ namespace Signum.Engine.Word
         OpenXmlPackage document;
         WordTemplateEntity template;
 
-        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type systemWordTemplateType, WordTemplateEntity template)
+        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type? systemWordTemplateType, WordTemplateEntity template)
         {
             this.QueryDescription = queryDescription;
             this.ModelType = systemWordTemplateType;
@@ -95,7 +95,7 @@ namespace Signum.Engine.Word
                     {
                         var firstRunPart = nodeProvider.NewRun(
                             (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true),
-                             start.Text.Substring(0, m.Index - start.Interval.Min),
+                             start.Text!.Substring(0, m.Index - start.Interval.Min),
                              SpaceProcessingModeValues.Preserve
                             );
                         par.Append(firstRunPart);
@@ -111,17 +111,15 @@ namespace Signum.Engine.Word
                     {
                         var endRun = (OpenXmlCompositeElement)end.Element;
 
-                        var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
+                        var textPart = end.Text!.Substring(interval.Max - end.Interval.Min);
                         var endRunPart = nodeProvider.NewRun(
                             nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
                             textPart,
                              SpaceProcessingModeValues.Preserve
                             );
 
-                        stack.Push(new ElementInfo
+                        stack.Push(new ElementInfo(endRunPart, textPart)
                         {
-                            Element = endRunPart,
-                            Text = textPart,
                             Interval = new Interval<int>(interval.Max, end.Interval.Max)
                         });
                     }
@@ -155,7 +153,7 @@ namespace Signum.Engine.Word
 
         private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens, INodeProvider nodeProvider)
         {
-            var infos = childrens.Select(c => new ElementInfo { Element = c, Text = nodeProvider.IsRun(c) ? nodeProvider.GetText(c) : null }).ToList();
+            var infos = childrens.Select(c => new ElementInfo(c, nodeProvider.IsRun(c) ? nodeProvider.GetText(c) : null)).ToList();
 
             int currentPosition = 0;
             foreach (ElementInfo ri in infos)
@@ -169,9 +167,15 @@ namespace Signum.Engine.Word
 
         class ElementInfo
         {
-            public string Text;
-            public OpenXmlElement Element;
+            public readonly OpenXmlElement Element;
+            public readonly string? Text;
             public Interval<int> Interval;
+
+            public ElementInfo(OpenXmlElement element, string? text)
+            {
+                Element = element;
+                Text = text;
+            }
 
             public override string ToString()
             {
@@ -206,9 +210,9 @@ namespace Signum.Engine.Word
                             {
                                 var vp = ValueProviderBase.TryParse(s.Value.Token, variable, this);
 
-                                matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp, s.Value.Format)
+                                matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp!, s.Value.Format!)
                                 {
-                                    RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
+                                    RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -217,9 +221,9 @@ namespace Signum.Engine.Word
                         case "declare":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
-                                matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp, this.AddError)
+                                matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp!, this.AddError)
                                 {
-                                    RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
+                                    RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -295,7 +299,7 @@ namespace Signum.Engine.Word
                         case "foreach":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
-                                var fn = new ForeachNode(matchNode.NodeProvider, vp) { ForeachToken = new MatchNodePair(matchNode) };
+                                var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
                                 PushBlock(fn);
 
                                 DeclareVariable(vp);
@@ -326,7 +330,7 @@ namespace Signum.Engine.Word
             Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
         }
 
-        T PopBlock<T>() where T : BlockContainerNode
+        T? PopBlock<T>() where T : BlockContainerNode
         {
             if (stack.IsEmpty())
             {
@@ -341,11 +345,11 @@ namespace Signum.Engine.Word
                 return null;
             }
 
-            Variables = Variables.Previous;
+            Variables = Variables.Previous!;
             return (T)n;
         }
 
-        T PeekBlock<T>() where T : BlockContainerNode
+        T? PeekBlock<T>() where T : BlockContainerNode
         {
             if (stack.IsEmpty())
             {
@@ -361,7 +365,7 @@ namespace Signum.Engine.Word
             }
 
 
-            Variables = Variables.Previous;
+            Variables = Variables.Previous!;
             Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
             return (T)n;
         }
@@ -373,18 +377,18 @@ namespace Signum.Engine.Word
         }
 
 
-        void DeclareVariable(ValueProviderBase token)
+        void DeclareVariable(ValueProviderBase? token)
         {
             if (token?.Variable.HasText() == true)
             {
-                if (Variables.TryGetValue(token.Variable, out ValueProviderBase t))
+                if (Variables.TryGetValue(token!.Variable!, out ValueProviderBase t))
                 {
                     if (!t.Equals(token))
                         AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
                 }
                 else
                 {
-                    Variables.Add(token.Variable, token);
+                    Variables.Add(token!.Variable!, token);
                 }
             }
         }

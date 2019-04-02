@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
 
                     foreach (var item in groups)
                     {
-                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, item.Key));
+                        Type? type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, item.Key));
 
                         if (type == null)
                             continue;
@@ -79,12 +79,11 @@ namespace Signum.Engine.Authorization
                     {
                         var pp = new PropertyPair(s);
 
-                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, pp.Type));
+                        Type? type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, pp.Type));
                         if (type == null)
                             return null;
 
-                        PropertyRoute route = routesDicCache[type].TryGetC(replacements.Apply(AuthPropertiesReplacementKey(type), pp.Property));
-
+                        PropertyRoute? route = routesDicCache[type].TryGetC(replacements.Apply(AuthPropertiesReplacementKey(type), pp.Property));
                         if (route == null)
                             return null;
 
@@ -168,7 +167,7 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleEntity.Current, route);
         }
 
-        public static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+        public static string? GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return null;
@@ -194,7 +193,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
+        public static Dictionary<PropertyRoute, PropertyAllowed>? OverridenProperties()
         {
             var dd = cache.GetDefaultDictionary();
 

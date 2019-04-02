@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -147,8 +147,8 @@ namespace Signum.Engine.Help
             if (dic.ContainsKey(ci.Parent.Name))
                 return ci.Parent;
 
-            if (Schema.Current.ForceCultureInfo != null && dic.ContainsKey(Schema.Current.ForceCultureInfo.Name))
-                return Schema.Current.ForceCultureInfo;
+            if (Schema.Current.ForceCultureInfo != null && dic.ContainsKey(Schema.Current.ForceCultureInfo!.Name))
+                return Schema.Current.ForceCultureInfo!;
 
             throw new InvalidOperationException("No compatible CultureInfo found in the database for {0}".FormatWith(ci.Name));
         }
@@ -203,7 +203,7 @@ namespace Signum.Engine.Help
                         Entity = e,
                         e.Id,
                         e.Type,
-                        Description = e.Description.Etc(100)
+                        Description = e.Description.Try(d => d.Etc(100))
                     });
 
                 sb.Include<NamespaceHelpEntity>()
@@ -214,7 +214,7 @@ namespace Signum.Engine.Help
                         n.Id,
                         n.Name,
                         n.Culture,
-                        Description = n.Description.Etc(100)
+                        Description = n.Description.Try(d => d.Etc(100))
                     });
                 
                 sb.Include<AppendixHelpEntity>()
@@ -226,7 +226,7 @@ namespace Signum.Engine.Help
                     a.UniqueName,
                     a.Culture,
                     a.Title,
-                    Description = a.Description.Etc(100)
+                    Description = a.Description.Try(d => d.Etc(100))
                 });
 
                 sb.Include<QueryHelpEntity>()
@@ -237,7 +237,7 @@ namespace Signum.Engine.Help
                         q.Id,
                         q.Query,
                         q.Culture,
-                        Description = q.Description.Etc(100)
+                        Description = q.Description.Try(d => d.Etc(100))
                     });
                
                 sb.Schema.Synchronizing += Schema_Synchronizing;
@@ -258,7 +258,7 @@ namespace Signum.Engine.Help
             }
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             bool any =
                 Database.Query<EntityHelpEntity>().Any() ||
@@ -269,12 +269,10 @@ namespace Signum.Engine.Help
             if (!(any && replacements.Interactive && SafeConsole.Ask("Synchronize Help content?")))
                 return null;
 
-            SyncData data = new SyncData
-            {
-                Namespaces = AllTypes().Select(a => a.Namespace).ToHashSet(),
-                Appendices = Database.Query<AppendixHelpEntity>().Select(a => a.UniqueName).ToHashSet(),
-                StringDistance = new StringDistance()
-            };
+            SyncData data = new SyncData(
+                namespaces: AllTypes().Select(a => a.Namespace).ToHashSet(),
+                appendices: Database.Query<AppendixHelpEntity>().Select(a => a.UniqueName).ToHashSet()
+            );
 
             var ns = SynchronizeNamespace(replacements, data);
             var appendix = SynchronizeAppendix(replacements, data);
@@ -288,10 +286,16 @@ namespace Signum.Engine.Help
         {
             public HashSet<string> Namespaces;
             public HashSet<string> Appendices;
-            public StringDistance StringDistance;
+            public StringDistance StringDistance = new StringDistance();
+
+            public SyncData(HashSet<string> namespaces, HashSet<string> appendices)
+            {
+                Namespaces = namespaces;
+                Appendices = appendices;
+            }
         }
 
-        static SqlPreCommand SynchronizeQueries(Replacements replacements, SyncData data)
+        static SqlPreCommand? SynchronizeQueries(Replacements replacements, SyncData data)
         {
             var dic = Database.Query<QueryHelpEntity>().ToList();
 
@@ -306,8 +310,7 @@ namespace Signum.Engine.Help
 
             return dic.Select(qh =>
             {
-                object queryName = queryKeys.TryGetC(replace.TryGetC(qh.Query.Key) ?? qh.Query.Key);
-
+                object? queryName = queryKeys.TryGetC(replace.TryGetC(qh.Query.Key) ?? qh.Query.Key);
                 if (queryName == null)
                     return null; //PreDeleteSqlSync
 
@@ -335,7 +338,7 @@ namespace Signum.Engine.Help
             }).Combine(Spacing.Simple);
         }
 
-        static SqlPreCommand SynchronizeTypes(Replacements replacements, SyncData data)
+        static SqlPreCommand? SynchronizeTypes(Replacements replacements, SyncData data)
         {
             var dic = Database.Query<EntityHelpEntity>().ToList();
 
@@ -351,8 +354,7 @@ namespace Signum.Engine.Help
             using (replacements.WithReplacedDatabaseName())
                 return dic.Select(eh =>
                 {
-                    Type type = typesByTableName.TryGetC(replace.TryGetC(eh.Type.TableName) ?? eh.Type.TableName);
-
+                    Type? type = typesByTableName.TryGetC(replace.TryGetC(eh.Type.TableName) ?? eh.Type.TableName);
                     if (type == null)
                         return null; //PreDeleteSqlSync
 
@@ -374,7 +376,7 @@ namespace Signum.Engine.Help
                 }).Combine(Spacing.Simple);
         }
 
-        static SqlPreCommand SynchronizeNamespace(Replacements replacements, SyncData data)
+        static SqlPreCommand? SynchronizeNamespace(Replacements replacements, SyncData data)
         {
             var entities = Database.Query<NamespaceHelpEntity>().ToList();
 
@@ -401,7 +403,7 @@ namespace Signum.Engine.Help
                 }).Combine(Spacing.Simple);
         }
 
-        static SqlPreCommand SynchronizeAppendix(Replacements replacements, SyncData data)
+        static SqlPreCommand? SynchronizeAppendix(Replacements replacements, SyncData data)
         {
             var entities = Database.Query<AppendixHelpEntity>().ToList();
 
@@ -444,7 +446,7 @@ namespace Signum.Engine.Help
 
         public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
 
-        static string SynchronizeContent(string content, Replacements r, SyncData data)
+        static string? SynchronizeContent(string? content, Replacements r, SyncData data)
         {
             if (content == null)
                 return null;
@@ -464,8 +466,7 @@ namespace Signum.Engine.Help
                 {
                     case WikiFormat.EntityLink:
                         {
-                            string type = r.SelectInteractive(link, TypeLogic.NameToType.Keys, "Type", data.StringDistance);
-
+                            string? type = r.SelectInteractive(link, TypeLogic.NameToType.Keys, "Type", data.StringDistance);
                             if (type == null)
                                 return Link(letter + "-error", link, text);
 
@@ -473,15 +474,13 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.PropertyLink:
                         {
-                            string type = r.SelectInteractive(link.Before("."), TypeLogic.NameToType.Keys, "Type", data.StringDistance);
-
+                            string? type = r.SelectInteractive(link.Before("."), TypeLogic.NameToType.Keys, "Type", data.StringDistance);
                             if (type == null)
                                 return Link(letter + "-error", link, text);
 
                             var routes = PropertyRoute.GenerateRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
 
-                            string pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, data.StringDistance);
-
+                            string? pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, data.StringDistance);
                             if (pr == null)
                                 return Link(letter + "-error", link, text);
 
@@ -489,8 +488,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.QueryLink:
                         {
-                            string query = r.SelectInteractive(link, QueryLogic.QueryNames.Keys, "Query", data.StringDistance);
-
+                            string? query = r.SelectInteractive(link, QueryLogic.QueryNames.Keys, "Query", data.StringDistance);
                             if (query == null)
                                 return Link(letter + "-error", link, text);
 
@@ -498,8 +496,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.OperationLink:
                         {
-                            string operation = r.SelectInteractive(link, SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", data.StringDistance);
-
+                            string? operation = r.SelectInteractive(link, SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", data.StringDistance);
                             if (operation == null)
                                 return Link(letter + "-error", link, text);
 
@@ -508,8 +505,7 @@ namespace Signum.Engine.Help
                     case WikiFormat.Hyperlink: return m.Value;
                     case WikiFormat.NamespaceLink:
                         {
-                            string @namespace = r.SelectInteractive(link, data.Namespaces, "Namespace", data.StringDistance);
-
+                            string? @namespace = r.SelectInteractive(link, data.Namespaces, "Namespace", data.StringDistance);
                             if (@namespace == null)
                                 return Link(letter + "-error", link, text);
 
@@ -517,8 +513,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.AppendixLink:
                         {
-                            string appendix = r.SelectInteractive(link, data.Appendices, "Appendices", data.StringDistance);
-
+                            string? appendix = r.SelectInteractive(link, data.Appendices, "Appendices", data.StringDistance);
                             if (appendix == null)
                                 return Link(letter + "-error", link, text);
 

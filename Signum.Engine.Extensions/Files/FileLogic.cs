@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Files;
@@ -16,7 +16,9 @@ namespace Signum.Engine.Files
 
         static Expression<Func<FileEntity, WebImage>> WebImageFileExpression =
             f => new WebImage { FullWebPath = DownloadFileUrl(f.ToLite()) };
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("WebImageFileExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public static WebImage WebImage(this FileEntity f)
         {
             return new WebImage { FullWebPath = DownloadFileUrl(f?.ToLite()) };
@@ -24,7 +26,9 @@ namespace Signum.Engine.Files
 
         static Expression<Func<FileEntity, WebDownload>> WebDownloadFileExpression =
            f => new WebDownload { FullWebPath = DownloadFileUrl(f.ToLite()) };
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("WebDownloadFileExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public static WebDownload WebDownload(this FileEntity f)
         {
             return new WebDownload { FullWebPath = DownloadFileUrl(f?.ToLite()) };

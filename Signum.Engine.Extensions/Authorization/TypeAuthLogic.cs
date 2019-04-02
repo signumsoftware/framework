@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -60,10 +60,10 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null!)));
         }
 
-        static string Schema_IsAllowedCallback(Type type, bool inUserInterface)
+        static string? Schema_IsAllowedCallback(Type type, bool inUserInterface)
         {
             var allowed = GetAllowed(type);
 

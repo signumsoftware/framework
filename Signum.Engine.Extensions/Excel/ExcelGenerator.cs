@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
@@ -98,7 +98,7 @@ namespace Signum.Engine.Excel
 
         private static List<ColumnData> GetColumnsEquivalences(this SpreadsheetDocument document, SheetData sheetData, ResultTable results)
         {
-            var resultsCols = results.Columns.ToDictionary(c => c.Column.DisplayName);
+            var resultsCols = results.Columns.ToDictionary(c => c.Column.DisplayName!);
 
             var headerCells = sheetData.Descendants<Row>().FirstEx().Descendants<Cell>().ToList();
             var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c));
@@ -114,22 +114,13 @@ namespace Signum.Engine.Excel
                 
                 if (cell != null)
                 {
-                    return new ColumnData
-                    {
-                        IsNew = false,
-                        StyleIndex = rowDataCellTemplates[headerCells.IndexOf(cell)].StyleIndex,
-                        Column = resultCol,
-                    };
+                    var styleIndex = rowDataCellTemplates[headerCells.IndexOf(cell)].StyleIndex;
+                    return new ColumnData(resultCol!, styleIndex, isNew: false);
                 }
                 else
                 {
                     CellBuilder cb = PlainExcelGenerator.CellBuilder;
-                    return new ColumnData
-                    {
-                        IsNew = true,
-                        StyleIndex = 0, 
-                        Column = resultCol,
-                    };
+                    return new ColumnData(resultCol!, 0, isNew: true);
                 }
             });
 
@@ -171,10 +162,17 @@ namespace Signum.Engine.Excel
 
         public class ColumnData
         {
+            public ColumnData(ResultColumn column, UInt32Value styleIndex, bool isNew) 
+            {
+                Column = column;
+                IsNew = isNew;
+                StyleIndex = styleIndex;
+            }
+
             /// <summary>
             /// Column Data
             /// </summary>
-            public Signum.Entities.DynamicQuery.ResultColumn Column { get; set; }
+            public ResultColumn Column { get; set; }
 
             /// <summary>
             /// Indicates the column is not present in the template excel

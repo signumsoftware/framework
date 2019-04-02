@@ -19,7 +19,7 @@ namespace Signum.React.Rest
             SignumAuthenticationFilter.Authenticators.Insert(0, ApiKeyAuthenticator);
         }
 
-        private static SignumAuthenticationResult ApiKeyAuthenticator(FilterContext ctx)
+        private static SignumAuthenticationResult? ApiKeyAuthenticator(FilterContext ctx)
         {
             ctx.HttpContext.Request.Query.TryGetValue(RestApiKeyLogic.ApiKeyQueryParameter, out var val);
             ctx.HttpContext.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeaderParameter, out var headerKeys);

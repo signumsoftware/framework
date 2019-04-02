@@ -6,20 +6,21 @@ namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowGatewayEntity : Entity, IWorkflowNodeEntity, IWithModel
-    {
-        [NotNullValidator]
-        public WorkflowLaneEntity Lane{ get; set; }
+    {   
+        public WorkflowLaneEntity Lane { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
+        
+        public string? GetName() => Name;
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
         public WorkflowGatewayType Type { get; set; }
         public WorkflowGatewayDirection Direction { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         static Expression<Func<WorkflowGatewayEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
@@ -71,8 +72,8 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowGatewayModel : ModelEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
         public WorkflowGatewayType Type { get; set; }
         public WorkflowGatewayDirection Direction { get; set; }

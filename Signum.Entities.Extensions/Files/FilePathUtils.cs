@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.IO;
 using System.Security;
@@ -41,11 +41,11 @@ namespace Signum.Entities.Files
                 e = Encoding.UTF8;
             }
             byte[] bytes = e.GetBytes(str);
-            byte[] buffer2 = UrlEncodeNonAscii(bytes, 0, bytes.Length, false);
+            byte[] buffer2 = UrlEncodeNonAscii(bytes, 0, bytes.Length, false) ?? bytes;
             return Encoding.ASCII.GetString(buffer2);
         }
 
-        static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
+        static byte[]? UrlEncodeNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
         {
             if (!ValidateUrlEncodingParameters(bytes, offset, count))
             {

@@ -36,8 +36,8 @@ namespace Signum.Entities.Chart
             }
         }
 
-        QueryTokenEmbedded token;
-        public QueryTokenEmbedded Token
+        QueryTokenEmbedded? token;
+        public QueryTokenEmbedded? Token
         {
             get { return token; }
             set
@@ -47,8 +47,8 @@ namespace Signum.Entities.Chart
             }
         }
 
-        string displayName;
-        public string DisplayName
+        string? displayName;
+        public string? DisplayName
         {
             get { return displayName ?? Token?.Let(t => t.TryToken?.NiceName()); }
             set
@@ -88,14 +88,14 @@ namespace Signum.Entities.Chart
             Notified?.Invoke();
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token))
             {
                 if (Token == null)
                     return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().FormatWith(scriptColumn.DisplayName) : null;
 
-                if (!ChartUtils.IsChartColumnType(token.Token, ScriptColumn.ColumnType))
+                if (!ChartUtils.IsChartColumnType(Token.Token, ScriptColumn.ColumnType))
                     return ChartMessage._0IsNot1.NiceToString().FormatWith(DisplayName, ScriptColumn.ColumnType);
             }
 
@@ -122,7 +122,7 @@ namespace Signum.Entities.Chart
 
         internal Column CreateColumn()
         {
-            return new Column(Token.Token, DisplayName);
+            return new Column(Token!.Token, DisplayName);
         }
 
         internal XElement ToXml(IToXmlContext ctx)
@@ -145,7 +145,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return token?.ToString();
+            return token?.ToString() ?? "";
         }
     }
 }

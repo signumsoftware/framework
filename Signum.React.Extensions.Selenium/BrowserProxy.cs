@@ -101,7 +101,7 @@ namespace Signum.React.Selenium
         }
 
 
-        public virtual string GetCurrentUser()
+        public virtual string? GetCurrentUser()
         {
             var element = Selenium.WaitElementPresent(By.CssSelector("#sfUserDropDown, .sf-login"));
 

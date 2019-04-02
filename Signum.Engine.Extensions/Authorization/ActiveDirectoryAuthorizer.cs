@@ -13,7 +13,7 @@ namespace Signum.Engine.Authorization
         public readonly string UserName;
         public readonly string DomainName;
 
-        UserPrincipal userPrincipal;
+        UserPrincipal? userPrincipal;
 
         public AutoCreateUserContext(PrincipalContext principalContext, string userName, string domainName)
         {
@@ -32,9 +32,9 @@ namespace Signum.Engine.Authorization
     {
         Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
 
-        public Func<AutoCreateUserContext, UserEntity> AutoCreateUser;  
+        public Func<AutoCreateUserContext, UserEntity>? AutoCreateUser;  
 
-        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<AutoCreateUserContext, UserEntity> autoCreateUser = null)
+        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<AutoCreateUserContext, UserEntity>? autoCreateUser = null)
         {
             this.GetConfig = getConfig;
             this.AutoCreateUser = autoCreateUser;
@@ -64,7 +64,7 @@ namespace Signum.Engine.Authorization
                                 {
                                     if (this.AutoCreateUser != null)
                                     {
-                                        user = this.AutoCreateUser(new AutoCreateUserContext(pc, localName, domainName));
+                                        user = this.AutoCreateUser(new AutoCreateUserContext(pc, localName, domainName!));
                                         if(user != null && user.IsNew)
                                         {
                                             using (ExecutionMode.Global())

@@ -3,11 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>Signum.Entities</RootNamespace>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <NullableContextOptions>enable</NullableContextOptions>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Platforms>x64;x86</Platforms>
   </PropertyGroup>
-
+  
+  <PropertyGroup>
+    <NoWarn>1701;1702;8618</NoWarn>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.1.0" />
     <PackageReference Include="Signum.Analyzer" Version="1.0.1" />

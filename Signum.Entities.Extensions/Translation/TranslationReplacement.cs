@@ -7,13 +7,13 @@ namespace Signum.Entities.Translation
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class TranslationReplacementEntity : Entity
     {
-        [NotNullValidator]
+        
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string WrongTranslation { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string RightTranslation { get; set; }
     }
 
