@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -329,7 +329,7 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
     public enum RoundingType
     {
         Floor,

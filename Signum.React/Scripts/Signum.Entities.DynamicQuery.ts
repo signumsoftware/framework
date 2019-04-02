@@ -107,6 +107,13 @@ export module QueryTokenMessage {
   export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
 }
 
+export const RoundingType = new EnumType<RoundingType>("RoundingType");
+export type RoundingType =
+  "Floor" |
+  "Ceil" |
+  "Round" |
+  "RoundMiddle";
+
 export const SystemTimeMode = new EnumType<SystemTimeMode>("SystemTimeMode");
 export type SystemTimeMode =
   "AsOf" |
