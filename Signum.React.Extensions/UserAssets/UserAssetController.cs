@@ -119,7 +119,7 @@ namespace Signum.React.UserAssets
             {
                 var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-                var expectedValueType = filter.operation.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
+                var expectedValueType = filter.operation!.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
                 
                 var val = filter.value is JToken jtok ?
                      jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :

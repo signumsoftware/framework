@@ -59,7 +59,6 @@ namespace Signum.Entities.Rest
         [SqlDbType(Size = MaxValue)]
         public string ResponseBody { get; set; }
 
-
         public RestLogReplayState? ReplayState { get; set; }
 
         public double? ChangedPercentage { get; set; }
