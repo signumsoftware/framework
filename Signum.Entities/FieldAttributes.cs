@@ -298,7 +298,6 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public bool Identity { get; set; }
 
-        public bool SequentialGuid;
 
         bool identityBehaviour;
 
@@ -310,18 +309,17 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
                 identityBehaviour = value;
                 if (Type == typeof(Guid))
                 {
-                    this.Default = identityBehaviour ? SequentialGuid ? NewSequentialId : NewId : null;
+                    this.Default = identityBehaviour ? NewId : null;
                 }
             }
         }
 
-        public PrimaryKeyAttribute(Type type, string name = "ID", bool sequentialGuid = true)
+        public PrimaryKeyAttribute(Type type, string name = "ID")
         {
             this.Type = type;
             this.Name = name;
             this.Identity = type == typeof(Guid) ? false : true;
             this.IdentityBehaviour = true;
-            this.SequentialGuid = sequentialGuid;
         }
     }
 
