@@ -7,7 +7,7 @@
     },
     "Extensions": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.2\\Signum.Extensions.React.dll\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
+      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.2\\Signum.React.Extensions.dll\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
       "workingDirectory": "D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\"
     },
     "Southwind": {
