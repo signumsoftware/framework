@@ -297,8 +297,8 @@ namespace Signum.Engine
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
                             var addSystemVersioning = (tab.SystemVersioned != null &&
-                                (dif.Period == null || 
-                                !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName?.ToString()), tab.SystemVersioned?.TableName?.ToString()) || 
+                                (dif.Period == null || dif.TemporalTableName == null || 
+                                !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
                                 alterColumnToNotNullableHistory) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a => a.GoBefore = true) : null);
 

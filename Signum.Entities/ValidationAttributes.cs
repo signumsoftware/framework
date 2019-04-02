@@ -90,7 +90,7 @@ namespace Signum.Entities
 
     public static class NotNullaValidatorExtensions
     {
-        public static string IsSetOnlyWhen(this (PropertyInfo pi, object nullableValue) tuple, bool shouldBeSet)
+        public static string? IsSetOnlyWhen(this (PropertyInfo pi, object nullableValue) tuple, bool shouldBeSet)
         {
             if (tuple.nullableValue == null && shouldBeSet)
                 return ValidationMessage._0IsNotSet.NiceToString(tuple.pi.NiceName());
@@ -586,7 +586,7 @@ namespace Signum.Entities
             return true;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -777,7 +777,7 @@ namespace Signum.Entities
             this.MinYear = minYear;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
