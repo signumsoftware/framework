@@ -14,6 +14,10 @@ namespace Signum.Entities.DynamicQuery
         public MemberInfo MemberInfo { get; private set; }
         public Func<string> DisplayName { get; private set; }
 
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+
+
         internal NetPropertyToken(QueryToken parent, Expression<Func<object>> pi, Func<string> displayName) :
             this(parent, ReflectionTools.GetPropertyInfo(pi), displayName)
         {
@@ -21,19 +25,11 @@ namespace Signum.Entities.DynamicQuery
         }
 
         internal NetPropertyToken(QueryToken parent, MemberInfo pi, Func<string> displayName)
-            : base(parent)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
-
-            if (displayName == null)
-                throw new ArgumentNullException(nameof(displayName));
-
-            this.DisplayName = displayName;
-            this.MemberInfo = pi;
+            this.DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
+            this.MemberInfo = pi ?? throw new ArgumentNullException(nameof(pi));
         }
 
         public override Type Type
@@ -61,7 +57,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var result = Parent.BuildExpression(context);
+            var result = parent.BuildExpression(context);
 
             var prop =
                 MemberInfo is PropertyInfo pi ? (Expression)Expression.Property(result.UnNullify(), pi) :
@@ -76,12 +72,12 @@ namespace Signum.Entities.DynamicQuery
             return SubTokensBase(this.Type, options, GetImplementations());
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
@@ -91,24 +87,24 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             return null;
         }
 
         public override string NiceName()
         {
-            return DisplayName() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return DisplayName() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
         }
 
         public override QueryToken Clone()
         {
-            return new NetPropertyToken(Parent.Clone(), MemberInfo, DisplayName);
+            return new NetPropertyToken(parent.Clone(), MemberInfo, DisplayName);
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -7,6 +7,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Basics
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public abstract class SemiSymbol : Entity
     {
@@ -44,28 +45,28 @@ namespace Signum.Entities.Basics
             var dic = FromDatabase.TryGetC(this.GetType());
             if (dic != null)
             {
-                SemiSymbol semiS = dic.TryGetC(this.Key);
+                SemiSymbol? semiS = dic.TryGetC(this.Key!);
                 if (semiS != null)
                     this.SetIdAndProps(semiS);
             }
         }
 
         [Ignore]
-        FieldInfo fieldInfo;
+        FieldInfo? fieldInfo;
         [HiddenProperty]
-        public FieldInfo FieldInfo
+        public FieldInfo? FieldInfo
         {
             get { return fieldInfo; }
             internal set { fieldInfo = value; }
         }
 
         [UniqueIndex(AllowMultipleNulls = true)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200)]
-        public string Key { get; set; }
+        [StringLengthValidator(Min = 3, Max = 200)]
+        public string? Key { get; set; }
 
-        internal string NiceToString()
+        internal string? NiceToString()
         {
-            return this.FieldInfo.NiceName();
+            return this.FieldInfo?.NiceName();
         }
 
 
@@ -92,7 +93,7 @@ namespace Signum.Entities.Basics
                 .Any(a => typeof(SemiSymbol).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         static Expression<Func<SemiSymbol, string>> ToStringExpression = e => e.Name;

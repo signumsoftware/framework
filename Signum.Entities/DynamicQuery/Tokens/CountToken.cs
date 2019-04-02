@@ -12,12 +12,12 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class CountToken : QueryToken
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+        
         internal CountToken(QueryToken parent)
-            : base(parent)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
-
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
         public override Type Type
@@ -39,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var parentResult = Parent.BuildExpression(context);
+            var parentResult = parent.BuildExpression(context);
 
             var result = Expression.Call(miCount.MakeGenericMethod(parentResult.Type.ElementType()), parentResult);
 
@@ -51,12 +51,12 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
@@ -66,24 +66,24 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             return null;
         }
 
         public override string NiceName()
         {
-            return ToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return ToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
         }
 
         public override QueryToken Clone()
         {
-            return new CountToken(Parent.Clone());
+            return new CountToken(parent.Clone());
         }
 
         public override string TypeColor

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -77,7 +77,6 @@ namespace Signum.Utilities
     public sealed class ExpressionFieldAttribute : Attribute
     {
         public string Name { get; set; }
-        public Type Type { get; set; }
         /// <param name="name">The name of the field for the expression that defines the content. If not set, will be automatically found from the method body.</param>
         public ExpressionFieldAttribute(string name = "auto")
         {

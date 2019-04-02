@@ -9,7 +9,7 @@ namespace Signum.Engine.Maps
 {
     public partial class Table
     {
-        public SqlPreCommand DeleteSqlSync<T>(T entity, Expression<Func<T, bool>> where, string comment = null)
+        public SqlPreCommand DeleteSqlSync<T>(T entity, Expression<Func<T, bool>>? where, string? comment = null)
             where T : Entity
         {
             if (typeof(T) != Type && where != null)
@@ -27,7 +27,7 @@ namespace Signum.Engine.Maps
             var main = new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
                     .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(), variableOrId, comment ?? entity.ToString()));
 
-            return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, main);
+            return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, main)!;
         }
 
         int parameterIndex;
@@ -36,7 +36,7 @@ namespace Signum.Engine.Maps
             var query = DbQueryProvider.Single.GetMainSqlCommand(Database.Query<T>().Where(where).Select(a => a.Id).Expression);
 
             string variableName = SqlParameterBuilder.GetParameterName(this.Name.Name + "Id_" + (parameterIndex++));
-            entity.SetId(new Entities.PrimaryKey(entity.id.Value.Object, variableName));
+            entity.SetId(new Entities.PrimaryKey(entity.id!.Value.Object, variableName));
 
             string queryString = query.PlainSql().Lines().ToString(" ");
 
@@ -45,9 +45,9 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public event Func<Entity, SqlPreCommand> PreDeleteSqlSync;
+        public event Func<Entity, SqlPreCommand?> PreDeleteSqlSync;
 
-        SqlPreCommand OnPreDeleteSqlSync(Entity entity)
+        SqlPreCommand? OnPreDeleteSqlSync(Entity entity)
         {
             if (PreDeleteSqlSync == null)
                 return null;

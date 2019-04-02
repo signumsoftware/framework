@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -38,7 +38,7 @@ namespace Signum.Entities
             PrimaryKeyType.ImportDefinitions(dic);
         }
 
-        public readonly string VariableName; //Used for Sync scenarios
+        public readonly string? VariableName; //Used for Sync scenarios
         public readonly IComparable Object;
 
         public PrimaryKey(IComparable obj)
@@ -226,9 +226,9 @@ namespace Signum.Entities
 
         public static bool TryParse(string value, Type entityType, out PrimaryKey id)
         {
-            if (ReflectionTools.TryParse(value, Type(entityType), out object val))
+            if (ReflectionTools.TryParse(value, Type(entityType), out object? val))
             {
-                id = new PrimaryKey((IComparable)val);
+                id = new PrimaryKey((IComparable)val!);
                 return true;
             }
             else
@@ -240,7 +240,7 @@ namespace Signum.Entities
 
         public static PrimaryKey Parse(string value, Type entityType)
         {
-            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(entityType)));
+            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(entityType))!);
         }
 
         public static PrimaryKey? Wrap(IComparable value)
@@ -251,7 +251,7 @@ namespace Signum.Entities
             return new PrimaryKey(value);
         }
 
-        public static IComparable Unwrap(PrimaryKey? id)
+        public static IComparable? Unwrap(PrimaryKey? id)
         {
             if (id == null)
                 return null;
@@ -259,7 +259,7 @@ namespace Signum.Entities
             return id.Value.Object;
         }
 
-        public static string UnwrapToString(PrimaryKey? id)
+        public static string? UnwrapToString(PrimaryKey? id)
         {
             if (id == null)
                 return null;
@@ -274,8 +274,8 @@ namespace Signum.Entities
 
         private PrimaryKey(SerializationInfo info, StreamingContext ctxt)
         {
-            this.Object = null;
-            this.VariableName = null;
+            this.Object = null!;
+            this.VariableName = null!;
             foreach (SerializationEntry item in info)
             {
                 switch (item.Name)

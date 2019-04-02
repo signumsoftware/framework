@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections;
 
@@ -7,8 +7,8 @@ namespace Signum.Utilities.DataStructures
     public class LambdaComparer<T, S> : IComparer<T>, IEqualityComparer<T>, IComparer, IEqualityComparer
     {
         readonly Func<T, S> func;
-        readonly IComparer<S> comparer = null;
-        readonly IEqualityComparer<S> equalityComparer = null;
+        readonly IComparer<S> comparer;
+        readonly IEqualityComparer<S> equalityComparer;
 
         int descending = 1;
         public bool Descending
@@ -17,7 +17,7 @@ namespace Signum.Utilities.DataStructures
             set { descending = value ? -1 : 1; }
         }
 
-        public LambdaComparer(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
+        public LambdaComparer(Func<T, S> func, IEqualityComparer<S>? equalityComparer = null, IComparer<S>? comparer = null)
         {
             if (func == null)
                 throw new ArgumentNullException("func");
@@ -60,12 +60,12 @@ namespace Signum.Utilities.DataStructures
 
     public static class LambdaComparer
     {
-        public static LambdaComparer<T, S> By<T, S>(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
+        public static LambdaComparer<T, S> By<T, S>(Func<T, S> func, IEqualityComparer<S>? equalityComparer = null, IComparer<S>? comparer = null)
         {
             return new LambdaComparer<T, S>(func, equalityComparer, comparer);
         }
 
-        public static LambdaComparer<T, S> ByDescending<T, S>(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
+        public static LambdaComparer<T, S> ByDescending<T, S>(Func<T, S> func, IEqualityComparer<S>? equalityComparer = null, IComparer<S>? comparer = null)
         {
             return new LambdaComparer<T, S>(func, equalityComparer, comparer) { Descending = true };
         }

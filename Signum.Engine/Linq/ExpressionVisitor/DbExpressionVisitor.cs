@@ -99,12 +99,10 @@ namespace Signum.Engine.Linq
 
         [DebuggerStepThrough]
         protected static ReadOnlyDictionary<K, V> Visit<K, V>(ReadOnlyDictionary<K, V> dictionary, Func<V, V> newValue)
+            where K : object
             where V : class
         {
-            if (dictionary == null)
-                return null;
-
-            Dictionary<K, V> alternate = null;
+            Dictionary<K, V>? alternate = null;
             foreach (var k in dictionary.Keys)
             {
                 V item = dictionary[k];
@@ -310,7 +308,7 @@ namespace Signum.Engine.Linq
                 if (select != null)
                     return new InExpression(expression, select);
                 else
-                    return InExpression.FromValues(expression, @in.Values);
+                    return InExpression.FromValues(expression, @in.Values!);
             }
             return @in;
         }
@@ -359,7 +357,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
-            SourceExpression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From!);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
@@ -385,8 +383,8 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitSetOperator(SetOperatorExpression set)
         {
-            SourceWithAliasExpression left = (SourceWithAliasExpression)this.VisitSource(set.Left);
-            SourceWithAliasExpression right = (SourceWithAliasExpression)this.VisitSource(set.Right);
+            SourceWithAliasExpression left = (SourceWithAliasExpression)this.VisitSource(set.Left)!;
+            SourceWithAliasExpression right = (SourceWithAliasExpression)this.VisitSource(set.Right)!;
             if (left != set.Left || right != set.Right)
             {
                 return new SetOperatorExpression(set.Operator, left, right, set.Alias);

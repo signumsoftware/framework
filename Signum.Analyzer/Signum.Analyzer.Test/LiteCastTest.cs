@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -74,13 +74,13 @@ var result = entity is Lite<Entity>;
             ");
         }
 
-        private void TestDiagnostic(string expectedError, string code, bool withIncludes = false)
+        private void TestDiagnostic(string expectedError, string code, bool withIncludes = false, bool assertNoErrors = true)
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, assertNoErrors, new DiagnosticResult[0]);
             else
-                VerifyCSharpDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, assertNoErrors, new DiagnosticResult
                 {
                     Id = LiteCastAnalyzer.DiagnosticId,
                     Message = expectedError,

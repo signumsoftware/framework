@@ -35,7 +35,7 @@ namespace Signum.Utilities
             }
         }
 
-        static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
+        static readonly Variable<HeavyProfilerEntry?> current = Statics.ThreadVariable<HeavyProfilerEntry?>("heavy"); 
 
         public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
@@ -47,7 +47,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static Tracer Log(string role)
+        public static Tracer? Log(string role)
         {
             if (!enabled)
                 return null;
@@ -57,7 +57,7 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer Log(string role, Func<string> additionalData)
+        public static Tracer? Log(string role, Func<string> additionalData)
         {
             if (!enabled)
                 return null;
@@ -67,7 +67,7 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer LogNoStackTrace(string role)
+        public static Tracer? LogNoStackTrace(string role)
         {
             if (!enabled)
                 return null;
@@ -77,7 +77,7 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer LogNoStackTrace(string role, Func<string> additionalData)
+        public static Tracer? LogNoStackTrace(string role, Func<string> additionalData)
         {
             if (!enabled)
                 return null;
@@ -109,11 +109,11 @@ namespace Signum.Utilities
             }
         }
 
-        private static Tracer CreateNewEntry(string role, Func<string> additionalData, bool stackTrace)
+        private static Tracer? CreateNewEntry(string role, Func<string>? additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
          
-            if (enabled == false || TimeLimit.Value < beforeStart)
+            if (enabled == false || TimeLimit! < beforeStart)
             {
                 enabled = false;
                 Clean();
@@ -161,8 +161,8 @@ namespace Signum.Utilities
 
         public class Tracer : IDisposable
         {
-            internal HeavyProfilerEntry newCurrent;
-
+            internal HeavyProfilerEntry? newCurrent;
+            
             public void Dispose()
             {
                 if (newCurrent == null) //After a Switch sequence disabled in the middle
@@ -180,12 +180,12 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Switch(this Tracer tracer, string role, Func<string> additionalData = null)
+        public static void Switch(this Tracer? tracer, string role, Func<string>? additionalData = null)
         {
             if (tracer == null)
                 return;
 
-            bool hasStackTrace = current.Value.StackTrace != null;
+            bool hasStackTrace = current.Value!.StackTrace != null;
 
             tracer.Dispose();
 
@@ -261,7 +261,7 @@ namespace Signum.Utilities
 
         public static IOrderedEnumerable<SqlProfileResume> SqlStatistics()
         {
-            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AdditionalData).Select(gr =>
+            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => a.AdditionalData!).Select(gr =>
                         new SqlProfileResume
                         {
                             Query = gr.Key,
@@ -279,7 +279,7 @@ namespace Signum.Utilities
         {
             var array = fullIndex.Split('-').Select(a => int.Parse(a)).ToArray();
 
-            HeavyProfilerEntry entry = null;
+            HeavyProfilerEntry? entry = null;
 
             List<HeavyProfilerEntry> currentList = Signum.Utilities.HeavyProfiler.Entries;
 
@@ -295,15 +295,15 @@ namespace Signum.Utilities
                 currentList = entry.Entries;
             }
 
-            return entry;
+            return entry!;
         }
     }
-
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable]
     public class HeavyProfilerEntry
     {
         public List<HeavyProfilerEntry> Entries;
-        public HeavyProfilerEntry Parent; 
+        public HeavyProfilerEntry? Parent; 
         public string Role;
 
         public int Index;
@@ -315,7 +315,7 @@ namespace Signum.Utilities
             return this.Follow(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), "-");
         }
 
-        public string AdditionalData;
+        public string? AdditionalData;
         public string AdditionalDataPreview()
         {
             if (string.IsNullOrEmpty(AdditionalData))
@@ -329,8 +329,8 @@ namespace Signum.Utilities
         public long? End;
         public long EndOrNow => End ?? PerfCounter.Ticks;
 
-        public StackTrace StackTrace;
-        public List<ExternalStackTrace> ExternalStackTrace;
+        public StackTrace? StackTrace;
+        public List<ExternalStackTrace>? ExternalStackTrace;
 
         public TimeSpan Elapsed
         {
@@ -408,8 +408,8 @@ namespace Signum.Utilities
 
         private XElement StackTraceToXml(StackTrace stackTrace)
         {
-            var frames = (from i in 0.To(StackTrace.FrameCount)
-                          let sf = StackTrace.GetFrame(i)
+            var frames = (from i in 0.To(StackTrace!.FrameCount)
+                          let sf = StackTrace!.GetFrame(i)
                           let mi = sf.GetMethod()                          
                           select new XElement("StackFrame",
                               new XAttribute("Method", mi.DeclaringType?.FullName + "." + mi.Name),
@@ -445,7 +445,7 @@ namespace Signum.Utilities
                     item.CleanStackTrace();
         }
 
-        internal static HeavyProfilerEntry ImportXml(XElement xLog, HeavyProfilerEntry parent)
+        internal static HeavyProfilerEntry ImportXml(XElement xLog, HeavyProfilerEntry? parent = null)
         {
             var result = new HeavyProfilerEntry
             {

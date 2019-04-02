@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections.Generic;
@@ -38,20 +38,20 @@ namespace Signum.Engine
 
     public static class GlobalLazy
     {
-        static HashSet<IResetLazy> registeredLazyList = new HashSet<IResetLazy>();
+        static readonly HashSet<IResetLazy> registeredLazyList = new HashSet<IResetLazy>();
         public static List<ResetLazyStats> Statistics()
         {
             return registeredLazyList.Select(a => a.Stats()).OrderByDescending(x=>x.SumLoadTime).ToList();
         }
 
 
-        public static ResetLazy<T> WithoutInvalidations<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
+        public static ResetLazy<T> WithoutInvalidations<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication)
         {
             ResetLazy<T> result = new ResetLazy<T>(() =>
             {
                 using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("ResetLazy", () => typeof(T).TypeName()))
-                using (Transaction tr = Transaction.InTestTransaction ? null : Transaction.ForceNew())
+                using (Transaction? tr = Transaction.InTestTransaction ? null : Transaction.ForceNew())
                 using (new EntityCache(EntityCacheType.ForceNewSealed))
                 {
                     var value = func();

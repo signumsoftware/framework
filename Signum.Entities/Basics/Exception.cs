@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using System.Threading;
@@ -11,25 +11,27 @@ namespace Signum.Entities.Basics
     {
         public const string ExceptionDataKey = "exceptionEntity";
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public ExceptionEntity() { }
 
         public ExceptionEntity(Exception ex)
         {
             this.ExceptionType = ex.GetType().Name;
-            this.ExceptionMessage = ex.Message;
-            this.StackTrace = ex.StackTrace;
+            this.ExceptionMessage = ex.Message!;
+            this.StackTrace = ex.StackTrace!;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
             this.MachineName = System.Environment.MachineName;
             this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [NotNullable, SqlDbType(Size = 100)]
-        public string ExceptionType { get; set; }
+        [ForceNotNullable, SqlDbType(Size = 100)]
+        public string? ExceptionType { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue)]
         string exceptionMessage;
         public string ExceptionMessage
         {
@@ -43,7 +45,7 @@ namespace Signum.Entities.Basics
 
         public int ExceptionMessageHash { get; private set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue)]
         string stackTrace;
         public string StackTrace
         {
@@ -59,52 +61,52 @@ namespace Signum.Entities.Basics
 
         public int ThreadId { get; set; }
 
-        public Lite<IUserEntity> User { get; set; }
+        public Lite<IUserEntity>? User { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string Environment { get; set; }
+        public string? Environment { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string Version { get; set; }
+        public string? Version { get; set; }
 
         [SqlDbType(Size = 300)]
-        public string UserAgent { get; set; }
+        public string? UserAgent { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string RequestUrl { get; set; }
+        public string? RequestUrl { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string ControllerName { get; set; }
+        public string? ControllerName { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string ActionName { get; set; }
+        public string? ActionName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string UrlReferer { get; set; }
+        public string? UrlReferer { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string MachineName { get; set; }
+        public string? MachineName { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string ApplicationName { get; set; }
+        public string? ApplicationName { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string UserHostAddress { get; set; }
+        public string? UserHostAddress { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string UserHostName { get; set; }
+        public string? UserHostName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Form { get; set; }
+        public string? Form { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string QueryString { get; set; }
+        public string? QueryString { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Session { get; set; }
+        public string? Session { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Data { get; set; }
+        public string? Data { get; set; }
 
         public int HResult { get; internal set; }
 
@@ -126,7 +128,7 @@ namespace Signum.Entities.Basics
     public class DeleteLogParametersEmbedded : EmbeddedEntity
     {
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<DeleteLogsTypeOverridesEmbedded> DeleteLogs { get; set; } = new MList<DeleteLogsTypeOverridesEmbedded>();
 
         public DateTime? GetDateLimitDelete(TypeEntity type)
@@ -157,10 +159,10 @@ namespace Signum.Entities.Basics
         public int? PauseTime { get; set; } = 5000;
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable]
     public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
@@ -169,4 +171,5 @@ namespace Signum.Entities.Basics
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int? CleanLogsWithMoreThan { get; set; } = 30 * 6;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using System;
 using System.Linq.Expressions;
 
@@ -15,19 +15,24 @@ namespace Signum.Engine.Maps
             SchemaBuilder = schemaBuilder;
         }
 
-        public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null, Expression<Func<T, object>> includeFields = null)
+        public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null)
         {
             this.SchemaBuilder.AddUniqueIndex<T>(fields, where, includeFields);
             return this;
         }
 
-        public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null, Expression<Func<T, object>> includeFields = null)
+        public FluentInclude<T> WithIndex(Expression<Func<T, object?>> fields, 
+            Expression<Func<T, bool>>? where = null, 
+            Expression<Func<T, object>>? includeFields = null)
         {
             this.SchemaBuilder.AddIndex<T>(fields, where, includeFields);
             return this;
         }
 
-        public FluentInclude<T> WithUniqueIndexMList<M>(Expression<Func<T, MList<M>>> mlist, Expression<Func<MListElement<T, M>, object>> fields = null, Expression<Func<MListElement<T, M>, bool>> where = null, Expression<Func<MListElement<T, M>, object>> includeFields = null)
+        public FluentInclude<T> WithUniqueIndexMList<M>(Expression<Func<T, MList<M>>> mlist, 
+            Expression<Func<MListElement<T, M>, object>>? fields = null, 
+            Expression<Func<MListElement<T, M>, bool>>? where = null, 
+            Expression<Func<MListElement<T, M>, object>>? includeFields = null)
         {
             if (fields == null)
                 fields = mle => new { mle.Parent, mle.Element };
@@ -36,7 +41,10 @@ namespace Signum.Engine.Maps
             return this;
         }
 
-        public FluentInclude<T> WithIndexMList<M>(Expression<Func<T, MList<M>>> mlist, Expression<Func<MListElement<T, M>, object>> fields, Expression<Func<MListElement<T, M>, bool>> where = null, Expression<Func<MListElement<T, M>, object>> includeFields = null)
+        public FluentInclude<T> WithIndexMList<M>(Expression<Func<T, MList<M>>> mlist, 
+            Expression<Func<MListElement<T, M>, object>> fields, 
+            Expression<Func<MListElement<T, M>, bool>>? where = null, 
+            Expression<Func<MListElement<T, M>, object>>? includeFields = null)
         {
             this.SchemaBuilder.AddIndexMList<T, M>(mlist, fields, where, includeFields);
             return this;

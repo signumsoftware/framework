@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
@@ -32,9 +32,13 @@ namespace Signum.Engine.Linq
         HashSet<Expression> candidates;
         Alias newAlias;
         bool projectTrivialColumns;
-
-
-        private ColumnProjector() { }
+        
+        public ColumnProjector(HashSet<Expression> candidates, Alias newAlias, bool projectTrivialColumns)
+        {
+            this.candidates = candidates;
+            this.newAlias = newAlias;
+            this.projectTrivialColumns = projectTrivialColumns;
+        }
 
         static internal ColumnExpression SingleProjection(ColumnDeclaration declaration, Alias newAlias, Type columnType)
         {
@@ -45,19 +49,13 @@ namespace Signum.Engine.Linq
         {
             var candidates = DbExpressionNominator.Nominate(projector, out Expression newProj, isGroupKey: isGroupKey);
 
-            ColumnProjector cp = new ColumnProjector
-            {
-                newAlias = newAlias,
-                candidates = candidates,
-                projectTrivialColumns = selectTrivialColumns
-            };
+            ColumnProjector cp = new ColumnProjector(candidates, newAlias, selectTrivialColumns);
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly());
+            return new ProjectedColumns(e, cp.generator.Columns.NotNull().ToReadOnly());
         }
-
-
+        
         public override Expression Visit(Expression expression)
         {
             if (this.candidates.Contains(expression))
@@ -105,16 +103,16 @@ namespace Signum.Engine.Linq
         UnionAllRequest request;
         Type implementation;
 
-        private ColumnUnionProjector() { }
-
+        public ColumnUnionProjector(HashSet<Expression> candidates, UnionAllRequest request, Type implementation)
+        {
+            this.candidates = candidates;
+            this.request = request;
+            this.implementation = implementation;
+        }
+        
         static internal Expression Project(Expression projector, HashSet<Expression> candidates, UnionAllRequest request, Type implementation)
         {
-            ColumnUnionProjector cp = new ColumnUnionProjector
-            {
-                request = request,
-                implementation = implementation,
-                candidates = candidates,
-            };
+            ColumnUnionProjector cp = new ColumnUnionProjector(candidates, request, implementation);
 
             return cp.Visit(projector);;
         }
@@ -169,9 +167,9 @@ namespace Signum.Engine.Linq
                 this.columns.Add(item.Name ?? "-", item);
         }
 
-        public IEnumerable<ColumnDeclaration> Columns { get { return columns.Values; } }
+        public IEnumerable<ColumnDeclaration?> Columns { get { return columns.Values; } }
 
-        Dictionary<string, ColumnDeclaration> columns = new Dictionary<string, ColumnDeclaration>(StringComparer.InvariantCultureIgnoreCase);
+        Dictionary<string, ColumnDeclaration?> columns = new Dictionary<string, ColumnDeclaration?>(StringComparer.InvariantCultureIgnoreCase);
         int iColumn;
 
         public string GetUniqueColumnName(string name)

@@ -6,22 +6,17 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Column
     {
-        string displayName;
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { displayName = value; }
-        }
+        public string? DisplayName { get; set; }
 
         QueryToken token;
         public QueryToken Token { get { return token; } }
 
         public bool IsVisible = true;
 
-        public Column(QueryToken token, string displayName)
+        public Column(QueryToken token, string? displayName)
         {
             this.token = token;
-            this.displayName = displayName;
+            this.DisplayName = displayName;
         }
 
         public Column(ColumnDescription cd, object queryName)
@@ -32,8 +27,8 @@ namespace Signum.Entities.DynamicQuery
         public string Name { get { return Token.FullKey(); } }
         public virtual Type Type { get { return Token.Type; } }
         public Implementations? Implementations { get { return Token.GetImplementations(); } }
-        public string Format { get { return Token.Format; } }
-        public string Unit { get { return Token.Unit; } }
+        public string? Format { get { return Token.Format; } }
+        public string? Unit { get { return Token.Unit; } }
 
         public override string ToString()
         {
@@ -55,7 +50,7 @@ namespace Signum.Entities.DynamicQuery
     internal class _EntityColumn : Column
     {
         public _EntityColumn(ColumnDescription entityColumn, object queryName)
-            : base(new ColumnToken(entityColumn, queryName), null)
+            : base(new ColumnToken(entityColumn, queryName), null!)
         {
             if (!entityColumn.IsEntity)
                 throw new ArgumentException("entityColumn");

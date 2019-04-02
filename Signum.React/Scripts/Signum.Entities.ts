@@ -250,7 +250,7 @@ export module ConnectionMessage {
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
   Type: "CorruptMixin";
-  corrupt?: boolean;
+  corrupt: boolean;
 }
 
 export interface EmbeddedEntity extends ModifiableEntity {
@@ -281,7 +281,7 @@ export module EntityControlMessage {
 }
 
 export interface ImmutableEntity extends Entity {
-  allowChange?: boolean;
+  allowChange: boolean;
 }
 
 export module JavascriptMessage {
@@ -552,6 +552,7 @@ export module ValidationMessage {
   export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
   export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
+  export const BeAString = new MessageKey("ValidationMessage", "BeAString");
 }
 
 export module VoidEnumMessage {

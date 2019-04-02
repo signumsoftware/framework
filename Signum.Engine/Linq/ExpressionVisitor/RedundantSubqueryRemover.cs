@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
@@ -23,7 +24,7 @@ namespace Signum.Engine.Linq
             select = (SelectExpression)base.VisitSelect(select);
 
             // first remove all purely redundant subqueries
-            List<SelectExpression> redundant = RedundantSubqueryGatherer.Gather(select.From);
+            List<SelectExpression>? redundant = RedundantSubqueryGatherer.Gather(select.From!);
             if (redundant != null)
             {
                 select = (SelectExpression)SubqueryRemover.Remove(select, redundant);
@@ -37,7 +38,7 @@ namespace Signum.Engine.Linq
             proj = (ProjectionExpression)base.VisitProjection(proj);
             if (proj.Select.From is SelectExpression)
             {
-                List<SelectExpression> redundant = RedundantSubqueryGatherer.Gather(proj.Select);
+                List<SelectExpression>? redundant = RedundantSubqueryGatherer.Gather(proj.Select);
                 if (redundant != null)
                 {
                     proj = (ProjectionExpression)SubqueryRemover.Remove(proj, redundant);
@@ -50,7 +51,7 @@ namespace Signum.Engine.Linq
         {
             foreach (ColumnDeclaration decl in select.Columns)
             {
-                ColumnExpression col = decl.Expression as ColumnExpression;
+                ColumnExpression? col = decl.Expression as ColumnExpression;
                 if (col == null || decl.Name != col.Name)
                 {
                     return false;
@@ -62,7 +63,7 @@ namespace Signum.Engine.Linq
         internal static bool IsNameMapProjection(SelectExpression select)
         {
             if (select.From is TableExpression) return false;
-            SelectExpression fromSelect = select.From as SelectExpression;
+            SelectExpression? fromSelect = select.From as SelectExpression;
             if (fromSelect == null || select.Columns.Count != fromSelect.Columns.Count)
                 return false;
             ReadOnlyCollection<ColumnDeclaration> fromColumns = fromSelect.Columns;
@@ -70,7 +71,7 @@ namespace Signum.Engine.Linq
             // in from.
             for (int i = 0, n = select.Columns.Count; i < n; i++)
             {
-                ColumnExpression col = select.Columns[i].Expression as ColumnExpression;
+                ColumnExpression? col = select.Columns[i].Expression as ColumnExpression;
                 if (col == null || !(col.Name == fromColumns[i].Name))
                     return false;
             }
@@ -84,13 +85,9 @@ namespace Signum.Engine.Linq
 
         class RedundantSubqueryGatherer : DbExpressionVisitor
         {
-            List<SelectExpression> redundant;
-
-            private RedundantSubqueryGatherer()
-            {
-            }
-
-            internal static List<SelectExpression> Gather(Expression source)
+            List<SelectExpression>? redundant;
+            
+            internal static List<SelectExpression>? Gather(Expression source)
             {
                 RedundantSubqueryGatherer gatherer = new RedundantSubqueryGatherer();
                 gatherer.Visit(source);
@@ -163,13 +160,13 @@ namespace Signum.Engine.Linq
                 // logic except for the existence of a where clause
                 while (CanMergeWithFrom(select, wasTopLevel))
                 {
-                    SelectExpression fromSelect = GetLeftMostSelect(select.From);
+                    SelectExpression fromSelect = GetLeftMostSelect(select.From!)!;
 
                     // remove the redundant subquery
                     select = (SelectExpression)SubqueryRemover.Remove(select, new[] { fromSelect });
 
                     // merge where expressions
-                    Expression where = select.Where;
+                    Expression? where = select.Where;
                     if (fromSelect.Where != null)
                     {
                         if (where != null)
@@ -184,7 +181,7 @@ namespace Signum.Engine.Linq
                     var orderBy = select.OrderBy.Count > 0 ? select.OrderBy : fromSelect.OrderBy;
                     var groupBy = select.GroupBy.Count > 0 ? select.GroupBy : fromSelect.GroupBy;
                     //Expression skip = select.Skip != null ? select.Skip : fromSelect.Skip;
-                    Expression top = select.Top != null ? select.Top : fromSelect.Top;
+                    Expression? top = select.Top ?? fromSelect.Top;
                     bool isDistinct = select.IsDistinct | fromSelect.IsDistinct;
 
                     if (where != select.Where
@@ -215,11 +212,13 @@ namespace Signum.Engine.Linq
 
             static bool CanMergeWithFrom(SelectExpression select, bool isTopLevel)
             {
-                SelectExpression fromSelect = GetLeftMostSelect(select.From);
+                SelectExpression? fromSelect = GetLeftMostSelect(select.From!);
                 if (fromSelect == null)
                     return false;
+
                 if (!IsColumnProjection(fromSelect))
                     return false;
+
                 bool selHasOrderBy = select.OrderBy.Count > 0;
                 bool selHasGroupBy = select.GroupBy.Count > 0;
 
@@ -243,7 +242,7 @@ namespace Signum.Engine.Linq
                     return false;
 
                 // cannot move forward a take if outer has take or skip or distinct
-                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasGroupBy || HasApplyJoin(select.From) || select.Where != null))
+                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasGroupBy || HasApplyJoin(select.From!) || select.Where != null))
                     return false;
                 // cannot move forward a skip if outer has skip or distinct
                 //if (fromSelect.Skip != null && (select.Skip != null || select.Distinct || selHasAggregates || selHasGroupBy))
@@ -254,13 +253,14 @@ namespace Signum.Engine.Linq
                 return true;
             }
 
-            static SelectExpression GetLeftMostSelect(Expression source)
+            static SelectExpression? GetLeftMostSelect(Expression source)
             {
                 if (source is SelectExpression select)
                     return select;
 
                 if (source is JoinExpression join)
                     return GetLeftMostSelect(join.Left);
+
                 return null;
             }
 

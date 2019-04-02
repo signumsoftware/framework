@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
             return extensionsTokens.Concat(dicExtensionsTokens);
         }
 
-        public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName = null)
+        public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string>? niceName = null)
         {
             using (HeavyProfiler.LogNoStackTrace("RegisterExpression"))
             {
@@ -106,17 +106,12 @@ namespace Signum.Engine.DynamicQuery
             Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
             Expression<Func<KVP, K>> keySelector,
             Expression<Func<KVP, V>> valueSelector,
-            ResetLazy<HashSet<K>> allKeys = null)
+            ResetLazy<HashSet<K>>? allKeys = null)
             where T : Entity
+            where K : object
         {
-            var mei = new ExtensionDictionaryInfo<T, KVP, K, V>
-            {
-                CollectionSelector = collectionSelector,
-                KeySelector = keySelector,
-                ValueSelector = valueSelector,
-
-                AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector)
-            };
+            var mei = new ExtensionDictionaryInfo<T, KVP, K, V>(collectionSelector, keySelector, valueSelector,
+                allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector));
 
             RegisteredExtensionsDictionaries.Add(PropertyRoute.Root(typeof(T)), mei);
 
@@ -128,20 +123,14 @@ namespace Signum.Engine.DynamicQuery
                 Expression<Func<M, IEnumerable<KVP>>> collectionSelector,
                 Expression<Func<KVP, K>> keySelector,
                 Expression<Func<KVP, V>> valueSelector,
-                ResetLazy<HashSet<K>> allKeys = null)
+                ResetLazy<HashSet<K>>? allKeys = null)
             where T : Entity
             where M : ModifiableEntity
-        
+            where K : object
         {
-            var mei = new ExtensionDictionaryInfo<M, KVP, K, V>
-            {
-                CollectionSelector = collectionSelector,
-                KeySelector = keySelector,
-                ValueSelector = valueSelector,
-
-                AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector) , keySelector)
-            };
-
+            var mei = new ExtensionDictionaryInfo<M, KVP, K, V>(collectionSelector, keySelector, valueSelector,
+                allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector));
+            
             RegisteredExtensionsDictionaries.Add(PropertyRoute.Construct(embeddedSelector), mei);
 
             return mei;
@@ -153,7 +142,7 @@ namespace Signum.Engine.DynamicQuery
         {
             Expression<Func<T, IEnumerable<KVP>>> result = e => collectionSelector.Evaluate(embeddedSelector.Evaluate(e));
 
-            return (Expression<Func<T, IEnumerable<KVP>>>)ExpressionCleaner.Clean(result);
+            return (Expression<Func<T, IEnumerable<KVP>>>)ExpressionCleaner.Clean(result)!;
         }
 
         private ResetLazy<HashSet<K>> GetAllKeysLazy<T, KVP, K>(Expression<Func<T, IEnumerable<KVP>>> collectionSelector, Expression<Func<KVP, K>> keySelector)
@@ -184,6 +173,7 @@ namespace Signum.Engine.DynamicQuery
     }
 
     public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
+        where K : object
     {
         public ResetLazy<HashSet<K>> AllKeys;
 
@@ -193,7 +183,19 @@ namespace Signum.Engine.DynamicQuery
 
         public Expression<Func<KVP, V>> ValueSelector { get; set; }
 
-        ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
+        readonly ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
+
+        public ExtensionDictionaryInfo(
+            Expression<Func<T, IEnumerable<KVP>>> collectionSelector, 
+            Expression<Func<KVP, K>> keySelector, 
+            Expression<Func<KVP, V>> valueSelector,
+            ResetLazy<HashSet<K>> allKeys)
+        {
+            CollectionSelector = collectionSelector;
+            KeySelector = keySelector;
+            ValueSelector = valueSelector;
+            AllKeys = allKeys;
+        }
 
         public IEnumerable<QueryToken> GetAllTokens(QueryToken parent)
         {
@@ -202,14 +204,12 @@ namespace Signum.Engine.DynamicQuery
                 Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx());
 
                 Expression e = MetadataVisitor.JustVisit(lambda, MetaExpression.FromToken(qt, typeof(T)));
-
-                MetaExpression me = e as MetaExpression;
-
+                
                 var result = new ExtensionRouteInfo();
 
-                if (me?.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
+                if (e is MetaExpression me && me.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
                 {
-                    var cleanType = me.Type.CleanType();
+                    var cleanType = me!.Type.CleanType();
 
                     result.PropertyRoute = cm.PropertyRoutes.Only();
                     result.Implementations = me.Meta.Implementations;
@@ -225,10 +225,9 @@ namespace Signum.Engine.DynamicQuery
                 unit: info.Unit,
                 format: info.Format,
                 implementations: info.Implementations,
-                propertyRoute: info.PropertyRoute)
-            {
-                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))),
-            });
+                propertyRoute: info.PropertyRoute,
+                lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+            ));
         }
     }
 
@@ -236,8 +235,7 @@ namespace Signum.Engine.DynamicQuery
     public class ExtensionInfo
     {
         ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
-
-
+        
         public ExtensionInfo(Type sourceType, LambdaExpression lambda, Type type, string key, Func<string> niceName)
         {
             this.Type = type;
@@ -255,10 +253,10 @@ namespace Signum.Engine.DynamicQuery
         public bool Inherit = true;
 
         public Implementations? ForceImplementations;
-        public PropertyRoute ForcePropertyRoute;
-        public string ForceFormat;
-        public string ForceUnit;
-        public Func<string> ForceIsAllowed;
+        public PropertyRoute? ForcePropertyRoute;
+        public string? ForceFormat;
+        public string? ForceUnit;
+        public Func<string?>? ForceIsAllowed;
 
 
         internal readonly LambdaExpression Lambda;
@@ -270,7 +268,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromToken(qt, SourceType));
 
-                MetaExpression me;
+                MetaExpression? me;
 
                 if (this.IsProjection)
                 {
@@ -288,14 +286,14 @@ namespace Signum.Engine.DynamicQuery
 
                 var result = new ExtensionRouteInfo();
 
-                if (me?.Meta is CleanMeta cleanMeta && cleanMeta.PropertyRoutes.Any())
+                if (me != null && me.Meta is CleanMeta cleanMeta && cleanMeta.PropertyRoutes.Any())
                 {
                     result.PropertyRoute = cleanMeta.PropertyRoutes.Only();
                     result.Implementations = me.Meta.Implementations;
                     result.Format = ColumnDescriptionFactory.GetFormat(cleanMeta.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cleanMeta.PropertyRoutes);
                 }
-                else if(me?.Meta is DirtyMeta dirtyMeta)
+                else if (me?.Meta is DirtyMeta dirtyMeta)
                 {
                     result.PropertyRoute = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Only()).Distinct().Only();
                     result.Implementations = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
@@ -303,10 +301,10 @@ namespace Signum.Engine.DynamicQuery
                     result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
                 }
 
-                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
+                result.IsAllowed = () => me?.Meta.IsAllowed();
 
                 if (ForcePropertyRoute != null)
-                    result.PropertyRoute = ForcePropertyRoute;
+                    result.PropertyRoute = ForcePropertyRoute!;
 
                 if (ForceImplementations != null)
                     result.Implementations = ForceImplementations;
@@ -318,24 +316,24 @@ namespace Signum.Engine.DynamicQuery
                     result.Unit = ForceUnit;
 
                 if (ForceIsAllowed != null)
-                    result.IsAllowed = ForceIsAllowed;
+                    result.IsAllowed = ForceIsAllowed!;
 
                 return result;
             });
 
-            return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format, info.Implementations, info.IsAllowed(), info.PropertyRoute)
-            {
-                DisplayName = NiceName()
-            };
+            return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format,
+                info.Implementations, info.IsAllowed(), info.PropertyRoute, displayName: NiceName());
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class ExtensionRouteInfo
     {
-        public string Format;
-        public string Unit;
+        public string? Format;
+        public string? Unit;
         public Implementations? Implementations;
-        public Func<string> IsAllowed;
-        public PropertyRoute PropertyRoute;
+        public Func<string?> IsAllowed;
+        public PropertyRoute? PropertyRoute;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

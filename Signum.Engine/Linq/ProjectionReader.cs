@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,14 +32,12 @@ namespace Signum.Engine.Linq
     {
         public FieldReader Reader { get; private set;}
         public IRetriever Retriever { get; private set; }
-
-        public IProjectionRow Parent { get; private set; }
-
+        
         public CancellationToken Token { get; private set; }
 
         DbDataReader dataReader;
 
-        T current;
+        T current = default(T)!;
         Func<IProjectionRow, T> projector;
         Expression<Func<IProjectionRow, T>> projectorExpression;
 
@@ -63,7 +61,7 @@ namespace Signum.Engine.Linq
             get { return this.current; }
         }
 
-        object IEnumerator.Current
+        object? IEnumerator.Current
         {
             get { return this.current; }
         }
@@ -110,7 +108,7 @@ namespace Signum.Engine.Linq
 
     internal class ProjectionRowEnumerable<T> : IEnumerable<T>, IEnumerable
     {
-        ProjectionRowEnumerator<T> enumerator;
+        ProjectionRowEnumerator<T>? enumerator;
 
         internal ProjectionRowEnumerable(ProjectionRowEnumerator<T> enumerator)
         {
@@ -119,8 +117,7 @@ namespace Signum.Engine.Linq
 
         public IEnumerator<T> GetEnumerator()
         {
-            return Interlocked.Exchange(ref enumerator, null)
-                .ThrowIfNull("Cannot enumerate more than once");
+            return Interlocked.Exchange(ref enumerator, null).ThrowIfNull("Cannot enumerate more than once");
         }
 
         IEnumerator IEnumerable.GetEnumerator()

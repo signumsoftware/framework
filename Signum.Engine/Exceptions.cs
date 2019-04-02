@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -15,14 +15,14 @@ namespace Signum.Engine
     [Serializable]
     public class UniqueKeyException : ApplicationException
     {
-        public string TableName { get; private set; }
-        public Table Table { get; private set; }
+        public string? TableName { get; private set; }
+        public Table? Table { get; private set; }
 
-        public string IndexName { get; private set; }
-        public UniqueIndex Index { get; private set; }
-        public List<PropertyInfo> Properties { get; private set; }
+        public string? IndexName { get; private set; }
+        public UniqueIndex? Index { get; private set; }
+        public List<PropertyInfo>? Properties { get; private set; }
 
-        public string Values { get; private set; }
+        public string? Values { get; private set; }
 
         protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
@@ -56,7 +56,7 @@ namespace Signum.Engine
 
                             var properties = (from f in tup.Item1.Fields.Values
                                               let cols = f.Field.Columns()
-                                              where cols.Any() && cols.All(index.Columns.Contains)
+                                              where cols.Any() && cols.All(c => index.Columns.Contains(c))
                                               select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
 
                             if (properties.IsEmpty())
@@ -90,7 +90,7 @@ namespace Signum.Engine
                     Table == null ? TableName : Table.Type.NiceName(),
                     Index == null ? IndexName :
                     Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) :
-                    Properties.CommaAnd(p=>p.NiceName()),
+                    Properties!.CommaAnd(p => p.NiceName()),
                     Values);
             }
         }
@@ -100,12 +100,12 @@ namespace Signum.Engine
     [Serializable]
     public class ForeignKeyException : ApplicationException
     {
-        public string TableName { get; private set; }
-        public string Field { get; private set; }
-        public Type TableType { get; private set; }
+        public string? TableName { get; private set; }
+        public string? Field { get; private set; }
+        public Type? TableType { get; private set; }
 
-        public string ReferedTableName { get; private set; }
-        public Type ReferedTableType { get; private set; }
+        public string? ReferedTableName { get; private set; }
+        public Type? ReferedTableType { get; private set; }
 
         public bool IsInsert { get; private set; }
 
@@ -173,7 +173,9 @@ namespace Signum.Engine
         public Type Type { get; private set; }
         public PrimaryKey[] Ids { get; private set; }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public EntityNotFoundException(Type type, params PrimaryKey[] ids)
             : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
@@ -189,7 +191,9 @@ namespace Signum.Engine
         public Type Type { get; private set; }
         public PrimaryKey[] Ids { get; private set; }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public ConcurrencyException(Type type, params PrimaryKey[] ids)
             : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().FormatWith(type.NiceName(), ids.ToString(", ")))

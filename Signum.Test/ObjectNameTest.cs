@@ -1,5 +1,6 @@
-﻿using Xunit;
+using Xunit;
 using Signum.Engine.Maps;
+using System.Globalization;
 
 namespace Signum.Test
 {
@@ -45,8 +46,8 @@ namespace Signum.Test
             var simple = ObjectName.Parse("[FROM].[SELECT].[WHERE].[TOP]");
             Assert.Equal("TOP", simple.Name);
             Assert.Equal("WHERE", simple.Schema.Name);
-            Assert.Equal("SELECT", simple.Schema.Database.Name);
-            Assert.Equal("FROM", simple.Schema.Database.Server.Name);
+            Assert.Equal("SELECT", simple.Schema.Database!.Name);
+            Assert.Equal("FROM", simple.Schema.Database!.Server!.Name);
         }
 
 
@@ -56,8 +57,8 @@ namespace Signum.Test
             var simple = ObjectName.Parse("[FROM].[SELECT].[WHERE].[TOP.DISTINCT]");
             Assert.Equal("TOP.DISTINCT", simple.Name);
             Assert.Equal("WHERE", simple.Schema.Name);
-            Assert.Equal("SELECT", simple.Schema.Database.Name);
-            Assert.Equal("FROM", simple.Schema.Database.Server.Name);
+            Assert.Equal("SELECT", simple.Schema.Database!.Name);
+            Assert.Equal("FROM", simple.Schema.Database!.Server!.Name);
         }
     }
 }

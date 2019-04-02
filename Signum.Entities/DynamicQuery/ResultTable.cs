@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,6 +36,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
+#pragma warning disable CS8618, IDE0051 // Non-nullable field is uninitialized.
         ResultColumn(SerializationInfo info, StreamingContext context)
         {
             foreach (SerializationEntry entry in info)
@@ -48,6 +49,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
         }
+#pragma warning restore CS8618, IDE0051 // Non-nullable field is uninitialized.
 
         GenericInvoker<Func<int, IList>> listBuilder = new GenericInvoker<Func<int, IList>>(num => new List<int>(num));
 
@@ -73,7 +75,7 @@ namespace Signum.Entities.DynamicQuery
         {
             info.AddValue("column", column);
 
-            Func<object, string> serializer = GetValueSerializer();
+            Func<object, string>? serializer = GetValueSerializer();
 
             if (serializer == null)
                 info.AddValue("valuesList", values);
@@ -138,7 +140,7 @@ namespace Signum.Entities.DynamicQuery
             throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".FormatWith(column.Type));
         }
 
-        Func<object, string> GetValueSerializer()
+        Func<object, string>? GetValueSerializer()
         {
             if (column.Type.IsLite())
             {
@@ -205,7 +207,7 @@ namespace Signum.Entities.DynamicQuery
 
             string toStr = tmp.After(';');
 
-            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr);
+            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr)!;
 
             return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
         }
@@ -217,7 +219,7 @@ namespace Signum.Entities.DynamicQuery
     public class ResultTable
     {
         internal ResultColumn entityColumn;
-        public ColumnDescription EntityColumn
+        public ColumnDescription? EntityColumn
         {
             get { return entityColumn == null ? null : ((ColumnToken)entityColumn.Column.Token).Column; }
         }
@@ -239,7 +241,10 @@ namespace Signum.Entities.DynamicQuery
             this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
             this.columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
 
-            CreateIndices(columns);
+            int rowCount = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Count");
+            for (int i = 0; i < Columns.Length; i++)
+                Columns[i].Index = i;
+            this.rows = 0.To(rowCount).Select(i => new ResultRow(i, this)).ToArray();
 
             this.totalElements = totalElements;
             this.pagination = pagination;
@@ -251,38 +256,27 @@ namespace Signum.Entities.DynamicQuery
         //    CreateIndices(columns);
         //}
 
-        void CreateIndices(ResultColumn[] columns)
+        
+        public DataTable ToDataTable(DataTableValueConverter? converter = null)
         {
-            int rows = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Count");
-
-            for (int i = 0; i < Columns.Length; i++)
-                Columns[i].Index = i;
-
-            this.rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
-        }
-
-        public DataTable ToDataTable(DataTableValueConverter converter = null)
-        {
-            if (converter == null)
-                converter = new InvariantDataTableValueConverter();
+            var defConverter = converter ?? new InvariantDataTableValueConverter();
 
             DataTable dt = new DataTable("Table");
-            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, converter.ConvertType(c.Column))).ToArray());
+            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, defConverter.ConvertType(c.Column))).ToArray());
             foreach (var row in Rows)
             {
-                dt.Rows.Add(Columns.Select((c, i) => converter.ConvertValue(row[i], c.Column)).ToArray());
+                dt.Rows.Add(Columns.Select((c, i) => defConverter.ConvertValue(row[i], c.Column)).ToArray());
             }
             return dt;
         }
 
-        public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter converter = null)
+        public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter? converter = null)
         {
-            if (converter != null)
-                converter = new InvariantDataTableValueConverter();
+            var defConverter = converter  ?? new InvariantDataTableValueConverter();
 
             string Null = "- NULL -";
 
-            Dictionary<object, Dictionary<object, object>> dictionary =
+            Dictionary<object, Dictionary<object, object?>> dictionary =
                 this.Rows
                 .AgGroupToDictionary(
                     row => row[rowColumnIndex] ?? Null,
@@ -297,15 +291,15 @@ namespace Signum.Entities.DynamicQuery
             var valueColumn = this.Columns[valueIndex];
 
             var result = new DataTable();
-            result.Columns.Add(new DataColumn( rowColumn.Column.DisplayName, converter.ConvertType(rowColumn.Column)));
+            result.Columns.Add(new DataColumn( rowColumn.Column.DisplayName, defConverter.ConvertType(rowColumn.Column)));
             foreach (var item in allColumns)
-                result.Columns.Add(new DataColumn(item.ToString(), converter.ConvertType(valueColumn.Column)));
+                result.Columns.Add(new DataColumn(item.ToString(), defConverter.ConvertType(valueColumn.Column)));
 
             foreach (var kvp in dictionary)
             {
                 result.Rows.Add(
-                    allColumns.Select(val => converter.ConvertValue(kvp.Value.TryGetC(val), valueColumn.Column))
-                    .PreAnd(converter.ConvertValue(kvp.Key, rowColumn.Column))
+                    allColumns.Select(val => defConverter.ConvertValue(kvp.Value.TryGetCN(val), valueColumn.Column))
+                    .PreAnd(defConverter.ConvertValue(kvp.Key, rowColumn.Column))
                     .ToArray());
             }
 
@@ -322,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
 
         public int? TotalPages
         {
-            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements.Value) : (int?)null; }
+            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements!.Value) : (int?)null; }
         }
 
         public int? StartElementIndex
@@ -339,7 +333,7 @@ namespace Signum.Entities.DynamicQuery
     public abstract class DataTableValueConverter
     {
         public abstract Type ConvertType(Column column);
-        public abstract object ConvertValue(object value, Column column);
+        public abstract object? ConvertValue(object? value, Column column);
     }
 
     public class NiceDataTableValueConverter : DataTableValueConverter
@@ -360,7 +354,7 @@ namespace Signum.Entities.DynamicQuery
             return type.UnNullify();
         }
 
-        public override object ConvertValue(object value, Column column)
+        public override object? ConvertValue(object? value, Column column)
         {
             if (value is Lite<Entity>)
                 return ((Lite<Entity>)value).ToString();
@@ -391,7 +385,7 @@ namespace Signum.Entities.DynamicQuery
             return type.UnNullify();
         }
 
-        public override object ConvertValue(object value, Column column)
+        public override object? ConvertValue(object? value, Column column)
         {
             var type = column.Token.Type;
 
@@ -423,12 +417,12 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public object this[int columnIndex]
+        public object? this[int columnIndex]
         {
             get { return Table.Columns[columnIndex].Values[Index]; }
         }
 
-        public object this[ResultColumn column]
+        public object? this[ResultColumn column]
         {
             get { return column.Values[Index]; }
         }
@@ -444,29 +438,29 @@ namespace Signum.Entities.DynamicQuery
             get { return (Lite<Entity>)Table.entityColumn.Values[Index]; }
         }
 
-        public Lite<Entity> TryEntity
+        public Lite<Entity>? TryEntity
         {
             get { return Table.entityColumn == null ? null : (Lite<Entity>)Table.entityColumn.Values[Index]; }
         }
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)]!;
         }
 
         public T GetValue<T>(int columnIndex)
         {
-            return (T)this[columnIndex];
+            return (T)this[columnIndex]!;
         }
 
         public T GetValue<T>(ResultColumn column)
         {
-            return (T)this[column];
+            return (T)this[column]!;
         }
 
-        public object[] GetValues(ResultColumn[] columnArray)
+        public object?[] GetValues(ResultColumn[] columnArray)
         {
-            var result = new object[columnArray.Length];
+            var result = new object?[columnArray.Length];
             for (int i = 0; i < columnArray.Length; i++)
             {
                 result[i] = this[columnArray[i]];

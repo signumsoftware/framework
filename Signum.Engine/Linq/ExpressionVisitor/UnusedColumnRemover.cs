@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace Signum.Engine.Linq
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<Expression> groupBy = select.GroupBy.Select(e => IsConstant(e) ? null : Visit(e)).NotNull().ToReadOnly();
 
-            SourceExpression from = this.VisitSource(select.From);
+            SourceExpression? from = this.VisitSource(select.From!);
 
             if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupBy != select.GroupBy)
                 return new SelectExpression(select.Alias, select.IsDistinct, select.Top, columns, from, where, orderbys, groupBy, select.SelectOptions);
@@ -74,7 +74,7 @@ namespace Signum.Engine.Linq
 
         private void AddSingleColumn(SubqueryExpression subQuery)
         {
-            if (subQuery.Select.Columns.Count != 1)
+            if (subQuery.Select!.Columns.Count != 1)
                 throw new InvalidOperationException("Subquery has {0} columns: {1}".FormatWith(subQuery.Select.Columns.Count, subQuery.ToString()));
             allColumnsUsed.GetOrCreate(subQuery.Select.Alias).Add(subQuery.Select.Columns[0].Name);
         }
@@ -105,7 +105,7 @@ namespace Signum.Engine.Linq
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
-                var source = join.Right as SourceWithAliasExpression;
+                var source = (SourceWithAliasExpression)join.Right;
 
                 var hs = allColumnsUsed.TryGetC(source.Alias);
 
@@ -165,7 +165,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
-            var orderBys = Visit(rowNumber.OrderBy, o => IsConstant(o.Expression) ? null : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
+            var orderBys = Visit(rowNumber.OrderBy, o => IsConstant(o.Expression) ? null! : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
             if (orderBys != rowNumber.OrderBy)
                 return new RowNumberExpression(orderBys);
             return rowNumber;

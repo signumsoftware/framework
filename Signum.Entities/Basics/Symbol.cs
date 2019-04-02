@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -6,6 +6,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public abstract class Symbol : Entity
     {
@@ -33,8 +34,8 @@ namespace Signum.Entities
             catch (Exception e) when (StartParameters.IgnoredCodeErrors != null)
             {
                 //Could happend if Dynamic code has a duplicated name
-                this.fieldInfo = null;
-                this.Key = null;
+                this.fieldInfo = null!;
+                this.Key = null!;
                 StartParameters.IgnoredCodeErrors.Add(e);
                 return;
             }
@@ -59,7 +60,7 @@ namespace Signum.Entities
 
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string Key { get; set; }
 
         static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -129,9 +129,9 @@ namespace Signum.Utilities.NaturalLanguage
                 settings.UnitGender == 'f' ? (bool?)true :
                 settings.UnitGender == 'm' ? (bool?)false : null;
 
- 	        string signo = null;
-            string integerPart = null;
-            string decimalPart = null;
+ 	        string? signo = null;
+            string? integerPart = null;
+            string? decimalPart = null;
 
             if (number < 0)
             {
@@ -161,7 +161,7 @@ namespace Signum.Utilities.NaturalLanguage
         }
         private static string ConvertNumber(long num, bool? femenine, string singular, string plural)
         {
-            string result = null;
+            string? result = null;
             long numAux = num;
             for (int i = 0; numAux > 0; i++, numAux /= 1000)
                 result = " ".Combine(ConvertTrio((int)(numAux % 1000), i, femenine), " ", result);
@@ -173,7 +173,7 @@ namespace Signum.Utilities.NaturalLanguage
             return separator.Combine(result ?? "cero", numMod1M == 1 ? singular : plural);
         }
 
-        static string ConvertTrio(int val, int group, bool? femenine)
+        static string? ConvertTrio(int val, int group, bool? femenine)
         {
             string trio = val.ToString("000");
 
@@ -184,14 +184,14 @@ namespace Signum.Utilities.NaturalLanguage
             if (cent == 0 && dec == 0 && unit == 0 && group % 2 == 1)
                 return null;
 
-            string groupName = UnitsGroup(group, unit != 1 || dec > 0 || cent > 0);
+            string? groupName = UnitsGroup(group, unit != 1 || dec > 0 || cent > 0);
 
             string num = CentsDecsUnits(cent, dec, unit, group >= 2 ? null : femenine);
 
             return " ".Combine(val == 1 && groupName == "mil" ? null : num, groupName);
         }
 
-        static string UnitsGroup(int numGroup, bool plural)
+        static string? UnitsGroup(int numGroup, bool plural)
         {
             //en función de la cantidad de elementos que haya en enteros tendremos los
             //billones, millones, unidades...
@@ -252,7 +252,7 @@ namespace Signum.Utilities.NaturalLanguage
             }
         }
 
-        static string Units(int num, bool? femenine)
+        static string? Units(int num, bool? femenine)
         {
             switch (num)
             {
@@ -272,7 +272,7 @@ namespace Signum.Utilities.NaturalLanguage
             }
         }
 
-        static string Decs(int num)
+        static string? Decs(int num)
         {
             switch (num)
             {
@@ -290,7 +290,7 @@ namespace Signum.Utilities.NaturalLanguage
             }
         }
 
-        static string Cents(int num, bool femenine)
+        static string? Cents(int num, bool femenine)
         {
             switch (num)
             {

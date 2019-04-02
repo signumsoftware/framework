@@ -65,27 +65,23 @@ namespace Signum.Engine.CodeGeneration
                 if (selected.IsNullOrEmpty())
                     yield break;
 
-                string moduleName = GetDefaultModuleName(selected, solutionName);
+                string moduleName = GetDefaultModuleName(selected, solutionName)!;
                 SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
 
-                moduleName = Console.ReadLine().DefaultText(moduleName);
+                moduleName = Console.ReadLine().DefaultText(moduleName!);
 
-                yield return new Module
-                {
-                    ModuleName = moduleName,
-                    Types = selected.ToList()
-                };
+                yield return new Module(moduleName, selected.ToList());
 
                 types.SetRange(selected, a => a, a => true);
             }
 
         }
 
-        public static string GetDefaultModuleName(Type[] selected, string solutionName)
+        public static string? GetDefaultModuleName(Type[] selected, string solutionName)
         {
             StringDistance sd = new StringDistance();
 
-            string name = null;
+            string? name = null;
             foreach (var item in selected)
             {
                 if (name == null)
@@ -101,7 +97,7 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
-            return name.Trim('.');
+            return name?.Trim('.');
         }
     }
 
@@ -109,5 +105,11 @@ namespace Signum.Engine.CodeGeneration
     {
         public string ModuleName;
         public List<Type> Types;
+
+        public Module(string moduleName, List<Type> types)
+        {
+            ModuleName = moduleName;
+            Types = types;
+        }
     }
 }

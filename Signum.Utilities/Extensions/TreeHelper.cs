@@ -8,23 +8,23 @@ namespace Signum.Utilities
 {
     public static class TreeHelper
     {
-        public static ObservableCollection<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T> getParent)
+        public static ObservableCollection<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T?> getParent)
             where T : class
         {
             Node<T> top = new Node<T>();
 
             Dictionary<T, Node<T>> dic = new Dictionary<T, Node<T>>();
 
-            Func<T, Node<T>> createNode = null;
+            Func<T, Node<T>> createNode = null!;
 
             createNode = item => dic.GetOrCreate(item, () =>
-                {
-                    Node<T> itemNode = new Node<T>(item);
-                    T parent = getParent(item);
-                    Node<T> parentNode = parent != null ? createNode(parent) : top;
-                    parentNode.Children.Add(itemNode);
-                    return itemNode;
-                });
+            {
+                Node<T> itemNode = new Node<T>(item);
+                T? parent = getParent(item);
+                Node<T> parentNode = parent != null ? createNode(parent) : top;
+                parentNode.Children.Add(itemNode);
+                return itemNode;
+            });
 
             foreach (var item in collection)
             {
@@ -41,7 +41,7 @@ namespace Signum.Utilities
 
             Dictionary<T, Node<T>> dic = new Dictionary<T, Node<T>>();
 
-            Func<T, Node<T>> createNode = null;
+            Func<T, Node<T>> createNode = null!;
 
             createNode = item => dic.GetOrCreate(item, () =>
             {
@@ -84,7 +84,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static ObservableCollection<Node<S>> SelectTree<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector)
+        public static ObservableCollection<Node<S>>? SelectTree<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector)
         {
             return nodes.Select(n => new Node<S>(selector(n.Value), SelectTree(n.Children, selector))).ToObservableCollection();
         }
@@ -123,7 +123,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static ObservableCollection<Node<T>> Apply<T>(ObservableCollection<Node<T>> collection, Func<ObservableCollection<Node<T>>, ObservableCollection<Node<T>>> action)
+        public static ObservableCollection<Node<T>>? Apply<T>(ObservableCollection<Node<T>> collection, Func<ObservableCollection<Node<T>>, ObservableCollection<Node<T>>> action)
         {
             return action(collection).Select(a => new Node<T>(a.Value, Apply(a.Children, action))).ToObservableCollection();
         }
@@ -134,7 +134,7 @@ namespace Signum.Utilities
         public T Value { get; set; }
         public ObservableCollection<Node<T>> Children { get; set; }
 
-        public Node(T value, ObservableCollection<Node<T>> children)
+        public Node(T value, ObservableCollection<Node<T>>? children)
         {
             Value = value;
             Children = children ?? new ObservableCollection<Node<T>>();
@@ -148,6 +148,7 @@ namespace Signum.Utilities
 
         public Node()
         {
+            Value = default(T)!;
             Children = new ObservableCollection<Node<T>>();
         }
 

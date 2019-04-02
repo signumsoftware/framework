@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 
 namespace Signum.Engine.Maps
@@ -48,7 +48,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode();
         }
 
-        public static ServerName Parse(string name)
+        public static ServerName? Parse(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
@@ -61,9 +61,9 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; private set; }
 
-        public ServerName Server { get; private set; }
+        public ServerName? Server { get; private set; }
 
-        public DatabaseName(ServerName server, string name)
+        public DatabaseName(ServerName? server, string name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
@@ -101,7 +101,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ (Server == null ? 0 : Server.GetHashCode());
         }
 
-        public static DatabaseName Parse(string name)
+        public static DatabaseName? Parse(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
@@ -116,9 +116,9 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; private set; }
 
-        readonly DatabaseName database;
+        readonly DatabaseName? database;
 
-        public DatabaseName Database
+        public DatabaseName? Database
         {
             get
             {
@@ -136,7 +136,7 @@ namespace Signum.Engine.Maps
             return Name == "dbo" && Database == null;
         }
 
-        public SchemaName(DatabaseName database, string name)
+        public SchemaName(DatabaseName? database, string name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
@@ -172,7 +172,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ (Database == null ? 0 : Database.GetHashCode());
         }
 
-        public static SchemaName Parse(string name)
+        public static SchemaName Parse(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 return SchemaName.Default;
@@ -218,7 +218,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ Schema.GetHashCode();
         }
 
-        public static ObjectName Parse(string name)
+        public static ObjectName Parse(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
@@ -230,7 +230,7 @@ namespace Signum.Engine.Maps
 
         //FROM "[a.b.c].[d.e.f].[a.b.c].[c.d.f]"
         //TO   ("[a.b.c].[d.e.f].[a.b.c]", "c.d.f")
-        internal static (string prefix, string name) SplitLast(string str)
+        internal static (string? prefix, string name) SplitLast(string str)
         {
             if (!str.EndsWith("]"))
             {
@@ -247,7 +247,7 @@ namespace Signum.Engine.Maps
             );
         }
 
-        public ObjectName OnDatabase(DatabaseName databaseName)
+        public ObjectName OnDatabase(DatabaseName? databaseName)
         {
             return new ObjectName(new SchemaName(databaseName, Schema.Name), Name);
         }

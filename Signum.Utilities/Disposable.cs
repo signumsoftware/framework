@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 
 namespace Signum.Utilities
@@ -19,7 +19,7 @@ namespace Signum.Utilities
             action?.Invoke();
         }
 
-        public static IDisposable Combine(IDisposable first, IDisposable second)
+        public static IDisposable? Combine(IDisposable? first, IDisposable? second)
         {
             if (first == null || second == null)
                 return first ?? second;
@@ -28,7 +28,7 @@ namespace Signum.Utilities
             var secondEx = second as IDisposableException;
 
             if (firstEx == null && secondEx == null)
-                return new Disposable(() => { try { first.Dispose(); } finally { second.Dispose(); } });
+                return new Disposable(() => { try { first!.Dispose(); } finally { second!.Dispose(); } });
 
             return new DisposableException(              
                 ex =>
@@ -36,15 +36,15 @@ namespace Signum.Utilities
                     try { if (firstEx != null) firstEx.OnException(ex); }
                     finally { if (secondEx != null) secondEx.OnException(ex); }
                 },
-                () => { try { first.Dispose(); } finally { second.Dispose(); } });
+                () => { try { first!.Dispose(); } finally { second!.Dispose(); } });
         }
 
-        public static IDisposable Combine<Del>(Del delegated, Func<Del, IDisposable> invoke) where Del : class, ICloneable, ISerializable
+        public static IDisposable? Combine<Del>(Del delegated, Func<Del, IDisposable?> invoke) where Del : class, ICloneable, ISerializable
         {
             if (delegated == null)
                 return null;
 
-            IDisposable result = null;
+            IDisposable? result = null;
             foreach (var func in delegated.GetInvocationListTyped())
             {
                 try

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
@@ -28,7 +28,7 @@ namespace Signum.Utilities.DataStructures
         {
         }
 
-        public RecentDictionary(int capacity, IEqualityComparer<K> comparer)
+        public RecentDictionary(int capacity, IEqualityComparer<K>? comparer)
         {
             this.capacity = capacity;
             keyToLink = new Dictionary<K, LinkedListNode<V>>(comparer);
@@ -83,7 +83,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool Remove(K key)
         {
-            LinkedListNode<V> link = keyToLink.TryGetC(key);
+            LinkedListNode<V>? link = keyToLink.TryGetC(key);
 
             if (link == null)
                 return false;
@@ -137,7 +137,7 @@ namespace Signum.Utilities.DataStructures
                 return true;
             }
 
-            value = default(V);
+            value = default(V)!;
             return false;
         }
 
@@ -181,7 +181,7 @@ namespace Signum.Utilities.DataStructures
                 if (buff.Length > 1)
                     buff.Append(", ");
 
-                buff.Append(item.ToString());
+                buff.Append(item?.ToString());
             }
 
             buff.Append("]");

@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -30,7 +30,6 @@ var condition = lite == entity;
         [TestMethod]
         public void CompareIncompatibleTypes()
         {
-         
             TestDiagnostic("Impossible to compare Lite<AppleEntity> and Lite<OrangeEntity>", @"
 Lite<AppleEntity> apple = null;
 Lite<OrangeEntity> orange = null;
@@ -41,7 +40,6 @@ var condition = apple == orange;
         [TestMethod]
         public void CompareIncompatibleAbstractTypes()
         {
-
             TestDiagnostic("Impossible to compare Lite<AbstractBananaEntity> and Lite<OrangeEntity>", @"
 Lite<AbstractBananaEntity> banana = null;
 Lite<OrangeEntity> orange = null;
@@ -55,7 +53,7 @@ var condition = banana == orange;
 
             TestDiagnostic(null, @"
 Lite<Entity> type = null;
-Lite<QueryEntity> query = null;
+Lite<OrangeEntity> query = null;
 var condition = type == query;       
             ");
         }
@@ -81,16 +79,13 @@ var condition = type == baseLite;  //Could be SpiderMan!
             ");
         }
 
-
-
-
-        private void TestDiagnostic(string expectedError, string code, bool withIncludes = false)
+        private void TestDiagnostic(string expectedError, string code,  bool withIncludes = false, bool assertErrors = true)
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, assertErrors, new DiagnosticResult[0]);
             else
-                VerifyCSharpDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, assertErrors, new DiagnosticResult
                 {
                     Id = LiteEqualityAnalyzer.DiagnosticId,
                     Message = expectedError,
@@ -119,7 +114,7 @@ namespace ConsoleApplication1
     public class AppleEntity : Entity {}
     public class OrangeEntity : Entity {}
 
-    public abstracr class AbstractBananaEntity : Entity {}
+    public abstract class AbstractBananaEntity : Entity {}
 
     class Bla
     {  

@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public class PropertyRouteEntity : Entity
     {
-        public PropertyRouteEntity() { }
-
         [field: Ignore]
         PropertyRoute route;
         [HiddenProperty]
@@ -18,10 +17,9 @@ namespace Signum.Entities.Basics
             set { route = value; }
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string Path { get; set; }
 
-        [NotNullValidator]
         public TypeEntity RootType { get; set; }
 
         public static Func<PropertyRouteEntity, PropertyRoute> ToPropertyRouteFunc;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities;
@@ -67,7 +67,7 @@ namespace Signum.Engine.Linq
             get { return typeof(ModifiableEntity).IsAssignableFrom(Type); }
         }
 
-        public readonly Meta Meta;
+        public Meta Meta { get; private set; }
 
         public MetaExpression(Type type, Meta meta):
             base(MetaExpressionType.MetaExpression, type)

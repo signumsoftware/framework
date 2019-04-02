@@ -7,6 +7,7 @@ using System.Xml.Linq;
 namespace Signum.Utilities.DataStructures
 {
     public class DirectedEdgedGraph<T, E> : IEnumerable<T>
+        where T: object
     {
         Dictionary<T, Dictionary<T, E>> adjacency;
         public IEqualityComparer<T> Comparer { get; private set; }
@@ -149,7 +150,7 @@ namespace Signum.Utilities.DataStructures
             inverse.RemoveFullNode(node, to);
         }
 
-        Dictionary<T, E> TryGet(T node)
+        Dictionary<T, E>? TryGet(T node)
         {
             return adjacency.TryGetC(node);
         }
@@ -360,15 +361,15 @@ namespace Signum.Utilities.DataStructures
 
         public string ToGraphviz()
         {
-            return ToGraphviz(typeof(E).Name, a => a.ToString(), e => e.ToString());
+            return ToGraphviz(typeof(E).Name, a => a.ToString(), e => e?.ToString());
         }
 
         public string ToGraphviz(string name)
         {
-            return ToGraphviz(name, a => a.ToString(), e => e.ToString());
+            return ToGraphviz(name, a => a.ToString(), e => e?.ToString());
         }
 
-        public string ToGraphviz(string name, Func<T, string> getNodeLabel, Func<E, string> getEdgeLabel)
+        public string ToGraphviz(string name, Func<T, string> getNodeLabel, Func<E, string?> getEdgeLabel)
         {
             int num = 0;
             Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
@@ -385,10 +386,10 @@ namespace Signum.Utilities.DataStructures
             return ToDGML(
                 a => a.ToString() ?? "[null]",
                 a => ColorExtensions.ToHtmlColor(a.GetType().FullName.GetHashCode()),
-                e => e.ToString() ?? "[null]");
+                e => e?.ToString() ?? "[null]");
         }
 
-        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string> getEdgeLabel = null)
+        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string>? getEdgeLabel = null)
         {
             return ToDGML(n => new[]
             {
@@ -545,7 +546,7 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
-        public List<T> ShortestPath(T from, T to, Func<E, int> getWeight)
+        public List<T>? ShortestPath(T from, T to, Func<E, int> getWeight)
         {
             //http://en.wikipedia.org/wiki/Dijkstra's_algorithm
 

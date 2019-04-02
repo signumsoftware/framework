@@ -8,12 +8,17 @@ namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
     public class ExtensionDictionaryToken<T, K, V> : QueryToken
+        where K : object
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+
         public ExtensionDictionaryToken(QueryToken parent, K key,
-            string unit, string format,
+            string? unit, 
+            string? format,
             Implementations? implementations,
-            PropertyRoute propertyRoute)
-            : base(parent)
+            PropertyRoute? propertyRoute, 
+            Expression<Func<T, V>> lambda)
         {
             this.keyValue= key;
             this.unit = unit;
@@ -21,10 +26,10 @@ namespace Signum.Entities.DynamicQuery
             this.implementations = implementations;
             this.propertyRoute = propertyRoute;
             this.Priority = -10;
+            this.Lambda = lambda;
+            this.parent = parent;
         }
-
-        public string DisplayName { get; set; }
-
+        
         public override string ToString()
         {
             return "[" + (((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
@@ -35,16 +40,16 @@ namespace Signum.Entities.DynamicQuery
             return ((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString();
         }
 
-        public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
+        public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); } }
 
         K keyValue;
         public override string Key => "[" + keyValue.ToString() + "]";
 
-        string format;
-        public override string Format => format;
+        string? format;
+        public override string? Format => format;
 
-        string unit;
-        public override string Unit => unit;
+        string? unit;
+        public override string? Unit => unit;
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
@@ -55,39 +60,34 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var parentExpression = Parent.BuildExpression(context).ExtractEntity(false).UnNullify();
+            var parentExpression = parent.BuildExpression(context).ExtractEntity(false).UnNullify();
 
             var result = Expression.Invoke(Lambda, parentExpression);
 
-            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute });
+            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
         }
 
-        public PropertyRoute propertyRoute;
-        public override PropertyRoute GetPropertyRoute() => this.propertyRoute;
+        public PropertyRoute? propertyRoute;
+        public override PropertyRoute? GetPropertyRoute() => this.propertyRoute;
 
         public Implementations? implementations;
         public override Implementations? GetImplementations() => this.implementations;
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            PropertyRoute pr = GetPropertyRoute();
+            string? parentAllowed = this.parent.IsAllowed();
 
-            string parent = Parent.IsAllowed();
+            string? routeAlllowed = GetPropertyRoute()?.IsAllowed();
 
-            string route = pr?.IsAllowed();
+            if (parentAllowed.HasText() && routeAlllowed.HasText())
+                return QueryTokenMessage.And.NiceToString().Combine(parentAllowed!, routeAlllowed!);
 
-            if (parent.HasText() && route.HasText())
-                return QueryTokenMessage.And.NiceToString().Combine(parent, route);
-
-            return parent ?? route;
+            return parentAllowed ?? routeAlllowed;
         }
 
         public override QueryToken Clone()
         {
-            return new ExtensionDictionaryToken<T, K, V>(this.Parent.Clone(), keyValue, unit, format, implementations, propertyRoute)
-            {
-                Lambda = Lambda
-            };
+            return new ExtensionDictionaryToken<T, K, V>(this.parent.Clone(), keyValue, unit, format, implementations, propertyRoute, Lambda);
         }
     }
 }

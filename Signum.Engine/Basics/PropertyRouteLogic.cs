@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Basics;
@@ -40,7 +40,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        private static SqlPreCommand PropertyRouteLogic_PreDeleteSqlSync(Entity arg)
+        private static SqlPreCommand? PropertyRouteLogic_PreDeleteSqlSync(Entity arg)
         {
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
@@ -51,13 +51,13 @@ namespace Signum.Engine.Basics
             return prs.Select(pr => table.DeleteSqlSync(pr, p => p.RootType.CleanName == pr.RootType.CleanName && p.Path == pr.Path)).Combine(Spacing.Simple);
         }
 
-        public static PropertyRouteEntity TryGetPropertyRouteEntity(TypeEntity entity, string path)
+        public static PropertyRouteEntity? TryGetPropertyRouteEntity(TypeEntity entity, string path)
         {
             return Properties.Value.TryGetC(entity)?.TryGetC(path);
         }
 
         public const string PropertiesFor = "Properties For:{0}";
-        static SqlPreCommand SynchronizeProperties(Replacements rep)
+        static SqlPreCommand? SynchronizeProperties(Replacements rep)
         {
             var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.CleanName, g => g.ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 

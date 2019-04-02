@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -63,7 +63,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs(this Entity e)
         {
             var a = 2;
-        }");
+        }", assertErrors: false);
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs(this Entity e)
         {
             return;
-        }");
+        }", assertErrors: false);
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace Signum.Analyzer.Test
         {
             TestDiagnostic("no getter", @"        
         [ExpressionField]
-        public static int OperationLogs { set; }");
+        public static int OperationLogs { set; }", assertErrors: false);
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace Signum.Analyzer.Test
         {
             TestDiagnostic("no invocation", @"        
         [ExpressionField]
-        public static int OperationLogs => 1");
+        public static int OperationLogs => 1;");
         }
 
         [TestMethod]
@@ -106,7 +106,7 @@ namespace Signum.Analyzer.Test
         {
             TestDiagnostic("no invocation", @"        
         [ExpressionField]
-        public static int OperationLogs(this Entity e) => 1");
+        public static int OperationLogs(this Entity e) => 1;");
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace Signum.Analyzer.Test
             TestDiagnostic("no Evaluate", @"
         static Expression<Func<Entity, int>> MyExpression;         
         [ExpressionField]
-        public static int OperationLogs(this Entity e) => MyExpression.Invoke(e)");
+        public static int OperationLogs(this Entity e) => MyExpression.Invoke(e)", assertErrors: false);
         }
 
         [TestMethod]
@@ -124,7 +124,7 @@ namespace Signum.Analyzer.Test
             TestDiagnostic("no static field", @"
         static Expression<Func<Entity, int>> MyExpression { get; }         
         [ExpressionField]
-        public static int OperationLogs(this Entity e) => MyExpression.Evaluate(e)");
+        public static int OperationLogs(this Entity e) => MyExpression.Evaluate(e)", assertErrors: false);
         }
 
         [TestMethod]
@@ -133,25 +133,25 @@ namespace Signum.Analyzer.Test
             TestDiagnostic("first argument should be 'this'", @"
         static Expression<Func<Entity, int>> MyExpression;        
         [ExpressionField]
-        public int OperationLogs(this Entity e) => MyExpression.Evaluate(e)");
+        public int OperationLogs(this Entity e) => MyExpression.Evaluate(e)", assertErrors: false);
         }
 
         [TestMethod]
         public void ExpressionMissingArgument()
         {
             TestDiagnostic("missing argument 'e'", @"
-        static Expression<Func<Bla, int>> MyExpression;        
+        static Expression<Func<int>> MyExpression;        
         [ExpressionField]
-        public int OperationLogs(this Entity e) => MyExpression.Evaluate(this)");
+        public static int OperationLogs(this Entity e) => MyExpression.Evaluate();", includeExpression: true);
         }
 
         [TestMethod]
         public void ExpressionExtra()
         {
             TestDiagnostic("extra parameters", @"
-        static Expression<Func<Bla, Entity, Entity, int>> MyExpression;        
+        static Expression<Func<Entity, Entity, int>> MyExpression;        
         [ExpressionField]
-        public int OperationLogs(this Entity e) => MyExpression.Evaluate(this, e, e)");
+        public static int OperationLogs(this Entity e) => MyExpression.Evaluate(e, e);", assertErrors: false);
         }
 
         [TestMethod]
@@ -160,44 +160,44 @@ namespace Signum.Analyzer.Test
             TestDiagnostic(null, @"
         static Expression<Func<Bla, Entity, int>> MyExpression;        
         [ExpressionField]
-        public int OperationLogs(this Entity e) => MyExpression.Evaluate(this, e)");
+        public int OperationLogs(Entity e) => MyExpression.Evaluate(this, e);", staticClass: false, includeExpression: true);
         }
 
         [TestMethod]
         public void ExpressionExplicitNotFound()
         {
             TestDiagnostic("field 'MyExpression' not found", @"
-        static Expression<Func<Bla, Entity, int>> MyExpressionBad;        
+        static Expression<Func<Entity, int>> MyExpressionBad;        
         [ExpressionField(""MyExpression"")]
-        public int OperationLogs(this Entity e) => 0");
+        public static int OperationLogs(this Entity e) => 0;", assertErrors: false);
         }
 
         [TestMethod]
         public void ExpressionExplicitWrongType()
         {
-            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Bla, Entity, int>>'", @"
-        static Expression<Func<Entity, int>> MyExpression;        
+            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Entity, int>>'", @"
+        static Expression<Func<Entity, long, int>> MyExpression;        
         [ExpressionField(""MyExpression"")]
-        public int OperationLogs(this Entity e) => 0", withIncludes: true);
+        public static int OperationLogs(this Entity e) => 0;", includeExpression: true);
         }
 
         [TestMethod]
         public void ExpressionExplicitCorrect()
         {
             TestDiagnostic(null, @"
-        static Expression<Func<Bla, Entity, int>> MyExpression;        
+        static Expression<Func<Entity, int>> MyExpression;        
         [ExpressionField(""MyExpression"")]
-        public int OperationLogs(this Entity e) => 0", withIncludes: true);
+        public static int OperationLogs(this Entity e) => 0;", includeExpression: true);
         }
 
 
-        private void TestDiagnostic(string expectedError, string code, bool withIncludes = false)
+        private void TestDiagnostic(string expectedError, string code, bool includeExpression = false, bool staticClass = true, bool assertErrors = true)
         {
-            string test = Surround(code, withIncludes: withIncludes);
+            string test = Surround(code, includeExpression, staticClass);
             if (expectedError == null)
-                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, assertErrors, new DiagnosticResult[0]);
             else
-                VerifyCSharpDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, assertErrors, new DiagnosticResult
                 {
                     Id = ExpressionFieldAnalyzer.DiagnosticId,
                     Message = string.Format("'OperationLogs' should reference an static field of type Expression<T> with the same signature ({0})", expectedError),
@@ -205,9 +205,9 @@ namespace Signum.Analyzer.Test
                 });
         }
 
-        private static string Surround(string expression, bool withIncludes = false)
+        private static string Surround(string member, bool includeExpression = false, bool staticClass = true)
         {
-            return @"
+            return $@"
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -216,17 +216,17 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;" + (withIncludes ? @"
-using System.Linq.Expressions;" : null) +  @"
+using Signum.Utilities.ExpressionTrees;
+{(includeExpression ? @"using System.Linq.Expressions;
+" : null)}
 
 namespace ConsoleApplication1
-{
-    class Bla
-    {"
-+ expression +
-@"
-    }
-}";
+{{
+    {(staticClass ? "static" : null)} class Bla
+    {{
+{member}
+    }}
+}}";
         }
 
         [TestMethod]
@@ -252,23 +252,23 @@ namespace ConsoleApplication1
 
         static Expression<Func<Bla, string>> GetIdExpression = @this => @this.ToString();
         [ExpressionField]
-        public string GetId => GetIdExpression.Evaluate(this);");
+        public string GetId => GetIdExpression.Evaluate(this);", staticClass: false);
         }
 
         [TestMethod]
         public void ExpressionFixInstancePropertyImplicitThis()
         {
             TestCodeFix(@"
-        string id;
+        string? id;
 
         [ExpressionField]
-        public string GetId => id;",
+        public string? GetId => id;",
         @"
-        string id;
+        string? id;
 
-        static Expression<Func<Bla, string>> GetIdExpression = @this => @this.id;
+        static Expression<Func<Bla, string? >> GetIdExpression = @this => @this.id;
         [ExpressionField]
-        public string GetId => GetIdExpression.Evaluate(this);");
+        public string? GetId => GetIdExpression.Evaluate(this);", staticClass: false);
         }
 
         [TestMethod]
@@ -282,7 +282,7 @@ namespace ConsoleApplication1
 
         static Expression<Func<Bla, string>> GetIdExpression = @this => @this.ToString();
         [ExpressionField]
-        public string GetId { get { return GetIdExpression.Evaluate(this); } }");
+        public string GetId { get { return GetIdExpression.Evaluate(this); } }", staticClass: false);
         }
         
 
@@ -302,9 +302,12 @@ namespace ConsoleApplication1
         public static int GetId(Entity e) => GetIdExpression2.Evaluate(e);");
         }
 
-        private void TestCodeFix(string initial, string final)
+        private void TestCodeFix(string initial, string final, bool staticClass = true)
         {
-            VerifyCSharpFix(Surround(initial), Surround(final, withIncludes:true));
+            VerifyCSharpFix(
+                Surround(initial, includeExpression: false, staticClass: staticClass),
+                Surround(final, includeExpression: true, staticClass: staticClass),
+            assertNoInitialErrors: false);
         }
     }
 }

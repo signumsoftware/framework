@@ -26,7 +26,7 @@ namespace Signum.Entities
     [Serializable]
     public struct Implementations : IEquatable<Implementations>, ISerializable
     {
-        object arrayOrType;
+        object? arrayOrType;
 
         public bool IsByAll { get { return arrayOrType == null; } }
         public IEnumerable<Type> Types
@@ -46,14 +46,16 @@ namespace Signum.Entities
             {
                 yield return t;
             }
-            else
+            else if (arrayOrType is Type[] ts)
             {
-                foreach (var item in ((Type[])arrayOrType))
+                foreach (var item in ts)
                     yield return item;
             }
+            else
+                throw new InvalidOperationException("IsByAll");
         }
 
-        public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
+        public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute? ib, ImplementedByAllAttribute? iba)
         {
             if (ib != null && iba != null)
                 throw new NotSupportedException("Route {0} contains both {1} and {2}".FormatWith(route, ib.GetType().Name, iba.GetType().Name));
@@ -68,7 +70,7 @@ namespace Signum.Entities
         }
 
 
-        public static Implementations FromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
+        public static Implementations FromAttributes(Type t, PropertyRoute route, ImplementedByAttribute? ib, ImplementedByAllAttribute? iba)
         {
             Implementations? imp = TryFromAttributes(t, route, ib, iba);
 
@@ -121,7 +123,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             return new Implementations { arrayOrType = types.OrderBy(a => a.FullName).ToArray() };
         }
 
-        static string Error(Type type)
+        static string? Error(Type type)
         {
             if (type.IsInterface)
                 return "{0} is an interface".FormatWith(type.Name);
@@ -183,8 +185,8 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("arrayOrType", arrayOrType == null ? "ALL" :
-                arrayOrType is Type ? ((Type)arrayOrType).AssemblyQualifiedName :
-                arrayOrType is Type[] ? ((Type[])arrayOrType).ToString(a => a.AssemblyQualifiedName, "|") : null);
+                arrayOrType is Type t ? t.AssemblyQualifiedName :
+                arrayOrType is Type[] ts ? ts.ToString(a => a.AssemblyQualifiedName, "|") : null);
         }
     }
 
@@ -224,7 +226,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class NotNullableAttribute : Attribute
+    public sealed class ForceNotNullableAttribute : Attribute
     {
     }
 
@@ -234,7 +236,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     /// This attribute is only necessary in the case an entity field is not-nullable but you can not make the DB column nullable because of legacy data, or cycles in a graph of entities.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class NullableAttribute : Attribute
+    public sealed class ForceNullableAttribute: Attribute
     {
     }
 
@@ -248,7 +250,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public SqlDbType SqlDbType
         {
-            get { return sqlDbType.Value; }
+            get { return sqlDbType!.Value; }
             set { sqlDbType = value; }
         }
 
@@ -259,7 +261,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public int Size
         {
-            get { return size.Value; }
+            get { return size!.Value; }
             set { size = value; }
         }
 
@@ -270,7 +272,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public int Scale
         {
-            get { return scale.Value; }
+            get { return scale!.Value; }
             set { scale = value; }
         }
 
@@ -279,11 +281,11 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             get { return scale.HasValue; }
         }
 
-        public string UserDefinedTypeName { get; set; }
+        public string? UserDefinedTypeName { get; set; }
 
-        public string Default { get; set; }
+        public string? Default { get; set; }
 
-        public string Collation { get; set; }
+        public string? Collation { get; set; }
 
         public const string NewId = "NEWID()";
         public const string NewSequentialId = "NEWSEQUENTIALID()";
@@ -371,9 +373,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     {
         public bool HasTicks { get; private set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public Type Type { get; set; }
+        public Type? Type { get; set; }
 
         public TicksColumnAttribute(bool hasTicks = true)
         {
@@ -387,7 +389,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class SystemVersionedAttribute : Attribute
     {
-        public string TemporalTableName { get; set; }
+        public string? TemporalTableName { get; set; }
         public string StartDateColumnName { get; set; } = "SysStartDate";
         public string EndDateColumnName { get; set; } = "SysEndDate";
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,20 +16,20 @@ namespace Signum.Engine.Linq
 
         SqlPreCommandSimple MainCommand { get; set; }
 
-        object Execute();
-        Task<object> ExecuteAsync(CancellationToken token);
+        object? Execute();
+        Task<object?> ExecuteAsync(CancellationToken token);
 
         LambdaExpression GetMainProjector();
     }
 
     interface IChildProjection
     {
-        LookupToken Token { get; set; }
+        LookupToken Token { get; }
 
         void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever);
         Task FillAsync(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever, CancellationToken token);
 
-        SqlPreCommandSimple Command { get; set; }
+        SqlPreCommandSimple Command { get; }
 
         bool IsLazy { get; }
     }
@@ -38,9 +38,15 @@ namespace Signum.Engine.Linq
     class EagerChildProjection<K, V>: IChildProjection
     {
         public LookupToken Token { get; set; }
-
         public SqlPreCommandSimple Command { get; set; }
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
+
+        public EagerChildProjection(LookupToken token, SqlPreCommandSimple command, Expression<Func<IProjectionRow, KeyValuePair<K, V>>> projectorExpression)
+        {
+            Token = token;
+            Command = command;
+            ProjectorExpression = projectorExpression;
+        }
 
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
@@ -103,14 +109,21 @@ namespace Signum.Engine.Linq
 
     class LazyChildProjection<K, V> : IChildProjection
     {
-        public LookupToken Token { get; set; }
+        public LookupToken Token { get; }
 
-        public SqlPreCommandSimple Command { get; set; }
+        public SqlPreCommandSimple Command { get; }
         internal Expression<Func<IProjectionRow, KeyValuePair<K, MList<V>.RowIdElement>>> ProjectorExpression;
+
+        public LazyChildProjection(LookupToken token, SqlPreCommandSimple command, Expression<Func<IProjectionRow, KeyValuePair<K, MList<V>.RowIdElement>>> projectorExpression)
+        {
+            Token = token;
+            Command = command;
+            ProjectorExpression = projectorExpression;
+        }
 
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
-            Dictionary<K, MList<V>> requests = (Dictionary<K, MList<V>>)lookups.TryGetC(Token);
+            Dictionary<K, MList<V>>? requests = (Dictionary<K, MList<V>>?)lookups.TryGetC(Token);
 
             if (requests == null)
                 return;
@@ -148,7 +161,7 @@ namespace Signum.Engine.Linq
 
         public async Task FillAsync(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever, CancellationToken token)
         {
-            Dictionary<K, MList<V>> requests = (Dictionary<K, MList<V>>)lookups.TryGetC(Token);
+            Dictionary<K, MList<V>>? requests = (Dictionary<K, MList<V>>?)lookups.TryGetC(Token);
 
             if (requests == null)
                 return;
@@ -197,21 +210,33 @@ namespace Signum.Engine.Linq
         internal List<IChildProjection> EagerProjections { get; set; }
         internal List<IChildProjection> LazyChildProjections { get; set; }
 
-        Dictionary<LookupToken, IEnumerable> lookups;
 
         public SqlPreCommandSimple MainCommand { get; set; }
         internal Expression<Func<IProjectionRow, T>> ProjectorExpression;
 
-        public object Execute()
+        public TranslateResult(
+            List<IChildProjection> eagerProjections, 
+            List<IChildProjection> lazyChildProjections,
+            SqlPreCommandSimple mainCommand, 
+            Expression<Func<IProjectionRow, T>> projectorExpression,
+            UniqueFunction? unique)
+        {
+            EagerProjections = eagerProjections;
+            LazyChildProjections = lazyChildProjections;
+            MainCommand = mainCommand;
+            ProjectorExpression = projectorExpression;
+            Unique = unique;
+        }
+
+        public object? Execute()
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                object result;
+                object? result;
                 using (var retriever = EntityCache.NewRetriever())
                 {
-                    if (EagerProjections.Any() || LazyChildProjections.Any())
-                        lookups = new Dictionary<LookupToken, IEnumerable>();
+                    var lookups = new Dictionary<LookupToken, IEnumerable>();
 
                     foreach (var child in EagerProjections)
                         child.Fill(lookups, retriever);
@@ -250,16 +275,15 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public async Task<object> ExecuteAsync(CancellationToken token)
+        public async Task<object?> ExecuteAsync(CancellationToken token)
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                object result;
+                object? result;
                 using (var retriever = EntityCache.NewRetriever())
                 {
-                    if (EagerProjections.Any() || LazyChildProjections.Any())
-                        lookups = new Dictionary<LookupToken, IEnumerable>();
+                    var lookups = new Dictionary<LookupToken, IEnumerable>();
 
                     foreach (var child in EagerProjections)
                         child.Fill(lookups, retriever);
@@ -315,9 +339,9 @@ namespace Signum.Engine.Linq
         {
             try
             {
-                SqlPreCommand eager = EagerProjections?.Select(cp => cp.Command).Combine(Spacing.Double);
+                SqlPreCommand? eager = EagerProjections?.Select(cp => cp.Command).Combine(Spacing.Double);
 
-                SqlPreCommand lazy = LazyChildProjections?.Select(cp => cp.Command).Combine(Spacing.Double);
+                SqlPreCommand? lazy = LazyChildProjections?.Select(cp => cp.Command).Combine(Spacing.Double);
 
                 return SqlPreCommandConcat.Combine(Spacing.Double,
                     eager == null ? null : new SqlPreCommandSimple("--------- Eager Client Joins ----------------"),
@@ -325,7 +349,7 @@ namespace Signum.Engine.Linq
                     eager == null && lazy == null ? null : new SqlPreCommandSimple("--------- MAIN QUERY ------------------------"),
                     MainCommand,
                     lazy == null ? null :  new SqlPreCommandSimple("--------- Lazy Client Joins (if needed) -----"),
-                    lazy).PlainSql();
+                    lazy)!.PlainSql();
 
             }
             catch

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using Signum.Utilities;
@@ -78,9 +78,9 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.EntityExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
-        public static Dictionary<K, V> ToDictionaryOrNull<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> nullableValueSelector) where V : class
+        public static Dictionary<K, V>? ToDictionaryOrNull<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V?> nullableValueSelector) where V : class
         {
-            Dictionary<K, V> result = null;
+            Dictionary<K, V>? result = null;
 
             foreach (var item in collection)
             {
@@ -98,19 +98,19 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        public static Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck(DirectedGraph<Modifiable> graph)
+        public static Dictionary<Guid, IntegrityCheck>? EntityIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
             return graph.OfType<ModifiableEntity>()
                 .ToDictionaryOrNull(a => a.temporalId, a => a.IntegrityCheck());
         }
 
-        public static Dictionary<Guid, IntegrityCheck> FullIntegrityCheck(DirectedGraph<Modifiable> graph)
+        public static Dictionary<Guid, IntegrityCheck>? FullIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
             AssertCloneAttack(graph);
 
             DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors.Values);
+            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).NotNull().SelectMany(errors => errors.Values);
 
             var modErros = graph.Except(identGraph).OfType<ModifiableEntity>()
                             .Select(a => a.IntegrityCheck())
@@ -129,7 +129,7 @@ namespace Signum.Entities.Reflection
         static void AssertCloneAttack(DirectedGraph<Modifiable> graph)
         {
             var problems = (from m in graph.OfType<Entity>()
-                            group m by new { Type = m.GetType(), Id = (m as Entity)?.Let(ident => (object)ident.IdOrNull) ?? (object)m.temporalId } into g
+                            group m by new { Type = m.GetType(), Id = (m as Entity)?.Let(ident => (object?)ident.IdOrNull) ?? (object)m.temporalId } into g
                             where g.Count() > 1 && g.Count(m => m.Modified == ModifiedState.SelfModified) > 0
                             select g).ToList();
 
@@ -194,7 +194,7 @@ namespace Signum.Entities.Reflection
         }
 
 
-        static string[] colors =
+        static readonly string[] colors =
         {
              "aquamarine1",  "aquamarine4", "blue", "blueviolet",
              "brown4", "burlywood", "cadetblue1", "cadetblue",
@@ -231,7 +231,7 @@ namespace Signum.Entities.Reflection
 
             }).ToList();
 
-            string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2} shape={3}{4}, label=\"{5}\"]".FormatWith(modifiables.Comparer.GetHashCode(t.Node), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label), "\r\n");
+            string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2} shape={3}{4}, label=\"{5}\"]".FormatWith(modifiables.Comparer.GetHashCode(t.Node! /*CSBUG*/), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label), "\r\n");
 
             string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".FormatWith(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\r\n");
 
@@ -324,7 +324,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
                new XAttribute("TypeName", list.GetType().TypeName()),
                new XAttribute("NodeRadius", 2),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType()!.FullName.GetHashCode())),
             };
         }
 

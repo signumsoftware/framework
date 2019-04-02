@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq.Expressions;
@@ -349,7 +349,7 @@ namespace Signum.Utilities
         public static string ToAgoString(this DateTime dateTime, DateTime now)
         {
             TimeSpan ts = now.Subtract(dateTime);
-            string resource = null;
+            string? resource = null;
             if (ts.TotalMilliseconds < 0)
                 resource = DateTimeMessage.In0.NiceToString();
             else

@@ -1,15 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
 
 namespace Signum.Utilities
 {
-    public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, WithDescription<V>>> where V : class
+    public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, WithDescription<V>>>
+        where K : object
+        where V : class
     {
-        Dictionary<string, WithDescription<V>> dictionary = new Dictionary<string, WithDescription<V>>(StringComparer.InvariantCultureIgnoreCase);
-        Dictionary<int, string> separators = new Dictionary<int, string>();
-        string welcomeMessage;
+        readonly Dictionary<string, WithDescription<V>> dictionary = new Dictionary<string, WithDescription<V>>(StringComparer.InvariantCultureIgnoreCase);
+        readonly Dictionary<int, string> separators = new Dictionary<int, string>();
+        readonly string welcomeMessage;
 
         public ConsoleSwitch()
             : this(ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString())
@@ -37,7 +39,7 @@ namespace Signum.Utilities
             dictionary.AddOrThrow(key.ToString(), new WithDescription<V>(value, description), "Key {0} already in ConsoleSwitch");
         }
         
-        public V Choose(int? numberOfOptions = null)
+        public V? Choose(int? numberOfOptions = null)
         {
             var tuple = ChooseTuple(numberOfOptions);
 
@@ -47,7 +49,7 @@ namespace Signum.Utilities
             return tuple.Value;
         }
 
-        public WithDescription<V> ChooseTuple(int? numberOfOptions = null)
+        public WithDescription<V>? ChooseTuple(int? numberOfOptions = null)
         {
             Console.WriteLine(welcomeMessage);
             var noOfOptsPerScreen = numberOfOptions ?? dictionary.Count;
@@ -89,7 +91,7 @@ namespace Signum.Utilities
             {
                 var key = keys[i];
 
-                string value = separators.TryGetC(i);
+                string? value = separators.TryGetC(i);
                 if (value.HasText())
                 {
                     Console.WriteLine();
@@ -105,13 +107,13 @@ namespace Signum.Utilities
             Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
         }
 
-        public V[] ChooseMultiple(string[] args = null)
+        public V[]? ChooseMultiple(string[]? args = null)
         {
             return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString(), args);
         }
 
 
-        public V[] ChooseMultiple(string endMessage, string[] args = null)
+        public V[]? ChooseMultiple(string endMessage, string[]? args = null)
         {
             var array = ChooseMultipleWithDescription(endMessage, args);
 
@@ -122,12 +124,12 @@ namespace Signum.Utilities
 
         }
 
-        public WithDescription<V>[] ChooseMultipleWithDescription(string[] args = null)
+        public WithDescription<V>[]? ChooseMultipleWithDescription(string[]? args = null)
         {
             return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString(), args);
         }
 
-        public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage, string[] args = null)
+        public WithDescription<V>[]? ChooseMultipleWithDescription(string endMessage, string[]? args = null)
         {
             if (args != null)
                 return args.ToString(" ").SplitNoEmpty(',').SelectMany(GetValuesRange).ToArray();
@@ -174,7 +176,9 @@ namespace Signum.Utilities
                 if (from.HasValue && to == null)
                     return dictionary.Keys.Skip(from.Value).Select(s => dictionary.GetOrThrow(s));
 
+#pragma warning disable CS8629 // Nullable value type may be null. CSBUG
                 return dictionary.Keys.Skip(from.Value).Take((to.Value + 1) - from.Value).Select(s => dictionary.GetOrThrow(s));
+#pragma warning restore CS8629 // Nullable value type may be null.
             }
             else
             {
@@ -191,7 +195,7 @@ namespace Signum.Utilities
             return index;
         }
 
-        WithDescription<V> TryGetValue(string input)
+        WithDescription<V>? TryGetValue(string input)
         {
             var exact = dictionary.TryGetC(input);
             if (exact != null)
@@ -242,7 +246,8 @@ namespace Signum.Utilities
         More
     }
 
-    public class WithDescription<T>
+    public class WithDescription<T> 
+        where T : class
     {
         public T Value { get; private set; }
 
@@ -274,21 +279,21 @@ namespace Signum.Utilities
 
     public static class ConsoleSwitchExtensions
     {
-        public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class        {
+        public static T? ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string>? getString = null, string? message = null) where T : class        {
       
             var cs = new ConsoleSwitch<int, T>(message ?? ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString());
             cs.Load(collection.ToList(), getString);
             return cs.Choose();
         }
 
-        public static T[] ChooseConsoleMultiple<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class
+        public static T[]? ChooseConsoleMultiple<T>(this IEnumerable<T> collection, Func<T, string>? getString = null, string? message = null) where T : class
         {
             var cs = new ConsoleSwitch<int, T>(message ?? ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString());
             cs.Load(collection.ToList(), getString);
             return cs.ChooseMultiple();
         }
 
-        public static ConsoleSwitch<int, T> Load<T>(this ConsoleSwitch<int, T> cs, List<T> collection, Func<T, string> getString = null) where T : class
+        public static ConsoleSwitch<int, T> Load<T>(this ConsoleSwitch<int, T> cs, List<T> collection, Func<T, string>? getString = null) where T : class
         {
             for (int i = 0; i < collection.Count; i++)
             {

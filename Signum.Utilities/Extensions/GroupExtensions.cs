@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.DataStructures;
@@ -21,7 +21,7 @@ namespace Signum.Utilities
                 .ToDictionaryEx(g => g.Key, g => g.Distinct().AssertSingle(g.Key));
         }
 
-        public static T AssertSingle<T>(this IEnumerable<T> collection, object key)
+        public static T AssertSingle<T>(this IEnumerable<T> collection, object? key)
         {
             int c = collection.Count();
             if (c == 0) throw new InvalidOperationException("No element exists with key '{0}'".FormatWith(key));
@@ -184,7 +184,7 @@ namespace Signum.Utilities
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup = false, bool initialGroup = false)
         {
             List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
-            Grouping<T, T> group = null;
+            Grouping<T, T>? group = null;
             foreach (var item in collection)
             {
                 if (isGroupKey(item))
@@ -201,7 +201,7 @@ namespace Signum.Utilities
                         if(!initialGroup)
                             throw new InvalidOperationException("Parameter initialGroup is false");
 
-                        group = new Grouping<T, T>(default(T));
+                        group = new Grouping<T, T>(default(T)!);
                         result.Add(group);
                     }
 
@@ -214,7 +214,7 @@ namespace Signum.Utilities
 
         public static IEnumerable<IGrouping<K, T>> GroupWhenChange<T, K>(this IEnumerable<T> collection, Func<T, K> getGroupKey)
         {
-            Grouping<K, T> current = null;
+            Grouping<K, T>? current = null;
 
             foreach (var item in collection)
             {
@@ -225,7 +225,7 @@ namespace Signum.Utilities
                         item
                     };
                 }
-                else if (current.Key.Equals(getGroupKey(item)))
+                else if (object.Equals(current.Key, getGroupKey(item)))
                 {
                     current.Add(item);
                 }

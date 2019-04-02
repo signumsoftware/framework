@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Utilities
 {
@@ -6,7 +6,7 @@ namespace Signum.Utilities
     {
         const int numUpdates = 10000;
 
-        private string currentTask;
+        private string? currentTask;
 
         private int min;
         private int max;
@@ -42,7 +42,7 @@ namespace Signum.Utilities
             }
         }
 
-        public string CurrentTask
+        public string? CurrentTask
         {
             get { return currentTask; }
         }

@@ -166,4 +166,3 @@ In fact, we could classify entities depending their *staticness-dynamicness* lik
 * **Log Entities:** Automatically created by the system, and removed after some time. (i.e.: `OperationLogEntity`)
 
 **DOWN: Dynamic and unfrequently used**
- 

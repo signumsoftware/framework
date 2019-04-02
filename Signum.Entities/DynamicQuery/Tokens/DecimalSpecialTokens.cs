@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -13,9 +13,12 @@ namespace Signum.Entities.DynamicQuery
     {
         public decimal StepSize;
 
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+        
         internal StepToken(QueryToken parent, decimal stepSize)
-            : base(parent)
         {
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
             this.StepSize = stepSize;
             this.Priority = 1;
         }
@@ -27,17 +30,17 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0Steps1.NiceToString(Parent.NiceName(), StepSize);
+            return QueryTokenMessage._0Steps1.NiceToString(parent.NiceName(), StepSize);
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return Parent.Format; }
+            get { return parent.Format; }
         }
 
         public override Type Type
         {
-            get { return Parent.Type.Nullify(); }
+            get { return parent.Type.Nullify(); }
         }
 
         public override string Key
@@ -64,34 +67,34 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(context);
+            var exp = parent.BuildExpression(context);
 
             return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize, RoundingType.Ceil);
         }
 
-        public override string Unit
+        public override string? Unit
         {
-            get { return this.Parent.Unit; }
+            get { return this.parent.Unit; }
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            return this.Parent.GetPropertyRoute();
+            return this.parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
         {
-            return this.Parent.GetImplementations();
+            return this.parent.GetImplementations();
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return this.Parent.IsAllowed();
+            return this.parent.IsAllowed();
         }
 
         public override QueryToken Clone()
         {
-            return new StepToken(this.Parent.Clone(), this.StepSize);
+            return new StepToken(this.parent.Clone(), this.StepSize);
         }
 
         public override bool IsGroupable
@@ -103,9 +106,12 @@ namespace Signum.Entities.DynamicQuery
     public class StepMultiplierToken : QueryToken
     {
         public decimal Multiplier;
+        internal StepToken parent;
+        public override QueryToken? Parent => parent;
 
-        public StepMultiplierToken(StepToken parent, decimal multiplier) : base(parent)
+        public StepMultiplierToken(StepToken parent, decimal multiplier)
         {
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
             this.Multiplier = multiplier;
         }
 
@@ -117,22 +123,22 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.NiceName(), StepSize());
+            return QueryTokenMessage._0Steps1.NiceToString(parent.NiceName(), StepSize());
         }
 
         internal decimal StepSize()
         {
-            return ((StepToken)this.Parent).StepSize * Multiplier;
+            return parent.StepSize * Multiplier;
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return Parent.Format; }
+            get { return parent.Format; }
         }
 
         public override Type Type
         {
-            get { return Parent.Type.Nullify(); }
+            get { return parent.Type.Nullify(); }
         }
 
         public override string Key
@@ -142,7 +148,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.Parent.BuildExpression(context);
+            var exp = parent.Parent!.BuildExpression(context);
 
             return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize(), RoundingType.Ceil);
         }
@@ -160,27 +166,27 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new StepMultiplierToken((StepToken)this.Parent.Clone(), this.Multiplier);
+            return new StepMultiplierToken((StepToken)this.parent.Clone(), this.Multiplier);
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            return this.Parent.GetPropertyRoute();
+            return this.parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
         {
-            return this.Parent.GetImplementations();
+            return this.parent.GetImplementations();
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return this.Parent.IsAllowed();
+            return this.parent.IsAllowed();
         }
 
         public override bool IsGroupable
@@ -192,10 +198,11 @@ namespace Signum.Entities.DynamicQuery
     public class StepRoundingToken : QueryToken
     {
         public RoundingType Rounding;
-
+        StepMultiplierToken parent;
+        public override QueryToken? Parent => parent;
         public StepRoundingToken(StepMultiplierToken parent, RoundingType rounding)
-            : base(parent)
         {
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
             this.Rounding = rounding;
         }
 
@@ -206,7 +213,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            var num = ((StepMultiplierToken)this.Parent).StepSize();
+            var num = parent.StepSize();
 
             string str = Rounding == RoundingType.Ceil ? "⌈{0}⌉" :
                 Rounding == RoundingType.Floor ? "⌊{0}⌋" :
@@ -214,17 +221,17 @@ namespace Signum.Entities.DynamicQuery
                 Rounding == RoundingType.RoundMiddle ? "|{0}|" :
                 throw new InvalidOperationException();
 
-            return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.Parent.NiceName(), str.FormatWith(num));
+            return QueryTokenMessage._0Steps1.NiceToString(parent.parent.NiceName(), str.FormatWith(num));
         }
 
-        public override string Format
+        public override string? Format
         {
-            get { return Parent.Format; }
+            get { return parent.Format; }
         }
 
         public override Type Type
         {
-            get { return Parent.Type.Nullify(); }
+            get { return parent.Type.Nullify(); }
         }
 
         public override string Key
@@ -239,34 +246,34 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.Parent.Parent.BuildExpression(context);
+            var exp = Parent!.Parent!.Parent!.BuildExpression(context);
 
-            return RoundingExpressionGenerator.RoundExpression(exp, ((StepMultiplierToken)this.Parent).StepSize(), this.Rounding);
+            return RoundingExpressionGenerator.RoundExpression(exp, ((StepMultiplierToken)this.Parent!).StepSize(), this.Rounding);
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            return this.Parent.GetPropertyRoute();
+            return this.parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
         {
-            return this.Parent.GetImplementations();
+            return this.parent.GetImplementations();
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return this.Parent.IsAllowed();
+            return this.parent.IsAllowed();
         }
 
         public override QueryToken Clone()
         {
-            return new StepRoundingToken((StepMultiplierToken)this.Parent.Clone(), this.Rounding);
+            return new StepRoundingToken((StepMultiplierToken)this.parent.Clone(), this.Rounding);
         }
 
         public override bool IsGroupable
@@ -342,9 +349,11 @@ namespace Signum.Entities.DynamicQuery
     {
         public int Divisor;
 
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
         internal ModuloToken(QueryToken parent, int divisor)
-            : base(parent)
         {
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
             this.Divisor = divisor;
         }
 
@@ -355,10 +364,10 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0Mod1.NiceToString(Parent.NiceName(), Divisor);
+            return QueryTokenMessage._0Mod1.NiceToString(parent.NiceName(), Divisor);
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
@@ -382,33 +391,33 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(context);
+            var exp = parent.BuildExpression(context);
             return Expression.Modulo(Expression.Convert(exp, typeof(int)), Expression.Constant(Divisor)).Nullify();
         }
 
-        public override string Unit
+        public override string? Unit
         {
-            get { return this.Parent.Unit; }
+            get { return this.parent.Unit; }
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
-            return this.Parent.GetPropertyRoute();
+            return this.parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
         {
-            return this.Parent.GetImplementations();
+            return this.parent.GetImplementations();
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return this.Parent.IsAllowed();
+            return this.parent.IsAllowed();
         }
 
         public override QueryToken Clone()
         {
-            return new ModuloToken(this.Parent.Clone(), this.Divisor);
+            return new ModuloToken(this.parent.Clone(), this.Divisor);
         }
 
         public override bool IsGroupable

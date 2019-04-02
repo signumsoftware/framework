@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
@@ -201,7 +201,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void WhereRefersTo1()
         {
-            var lite = (Lite<BandEntity>)null;
+            var lite = (Lite<BandEntity>?)null;
 
             var first = Database.Query<BandEntity>().Where(b => lite.Is(b)).FirstOrDefault();
 
@@ -211,7 +211,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void WhereRefersTo2()
         {
-            var entity = (BandEntity)null;
+            var entity = (BandEntity?)null;
 
             var first = Database.Query<BandEntity>().Where(b => b.ToLite().Is(entity)).FirstOrDefault();
 
@@ -340,7 +340,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void WhereOutsideCast()
         {
-            var albums = Database.Query<BandEntity>().Where(a => ((PersonalAwardEntity)a.LastAward) != null).ToList();
+            var albums = Database.Query<BandEntity>().Where(a => ((PersonalAwardEntity?)a.LastAward) != null).ToList();
         }
 
         [Fact]

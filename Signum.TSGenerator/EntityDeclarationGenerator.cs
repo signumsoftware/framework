@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -434,7 +434,6 @@ namespace Signum.TSGenerator
                 return att;
 
             return GetAttributeInherit(type.BaseType?.Resolve(), attributeName);
-
         }
 
         public static bool? InTypeScript(this MemberReference mr)
@@ -455,13 +454,10 @@ namespace Signum.TSGenerator
 
             if (b != null)
                 return b.Value;
-
-            if (IsCollection(p.PropertyType))
-                return false;
-
-            return GetTypescriptUndefined(p.DeclaringType) ?? true;
+            
+            return GetTypescriptUndefined(p.DeclaringType) ?? false;
         }
-
+        
         private static bool? GetTypescriptUndefined(TypeDefinition declaringType)
         {
             var attr = GetAttributeInherit(declaringType, Cache.InTypeScriptAttribute.FullName);
@@ -476,23 +472,21 @@ namespace Signum.TSGenerator
             var b = attr == null ? null : (bool?)attr.Properties.SingleOrDefault(a => a.Name == "Null").Argument.Value;
             if (b != null)
                 return b.Value;
-
-            if (IsCollection(p.PropertyType))
-                return false;
-
-            if (GetTypescriptUndefined(p.DeclaringType) == false &&
-                p.CustomAttributes.Any(a =>
-                a.AttributeType.Name == "NotNullableAttribute" ||
-                a.AttributeType.Name == "NotNullValidatorAttribute" ||
-                a.AttributeType.Name == "StringLengthValidatorAttribute" && a.Properties.Any(na => na.Name == "AllowNulls" && false.Equals(na.Argument.Value))))
-                return false;
-
-            return !p.PropertyType.IsValueType || p.PropertyType.UnNullify() != p.PropertyType;
+            
+            if (p.PropertyType.IsValueType)
+                return p.PropertyType.IsNullable();
+            else
+                return p.CustomAttributes.Any(a => a.AttributeType.Name == "NullableAttribute" && ((byte)2).Equals(a.ConstructorArguments[0].Value));
         }
 
         private static string FirstLower(string name)
         {
             return char.ToLowerInvariant(name[0]) + name.Substring(1);
+        }
+
+        public static bool IsNullable(this TypeReference type)
+        {
+            return type is GenericInstanceType gtype && gtype.ElementType.Name == "Nullable`1";
         }
 
         public static TypeReference UnNullify(this TypeReference type)
@@ -613,14 +607,7 @@ namespace Signum.TSGenerator
         {
             return type.Interfaces.Select(a => a.InterfaceType).Concat(type.BaseType == null ? Enumerable.Empty<TypeReference>() : AllInterfaces(type.BaseType.Resolve()));
         }
-
-        public static bool IsCollection(this TypeReference type)
-        {
-            return type.FullName != typeof(string).FullName &&
-                type.FullName != typeof(byte[]).FullName &&
-                (type.IsArray || type.Resolve()?.Interfaces.Any(i => i.InterfaceType.FullName == typeof(IEnumerable).FullName) == true);
-        }
-
+        
         public static NamespaceTSReference GetNamespaceReference(Options options, TypeDefinition type)
         {
             AssemblyReference assemblyReference;

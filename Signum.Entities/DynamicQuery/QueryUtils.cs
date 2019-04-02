@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -21,13 +21,8 @@ namespace Signum.Entities.DynamicQuery
 
             return (queryName is Type ? Reflector.CleanTypeName((Type) queryName) : queryName.ToString());
         }
-
+        
         public static string GetNiceName(object queryName)
-        {
-            return GetNiceName(queryName, null);
-        }
-
-        public static string GetNiceName(object queryName, CultureInfo ci)
         {
             if (queryName is Type)
                 queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
@@ -103,7 +98,7 @@ namespace Signum.Entities.DynamicQuery
             return FilterOperations[filtertype];
         }
 
-        static Dictionary<FilterType, List<FilterOperation>> FilterOperations = new Dictionary<FilterType, List<FilterOperation>>
+        static readonly Dictionary<FilterType, List<FilterOperation>> FilterOperations = new Dictionary<FilterType, List<FilterOperation>>
         {
             {
                 FilterType.String, new List<FilterOperation>
@@ -209,7 +204,7 @@ namespace Signum.Entities.DynamicQuery
         };
 
 
-        public static QueryToken SubToken(QueryToken token, QueryDescription qd, SubTokensOptions options, string key)
+        public static QueryToken? SubToken(QueryToken? token, QueryDescription qd, SubTokensOptions options, string key)
         {
             var result = SubTokenBasic(token, qd, options, key);
 
@@ -222,7 +217,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, SubTokensOptions options)
+        public static List<QueryToken> SubTokens(this QueryToken? token, QueryDescription qd, SubTokensOptions options)
         {
             var result = SubTokensBasic(token, qd, options);
 
@@ -233,7 +228,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        private static IEnumerable<QueryToken> AggregateTokens(QueryToken token, QueryDescription qd)
+        private static IEnumerable<QueryToken> AggregateTokens(QueryToken? token, QueryDescription qd)
         {
             if (token == null)
             {
@@ -286,7 +281,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        static QueryToken SubTokenBasic(QueryToken token, QueryDescription qd, SubTokensOptions options, string key)
+        static QueryToken? SubTokenBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options, string key)
         {
             if (token == null)
             {
@@ -303,8 +298,8 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public static Func<bool> MergeEntityColumns = null;
-        static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd, SubTokensOptions options)
+        public static Func<bool>? MergeEntityColumns = null;
+        static List<QueryToken> SubTokensBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options)
         {
             if (token == null)
             {
@@ -347,7 +342,7 @@ namespace Signum.Entities.DynamicQuery
 
             string firstPart = parts.FirstEx();
 
-            QueryToken result = SubToken(null, qd, options, firstPart);
+            QueryToken? result = SubToken(null, qd, options, firstPart);
 
             if (result == null)
                 throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
@@ -361,7 +356,7 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-        public static string CanFilter(QueryToken token)
+        public static string? CanFilter(QueryToken token)
         {
             if (token == null)
                 return "No column selected";
@@ -372,7 +367,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public static string CanColumn(QueryToken token)
+        public static string? CanColumn(QueryToken token)
         {
             if (token == null)
                 return "No column selected";
@@ -402,7 +397,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Lambda(body, ctx.Parameter);
         }
 
-        public static string CanOrder(QueryToken token)
+        public static string? CanOrder(QueryToken token)
         {
             if (token == null)
                 return "No column selected";
@@ -424,7 +419,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity ident) => ident.ToLite()).GetGenericMethodDefinition();
+        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity ident) => ident.ToLite()).GetGenericMethodDefinition();
         internal static Expression ExtractEntity(this Expression expression, bool idAndToStr)
         {
             if (expression.Type.IsLite())
@@ -501,12 +496,12 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
-        static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
-        static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
-        static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
-        static MethodInfo miDistinctNullable = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<int>(null, null)).GetGenericMethodDefinition();
-        static MethodInfo miDistinct = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
+        static readonly MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
+        static readonly MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
+        static readonly MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
+        static readonly MethodInfo miDistinctNullable = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<int>(null, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miDistinct = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
 
         public static Expression GetCompareExpression(FilterOperation operation, Expression left, Expression right, bool inMemory = false)
         {

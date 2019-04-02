@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
 {
@@ -10,15 +10,15 @@ namespace Signum.Engine.Linq
         Expression searchFor;
         Expression replaceWith;
 
-        private Replacer() { }
+        private Replacer(Expression searchFor, Expression replaceWith)
+        {
+            this.searchFor = searchFor;
+            this.replaceWith = replaceWith;
+        }
 
         static internal Expression Replace(Expression expression, Expression searchFor, Expression replaceWith)
         {
-            return new Replacer
-            {
-                searchFor = searchFor,
-                replaceWith = replaceWith
-            }.Visit(expression);
+            return new Replacer(searchFor, replaceWith).Visit(expression);
         }
 
         public override Expression Visit(Expression exp)

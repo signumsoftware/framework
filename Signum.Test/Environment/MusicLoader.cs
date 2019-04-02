@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Types;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -112,7 +112,7 @@ namespace Signum.Test.Environment
             new NoteWithDateEntity { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }
                 .Execute(NoteWithDateOperation.Save);
 
-            new NoteWithDateEntity { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null, Target = michael }
+            new NoteWithDateEntity { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null!, Target = michael }
                 .SetMixin((CorruptMixin c) => c.Corrupt, true)
                 .Do(n => n.Mixin<ColaboratorsMixin>().Colaborators.Add(michael))
                 .Execute(NoteWithDateOperation.Save);
@@ -235,7 +235,7 @@ namespace Signum.Test.Environment
             new AwardNominationEntity { Author = smashingPumpkins.ToLite(), Award = ama.ToLite() }.Save();
 
             new AwardNominationEntity { Author = michael.ToLite(), Award = pa.ToLite() }.Save();
-            new AwardNominationEntity { Author = michael.ToLite(), Award = null}.Save();
+            new AwardNominationEntity { Author = michael.ToLite(), Award = null!}.Save();
 
             new ConfigEntity
             {

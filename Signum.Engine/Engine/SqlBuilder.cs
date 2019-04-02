@@ -54,7 +54,7 @@ namespace Signum.Engine
                 AlterTableDisableSystemVersioning(diffTable.Name),
                 DropTable(diffTable.Name)
                 //DropTable(diffTable.TemporalTableName)
-            );
+            )!;
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
@@ -72,12 +72,12 @@ namespace Signum.Engine
             return new[]{
                  DropIndex(viewName, index),
                  DropView(viewName)
-            }.Combine(Spacing.Simple);
+            }.Combine(Spacing.Simple)!;
         }
 
         public static SqlPreCommand AlterTableAddPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned)}");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)}");
         }
 
         static string Period(SystemVersionedInfo sv) {
@@ -95,7 +95,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}))");
         }
 
         public static SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
@@ -108,7 +108,7 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".FormatWith(table.Name, columnName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint tempDefault = null)
+        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint? tempDefault = null)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column))));
         }
@@ -160,28 +160,28 @@ namespace Signum.Engine
             return false;
         }
 
-        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string defaultConstraintName = null, ObjectName forceTableName = null)
+        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
         {
             var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null)));
 
             if (column.Default == null)
                 return alterColumn;
 
-            var defCons = GetDefaultConstaint(table, column);
+            var defCons = GetDefaultConstaint(table, column)!;
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 AlterTableDropConstraint(table.Name, defaultConstraintName ?? defCons.Name),
                 alterColumn,
                 AlterTableAddDefaultConstraint(table.Name, defCons)
-            );
+            )!;
         }
 
-        public static DefaultConstraint GetDefaultConstaint(ITable t, IColumn c)
+        public static DefaultConstraint? GetDefaultConstaint(ITable t, IColumn c)
         {
             if (c.Default == null)
                 return null;
 
-            return new DefaultConstraint { ColumnName = c.Name, Name = $"DF_{t.Name.Name}_{c.Name}", QuotedDefinition = Quote(c.SqlDbType, c.Default) };
+            return new DefaultConstraint(c.Name, $"DF_{t.Name.Name}_{c.Name}", Quote(c.SqlDbType, c.Default));
         }
 
         public class DefaultConstraint
@@ -189,10 +189,17 @@ namespace Signum.Engine
             public string ColumnName;
             public string Name;
             public string QuotedDefinition;
+
+            public DefaultConstraint(string columnName, string name, string quotedDefinition)
+            {
+                ColumnName = columnName;
+                Name = name;
+                QuotedDefinition = quotedDefinition;
+            }
         }
 
 
-        public static string CreateColumn(IColumn c, DefaultConstraint constraint)
+        public static string CreateColumn(IColumn c, DefaultConstraint? constraint)
         {
             string fullType = GetColumnType(c);
 
@@ -202,10 +209,10 @@ namespace Signum.Engine
 
             var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
 
-            return $" ".CombineIfNotEmpty(
+            return $" ".Combine(
                 c.Name.SqlEscape(),
                 fullType,
-                c.Identity ? "IDENTITY " : null,
+                c.Identity ? "IDENTITY " : null, 
                 generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
                 c.Nullable.ToBool() ? "NULL" : "NOT NULL",
@@ -240,7 +247,7 @@ namespace Signum.Engine
             return "({0},{1})".FormatWith(size, scale);
         }
 
-        public static SqlPreCommand AlterTableForeignKeys(ITable t)
+        public static SqlPreCommand? AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
                 (c.ReferenceTable == null || c.AvoidForeignKey) ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
@@ -269,7 +276,7 @@ namespace Signum.Engine
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand CreateIndex(Index index, Replacements checkUnique)
+        public static SqlPreCommand CreateIndex(Index index, Replacements? checkUnique)
         {
             if (index is PrimaryClusteredIndex)
             {
@@ -291,13 +298,16 @@ namespace Signum.Engine
 
                     SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
 
-                    return SqlPreCommand.Combine(Spacing.Simple, checkUnique!=null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, viewSql, indexSql);
+                    return SqlPreCommand.Combine(Spacing.Simple, 
+                        checkUnique!=null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, 
+                        viewSql, 
+                        indexSql)!;
                 }
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Double,
                         checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null,
-                        CreateIndexBasic(index, false));
+                        CreateIndexBasic(index, false))!;
                 }
             }
             else
@@ -332,7 +342,7 @@ WHERE {oldPrimaryKey} NOT IN
 ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}");
         }
 
-        public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
+        public static SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
         {
             try
             {
@@ -387,7 +397,7 @@ WHERE {primaryKey.Name} NOT IN
             var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null;
             var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
 
-            var tableName = forHistoryTable ? index.Table.SystemVersioned.TableName : index.Table.Name;
+            var tableName = forHistoryTable ? index.Table.SystemVersioned!.TableName : index.Table.Name;
 
             return new SqlPreCommandSimple($"CREATE {indexType} {index.IndexName} ON {tableName}({columns}){include}{where}");
         }
@@ -412,12 +422,12 @@ WHERE {primaryKey.Name} NOT IN
             return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraint.Name} DEFAULT {constraint.QuotedDefinition} FOR {constraint.ColumnName}");
         }
 
-        public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
+        public static SqlPreCommand? AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
             return AlterTableAddConstraintForeignKey(table.Name, fieldName, foreignTable.Name, foreignTable.PrimaryKey.Name);
         }
 
-        public static SqlPreCommand AlterTableAddConstraintForeignKey(ObjectName parentTable, string parentColumn, ObjectName targetTable, string targetPrimaryKey)
+        public static SqlPreCommand? AlterTableAddConstraintForeignKey(ObjectName parentTable, string parentColumn, ObjectName targetTable, string targetPrimaryKey)
         {
             if (!object.Equals(parentTable.Schema.Database, targetTable.Schema.Database))
                 return null;
@@ -440,7 +450,7 @@ WHERE {primaryKey.Name} NOT IN
             return SP_RENAME(foreignKeyName.Schema.Database, foreignKeyName.OnDatabase(null).ToString(), newName, "OBJECT");
         }
 
-        public static SqlPreCommandSimple SP_RENAME(DatabaseName database, string oldName, string newName, string objectType)
+        public static SqlPreCommandSimple SP_RENAME(DatabaseName? database, string oldName, string newName, string? objectType)
         {
             return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3}".FormatWith(
                 database == null ? null: (new SchemaName(database, "dbo").ToString() + "."),
@@ -462,7 +472,7 @@ WHERE {primaryKey.Name} NOT IN
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 AlterSchema(oldTableName, newTableName.Schema),
-                oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name));
+                oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name))!;
         }
 
         public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
@@ -473,7 +483,7 @@ WHERE {primaryKey.Name} NOT IN
             return SqlPreCommand.Combine(Spacing.Simple,
               CreateTableSql(newTable),
               MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
-              DropTable(oldTable));
+              DropTable(oldTable))!;
         }
 
         public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)
@@ -490,7 +500,7 @@ FROM {1} as [table]".FormatWith(
             return SqlPreCommand.Combine(Spacing.Simple,
                 new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".FormatWith(newTable)) { GoBefore = true },
                 command,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".FormatWith(newTable)) { GoAfter = true });
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".FormatWith(newTable)) { GoAfter = true })!;
         }
 
         public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
@@ -580,7 +590,7 @@ FROM {1} as [table]".FormatWith(
 
         public static SqlPreCommandSimple DropPrimaryKeyConstraint(ObjectName tableName)
         {
-            DatabaseName db = tableName.Schema.Database;
+            DatabaseName? db = tableName.Schema.Database;
 
             var tn = tableName.OnDatabase(null);
 
@@ -601,7 +611,7 @@ EXEC DB.dbo.sp_executesql @sql"
         }
 
 
-        internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)
+        internal static SqlPreCommand? DropStatistics(string tn, List<DiffStats> list)
         {
             if (list.IsEmpty())
                 return null;

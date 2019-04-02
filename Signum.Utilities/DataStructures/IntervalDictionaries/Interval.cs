@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
@@ -277,7 +277,9 @@ namespace Signum.Utilities.DataStructures
             if (temp != 0)
                 return temp;
 
+#pragma warning disable CS8629 // Nullable value type may be null. CSBUG
             return min.Value.CompareTo(other.min.Value);
+#pragma warning restore CS8629 // Nullable value type may be null.
         }
 
         public int CompareTo(object obj)
@@ -308,7 +310,7 @@ namespace Signum.Utilities.DataStructures
             return min.GetHashCode();
         }
 
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider formatProvider)
         {
             if (string.IsNullOrEmpty(format))
                 return BuildString(formatProvider, "{0} - {1}", "< {0}", "{0} ≤", "All");

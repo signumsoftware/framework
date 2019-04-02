@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
 
         private MetadataVisitor() { }
 
-        static internal Dictionary<string, Meta> GatherMetadata(Expression expression)
+        static internal Dictionary<string, Meta?>? GatherMetadata(Expression expression)
         {
             if (expression == null)
                 throw new ArgumentException("expression");
@@ -32,10 +32,9 @@ namespace Signum.Engine.Linq
             if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
                 throw new InvalidOperationException("Expression type is not IQueryable");
 
-            Expression simplified = MetaEvaluator.Clean(expression);
+            Expression? simplified = MetaEvaluator.Clean(expression);
 
-            MetaProjectorExpression meta = new MetadataVisitor().Visit(simplified) as MetaProjectorExpression;
-
+            var meta = (MetaProjectorExpression?)new MetadataVisitor().Visit(simplified!);
             if (meta == null)
                 return null;
 
@@ -109,7 +108,7 @@ namespace Signum.Engine.Linq
                         if (m.Arguments.Count == 2)
                             return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes(), null);
                         else
-                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("collectionSelector").StripQuotes(), m.TryGetArgument("resultSelector").StripQuotes());
+                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("collectionSelector").StripQuotes(), m.TryGetArgument("resultSelector")?.StripQuotes());
                     case "Join":
                         return this.BindJoin(
                             m.Type, m.GetArgument("outer"), m.GetArgument("inner"),
@@ -143,18 +142,18 @@ namespace Signum.Engine.Linq
                     case "Max":
                     case "Average":
                         return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
-                            m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes());
+                            m.GetArgument("source"), m.TryGetArgument("selector")?.StripQuotes());
                     case "First":
                     case "FirstOrDefault":
                     case "Single":
                     case "SingleOrDefault":
                         return BindUniqueRow(m.Type, m.Method.Name.ToEnum<UniqueFunction>(),
-                            m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes());
+                            m.GetArgument("source"), m.TryGetArgument("predicate")?.StripQuotes());
                     case "FirstEx":
                     case "SingleEx":
                     case "SingleOrDefaultEx":
                         return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
-                           m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes());
+                           m.GetArgument("collection"), m.TryGetArgument("predicate")?.StripQuotes());
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
                     case "Take":
@@ -225,7 +224,7 @@ namespace Signum.Engine.Linq
         public static MetaProjectorExpression AsProjection(Expression expression)
         {
             if (expression is MetaProjectorExpression mpe)
-                return (MetaProjectorExpression)mpe;
+                return mpe;
 
             if (expression.NodeType == ExpressionType.New)
             {
@@ -234,7 +233,7 @@ namespace Signum.Engine.Linq
                     return (MetaProjectorExpression)nex.Arguments[1];
             }
 
-            Type elementType = expression.Type.ElementType();
+            Type? elementType = expression.Type.ElementType();
             if (elementType != null)
             {
                 if (expression is MetaExpression meta && meta.Meta is CleanMeta)
@@ -246,8 +245,7 @@ namespace Signum.Engine.Linq
                             new CleanMeta(route.TryGetImplementations(), route)));
                 }
 
-                return new MetaProjectorExpression(expression.Type,
-                     MakeVoidMeta(elementType));
+                return new MetaProjectorExpression(expression.Type, MakeVoidMeta(elementType));
             }
 
             throw new InvalidOperationException();
@@ -263,7 +261,7 @@ namespace Signum.Engine.Linq
             return AsProjection(Visit(source));
         }
 
-        private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate)
+        private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression? predicate)
         {
             return AsProjection(Visit(source)).Projector;
         }
@@ -293,7 +291,7 @@ namespace Signum.Engine.Linq
             return MakeVoidMeta(resultType);
         }
 
-        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selector)
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression? selector)
         {
             MetaProjectorExpression mp = AsProjection(Visit(source));
             if (selector == null)
@@ -315,7 +313,7 @@ namespace Signum.Engine.Linq
             return new MetaProjectorExpression(resultType, projector);
         }
 
-        protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression resultSelector)
+        protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression? resultSelector)
         {
             MetaProjectorExpression mp = AsProjection(Visit(source));
             MetaProjectorExpression collectionProjector = AsProjection(MapAndVisit(collectionSelector, mp));
@@ -359,7 +357,7 @@ namespace Signum.Engine.Linq
             return AsProjection(Visit(source));
         }
 
-        public Type TableType(object value)
+        public Type? TableType(object value)
         {
             if (value == null)
                 return null;
@@ -380,7 +378,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            Type type = TableType(c.Value);
+            Type? type = TableType(c.Value);
             if (type != null)
             {
                 if (typeof(Entity).IsAssignableFrom(type))
@@ -457,13 +455,13 @@ namespace Signum.Engine.Linq
                 var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
-                    return new MetaExpression(memberType, null);
+                    return new MetaExpression(memberType, new DirtyMeta(null, new Meta[0]));
 
                 MetaExpression meta = (MetaExpression)source;
 
                 if (meta.Meta.Implementations != null)
                 {
-                    var routes = meta.Meta.Implementations.Value.Types.Select(t=> PropertyRoute.Root(t).Add(pi)).ToArray();
+                    var routes = meta.Meta.Implementations.Value.Types.Select(t => PropertyRoute.Root(t).Add(pi)).ToArray();
 
                     return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
@@ -542,7 +540,7 @@ namespace Signum.Engine.Linq
 
             if (u.NodeType == ExpressionType.Convert || u.NodeType == ExpressionType.TypeAs)
             {
-                var imps = exp.Meta.Implementations?.Let(s => CastImplementations(s, u.Type.CleanType()));
+                var imps = exp.Meta?.Implementations?.Let(s => CastImplementations(s, u.Type.CleanType()));
 
                 return new MetaExpression(u.Type, exp.Meta is DirtyMeta ?
                     (Meta)new DirtyMeta(imps, ((DirtyMeta)exp.Meta).CleanMetas.Cast<Meta>().ToArray()) :
@@ -572,13 +570,10 @@ namespace Signum.Engine.Linq
         {
             var right = Visit(b.Right);
             var left = Visit(b.Left);
-
-            var mRight = right as MetaExpression;
-            var mLeft = left as MetaExpression;
-
+            
             Implementations? imps =
-                mRight != null && mRight.Meta.Implementations != null &&
-                mLeft != null && mLeft.Meta.Implementations != null ?
+                right is MetaExpression mRight && mRight.Meta.Implementations != null &&
+                left is MetaExpression mLeft && mLeft.Meta.Implementations != null ?
                 AggregateImplementations(new[] {
                     mRight.Meta.Implementations.Value,
                     mLeft.Meta.Implementations.Value }) :
@@ -592,12 +587,10 @@ namespace Signum.Engine.Linq
             var ifTrue = Visit(c.IfTrue);
             var ifFalse = Visit(c.IfFalse);
 
-            var mIfTrue = ifTrue as MetaExpression;
-            var mIfFalse = ifFalse as MetaExpression;
 
             Implementations? imps =
-                mIfTrue != null && mIfTrue.Meta.Implementations != null &&
-                mIfFalse != null && mIfFalse.Meta.Implementations != null ?
+                ifTrue is MetaExpression mIfTrue && mIfTrue.Meta.Implementations != null &&
+                ifFalse is MetaExpression mIfFalse && mIfFalse.Meta.Implementations != null ?
                 AggregateImplementations(new[] {
                     mIfTrue.Meta.Implementations.Value,
                     mIfFalse.Meta.Implementations.Value }) :

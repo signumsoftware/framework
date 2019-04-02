@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +18,7 @@ namespace Signum.Engine.Maps
     {
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
         {
-            Expression id = GetIdExpression(tableAlias);
+            Expression? id = GetIdExpression(tableAlias);
 
             if (IsView)
             {
@@ -33,10 +33,10 @@ namespace Signum.Engine.Maps
                 Schema.Current.AssertAllowed(Type, inUserInterface: false);
 
                 var period = GenerateSystemPeriod(tableAlias, binder);
-                var bindings = GenerateBindings(tableAlias, binder, id, period);
-                var mixins = GenerateMixins(tableAlias, binder, id, period);
+                var bindings = GenerateBindings(tableAlias, binder, id!, period);
+                var mixins = GenerateMixins(tableAlias, binder, id!, period);
 
-                var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id, period, tableAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
+                var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id!, period, tableAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
 
                 return result;
             }
@@ -44,7 +44,7 @@ namespace Signum.Engine.Maps
 
         internal static ConstructorInfo intervalConstructor = typeof(Interval<DateTime>).GetConstructor(new[] { typeof(DateTime), typeof(DateTime) });
 
-        internal NewExpression GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
+        internal NewExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
             return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? Expression.New(intervalConstructor,
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName),
@@ -52,11 +52,12 @@ namespace Signum.Engine.Maps
             ) : null;
         }
 
-        internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
-            List<FieldBinding> result = new List<FieldBinding>();
-
-           result.Add(new FieldBinding(Table.fiId, id));
+            List<FieldBinding> result = new List<FieldBinding>
+            {
+                new FieldBinding(Table.fiId, id)
+            };
 
             foreach (var ef in this.Fields.Values)
             {
@@ -72,7 +73,7 @@ namespace Signum.Engine.Maps
             return result.ToReadOnly();
         }
 
-        internal ReadOnlyCollection<MixinEntityExpression> GenerateMixins(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal ReadOnlyCollection<MixinEntityExpression>? GenerateMixins(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             if (this.Mixins == null)
                 return null;
@@ -81,7 +82,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        internal Expression GetIdExpression(Alias alias)
+        internal Expression? GetIdExpression(Alias alias)
         {
             var field = Fields.TryGetC(Table.fiId.Name);
 
@@ -95,10 +96,10 @@ namespace Signum.Engine.Maps
                     return new ColumnExpression(Signum.Entities.PrimaryKey.Type(fr.ReferenceTable.Type).Nullify(), alias, fr.Name);
             }
 
-            return field.Field.GetExpression(alias, null, null, null);
+            return field.Field!.GetExpression(alias, null!, null!, null);
         }
 
-        public EntityField GetViewPrimaryKey()
+        public EntityField? GetViewPrimaryKey()
         {
             return Fields.Values.FirstOrDefault(f => f.Field is IColumn && ((IColumn)f.Field).PrimaryKey);
         }
@@ -107,12 +108,12 @@ namespace Signum.Engine.Maps
         {
             var res = GetIdExpression(alias);
 
-            return res is PrimaryKeyExpression ?
-                (ColumnExpression)((PrimaryKeyExpression)res).Value:
-                (ColumnExpression)res;
+            return res is PrimaryKeyExpression pe?
+                (ColumnExpression)pe.Value :
+                (ColumnExpression)res!;
         }
     }
-
+    
     public partial class TableMList
     {
         internal PrimaryKeyExpression RowIdExpression(Alias tableAlias)
@@ -129,10 +130,10 @@ namespace Signum.Engine.Maps
 
         internal ColumnExpression OrderExpression(Alias tableAlias)
         {
-            return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.Order).Name);
+            return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.Order!).Name);
         }
 
-        internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, NewExpression externalPeriod, bool withRowId)
+        internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, NewExpression? externalPeriod, bool withRowId)
         {
             var rowId = RowIdExpression(tableAlias);
 
@@ -157,11 +158,11 @@ namespace Signum.Engine.Maps
             Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
 
             var rowId = RowIdExpression(tableAlias);
-            NewExpression period = GenerateSystemPeriod(tableAlias, binder);
+            NewExpression? period = GenerateSystemPeriod(tableAlias, binder);
 
             return new MListElementExpression(
                 rowId,
-                (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null, period),
+                (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null!, period),
                 this.Order == null ? null : OrderExpression(tableAlias),
                 this.Field.GetExpression(tableAlias, binder, rowId, period),
                 period,
@@ -169,9 +170,9 @@ namespace Signum.Engine.Maps
                 tableAlias);
         }
 
-        internal NewExpression GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
+        internal NewExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
-            return this.SystemVersioned != null || (force || binder.systemTime is SystemTime.Interval) ? Expression.New(Table.intervalConstructor,
+            return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? Expression.New(Table.intervalConstructor,
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName),
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName)
             ) : null;
@@ -185,12 +186,12 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        internal abstract Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period);
+        internal abstract Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period);
     }
 
     public partial class FieldPrimaryKey
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             return new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, this.Name).Nullify());
         }
@@ -198,7 +199,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldValue
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             var column = new ColumnExpression(this.Type, tableAlias, this.Name);
 
@@ -213,7 +214,7 @@ namespace Signum.Engine.Maps
     {
         public static readonly PropertyInfo piDateTimeTicks = ReflectionTools.GetPropertyInfo((DateTime d) => d.Ticks);
 
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             if (this.Type == this.FieldType)
                return new ColumnExpression(this.Type, tableAlias, this.Name);
@@ -227,9 +228,9 @@ namespace Signum.Engine.Maps
 
     public partial class FieldReference
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
-            Type cleanType = IsLite ? Lite.Extract(FieldType) : FieldType;
+            Type cleanType = IsLite ? Lite.Extract(FieldType)! : FieldType;
 
             var result = new EntityExpression(cleanType, new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, Name)), period, null, null, null, null, AvoidExpandOnRetrieving);
 
@@ -242,7 +243,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEnum
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             return Expression.Convert(new ColumnExpression(this.Type, tableAlias, Name), FieldType);
         }
@@ -250,7 +251,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMList
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             return new MListExpression(FieldType, (PrimaryKeyExpression)id, period, TableMList); // keep back id empty for some seconds
         }
@@ -258,7 +259,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
@@ -276,7 +277,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMixin
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             var bindings = (from kvp in Fields
                             let fi = kvp.Value.FieldInfo
@@ -290,12 +291,12 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedBy
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             var implementations = ImplementationColumns.SelectDictionary(t => t, (t, ic) =>
                  new EntityExpression(t, new PrimaryKeyExpression(new ColumnExpression(ic.Type.Nullify(), tableAlias, ic.Name)), period, null, null, null, null, AvoidExpandOnRetrieving));
 
-            var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, SplitStrategy, implementations);
+            var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType)! : FieldType, SplitStrategy, implementations);
 
             if (this.IsLite)
                 return binder.MakeLite(result, null);
@@ -306,10 +307,10 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression? period)
         {
             Expression result = new ImplementedByAllExpression(
-                IsLite ? Lite.Extract(FieldType) : FieldType,
+                IsLite ? Lite.Extract(FieldType)! : FieldType,
                 new ColumnExpression(Column.Type, tableAlias, Column.Name),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(new ColumnExpression(ColumnType.Type.Nullify(), tableAlias, ColumnType.Name))),
                 period);

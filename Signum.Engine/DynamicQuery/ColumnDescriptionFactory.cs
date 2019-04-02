@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -11,15 +11,15 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ColumnDescriptionFactory
     {
-        readonly internal Meta Meta;
-        public Func<string> OverrideDisplayName { get; set; }
-        public Func<string> OverrideIsAllowed { get; set; }
+        readonly internal Meta? Meta;
+        public Func<string>? OverrideDisplayName { get; set; }
+        public Func<string>? OverrideIsAllowed { get; set; }
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
 
-        public string Format { get; set; }
-        public string Unit { get; set; }
+        public string? Format { get; set; }
+        public string? Unit { get; set; }
         Implementations? implementations;
         public Implementations? Implementations
         {
@@ -40,8 +40,8 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        PropertyRoute[] propertyRoutes;
-        public PropertyRoute[] PropertyRoutes
+        PropertyRoute[]? propertyRoutes;
+        public PropertyRoute[]? PropertyRoutes
         {
             get { return propertyRoutes; }
             set
@@ -60,7 +60,7 @@ namespace Signum.Engine.DynamicQuery
 
 
 
-        internal static string GetUnit(PropertyRoute[] routes)
+        internal static string? GetUnit(PropertyRoute[] routes)
         {
             switch (routes[0].PropertyRouteType)
             {
@@ -76,7 +76,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException();
         }
 
-        internal static string GetFormat(PropertyRoute[] routes)
+        internal static string? GetFormat(PropertyRoute[] routes)
         {
             switch (routes[0].PropertyRouteType)
             {
@@ -92,7 +92,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException();
         }
 
-        public ColumnDescriptionFactory(int index, MemberInfo mi, Meta meta)
+        public ColumnDescriptionFactory(int index, MemberInfo mi, Meta? meta)
         {
             Name = mi.Name;
 
@@ -124,9 +124,9 @@ namespace Signum.Engine.DynamicQuery
 
             if (propertyRoutes != null &&
                 propertyRoutes[0].PropertyRouteType == PropertyRouteType.FieldOrProperty &&
-                propertyRoutes[0].PropertyInfo.Name == Name)
+                propertyRoutes[0].PropertyInfo!.Name == Name)
             {
-                var result = propertyRoutes.Select(pr=>pr.PropertyInfo.NiceName()).Only();
+                var result = propertyRoutes.Select(pr => pr.PropertyInfo!.NiceName()).Only();
                 if (result != null)
                     return result;
             }
@@ -145,7 +145,7 @@ namespace Signum.Engine.DynamicQuery
             get { return this.Name == ColumnDescription.Entity; }
         }
 
-        public string IsAllowed()
+        public string? IsAllowed()
         {
             if (OverrideIsAllowed != null)
                 return OverrideIsAllowed();
@@ -156,13 +156,13 @@ namespace Signum.Engine.DynamicQuery
             return null;
         }
 
-        Type processedType;
+        Type? processedType;
         Type ProcessedType
         {
             get
             {
-                return processedType ??
-                    (processedType = (Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
+                return processedType ?? (processedType = 
+                    (Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
                     Type.UnNullify() == typeof(PrimaryKey) ? UnwrapFromPropertRoutes().Nullify() :
                     Type.Nullify()));
             }
@@ -170,21 +170,19 @@ namespace Signum.Engine.DynamicQuery
 
         private Type UnwrapFromPropertRoutes()
         {
-            if(propertyRoutes.IsNullOrEmpty())
-                throw new InvalidOperationException("Impossible to determine the underlying type of the PrimaryKey of column {0} if PropertyRoutes is not set"
-                    .FormatWith(this.Name));
+            if(propertyRoutes == null || propertyRoutes.Length == 0)
+                throw new InvalidOperationException($"Impossible to determine the underlying type of the PrimaryKey of column {this.Name} if PropertyRoutes is not set");
 
             return propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).Distinct().SingleEx();
         }
 
         public ColumnDescription BuildColumnDescription()
         {
-            return new ColumnDescription(Name, ProcessedType)
+            return new ColumnDescription(Name, ProcessedType, DisplayName())
             {
                 PropertyRoutes = propertyRoutes,
                 Implementations = Implementations,
-
-                DisplayName = DisplayName(),
+                
                 Format = Format,
                 Unit = Unit,
             };

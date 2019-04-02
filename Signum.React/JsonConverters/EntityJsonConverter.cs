@@ -27,7 +27,7 @@ namespace Signum.React.Json
                 Validator.GetPropertyValidators(_t).Values
                 .Where(pv => ShouldSerialize(pv.PropertyInfo))
                 .Select(pv => new PropertyConverter(_t, pv))
-                .ToDictionary(a => a.PropertyValidator.PropertyInfo.Name.FirstLower())
+                .ToDictionary(a => a.PropertyValidator!.PropertyInfo.Name.FirstLower())
             );
         }
 
@@ -47,13 +47,13 @@ namespace Signum.React.Json
             return true;
         }
 
-        public readonly IPropertyValidator PropertyValidator;
-        public readonly Func<object, object> GetValue;
-        public readonly Action<object, object> SetValue;
+        public readonly IPropertyValidator? PropertyValidator;
+        public readonly Func<object, object?>? GetValue;
+        public readonly Action<object, object?>? SetValue;
 
 
-        public Action<ReadJsonPropertyContext> CustomReadJsonProperty { get; set; }
-        public Action<WriteJsonPropertyContext> CustomWriteJsonProperty { get; set; }
+        public Action<ReadJsonPropertyContext>? CustomReadJsonProperty { get; set; }
+        public Action<WriteJsonPropertyContext>? CustomWriteJsonProperty { get; set; }
 
         public bool AvoidValidate { get; set; }
 
@@ -70,12 +70,12 @@ namespace Signum.React.Json
 
         public override string ToString()
         {
-            return this.PropertyValidator?.PropertyInfo.Name;
+            return this.PropertyValidator?.PropertyInfo.Name ?? "";
         }
 
         internal bool IsNotNull()
         {
-            var pi = this.PropertyValidator.PropertyInfo;
+            var pi = this.PropertyValidator!.PropertyInfo;
 
             return pi.PropertyType.IsValueType && !pi.PropertyType.IsNullable();
         }
@@ -83,6 +83,15 @@ namespace Signum.React.Json
 
     public class ReadJsonPropertyContext
     {
+        public ReadJsonPropertyContext(JsonReader jsonReader, JsonSerializer jsonSerializer, PropertyConverter propertyConverter, ModifiableEntity entity, PropertyRoute parentPropertyRoute)
+        {
+            JsonReader = jsonReader;
+            JsonSerializer = jsonSerializer;
+            PropertyConverter = propertyConverter;
+            Entity = entity;
+            ParentPropertyRoute = parentPropertyRoute;
+        }
+
         public JsonReader JsonReader { get; internal set; }
         public JsonSerializer JsonSerializer { get; internal set; }
 
@@ -93,6 +102,16 @@ namespace Signum.React.Json
 
     public class WriteJsonPropertyContext
     {
+        public WriteJsonPropertyContext(ModifiableEntity entity, string lowerCaseName, PropertyConverter propertyConverter, PropertyRoute parentPropertyRoute, JsonWriter jsonWriter, JsonSerializer jsonSerializer)
+        {
+            Entity = entity;
+            LowerCaseName = lowerCaseName;
+            PropertyConverter = propertyConverter;
+            ParentPropertyRoute = parentPropertyRoute;
+            JsonWriter = jsonWriter;
+            JsonSerializer = jsonSerializer;
+        }
+
         public ModifiableEntity Entity { get; internal set; }
         public string LowerCaseName { get; internal set; }
         public PropertyConverter PropertyConverter { get; internal set; }
@@ -208,19 +227,18 @@ namespace Signum.React.Json
         {
             if (pc.CustomWriteJsonProperty != null)
             {
-                pc.CustomWriteJsonProperty(new WriteJsonPropertyContext
-                {
-                    JsonWriter = writer,
-                    JsonSerializer = serializer,
-                    LowerCaseName = lowerCaseName,
-                    Entity = mod,
-                    ParentPropertyRoute = route,
-                    PropertyConverter = pc
-                });
+                pc.CustomWriteJsonProperty(new WriteJsonPropertyContext(
+                    entity : mod,
+                    lowerCaseName : lowerCaseName,
+                    propertyConverter : pc,
+                    parentPropertyRoute : route,
+                    jsonWriter : writer,
+                    jsonSerializer  : serializer
+                ));
             }
             else
             {
-                var pr = route.Add(pc.PropertyValidator.PropertyInfo);
+                var pr = route.Add(pc.PropertyValidator!.PropertyInfo);
 
                 string error = CanReadPropertyRoute?.Invoke(pr);
 
@@ -230,7 +248,7 @@ namespace Signum.React.Json
                 using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
                 {
                     writer.WritePropertyName(lowerCaseName);
-                    var val = pc.GetValue(mod);
+                    var val = pc.GetValue!(mod);
                     if (val is Lite<Entity> lite)
                         new LiteJsonConverter().WriteJson(writer, lite, serializer);
                     else
@@ -250,7 +268,7 @@ namespace Signum.React.Json
             AfterDeserilization.Register((ModifiableEntity e) => { });
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             using (HeavyProfiler.LogNoStackTrace("ReadJson", () => objectType.Name))
             {
@@ -315,21 +333,20 @@ namespace Signum.React.Json
         {
             if (pc.CustomReadJsonProperty != null)
             {
-                pc.CustomReadJsonProperty(new ReadJsonPropertyContext
-                {
-                    JsonReader = reader,
-                    JsonSerializer = serializer,
-                    Entity = entity,
-                    ParentPropertyRoute = parentRoute,
-                    PropertyConverter = pc,
-                });
+                pc.CustomReadJsonProperty(new ReadJsonPropertyContext(
+                    jsonReader : reader,
+                    jsonSerializer : serializer,
+                    entity : entity,
+                    parentPropertyRoute : parentRoute,
+                    propertyConverter : pc
+                ));
             }
             else
             {
 
-                object oldValue = pc.GetValue(entity);
+                object? oldValue = pc.GetValue!(entity);
 
-                var pi = pc.PropertyValidator.PropertyInfo;
+                var pi = pc.PropertyValidator!.PropertyInfo;
 
                 var pr = parentRoute.Add(pi);
 
@@ -367,7 +384,7 @@ namespace Signum.React.Json
             }
         }
 
-        private bool IsEquals(object newValue, object oldValue)
+        private bool IsEquals(object newValue, object? oldValue)
         {
             if (newValue is byte[] && oldValue is byte[])
                 return MemCompare.Compare((byte[])newValue, (byte[])oldValue);

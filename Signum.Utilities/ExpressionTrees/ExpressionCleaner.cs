@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -20,18 +20,20 @@ namespace Signum.Utilities.ExpressionTrees
 
         bool shortCircuit;
 
-        public static Expression Clean(Expression expr)
+        public ExpressionCleaner(Func<Expression, Expression> partialEval, bool shortCircuit)
+        {
+            this.partialEval = partialEval;
+            this.shortCircuit = shortCircuit;
+        }
+
+        public static Expression? Clean(Expression? expr)
         {
             return Clean(expr, ExpressionEvaluator.PartialEval, true);
         }
 
-        public static Expression Clean(Expression expr, Func<Expression, Expression> partialEval, bool shortCircuit)
+        public static Expression? Clean(Expression? expr, Func<Expression, Expression> partialEval, bool shortCircuit)
         {
-            ExpressionCleaner ee = new ExpressionCleaner()
-            {
-                partialEval = partialEval,
-                shortCircuit = shortCircuit
-            };
+            ExpressionCleaner ee = new ExpressionCleaner(partialEval, shortCircuit);
             var result = ee.Visit(expr);
             return partialEval(result);
         }
@@ -48,19 +50,18 @@ namespace Signum.Utilities.ExpressionTrees
 		{
             MethodCallExpression expr = (MethodCallExpression)base.VisitMethodCall(m);
 
-            Expression binded =  BindMethodExpression(expr, false);
-
+            Expression? binded =  BindMethodExpression(expr, false);
             if (binded != null)
                 return Visit(binded);
 
             return expr;
 		}
 
-        public static Expression BindMethodExpression(MethodCallExpression m, bool allowPolymorphics)
+        public static Expression? BindMethodExpression(MethodCallExpression m, bool allowPolymorphics)
         {
             if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Evaluate")
             {
-                LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
+                LambdaExpression lambda = (LambdaExpression)ExpressionEvaluator.Eval(m.Arguments[0])!;
 
                 return Expression.Invoke(lambda, m.Arguments.Skip(1).ToArray());
             }
@@ -79,7 +80,7 @@ namespace Signum.Utilities.ExpressionTrees
                     Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
 
                     var type = attribute.ExpanderType.MakeGenericType(m.Method.GetGenericArguments());
-                    GenericMethodExpander expander = Activator.CreateInstance(type) as GenericMethodExpander;
+                    GenericMethodExpander expander = (GenericMethodExpander)Activator.CreateInstance(type);
                     return Expression.Invoke(expander.GenericLambdaExpression, args);
                 }
                 else
@@ -98,7 +99,7 @@ namespace Signum.Utilities.ExpressionTrees
                 }
             }
 
-            LambdaExpression lambdaExpression = GetFieldExpansion(m.Object?.Type, m.Method);
+            LambdaExpression? lambdaExpression = GetFieldExpansion(m.Object?.Type, m.Method);
             if (lambdaExpression != null)
             {
                 Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
@@ -114,24 +115,23 @@ namespace Signum.Utilities.ExpressionTrees
         {
             MemberExpression exp = (MemberExpression)base.VisitMember(m);
 
-            Expression binded = BindMemberExpression(exp, false);
-
+            Expression? binded = BindMemberExpression(exp, false);
             if (binded != null)
                 return Visit(binded);
 
             return exp;
         }
 
-        public static Expression BindMemberExpression(MemberExpression m, bool allowPolymorphics)
+        public static Expression? BindMemberExpression(MemberExpression m, bool allowPolymorphics)
         {
-            PropertyInfo pi = m.Member as PropertyInfo;
+            PropertyInfo? pi = m.Member as PropertyInfo;
             if (pi == null)
                 return null;
 
             if (pi.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
                 return null;
 
-            LambdaExpression lambda = GetFieldExpansion(m.Expression?.Type, pi);
+            LambdaExpression? lambda = GetFieldExpansion(m.Expression?.Type, pi);
             if (lambda == null)
                 return null;
 
@@ -146,13 +146,13 @@ namespace Signum.Utilities.ExpressionTrees
             return GetFieldExpansion(type, mi) != null || mi is MethodInfo && mi.HasAttribute<MethodExpanderAttribute>();
         }
 
-        public static LambdaExpression GetFieldExpansion(Type decType, MemberInfo mi)
+        public static LambdaExpression? GetFieldExpansion(Type decType, MemberInfo mi)
         {
             if (decType == null || decType == mi.DeclaringType || IsStatic(mi))
                 return GetExpansion(mi);
             else
             {
-                for (MemberInfo m = GetMember(decType, mi); m != null; m = BaseMember(m))
+                for (MemberInfo? m = GetMember(decType, mi); m != null; m = BaseMember(m))
                 {
                     var result = GetExpansion(m);
                     if (result != null)
@@ -174,7 +174,7 @@ namespace Signum.Utilities.ExpressionTrees
             return false;
         }
 
-        static LambdaExpression GetExpansion(MemberInfo mi)
+        static LambdaExpression? GetExpansion(MemberInfo mi)
         {
             ExpressionFieldAttribute efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
             if (efa == null)
@@ -193,17 +193,17 @@ namespace Signum.Utilities.ExpressionTrees
             if (obj == null)
                 throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(efa.Name));
 
-            var result = obj as LambdaExpression;
-
-            if (result == null)
+            if (!(obj is LambdaExpression result))
                 throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(efa.Name, type.TypeName()));
 
             return result;
         }
 
-        static BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        static readonly BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        static MemberInfo GetMember(Type decType, MemberInfo mi)
+        
+
+        static MemberInfo? GetMember(Type decType, MemberInfo mi)
         {
             if (mi is MethodInfo)
             {
@@ -235,12 +235,11 @@ namespace Signum.Utilities.ExpressionTrees
             throw new InvalidOperationException("Invalid Member type");
         }
 
-        static MemberInfo BaseMember(MemberInfo mi)
+        static MemberInfo? BaseMember(MemberInfo mi)
         {
-            MemberInfo result;
+            MemberInfo? result;
             if (mi is MethodInfo mti)
                 result = mti.GetBaseDefinition();
-
             else if (mi is PropertyInfo pi)
                 result = pi.GetBaseDefinition();
             else

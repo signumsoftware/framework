@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -16,7 +16,9 @@ namespace Signum.Utilities.Reflection
 
         private static bool IsTupleDefinition(Type genericTypeDefinition)
         {
-            return genericTypeDefinition == TupleOf(genericTypeDefinition.GetGenericArguments().Length);
+            var numParameters = genericTypeDefinition.GetGenericArguments().Length;
+
+            return numParameters <= 8 && genericTypeDefinition == TupleOf(numParameters);
         }
 
         public static Type TupleOf(int numParameters)
@@ -31,7 +33,7 @@ namespace Signum.Utilities.Reflection
                 case 6: return typeof(Tuple<,,,,,>);
                 case 7: return typeof(Tuple<,,,,,,>);
                 case 8: return typeof(Tuple<,,,,,,,>);
-                default: return null;
+                default: throw new UnexpectedValueException(numParameters);
             }
         }
 

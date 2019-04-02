@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -77,19 +77,19 @@ namespace Signum.Utilities.Reflection
     {
         public string Name {get; private set;}
         public MemberInfo MemberInfo { get; private set; }
-        public Func<T, object> Getter { get; private set; }
-        public Func<object, object> UntypedGetter { get; private set; }
-        public Action<T, object> Setter { get; private set; }
-        public Action<object, object> UntypedSetter { get; private set; }
+        public Func<T, object?>? Getter { get; private set; }
+        public Func<object, object?>? UntypedGetter { get; private set; }
+        public Action<T, object?>? Setter { get; private set; }
+        public Action<object, object?>? UntypedSetter { get; private set; }
 
-        public MemberEntry(string name, MemberInfo memberInfo, Func<T, object> getter, Func<object,object> untypedGetter,Action<T, object> setter, Action<object,object> untypedSetter)
+        public MemberEntry(string name, MemberInfo memberInfo, Func<T, object?>? getter, Func<object, object?>? untypedGetter, Action<T, object?>? setter, Action<object, object?>? untypedSetter)
         {
             this.Name = name;
             this.MemberInfo = memberInfo;
 
             this.Getter = getter;
             this.UntypedGetter = untypedGetter;
-        
+
             this.Setter = setter;
             this.UntypedSetter = untypedSetter;
         }
@@ -99,8 +99,8 @@ namespace Signum.Utilities.Reflection
     {
         string Name { get; }
         MemberInfo MemberInfo { get; }
-        Func<object, object> UntypedGetter { get; }
-        Action<object, object> UntypedSetter { get; }
+        Func<object, object?>? UntypedGetter { get; }
+        Action<object, object?>? UntypedSetter { get; }
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = true)]

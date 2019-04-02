@@ -1,22 +1,21 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false), InTypeScript(Undefined = false)]
     public class OperationLogEntity : Entity
     {
         [ImplementedByAll]
-        public Lite<IEntity> Target { get; set; }
+        public Lite<IEntity>? Target { get; set; }
 
         [ImplementedByAll]
-        public Lite<IEntity> Origin { get; set; }
+        public Lite<IEntity>? Origin { get; set; }
 
-        [NotNullValidator]
         public OperationSymbol Operation { get; set; }
 
-        [NotNullValidator]
         public Lite<IUserEntity> User { get; set; }
 
         public DateTime Start { get; set; }
@@ -24,14 +23,16 @@ namespace Signum.Entities.Basics
         public DateTime? End { get; set; }
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =
-            log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
+            log => (double?)(log.End - log.Start)!.Value.TotalMilliseconds;
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression"), Unit("ms")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public double? Duration
         {
             get { return End == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         public override string ToString()
         {

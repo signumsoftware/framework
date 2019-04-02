@@ -66,7 +66,7 @@ namespace Signum.Test.Environment
             if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
             {
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
-                sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
+                sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack!.Duration).Add(new Signum.Entities.IgnoreAttribute());
             }
 
             if(sqlVersion > SqlServerVersion.SqlServer2008)

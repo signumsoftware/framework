@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,20 +14,23 @@ namespace Signum.Entities.DynamicQuery
     {
         public CollectionAnyAllType CollectionAnyAllType { get; private set; }
 
-        Type elementType;
+        readonly QueryToken parent;
+        public override QueryToken? Parent => parent;
+
+        readonly Type elementType;
         internal CollectionAnyAllToken(QueryToken parent, CollectionAnyAllType type)
-            : base(parent)
         {
-            elementType = parent.Type.ElementType();
+            elementType = parent.Type.ElementType()!;
             if (elementType == null)
                 throw new InvalidOperationException("not a collection");
 
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
             this.CollectionAnyAllType = type;
         }
 
         public override Type Type
         {
-            get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
+            get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
         }
 
         public override string ToString()
@@ -47,46 +50,44 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
-            return Parent.GetElementImplementations();
+            return parent.GetElementImplementations();
         }
 
-        public override string Format
+        public override string? Format
         {
             get
             {
-
                 if (Parent is ExtensionToken et && et.IsProjection)
                     return et.ElementFormat;
 
-                return Parent.Format;
+                return parent.Format;
             }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get
             {
-
                 if (Parent is ExtensionToken et && et.IsProjection)
                     return et.ElementUnit;
 
-                return Parent.Unit;
+                return parent.Unit;
             }
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
         public override bool HasAllOrAny() => true;
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             if (Parent is ExtensionToken et && et.IsProjection)
                 return et.GetElementPropertyRoute();
 
-            PropertyRoute parent = Parent.GetPropertyRoute();
+            PropertyRoute parent = Parent!.GetPropertyRoute()!;
             if (parent != null && parent.Type.ElementType() != null)
                 return parent.Add("Item");
 
@@ -95,12 +96,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return null;
+            return null!;
         }
 
         public override QueryToken Clone()
         {
-            return new CollectionAnyAllToken(Parent.Clone(), this.CollectionAnyAllType);
+            return new CollectionAnyAllToken(parent.Clone(), this.CollectionAnyAllType);
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
@@ -124,10 +125,10 @@ namespace Signum.Entities.DynamicQuery
             get { return "#0000FF"; }
         }
 
-        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
 
         public Expression BuildAnyAll(Expression collection, ParameterExpression param, Expression body)
         {

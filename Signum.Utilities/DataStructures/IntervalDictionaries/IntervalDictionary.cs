@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
@@ -11,7 +11,7 @@ namespace Signum.Utilities.DataStructures
     public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>>
         where K: struct, IComparable<K>, IEquatable<K>
     {
-        SortedList<Interval<K>, V> dic = new SortedList<Interval<K>, V>();
+        readonly SortedList<Interval<K>, V> dic = new SortedList<Interval<K>, V>();
 
         public IntervalDictionary()
         {
@@ -147,13 +147,14 @@ namespace Signum.Utilities.DataStructures
 
         public V TryGet(K key, V defaultValue)
         {
-            this.TryGetValue(key, out defaultValue);
+            if (this.TryGetValue(key, out var value))
+                return value;
             return defaultValue;
         }
 
         public bool TryGetValue(K key, out V value)
         {
-            value = default(V);
+            value = default(V)!;
 
             int index = PossibleIndex(key);
             if (index == -1)
@@ -287,7 +288,9 @@ namespace Signum.Utilities.DataStructures
         public static IntervalDictionary<K, VR> Mix<K, V1, V2, VR>(this IntervalDictionary<K, V1> me, IntervalDictionary<K, V2> other, Func<Interval<K>, IntervalValue<V1>, IntervalValue<V2>, IntervalValue<VR>> mixer)
             where K : struct, IComparable<K>, IEquatable<K>
         {
-            Interval<K>[] keys = me.Intervals.Concat(other.Intervals).SelectMany(a => a.Elements()).Distinct().OrderBy().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
+#pragma warning disable CS8629 // Nullable value type may be null. CSBUG
+            Interval<K>[] keys = me.Intervals.Concat(other.Intervals).SelectMany(a => a.Elements()).Distinct().OrderBy().BiSelectS((min, max) => new Interval<K>(min.Value, max.Value)).ToArray();
+#pragma warning restore CS8629 // Nullable value type may be null.
             return new IntervalDictionary<K, VR>(keys
                 .Select(k => new { Intervalo = k, Valor = mixer(k, me.TryGetValue(k.Min), other.TryGetValue(k.Min)) })
                 .Where(a => a.Valor.HasInterval).Select(a => KVP.Create(a.Intervalo, a.Valor.Value)));
@@ -296,14 +299,18 @@ namespace Signum.Utilities.DataStructures
         public static IntervalDictionary<K, VR> Collapse<K, V, VR>(this IEnumerable<IntervalDictionary<K, V>> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
             where K : struct, IComparable<K>, IEquatable<K>
         {
-            Interval<K>[] keys = collection.SelectMany(a => a).SelectMany(a => a.Key.Elements()).Distinct().OrderBy().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
+#pragma warning disable CS8629 // Nullable value type may be null.
+            Interval<K>[] keys = collection.SelectMany(a => a).SelectMany(a => a.Key.Elements()).Distinct().OrderBy().BiSelectS((min, max) => new Interval<K>(min.Value, max.Value)).ToArray();
+#pragma warning restore CS8629 // Nullable value type may be null.
             return new IntervalDictionary<K, VR>(keys.Select(k => KVP.Create(k, mixer(k, collection.Select(intDic => intDic.TryGetValue(k.Min)).Where(vi => vi.HasInterval).Select(vi => vi.Value)))));
         }
 
         public static IntervalDictionary<K, VR> AggregateIntervalDictionary<K, V, VR>(this IEnumerable<(Interval<K> interval, V value)> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
            where K : struct, IComparable<K>, IEquatable<K>
         {
-            Interval<K>[] keys = collection.SelectMany(a => a.interval.Elements()).Distinct().OrderBy().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
+#pragma warning disable CS8629 // Nullable value type may be null.
+            Interval<K>[] keys = collection.SelectMany(a => a.interval.Elements()).Distinct().OrderBy().BiSelectS((min, max) => new Interval<K>(min.Value, max.Value)).ToArray();
+#pragma warning restore CS8629 // Nullable value type may be null.
             return new IntervalDictionary<K, VR>(keys.Select(k => KVP.Create(k, mixer(k, collection.Where(a => a.interval.Subset(k)).Select(a => a.value)))));
         }
 

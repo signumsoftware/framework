@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 
 namespace Signum.Engine
@@ -38,9 +38,10 @@ namespace Signum.Engine
         }
 
         static readonly ThreadVariable<bool> cacheTempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
-        public static IDisposable DisableCache()
+        public static IDisposable? DisableCache()
         {
-            if (cacheTempDisabled.Value) return null;
+            if (cacheTempDisabled.Value)
+                return null;
             cacheTempDisabled.Value = true;
             return new Disposable(() => cacheTempDisabled.Value = false);
         }

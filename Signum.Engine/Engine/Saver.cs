@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -83,7 +83,7 @@ namespace Signum.Engine
         private static void SaveGraph(Schema schema, DirectedGraph<Entity> identifiables)
         {
             //takes apart the 'forbidden' connections from the good ones
-            DirectedGraph<Entity> backEdges = identifiables.FeedbackEdgeSet();
+            DirectedGraph<Entity>? backEdges = identifiables.FeedbackEdgeSet();
 
             if (backEdges.IsEmpty())
                 backEdges = null;
@@ -116,7 +116,7 @@ namespace Signum.Engine
             }
         }
 
-        private static void SaveGroup(Schema schema, IGrouping<TypeNew, Entity> group, DirectedGraph<Entity> backEdges)
+        private static void SaveGroup(Schema schema, IGrouping<TypeNew, Entity> group, DirectedGraph<Entity>? backEdges)
         {
             Table table = schema.Table(group.Key.Type);
 

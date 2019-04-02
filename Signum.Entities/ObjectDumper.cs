@@ -50,8 +50,8 @@ namespace Signum.Entities
             HashSet<object> objects = new HashSet<Object>(ReferenceEqualityComparer<object>.Default);
             public StringBuilder Sb = new StringBuilder();
             int level = 0;
-            ShowIgnoredFields showIgnoredFields;
-            bool showByteArrays;
+            readonly ShowIgnoredFields showIgnoredFields;
+            readonly bool showByteArrays;
 
             public DumpVisitor(ShowIgnoredFields showIgnoredFields, bool showByteArrays)
             {
@@ -85,7 +85,7 @@ namespace Signum.Entities
 
                 if (IsBasicType(t) || t.IsValueType)
                 {
-                    Sb.Append(DumpValue(o));
+                    Sb.Append(DumpValue(o!));
                     return;
                 }
 
@@ -95,19 +95,16 @@ namespace Signum.Entities
 
                 if (IgnoreTypes.Contains(t))
                 {
-                    Sb.Append("{ " + o.ToString() + " }");
+                    Sb.Append("{ " + o!.ToString() + " }");
                     return;
                 }
 
-                if (objects.Contains(o))
+                if (objects.Contains(o!))
                 {
-                    if (o is Entity)
+                    if (o is Entity ent)
                     {
-                        var ident = o as Entity;
-                        var ent = o as Entity;
-
                         Sb.Append("({0}{1})".FormatWith(
-                            ident.IsNew ? "IsNew": ident.IdOrNull.ToString(),
+                            ent.IsNew ? "IsNew": ent.IdOrNull.ToString(),
                             ent == null ? null : ", ticks: " + ent.ticks
                             ));
                     }
@@ -116,18 +113,17 @@ namespace Signum.Entities
                         var id = ((Lite<Entity>)o).IdOrNull;
                         Sb.Append(id.HasValue ? "({0})".FormatWith(id.Value) : "");
                     }
-                    Sb.Append(" /* [CICLE] {0} */".FormatWith(SafeToString(o)));
+                    Sb.Append(" /* [CICLE] {0} */".FormatWith(SafeToString(o!)));
                     return;
                 }
 
-                objects.Add(o);
+                objects.Add(o!);
 
-                if (o is Entity)
+                if (o is Entity e)
                 {
-                    var ent = (Entity)o;
                     Sb.Append("({0}{1})".FormatWith(
-                        ent.IsNew ? "IsNew" : ent.IdOrNull.ToString(),
-                        ent.ticks == 0 ? null : ", ticks: " + ent.ticks
+                        e.IsNew ? "IsNew" : e.IdOrNull.ToString(),
+                        e.ticks == 0 ? null : ", ticks: " + e.ticks
                         ));
 
                     string toString = SafeToString(o);
@@ -135,9 +131,8 @@ namespace Signum.Entities
                     Sb.Append(" /* {0} */".FormatWith(toString));
                 }
 
-                if (o is Lite<Entity>)
+                if (o is Lite<Entity> l)
                 {
-                    var l = o as Lite<Entity>;
                     Sb.Append("({0}, \"{1}\")".FormatWith((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
                     if (((Lite<Entity>)o).EntityOrNull != null)
                     {
@@ -151,7 +146,7 @@ namespace Signum.Entities
                     return;
                 }
 
-                if (o is IEnumerable && !Any((o as IEnumerable)))
+                if (o is IEnumerable ie && !Any(ie))
                 {
                     Sb.Append("{}");
                     return;
@@ -167,10 +162,9 @@ namespace Signum.Entities
                 level += 1;
 
                 if (t.Namespace.HasText() && t.Namespace.StartsWith("System.Reflection"))
-                    Sb.AppendLine("ToString = {0},".FormatWith(SafeToString(o)).Indent(level));
-                else if (o is Exception)
+                    Sb.AppendLine("ToString = {0},".FormatWith(SafeToString(o!)).Indent(level));
+                else if (o is Exception ex)
                 {
-                    var ex = o as Exception;
                     DumpPropertyOrField(typeof(string), "Message", ex.Message);
                     DumpPropertyOrField(typeof(string), "StackTrace", ex.StackTrace);
                     DumpPropertyOrField(typeof(Exception), "InnerException", ex.InnerException);
@@ -180,7 +174,7 @@ namespace Signum.Entities
                 {
                     if (o is IDictionary)
                     {
-                        foreach (DictionaryEntry item in (o as IDictionary))
+                        foreach (DictionaryEntry item in (o as IDictionary)!)
                         {
                             Sb.Append("{".Indent(level));
                             DumpObject(item.Key);
@@ -191,7 +185,7 @@ namespace Signum.Entities
                     }
                     else
                     {
-                        foreach (var item in (o as IEnumerable))
+                        foreach (var item in (o as IEnumerable)!)
                         {
                             Sb.Append("".Indent(level));
                             DumpObject(item);
@@ -278,13 +272,13 @@ namespace Signum.Entities
 
             private bool Any(IEnumerable ie)
             {
-                if (ie is IList)
-                    return (ie as IList).Count > 0;
+                if (ie is IList l)
+                    return l.Count > 0;
 
-                if (ie is Array)
-                    return (ie as Array).Length > 0;
+                if (ie is Array a)
+                    return a.Length > 0;
 
-                foreach (var item in ie)
+                foreach (var item in ie!)
                 {
                     return true;
                 }
@@ -313,8 +307,8 @@ namespace Signum.Entities
             string DumpValue(object item)
             {
                 string value = item?.ToString() ?? "null";
-                string startDelimiter = null;
-                string endDelimiter = null;
+                string? startDelimiter = null;
+                string? endDelimiter = null;
 
                 if (item != null)
                 {

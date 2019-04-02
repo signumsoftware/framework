@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -89,11 +89,11 @@ namespace Signum.Utilities
 
     class ExpandContainsAny : IMethodExpander
 	{
-        static MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
+        static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
 
         public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
         {
-            var parts = (string[])ExpressionEvaluator.Eval(parameters[1]);
+            var parts = (string[])ExpressionEvaluator.Eval(parameters[1])!;
 
             return parts.Select(p => (Expression)Expression.Call(parameters[0], miContains, Expression.Constant(p))).AggregateOr();
         }
@@ -101,11 +101,11 @@ namespace Signum.Utilities
 
     class ExpandContainsAll : IMethodExpander
     {
-        static MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
+        static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
 
         public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
         {
-            var parts = (string[])ExpressionEvaluator.Eval(parameters[1]);
+            var parts = (string[])ExpressionEvaluator.Eval(parameters[1])!;
 
             return parts.Select(p => (Expression)Expression.Call(parameters[0], miContains, Expression.Constant(p))).AggregateAnd();
         }
@@ -114,30 +114,27 @@ namespace Signum.Utilities
 
     class ExpandNone : IMethodExpander 
     {
-        static MethodInfo miAnyEnumerable = ReflectionTools.GetMethodInfo(() => Enumerable.Any((IEnumerable<string>)null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQueryable = ReflectionTools.GetMethodInfo(() =>Queryable.Any((IQueryable<string>)null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyEnumerableWithPredicate = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQueryableWithPredicate  = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyEnumerable = ReflectionTools.GetMethodInfo(() => Enumerable.Any((IEnumerable<string>)null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQueryable = ReflectionTools.GetMethodInfo(() =>Queryable.Any((IQueryable<string>)null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyEnumerableWithPredicate = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IEnumerable<string>)null!, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQueryableWithPredicate  = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null!, null)).GetGenericMethodDefinition();
 
         public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {
             Type foo = mi.DeclaringType;
             Type bar = typeof(Queryable);
-            MethodInfo any = getAny(mi).MakeGenericMethod(mi.GetGenericArguments());
+            MethodInfo any = GetAny(mi).MakeGenericMethod(mi.GetGenericArguments());
             return Expression.Not(Expression.Call(any, arguments));
         }
 
-        private MethodInfo getAny(MethodInfo mi)
+        private MethodInfo GetAny(MethodInfo mi)
         {
-
             var parameters = mi.GetParameters();
             bool query = parameters[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
             if (parameters.Length == 1)
                 return query ? miAnyQueryable : miAnyEnumerable;
             else
                 return query ? miAnyQueryableWithPredicate : miAnyEnumerableWithPredicate;
-            
-            
         }
     }
 

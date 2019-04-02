@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Threading;
@@ -34,7 +34,7 @@ namespace Signum.Utilities.Synchronization
             get { return current.Value; }
         }
 
-        object IEnumerator.Current
+        object? IEnumerator.Current
         {
             get { return current.Value; }
         }
@@ -46,7 +46,7 @@ namespace Signum.Utilities.Synchronization
                 if (moveNext && (moveNext = enumerator.MoveNext()))
                     current.Value = enumerator.Current;
                 else
-                    current.Value = default(T);
+                    current.Value = default(T)!;
 
                 return moveNext; 
             }

@@ -23,6 +23,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+
     [ValidateModelFilter]
     public class QueryController : ControllerBase
     {
@@ -49,7 +51,7 @@ namespace Signum.React.ApiControllers
             };
 
             var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
-            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
+            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations!.Value.Types.SingleEx();
 
             var result = await dqueryable.Query.AutocompleteUntypedAsync(dqueryable.Context.GetEntitySelector(), request.subString, request.count, entityType, token);
 
@@ -111,7 +113,6 @@ namespace Signum.React.ApiControllers
         {
             public string queryKey;
             public List<TokenRequest> tokens;
-
         }
 
         [HttpPost("api/query/subTokens")]
@@ -131,7 +132,7 @@ namespace Signum.React.ApiControllers
         public class SubTokensRequest
         {
             public string queryKey;
-            public string token;
+            public string? token;
             public SubTokensOptions options;
         }
 
@@ -149,7 +150,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
-        public async Task<object> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
+        public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
         {
             return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryCountRequest(), token);
         }
@@ -277,7 +278,7 @@ namespace Signum.React.ApiControllers
             if (filter is FilterGroup fg)
                 return new FilterGroupTS
                 {
-                    token = fg.Token.FullKey(),
+                    token = fg.Token?.FullKey(),
                     groupOperation = fg.GroupOperation,
                     filters = fg.Filters.Select(f => FromFilter(f)).ToList(),
                 };
@@ -290,16 +291,14 @@ namespace Signum.React.ApiControllers
     {
         public string token;
         public FilterOperation operation;
-        public object value;
+        public object? value;
 
         public override Filter ToFilter(QueryDescription qd, bool canAggregate)
         {
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
-
-
-
+            
             var val = value is JToken jtok ?
                  jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
                  value;
@@ -313,7 +312,7 @@ namespace Signum.React.ApiControllers
     public class FilterGroupTS : FilterTS
     {
         public FilterGroupOperation groupOperation;
-        public string token;
+        public string? token;
         public List<FilterTS> filters;
 
         public override Filter ToFilter(QueryDescription qd, bool canAggregate)
@@ -366,8 +365,8 @@ namespace Signum.React.ApiControllers
             switch (mode)
             {
                 case PaginationMode.All: return new Pagination.All();
-                case PaginationMode.Firsts: return new Pagination.Firsts(this.elementsPerPage.Value);
-                case PaginationMode.Paginate: return new Pagination.Paginate(this.elementsPerPage.Value, this.currentPage.Value);
+                case PaginationMode.Firsts: return new Pagination.Firsts(this.elementsPerPage!.Value);
+                case PaginationMode.Paginate: return new Pagination.Paginate(this.elementsPerPage!.Value, this.currentPage!.Value);
                 default:throw new InvalidOperationException($"Unexpected {mode}");
             }
         }
@@ -424,9 +423,9 @@ namespace Signum.React.ApiControllers
             switch (mode)
             {
                 case SystemTimeMode.All: return new SystemTime.All();
-                case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate.Value);
-                case SystemTimeMode.Between: return new SystemTime.Between(startDate.Value, endDate.Value);
-                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate.Value, endDate.Value);
+                case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate!.Value);
+                case SystemTimeMode.Between: return new SystemTime.Between(startDate!.Value, endDate!.Value);
+                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate!.Value, endDate!.Value);
                 default: throw new InvalidOperationException($"Unexpected {mode}");
             }
         }
@@ -461,15 +460,15 @@ namespace Signum.React.ApiControllers
         public string typeColor;
         public string niceTypeName;
         public FilterType? filterType;
-        public string unit;
-        public string format;
+        public string? unit;
+        public string? format;
         public string displayName;
         public bool isGroupable;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool hasOrderAdapter;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool preferEquals;
-        public string propertyRoute;
+        public string? propertyRoute;
 
         public ColumnDescriptionTS(ColumnDescription a, object queryName)
         {
@@ -545,15 +544,15 @@ namespace Signum.React.ApiControllers
         public QueryTokenType? queryTokenType;
         public TypeReferenceTS type;
         public FilterType? filterType;
-        public string format;
-        public string unit;
+        public string? format;
+        public string? unit;
         public bool isGroupable;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool hasOrderAdapter;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool preferEquals;
-        public QueryTokenTS parent;
-        public string propertyRoute;
+        public QueryTokenTS? parent;
+        public string? propertyRoute;
     }
 
     public enum QueryTokenType

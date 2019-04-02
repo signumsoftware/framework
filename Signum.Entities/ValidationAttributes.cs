@@ -19,13 +19,13 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public abstract class ValidatorAttribute : Attribute
     {
-        public Func<ModifiableEntity, bool> IsApplicable;
-        public Func<string> ErrorMessage { get; set; }
+        public Func<ModifiableEntity, bool>? IsApplicable;
+        public Func<string>? ErrorMessage { get; set; }
 
-        public string UnlocalizableErrorMessage
+        public string? UnlocalizableErrorMessage
         {
             get { return ErrorMessage == null ? null : ErrorMessage(); }
-            set { ErrorMessage = () => value; }
+            set { ErrorMessage = () => value!; }
         }
 
         public int Order { get; set; }
@@ -36,7 +36,7 @@ namespace Signum.Entities
         //Used for documentation purposes only
         public abstract string HelpMessage { get; }
 
-        public string Error(ModifiableEntity entity, PropertyInfo property, object value)
+        public string? Error(ModifiableEntity entity, PropertyInfo property, object? value)
         {
             if (DisabledInModelBinder && Validator.InModelBinder)
                 return null;
@@ -44,7 +44,7 @@ namespace Signum.Entities
             if (IsApplicable != null && !IsApplicable(entity))
                 return null;
 
-            string defaultError = OverrideError(value);
+            string? defaultError = OverrideError(value);
 
             if (defaultError == null)
                 return null;
@@ -62,14 +62,19 @@ namespace Signum.Entities
         /// </summary>
         /// <param name="value"></param>
         /// <returns>returns an string with the error message, using {0} if you want the property name to be inserted</returns>
-        protected abstract string OverrideError(object value);
+        protected abstract string? OverrideError(object? value);
     }
 
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
-        protected override string OverrideError(object obj)
+        public bool Disabled { get; set; }
+
+        protected override string? OverrideError(object? obj)
         {
-            if (obj == null)
+            if (Disabled)
+                return null;
+
+            if (obj == null || obj is string s && s == "")
                 return ValidationMessage._0IsNotSet.NiceToString();
 
             return null;
@@ -100,8 +105,6 @@ namespace Signum.Entities
 
     public class StringLengthValidatorAttribute : ValidatorAttribute
     {
-        public bool AllowNulls { get; set; }
-
         bool? allowLeadingSpaces;
         public bool AllowLeadingSpaces
         {
@@ -132,17 +135,12 @@ namespace Signum.Entities
             set { max = value; }
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
-            string val = (string)value;
+            string val = (string)value!;
 
             if (string.IsNullOrEmpty(val))
-            {
-                if (AllowNulls)
-                    return null;
-
-                return ValidationMessage._0IsNotSet.NiceToString();
-            }
+                return null;
 
             if(!MultiLine && (val.Contains('\n') || val.Contains('\r')))
                 return ValidationMessage._0ShouldHaveJustOneLine.NiceToString();
@@ -172,11 +170,8 @@ namespace Signum.Entities
                 string result =
                     min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().FormatWith(min, max) :
                     min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().FormatWith(min) :
-                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : null;
-
-                if (AllowNulls)
-                    result = result.Add(" ", ValidationMessage.OrBeNull.NiceToString());
-
+                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : ValidationMessage.BeAString.NiceToString();
+                
                 return result;
             }
         }
@@ -206,9 +201,9 @@ namespace Signum.Entities
             get;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
-            string str = (string)value;
+            string? str = (string?)value;
             if (string.IsNullOrEmpty(str))
                 return null;
 
@@ -291,7 +286,7 @@ namespace Signum.Entities
                      type == IdentifierType.PascalAscii ? PascalAscii :
                      type == IdentifierType.Ascii ? Ascii:
                      type == IdentifierType.International ? International :
-                     null
+                     throw new UnexpectedValueException(type)
                      )
         {
             this.type = type;
@@ -382,9 +377,9 @@ namespace Signum.Entities
             get { return ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName); }
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
-            string str = (string)value;
+            string? str = (string?)value;
 
             if (str == null)
                 return null;
@@ -415,7 +410,7 @@ namespace Signum.Entities
             this.DecimalPlaces = decimalPlaces;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -476,7 +471,7 @@ namespace Signum.Entities
             this.number = number;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -547,7 +542,7 @@ namespace Signum.Entities
             this.max = max;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -610,9 +605,9 @@ namespace Signum.Entities
 
     public class NoRepeatValidatorAttribute : ValidatorAttribute
     {
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
-            IList list = (IList)value;
+            IList? list = (IList?)value;
             if (list == null || list.Count <= 1)
                 return null;
             string ex = list.Cast<object>().GroupCount().Where(kvp => kvp.Value > 1).ToString(e => "{0} x {1}".FormatWith(e.Key, e.Value), ", ");
@@ -626,14 +621,14 @@ namespace Signum.Entities
             get { return ValidationMessage.HaveNoRepeatedElements.NiceToString(); }
         }
 
-        public static string ByKey<T, K>(IEnumerable<T> collection, Func<T, K> keySelector)
+        public static string? ByKey<T, K>(IEnumerable<T> collection, Func<T, K> keySelector)
         {
             var errors = collection.GroupBy(keySelector)
                 .Select(gr => new { gr.Key, Count = gr.Count() })
                 .Where(a => a.Count > 1)
                 .ToString(e => "{0} x {1}".FormatWith(e.Key, e.Count), ", ");
 
-            return errors.DefaultText(null);
+            return errors.DefaultText(null!);
         }
     }
 
@@ -648,11 +643,11 @@ namespace Signum.Entities
             this.number = number;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
-            IList list = (IList)value;
+            IList? list = (IList?)value;
 
-            int val = list == null? 0: list.Count;
+            int val = list == null ? 0 : list.Count;
 
             if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                 (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
@@ -713,7 +708,7 @@ namespace Signum.Entities
             this.Precision = precision;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -753,7 +748,7 @@ namespace Signum.Entities
 
     public class DateInPastValidator : ValidatorAttribute
     {
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -812,7 +807,7 @@ namespace Signum.Entities
             this.Precision = precision;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -865,12 +860,12 @@ namespace Signum.Entities
             this.textCase = textCase;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
-            if (string.IsNullOrEmpty((string)value)) return null;
-
-            string str = (string)value;
-
+            string? str = (string?)value;
+            if (string.IsNullOrEmpty(str))
+                return null;
+            
             if ((this.textCase == StringCase.Uppercase) && (str != str.ToUpper()))
                 return ValidationMessage._0HasToBeUppercase.NiceToString();
 
@@ -904,7 +899,7 @@ namespace Signum.Entities
             this.Type = type;
         }
 
-        protected override string OverrideError(object value)
+        protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
@@ -946,11 +941,11 @@ namespace Signum.Entities
         Func<E, S> getState;
         string[] propertyNames;
         PropertyInfo[] properties;
-        Func<E, object>[] getters;
+        Func<E, object?>[] getters;
 
         Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
 
-        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] propertyGetters)
+        public StateValidator(Func<E, S> getState, params Expression<Func<E, object?>>[] propertyGetters)
         {
             this.getState = getState;
             this.properties = propertyGetters.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
@@ -967,7 +962,7 @@ namespace Signum.Entities
             dictionary.Add(state, necessary);
         }
 
-        public string Validate(E entity, PropertyInfo pi)
+        public string? Validate(E entity, PropertyInfo pi)
         {
             return Validate(entity, pi, true);
         }
@@ -981,9 +976,7 @@ namespace Signum.Entities
             return Necessary(state, index);
         }
 
-
-
-        public string Validate(E entity, PropertyInfo pi, bool showState)
+        public string? Validate(E entity, PropertyInfo pi, bool showState)
         {
             int index = propertyNames.IndexOf(pi.Name);
             if (index == -1)
@@ -994,14 +987,14 @@ namespace Signum.Entities
             return GetMessage(entity, state, showState, index);
         }
 
-        private string GetMessage(E entity, S state, bool showState, int index)
+        private string? GetMessage(E entity, S state, bool showState, int index)
         {
             bool? necessary = Necessary(state, index);
 
             if (necessary == null)
                 return null;
 
-            object val = getters[index](entity);
+            object? val = getters[index](entity);
             if (val is IList && ((IList)val).Count == 0 || val is string && ((string)val).Length == 0) //both are indistinguible after retrieving
                 val = null;
 
@@ -1035,7 +1028,7 @@ namespace Signum.Entities
             throw new NotImplementedException();
         }
 
-        public string PreviewErrors(E entity, S targetState, bool showState)
+        public string? PreviewErrors(E entity, S targetState, bool showState)
         {
             string result = propertyNames.Select((pn, i) => GetMessage(entity, targetState, showState, i)).NotNull().ToString("\r\n");
 
@@ -1183,5 +1176,6 @@ namespace Signum.Entities
         [Description("At least one value is needed")]
         _AtLeastOneValueIsNeeded,
         PowerOf,
+        BeAString,
     }
 }

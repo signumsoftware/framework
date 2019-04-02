@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -10,14 +10,14 @@ namespace Signum.React.Filters
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
     public class ProfilerActionSplitterAttribute : Attribute
     {
-        readonly string requestKey;
+        readonly string? requestKey;
 
-        public ProfilerActionSplitterAttribute(string requestKey = null)
+        public ProfilerActionSplitterAttribute(string? requestKey = null)
         {
             this.requestKey = requestKey;
         }
 
-        public string RequestKey
+        public string? RequestKey
         {
             get { return requestKey; }
         }

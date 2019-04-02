@@ -11,9 +11,10 @@ namespace Signum.Engine
         public static void Synchronize<K, N, O>(
           Dictionary<K, N> newDictionary,
           Dictionary<K, O> oldDictionary,
-          Action<K, N> createNew,
-          Action<K, O> removeOld,
-          Action<K, N, O> merge)
+          Action<K, N>? createNew,
+          Action<K, O>? removeOld,
+          Action<K, N, O>? merge)
+            where K : object
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -42,11 +43,12 @@ namespace Signum.Engine
         public static void SynchronizeProgressForeach<K, N, O>(
           Dictionary<K, N> newDictionary,
           Dictionary<K, O> oldDictionary,
-          Action<K, N> createNew,
-          Action<K, O> removeOld,
-          Action<K, N, O> merge,
+          Action<K, N>? createNew,
+          Action<K, O>? removeOld,
+          Action<K, N, O>? merge,
           bool showProgress = true,
           bool transactional = true)
+            where K : object
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -77,9 +79,9 @@ namespace Signum.Engine
           string replacementsKey,
           Dictionary<string, N> newDictionary,
           Dictionary<string, O> oldDictionary,
-          Action<string, N> createNew,
-          Action<string, O> removeOld,
-          Action<string, N, O> merge)
+          Action<string, N>? createNew,
+          Action<string, O>? removeOld,
+          Action<string, N, O>? merge)
         {
             replacements.AskForReplacements(
                 oldDictionary.Keys.ToHashSet(),
@@ -109,20 +111,21 @@ namespace Signum.Engine
             }
         }
 
-        public static SqlPreCommand SynchronizeScript<K, N, O>(
+        public static SqlPreCommand? SynchronizeScript<K, N, O>(
             Spacing spacing,
             Dictionary<K, N> newDictionary,
             Dictionary<K, O> oldDictionary,
-            Func<K, N, SqlPreCommand> createNew,
-            Func<K, O, SqlPreCommand> removeOld,
-            Func<K, N, O, SqlPreCommand> mergeBoth)
+            Func<K, N, SqlPreCommand?>? createNew,
+            Func<K, O, SqlPreCommand?>? removeOld,
+            Func<K, N, O, SqlPreCommand?>? mergeBoth)
             where O : class
             where N : class
+            where K : object
         {
             return newDictionary.OuterJoinDictionaryCC(oldDictionary, (key, newVal, oldVal) =>
             {
                 if (newVal == null)
-                    return removeOld == null ? null : removeOld(key, oldVal);
+                    return removeOld == null ? null : removeOld(key, oldVal!);
 
                 if (oldVal == null)
                     return createNew == null ? null : createNew(key, newVal);
@@ -133,15 +136,15 @@ namespace Signum.Engine
 
 
 
-        public static SqlPreCommand SynchronizeScriptReplacing<N, O>(
+        public static SqlPreCommand? SynchronizeScriptReplacing<N, O>(
             Replacements replacements,
             string replacementsKey,
             Spacing spacing,
             Dictionary<string, N> newDictionary,
             Dictionary<string, O> oldDictionary,
-            Func<string, N, SqlPreCommand> createNew,
-            Func<string, O, SqlPreCommand> removeOld,
-            Func<string, N, O, SqlPreCommand> mergeBoth)
+            Func<string, N, SqlPreCommand?>? createNew,
+            Func<string, O, SqlPreCommand?>? removeOld,
+            Func<string, N, O, SqlPreCommand?>? mergeBoth)
             where O : class
             where N : class
         {
@@ -154,9 +157,9 @@ namespace Signum.Engine
             return SynchronizeScript(spacing, newDictionary, repOldDictionary, createNew, removeOld, mergeBoth);
         }
 
-        public static IDisposable RenameTable(Table table, Replacements replacements)
+        public static IDisposable? RenameTable(Table table, Replacements replacements)
         {
-            string fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
+            string? fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
             if (fullName == null)
                 return null;
 
@@ -184,9 +187,9 @@ namespace Signum.Engine
 
         public bool Interactive = true;
         public bool SchemaOnly = false;
-        public string ReplaceDatabaseName = null;
+        public string? ReplaceDatabaseName = null;
 
-        public IDisposable WithReplacedDatabaseName()
+        public IDisposable? WithReplacedDatabaseName()
         {
             if (ReplaceDatabaseName == null)
                 return null;
@@ -196,7 +199,7 @@ namespace Signum.Engine
 
         public string Apply(string replacementsKey, string textToReplace)
         {
-            Dictionary<string, string> repDic = this.TryGetC(replacementsKey);
+            Dictionary<string, string>? repDic = this.TryGetC(replacementsKey);
 
             return repDic?.TryGetC(textToReplace) ?? textToReplace;
         }
@@ -286,7 +289,7 @@ namespace Signum.Engine
             return sd.LevenshteinDistance(o, n, weight: c => c.Type == StringDistance.ChoiceType.Substitute ? 2 : 1);
         }
 
-        public string SelectInteractive(string oldValue, ICollection<string> newValues, string replacementsKey, StringDistance sd)
+        public string? SelectInteractive(string oldValue, ICollection<string> newValues, string replacementsKey, StringDistance sd)
         {
             if (newValues.Contains(oldValue))
                 return oldValue;
@@ -312,7 +315,14 @@ namespace Signum.Engine
         {
             public string ReplacementKey;
             public string OldValue;
-            public List<string> NewValues;
+            public List<string>? NewValues;
+
+            public AutoReplacementContext(string replacementKey, string oldValue, List<string>? newValues)
+            {
+                ReplacementKey = replacementKey;
+                OldValue = oldValue;
+                NewValues = newValues;
+            }
         }
 
         public static Func<AutoReplacementContext, Selection?> AutoReplacement;
@@ -321,12 +331,7 @@ namespace Signum.Engine
         {
             if (AutoReplacement != null)
             {
-                Selection? selection = AutoReplacement(new AutoReplacementContext
-                {
-                    ReplacementKey = replacementsKey,
-                    OldValue = oldValue,
-                    NewValues = newValues
-                });
+                Selection? selection = AutoReplacement(new AutoReplacementContext(replacementsKey, oldValue, newValues));
                 if (selection != null)
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");
@@ -396,14 +401,15 @@ namespace Signum.Engine
 
         public struct Selection
         {
-            public Selection(string oldValue, string newValue)
+            /// <param name="newValue">Null for removed</param>
+            public Selection(string oldValue, string? newValue)
             {
                 this.OldValue = oldValue;
                 this.NewValue = newValue;
             }
 
             public readonly string OldValue;
-            public readonly string NewValue;
+            public readonly string? NewValue;
         }
 
     }

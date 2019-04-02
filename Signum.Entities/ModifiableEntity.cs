@@ -27,7 +27,7 @@ namespace Signum.Entities
     [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
     public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable
     {
-        static Func<bool> isRetrievingFunc = null;
+        static Func<bool>? isRetrievingFunc = null;
         static public bool IsRetrieving
         {
             get { return isRetrievingFunc != null && isRetrievingFunc(); }
@@ -40,18 +40,18 @@ namespace Signum.Entities
 
         protected internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        protected virtual T Get<T>(T fieldValue, [CallerMemberName]string automaticPropertyName = null)
+        protected virtual T Get<T>(T fieldValue, [CallerMemberName]string? automaticPropertyName = null)
         {
             return fieldValue;
         }
 
 
-        protected virtual bool Set<T>(ref T field, T value, [CallerMemberName]string automaticPropertyName = null)
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = GetPropertyInfo(automaticPropertyName);
+            PropertyInfo pi = GetPropertyInfo(automaticPropertyName!);
 
             if (pi == null)
                 throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".FormatWith(automaticPropertyName, this.GetType().TypeName()));
@@ -59,41 +59,39 @@ namespace Signum.Entities
             if (value is IMListPrivate && !((IMListPrivate)value).IsNew && !object.ReferenceEquals(value, field))
                 throw new InvalidOperationException("Only MList<T> with IsNew = true can be assigned to an entity");
 
-            if (field is INotifyCollectionChanged col)
+            if (field is INotifyCollectionChanged colb)
             {
                 if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
-                    col.CollectionChanged -= ChildCollectionChanged;
+                    colb.CollectionChanged -= ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)col)
+                    foreach (ModifiableEntity item in (IEnumerable)colb)
                         item.SetParentEntity(null);
             }
 
-            if ((object)field is ModifiableEntity mod)
+            if (field is ModifiableEntity modb)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    mod.SetParentEntity(null);
+                    modb.SetParentEntity(null);
             }
 
             SetSelfModified();
             field = value;
 
-            col = field as INotifyCollectionChanged;
-            if (col != null)
+            if (field is INotifyCollectionChanged cola)
             {
                 if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
-                    col.CollectionChanged += ChildCollectionChanged;
+                    cola.CollectionChanged += ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)col)
+                    foreach (ModifiableEntity item in (IEnumerable)cola)
                         item.SetParentEntity(this);
             }
 
-            mod = field as ModifiableEntity;
-            if (mod != null)
+            if (field is ModifiableEntity moda)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    mod.SetParentEntity(this);
+                    moda.SetParentEntity(this);
             }
 
             NotifyPrivate(pi.Name);
@@ -104,7 +102,7 @@ namespace Signum.Entities
 
             return true;
         }
-        
+
         struct PropertyKey : IEquatable<PropertyKey>
         {
             public PropertyKey(Type type, string propertyName)
@@ -121,7 +119,7 @@ namespace Signum.Entities
             public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
         }
 
-        static ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
+        static readonly ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
 
         protected PropertyInfo GetPropertyInfo(string propertyName)
         {
@@ -131,7 +129,9 @@ namespace Signum.Entities
         }
 
         static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
+#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [HiddenProperty, ExpressionField("ToStringPropertyExpression")]
+#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public string ToStringProperty
         {
             get
@@ -140,7 +140,7 @@ namespace Signum.Entities
                 return str.HasText() ? str : this.GetType().NiceName();
             }
         }
-
+        
         #region Collection Events
 
         protected internal override void PostRetrieving()
@@ -150,7 +150,7 @@ namespace Signum.Entities
 
         protected virtual void RebindEvents()
         {
-            foreach (INotifyCollectionChanged notify in AttributeManager<NotifyCollectionChangedAttribute>.FieldsWithAttribute(this))
+            foreach (INotifyCollectionChanged? notify in AttributeManager<NotifyCollectionChangedAttribute>.FieldsWithAttribute(this))
             {
                 if (notify == null)
                     continue;
@@ -158,7 +158,7 @@ namespace Signum.Entities
                 notify.CollectionChanged += ChildCollectionChanged;
             }
 
-            foreach (object field in AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this))
+            foreach (object? field in AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this))
             {
                 if (field == null)
                     continue;
@@ -167,7 +167,7 @@ namespace Signum.Entities
                     entity.SetParentEntity(this);
                 else
                 {
-                    foreach (ModifiableEntity item in (IEnumerable)field)
+                    foreach (ModifiableEntity item in (IEnumerable)field!)
                         item.SetParentEntity(this);
                 }
             }
@@ -181,7 +181,7 @@ namespace Signum.Entities
 
         protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            string propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
+            string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
             if (propertyName != null)
                 NotifyPrivate(propertyName);
 
@@ -206,7 +206,7 @@ namespace Signum.Entities
 
         }
 
-        protected virtual string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        protected virtual string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             return null;
         }
@@ -216,14 +216,14 @@ namespace Signum.Entities
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NonSerialized, Ignore]
-        ModifiableEntity parentEntity;
+        ModifiableEntity? parentEntity;
 
-        public ModifiableEntity GetParentEntity()
+        public ModifiableEntity? GetParentEntity()
         {
             return parentEntity;
         }
 
-        private void SetParentEntity(ModifiableEntity p)
+        private void SetParentEntity(ModifiableEntity? p)
         {
             if (p != null && this.parentEntity != null && this.parentEntity != p)
                 throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
@@ -231,7 +231,7 @@ namespace Signum.Entities
             this.parentEntity = p;
         }
 
-        internal string OnParentChildPropertyValidation(PropertyInfo pi)
+        internal string? OnParentChildPropertyValidation(PropertyInfo pi)
         {
             if (parentEntity == null)
                 return null;
@@ -282,18 +282,18 @@ namespace Signum.Entities
 
         #region IDataErrorInfo Members
         [HiddenProperty]
-        public string Error
+        public string? Error
         {
             get { return IntegrityCheck()?.Errors.Values.ToString("\r\n"); }
         }
 
-        public IntegrityCheck IntegrityCheck()
+        public IntegrityCheck? IntegrityCheck()
         {
             using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
             {
                 var validators = Validator.GetPropertyValidators(GetType());
 
-                Dictionary<string, string> dic = null;
+                Dictionary<string, string>? dic = null;
 
                 foreach (var pv in validators.Values)
                 {
@@ -316,7 +316,7 @@ namespace Signum.Entities
 
         //override for per-property checks
         [HiddenProperty]
-        string IDataErrorInfo.this[string columnName]
+        string? IDataErrorInfo.this[string columnName]
         {
             get
             {
@@ -327,14 +327,14 @@ namespace Signum.Entities
             }
         }
 
-        public string PropertyCheck(Expression<Func<object>> property)
+        public string? PropertyCheck(Expression<Func<object?>> property)
         {
             return PropertyCheck(ReflectionTools.GetPropertyInfo(property).Name);
         }
 
-        public string PropertyCheck(string propertyName)
+        public string? PropertyCheck(string propertyName)
         {
-            IPropertyValidator pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
+            IPropertyValidator? pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
 
             if (pp == null)
                 return null; //Hidden properties
@@ -342,17 +342,17 @@ namespace Signum.Entities
             return pp.PropertyCheck(this);
         }
 
-        protected internal virtual string PropertyValidation(PropertyInfo pi)
+        protected internal virtual string? PropertyValidation(PropertyInfo pi)
         {
             return null;
         }
 
-        protected static void Validate<T>(Expression<Func<T, object>> property, Func<T, PropertyInfo, string> validate) where T : ModifiableEntity
+        protected static void Validate<T>(Expression<Func<T, object?>> property, Func<T, PropertyInfo, string?> validate) where T : ModifiableEntity
         {
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
-        public Dictionary<Guid, IntegrityCheck> FullIntegrityCheck()
+        public Dictionary<Guid, IntegrityCheck>? FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
             return GraphExplorer.FullIntegrityCheck(graph);
@@ -389,8 +389,8 @@ namespace Signum.Entities
 
 
         [Ignore]
-        internal Dictionary<string, string> temporalErrors;
-        internal void SetTemporalErrors(Dictionary<string, string> errors)
+        internal Dictionary<string, string>? temporalErrors;
+        internal void SetTemporalErrors(Dictionary<string, string>? errors)
         {
             NotifyTemporalErrors();
 
@@ -439,7 +439,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return $"{Errors.Count} errors in {" ".CombineIfNotEmpty(Type.Name, Id)}\r\n"
+            return $"{Errors.Count} errors in {" ".Combine(Type.Name, Id)}\r\n"
                   + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
         }
     }
@@ -457,10 +457,11 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return $"{IntegrityCheck.Errors.Count} errors in {" ".CombineIfNotEmpty(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
+            var validators = Validator.GetPropertyValidators(Entity.GetType());
+            return $"{IntegrityCheck.Errors.Count} errors in {" ".Combine(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
                   + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
-                      kvp.Key, 
-                      Validator.TryGetPropertyValidator(Entity.GetType(), kvp.Key).GetValueUntyped(Entity), 
+                      kvp.Key,
+                      validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity), 
                       kvp.Value), 
                       "\r\n");
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.ExpressionTrees;
@@ -13,16 +13,19 @@ namespace Signum.Engine.Linq
     /// </summary>
     public class MetaEvaluator : ExpressionVisitor
     {
-        public static Expression Clean(Expression expression)
+        public static Expression? Clean(Expression expression)
         {
-            Expression expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval, false);
-            Expression simplified = OverloadingSimplifier.Simplify(expand);
+            Expression? expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval, false);
+            Expression? simplified = OverloadingSimplifier.Simplify(expand);
             return simplified;
         }
 
         HashSet<Expression> candidates;
-
-        private MetaEvaluator() { }
+        
+        public MetaEvaluator(HashSet<Expression> candidates)
+        {
+            this.candidates = candidates;
+        }
 
         /// <summary>
         /// Performs evaluation & replacement of independent sub-trees
@@ -32,15 +35,14 @@ namespace Signum.Engine.Linq
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
         public static Expression PartialEval(Expression exp)
         {
-            return new MetaEvaluator { candidates = ExpressionNominator.Nominate(exp) }.Visit(exp);
+            return new MetaEvaluator(candidates: ExpressionNominator.Nominate(exp)).Visit(exp);
         }
 
         public override Expression Visit(Expression exp)
         {
             if (exp == null)
-            {
-                return null;
-            }
+                return null!;
+
             if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
                 if (exp.Type.IsInstantiationOf(typeof(IQueryable<>)))

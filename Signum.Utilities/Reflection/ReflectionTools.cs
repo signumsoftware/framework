@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -41,13 +41,11 @@ namespace Signum.Utilities.Reflection
             if (m1.MetadataToken != m2.MetadataToken || m1.Module != m2.Module)
                 return false;
 
-            if (m1 is MethodInfo)
+            if (m1 is MethodInfo lhsMethod)
             {
-                MethodInfo lhsMethod = m1 as MethodInfo;
-
                 if (lhsMethod.IsGenericMethod)
                 {
-                    MethodInfo rhsMethod = m2 as MethodInfo;
+                    MethodInfo rhsMethod = (MethodInfo)m2;
 
                     Type[] lhsGenArgs = lhsMethod.GetGenericArguments();
                     Type[] rhsGenArgs = rhsMethod.GetGenericArguments();
@@ -81,13 +79,11 @@ namespace Signum.Utilities.Reflection
             Expression body = property.Body;
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
-
-            MemberExpression ex = body as MemberExpression;
-            if (ex == null)
+            
+            if (!(body is MemberExpression ex))
                 throw new ArgumentException("The lambda 'property' should be an expression accessing a property");
-
-            PropertyInfo pi = ex.Member as PropertyInfo;
-            if (pi == null)
+            
+            if (!(ex.Member is PropertyInfo pi))
                 throw new ArgumentException("The lambda 'property' should be an expression accessing a property");
 
             return pi;
@@ -107,8 +103,7 @@ namespace Signum.Utilities.Reflection
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
-            NewExpression ex = body as NewExpression;
-            if (ex == null)
+            if (!(body is NewExpression ex))
                 throw new ArgumentException("The lambda 'constuctor' should be an expression constructing an object");
 
             return ex.Constructor;
@@ -133,16 +128,14 @@ namespace Signum.Utilities.Reflection
             Expression body = field.Body;
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
-
-            MemberExpression ex = body as MemberExpression;
-            if (ex == null)
+            
+            if (!(body is MemberExpression ex))
                 throw new ArgumentException("The lambda 'field' should be an expression accessing a field");
 
-            FieldInfo pi = ex.Member as FieldInfo;
-            if (pi == null)
+            if (!(ex.Member is FieldInfo fi))
                 throw new ArgumentException("The lambda 'field' should be an expression accessing a field");
 
-            return pi;
+            return fi;
         }
 
 
@@ -165,11 +158,10 @@ namespace Signum.Utilities.Reflection
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
-            MemberExpression ex = body as MemberExpression;
-            if (ex == null)
+            if (!(body is MemberExpression me))
                 throw new ArgumentException("The lambda 'member' should be an expression accessing a member");
 
-            return ex.Member;
+            return me.Member;
         }
 
 
@@ -202,13 +194,11 @@ namespace Signum.Utilities.Reflection
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
-            MethodCallExpression ex = body as MethodCallExpression;
-            if (ex == null)
+            if (!(body is MethodCallExpression ex))
                 throw new ArgumentException("The lambda 'method' should be an expression calling a method");
 
             return ex.Method;
         }
-
 
         public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
         {
@@ -230,7 +220,7 @@ namespace Signum.Utilities.Reflection
             return ((MemberExpression)body).Expression.Type;
         }
 
-        public static Func<T, P> CreateGetter<T, P>(MemberInfo m)
+        public static Func<T, P>? CreateGetter<T, P>(MemberInfo m)
         {
             if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
                 return null;
@@ -240,7 +230,7 @@ namespace Signum.Utilities.Reflection
             return (Func<T, P>)exp.Compile();
         }
 
-        public static Func<T, object> CreateGetter<T>(MemberInfo m)
+        public static Func<T, object?>? CreateGetter<T>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateGetter"))
             {
@@ -250,11 +240,11 @@ namespace Signum.Utilities.Reflection
                 ParameterExpression p = Expression.Parameter(typeof(T), "p");
                 Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(T), typeof(object));
                 var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(p, m), typeof(object)), p);
-                return (Func<T, object>)exp.Compile();
+                return (Func<T, object?>)exp.Compile();
             }
         }
 
-        public static Func<object, object> CreateGetterUntyped(Type type, MemberInfo m)
+        public static Func<object, object?>? CreateGetterUntyped(Type type, MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateGetterUntyped"))
             {
@@ -264,11 +254,11 @@ namespace Signum.Utilities.Reflection
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(object), typeof(object));
                 var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, type), m), typeof(object)), p);
-                return (Func<object, object>)exp.Compile();
+                return (Func<object, object?>)exp.Compile();
             }
         }
 
-        public static Action<T, P> CreateSetter<T, P>(MemberInfo m)
+        public static Action<T, P>? CreateSetter<T, P>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
             {
@@ -283,7 +273,7 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static Action<T, object> CreateSetter<T>(MemberInfo m)
+        public static Action<T, object?>? CreateSetter<T>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
             {
@@ -294,13 +284,11 @@ namespace Signum.Utilities.Reflection
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 var exp = Expression.Lambda(typeof(Action<T, object>),
                     Expression.Assign(Expression.MakeMemberAccess(t, m), Expression.Convert(p, m.ReturningType())), t, p);
-                return (Action<T, object>)exp.Compile();
+                return (Action<T, object?>)exp.Compile();
             }
         }
-
-        static Module module = ((Expression<Func<int>>)(() => 2)).Compile().Method.Module;
-
-        public static Action<object, object> CreateSetterUntyped(Type type, MemberInfo m)
+        
+        public static Action<object, object?>? CreateSetterUntyped(Type type, MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateSetterUntyped"))
             {
@@ -311,7 +299,7 @@ namespace Signum.Utilities.Reflection
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 var exp = Expression.Lambda(typeof(Action<object, object>),
                     Expression.Assign(Expression.MakeMemberAccess(Expression.Convert(t, type), m), Expression.Convert(p, m.ReturningType())), t, p);
-                return (Action<object, object>)exp.Compile();
+                return (Action<object, object?>)exp.Compile();
             }
         }
 
@@ -383,7 +371,7 @@ namespace Signum.Utilities.Reflection
             return formatString.HasText() && formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public static object ParsePercentage(string value, Type targetType, CultureInfo culture)
+        public static object? ParsePercentage(string value, Type targetType, CultureInfo culture)
         {
             value = value.Trim(culture.NumberFormat.PercentSymbol.ToCharArray());
 
@@ -415,7 +403,7 @@ namespace Signum.Utilities.Reflection
                 return (T)(object)value;
 
             if (value == null || value == "")
-                return (T)(object)null;
+                return (T)(object?)null!;
 
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
@@ -426,13 +414,13 @@ namespace Signum.Utilities.Reflection
                 return (T)Convert.ChangeType(value, utype);
         }
 
-        public static object Parse(string value, Type type)
+        public static object? Parse(string value, Type type)
         {
             if (type == typeof(string))
                 return (object)value;
 
             if (value == null || value == "" || value == " ")
-                return (object)null;
+                return (object?)null;
 
             Type utype = type.UnNullify();
             if (utype.IsEnum)
@@ -461,7 +449,7 @@ namespace Signum.Utilities.Reflection
                 return (T)(object)value;
 
             if (value == null || value == "")
-                return (T)(object)null;
+                return (T)(object?)null!;
 
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
@@ -472,13 +460,13 @@ namespace Signum.Utilities.Reflection
                 return (T)Convert.ChangeType(value, utype, culture);
         }
 
-        public static object Parse(string value, Type type, CultureInfo culture)
+        public static object? Parse(string value, Type type, CultureInfo culture)
         {
             if (type == typeof(string))
-                return (object)value;
+                return value;
 
             if (value == null || value == "")
-                return (object)null;
+                return null;
 
             Type utype = type.UnNullify();
             if (utype.IsEnum)
@@ -491,38 +479,38 @@ namespace Signum.Utilities.Reflection
 
         public static bool TryParse<T>(string value, out T result)
         {
-            if (TryParse(value, typeof(T), CultureInfo.CurrentCulture, out object objResult))
+            if (TryParse(value, typeof(T), CultureInfo.CurrentCulture, out object? objResult))
             {
-                result = (T)objResult;
+                result = (T)objResult!;
                 return true;
             }
             else
             {
-                result = default(T);
+                result = default(T)!;
                 return false;
             }
         }
 
         public static bool TryParse<T>(string value,  CultureInfo ci, out T result)
         {
-            if (TryParse(value, typeof(T), ci, out object objResult))
+            if (TryParse(value, typeof(T), ci, out object? objResult))
             {
-                result = (T)objResult;
+                result = (T)objResult!;
                 return true;
             }
             else
             {
-                result = default(T);
+                result = default(T)!;
                 return false;
             }
         }
 
-        public static bool TryParse(string value, Type type, out object result)
+        public static bool TryParse(string? value, Type type, out object? result)
         {
             return TryParse(value, type, CultureInfo.CurrentCulture, out result);
         }
 
-        public static bool TryParse(string value, Type type, CultureInfo ci, out object result)
+        public static bool TryParse(string? value, Type type, CultureInfo ci, out object? result)
         {
             if (type == typeof(string))
             {
@@ -710,10 +698,10 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static T ChangeType<T>(object value)
+        public static T ChangeType<T>(object? value)
         {
             if (value == null)
-                return (T)(object)null;
+                return (T)(object?)null!;
 
             if (value.GetType() == typeof(T))
                 return (T)value;
@@ -736,7 +724,7 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static object ChangeType(object value, Type type)
+        public static object? ChangeType(object? value, Type type)
         {
             if (value == null)
                 return null;
@@ -770,7 +758,7 @@ namespace Signum.Utilities.Reflection
                     {
                         var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
                         IList col = (IList)Activator.CreateInstance(colType);
-                        foreach (var item in value as IEnumerable)
+                        foreach (var item in (IEnumerable)value)
                         {
                             col.Add(item);
                         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.IO;
 using System.Resources;
@@ -36,7 +36,7 @@ namespace Signum.Utilities
             str.Write(data, 0, data.Length);
         }
 
-        public static string ReadResourceStream(this Assembly assembly, string name, Encoding encoding = null)
+        public static string ReadResourceStream(this Assembly assembly, string name, Encoding? encoding = null)
         {
             using (Stream stream = assembly.GetManifestResourceStream(name))
             {
@@ -82,7 +82,7 @@ namespace Signum.Utilities
 
         [DebuggerStepThrough]
         public static R Using<T, R>(this T disposable, Func<T, R> function)
-            where T : IDisposable
+            where T : IDisposable? 
         {
             //using (disposable)
             //    return function(disposable);
@@ -108,7 +108,7 @@ namespace Signum.Utilities
 
         [DebuggerStepThrough]
         public static void EndUsing<T>(this T disposable, Action<T> action)
-            where T : IDisposable
+            where T : IDisposable? 
         {
             try
             {

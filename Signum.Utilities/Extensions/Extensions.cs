@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web;
 
@@ -13,7 +14,7 @@ namespace Signum.Utilities
     public static class Extensions
     {
         #region Parse Number
-        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
+        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo? ci = null)
         {
             if (int.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out int result))
                 return result;
@@ -21,7 +22,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
+        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo? ci = null)
         {
             if (long.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out long result))
                 return result;
@@ -29,7 +30,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
+        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo? ci = null)
         {
             if (short.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out short result))
                 return result;
@@ -37,7 +38,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
+        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo? ci = null)
         {
             if (float.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out float result))
                 return result;
@@ -45,7 +46,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
+        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo? ci = null)
         {
             if (double.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out double result))
                 return result;
@@ -53,7 +54,7 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number, CultureInfo ci = null)
+        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number, CultureInfo? ci = null)
         {
             if (decimal.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out decimal result))
                 return result;
@@ -225,7 +226,7 @@ namespace Signum.Utilities
 
         #region DateTime
 
-        public static DateTime? ToDateTimeExact(this string date, string format, IFormatProvider formatProvider = null,
+        public static DateTime? ToDateTimeExact(this string date, string format, IFormatProvider? formatProvider = null,
             DateTimeStyles? styles = null)
         {
             if (DateTime.TryParseExact(date, format,
@@ -261,7 +262,7 @@ namespace Signum.Utilities
             return value == -1 ? defaultValue : value;
         }
 
-        public static T ThrowIfNull<T>(this T? t, string message)
+        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, string message)
          where T : struct
         {
             if (t == null)
@@ -269,7 +270,7 @@ namespace Signum.Utilities
             return t.Value;
         }
 
-        public static T ThrowIfNull<T>(this T t, string message)
+        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, string message)
             where T : class
         {
             if (t == null)
@@ -278,7 +279,7 @@ namespace Signum.Utilities
         }
 
 
-        public static T ThrowIfNull<T>(this T? t, Func<string> message)
+        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, Func<string> message)
          where T : struct
         {
             if (t == null)
@@ -286,7 +287,7 @@ namespace Signum.Utilities
             return t.Value;
         }
 
-        public static T ThrowIfNull<T>(this T t, Func<string> message)
+        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, Func<string> message)
             where T : class
         {
             if (t == null)
@@ -298,6 +299,57 @@ namespace Signum.Utilities
         {
             return func(t);
         }
+
+        public delegate R? TryCC<T, R>(T val) where T : class where R : class;
+        public static R? Try<T, R>(this T? t, TryCC<T, R> func) where T : class where R : class
+        {
+            if (t == null)
+                return null;
+            return func(t);
+        }
+
+        public delegate R TryCS<T, R>(T val) where T : class where R : struct;
+        public static R? Try<T, R>(this T? t, TryCS<T, R> func) where T : class where R : struct
+        {
+            if (t == null)
+                return null;
+            return func(t);
+        }
+
+        public delegate R? TryCN<T, R>(T val) where T : class where R : struct;
+        public static R? Try<T, R>(this T? t, TryCN<T, R> func) where T : class where R : struct
+        {
+            if (t == null)
+                return null;
+            return func(t);
+        }
+
+        public delegate R? TrySC<T, R>(T val) where T : struct where R : class;
+        public static R? Try<T, R>(this T? t, TrySC<T, R> func) where T : struct where R : class
+        {
+            if (t == null)
+                return null;
+            return func(t.Value);
+        }
+
+        public delegate R TrySS<T, R>(T val) where T : struct where R : struct;
+        public static R? Try<T, R>(this T? t, TrySS<T, R> func) where T : struct where R : struct
+        {
+            if (t == null)
+                return null;
+
+            return func(t.Value);
+        }
+
+        public delegate R? TrySN<T, R>(T val) where T : struct where R : struct;
+        public static R? Try<T, R>(this T? t, TrySN<T, R> func) where T : struct where R : struct
+        {
+            if (t == null)
+                return null;
+
+            return func(t.Value);
+        }
+
 
         public static T Do<T>(this T t, Action<T> action)
         {
@@ -350,9 +402,9 @@ namespace Signum.Utilities
         public delegate R FuncCC<in T, R>(T input)
             where T : class
             where R : class;
-        public static IEnumerable<T> Follow<T>(this T start, FuncCC<T, T> next) where T : class
+        public static IEnumerable<T> Follow<T>(this T start, FuncCC<T, T?> next) where T : class
         {
-            for (T i = start; i != null; i = next(i))
+            for (T? i = start; i != null; i = next(i))
                 yield return i;
         }
 
@@ -369,7 +421,7 @@ namespace Signum.Utilities
                 yield return i.Value;
         }
 
-        public static IEnumerable<D> GetInvocationListTyped<D>(this D multicastDelegate)
+        public static IEnumerable<D> GetInvocationListTyped<D>(this D? multicastDelegate)
             where D : class, ICloneable, ISerializable
         {
             if (multicastDelegate == null)

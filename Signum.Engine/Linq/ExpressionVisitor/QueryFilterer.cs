@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
@@ -13,7 +13,7 @@ namespace Signum.Engine.Linq
 {
     public class QueryFilterer : ExpressionVisitor
     {
-        static GenericInvoker<Func<Schema, LambdaExpression>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression>>(s => s.GetInDatabaseFilter<TypeEntity>());
+        static GenericInvoker<Func<Schema, LambdaExpression?>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression?>>(s => s.GetInDatabaseFilter<TypeEntity>());
         static MethodInfo miWhere = ReflectionTools.GetMethodInfo((IQueryable<object> q) => q.Where(a => true)).GetGenericMethodDefinition();
 
         bool filter;
@@ -35,12 +35,11 @@ namespace Signum.Engine.Linq
                     {
                         if (typeof(Entity).IsAssignableFrom(queryType))
                         {
-                            LambdaExpression rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
-
+                            LambdaExpression? rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
                             if (rawFilter != null)
                             {
-                                Expression clean = ExpressionCleaner.Clean(rawFilter);
-                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+                                Expression clean = ExpressionCleaner.Clean(rawFilter)!;
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
 
                                 return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                             }
@@ -49,15 +48,14 @@ namespace Signum.Engine.Linq
                         {
                             Type entityType = queryType.GetGenericArguments()[0];
 
-                            LambdaExpression rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
-
+                            LambdaExpression? rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
                             if (rawFilter != null)
                             {
                                 var param = Expression.Parameter(queryType, "mle");
                                 var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
 
-                                Expression clean = ExpressionCleaner.Clean(lambda);
-                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+                                Expression clean = ExpressionCleaner.Clean(lambda)!;
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
 
                                 return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                             }
@@ -71,7 +69,7 @@ namespace Signum.Engine.Linq
                     /// <summary>
                     /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
                     /// </summary>
-                    return DbQueryProvider.Clean(query.Expression, filter, null);
+                    return DbQueryProvider.Clean(query.Expression, filter, null)!;
                 }
             }
 
@@ -95,7 +93,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        internal static Expression Filter(Expression expression, bool filter)
+        internal static Expression? Filter(Expression? expression, bool filter)
         {
             return new QueryFilterer { filter = filter }.Visit(expression);
         }

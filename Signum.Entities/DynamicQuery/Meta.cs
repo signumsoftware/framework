@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
@@ -10,7 +10,7 @@ namespace Signum.Entities.DynamicQuery
     {
         public readonly Implementations? Implementations;
 
-        public abstract string IsAllowed();
+        public abstract string? IsAllowed();
 
         protected Meta(Implementations? implementations)
         {
@@ -29,7 +29,7 @@ namespace Signum.Entities.DynamicQuery
             this.PropertyRoutes = propertyRoutes;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull();
             if (result.IsEmpty())
@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
                 .ToReadOnly();
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
             var result = CleanMetas.Select(a => a.IsAllowed()).NotNull();
             if (result.IsEmpty())

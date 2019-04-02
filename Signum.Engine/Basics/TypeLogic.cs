@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -37,7 +37,7 @@ namespace Signum.Engine.Basics
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -86,10 +86,10 @@ namespace Signum.Engine.Basics
         {
             return (from dn in Administrator.TryRetrieveAll<TypeEntity>(replacements)
                     join t in Schema.Current.Tables.Keys on dn.FullClassName equals (EnumEntity.Extract(t) ?? t).FullName
-                    select new { dn, t }).ToDictionary(a => a.dn, a => a.t);
+                    select (dn, t)).ToDictionary(a => a.dn, a => a.t);
         }
 
-        public static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        public static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             var schema = Schema.Current;
 
@@ -159,7 +159,7 @@ namespace Signum.Engine.Basics
             pc.Schema.Name  == ps.Schema.Name &&
             Suffix(pc.Schema.Database?.Name) == Suffix(ps.Schema.Database?.Name);
 
-        static string Suffix(string name) => name.TryAfterLast("_") ?? name;
+        static string? Suffix(string? name) => name.TryAfterLast("_") ?? name;
 
         static Dictionary<string, O> ApplyReplacementsToOld<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
         {
@@ -177,7 +177,7 @@ namespace Signum.Engine.Basics
 
             return GenerateSchemaTypes()
                 .Select((e, i) => table.InsertSqlSync(e, suffix: i.ToString()))
-                .Combine(Spacing.Simple)
+                .Combine(Spacing.Simple)!
                 .PlainSqlCommand();
         }
 
@@ -210,7 +210,7 @@ namespace Signum.Engine.Basics
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the schema");
         }
 
-        public static Type TryGetType(string cleanName)
+        public static Type? TryGetType(string cleanName)
         {
             return NameToType.TryGetC(cleanName);
         }
@@ -220,7 +220,7 @@ namespace Signum.Engine.Basics
             return TypeToName.GetOrThrow(type, "Type {0} not found in the schema");
         }
 
-        public static string TryGetCleanName(Type type)
+        public static string? TryGetCleanName(Type type)
         {
             return TypeToName.TryGetC(type);
         }
@@ -240,7 +240,7 @@ namespace Signum.Engine.Basics
                     current.Tables.Keys,
                     t => t.FullClassName,
                     t => (EnumEntity.Extract(t) ?? t).FullName,
-                    (typeEntity, type) => new { typeEntity, type },
+                    (typeEntity, type) => (typeEntity, type),
                      "caching {0}".FormatWith(current.Table(typeof(TypeEntity)).Name)
                     ).ToDictionary(a => a.type, a => a.typeEntity);
 

@@ -56,11 +56,11 @@ namespace Signum.Engine.Linq
                 exp1 = ConstanToNewExpression(exp1) ?? exp1;
                 exp2 = ConstanToNewExpression(exp2) ?? exp2;
 
-                return (exp1 as NewExpression).Arguments.ZipStrict(
-                       (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).AggregateAnd();
+                return ((NewExpression)exp1).Arguments.ZipStrict(
+                       ((NewExpression)exp2).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).AggregateAnd();
             }
 
-            Expression result;
+            Expression? result;
             result = PrimaryKeyEquals(exp1, exp2);
             if (result != null)
                 return result;
@@ -101,7 +101,7 @@ namespace Signum.Engine.Linq
             return EqualNullable(exp1, exp2);
         }
 
-        private static Expression EnumEquals(Expression exp1, Expression exp2)
+        private static Expression? EnumEquals(Expression exp1, Expression exp2)
         {
             var exp1Clean = RemoveConvertChain(exp1);
             var exp2Clean = RemoveConvertChain(exp2);
@@ -124,7 +124,7 @@ namespace Signum.Engine.Linq
             return null;
         }
         
-        private static Expression ConstantToDayOfWeek(Expression exp)
+        private static Expression? ConstantToDayOfWeek(Expression exp)
         {
             if (exp is ConstantExpression c)
             {
@@ -150,10 +150,8 @@ namespace Signum.Engine.Linq
 
             }
         }
-
-
-
-        private static Expression ConstanToNewExpression(Expression exp)
+        
+        private static Expression? ConstanToNewExpression(Expression exp)
         {
             var ce = exp as ConstantExpression;
 
@@ -172,7 +170,7 @@ namespace Signum.Engine.Linq
             return Expression.New(ci, ci.GetParameters().Select(p => Expression.Constant(values.GetOrThrow(p.Name), p.ParameterType)));
         }
 
-        public static Expression PrimaryKeyEquals(Expression exp1, Expression exp2)
+        public static Expression? PrimaryKeyEquals(Expression exp1, Expression exp2)
         {
             if (exp1.Type.UnNullify() == typeof(PrimaryKey) || exp2.Type.UnNullify() == typeof(PrimaryKey))
             {
@@ -185,7 +183,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        public static Expression ObjectEquals(Expression expr1, Expression expr2)
+        public static Expression? ObjectEquals(Expression expr1, Expression expr2)
         {
             if (expr1.Type == typeof(object) && expr2.Type == typeof(object))
             {
@@ -195,8 +193,8 @@ namespace Signum.Engine.Linq
                 if (left == null && right == null)
                     return null;
 
-                left = left ?? ChangeConstant(expr1, right.Type);
-                right = right ?? ChangeConstant(expr2, left.Type);
+                left = left ?? ChangeConstant(expr1, right!.Type);
+                right = right ?? ChangeConstant(expr2, left!.Type);
 
                 if (left == null || right == null)
                     return null;
@@ -207,7 +205,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        private static Expression ChangeConstant(Expression exp, Type type)
+        private static Expression? ChangeConstant(Expression exp, Type type)
         {
             if (exp is ConstantExpression ce)
             {
@@ -230,7 +228,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        private static Expression UncastObject(Expression expr)
+        private static Expression? UncastObject(Expression expr)
         {
             if (expr.NodeType == ExpressionType.Convert)
                 return ((UnaryExpression)expr).Operand;
@@ -281,7 +279,7 @@ namespace Signum.Engine.Linq
                 return a.CompareTo(b) <= 0;
             }
 
-            public static MethodInfo GetMethod(ExpressionType type)
+            public static MethodInfo? GetMethod(ExpressionType type)
             {
                 switch (type)
                 {
@@ -318,10 +316,10 @@ namespace Signum.Engine.Linq
             return unary;
         }
 
-        private static Expression ConditionalEquals(Expression exp1, Expression exp2)
+        private static Expression? ConditionalEquals(Expression exp1, Expression exp2)
         {
-            if (Schema.Current.Settings.IsDbType(exp1.Type)||
-                Schema.Current.Settings.IsDbType(exp2.Type))
+            if (Schema.Current.Settings.IsDbType(exp1.Type.UnNullify())||
+                Schema.Current.Settings.IsDbType(exp2.Type.UnNullify()))
                 return null;
 
             if (exp1 is ConditionalExpression ce1)
@@ -341,10 +339,10 @@ namespace Signum.Engine.Linq
             return SmartOr(SmartAnd(ce.Test, ifTrue), SmartAnd(SmartNot(ce.Test), ifFalse));
         }
 
-        private static Expression CoalesceEquals(Expression exp1, Expression exp2)
+        private static Expression? CoalesceEquals(Expression exp1, Expression exp2)
         {
-            if (Schema.Current.Settings.IsDbType(exp1.Type)||
-                Schema.Current.Settings.IsDbType(exp2.Type))
+            if (Schema.Current.Settings.IsDbType(exp1.Type.UnNullify()) ||
+                Schema.Current.Settings.IsDbType(exp2.Type.UnNullify()))
                 return null;
 
             if (exp1.NodeType == ExpressionType.Coalesce)
@@ -405,7 +403,7 @@ namespace Signum.Engine.Linq
             return Expression.Or(e1, e2);
         }
 
-        private static Expression TypeEquals(Expression exp1, Expression exp2)
+        private static Expression? TypeEquals(Expression exp1, Expression exp2)
         {
             if (exp1.Type != typeof(Type) || exp2.Type != typeof(Type))
                 return null;
@@ -455,7 +453,7 @@ namespace Signum.Engine.Linq
             return False;
         }
 
-        private static Expression TypeConstantIbEquals(ConstantExpression ce, TypeImplementedByExpression typeIb)
+        private static Expression? TypeConstantIbEquals(ConstantExpression ce, TypeImplementedByExpression typeIb)
         {
             if (ce.IsNull())
             {
@@ -466,7 +464,7 @@ namespace Signum.Engine.Linq
 
             var externalId = typeIb.TypeImplementations.TryGetC(type);
 
-            return NotEqualToNull(externalId);
+            return externalId == null ? False : NotEqualToNull(externalId);
         }
 
         private static Expression TypeConstantIbaEquals(ConstantExpression ce, TypeImplementedByAllExpression typeIba)
@@ -575,7 +573,7 @@ namespace Signum.Engine.Linq
 
         public static Expression In(Expression element, object[] values)
         {
-            var nominate = DbExpressionNominator.FullNominate(element);
+            var nominate = DbExpressionNominator.FullNominate(element)!;
 
             if (nominate is ToDayOfWeekExpression dowe)
             {
@@ -599,7 +597,7 @@ namespace Signum.Engine.Linq
             if (cleanElement == NewId)
                 return False;
 
-            return InExpression.FromValues(DbExpressionNominator.FullNominate(cleanElement), cleanValues);
+            return InExpression.FromValues(DbExpressionNominator.FullNominate(cleanElement)!, cleanValues);
         }
 
         private static Expression DispachConditionalTypesIn(ConditionalExpression ce, IEnumerable<Type> collection)
@@ -650,7 +648,7 @@ namespace Signum.Engine.Linq
 
 
 
-        public static Expression LiteEquals(Expression e1, Expression e2)
+        public static Expression? LiteEquals(Expression e1, Expression e2)
         {
             if ( e1.Type.IsLite() || e2.Type.IsLite())
             {
@@ -663,7 +661,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        public static Expression MListElementEquals(Expression e1, Expression e2)
+        public static Expression? MListElementEquals(Expression e1, Expression e2)
         {
             if (e1 is MListElementExpression || e2 is MListElementExpression)
             {
@@ -695,7 +693,7 @@ namespace Signum.Engine.Linq
             return liteReference.Reference;
         }
 
-        public static Expression EntityEquals(Expression e1, Expression e2)
+        public static Expression? EntityEquals(Expression e1, Expression e2)
         {
             e1 = ConstantToEntity(e1) ?? e1;
             e2 = ConstantToEntity(e2) ?? e2;
@@ -804,9 +802,9 @@ namespace Signum.Engine.Linq
             return NotEqualNullable(exp.Value, new SqlConstantExpression(null, exp.ValueType));
         }
 
-        public static Expression ConstantToEntity(Expression expression)
+        public static Expression? ConstantToEntity(Expression expression)
         {
-            ConstantExpression c = expression as ConstantExpression;
+            ConstantExpression? c = expression as ConstantExpression;
             if (c == null)
                 return null;
 
@@ -828,9 +826,9 @@ namespace Signum.Engine.Linq
 
 
 
-        public static Expression ConstantToLite(Expression expression)
+        public static Expression? ConstantToLite(Expression expression)
         {
-            ConstantExpression c = expression as ConstantExpression;
+            ConstantExpression? c = expression as ConstantExpression;
             if (c == null)
                 return null;
 

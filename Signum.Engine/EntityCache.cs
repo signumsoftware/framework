@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -22,7 +22,7 @@ namespace Signum.Engine
 
                 var tuple = (e.GetType(), e.Id);
 
-                Entity ident = dic.TryGetC(tuple);
+                Entity? ident = dic.TryGetC(tuple);
 
                 if (ident == null)
                     dic.Add(tuple, e);
@@ -38,7 +38,7 @@ namespace Signum.Engine
                 return dic.ContainsKey((type, id));
             }
 
-            public Entity Get(Type type, PrimaryKey id)
+            public Entity? Get(Type type, PrimaryKey id)
             {
                 return dic.TryGetC((type, id));
             }
@@ -51,7 +51,7 @@ namespace Signum.Engine
                     Add(ident);
             }
 
-            IRetriever retriever;
+            IRetriever? retriever;
             public RealEntityCache(bool isSealed)
             {
                 IsSealed = isSealed;
@@ -88,16 +88,13 @@ namespace Signum.Engine
             }
 
             public bool IsSealed { get; private set; }
-            internal Dictionary<string, object> GetRetrieverUserData() => this.retriever.GetUserData();
+            internal Dictionary<string, object>? GetRetrieverUserData() => this.retriever?.GetUserData();
         }
 
 
-        static readonly Variable<RealEntityCache> currentCache = Statics.ThreadVariable<RealEntityCache>("cache");
-
-
-        RealEntityCache oldCache;
-
-        private bool facked = false;
+        static readonly Variable<RealEntityCache?> currentCache = Statics.ThreadVariable<RealEntityCache?>("cache");
+        readonly RealEntityCache? oldCache;
+        readonly bool facked = false;
 
         public EntityCache(EntityCacheType type = EntityCacheType.Normal)
         {
@@ -124,9 +121,9 @@ namespace Signum.Engine
 
         public static bool Created { get { return currentCache.Value != null; } }
 
-        internal static bool HasRetriever { get { return currentCache.Value != null && currentCache.Value.HasRetriever; } }
+        internal static bool HasRetriever { get { return currentCache.Value != null && currentCache.Value!.HasRetriever; } }
 
-        public static bool IsSealed { get { return currentCache.Value.IsSealed; } }
+        public static bool IsSealed { get { return currentCache.Value!.IsSealed; } }
 
         public void Dispose()
         {
@@ -169,17 +166,17 @@ namespace Signum.Engine
             return Current.Contains(type, id);
         }
 
-        public static T Get<T>(PrimaryKey id) where T : Entity
+        public static T? Get<T>(PrimaryKey id) where T : Entity
         {
-            return (T)Get(typeof(T), id);
+            return (T?)Get(typeof(T), id);
         }
 
-        public static Entity Get(Type type, PrimaryKey id)
+        public static Entity? Get(Type type, PrimaryKey id)
         {
             return Current.Get(type, id);
         }
 
-        public static Dictionary<string, object> RetrieverUserData()
+        public static Dictionary<string, object>? RetrieverUserData()
         {
             return Current.GetRetrieverUserData();
         }

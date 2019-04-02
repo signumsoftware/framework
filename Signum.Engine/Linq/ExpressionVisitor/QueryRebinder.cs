@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -11,17 +11,17 @@ namespace Signum.Engine.Linq
 {
     internal class QueryRebinder : DbExpressionVisitor
     {
-        ImmutableStack<Dictionary<ColumnExpression, ColumnExpression>> scopes = ImmutableStack<Dictionary<ColumnExpression, ColumnExpression>>.Empty;
+        ImmutableStack<Dictionary<ColumnExpression, ColumnExpression?>> scopes = ImmutableStack<Dictionary<ColumnExpression, ColumnExpression?>>.Empty;
 
-        public Dictionary<ColumnExpression, ColumnExpression> CurrentScope { get { return scopes.Peek(); } }
+        public Dictionary<ColumnExpression, ColumnExpression?> CurrentScope { get { return scopes.Peek(); } }
 
         private QueryRebinder() { }
 
 
         internal class ColumnCollector : DbExpressionVisitor
         {
-            internal Alias[] knownAliases;
-            internal Dictionary<ColumnExpression, ColumnExpression> currentScope;
+            internal Alias[] knownAliases = null!;
+            internal Dictionary<ColumnExpression, ColumnExpression?> currentScope = null!;
 
             protected internal override Expression VisitColumn(ColumnExpression column)
             {
@@ -135,7 +135,7 @@ namespace Signum.Engine.Linq
         {
             using (NewScope())
             {
-                CurrentScope.AddRange(askedColumns.ToDictionary(c => new ColumnExpression(c.Type, part.Alias, c.Name), c => (ColumnExpression)null));
+                CurrentScope.AddRange(askedColumns.ToDictionary(c => new ColumnExpression(c.Type, part.Alias, c.Name), c => (ColumnExpression?)null));
                 return (SourceWithAliasExpression)Visit(part);
             }
         }
@@ -185,8 +185,8 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSelect(SelectExpression select)
         {
-            Dictionary<ColumnExpression, ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (ColumnExpression)null);
-            Dictionary<ColumnExpression, ColumnExpression> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
+            Dictionary<ColumnExpression, ColumnExpression?> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (ColumnExpression?)null);
+            Dictionary<ColumnExpression, ColumnExpression?> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
 
             var disposable = NewScope();//SCOPE START
             var scope = CurrentScope;
@@ -203,7 +203,7 @@ namespace Signum.Engine.Linq
             foreach (var e in select.GroupBy)
                 col.Visit(e);
 
-            SourceExpression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From!);
             Expression top = this.Visit(select.Top);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
@@ -244,7 +244,7 @@ namespace Signum.Engine.Linq
             return result.AsReadOnly();
         }
 
-        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, ColumnExpression> askedColumns)
+        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, ColumnExpression?> askedColumns)
         {
             ColumnGenerator cg = new ColumnGenerator(columns);
 
@@ -258,14 +258,12 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    ColumnExpression colExp = CurrentScope[col];
+                    ColumnExpression? colExp = CurrentScope[col];
                     //if (expr is ColumnExpression colExp)
                     //{
-                    ColumnDeclaration cd = cg.Columns.FirstOrDefault(c => c.Expression.Equals(colExp));
+                    ColumnDeclaration? cd = cg.Columns.FirstOrDefault(c => c!.Expression.Equals(colExp));
                     if (cd == null)
-                    {
-                        cd = cg.MapColumn(colExp);
-                    }
+                        cd = cg.MapColumn(colExp!);
 
                     askedColumns[col] = new ColumnExpression(col.Type, currentAlias, cd.Name);
                     //}
@@ -278,20 +276,20 @@ namespace Signum.Engine.Linq
 
 
             if (columns.Count != cg.Columns.Count())
-                return cg.Columns.ToReadOnly();
+                return cg.Columns.NotNull().ToReadOnly();
 
             return columns;
         }
 
         public IDisposable NewScope()
         {
-            scopes = scopes.Push(new Dictionary<ColumnExpression, ColumnExpression>());
+            scopes = scopes.Push(new Dictionary<ColumnExpression, ColumnExpression?>());
             return new Disposable(() => scopes = scopes.Pop());
         }
 
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
-            if (CurrentScope.TryGetValue(column, out ColumnExpression result))
+            if (CurrentScope.TryGetValue(column, out ColumnExpression? result))
                 return result ?? column;
             else
             {
@@ -302,7 +300,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
-            var column = scalar.Select.Columns.SingleEx();
+            var column = scalar.Select!.Columns.SingleEx();
 
             VisitColumn(new ColumnExpression(scalar.Type, scalar.Select.Alias, column.Name ?? "-"));
 

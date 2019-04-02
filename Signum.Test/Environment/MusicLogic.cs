@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -237,7 +237,7 @@ namespace Signum.Test.Environment
             new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
             {
                 ToStates = { AlbumState.Saved },
-                Construct = (BandEntity band, object[] args) =>
+                Construct = (BandEntity band, object[]? args) =>
                     new AlbumEntity
                     {
                         Author = band,

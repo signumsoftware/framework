@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 
@@ -19,30 +19,30 @@ namespace Signum.Entities
         {
             public static ConstructSymbol<T>.Simple Simple(Type declaringType, string fieldName)
             {
-                return new SimpleImp { Symbol = new OperationSymbol(declaringType, fieldName) };
+                return new SimpleImp(new OperationSymbol(declaringType, fieldName));
             }
 
             public static ConstructSymbol<T>.From<F> From<F>(Type declaringType, string fieldName)
                 where F : class,  IEntity
             {
-                return new FromImp<F> { Symbol = new OperationSymbol(declaringType, fieldName) };
+                return new FromImp<F>(new OperationSymbol(declaringType, fieldName));
             }
 
             public static ConstructSymbol<T>.FromMany<F>  FromMany<F>(Type declaringType, string fieldName)
                 where F : class, IEntity
             {
-                return new FromManyImp<F> { Symbol = new OperationSymbol(declaringType, fieldName) };
+                return new FromManyImp<F>(new OperationSymbol(declaringType, fieldName));
             }
 
             [Serializable]
             class SimpleImp : ConstructSymbol<T>.Simple
             {
-                OperationSymbol symbol;
-                public OperationSymbol Symbol
+                public SimpleImp(OperationSymbol symbol)
                 {
-                    get { return symbol; }
-                    internal set { this.symbol = value; }
+                    this.Symbol = symbol;
                 }
+
+                public OperationSymbol Symbol { get; internal set; }
 
                 public override string ToString()
                 {
@@ -54,12 +54,12 @@ namespace Signum.Entities
             class FromImp<F> : ConstructSymbol<T>.From<F>
                 where F : class, IEntity
             {
-                OperationSymbol symbol;
-                public OperationSymbol Symbol
+                public FromImp(OperationSymbol symbol)
                 {
-                    get { return symbol; }
-                    internal set { this.symbol = value; }
+                    Symbol = symbol;
                 }
+
+                public OperationSymbol Symbol { get; private set; }
 
                 public Type BaseType
                 {
@@ -76,12 +76,12 @@ namespace Signum.Entities
             class FromManyImp<F> : ConstructSymbol<T>.FromMany<F>
                 where F : class, IEntity
             {
-                OperationSymbol symbol;
-                public OperationSymbol Symbol
+                public FromManyImp(OperationSymbol symbol)
                 {
-                    get { return symbol; }
-                    internal set { this.symbol = value; }
+                    Symbol = symbol;
                 }
+
+                public OperationSymbol Symbol { get; set; }
 
                 public Type BaseType
                 {
@@ -98,26 +98,26 @@ namespace Signum.Entities
         public static ExecuteSymbol<T> Execute<T>(Type declaringType, string fieldName)
             where T : class,  IEntity
         {
-            return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(declaringType, fieldName) };
+            return new ExecuteSymbolImp<T>(new OperationSymbol(declaringType, fieldName));
         }
 
         public static DeleteSymbol<T> Delete<T>(Type declaringType, string fieldName)
             where T : class, IEntity
         {
-            return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(declaringType, fieldName) };
+            return new DeleteSymbolImp<T>(new OperationSymbol(declaringType, fieldName));
         }
 
         [Serializable]
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
           where T : class, IEntity
         {
-            OperationSymbol symbol;
-            public OperationSymbol Symbol
+            public ExecuteSymbolImp(OperationSymbol symbol)
             {
-                get { return symbol; }
-                internal set { this.symbol = value; }
+                Symbol = symbol;
             }
 
+            public OperationSymbol Symbol { get; private set; }
+            
             public Type BaseType
             {
                 get { return typeof(T); }
@@ -133,12 +133,12 @@ namespace Signum.Entities
         class DeleteSymbolImp<T> : DeleteSymbol<T>
           where T : class, IEntity
         {
-            OperationSymbol symbol;
-            public OperationSymbol Symbol
+            public DeleteSymbolImp(OperationSymbol symbol)
             {
-                get { return symbol; }
-                internal set { this.symbol = value; }
+                Symbol = symbol;
             }
+
+            public OperationSymbol Symbol { get; private set; }
 
             public Type BaseType
             {
@@ -205,6 +205,13 @@ namespace Signum.Entities
     [Serializable]
     public class OperationInfo
     {
+        public OperationInfo(OperationSymbol symbol, OperationType type)
+        {
+            this.OperationSymbol = symbol;
+            this.OperationType = type;
+        }
+
+
         public OperationSymbol OperationSymbol { get; internal set; }
         public OperationType OperationType { get; internal set; }
 
@@ -214,8 +221,8 @@ namespace Signum.Entities
         public bool? HasCanExecute { get; internal set; }
 
         public bool Returns { get; internal set; }
-        public Type ReturnType { get; internal set; }
-        public Type BaseType { get; internal set; }
+        public Type? ReturnType { get; internal set; }
+        public Type? BaseType { get; internal set; }
 
         public override string ToString()
         {

@@ -33,12 +33,12 @@ namespace TestHelper
         /// Note: Considers Diagnostics to be the same if they have the same Ids.  In the case of multiple diagnostics with the same Id in a row,
         /// this method may not necessarily return the new one.
         /// </summary>
-        /// <param name="diagnostics">The Diagnostics that existed in the code before the CodeFix was applied</param>
+        /// <param name="oldDiagnostics">The Diagnostics that existed in the code before the CodeFix was applied</param>
         /// <param name="newDiagnostics">The Diagnostics that exist in the code after the CodeFix was applied</param>
         /// <returns>A list of Diagnostics that only surfaced in the code after the CodeFix was applied</returns>
-        private static IEnumerable<Diagnostic> GetNewDiagnostics(IEnumerable<Diagnostic> diagnostics, IEnumerable<Diagnostic> newDiagnostics)
+        private static IEnumerable<Diagnostic> GetNewDiagnostics(IEnumerable<Diagnostic> oldDiagnostics, IEnumerable<Diagnostic> newDiagnostics)
         {
-            var oldArray = diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
+            var oldArray = oldDiagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
             var newArray = newDiagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
 
             int oldIndex = 0;

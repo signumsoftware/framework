@@ -17,7 +17,7 @@ namespace Signum.Engine.Maps
     public interface IFieldFinder
     {
         Field GetField(MemberInfo value);
-        Field TryGetField(MemberInfo value);
+        Field? TryGetField(MemberInfo value);
     }
 
     public interface ITable
@@ -28,13 +28,13 @@ namespace Signum.Engine.Maps
 
         Dictionary<string, IColumn> Columns { get; }
 
-        List<Index> MultiColumnIndexes { get; set; }
+        List<Index>? MultiColumnIndexes { get; set; }
 
         List<Index> GeneratAllIndexes();
 
         void GenerateColumns();
 
-        SystemVersionedInfo SystemVersioned { get; }
+        SystemVersionedInfo? SystemVersioned { get; }
     }
 
     public class SystemVersionedInfo
@@ -42,6 +42,13 @@ namespace Signum.Engine.Maps
         public ObjectName TableName;
         public string StartColumnName;
         public string EndColumnName;
+
+        public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
+        {
+            TableName = tableName;
+            StartColumnName = startColumnName;
+            EndColumnName = endColumnName;
+        }
 
         internal IEnumerable<IColumn> Columns()
         {
@@ -72,15 +79,15 @@ namespace Signum.Engine.Maps
             public IsNullable Nullable => IsNullable.No;
             public SqlDbType SqlDbType => SqlDbType.DateTime2;
             public Type Type => typeof(DateTime);
-            public string UserDefinedTypeName => null;
+            public string? UserDefinedTypeName => null;
             public bool PrimaryKey => false;
             public bool IdentityBehaviour => false;
             public bool Identity => false;
-            public string Default { get; set; }
+            public string? Default { get; set; }
             public int? Size => null;
             public int? Scale => null;
-            public string Collation => null;
-            public Table ReferenceTable => null;
+            public string? Collation => null;
+            public Table? ReferenceTable => null;
             public bool AvoidForeignKey => false;
         }
 
@@ -101,20 +108,22 @@ namespace Signum.Engine.Maps
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
-        public SystemVersionedInfo SystemVersioned { get; set; }
+        public SystemVersionedInfo? SystemVersioned { get; set; }
 
         public Dictionary<string, EntityField> Fields { get; set; }
-        public Dictionary<Type, FieldMixin> Mixins { get; set; }
+        public Dictionary<Type, FieldMixin>? Mixins { get; set; }
 
         public Dictionary<string, IColumn> Columns { get; set; }
 
 
-        public List<Index> MultiColumnIndexes { get; set; }
+        public List<Index>? MultiColumnIndexes { get; set; }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public Table(Type type)
         {
             this.Type = type;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public override string ToString()
         {
@@ -138,7 +147,7 @@ namespace Signum.Engine.Maps
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
             inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
             updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));
-            saveCollections = new ResetLazy<CollectionsCache>(() => CollectionsCache.InitializeCollections(this));
+            saveCollections = new ResetLazy<CollectionsCache?>(() => CollectionsCache.InitializeCollections(this));
         }
 
         public Field GetField(MemberInfo member)
@@ -153,7 +162,7 @@ namespace Signum.Engine.Maps
                     return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
                 }
             }
-
+            
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
@@ -164,7 +173,7 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public Field TryGetField(MemberInfo member)
+        public Field? TryGetField(MemberInfo member)
         {
             if (member is MethodInfo mi)
             {
@@ -181,12 +190,12 @@ namespace Signum.Engine.Maps
                 return Mixins?.TryGetC((Type)member);
             }
 
-            FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member);
+            FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
 
             if (fi == null)
                 return null;
 
-            EntityField field = Fields.TryGetC(fi.Name);
+            EntityField? field = Fields.TryGetC(fi.Name);
 
             if (field == null)
                 return null;
@@ -273,13 +282,14 @@ namespace Signum.Engine.Maps
         public FieldInfo FieldInfo { get; private set; }
 
         Type type;
-        Func<object, object> getter;
-        public Func<object, object> Getter => getter ?? (getter = ReflectionTools.CreateGetterUntyped(type, FieldInfo));
+        Func<object, object?>? getter;
+        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetterUntyped(type, FieldInfo)!);
 
-        public EntityField(Type type, FieldInfo fi)
+        public EntityField(Type type, FieldInfo fi, Field field)
         {
-            FieldInfo = fi;
+            this.FieldInfo = fi;
             this.type = type;
+            this.Field = field;
         }
 
         public override string ToString()
@@ -292,9 +302,9 @@ namespace Signum.Engine.Maps
     {
         public Type FieldType { get; private set; }
         public PropertyRoute Route { get; private set; }
-        public UniqueIndex UniqueIndex { get; set; }
+        public UniqueIndex? UniqueIndex { get; set; }
 
-        public Field(PropertyRoute route, Type fieldType = null)
+        public Field(PropertyRoute route, Type? fieldType = null)
         {
             this.Route = route;
             this.FieldType = fieldType ?? route.Type;
@@ -311,7 +321,7 @@ namespace Signum.Engine.Maps
             return new[] { UniqueIndex };
         }
 
-        public virtual UniqueIndex GenerateUniqueIndex(ITable table, UniqueIndexAttribute attribute)
+        public virtual UniqueIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
         {
             if (attribute == null)
                 return null;
@@ -366,15 +376,15 @@ namespace Signum.Engine.Maps
         IsNullable Nullable { get; }
         SqlDbType SqlDbType { get; }
         Type Type { get; }
-        string UserDefinedTypeName { get; }
+        string? UserDefinedTypeName { get; }
         bool PrimaryKey { get; }
         bool IdentityBehaviour { get; }
         bool Identity { get; }
-        string Default { get; }
+        string? Default { get; }
         int? Size { get; }
         int? Scale { get; }
-        string Collation { get; }
-        Table ReferenceTable { get; }
+        string? Collation { get; }
+        Table? ReferenceTable { get; }
         bool AvoidForeignKey { get; }
     }
 
@@ -420,23 +430,25 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         IsNullable IColumn.Nullable { get { return IsNullable.No; } }
         public SqlDbType SqlDbType { get; set; }
-        public string UserDefinedTypeName { get; set; }
+        public string? UserDefinedTypeName { get; set; }
         bool IColumn.PrimaryKey { get { return true; } }
         public bool Identity { get; set; }
         bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
-        public string Collation { get; set; }
-        Table IColumn.ReferenceTable { get { return null; } }
+        public string? Collation { get; set; }
+        Table? IColumn.ReferenceTable { get { return null; } }
         public Type Type { get; set; }
         public bool AvoidForeignKey { get { return false; } }
-        public string Default { get; set; }
+        public string? Default { get; set; }
 
         Table table;
-        public FieldPrimaryKey(PropertyRoute route, Table table)
+        public FieldPrimaryKey(PropertyRoute route, Table table, string name, Type type)
             : base(route)
         {
             this.table = table;
+            this.Name = name;
+            this.Type = type;
         }
 
         public override string ToString()
@@ -473,20 +485,21 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         public IsNullable Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
-        public string UserDefinedTypeName { get; set; }
+        public string? UserDefinedTypeName { get; set; }
         public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
-        public string Collation { get; set; }
+        public string? Collation { get; set; }
         public int? Scale { get; set; }
-        Table IColumn.ReferenceTable { get { return null; } }
+        Table? IColumn.ReferenceTable { get { return null; } }
         public bool AvoidForeignKey { get { return false; } }
-        public string Default { get; set; }
+        public string? Default { get; set; }
 
-        public FieldValue(PropertyRoute route, Type fieldType = null)
+        public FieldValue(PropertyRoute route, Type? fieldType, string name)
             : base(route, fieldType)
         {
+            this.Name = name;
         }
 
         public override string ToString()
@@ -524,9 +537,10 @@ namespace Signum.Engine.Maps
     {
         public new Type Type { get; set; }
 
-        public FieldTicks(PropertyRoute route)
-            : base(route)
+        public FieldTicks(PropertyRoute route, Type type, string name)
+            : base(route, null, name)
         {
+            this.Type = type;
         }
     }
 
@@ -537,29 +551,33 @@ namespace Signum.Engine.Maps
             public string Name { get; set; }
             public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
             public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
-            string IColumn.UserDefinedTypeName { get { return null; } }
+            string? IColumn.UserDefinedTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
             bool IColumn.IdentityBehaviour { get { return false; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
-            string IColumn.Collation { get { return null; } }
-            public Table ReferenceTable { get { return null; } }
+            string? IColumn.Collation { get { return null; } }
+            public Table? ReferenceTable { get { return null; } }
             Type IColumn.Type { get { return typeof(bool); } }
             public bool AvoidForeignKey { get { return false; } }
-            public string Default { get; set; }
+            public string? Default { get; set; }
 
+            public EmbeddedHasValueColumn(string name)
+            {
+                Name = name;
+            }
         }
 
-        public EmbeddedHasValueColumn HasValue { get; set; }
+        public EmbeddedHasValueColumn? HasValue { get; set; }
 
         public Dictionary<string, EntityField> EmbeddedFields { get; set; }
-
-        public Func<EmbeddedEntity> Constructor { get; private set; }
-
-        public FieldEmbedded(PropertyRoute route)
+        
+        public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields)
             : base(route)
         {
+            this.HasValue = hasValue;
+            this.EmbeddedFields = embeddedFields;
         }
 
         public override string ToString()
@@ -579,14 +597,14 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public Field TryGetField(MemberInfo value)
+        public Field? TryGetField(MemberInfo value)
         {
-            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value);
+            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value)!;
 
             if (fi == null)
                 return null;
 
-            EntityField field = EmbeddedFields.TryGetC(fi.Name);
+            EntityField? field = EmbeddedFields.TryGetC(fi.Name);
 
             if (field == null)
                 return null;
@@ -634,10 +652,11 @@ namespace Signum.Engine.Maps
 
         public Table MainEntityTable;
 
-        public FieldMixin(PropertyRoute route, Table mainEntityTable)
+        public FieldMixin(PropertyRoute route, Table mainEntityTable, Dictionary<string, EntityField> fields)
             : base(route)
         {
             this.MainEntityTable = mainEntityTable;
+            this.Fields = fields;
         }
 
         public override string ToString()
@@ -657,14 +676,14 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public Field TryGetField(MemberInfo value)
+        public Field? TryGetField(MemberInfo value)
         {
-            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value);
+            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value)!;
 
             if (fi == null)
                 return null;
 
-            EntityField field = Fields.TryGetC(fi.Name);
+            EntityField? field = Fields.TryGetC(fi.Name);
 
             if (field == null)
                 return null;
@@ -719,18 +738,23 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
+        Table? IColumn.ReferenceTable => ReferenceTable;
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
-        public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
-        public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
+        public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
+        public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
 
         public bool AvoidForeignKey { get; set; }
 
         public bool IsLite { get; internal set; }
         public bool AvoidExpandOnRetrieving { get; set; }
-        public string Default { get; set; }
+        public string? Default { get; set; }
 
-        public FieldReference(PropertyRoute route, Type fieldType = null) : base(route, fieldType) { }
+        public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
+        {
+            this.Name = name;
+            this.ReferenceTable = referenceTable;
+        }
 
         public override string ToString()
         {
@@ -800,7 +824,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public FieldEnum(PropertyRoute route) : base(route) { }
+        public FieldEnum(PropertyRoute route, string name, Table referenceTable) : base(route, null, name, referenceTable) { }
 
         public override string ToString()
         {
@@ -838,7 +862,10 @@ namespace Signum.Engine.Maps
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
 
-        public FieldImplementedBy(PropertyRoute route) : base(route) { }
+        public FieldImplementedBy(PropertyRoute route, Dictionary<Type, ImplementationColumn> implementations) : base(route, null)
+        {
+            this.ImplementationColumns = implementations;
+        }
 
         public override string ToString()
         {
@@ -895,7 +922,11 @@ namespace Signum.Engine.Maps
         public ImplementationStringColumn Column { get; set; }
         public ImplementationColumn ColumnType { get; set; }
 
-        public FieldImplementedByAll(PropertyRoute route) : base(route) { }
+        public FieldImplementedByAll(PropertyRoute route, ImplementationStringColumn column, ImplementationColumn columnType) : base(route)
+        {
+            this.Column = column;
+            this.ColumnType = columnType;
+        }
 
         public override IEnumerable<IColumn> Columns()
         {
@@ -950,38 +981,53 @@ namespace Signum.Engine.Maps
         bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
-        public Table ReferenceTable { get; set; }
+        public Table ReferenceTable { get; private set; }
+        Table? IColumn.ReferenceTable => ReferenceTable;
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
-        public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
-        public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
+        public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
+        public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         public bool AvoidForeignKey { get; set; }
-        public string Default { get; set; }
+        public string? Default { get; set; }
+
+        public ImplementationColumn(string name, Table referenceTable)
+        {
+            Name = name;
+            ReferenceTable = referenceTable;
+        }
     }
 
     public partial class ImplementationStringColumn : IColumn
     {
         public string Name { get; set; }
         public IsNullable Nullable { get; set; }
-        string IColumn.UserDefinedTypeName { get { return null; } }
+        string? IColumn.UserDefinedTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
         int? IColumn.Scale { get { return null; } }
-        public string Collation { get; set; }
-        public Table ReferenceTable { get { return null; } }
+        public string? Collation { get; set; }
+        public Table? ReferenceTable { get { return null; } }
         public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
         public Type Type { get { return typeof(string); } }
         public bool AvoidForeignKey { get { return false; } }
-        public string Default { get; set; }
+        public string? Default { get; set; }
+
+        public ImplementationStringColumn(string name)
+        {
+            Name = name;
+        }
     }
 
     public partial class FieldMList : Field, IFieldFinder
     {
         public TableMList TableMList { get; set; }
 
-        public FieldMList(PropertyRoute route) : base(route) { }
+        public FieldMList(PropertyRoute route, TableMList tableMList) : base(route)
+        {
+            this.TableMList = tableMList;
+        }
 
         public override string ToString()
         {
@@ -996,7 +1042,7 @@ namespace Signum.Engine.Maps
             throw new InvalidOperationException("{0} not supported by MList field".FormatWith(member.Name));
         }
 
-        public Field TryGetField(MemberInfo member)
+        public Field? TryGetField(MemberInfo member)
         {
             if (member.Name == "Item")
                 return TableMList.Field;
@@ -1039,42 +1085,52 @@ namespace Signum.Engine.Maps
             public string Name { get; set; }
             IsNullable IColumn.Nullable { get { return IsNullable.No; } }
             public SqlDbType SqlDbType { get; set; }
-            public string Collation { get; set; }
-            public string UserDefinedTypeName { get; set; }
+            public string? Collation { get; set; }
+            public string? UserDefinedTypeName { get; set; }
             bool IColumn.PrimaryKey { get { return true; } }
             public bool Identity { get; set; }
             bool IColumn.IdentityBehaviour { get { return true; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
-            Table IColumn.ReferenceTable { get { return null; } }
+            Table? IColumn.ReferenceTable { get { return null; } }
             public Type Type { get; set; }
             public bool AvoidForeignKey { get { return false; } }
-            public string Default { get; set; }
+            public string? Default { get; set; }
+
+            public PrimaryKeyColumn(Type type, string name)
+            {
+                Type = type;
+                Name = name;
+            }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
-        public List<Index> MultiColumnIndexes { get; set; }
+        public List<Index>? MultiColumnIndexes { get; set; }
 
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
         public FieldReference BackReference { get; set; }
-        public FieldValue Order { get; set; }
+        public FieldValue? Order { get; set; }
         public Field Field { get; set; }
 
-        public SystemVersionedInfo SystemVersioned { get; set; }
+        public SystemVersionedInfo? SystemVersioned { get; set; }
 
         public Type CollectionType { get; private set; }
-        public Func<IList> Constructor { get; private set; }
 
         public PropertyRoute PropertyRoute { get; internal set; }
-        Func<Entity, IMListPrivate> getter;
+        Func<Entity, IMListPrivate>? getter;
         public Func<Entity, IMListPrivate> Getter => getter ?? (getter = PropertyRoute.GetLambdaExpression<Entity, IMListPrivate>(true).Compile());
 
-        public TableMList(Type collectionType)
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+        public TableMList(Type collectionType, ObjectName name, PrimaryKeyColumn primaryKey, FieldReference backReference)
         {
+            this.Name = name;
+            this.PrimaryKey = primaryKey;
+            this.BackReference = backReference;
             this.CollectionType = collectionType;
             this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public override string ToString()
         {
@@ -1110,7 +1166,7 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo member)
         {
-            Field result = TryGetField(member);
+            Field? result = TryGetField(member);
 
             if(result  == null)
                 throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
@@ -1118,7 +1174,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public Field TryGetField(MemberInfo mi)
+        public Field? TryGetField(MemberInfo mi)
         {
             if (mi.Name == "Parent")
                 return this.BackReference;

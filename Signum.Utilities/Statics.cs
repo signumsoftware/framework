@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,7 +8,7 @@ namespace Signum.Utilities
 {
     public static class Statics
     {
-        static Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
+        static readonly Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
 
         public static ThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)
         {
@@ -17,7 +17,7 @@ namespace Signum.Utilities
             return variable;
         }
        
-        public static Dictionary<string, object> ExportThreadContext(bool force = false)
+        public static Dictionary<string, object?> ExportThreadContext(bool force = false)
         {
             return threadVariables.Where(t => !t.Value.IsClean && (!t.Value.AvoidExportImport || force)).ToDictionaryEx(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
         }
@@ -56,7 +56,7 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("The thread variable \r\n" + errors);
         }
 
-        static Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
+        static readonly Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
 
         public static SessionVariable<T> SessionVariable<T>(string name)
         {
@@ -82,7 +82,7 @@ namespace Signum.Utilities
     public interface IUntypedVariable
     {
         string Name { get; }
-        object UntypedValue { get; set; }
+        object? UntypedValue { get; set; }
         bool IsClean {get;}
         void Clean();
     }
@@ -98,10 +98,10 @@ namespace Signum.Utilities
 
         public abstract T Value { get; set; }
 
-        public object UntypedValue
+        public object? UntypedValue
         {
             get { return Value; }
-            set { Value = (T)value; }
+            set { Value = (T)value!; }
         }
 
         public bool IsClean
@@ -138,7 +138,7 @@ namespace Signum.Utilities
 
     public class ThreadVariable<T> : Variable<T>, IThreadVariable
     {
-        AsyncLocal<T> store = new AsyncLocal<T>();
+        readonly AsyncLocal<T> store = new AsyncLocal<T>();
 
         internal ThreadVariable(string name) : base(name) { }
 
@@ -152,13 +152,13 @@ namespace Signum.Utilities
 
         public override void Clean()
         {
-            Value = default(T);
+            Value = default(T)!;
         }
     }
 
     public abstract class SessionVariable<T>: Variable<T>
     {
-        public abstract Func<T> ValueFactory { get; set; }
+        public abstract Func<T>? ValueFactory { get; set; }
 
         protected internal SessionVariable(string name)
             : base(name)
@@ -168,7 +168,7 @@ namespace Signum.Utilities
         public T GetDefaulValue()
         {
             if (ValueFactory == null)
-                return default(T);
+                return default(T)!;
 
             Value = ValueFactory();
 
@@ -191,15 +191,16 @@ namespace Signum.Utilities
 
         class VoidVariable<T> : SessionVariable<T>
         {
-            public override Func<T> ValueFactory { get; set; }
+            public override Func<T>? ValueFactory { get; set; }
 
             public VoidVariable(string name)
                 : base(name)
-            { }
+            {
+            }
 
             public override T Value
             {
-                get { return default(T); }
+                get { return default(T)!; }
                 set { throw new InvalidOperationException("No session found to set '{0}'".FormatWith(this.Name)); ; }
             }
 
@@ -211,9 +212,9 @@ namespace Signum.Utilities
 
     public class SingletonSessionFactory : ISessionFactory
     {
-        public static Dictionary<string, object> singletonSession = new Dictionary<string, object>();
+        public static Dictionary<string, object?> singletonSession = new Dictionary<string, object?>();
 
-        public static Dictionary<string, object> SingletonSession
+        public static Dictionary<string, object?> SingletonSession
         {
             get { return singletonSession; }
             set { singletonSession = value; }
@@ -226,8 +227,8 @@ namespace Signum.Utilities
 
         class SingletonVariable<T> : SessionVariable<T>
         {
-            public override Func<T> ValueFactory { get; set; }
-            
+            public override Func<T>? ValueFactory { get; set; }
+
             public SingletonVariable(string name)
                 : base(name)
             { }
@@ -236,8 +237,8 @@ namespace Signum.Utilities
             {
                 get
                 {
-                    if (singletonSession.TryGetValue(Name, out object result))
-                        return (T)result;
+                    if (singletonSession.TryGetValue(Name, out object? result))
+                        return (T)result!;
 
                     return GetDefaulValue();
                 }
@@ -255,7 +256,7 @@ namespace Signum.Utilities
     {
         public ISessionFactory Factory;
 
-        static readonly ThreadVariable<Dictionary<string, object>> overridenSession = Statics.ThreadVariable<Dictionary<string, object>>("overridenSession");
+        static readonly ThreadVariable<Dictionary<string, object?>> overridenSession = Statics.ThreadVariable<Dictionary<string, object?>>("overridenSession");
 
         public static bool IsOverriden
         {
@@ -269,10 +270,10 @@ namespace Signum.Utilities
 
         public static IDisposable OverrideSession()
         {
-            return OverrideSession(new Dictionary<string, object>());
+            return OverrideSession(new Dictionary<string, object?>());
         }
 
-        public static IDisposable OverrideSession(Dictionary<string, object> sessionDictionary)
+        public static IDisposable OverrideSession(Dictionary<string, object?> sessionDictionary)
         {
             if (!(Statics.SessionFactory is ScopeSessionFactory))
                 throw new InvalidOperationException("Impossible to OverrideSession because Statics.SessionFactory is not a ScopeSessionFactory"); 
@@ -288,15 +289,15 @@ namespace Signum.Utilities
 
         class OverrideableVariable<T> : SessionVariable<T>
         {
-            SessionVariable<T> variable;
+            readonly SessionVariable<T> variable;
 
             public OverrideableVariable(SessionVariable<T> variable)
                 : base(variable.Name)
             {
                 this.variable = variable;
             }
-
-            public override Func<T> ValueFactory
+            
+            public override Func<T>? ValueFactory
             {
                 get { return variable.ValueFactory; }
                 set { variable.ValueFactory = value; }
@@ -310,8 +311,8 @@ namespace Signum.Utilities
 
                     if (dic != null)
                     {
-                        if (dic.TryGetValue(Name, out object result))
-                            return (T)result;
+                        if (dic.TryGetValue(Name, out object? result))
+                            return (T)result!;
 
                         return GetDefaulValue();
                     }

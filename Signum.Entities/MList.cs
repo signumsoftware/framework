@@ -86,10 +86,12 @@ namespace Signum.Entities
                 return "({0}) {1}".FormatWith(pre, Element);
             }
 
+#pragma warning disable IDE0051 // Remove unused private members
             private RowIdElement(SerializationInfo info, StreamingContext ctxt)
+#pragma warning restore IDE0051 // Remove unused private members
             {
                 this.RowId = null;
-                this.Element = default(T);
+                this.Element = default(T)!;
                 this.OldIndex = null;
                 foreach (SerializationEntry item in info)
                 {
@@ -117,11 +119,11 @@ namespace Signum.Entities
 
 
         [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [NonSerialized]
-        NotifyCollectionChangedEventHandler collectionChanged;
-        event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
+        NotifyCollectionChangedEventHandler? collectionChanged;
+        public event NotifyCollectionChangedEventHandler CollectionChanged
         {
             add { collectionChanged += value; }
             remove { collectionChanged -= value; }
@@ -611,10 +613,10 @@ namespace Signum.Entities
             this.Remove((T)value);
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get { return this[index]; }
-            set { this[index] = (T)value; }
+            set { this[index] = (T)value!; }
         }
 
         void ICollection.CopyTo(Array array, int index)
@@ -639,7 +641,7 @@ namespace Signum.Entities
             get { return this.innerList; }
         }
 
-        void IMListPrivate.InnerListModified(IList newItems, IList oldItems)
+        void IMListPrivate.InnerListModified(IList? newItems, IList? oldItems)
         {
             this.SetSelfModified();
 
@@ -680,7 +682,7 @@ namespace Signum.Entities
         {
             var prev = this.innerList[index];
 
-            this.innerList[index] = new RowIdElement(prev.Element, prev.RowId.Value, index);
+            this.innerList[index] = new RowIdElement(prev.Element, prev.RowId!.Value, index);
         }
 
         void IMListPrivate.ExecutePostRetrieving()
@@ -693,11 +695,11 @@ namespace Signum.Entities
             if (this.innerList.Any(a => a.RowId == null))
                 return; //The MList was changed in the entity PostRetriever, like UserChart Columns
 
-            if (this.innerList.Select(a => a.RowId.Value).Duplicates().Any())
+            if (this.innerList.Select(a => a.RowId!.Value).Duplicates().Any())
                 throw new InvalidOperationException("Duplicated RowId found, possible problem in LINQ provider");
 
             if (this.innerList.Any(a => a.OldIndex.HasValue))
-                this.innerList.Sort(a => a.OldIndex.Value);
+                this.innerList.Sort(a => a.OldIndex!.Value);
         }
 
         public bool AssignMList(MList<T> list)
@@ -756,7 +758,7 @@ namespace Signum.Entities
             }
             else
             {
-                var current = innerList.ToDictionary(a => a.RowId.Value, a => a.Element);
+                var current = innerList.ToDictionary(a => a.RowId!.Value, a => a.Element);
 
                 foreach (var item in newList)
                 {
@@ -780,6 +782,7 @@ namespace Signum.Entities
     }
 
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MListElement<E, V> where E : Entity
     {
         public PrimaryKey RowId { get; set; }
@@ -792,6 +795,7 @@ namespace Signum.Entities
             return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
         }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public interface IMListPrivate
     {
@@ -805,7 +809,7 @@ namespace Signum.Entities
         void SetRowId(int index, PrimaryKey rowId);
         void ForceRowId(int index, PrimaryKey rowId);
 
-        void InnerListModified(IList newItems, IList oldItems);
+        void InnerListModified(IList? newItems, IList? oldItems);
 
         void AssignAndPostRetrieving(IMListPrivate newList);
     }
@@ -820,7 +824,7 @@ namespace Signum.Entities
 
     internal sealed class MListDebugging<T>
     {
-        private ICollection<T> collection;
+        private readonly ICollection<T> collection;
 
         public MListDebugging(ICollection<T> collection)
         {
@@ -850,13 +854,13 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class PreserveOrderAttribute : SqlDbTypeAttribute
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public PreserveOrderAttribute()
         {
         }
 
-        public PreserveOrderAttribute(string name)
+        public PreserveOrderAttribute(string? name)
         {
             this.Name = name;
         }

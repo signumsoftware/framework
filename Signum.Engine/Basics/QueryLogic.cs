@@ -104,7 +104,7 @@ namespace Signum.Engine.Basics
             return QueryNames.GetOrThrow(queryKey, "QueryName with unique name {0} not found");
         }
 
-        public static object TryToQueryName(string queryKey)
+        public static object? TryToQueryName(string queryKey)
         {
             return QueryNames.TryGetC(queryKey);
         }
@@ -133,17 +133,17 @@ namespace Signum.Engine.Basics
 
         public const string QueriesKey = "Queries";
 
-        static SqlPreCommand Schema_Generating()
+        static SqlPreCommand? Schema_Generating()
         {
             Table table = Schema.Current.Table<QueryEntity>();
 
             var should = GenerateQueries();
 
-            return should.Select((q, i) => table.InsertSqlSync(q, suffix: i.ToString())).Combine(Spacing.Simple).PlainSqlCommand();
+            return should.Select((q, i) => table.InsertSqlSync(q, suffix: i.ToString())).Combine(Spacing.Simple)?.PlainSqlCommand();
 
         }
 
-        static SqlPreCommand SynchronizeQueries(Replacements replacements)
+        static SqlPreCommand? SynchronizeQueries(Replacements replacements)
         {
             var should = GenerateQueries();
 

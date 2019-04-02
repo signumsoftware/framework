@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
@@ -193,8 +194,8 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryValueRequest : BaseQueryRequest
     {
-        public QueryToken ValueToken { get; set; }
-        public SystemTime SystemTime { get; set; }
+        public QueryToken? ValueToken { get; set; }
+        public SystemTime? SystemTime { get; set; }
 
         public List<CollectionElementToken> Multiplications
         {

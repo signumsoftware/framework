@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Signum.Entities.Basics;
@@ -11,7 +11,7 @@ namespace Signum.React.Filters
 {
     public class SignumAuthenticationResult
     {
-        public IUserEntity User { get; set; }
+        public IUserEntity? User { get; set; }
     }
 
     public class SignumEnableBufferingFilter : IResourceFilter
@@ -43,9 +43,9 @@ namespace Signum.React.Filters
     {
         public SignumAuthenticationFilter() : base("Signum_User"){ }
 
-        public static readonly IList<Func<FilterContext, SignumAuthenticationResult>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult>>();
+        public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
-        private static SignumAuthenticationResult Authenticate(ResourceExecutingContext actionContext)
+        private static SignumAuthenticationResult? Authenticate(ResourceExecutingContext actionContext)
         {
             foreach (var item in Authenticators)
             {
@@ -57,7 +57,7 @@ namespace Signum.React.Filters
             return null;
         }
 
-        public override IDisposable GetResource(ResourceExecutingContext context)
+        public override IDisposable? GetResource(ResourceExecutingContext context)
         {
             var result = Authenticate(context);
 
@@ -98,7 +98,7 @@ namespace Signum.React.Filters
     {
         public SignumTimesTrackerFilter() : base("Signum_TimesTracker") {  }
 
-        public override IDisposable GetResource(ResourceExecutingContext context)
+        public override IDisposable? GetResource(ResourceExecutingContext context)
         {
             string action = ProfilerActionSplitterAttribute.GetActionDescription(context);
             return TimeTracker.Start(action);
@@ -109,7 +109,7 @@ namespace Signum.React.Filters
     {
         public SignumHeavyProfilerFilter() : base("Signum_HeavyProfiler") { }
 
-        public override IDisposable GetResource(ResourceExecutingContext context)
+        public override IDisposable? GetResource(ResourceExecutingContext context)
         {
             return HeavyProfiler.Log("Web.API " + context.HttpContext.Request.Method, () => context.HttpContext.Request.GetDisplayUrl());
         }
@@ -124,7 +124,7 @@ namespace Signum.React.Filters
             this.ResourceKey = key;
         }
 
-        public abstract IDisposable GetResource(ResourceExecutingContext context);
+        public abstract IDisposable? GetResource(ResourceExecutingContext context);
 
         public void OnResourceExecuting(ResourceExecutingContext context)
         {

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -83,11 +83,9 @@ namespace Signum.React.Facades
         {
             var canExecutes = OperationLogic.ServiceCanExecute(entity);
 
-            var result = new EntityPackTS
-            {
-                entity = entity,
-                canExecute = canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
-            };
+            var result = new EntityPackTS(entity,
+                canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
+            );
 
             foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
             {
@@ -104,8 +102,14 @@ namespace Signum.React.Facades
         public Dictionary<string, string> canExecute { get; set; }
 
         [JsonExtensionData]
-        public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, object> extension { get; set; } = new Dictionary<string, object>();
 
         public static Action<EntityPackTS> AddExtension;
+
+        public EntityPackTS(Entity entity, Dictionary<string, string> canExecute)
+        {
+            this.entity = entity;
+            this.canExecute = canExecute;
+        }
     }
 }

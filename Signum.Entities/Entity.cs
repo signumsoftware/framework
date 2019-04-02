@@ -22,7 +22,7 @@ namespace Signum.Entities
 
 
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        protected internal string toStr; //for queries and lites on entities with non-expression ToString
+        protected internal string? toStr; //for queries and lites on entities with non-expression ToString
 
         [HiddenProperty, Description("Id")]
         public PrimaryKey Id
@@ -60,7 +60,7 @@ namespace Signum.Entities
             set { ticks = value; }
         }
 
-        protected bool SetIfNew<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
@@ -70,7 +70,7 @@ namespace Signum.Entities
                 throw new InvalidOperationException("Attempt to modify '{0}' when the entity is not new".FormatWith(automaticPropertyName));
             }
 
-            return base.Set<T>(ref field, value, automaticPropertyName);
+            return base.Set<T>(ref field, value, automaticPropertyName!);
         }
 
         public override string ToString()
@@ -97,7 +97,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck()
+        public virtual Dictionary<Guid, IntegrityCheck>? EntityIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
@@ -105,7 +105,7 @@ namespace Signum.Entities
             }
         }
 
-        internal virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheckBase()
+        internal virtual Dictionary<Guid, IntegrityCheck>? EntityIntegrityCheckBase()
         {
             using (HeavyProfiler.LogNoStackTrace("EntityIntegrityCheckBase", () => GetType().Name))
                 return GraphExplorer.EntityIntegrityCheck(GraphExplorer.FromRootEntity(this));
@@ -124,7 +124,7 @@ namespace Signum.Entities
         }
 
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        readonly MixinEntity mixin;
+        readonly MixinEntity? mixin;
         public M Mixin<M>() where M : MixinEntity
         {
             var result = TryMixin<M>();
@@ -135,7 +135,7 @@ namespace Signum.Entities
                 .FormatWith(typeof(M).TypeName(), GetType().TypeName()));
         }
 
-        public M TryMixin<M>() where M : MixinEntity
+        public M? TryMixin<M>() where M : MixinEntity
         {
             var current = mixin;
             while (current != null)
@@ -256,7 +256,7 @@ namespace Signum.Entities
 
             internal static Action<T, V> Setter<V>(PropertyInfo pi)
             {
-                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
+                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi))!);
             }
         }
 
@@ -271,9 +271,9 @@ namespace Signum.Entities
         public static T SetNotModified<T>(this T mod)
             where T : Modifiable
         {
-            if (mod is Entity e)
-                e.IsNew = false;
-            mod.Modified = ModifiedState.Clean;
+            if (mod is Entity)
+                ((Entity)(Modifiable)mod).IsNew = false;
+            mod.Modified = ModifiedState.Clean; /*Compiler bug*/
             return mod;
         }
 

@@ -1,4 +1,4 @@
-﻿using Signum.Entities.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -10,9 +10,9 @@ namespace Signum.Engine.Linq
 {
     internal class OrderByRewriter : DbExpressionVisitor
     {
-        List<ColumnExpression> gatheredKeys;
-        ReadOnlyCollection<OrderExpression> gatheredOrderings;
-        SelectExpression outerMostSelect;
+        List<ColumnExpression>? gatheredKeys;
+        ReadOnlyCollection<OrderExpression>? gatheredOrderings;
+        SelectExpression? outerMostSelect;
         bool hasProjectionInProjector;
 
         private OrderByRewriter() { }
@@ -73,7 +73,7 @@ namespace Signum.Engine.Linq
                     gatheredKeys = new List<ColumnExpression>();
             }
 
-            List<ColumnExpression> savedKeys = null;
+            List<ColumnExpression>? savedKeys = null;
             if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems() || select.IsAllAggregates))
                 savedKeys = gatheredKeys.ToList();
 
@@ -82,7 +82,7 @@ namespace Signum.Engine.Linq
             if (savedKeys != null)
                 gatheredKeys = savedKeys;
 
-            List<ColumnDeclaration> newColumns = null;
+            List<ColumnDeclaration>? newColumns = null;
 
             if (select.GroupBy.HasItems())
             {
@@ -96,7 +96,7 @@ namespace Signum.Engine.Linq
 
                     foreach (var ge in select.GroupBy)
                     {
-                        var cd = cg.Columns.FirstOrDefault(a => DbExpressionComparer.AreEqual(a.Expression, ge));
+                        var cd = cg.Columns.NotNull().FirstOrDefault(a => DbExpressionComparer.AreEqual(a.Expression, ge));
 
                         if (cd != null)
                             newKeys.Add(cd);
@@ -105,7 +105,7 @@ namespace Signum.Engine.Linq
                     }
 
                     if (cg.Columns.Count() != select.Columns.Count)
-                        newColumns = cg.Columns.ToList();
+                        newColumns = cg.Columns.NotNull().ToList();
 
                     gatheredKeys.AddRange(newKeys.Select(cd => new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name)));
                 }
@@ -137,7 +137,7 @@ namespace Signum.Engine.Linq
             if (select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
-            ReadOnlyCollection<OrderExpression> orderings = null;
+            ReadOnlyCollection<OrderExpression>? orderings = null;
 
             if (isOuterMost && !IsCountSumOrAvg(select) || select.Top != null)
             {
@@ -150,7 +150,7 @@ namespace Signum.Engine.Linq
             if (AreEqual(select.OrderBy, orderings) && !select.IsReverse && newColumns == null)
                 return select;
 
-            return new SelectExpression(select.Alias, select.IsDistinct, select.Top, (IEnumerable<ColumnDeclaration>)newColumns ?? select.Columns,
+            return new SelectExpression(select.Alias, select.IsDistinct, select.Top, (IEnumerable<ColumnDeclaration>?)newColumns ?? select.Columns,
                 select.From, select.Where, orderings, select.GroupBy, select.SelectOptions & ~SelectOptions.Reverse);
         }
 
@@ -164,7 +164,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
-            if (!scalar.Select.IsForXmlPathEmpty)
+            if (!scalar.Select!.IsForXmlPathEmpty)
             {
                 using (Scope())
                     return base.VisitScalar(scalar);
@@ -174,7 +174,7 @@ namespace Signum.Engine.Linq
                 using (Scope())
                 {
                     var oldOuterMostSelect = outerMostSelect;
-                    outerMostSelect = scalar.Select;
+                    outerMostSelect = scalar.Select!;
 
                     var result = base.VisitScalar(scalar);
                     outerMostSelect = oldOuterMostSelect;
@@ -199,7 +199,7 @@ namespace Signum.Engine.Linq
                     return base.VisitIn(@in);
         }
 
-        static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
+        static bool AreEqual(IEnumerable<OrderExpression>? col1, IEnumerable<OrderExpression>? col2)
         {
             bool col1Empty = col1 == null || col1.IsEmpty();
             bool col2Empty = col2 == null || col2.IsEmpty();
@@ -231,8 +231,7 @@ namespace Signum.Engine.Linq
                     exp = ((BinaryExpression)exp).Left;
             }
 
-            AggregateExpression aggExp = exp as AggregateExpression;
-            if (aggExp == null)
+            if (!(exp is AggregateExpression aggExp))
                 return false;
 
             return aggExp.AggregateFunction == AggregateSqlFunction.Count ||
@@ -246,7 +245,7 @@ namespace Signum.Engine.Linq
         {
             SourceExpression left = this.VisitSource(join.Left);
 
-            ReadOnlyCollection<OrderExpression> leftOrders = this.gatheredOrderings;
+            ReadOnlyCollection<OrderExpression>? leftOrders = this.gatheredOrderings;
             this.gatheredOrderings = null;
 
             SourceExpression right = join.Right is TableExpression ? join.Right : this.VisitSource(join.Right);
@@ -302,7 +301,7 @@ namespace Signum.Engine.Linq
             return exp;
         }
 
-        protected void PrependOrderings(ReadOnlyCollection<OrderExpression> newOrderings)
+        protected void PrependOrderings(ReadOnlyCollection<OrderExpression>? newOrderings)
         {
             if (!newOrderings.IsNullOrEmpty())
             {

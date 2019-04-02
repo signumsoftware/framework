@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -29,11 +29,12 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class HasValueToken : QueryToken
     {
+        QueryToken parent;
+        public override QueryToken? Parent => parent;
+        
         internal HasValueToken(QueryToken parent)
-            : base(parent)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
             this.Priority = -1;
         }
@@ -55,7 +56,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            Expression baseExpression = Parent.BuildExpression(context);
+            Expression baseExpression = parent.BuildExpression(context);
 
             var result = Expression.NotEqual(baseExpression, Expression.Constant(null, baseExpression.Type.Nullify()));
 
@@ -70,12 +71,12 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        public override string Format
+        public override string? Format
         {
             get { return null; }
         }
 
-        public override string Unit
+        public override string? Unit
         {
             get { return null; }
         }
@@ -85,24 +86,24 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override string IsAllowed()
+        public override string? IsAllowed()
         {
-            return Parent.IsAllowed();
+            return parent.IsAllowed();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override PropertyRoute? GetPropertyRoute()
         {
             return null; ;
         }
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0HasValue.NiceToString(Parent.ToString());
+            return QueryTokenMessage._0HasValue.NiceToString(parent.ToString());
         }
 
         public override QueryToken Clone()
         {
-            return new HasValueToken(Parent.Clone());
+            return new HasValueToken(parent.Clone());
         }
     }
 

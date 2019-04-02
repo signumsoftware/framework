@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Entities;
@@ -11,12 +11,17 @@ namespace Signum.Engine.Linq
 {
     internal class EntityCompleter : DbExpressionVisitor
     {
-        QueryBinder binder;
+        readonly QueryBinder binder;
         ImmutableStack<Type> previousTypes = ImmutableStack<Type>.Empty;
+
+        public EntityCompleter(QueryBinder binder)
+        {
+            this.binder = binder;
+        }
 
         public static Expression Complete(Expression source, QueryBinder binder)
         {
-            EntityCompleter pc = new EntityCompleter() { binder = binder };
+            EntityCompleter pc = new EntityCompleter(binder);
 
             var result = pc.Visit(source);
 
@@ -41,7 +46,7 @@ namespace Signum.Engine.Linq
             return new LiteValueExpression(lite.Type, typeId, id, toStr);
         }
 
-        private Expression LiteToString(LiteReferenceExpression lite, Expression typeId)
+        private Expression? LiteToString(LiteReferenceExpression lite, Expression typeId)
         {
             if (lite.CustomToStr != null)
                 return Visit(lite.CustomToStr);
@@ -101,7 +106,7 @@ namespace Signum.Engine.Linq
 
             previousTypes = previousTypes.Push(ee.Type);
 
-            var bindings = VisitBindings(ee.Bindings);
+            var bindings = VisitBindings(ee.Bindings!);
 
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 

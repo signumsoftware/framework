@@ -17,30 +17,30 @@ namespace Signum.Engine
     /// </summary>
     public class Transaction : IDisposableException
     {
-        static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions", avoidExportImport: true);
+        static readonly Variable<Dictionary<Connector, ICoreTransaction>?> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>?>("transactions", avoidExportImport: true);
 
         bool commited;
         ICoreTransaction coreTransaction;
 
         interface ICoreTransaction
         {
-            event Action<Dictionary<string, object>> PostRealCommit;
+            event Action<Dictionary<string, object>?> PostRealCommit;
             void CallPostRealCommit();
-            event Action<Dictionary<string, object>> PreRealCommit;
-            DbConnection Connection { get; }
-            DbTransaction Transaction { get; }
+            event Action<Dictionary<string, object>?> PreRealCommit;
+            DbConnection? Connection { get; }
+            DbTransaction? Transaction { get; }
 
             bool Started { get; }
 
-            Exception IsRolledback { get; }
+            Exception? IsRolledback { get; }
             void Rollback(Exception ex);
-            event Action<Dictionary<string, object>> Rolledback;
+            event Action<Dictionary<string, object>?> Rolledback;
 
             void Commit();
             void Finish();
             void Start();
 
-            ICoreTransaction Parent { get; }
+            ICoreTransaction? Parent { get; }
 
             Dictionary<string, object> UserData { get; }
         }
@@ -51,27 +51,30 @@ namespace Signum.Engine
 
             public FakedTransaction(ICoreTransaction parent)
             {
+                if (parent == null)
+                    throw new ArgumentNullException(nameof(parent));
+
                 if (parent != null && parent.IsRolledback != null)
                     throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\r\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
 
                 this.parent = parent;
             }
 
-            public event Action<Dictionary<string, object>> PostRealCommit
+            public event Action<Dictionary<string, object>?> PostRealCommit
             {
                 add { parent.PostRealCommit += value; }
                 remove { parent.PostRealCommit -= value; }
             }
 
-            public event Action<Dictionary<string, object>> PreRealCommit
+            public event Action<Dictionary<string, object>?> PreRealCommit
             {
                 add { parent.PreRealCommit += value; }
                 remove { parent.PreRealCommit -= value; }
             }
 
-            public DbConnection Connection { get { return parent.Connection; } }
-            public DbTransaction Transaction { get { return parent.Transaction; } }
-            public Exception IsRolledback { get { return parent.IsRolledback; } }
+            public DbConnection? Connection { get { return parent.Connection; } }
+            public DbTransaction? Transaction { get { return parent.Transaction; } }
+            public Exception? IsRolledback { get { return parent.IsRolledback; } }
             public bool Started { get { return parent.Started; } }
 
             public void Start() { parent.Start(); }
@@ -95,12 +98,12 @@ namespace Signum.Engine
 
             }
 
-            public ICoreTransaction Parent
+            public ICoreTransaction? Parent
             {
                 get { return parent; }
             }
 
-            public event Action<Dictionary<string, object>> Rolledback
+            public event Action<Dictionary<string, object>?> Rolledback
             {
                 add { parent.Rolledback += value; }
                 remove { parent.Rolledback -= value; }
@@ -109,19 +112,19 @@ namespace Signum.Engine
 
         class RealTransaction : ICoreTransaction
         {
-            ICoreTransaction parent;
+            ICoreTransaction? parent;
 
-            public DbConnection Connection { get; private set; }
-            public DbTransaction Transaction { get; private set; }
-            public Exception IsRolledback { get; private set; }
+            public DbConnection? Connection { get; private set; }
+            public DbTransaction? Transaction { get; private set; }
+            public Exception? IsRolledback { get; private set; }
             public bool Started { get; private set; }
-            public event Action<Dictionary<string, object>> PostRealCommit;
-            public event Action<Dictionary<string, object>> PreRealCommit;
-            public event Action<Dictionary<string, object>> Rolledback;
+            public event Action<Dictionary<string, object>?> PostRealCommit;
+            public event Action<Dictionary<string, object>?> PreRealCommit;
+            public event Action<Dictionary<string, object>?> Rolledback;
 
             IsolationLevel? IsolationLevel;
 
-            public RealTransaction(ICoreTransaction parent, IsolationLevel? isolationLevel)
+            public RealTransaction(ICoreTransaction? parent, IsolationLevel? isolationLevel)
             {
                 IsolationLevel = isolationLevel;
                 this.parent = parent;
@@ -145,7 +148,7 @@ namespace Signum.Engine
                 {
                     OnPreRealCommit();
 
-                    Transaction.Commit();
+                    Transaction!.Commit();
                 }
             }
 
@@ -176,7 +179,7 @@ namespace Signum.Engine
             {
                 if (Started && IsRolledback == null)
                 {
-                    Transaction.Rollback();
+                    Transaction!.Rollback();
                     IsRolledback = ex;
                     Rolledback?.Invoke(this.userData);
                 }
@@ -197,13 +200,13 @@ namespace Signum.Engine
                 }
             }
 
-            Dictionary<string, object> userData;
+            Dictionary<string, object>? userData;
             public Dictionary<string, object> UserData
             {
                 get { return userData ?? (userData = new Dictionary<string, object>()); }
             }
 
-            public ICoreTransaction Parent
+            public ICoreTransaction? Parent
             {
                 get { return parent; }
             }
@@ -214,19 +217,19 @@ namespace Signum.Engine
         {
             ICoreTransaction parent;
             string savePointName;
-            public Exception IsRolledback { get; private set; }
+            public Exception? IsRolledback { get; private set; }
             public bool Started { get; private set; }
-            public event Action<Dictionary<string, object>> PostRealCommit;
+            public event Action<Dictionary<string, object>?> PostRealCommit;
 
-            public event Action<Dictionary<string, object>> PreRealCommit;
-            public event Action<Dictionary<string, object>> Rolledback;
+            public event Action<Dictionary<string, object>?> PreRealCommit;
+            public event Action<Dictionary<string, object>?> Rolledback;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
                 if (parent == null)
                     throw new InvalidOperationException("Named transactions should be nested inside another transaction");
 
-                if (parent != null && parent.IsRolledback != null)
+                if (parent.IsRolledback != null)
                     throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\r\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
 
                 this.parent = parent;
@@ -234,15 +237,15 @@ namespace Signum.Engine
             }
 
 
-            public DbConnection Connection { get { return parent.Connection; } }
-            public DbTransaction Transaction { get { return parent.Transaction; } }
+            public DbConnection? Connection { get { return parent.Connection; } }
+            public DbTransaction? Transaction { get { return parent.Transaction; } }
 
             public void Start()
             {
                 if (!Started)
                 {
                     parent.Start();
-                    Connector.Current.SaveTransactionPoint(Transaction, savePointName);
+                    Connector.Current.SaveTransactionPoint(Transaction!, savePointName);
                     Started = true;
                 }
             }
@@ -251,7 +254,7 @@ namespace Signum.Engine
             {
                 if (Started && IsRolledback  == null)
                 {
-                    Connector.Current.RollbackTransactionPoint(Transaction, savePointName);
+                    Connector.Current.RollbackTransactionPoint(Transaction!, savePointName);
                     IsRolledback = ex;
                     Rolledback?.Invoke(this.UserData);
                 }
@@ -274,13 +277,13 @@ namespace Signum.Engine
 
             public void Finish() { }
 
-            Dictionary<string, object> userData;
+            Dictionary<string, object>? userData;
             public Dictionary<string, object> UserData
             {
                 get { return userData ?? (userData = new Dictionary<string, object>()); }
             }
 
-            public ICoreTransaction Parent
+            public ICoreTransaction? Parent
             {
                 get { return parent; }
             }
@@ -288,17 +291,17 @@ namespace Signum.Engine
 
         class NoneTransaction : ICoreTransaction
         {
-            ICoreTransaction parent;
+            ICoreTransaction? parent;
 
-            public DbConnection Connection { get; private set; }
-            public DbTransaction Transaction { get { return null; } }
-            public Exception IsRolledback { get; private set; }
+            public DbConnection? Connection { get; private set; }
+            public DbTransaction? Transaction { get { return null; } }
+            public Exception? IsRolledback { get; private set; }
             public bool Started { get; private set; }
-            public event Action<Dictionary<string, object>> PostRealCommit;
-            public event Action<Dictionary<string, object>> PreRealCommit;
-            public event Action<Dictionary<string, object>> Rolledback;
+            public event Action<Dictionary<string, object>?> PostRealCommit;
+            public event Action<Dictionary<string, object>?> PreRealCommit;
+            public event Action<Dictionary<string, object>?> Rolledback;
 
-            public NoneTransaction(ICoreTransaction parent)
+            public NoneTransaction(ICoreTransaction? parent)
             {
                 this.parent = parent;
             }
@@ -368,13 +371,13 @@ namespace Signum.Engine
                 }
             }
 
-            Dictionary<string, object> userData;
+            Dictionary<string, object>? userData;
             public Dictionary<string, object> UserData
             {
                 get { return userData ?? (userData = new Dictionary<string, object>()); }
             }
 
-            public ICoreTransaction Parent
+            public ICoreTransaction? Parent
             {
                 get { return parent; }
             }
@@ -390,7 +393,7 @@ namespace Signum.Engine
         class TestTransaction : RealTransaction
         {
             bool oldTestTransaction;
-            public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
+            public TestTransaction(ICoreTransaction? parent, IsolationLevel? isolation)
                 : base(parent, isolation)
             {
                 oldTestTransaction = inTestTransaction.Value;
@@ -413,19 +416,18 @@ namespace Signum.Engine
         {
         }
 
-        Transaction(Func<ICoreTransaction, ICoreTransaction> factory)
+        Transaction(Func<ICoreTransaction?, ICoreTransaction> factory)
         {
-            if (currents.Value == null)
-                currents.Value = new Dictionary<Connector, ICoreTransaction>();
+            var dic = currents.Value ??= new Dictionary<Connector, ICoreTransaction>();
 
             Connector bc = Connector.Current;
 
             if (bc == null)
                 throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to set it.");
 
-            ICoreTransaction parent = currents.Value.TryGetC(bc);
+            ICoreTransaction? parent = dic.TryGetC(bc);
 
-            currents.Value[bc] = coreTransaction = factory(parent);
+            dic[bc] = coreTransaction = factory(parent);
         }
 
         public static Transaction None()
@@ -435,7 +437,7 @@ namespace Signum.Engine
 
         public static Transaction NamedSavePoint(string savePointName)
         {
-            return new Transaction(parent => new NamedTransaction(parent, savePointName));
+            return new Transaction(parent => new NamedTransaction(parent!, savePointName));
         }
 
 
@@ -450,14 +452,14 @@ namespace Signum.Engine
         public static Transaction ForceNew()
         {
             return new Transaction(parent => inTestTransaction.Value ?
-                (ICoreTransaction)new FakedTransaction(parent) :
+                (ICoreTransaction)new FakedTransaction(parent!) :
                 (ICoreTransaction)new RealTransaction(parent, null));
         }
 
         public static Transaction ForceNew(IsolationLevel? isolationLevel)
         {
             return new Transaction(parent => inTestTransaction.Value ?
-                (ICoreTransaction)new FakedTransaction(parent) :
+                (ICoreTransaction)new FakedTransaction(parent!) :
                 (ICoreTransaction)new RealTransaction(parent, isolationLevel));
         }
 
@@ -473,7 +475,7 @@ namespace Signum.Engine
 
         static ICoreTransaction GetCurrent()
         {
-            return currents.Value.GetOrThrow(Connector.Current, "No Transaction created yet");
+            return currents.Value!.GetOrThrow(Connector.Current, "No Transaction created yet");
         }
 
         public static event Action<Dictionary<string, object>> PostRealCommit
@@ -506,10 +508,10 @@ namespace Signum.Engine
 
         public static bool HasTransaction
         {
-            get { return currents.Value != null && currents.Value.ContainsKey(Connector.Current); }
+            get { return currents.Value != null && currents.Value!.ContainsKey(Connector.Current); }
         }
 
-        public static DbConnection CurrentConnection
+        public static DbConnection? CurrentConnection
         {
             get
             {
@@ -519,7 +521,7 @@ namespace Signum.Engine
             }
         }
 
-        public static DbTransaction CurrentTransaccion
+        public static DbTransaction? CurrentTransaccion
         {
             get
             {
@@ -536,7 +538,7 @@ namespace Signum.Engine
                 t.Started,
                 t.IsRolledback,
                 t.Connection == null ? "null" : (t.Connection.State.ToString() + " Hash " + t.Connection.GetHashCode()),
-                t.Transaction == null ? "null" : (" Hash " + t.Connection.GetHashCode())), "\r\n");
+                t.Transaction == null ? "null" : (" Hash " + t.Transaction.GetHashCode())), "\r\n");
         }
 
         public T Commit<T>(T returnValue)
@@ -580,14 +582,15 @@ namespace Signum.Engine
             }
             finally
             {
+                var dic = currents.Value!;
                 if (coreTransaction.Parent == null)
                 {
-                    currents.Value.Remove(Connector.Current);
-                    if (currents.Value.Count == 0)
+                    dic.Remove(Connector.Current);
+                    if (dic.Count == 0)
                         currents.Value = null;
                 }
                 else
-                    currents.Value[Connector.Current] = coreTransaction.Parent;
+                    dic[Connector.Current] = coreTransaction.Parent;
             }
 
             if (commited)
@@ -599,7 +602,7 @@ namespace Signum.Engine
             ((RealTransaction)tr.coreTransaction).OnPreRealCommit();
         }
 
-        Exception savedException;
+        Exception? savedException;
 
         public void OnException(Exception ex)
         {

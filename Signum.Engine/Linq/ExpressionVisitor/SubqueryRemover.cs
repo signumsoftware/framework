@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -9,16 +9,16 @@ namespace Signum.Engine.Linq
     {
         HashSet<SelectExpression> selectsToRemove;
         Dictionary<Alias, Dictionary<string, Expression>> map;
-
-        private SubqueryRemover() { }
+        
+        public SubqueryRemover(IEnumerable<SelectExpression> selectsToRemove)
+        {
+            this.map = selectsToRemove.ToDictionary(d => d.Alias, d => d.Columns.ToDictionary(d2 => d2.Name, d2 => d2.Expression));
+            this.selectsToRemove = new HashSet<SelectExpression>(selectsToRemove);
+        }
 
         public static Expression Remove(Expression expression, IEnumerable<SelectExpression> selectsToRemove)
         {
-            return new SubqueryRemover
-            {
-                map = selectsToRemove.ToDictionary(d => d.Alias, d => d.Columns.ToDictionary(d2 => d2.Name, d2 => d2.Expression)),
-                selectsToRemove = new HashSet<SelectExpression>(selectsToRemove)
-            }.Visit(expression);
+            return new SubqueryRemover(selectsToRemove).Visit(expression);
         }
 
         protected internal override Expression VisitSelect(SelectExpression select)

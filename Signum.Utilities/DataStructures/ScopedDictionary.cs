@@ -5,20 +5,20 @@ namespace Signum.Utilities.DataStructures
 {
     public class ScopedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
-        ScopedDictionary<TKey, TValue> previous;
+        ScopedDictionary<TKey, TValue>? previous;
         Dictionary<TKey, TValue> map;
 
         public IEqualityComparer<TKey> Comparer { get { return map.Comparer; } }
-        public ScopedDictionary<TKey, TValue> Previous { get { return previous; } }
+        public ScopedDictionary<TKey, TValue>? Previous { get { return previous; } }
 
-        public ScopedDictionary(ScopedDictionary<TKey, TValue> previous)
+        public ScopedDictionary(ScopedDictionary<TKey, TValue>? previous)
             :this(previous, EqualityComparer<TKey>.Default)
         {
             this.previous = previous;
             this.map = new Dictionary<TKey, TValue>();
         }
 
-        public ScopedDictionary(ScopedDictionary<TKey, TValue> previous, IEqualityComparer<TKey> comparer)
+        public ScopedDictionary(ScopedDictionary<TKey, TValue>? previous, IEqualityComparer<TKey> comparer)
         {
             this.previous = previous;
             this.map = new Dictionary<TKey, TValue>(comparer);
@@ -31,18 +31,18 @@ namespace Signum.Utilities.DataStructures
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            for (ScopedDictionary<TKey, TValue> scope = this; scope != null; scope = scope.previous)
+            for (ScopedDictionary<TKey, TValue>? scope = this; scope != null; scope = scope.previous)
             {
                 if (scope.map.TryGetValue(key, out value))
                     return true;
             }
-            value = default(TValue);
+            value = default(TValue)!;
             return false;
         }
 
         public bool ContainsKey(TKey key)
         {
-            for (ScopedDictionary<TKey, TValue> scope = this; scope != null; scope = scope.previous)
+            for (ScopedDictionary<TKey, TValue>? scope = this; scope != null; scope = scope.previous)
             {
                 if (scope.map.ContainsKey(key))
                     return true;
@@ -52,7 +52,7 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            var str = map.ToString(kvp => kvp.Key.ToString() + " -> " + kvp.Value.ToString(), "\r\n");
+            var str = map.ToString(kvp => kvp.Key + " -> " + kvp.Value, "\r\n");
 
             if (this.previous == null)
                 return str;
@@ -83,7 +83,7 @@ namespace Signum.Utilities.DataStructures
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            for (var sd = this; sd != null; sd = sd.previous)
+            for (ScopedDictionary<TKey, TValue>? sd = this; sd != null; sd = sd.previous)
             {
                 foreach (var item in sd.map)
                 {

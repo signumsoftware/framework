@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Signum.Utilities;
@@ -20,7 +20,7 @@ namespace Signum.Entities.Patterns
             }
         }
 
-        protected bool UnsafeSet<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        protected bool UnsafeSet<T>(ref T field, T value, [CallerMemberNameAttribute]string? automaticPropertyName = null)
         {
             return base.Set<T>(ref field, value, automaticPropertyName);
         }
@@ -29,7 +29,7 @@ namespace Signum.Entities.Patterns
         {
         }
 
-        protected override bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        protected override bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string? automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
@@ -43,7 +43,7 @@ namespace Signum.Entities.Patterns
         protected override void ChildCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
         {
             if (this.locked)
-                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString(sender.GetType().ElementType().NicePluralName(), this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString(sender.GetType().ElementType()!.NicePluralName(), this.ToString()));
 
             base.ChildCollectionChanged(sender, args);
         }

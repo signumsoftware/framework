@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -30,10 +30,10 @@ namespace Signum.Entities.DynamicQuery
     public class FilterGroup : Filter
     {
         public FilterGroupOperation GroupOperation { get; }
-        public QueryToken Token { get; }
+        public QueryToken? Token { get; }
         public List<Filter> Filters { get; }
 
-        public FilterGroup(FilterGroupOperation groupOperation, QueryToken token, List<Filter> filters)
+        public FilterGroup(FilterGroupOperation groupOperation, QueryToken? token, List<Filter> filters)
         {
             this.GroupOperation = groupOperation;
             this.Token = token;
@@ -47,8 +47,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Expression GetExpression(BuildExpressionContext ctx)
         {
-            var anyAll = Token as CollectionAnyAllToken;
-            if(anyAll == null)
+            if (!(Token is CollectionAnyAllToken anyAll))
             {
                 return this.GroupOperation == FilterGroupOperation.And ?
                     Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
@@ -56,8 +55,8 @@ namespace Signum.Entities.DynamicQuery
             }
             else
             {
-                Expression collection = anyAll.Parent.BuildExpression(ctx);
-                Type elementType = collection.Type.ElementType();
+                Expression collection = anyAll.Parent!.BuildExpression(ctx);
+                Type elementType = collection.Type.ElementType()!;
 
                 var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
                 ctx.Replacemens.Add(anyAll, p);
@@ -90,9 +89,9 @@ namespace Signum.Entities.DynamicQuery
     {
         public QueryToken Token { get; }
         public FilterOperation Operation { get; }
-        public object Value { get; }
+        public object? Value { get; }
 
-        public FilterCondition(QueryToken token, FilterOperation operation, object value)
+        public FilterCondition(QueryToken token, FilterOperation operation, object? value)
         {
             this.Token = token;
             this.Operation = operation;
@@ -116,11 +115,11 @@ namespace Signum.Entities.DynamicQuery
             if (anyAll == null)
                 return GetConditionExpressionBasic(ctx);
 
-            Expression collection = anyAll.Parent.BuildExpression(ctx);
-            Type elementType = collection.Type.ElementType();
+            Expression collection = anyAll.Parent!.BuildExpression(ctx);
+            Type elementType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-            ctx.Replacemens.Add(anyAll, p.BuildLiteNulifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute() }));
+            ctx.Replacemens.Add(anyAll, p.BuildLiteNulifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
             var body = GetExpression(ctx);
             ctx.Replacemens.Remove(anyAll);
 

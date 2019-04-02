@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -29,7 +29,7 @@ namespace Signum.Engine.DynamicQuery
             queries[queryName] = bucket;
         }
 
-        public DynamicQueryBucket TryGetQuery(object queryName)
+        public DynamicQueryBucket? TryGetQuery(object queryName)
         {
             AssertQueryAllowed(queryName, false);
             return queries.TryGetC(queryName);
@@ -58,7 +58,7 @@ namespace Signum.Engine.DynamicQuery
             return Implementations.By(property.PropertyType.CleanType());
         }
 
-        T Execute<T>(ExecuteType executeType, object queryName, BaseQueryRequest request, Func<DynamicQueryBucket, T> executor)
+        T Execute<T>(ExecuteType executeType, object queryName, BaseQueryRequest? request, Func<DynamicQueryBucket, T> executor)
         {
             using (ExecutionMode.UserInterface())
             using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetKey(queryName)))
@@ -102,7 +102,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public event Func<ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecuted;
+        public event Func<ExecuteType, object, BaseQueryRequest?, IDisposable?> QueryExecuted;
 
         public enum ExecuteType
         {
@@ -131,22 +131,22 @@ namespace Signum.Engine.DynamicQuery
                 return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
         }
 
-        public object ExecuteQueryValue(QueryValueRequest request)
+        public object? ExecuteQueryValue(QueryValueRequest request)
         {
             return Execute(ExecuteType.ExecuteQueryValue, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
-        public Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
+        public Task<object?> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
         {
             return ExecuteAsync(ExecuteType.ExecuteQueryValue, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
         }
 
-        public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        public Lite<Entity>? ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }
 
-        public Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
+        public Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
         {
             return ExecuteAsync(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntityAsync(request, token));
         }
@@ -212,18 +212,18 @@ namespace Signum.Engine.DynamicQuery
             return queries.Keys.ToList();
         }
 
-        public Task<object[]> BatchExecute(BaseQueryRequest[] requests, CancellationToken token)
+        public Task<object?[]> BatchExecute(BaseQueryRequest[] requests, CancellationToken token)
         {
-            return Task.WhenAll<object>(requests.Select<BaseQueryRequest, Task<object>>(r =>
+            return Task.WhenAll<object?>(requests.Select<BaseQueryRequest, Task<object?>>(r =>
             {
                 if (r is QueryValueRequest)
                     return ExecuteQueryValueAsync((QueryValueRequest)r, token);
 
                 if (r is QueryRequest)
-                    return ExecuteQueryAsync((QueryRequest)r, token).ContinueWith(a => (object)a.Result);
+                    return ExecuteQueryAsync((QueryRequest)r, token).ContinueWith<object?>(a => a.Result);
 
                 if (r is UniqueEntityRequest)
-                    return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object)a.Result);
+                    return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object?)a.Result);
 
                 throw new InvalidOperationException("Unexpected QueryRequest type"); ;
             }));

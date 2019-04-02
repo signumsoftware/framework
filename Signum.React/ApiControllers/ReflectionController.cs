@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Signum.React.Facades;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
@@ -16,7 +16,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpGet("api/reflection/typeEntity/{typeName}")]
-        public TypeEntity GetTypeEntity(string typeName)
+        public TypeEntity? GetTypeEntity(string typeName)
         {
             return TypeLogic.TryGetType(typeName)?.ToTypeEntity();
         }

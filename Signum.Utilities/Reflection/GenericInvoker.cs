@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -96,11 +96,16 @@ namespace Signum.Utilities.Reflection
 
     class GeneratorVisitor : ExpressionVisitor
     {
-        Type[] types;
+        readonly Type[] types;
+
+        public GeneratorVisitor(Type[] types)
+        {
+            this.types = types;
+        }
 
         public static Expression<T> GetGenerator<T>(Expression<T> expression, Type[] types)
         {
-            return (Expression<T>)new GeneratorVisitor { types = types }.Visit(expression);
+            return (Expression<T>)new GeneratorVisitor(types).Visit(expression);
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -123,22 +128,11 @@ namespace Signum.Utilities.Reflection
 
             Expression body = Convert(this.Visit(lambda.Body), returnType);
 
-            //if (returnType != typeof(void))
-            //    body = Expression.Call(giInside.MakeGenericMethod(returnType),
-            //        Expression.Lambda(body));
-
             if (body != lambda.Body)
             {
                 return Expression.Lambda(lambda.Type, body, lambda.Parameters);
             }
             return lambda;
-        }
-
-        static MethodInfo giInside = ReflectionTools.GetMethodInfo(() => Inside<string>(null)).GetGenericMethodDefinition();
-
-        static T Inside<T>(Func<T> lambda)
-        {
-            return HeavyProfiler.LogNoStackTrace("inside").Using(_ => lambda()); 
         }
 
         private Expression Convert(Expression result, Type type)

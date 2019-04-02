@@ -1,22 +1,23 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public class TypeEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Max = 200), UniqueIndex]
+        [StringLengthValidator(Max = 200), UniqueIndex]
         public string TableName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200), UniqueIndex]
+        [StringLengthValidator(Max = 200), UniqueIndex]
         public string CleanName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string Namespace { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string ClassName { get; set; }
 
         static Expression<Func<TypeEntity, string>> FullClassNameExpression =
@@ -42,13 +43,13 @@ namespace Signum.Entities.Basics
             return ClassName == type.Name && Namespace == type.Namespace;
         }
 
-        public static Func<Type, TypeEntity> ToTypeEntityFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };
-        public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("Lite.ToTypeFunc is not set"); };
-        public static Func<string, Type> TryGetType = s => { throw new InvalidOperationException("Lite.TryGetType is not set"); };
-        public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("Lite.GetCleanName is not set"); };
+        public static Func<Type, TypeEntity> ToTypeEntityFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeEntityFunc is not set"); };
+        public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeFunc is not set"); };
+        public static Func<string, Type?> TryGetType = s => { throw new InvalidOperationException("TypeEntity.TryGetType is not set"); };
+        public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("TypeEntity.GetCleanName is not set"); };
 
         public static bool AlreadySet { get; private set; }
-        public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type> tryGetType)
+        public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type?> tryGetType)
         {
             TypeEntity.GetCleanName = getCleanName;
             TypeEntity.TryGetType = tryGetType;

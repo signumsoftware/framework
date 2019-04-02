@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -11,27 +12,43 @@ namespace Signum.Utilities
 {
     public static class StringExtensions
     {
+#pragma warning disable IDE0052 // Remove unread private members
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
+#pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("HasTextExpression")]
-        public static bool HasText(this string str)
+        public static bool HasText([NotNullWhenTrue]this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }
 
+#pragma warning disable IDE0052 // Remove unread private members
         static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
+#pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("DefaultTextExpression")]
-        public static string DefaultText(this string str, string defaultText)
+        public static string DefaultText(this string? str, string defaultText)
         {
             if (str.HasText())
-                return str;
+                return str!;
             else
                 return defaultText;
         }
 
-        public static string AssertHasText(this string str, string errorMessage)
+#pragma warning disable IDE0052 // Remove unread private members
+        static readonly Expression<Func<string, string?>> DefaultToNullExpression = a => a == null || a.Length == 0 ? null : a;
+#pragma warning restore IDE0052 // Remove unread private members
+        [ExpressionField("EmtpyToNullExpression")]
+        public static string? DefaultToNull(this string? str)
+        {
+            if (!str.HasText())
+                return null;
+
+            return str;
+        }
+
+        public static string AssertHasText(this string? str, string errorMessage)
         {
             if (str.HasText())
-                return str;
+                return str!;
             else
                 throw new ArgumentException(errorMessage);
         }
@@ -41,20 +58,20 @@ namespace Signum.Utilities
             return source.IndexOf(toCheck, comp) >= 0;
         }
 
-        public static string Add(this string str, string separator, string part)
+        public static string Add(this string? str, string separator, string? part)
         {
             if (str.HasText())
             {
                 if (part.HasText())
                     return str + separator + part;
                 else
-                    return str;
+                    return str ?? "";
             }
             else
-                return part;
+                return part ?? "";
         }
 
-        public static string AddLine(this string str, string part)
+        public static string? AddLine(this string? str, string part)
         {
             return Add(str, "\r\n", part);
         }
@@ -147,7 +164,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the first occurence of the separator or null if not found</returns>
-        public static string TryBefore(this string str, char separator)
+        public static string? TryBefore(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -166,7 +183,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the first occurence of the separator or null if not found</returns>
-        public static string TryBefore(this string str, string separator)
+        public static string? TryBefore(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -184,7 +201,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the first occurence of the separator or null if not found</returns>
-        public static string TryAfter(this string str, char separator)
+        public static string? TryAfter(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -202,7 +219,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the first occurence of the separator or null if not found</returns>
-        public static string TryAfter(this string str, string separator)
+        public static string? TryAfter(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -288,7 +305,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the last occurence of the separator or null if not found</returns>
-        public static string TryBeforeLast(this string str, char separator)
+        public static string? TryBeforeLast(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -307,7 +324,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring before the last occurence of the separator or null if not found</returns>
-        public static string TryBeforeLast(this string str, string separator)
+        public static string? TryBeforeLast(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -325,7 +342,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the last occurence of the separator or null if not found</returns>
-        public static string TryAfterLast(this string str, char separator)
+        public static string? TryAfterLast(this string? str, char separator)
         {
             if (str == null)
                 return null;
@@ -343,7 +360,7 @@ namespace Signum.Utilities
         /// <param name="str"></param>
         /// <param name="separator"></param>
         /// <returns>the substring after the last occurence of the separator or null if not found</returns>
-        public static string TryAfterLast(this string str, string separator)
+        public static string? TryAfterLast(this string? str, string separator)
         {
             if (str == null)
                 return null;
@@ -355,7 +372,7 @@ namespace Signum.Utilities
             return str.Substring(index + separator.Length);
         }
 
-        public static string Between(this string str, string firstSeparator, string secondSeparator = null)
+        public static string Between(this string str, string firstSeparator, string? secondSeparator = null)
         {
             if (secondSeparator == null)
                 secondSeparator = firstSeparator;
@@ -391,10 +408,10 @@ namespace Signum.Utilities
             return str.Substring(start, end - start);
         }
 
-        public static string TryBetween(this string str, string firstSeparator, string secondSeparator = null)
+        public static string? TryBetween(this string? str, string firstSeparator, string? secondSeparator = null)
         {
-            if (secondSeparator == null)
-                secondSeparator = firstSeparator;
+            if (str == null)
+                return null;
 
             int start = str.IndexOf(firstSeparator);
             if (start == -1)
@@ -402,17 +419,17 @@ namespace Signum.Utilities
 
             start = start + 1;
 
-            int end = str.IndexOf(secondSeparator, start);
+            int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
             if (start == -1)
                 return null;
 
             return str.Substring(start, end - start);
         }
 
-        public static string TryBetween(this string str, char firstSeparator, char secondSeparator = (char)0)
+        public static string? TryBetween(this string? str, char firstSeparator, char? secondSeparator = null)
         {
-            if (secondSeparator == 0)
-                secondSeparator = firstSeparator;
+            if (str == null)
+                return null;
 
             int start = str.IndexOf(firstSeparator);
             if (start == -1)
@@ -420,7 +437,7 @@ namespace Signum.Utilities
 
             start = start + 1;
 
-            int end = str.IndexOf(secondSeparator, start);
+            int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
             if (start == -1)
                 return null;
 
@@ -437,9 +454,6 @@ namespace Signum.Utilities
 
         public static string TryStart(this string str, int numChars)
         {
-            if (str == null)
-                return null;
-
             if (numChars > str.Length)
                 return str;
 
@@ -456,9 +470,6 @@ namespace Signum.Utilities
 
         public static string TryEnd(this string str, int numChars)
         {
-            if (str == null)
-                return null;
-
             if (numChars > str.Length)
                 return str;
 
@@ -530,7 +541,7 @@ namespace Signum.Utilities
             return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length);
         }
 
-        public static string FirstNonEmptyLine(this string str)
+        public static string? FirstNonEmptyLine(this string? str)
         {
             if (str == null)
                 return null;
@@ -598,27 +609,27 @@ namespace Signum.Utilities
             return sb.ToString();
         }
 
-        public static string FormatWith(this string format, object arg0)
+        public static string FormatWith(this string format, object? arg0)
         {
             return string.Format(format, arg0);
         }
 
-        public static string FormatWith(this string format, object arg0, object arg1)
+        public static string FormatWith(this string format, object? arg0, object? arg1)
         {
             return string.Format(format, arg0, arg1);
         }
 
-        public static string FormatWith(this string format, object arg0, object arg1, object arg2)
+        public static string FormatWith(this string format, object? arg0, object? arg1, object? arg2)
         {
             return string.Format(format, arg0, arg1, arg2);
         }
 
-        public static string FormatWith(this string pattern, params object[] parameters)
+        public static string FormatWith(this string pattern, params object?[] parameters)
         {
             return string.Format(pattern, parameters);
         }
 
-        public static string FormatWith(this string format, IFormatProvider provider, params object[] args)
+        public static string FormatWith(this string format, IFormatProvider provider, params object?[] args)
         {
             return string.Format(provider, format, args);
         }
@@ -630,7 +641,7 @@ namespace Signum.Utilities
 
         public static string Replace(this string str, Dictionary<char, char> replacements)
         {
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
             for (int i = 0; i < str.Length; i++)
             {
                 char c = str[i];
@@ -710,7 +721,7 @@ namespace Signum.Utilities
             return wildcards.Any(wc => fileName.Wildcards(wc));
         }
 
-        static Dictionary<string, string> wildcardsPatterns = new Dictionary<string, string>();
+        static readonly Dictionary<string, string> wildcardsPatterns = new Dictionary<string, string>();
         public static bool Wildcards(this string fileName, string wildcard)
         {
             var pattern = wildcardsPatterns.GetOrCreate(wildcard, wildcard.Replace(".", "[.]").Replace("*", ".*").Replace("?", "."));
@@ -749,8 +760,8 @@ namespace Signum.Utilities
             return ToComputerSize(value, false);
         }
 
-        static string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-        static string[] magnitudes = new[] { "Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" };
+        static readonly string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+        static readonly string[] magnitudes = new[] { "Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" };
         public static string ToComputerSize(this long value, bool useAbbreviations)
         {
             double valor = value;
@@ -760,29 +771,10 @@ namespace Signum.Utilities
 
             return "{0:#,###.00} {1}".FormatWith(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
-
-        public static string Combine(this string separator, params object[] elements)
+        
+        public static string Combine(this string separator, params object?[] elements)
         {
-            StringBuilder sb = null;
-            foreach (var item in elements)
-            {
-                if (item != null)
-                {
-                    if (sb == null)
-                        sb = new StringBuilder();
-                    else
-                        sb.Append(separator);
-
-                    sb.Append(item.ToString());
-                }
-            }
-
-            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
-        }
-
-        public static string CombineIfNotEmpty(this string separator, params object[] elements)
-        {
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
             foreach (var item in elements)
             {
                 string str;
@@ -843,16 +835,6 @@ namespace Signum.Utilities
         public static string[] SplitNoEmpty(this string text, params char[] separators)
         {
             return text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        public static string EmptyToNull(this string text)
-        {
-            return string.IsNullOrEmpty(text) ? null : text;
-        }
-
-        public static string WhiteSpaceToNull(this string text)
-        {
-            return string.IsNullOrWhiteSpace(text) ? null : text;
         }
     }
 }
