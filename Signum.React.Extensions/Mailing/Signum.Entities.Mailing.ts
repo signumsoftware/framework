@@ -35,7 +35,7 @@ export interface ClientCertificationFileEmbedded extends Entities.EmbeddedEntity
 export const EmailAddressEmbedded = new Type<EmailAddressEmbedded>("EmailAddressEmbedded");
 export interface EmailAddressEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailAddressEmbedded";
-  emailOwner: Entities.Lite<IEmailOwnerEntity>;
+  emailOwner: Entities.Lite<IEmailOwnerEntity> | null;
   emailAddress: string;
   invalidEmail: boolean;
   displayName: string | null;
@@ -96,9 +96,9 @@ export const EmailMessageEntity = new Type<EmailMessageEntity>("EmailMessage");
 export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
   Type: "EmailMessage";
   recipients: Entities.MList<EmailRecipientEmbedded>;
-  target: Entities.Lite<Entities.Entity>;
+  target: Entities.Lite<Entities.Entity> | null;
   from: EmailAddressEmbedded;
-  template: Entities.Lite<EmailTemplateEntity>;
+  template: Entities.Lite<EmailTemplateEntity> | null;
   creationDate: string;
   sent: string | null;
   receptionNotified: string | null;
@@ -106,11 +106,11 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   body: string | null;
   bodyHash: string | null;
   isBodyHtml: boolean;
-  exception: Entities.Lite<Signum.ExceptionEntity>;
+  exception: Entities.Lite<Signum.ExceptionEntity> | null;
   state: EmailMessageState;
   uniqueIdentifier: string | null;
   editableMessage: boolean;
-  package: Entities.Lite<EmailPackageEntity>;
+  package: Entities.Lite<EmailPackageEntity> | null;
   processIdentifier: string | null;
   sendRetries: number;
   attachments: Entities.MList<EmailAttachmentEmbedded>;
@@ -212,7 +212,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   from: EmailTemplateContactEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
-  masterTemplate: Entities.Lite<EmailMasterTemplateEntity>;
+  masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
   isBodyHtml: boolean;
   messages: Entities.MList<EmailTemplateMessageEmbedded>;
   applicable: Templating.TemplateApplicableEval;
@@ -285,7 +285,7 @@ export interface NewsletterDeliveryEntity extends Entities.Entity, Processes.IPr
   Type: "NewsletterDelivery";
   sent: boolean;
   sendDate: string | null;
-  recipient: Entities.Lite<IEmailOwnerEntity>;
+  recipient: Entities.Lite<IEmailOwnerEntity> | null;
   newsletter: Entities.Lite<NewsletterEntity>;
 }
 
@@ -350,7 +350,7 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
   startDate: string;
   endDate: string | null;
   newEmails: number;
-  exception: Entities.Lite<Signum.ExceptionEntity>;
+  exception: Entities.Lite<Signum.ExceptionEntity> | null;
 }
 
 export const Pop3ReceptionExceptionEntity = new Type<Pop3ReceptionExceptionEntity>("Pop3ReceptionException");
@@ -366,7 +366,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   name: string;
   emailTemplate: Entities.Lite<EmailTemplateEntity>;
   uniqueTarget: Entities.Lite<Entities.Entity>;
-  targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity>;
+  targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity> | null;
   modelConverter: Templating.ModelConverterSymbol;
 }
 

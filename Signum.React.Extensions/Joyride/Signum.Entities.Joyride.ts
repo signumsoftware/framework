@@ -12,7 +12,7 @@ export const JoyrideEntity = new Type<JoyrideEntity>("Joyride");
 export interface JoyrideEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Joyride";
   name: string;
-  culture: Entities.Lite<Basics.CultureInfoEntity>;
+  culture: Entities.Lite<Basics.CultureInfoEntity> | null;
   type: JoyrideType;
   steps: Entities.MList<JoyrideStepEntity>;
   showSkipButton: boolean;
@@ -38,7 +38,7 @@ export const JoyrideStepEntity = new Type<JoyrideStepEntity>("JoyrideStep");
 export interface JoyrideStepEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "JoyrideStep";
   guid: string;
-  culture: Entities.Lite<Basics.CultureInfoEntity>;
+  culture: Entities.Lite<Basics.CultureInfoEntity> | null;
   title: string;
   text: string;
   style: JoyrideStepStyleEntity | null;

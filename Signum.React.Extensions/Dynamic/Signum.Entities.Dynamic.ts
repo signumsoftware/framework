@@ -104,7 +104,7 @@ export interface DynamicSqlMigrationEntity extends Entities.Entity {
   creationDate: string;
   createdBy: Entities.Lite<Basics.IUserEntity>;
   executionDate: string | null;
-  executedBy: Entities.Lite<Basics.IUserEntity>;
+  executedBy: Entities.Lite<Basics.IUserEntity> | null;
   comment: string;
   script: string;
 }

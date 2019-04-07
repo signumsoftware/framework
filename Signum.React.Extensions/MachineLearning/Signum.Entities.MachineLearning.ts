@@ -191,8 +191,8 @@ export interface PredictorEntity extends Entities.Entity, Processes.IProcessData
   algorithm: PredictorAlgorithmSymbol;
   resultSaver: PredictorResultSaverSymbol | null;
   publication: PredictorPublicationSymbol | null;
-  trainingException: Entities.Lite<Basics.ExceptionEntity>;
-  user: Entities.Lite<Basics.IUserEntity>;
+  trainingException: Entities.Lite<Basics.ExceptionEntity> | null;
+  user: Entities.Lite<Basics.IUserEntity> | null;
   algorithmSettings: IPredictorAlgorithmSettings;
   state: PredictorState;
   mainQuery: PredictorMainQueryEmbedded;
@@ -358,7 +358,7 @@ export const PredictSimpleResultEntity = new Type<PredictSimpleResultEntity>("Pr
 export interface PredictSimpleResultEntity extends Entities.Entity {
   Type: "PredictSimpleResult";
   predictor: Entities.Lite<PredictorEntity>;
-  target: Entities.Lite<Entities.Entity>;
+  target: Entities.Lite<Entities.Entity> | null;
   key0: string | null;
   key1: string | null;
   key2: string | null;

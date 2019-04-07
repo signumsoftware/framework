@@ -21,7 +21,7 @@ export module IsolationMessage {
 export const IsolationMixin = new Type<IsolationMixin>("IsolationMixin");
 export interface IsolationMixin extends Entities.MixinEntity {
   Type: "IsolationMixin";
-  isolation: Entities.Lite<IsolationEntity>;
+  isolation: Entities.Lite<IsolationEntity> | null;
 }
 
 export module IsolationOperation {

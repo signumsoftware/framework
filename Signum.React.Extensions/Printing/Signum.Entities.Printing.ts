@@ -16,7 +16,7 @@ export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLine
   creationDate: string;
   testFileType: Files.FileTypeSymbol;
   file: Files.FilePathEmbedded;
-  package: Entities.Lite<PrintPackageEntity>;
+  package: Entities.Lite<PrintPackageEntity> | null;
   printedOn: string | null;
   referred: Entities.Lite<Entities.Entity>;
   state: PrintLineState;

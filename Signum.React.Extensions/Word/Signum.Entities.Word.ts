@@ -41,7 +41,7 @@ export interface WordTemplateEntity extends Entities.Entity {
   culture: Signum.CultureInfoEntity;
   applicable: Templating.TemplateApplicableEval | null;
   disableAuthorization: boolean;
-  template: Entities.Lite<Files.FileEntity>;
+  template: Entities.Lite<Files.FileEntity> | null;
   fileName: string;
   wordTransformer: WordTransformerSymbol | null;
   wordConverter: WordConverterSymbol | null;

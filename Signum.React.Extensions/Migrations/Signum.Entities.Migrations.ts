@@ -22,7 +22,7 @@ export interface LoadMethodLogEntity extends Entities.Entity {
   description: string | null;
   start: string;
   end: string | null;
-  exception: Entities.Lite<Basics.ExceptionEntity>;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export const SqlMigrationEntity = new Type<SqlMigrationEntity>("SqlMigration");

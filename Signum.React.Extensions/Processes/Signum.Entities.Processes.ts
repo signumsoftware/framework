@@ -18,7 +18,7 @@ export const PackageEntity = new Type<PackageEntity>("Package");
 export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
   Type: "Package";
   name: string | null;
-  operationArguments: string;
+  operationArguments: string | null;
 }
 
 export const PackageLineEntity = new Type<PackageLineEntity>("PackageLine");
@@ -26,7 +26,7 @@ export interface PackageLineEntity extends Entities.Entity, IProcessLineDataEnti
   Type: "PackageLine";
   package: Entities.Lite<PackageEntity>;
   target: Entities.Entity;
-  result: Entities.Lite<Entities.Entity>;
+  result: Entities.Lite<Entities.Entity> | null;
   finishTime: string | null;
 }
 
@@ -67,7 +67,7 @@ export interface ProcessEntity extends Entities.Entity {
   executionEnd: string | null;
   suspendDate: string | null;
   exceptionDate: string | null;
-  exception: Entities.Lite<Basics.ExceptionEntity>;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
   progress: number | null;
   status: string | null;
 }
@@ -76,7 +76,7 @@ export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("
 export interface ProcessExceptionLineEntity extends Entities.Entity {
   Type: "ProcessExceptionLine";
   elementInfo: string | null;
-  line: Entities.Lite<IProcessLineDataEntity>;
+  line: Entities.Lite<IProcessLineDataEntity> | null;
   process: Entities.Lite<ProcessEntity>;
   exception: Entities.Lite<Basics.ExceptionEntity>;
 }

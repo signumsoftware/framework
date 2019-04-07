@@ -158,7 +158,7 @@ export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserChart";
   query: Basics.QueryEntity;
-  entityType: Entities.Lite<Basics.TypeEntity>;
+  entityType: Entities.Lite<Basics.TypeEntity> | null;
   hideQuickLink: boolean;
   owner: Entities.Lite<Entities.Entity>;
   displayName: string;

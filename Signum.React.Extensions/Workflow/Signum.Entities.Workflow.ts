@@ -27,10 +27,10 @@ export interface WorkflowEntitiesDictionary {
 export const ActivityWithRemarks = new Type<ActivityWithRemarks>("ActivityWithRemarks");
 export interface ActivityWithRemarks extends Entities.ModelEntity {
   Type: "ActivityWithRemarks";
-  workflowActivity: Entities.Lite<WorkflowActivityEntity>;
+  workflowActivity: Entities.Lite<WorkflowActivityEntity> | null;
   case: Entities.Lite<CaseEntity>;
-  caseActivity: Entities.Lite<CaseActivityEntity>;
-  notification: Entities.Lite<CaseNotificationEntity>;
+  caseActivity: Entities.Lite<CaseActivityEntity> | null;
+  notification: Entities.Lite<CaseNotificationEntity> | null;
   remarks: string | null;
   alerts: number;
   tags: Array<CaseTagTypeEntity>;
@@ -50,11 +50,11 @@ export interface CaseActivityEntity extends Entities.Entity {
   workflowActivity: IWorkflowNodeEntity;
   originalWorkflowActivityName: string;
   startDate: string;
-  previous: Entities.Lite<CaseActivityEntity>;
+  previous: Entities.Lite<CaseActivityEntity> | null;
   note: string | null;
   doneDate: string | null;
   duration: number | null;
-  doneBy: Entities.Lite<Authorization.UserEntity>;
+  doneBy: Entities.Lite<Authorization.UserEntity> | null;
   doneType: DoneType | null;
   scriptExecution: ScriptExecutionEmbedded | null;
 }
@@ -405,8 +405,8 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
   name: string | null;
   bpmnElementId: string;
   type: ConnectionType;
-  condition: Entities.Lite<WorkflowConditionEntity>;
-  action: Entities.Lite<WorkflowActionEntity>;
+  condition: Entities.Lite<WorkflowConditionEntity> | null;
+  action: Entities.Lite<WorkflowActionEntity> | null;
   order: number | null;
   xml: WorkflowXmlEmbedded;
 }
@@ -419,8 +419,8 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
   needCondition: boolean;
   needOrder: boolean;
   type: ConnectionType;
-  condition: Entities.Lite<WorkflowConditionEntity>;
-  action: Entities.Lite<WorkflowActionEntity>;
+  condition: Entities.Lite<WorkflowConditionEntity> | null;
+  action: Entities.Lite<WorkflowActionEntity> | null;
   order: number | null;
 }
 
@@ -446,7 +446,7 @@ export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntit
   lane: WorkflowLaneEntity;
   type: WorkflowEventType;
   timer: WorkflowTimerEmbedded | null;
-  boundaryOf: Entities.Lite<WorkflowActivityEntity>;
+  boundaryOf: Entities.Lite<WorkflowActivityEntity> | null;
   xml: WorkflowXmlEmbedded;
 }
 
@@ -480,7 +480,7 @@ export const WorkflowEventTaskConditionResultEntity = new Type<WorkflowEventTask
 export interface WorkflowEventTaskConditionResultEntity extends Entities.Entity {
   Type: "WorkflowEventTaskConditionResult";
   creationDate: string;
-  workflowEventTask: Entities.Lite<WorkflowEventTaskEntity>;
+  workflowEventTask: Entities.Lite<WorkflowEventTaskEntity> | null;
   result: boolean;
 }
 
@@ -658,7 +658,7 @@ export const WorkflowReplacementItemEmbedded = new Type<WorkflowReplacementItemE
 export interface WorkflowReplacementItemEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowReplacementItemEmbedded";
   oldNode: Entities.Lite<IWorkflowNodeEntity>;
-  subWorkflow: Entities.Lite<WorkflowEntity>;
+  subWorkflow: Entities.Lite<WorkflowEntity> | null;
   newNode: string;
 }
 
@@ -691,7 +691,7 @@ export module WorkflowScriptOperation {
 export const WorkflowScriptPartEmbedded = new Type<WorkflowScriptPartEmbedded>("WorkflowScriptPartEmbedded");
 export interface WorkflowScriptPartEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowScriptPartEmbedded";
-  script: Entities.Lite<WorkflowScriptEntity>;
+  script: Entities.Lite<WorkflowScriptEntity> | null;
   retryStrategy: WorkflowScriptRetryStrategyEntity | null;
 }
 
@@ -729,7 +729,7 @@ export const WorkflowTimerEmbedded = new Type<WorkflowTimerEmbedded>("WorkflowTi
 export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowTimerEmbedded";
   duration: Signum.TimeSpanEmbedded | null;
-  condition: Entities.Lite<WorkflowTimerConditionEntity>;
+  condition: Entities.Lite<WorkflowTimerConditionEntity> | null;
 }
 
 export module WorkflowValidationMessage {

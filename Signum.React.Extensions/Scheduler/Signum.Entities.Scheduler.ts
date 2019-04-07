@@ -67,8 +67,8 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
   endTime: string | null;
   machineName: string;
   applicationName: string;
-  productEntity: Entities.Lite<Entities.Entity>;
-  exception: Entities.Lite<Basics.ExceptionEntity>;
+  productEntity: Entities.Lite<Entities.Entity> | null;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
   remarks: string | null;
 }
 
@@ -123,7 +123,7 @@ export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionL
 export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
   Type: "SchedulerTaskExceptionLine";
   elementInfo: string | null;
-  schedulerTaskLog: Entities.Lite<ScheduledTaskLogEntity>;
+  schedulerTaskLog: Entities.Lite<ScheduledTaskLogEntity> | null;
   exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
@@ -178,9 +178,9 @@ export interface SystemEventLogEntity extends Entities.Entity {
   Type: "SystemEventLog";
   machineName: string;
   date: string;
-  user: Entities.Lite<Basics.IUserEntity>;
+  user: Entities.Lite<Basics.IUserEntity> | null;
   eventType: string;
-  exception: Entities.Lite<Basics.ExceptionEntity>;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 

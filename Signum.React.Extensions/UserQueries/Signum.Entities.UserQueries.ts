@@ -51,7 +51,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   Type: "UserQuery";
   query: Basics.QueryEntity;
   groupResults: boolean;
-  entityType: Entities.Lite<Basics.TypeEntity>;
+  entityType: Entities.Lite<Basics.TypeEntity> | null;
   hideQuickLink: boolean;
   owner: Entities.Lite<Entities.Entity>;
   displayName: string;
