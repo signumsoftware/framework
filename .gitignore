@@ -40,3 +40,4 @@ Signum.React/node_modules/*.js
 /Signum.TSGenerator/Binaries/*
 /Signum.React/node_modules/@types/react/node_modules*
 /Signum.React/node_modules/**/*.md
+/Signum.React/ts_out/*
