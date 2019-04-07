@@ -5,7 +5,9 @@
     "module": "esnext",
     "moduleResolution": "node",
     "jsx": "react",
-    "noEmit": true,
+    "incremental": true,
+    "outDir": "./ts_out",
+    //"noEmit": true,
     "strict": true,
     "baseUrl": ".",
     "paths": {

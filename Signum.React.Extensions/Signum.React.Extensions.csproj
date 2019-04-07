@@ -52,6 +52,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="ts_out\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Axis.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\InitialMessage.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Legend.tsx" />
