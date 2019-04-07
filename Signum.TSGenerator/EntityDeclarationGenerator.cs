@@ -448,9 +448,9 @@ namespace Signum.TSGenerator
 
         public static bool GetTypescriptUndefined(this PropertyDefinition p)
         {
-            var attr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == Cache.InTypeScriptAttribute.FullName);
+            var ainTSAttr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == Cache.InTypeScriptAttribute.FullName);
 
-            var b = attr == null ? null : (bool?)attr.Properties.SingleOrDefault(a => a.Name == "Undefined").Argument.Value;
+            var b = (bool?)ainTSAttr?.Properties.SingleOrDefault(a => a.Name == "Undefined").Argument.Value;
 
             if (b != null)
                 return b.Value;
@@ -460,23 +460,38 @@ namespace Signum.TSGenerator
         
         private static bool? GetTypescriptUndefined(TypeDefinition declaringType)
         {
-            var attr = GetAttributeInherit(declaringType, Cache.InTypeScriptAttribute.FullName);
+            var inTSAttr = GetAttributeInherit(declaringType, Cache.InTypeScriptAttribute.FullName);
 
-            return attr == null ? null : (bool?)attr.Properties.SingleOrDefault(a => a.Name == "Undefined").Argument.Value;
+            return (bool?)inTSAttr?.Properties.SingleOrDefault(a => a.Name == "Undefined").Argument.Value;
         }
 
         public static bool GetTypescriptNull(this PropertyDefinition p)
         {
-            var attr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == Cache.InTypeScriptAttribute.FullName);
+            var inTSAttr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == Cache.InTypeScriptAttribute.FullName);
 
-            var b = attr == null ? null : (bool?)attr.Properties.SingleOrDefault(a => a.Name == "Null").Argument.Value;
+            var b = (bool?)inTSAttr?.Properties.SingleOrDefault(a => a.Name == "Null").Argument.Value;
             if (b != null)
                 return b.Value;
             
             if (p.PropertyType.IsValueType)
                 return p.PropertyType.IsNullable();
             else
-                return p.CustomAttributes.Any(a => a.AttributeType.Name == "NullableAttribute" && ((byte)2).Equals(a.ConstructorArguments[0].Value));
+            {
+                var nullableAttr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.Name == "NullableAttribute");
+
+                if (nullableAttr == null)
+                    return false;
+
+                var arg = nullableAttr.ConstructorArguments[0].Value;
+
+                if (arg is byte val)
+                    return val == 2;
+
+                if (arg is CustomAttributeArgument[] args)
+                    return ((byte)args[0].Value) == 2;
+
+                throw new InvalidOperationException("Unexpected value of type " + arg.GetType() + " in NullableAttribute constructor");
+            }
         }
 
         private static string FirstLower(string name)
