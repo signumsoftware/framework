@@ -190,6 +190,15 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs(this Entity e) => 0;", includeExpression: true);
         }
 
+        [TestMethod]
+        public void ExpressionExplicitCorrectNullable()
+        {
+            TestDiagnostic(null, @"
+        static Expression<Func<Entity, string?>> MyExpression;        
+        [ExpressionField(""MyExpression"")]
+        public static string? OperationLogs(this Entity e) => """";", includeExpression: true);
+        }
+
 
         private void TestDiagnostic(string expectedError, string code, bool includeExpression = false, bool staticClass = true, bool assertErrors = true)
         {

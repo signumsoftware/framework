@@ -20,7 +20,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void CompareLiteAndEntity()
         {
-            TestDiagnostic("Impossible to compare Lite<T> and T. Consider using RefersTo method", @"
+            TestDiagnostic("Impossible to compare Lite<T> and T. Consider using 'Is' extension method", @"
 Lite<Entity> lite = null;
 Entity entity = null;
 var condition = lite == entity;       
