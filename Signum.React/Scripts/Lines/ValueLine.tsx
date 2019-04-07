@@ -1,4 +1,3 @@
-/// <reference path="../ConfigureReactWidgets.ts" />
 import * as React from 'react'
 import * as moment from 'moment'
 import * as numbro from 'numbro'

@@ -1,4 +1,3 @@
-/// <reference path="../globals.d.ts" />
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'

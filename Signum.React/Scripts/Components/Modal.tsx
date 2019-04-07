@@ -127,7 +127,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
   static defaultProps = {
     ...BaseModal.defaultProps,
     animation: true,
-  };
+  } as any;
 
   static TRANSITION_DURATION = 300;
   static BACKDROP_TRANSITION_DURATION = 150;

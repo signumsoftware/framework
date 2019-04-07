@@ -73,11 +73,11 @@ export function configure() {
 declare module "moment" {
 
   interface Moment {
-    fromUserInterface(this: moment.Moment): Moment;
-    toUserInterface(this: moment.Moment): Moment;
+    fromUserInterface(this: moment.Moment): moment.Moment;
+    toUserInterface(this: moment.Moment): moment.Moment;
   }
 
-  function smartNow(this: moment.Moment): Moment;
+  function smartNow(this: moment.Moment): moment.Moment;
 
   interface Duration {
     format(template?: string, precision?: string, settings?: any): string;
