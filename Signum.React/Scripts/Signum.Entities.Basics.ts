@@ -39,7 +39,7 @@ export interface ExceptionEntity extends Entities.Entity {
   stackTrace: string;
   stackTraceHash: number;
   threadId: number;
-  user: Entities.Lite<IUserEntity>;
+  user: Entities.Lite<IUserEntity> | null;
   environment: string | null;
   version: string | null;
   userAgent: string | null;
@@ -65,13 +65,13 @@ export interface IUserEntity extends Entities.Entity {
 export const OperationLogEntity = new Type<OperationLogEntity>("OperationLog");
 export interface OperationLogEntity extends Entities.Entity {
   Type: "OperationLog";
-  target: Entities.Lite<Entities.Entity>;
-  origin: Entities.Lite<Entities.Entity>;
+  target: Entities.Lite<Entities.Entity> | null;
+  origin: Entities.Lite<Entities.Entity> | null;
   operation: Entities.OperationSymbol;
   user: Entities.Lite<IUserEntity>;
   start: string;
   end: string | null;
-  exception: Entities.Lite<ExceptionEntity>;
+  exception: Entities.Lite<ExceptionEntity> | null;
 }
 
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
