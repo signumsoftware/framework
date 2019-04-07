@@ -1,4 +1,5 @@
 import * as Navigator from '@framework/Navigator'
+import * as React from 'react'
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'

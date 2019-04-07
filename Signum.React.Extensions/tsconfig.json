@@ -7,6 +7,7 @@
     "jsx": "react",
     "incremental": true,
     "outDir": "./ts_out",
+    //"composite": true,
     //"noEmit": true,
     "strict": true,
     "baseUrl": ".",
@@ -23,5 +24,12 @@
       //"esnext",
       "dom"
     ]
-  }
+  }//,
+  //"exclude": [
+  //  "../../Framework/Signum.React/ts_out",
+  //  "ts_out"
+  //],
+  //"references": [
+  //  { "path": "../../Framework/Signum.React" }
+  //]
 }
