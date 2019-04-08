@@ -48,6 +48,7 @@ namespace Signum.Entities.Files
 
         [Ignore]
         byte[] binaryFile;
+        [NotNullValidator(Disabled = true)]
         public byte[] BinaryFile
         {
             get { return binaryFile; }
@@ -72,13 +73,13 @@ namespace Signum.Entities.Files
         public string Suffix { get; set; }
 
         [Ignore]
-        public string CalculatedDirectory { get; set; }
+        public string? CalculatedDirectory { get; set; }
 
         [ForceNotNullable]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
-        internal PrefixPair _prefixPair;
+        internal PrefixPair? _prefixPair;
         public void SetPrefixPair(PrefixPair prefixPair)
         {
             this._prefixPair = prefixPair;

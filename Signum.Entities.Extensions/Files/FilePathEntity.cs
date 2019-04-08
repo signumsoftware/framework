@@ -75,7 +75,7 @@ namespace Signum.Entities.Files
         public string Suffix { get; set; }
 
         [Ignore]
-        public string CalculatedDirectory { get; set; }
+        public string? CalculatedDirectory { get; set; }
 
         public FileTypeSymbol FileType { get; internal set; }
 
