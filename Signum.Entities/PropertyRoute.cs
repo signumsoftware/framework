@@ -632,7 +632,7 @@ namespace Signum.Entities
 
                 case PropertyRouteType.FieldOrProperty:
                     {
-                        var parentEntity = entity.GetParentEntity();
+                        var parentEntity = entity.TryGetParentEntity<ModifiableEntity>();
 
                         if (parentEntity == null)
                             return null;
@@ -657,7 +657,7 @@ namespace Signum.Entities
                     }
                 case PropertyRouteType.MListItems:
                     {
-                        var parentEntity = entity.GetParentEntity();
+                        var parentEntity = entity.TryGetParentEntity<ModifiableEntity>();
 
                         if (parentEntity == null)
                             return null;

@@ -216,9 +216,19 @@ namespace Signum.Entities
         [NonSerialized, Ignore]
         ModifiableEntity? parentEntity;
 
-        public ModifiableEntity? GetParentEntity()
+        public T? TryGetParentEntity<T>()
+            where T: ModifiableEntity
         {
-            return parentEntity;
+            return parentEntity as T;
+        }
+
+        public T GetParentEntity<T>()
+            where T : ModifiableEntity
+        {
+            if (parentEntity == null)
+                throw new InvalidOperationException("parentEntity is null");
+
+            return (T)parentEntity;
         }
 
         private void SetParentEntity(ModifiableEntity? p)
@@ -255,7 +265,7 @@ namespace Signum.Entities
 
         void NotifyPrivate(string propertyName)
         {
-            var parent = this.GetParentEntity();
+            var parent = this.parentEntity;
             if (parent != null)
                 parent.ChildPropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 
