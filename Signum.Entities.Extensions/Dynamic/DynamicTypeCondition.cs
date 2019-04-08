@@ -40,7 +40,7 @@ namespace Signum.Entities.Dynamic
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()!).EntityType.ToType().FullName;
+            var entityTypeName = this.GetParentEntity<DynamicTypeConditionEntity>().EntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +

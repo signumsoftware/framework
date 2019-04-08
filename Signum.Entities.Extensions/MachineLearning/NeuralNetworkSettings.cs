@@ -69,7 +69,7 @@ namespace Signum.Entities.MachineLearning
             {
                 if (OutputActivation == NeuralNetworkActivation.ReLU || OutputActivation == NeuralNetworkActivation.Sigmoid)
                 {
-                    var p = (PredictorEntity)this.GetParentEntity()!;
+                    var p = this.GetParentEntity<PredictorEntity>();
                     var errors = p.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output && a.Encoding.Is(DefaultColumnEncodings.NormalizeZScore)).Select(a => a.Token).ToList();
                     errors.AddRange(p.SubQueries.SelectMany(sq => sq.Columns).Where(a => a.Usage == PredictorSubQueryColumnUsage.Output && a.Encoding.Is(DefaultColumnEncodings.NormalizeZScore)).Select(a => a.Token).ToList());
 

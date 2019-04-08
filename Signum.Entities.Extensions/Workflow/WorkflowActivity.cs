@@ -213,8 +213,8 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var decomposition = (SubWorkflowEmbedded)this.GetParentEntity()!;
-            var activity = (WorkflowActivityEntity)decomposition.GetParentEntity()!;
+            var decomposition = this.GetParentEntity<SubWorkflowEmbedded>();
+            var activity = decomposition.GetParentEntity<WorkflowActivityEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");

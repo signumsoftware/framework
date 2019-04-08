@@ -106,7 +106,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowEventTaskEntity)this.GetParentEntity()!;
+            var parent = this.GetParentEntity<WorkflowEventTaskEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -138,7 +138,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowEventTaskEntity)this.GetParentEntity()!;
+            var parent = this.GetParentEntity<WorkflowEventTaskEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");

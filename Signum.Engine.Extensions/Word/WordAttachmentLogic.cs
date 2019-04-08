@@ -72,14 +72,14 @@ namespace Signum.Engine.Word
             return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { SystemEmail = ctx.SystemEmail });
         }
 
-        static string? WordAttachmentFileName_StaticPropertyValidation(WordAttachmentEntity WordAttachment, PropertyInfo pi)
+        static string? WordAttachmentFileName_StaticPropertyValidation(WordAttachmentEntity wordAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)WordAttachment.GetParentEntity()!;
-            if (template != null && WordAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
+            var template = wordAttachment.TryGetParentEntity<EmailTemplateEntity>();
+            if (template != null && wordAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
-                    WordAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, WordAttachment.FileName, out string errorMessage);
+                    wordAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, wordAttachment.FileName, out string errorMessage);
                     return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)

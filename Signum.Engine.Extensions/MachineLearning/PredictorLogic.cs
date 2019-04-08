@@ -235,7 +235,7 @@ namespace Signum.Engine.MachineLearning
 
         static string? SubQueryColumns_StaticPropertyValidation(PredictorSubQueryEntity sq, PropertyInfo pi)
         {
-            var p = (PredictorEntity)sq.GetParentEntity()!;
+            var p = sq.GetParentEntity<PredictorEntity>()!;
             var tokens = GetParentKeys(p.MainQuery);
             
             var current = sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
@@ -252,8 +252,8 @@ namespace Signum.Engine.MachineLearning
 
         static string? GroupKey_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
-            var sq = (PredictorSubQueryEntity)column.GetParentEntity()!;
-            var p = (PredictorEntity)sq.GetParentEntity()!;
+            var sq = column.GetParentEntity<PredictorSubQueryEntity>()!;
+            var p = sq.GetParentEntity<PredictorEntity>()!;
             if (column.Token != null && column.Usage == PredictorSubQueryColumnUsage.ParentKey)
             {
                 var index = sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey).IndexOf(column);
@@ -301,8 +301,8 @@ namespace Signum.Engine.MachineLearning
 
         static string? Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
         {
-            var mq = (PredictorMainQueryEmbedded)column.GetParentEntity()!;
-            var p = (PredictorEntity)mq.GetParentEntity()!;
+            var mq = column.GetParentEntity<PredictorMainQueryEmbedded>();
+            var p = mq.GetParentEntity<PredictorEntity>();
             if (p.Algorithm == null)
                 return null;
 
@@ -312,8 +312,8 @@ namespace Signum.Engine.MachineLearning
 
         static string? SubQueryColumn_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
-            var sq = (PredictorSubQueryEntity)column.GetParentEntity()!;
-            var p = (PredictorEntity)sq.GetParentEntity()!;
+            var sq = column.GetParentEntity<PredictorSubQueryEntity>();
+            var p = sq.GetParentEntity<PredictorEntity>()!;
             if (p.Algorithm == null || column.Usage == PredictorSubQueryColumnUsage.ParentKey || column.Usage == PredictorSubQueryColumnUsage.SplitBy)
                 return null;
 

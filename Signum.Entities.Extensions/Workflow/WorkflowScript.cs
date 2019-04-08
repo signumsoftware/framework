@@ -46,7 +46,7 @@ namespace Signum.Entities.Workflow
 
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowScriptEntity)this.GetParentEntity()!;
+            var parent = this.GetParentEntity<WorkflowScriptEntity>();
 
             var script = this.Script.Trim();
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
