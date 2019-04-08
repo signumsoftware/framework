@@ -366,6 +366,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class AwardNominationEntity : Entity, ICanBeOrdered
     {
+        [NotNullValidator(Disabled = true)]
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
         public Lite<IAuthorEntity> Author { get; set; }
 
