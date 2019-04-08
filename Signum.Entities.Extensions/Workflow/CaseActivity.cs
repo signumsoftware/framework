@@ -69,9 +69,7 @@ namespace Signum.Entities.Workflow
         (@this.WorkflowActivity is WorkflowEventEntity) ? CaseActivityState.PendingNext :
         ((WorkflowActivityEntity)@this.WorkflowActivity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision :
         CaseActivityState.PendingNext;
-#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("StateExpression")]
-#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public CaseActivityState State
         {
             get

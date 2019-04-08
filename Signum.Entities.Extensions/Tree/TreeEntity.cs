@@ -39,9 +39,7 @@ namespace Signum.Entities.Tree
         static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
         [Ignore]
         short? level;
-#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("LevelExpression"), InTypeScript(true)]
-#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public short? Level
         {
             get { return level; }

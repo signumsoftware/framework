@@ -75,9 +75,7 @@ namespace Signum.Entities.Processes
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
          log => (double?)(log.ExecutionEnd - log.ExecutionStart)!.Value.TotalMilliseconds;
-#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationExpression")]
-#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public double? Duration
         {
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
@@ -85,9 +83,7 @@ namespace Signum.Entities.Processes
 
         static Expression<Func<ProcessEntity, TimeSpan?>> DurationSpanExpression =
         log => log.ExecutionEnd - log.ExecutionStart;
-#pragma warning disable SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         [ExpressionField("DurationSpanExpression")]
-#pragma warning restore SF0002 // Use ExpressionFieldAttribute in non-trivial method or property
         public TimeSpan? DurationSpan
         {
             get { return ExecutionEnd == null ? null : DurationSpanExpression.Evaluate(this); }
