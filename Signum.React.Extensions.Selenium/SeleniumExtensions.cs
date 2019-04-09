@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using OpenQA.Selenium;
@@ -14,6 +15,7 @@ namespace Signum.React.Selenium
     public static class SeleniumExtensions
     {
         public static TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(20 * 1000);
+        public static TimeSpan ThrowExceptionForDeveloperAfter = TimeSpan.FromMilliseconds(5 * 1000);
         public static TimeSpan DefaultPoolingInterval = TimeSpan.FromMilliseconds(200);
 
         public static T Wait<T>(this RemoteWebDriver selenium, Func<T> condition, Func<string>? actionDescription = null, TimeSpan? timeout = null)
@@ -27,8 +29,26 @@ namespace Signum.React.Selenium
                 };
 
                 wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException), typeof(StaleElementReferenceException));
+                var throwExceptionAfter = Debugger.IsAttached ? DateTime.Now.Add(ThrowExceptionForDeveloperAfter) : (DateTime?)null;
+                return wait.Until(str =>
+                {
+                    var result = condition();
 
-                return wait.Until(_ => condition());
+                    if ((result == null || result.Equals(false)) && throwExceptionAfter < DateTime.Now)
+                    {
+                        try
+                        {
+                            throw new WaitTakingTooLongException("Hey Developer! looks like this condition is taking too long");
+                        }
+                        catch (WaitTakingTooLongException)
+                        {
+                            throwExceptionAfter = null;
+                            return result;
+                        }
+                    }
+
+                    return result;
+                });
             }
             catch (WebDriverTimeoutException ex)
             {
@@ -37,6 +57,18 @@ namespace Signum.React.Selenium
                     selenium.Title,
                     selenium.Url));
             }
+        }
+
+
+        [Serializable]
+        public class WaitTakingTooLongException : Exception
+        {
+            public WaitTakingTooLongException() { }
+            public WaitTakingTooLongException(string message) : base(message) { }
+            public WaitTakingTooLongException(string message, Exception inner) : base(message, inner) { }
+            protected WaitTakingTooLongException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         }
 
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
