@@ -699,7 +699,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.findOptions.groupResults)
       throw new Error("Results are grouped")
 
-    return this.state.selectedRows!.map(a => a.entity!);
+    if (this.state.selectedRows == null)
+      return []; 
+
+    return this.state.selectedRows.map(a => a.entity!);
   }
 
   // SELECT BUTTON
