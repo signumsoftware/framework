@@ -491,7 +491,7 @@ namespace Signum.Utilities
                 else
                     sb.Append(separator);
 
-                sb.Append(item!.ToString());
+                sb.Append(item?.ToString());
             }
 
             if (sb == null)
