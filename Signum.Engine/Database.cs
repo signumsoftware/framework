@@ -1195,6 +1195,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
 
+            //return Database.Query<E>().Where(e => e.Is(lite));
+
             return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.EntityType).Invoke(lite);
         }
 
