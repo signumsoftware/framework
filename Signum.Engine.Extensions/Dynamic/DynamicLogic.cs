@@ -279,9 +279,9 @@ namespace Signum.Engine.Dynamic
                     .Concat(DynamicCode.GetMetadataReferences(needsCodeGenAssembly));
 
                 var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(assemblyName))
-                      .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                      .WithOptions(new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
                       .AddReferences(references)
-                      .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName))));
+                      .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName), options: new CSharpParseOptions(LanguageVersion.CSharp8))));
 
                 var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, $"{assemblyName.Before(".")}.{Guid.NewGuid()}.dll");
 
