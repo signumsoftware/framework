@@ -133,17 +133,27 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             var errorSuffix = "columns in table " + this.Name.Name;
+            var columns = new Dictionary<string, IColumn>();
+            void AddColumns(IEnumerable<IColumn> newColumns)
+            {
+                try
+                {
+                    columns.AddRange(newColumns, c => c.Name, c => c, errorSuffix);
+                }catch(RepeatedElementsException ex) when (StartParameters.IgnoredCodeErrors != null)
+                {
+                    StartParameters.IgnoredCodeErrors.Add(ex);
+                }
+            }
 
-            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix);
+            AddColumns(Fields.Values.SelectMany(c => c.Field.Columns()));
 
             if (Mixins != null)
-                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix), errorSuffix);
+                AddColumns(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()));
 
             if (this.SystemVersioned != null)
-                columns.AddRange(this.SystemVersioned.Columns().ToDictionaryEx(a => a.Name), errorSuffix);
+                AddColumns(this.SystemVersioned.Columns());
 
             Columns = columns;
-
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
             inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
             updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));

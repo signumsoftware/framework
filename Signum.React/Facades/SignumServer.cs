@@ -89,7 +89,14 @@ namespace Signum.React.Facades
 
             foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
             {
-                action(result);
+                try
+                {
+                    action(result);
+                }
+                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                {
+
+                }
             }
 
             return result;

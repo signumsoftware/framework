@@ -383,7 +383,7 @@ namespace Signum.Utilities
             }
 
             if (repetitions.Count > 0)
-                throw new ArgumentException($@"There are some repeated {errorContext}...
+                throw new RepeatedElementsException($@"There are some repeated {errorContext}...
 {repetitions.ToString(kvp => $@"Key ""{kvp.Key}"" has {kvp.Value.Count} repetitions:
 {kvp.Value.Take(ErrorExampleLimit).ToString("\r\n").Indent(4)}", "\r\n")}");
         }
@@ -548,6 +548,13 @@ namespace Signum.Utilities
 
             return collection;
         }
+    }
+
+
+    [Serializable]
+    public class RepeatedElementsException : Exception
+    {
+        public RepeatedElementsException(string message) : base(message) { }
     }
 
     public static class KVP
