@@ -290,7 +290,7 @@ namespace Signum.Entities
             foreach (var item in GraphExplorer.FromRoot(entity).Where(a => a.Modified != ModifiedState.Sealed))
             {
                 item.SetNotModified();
-                if (item is Entity e)
+                if (item is Entity e && e.IdOrNull == null)
                     e.SetId(new PrimaryKey("invalidId"));
             }
 
