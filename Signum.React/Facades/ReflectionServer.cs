@@ -442,8 +442,20 @@ namespace Signum.React.Facades
 
             if (this.IsEmbedded && !this.IsCollection)
                 this.TypeNiceName = type.NiceName();
-
-            this.Name = implementations?.Key() ?? TypeScriptType(type);
+            if(implementations != null)
+            {
+                try
+                {
+                    this.Name = implementations.Value.Key();
+                }
+                catch (Exception) when (StartParameters.IgnoredCodeErrors != null)
+                {
+                    this.Name = "ERROR";
+                }
+            }else
+            {
+                this.Name = TypeScriptType(type);
+            }
         }
 
         private static string TypeScriptType(Type type)
