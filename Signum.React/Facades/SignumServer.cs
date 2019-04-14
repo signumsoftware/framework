@@ -79,6 +79,8 @@ namespace Signum.React.Facades
             ReflectionServer.Start();
         }
 
+        public static bool IgnoreExceptions = false;
+
         public static EntityPackTS GetEntityPack(Entity entity)
         {
             var canExecutes = OperationLogic.ServiceCanExecute(entity);
@@ -89,7 +91,14 @@ namespace Signum.React.Facades
 
             foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
             {
-                action(result);
+                try
+                {
+                    action(result);
+                }
+                catch (Exception) when (IgnoreExceptions)
+                {
+
+                }
             }
 
             return result;
