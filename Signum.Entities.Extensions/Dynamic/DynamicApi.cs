@@ -16,7 +16,7 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicApiEval Eval { get; set; }
 
         static Expression<Func<DynamicApiEntity, string>> ToStringExpression = @this => @this.Name;
