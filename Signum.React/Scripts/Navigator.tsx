@@ -956,7 +956,7 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
   component.prototype.render.withViewOverrides = true;
 }
 
-function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
     if (view == null)
