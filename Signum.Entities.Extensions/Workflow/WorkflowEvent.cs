@@ -44,6 +44,7 @@ namespace Signum.Entities.Workflow
                 Type = this.Type,
                 Task = WorkflowEventTaskModel.GetModel(this),
                 Timer = this.Timer,
+                BpmnElementId = this.BpmnElementId,
             };
             return model;
         }
@@ -54,6 +55,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.Timer = wModel.Timer;
+            this.BpmnElementId = wModel.BpmnElementId;
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
         }
 

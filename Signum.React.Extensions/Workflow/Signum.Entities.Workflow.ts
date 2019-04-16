@@ -333,7 +333,7 @@ export module WorkflowActivityMessage {
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
 export interface WorkflowActivityModel extends Entities.ModelEntity {
   Type: "WorkflowActivityModel";
-  workflowActivity: Entities.Lite<WorkflowActivityEntity>;
+  workflowActivity: Entities.Lite<WorkflowActivityEntity> | null;
   workflow: WorkflowEntity | null;
   mainEntityType: Basics.TypeEntity;
   name: string;
