@@ -22,7 +22,7 @@ interface DynamicViewOverrideComponentProps {
 
 interface DynamicViewOverrideComponentState {
   exampleEntity?: Entity;
-  componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }> | null;
+  componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }> | null;
   syntaxError?: string;
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
   scriptChanged?: boolean;
@@ -238,7 +238,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName || undefined).promise.then(func => {
           var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
           var re = func(tempCtx);
-          this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> });
+          this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }> });
           this.compileFunction();
         });
       }
@@ -341,44 +341,67 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
 interface RenderWithReplacementsProps {
   entity: Entity;
-  componentClass: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
+  componentClass: React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }>;
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
 }
 
-export class RenderWithReplacements extends React.Component<RenderWithReplacementsProps> {
+interface RenderWithReplacementsState {
+  viewOverride?: (vr: ViewReplacer<Entity>) => void;
+}
 
+export class RenderWithReplacements extends React.Component<RenderWithReplacementsProps, RenderWithReplacementsState> {
 
   originalRender: any;
+
+  constructor(props: RenderWithReplacementsProps) {
+    super(props);
+    this.state = {};
+  }
+
   componentWillMount() {
 
-    this.originalRender = this.props.componentClass.prototype.render;
+    if (this.props.componentClass.prototype.render)
+      this.originalRender = this.props.componentClass.prototype.render;
 
-    DynamicViewClient.unPatchComponent(this.props.componentClass);
-
-    if (this.props.viewOverride)
-      DynamicViewClient.patchComponent(this.props.componentClass, this.props.viewOverride);
+    this.setState({ viewOverride: this.props.viewOverride });
   }
 
   componentWillReceiveProps(newProps: RenderWithReplacementsProps) {
     if (newProps.componentClass != this.props.componentClass)
       throw new Error("not implemented");
 
-    if (newProps.viewOverride != this.props.viewOverride) {
-      DynamicViewClient.unPatchComponent(this.props.componentClass);
-      if (newProps.viewOverride)
-        DynamicViewClient.patchComponent(this.props.componentClass, newProps.viewOverride);
-    }
+    if (newProps.viewOverride != this.props.viewOverride)
+      this.setState({ viewOverride: newProps.viewOverride });
   }
 
   componentWillUnmount() {
-    this.props.componentClass.prototype.render = this.originalRender;
+    if (this.props.componentClass.prototype.render)
+      this.props.componentClass.prototype.render = this.originalRender;
   }
 
   render() {
 
     var ctx = new TypeContext(undefined, undefined, PropertyRoute.root(this.props.entity.Type), new ReadonlyBinding(this.props.entity, "example"));
 
-    return React.createElement(this.props.componentClass, { ctx: ctx });
+    return React.createElement(this.applyViewOverrides(this.state.viewOverride), { ctx: ctx });
+  }
+
+  applyViewOverrides(vo?: (vr: ViewReplacer<Entity>) => void) {
+
+    if (this.props.componentClass.prototype.render)
+      DynamicViewClient.unPatchComponent((this.props.componentClass as React.ComponentClass<{ ctx: TypeContext<Entity> }>));
+
+    if (!vo)
+      return this.props.componentClass;
+
+    if (this.props.componentClass.prototype.render) {
+      DynamicViewClient.patchComponent((this.props.componentClass as React.ComponentClass<{ ctx: TypeContext<Entity> }>), vo);
+      return this.props.componentClass;
+    }
+    else
+      return Navigator.surroundFunctionComponent((this.props.componentClass as React.FunctionComponent<{ ctx: TypeContext<Entity> }>),
+        [{ override: vo }]);
   }
 }
+
 
