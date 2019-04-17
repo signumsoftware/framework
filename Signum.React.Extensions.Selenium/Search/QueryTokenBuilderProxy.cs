@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using OpenQA.Selenium;
 using Signum.Utilities;
 
@@ -15,7 +15,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator TokenElement(int tokenIndex)
         {
-            return this.Element.WithLocator(By.CssSelector(".sf-query-token-part:nth-child(2)"));
+            return this.Element.WithLocator(By.CssSelector($".sf-query-token-part:nth-child({tokenIndex + 1}"));
         }
 
         public void SelectToken(string token)

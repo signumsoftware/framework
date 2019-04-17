@@ -24,7 +24,7 @@ namespace Signum.React.Selenium
             if (!this.SearchControl.FiltersVisible)
                 this.SearchControl.ToggleFilters(true);
 
-            this.SearchControl.Filters.AddFilter("Id", FilterOperation.EqualTo, lite.Id);
+            this.SearchControl.Filters.AddFilter("Entity.Id", FilterOperation.EqualTo, lite.Id);
 
             this.SearchControl.Search();
 
@@ -57,7 +57,10 @@ namespace Signum.React.Selenium
 
         public void SelectById(PrimaryKey id)
         {
-            this.SearchControl.Filters.AddFilter("Id", FilterOperation.EqualTo, id);
+            if (!this.SearchControl.FiltersVisible)
+                this.SearchControl.ToggleFilters(true);
+
+            this.SearchControl.Filters.AddFilter("Entity.Id", FilterOperation.EqualTo, id);
             this.SearchControl.Search();
             this.Results.SelectRow(0);
 
