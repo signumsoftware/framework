@@ -85,6 +85,9 @@ namespace Signum.Engine
             where L : Entity
         {
             var mListPropertRoute = PropertyRoute.Construct(mListField);
+            if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
+                throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
+
             RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
 
             

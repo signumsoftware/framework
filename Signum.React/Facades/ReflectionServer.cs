@@ -193,7 +193,7 @@ namespace Signum.React.Facades
                                         TypeNiceName = GetTypeNiceName(p.PropertyInfo!.PropertyType),
                                         Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                         IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
-                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || Validator.TryGetPropertyValidator(p)!.Validators.Any(v => (v is NotNullValidatorAttribute) && !v.DisabledInModelBinder)),
+                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || (Validator.TryGetPropertyValidator(p)?.Validators.Any(v => (v is NotNullValidatorAttribute) && !v.DisabledInModelBinder)) == true),
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                         IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
@@ -442,8 +442,20 @@ namespace Signum.React.Facades
 
             if (this.IsEmbedded && !this.IsCollection)
                 this.TypeNiceName = type.NiceName();
-
-            this.Name = implementations?.Key() ?? TypeScriptType(type);
+            if(implementations != null)
+            {
+                try
+                {
+                    this.Name = implementations.Value.Key();
+                }
+                catch (Exception) when (StartParameters.IgnoredCodeErrors != null)
+                {
+                    this.Name = "ERROR";
+                }
+            }else
+            {
+                this.Name = TypeScriptType(type);
+            }
         }
 
         private static string TypeScriptType(Type type)
