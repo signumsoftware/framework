@@ -16,7 +16,8 @@ export interface ValueFindOptionsParsed {
 }
 
 export interface ModalFindOptions {
-  title?: string;
+  title?: React.ReactNode;
+  message?: React.ReactNode; 
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
