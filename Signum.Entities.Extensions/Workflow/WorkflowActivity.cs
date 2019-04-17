@@ -258,7 +258,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
-        public Lite<WorkflowActivityEntity>  WorkflowActivity { get; set; }
+        public Lite<WorkflowActivityEntity>?  WorkflowActivity { get; set; }
 
         public WorkflowEntity? Workflow { get; set; }
 
