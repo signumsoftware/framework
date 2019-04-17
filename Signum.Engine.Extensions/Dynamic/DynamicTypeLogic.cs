@@ -465,6 +465,9 @@ namespace Signum.Engine.Dynamic
         {
             var atts = property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v)).ToList();
 
+            if (property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory && !property.Validators.Any(v => v.Type == "NotNull"))
+                atts.Add(GetValidatorAttribute(new DynamicValidator.NotNull { Type = "NotNull" }));
+
             if (property.Unit != null)
                 atts.Add($"Unit(\"{property.Unit}\")");
 

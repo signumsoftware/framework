@@ -94,13 +94,13 @@ namespace Signum.Engine.Dynamic
                                     return new Replacements.Selection(ctx.OldValue, null);
                                 };
 
-                            var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement)!;
+                            var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement);
 
                             return new DynamicSqlMigrationEntity
                             {
                                 CreationDate = TimeZoneManager.Now,
                                 CreatedBy = UserEntity.Current.ToLite(),
-                                Script = script.ToString(),
+                                Script = script?.ToString() ?? "",
                             };
                         }
                         finally
