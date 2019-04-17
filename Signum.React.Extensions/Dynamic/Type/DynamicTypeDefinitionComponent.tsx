@@ -1085,11 +1085,6 @@ function autoFix(p: DynamicProperty) {
 
   p.validators = p.validators.filter(dv => registeredValidators[dv.type].allowed(p));
 
-  if (registeredValidators["NotNull"].allowed(p)) {
-    if (!p.validators.some(a => a.type == "NotNull"))
-      p.validators.push({ type: "NotNull" });
-  }
-
   if (registeredValidators["StringLength"].allowed(p)) {
 
     var c = p.validators.filter(a => a.type == "StringLength").firstOrNull() as Validators.StringLength | undefined;

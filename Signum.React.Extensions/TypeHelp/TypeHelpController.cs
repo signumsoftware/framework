@@ -237,10 +237,10 @@ namespace Signum.React.TypeHelp
             this.subMembers = new List<TypeMemberHelpTS>();
         }
 
-        string GetCleanTypeName(Type type)
+        string? GetCleanTypeName(Type type)
         {
             type = type.ElementType() ?? type;
-            return TypeLogic.GetCleanName(type.CleanType());
+            return TypeLogic.TryGetCleanName(type.CleanType());
         }
     }
 }
