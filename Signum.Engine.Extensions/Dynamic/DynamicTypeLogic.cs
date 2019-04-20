@@ -585,17 +585,17 @@ namespace Signum.Engine.Dynamic
                 return "";
 
             string result = SimplifyType(property.Type);
-            if (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
-                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory)
-                result = result + "?";
+
+            var isNullable = (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
+                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory);
 
             if (property.IsLite)
-                result = "Lite<" + result + ">";
+                return "Lite<" + result + ">" + (isNullable ? "?" : "");
             
             if (property.IsMList != null)
-                result = "MList<" + result + ">";
+                return "MList<" + result + ">";
 
-            return result;
+            return result + (isNullable ? "?" : "");
         }
 
         private bool IsValueType(DynamicProperty property)
