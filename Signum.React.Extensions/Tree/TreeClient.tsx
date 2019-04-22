@@ -145,7 +145,7 @@ export function getAllTreeTypes() {
   return getAllTypes().filter(t => isTree(t));
 }
 
-export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: FilterOption[], options?: { title?: string }): Promise<Lite<T> | undefined>;
+export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<T> | undefined>;
 export function openTree(typeName: string, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined>;
 export function openTree(type: Type<TreeEntity> | string, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
   const typeName = type instanceof Type ? type.typeName : type;
@@ -155,7 +155,7 @@ export function openTree(type: Type<TreeEntity> | string, filterOptions?: Filter
 }
 
 export interface TreeModalOptions {
-  title?: string;
+  title?: React.ReactNode;
   excludedNodes?: Array<Lite<TreeEntity>>;
 }
 

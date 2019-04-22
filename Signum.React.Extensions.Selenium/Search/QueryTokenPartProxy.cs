@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Utilities;
 
 namespace Signum.React.Selenium
@@ -13,16 +13,22 @@ namespace Signum.React.Selenium
             this.Element = element;
         }
 
-        public void Select(string key)
+        public void Select(string? key)
         {
-            this.Element.FindElement(By.ClassName("rw-dropdownlist")).Click();
+            if (!this.Element.IsElementVisible(By.ClassName("rw-popup-container")))
+            {
+                this.Element.FindElement(By.ClassName("rw-dropdown-list")).Click();
+            }
 
             var container = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));
 
-            if (key.HasText())
-                container.FindElement(By.CssSelector("li > span[data-token=" + key + "]")).Click();
-            else
-                container.FindElement(By.CssSelector("li > span:not([data-token])")).Click();
+            var selector = key.HasText() ?
+                By.CssSelector("li > span[data-token='" + key + "']") :
+                By.CssSelector("li > span:not([data-token])");
+
+            var elem = container.WaitElementVisible(selector);
+            elem.ScrollTo();
+            elem.Click();
         }
     }
 }
