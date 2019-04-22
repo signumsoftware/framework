@@ -586,14 +586,14 @@ namespace Signum.Engine.Dynamic
 
             string result = SimplifyType(property.Type);
 
-            var isNullable = (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
-                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory);
-
             if (property.IsLite)
-                return "Lite<" + result + ">" + (isNullable ? "?" : "");
-            
+                result = "Lite<" + result + ">";
+
             if (property.IsMList != null)
                 return "MList<" + result + ">";
+
+            var isNullable = (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
+                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory);
 
             return result + (isNullable ? "?" : "");
         }
