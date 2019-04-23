@@ -465,7 +465,7 @@ namespace Signum.Engine.Dynamic
         {
             var atts = property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v)).ToList();
 
-            if (property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory && !property.Validators.Any(v => v.Type == "NotNull"))
+            if (property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory && !property.Validators.EmptyIfNull().Any(v => v.Type == "NotNull"))
                 atts.Add(GetValidatorAttribute(new DynamicValidator.NotNull { Type = "NotNull" }));
 
             if (property.Unit != null)
@@ -585,17 +585,17 @@ namespace Signum.Engine.Dynamic
                 return "";
 
             string result = SimplifyType(property.Type);
-            if (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
-                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory)
-                result = result + "?";
 
             if (property.IsLite)
                 result = "Lite<" + result + ">";
-            
-            if (property.IsMList != null)
-                result = "MList<" + result + ">";
 
-            return result;
+            if (property.IsMList != null)
+                return "MList<" + result + ">";
+
+            var isNullable = (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
+                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory);
+
+            return result + (isNullable ? "?" : "");
         }
 
         private bool IsValueType(DynamicProperty property)
