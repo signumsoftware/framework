@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
@@ -24,7 +25,7 @@ export default function TreeButton(p : TreeButtonProps){
 
   var label = p.searchControl.props.largeToolbarButtons == true ? " " + TreeMessage.Tree.niceToString() : undefined;
   return (
-    <Button onClick={handleClick} color="light"><i className="fa fa-sitemap"></i>&nbsp;{label}</Button>
+    <Button onClick={handleClick} color="light"><FontAwesomeIcon icon="sitemap" />&nbsp; { label }</Button >
   );
 }
 
