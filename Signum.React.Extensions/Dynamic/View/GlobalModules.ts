@@ -11,6 +11,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Components from '@framework/Components'
 import * as AuthClient from '../../Authorization/AuthClient'
 import * as Services from '@framework/Services'
+import * as TreeClient from '../../Tree/TreeClient'
 
 
 export const globalModules: any = {
@@ -27,4 +28,5 @@ export const globalModules: any = {
   Operations,
   Constructor,
   Services,
+  TreeClient,
 };
