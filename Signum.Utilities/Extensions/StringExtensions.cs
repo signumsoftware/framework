@@ -529,16 +529,16 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static string PadChopRight(this string str, int length)
+        public static string PadChopRight(this string str, int length, char paddingChar = ' ')
         {
             str = str ?? "";
-            return str.Length > length ? str.Substring(0, length) : str.PadRight(length);
+            return str.Length > length ? str.Substring(0, length) : str.PadRight(length, paddingChar);
         }
 
-        public static string PadChopLeft(this string str, int length)
+        public static string PadChopLeft(this string str, int length, char paddingChar = ' ')
         {
             str = str ?? "";
-            return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length);
+            return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length, paddingChar);
         }
 
         public static string? FirstNonEmptyLine(this string? str)
