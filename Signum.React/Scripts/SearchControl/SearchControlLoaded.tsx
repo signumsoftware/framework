@@ -850,7 +850,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     const menuItems: React.ReactElement<any>[] = [];
-    if (this.canFilter() && cm.columnIndex && isColumnFilterable(cm.columnIndex))
+    if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex))
       menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
 
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
