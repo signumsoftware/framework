@@ -11,6 +11,7 @@ import { BooleanEnum } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
+import { format } from 'd3';
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
   valueLineType?: ValueLineType;
@@ -175,7 +176,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
   static isDuration(e: React.KeyboardEvent<any>): boolean {
     const c = e.keyCode;
     return (ValueLine.isNumber(e) ||
-      (c == 186) /*Colon*/);
+      (c == 190) /*. Colon*/);
   }
 }
 
@@ -605,16 +606,17 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
     );
   }
 
-  const handleOnChange = (newValue: number | null) => {
-    const d = newValue == null ? null : moment.duration(newValue);
-
-    vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
+  const handleOnChange = (newValue: string | null) => {
+    vl.setValue(newValue);
   };
 
   const htmlAttributes = {
     placeholder: getPlaceholder(vl),
     ...vl.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
+
+  if (htmlAttributes.placeholder == undefined)
+    htmlAttributes.placeholder = durationFormat;
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -632,8 +634,8 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
 }
 
 export interface DurationTextBoxProps {
-  value: number;
-  onChange: (newValue: number | null) => void;
+  value: string | null;
+  onChange: (newValue: string | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
   format?: string;
@@ -649,25 +651,38 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
   }
 
   render() {
-    const ticksPerMillisecond = 10000;
     const value = this.state.text != undefined ? this.state.text :
-      this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
+      this.props.value != undefined ? moment.duration(this.props.value).format(this.props.format) :
         "";
 
-    return <input ref={this.props.innerRef} {...this.props.htmlAttributes}
+    return <input ref={this.props.innerRef}
+      {...this.props.htmlAttributes}
       type="text"
       autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
-      className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
+      className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))}
+      value={value}
       onBlur={this.handleOnBlur}
       onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
       onInput={isIE11() ? this.handleOnChange : undefined}
-      onKeyDown={this.handleKeyDown} />
+      onKeyDown={this.handleKeyDown}/>
 
   }
 
   handleOnBlur = (e: React.FocusEvent<any>) => {
+
+    function fix(val: string, format: string | undefined) {
+      if (!val.contains(":") && format != null && format) {
+        if (format.contains("hh"))
+          return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
+        if (format.contains("mm"))
+          return format.replace("mm", val.toString()).replace("ss", "00");
+        return val;
+      }
+    }
+
+
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
+    const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(fix(input.value, this.props.format)).format("hh:mm:ss:");
     this.setState({ text: undefined });
     if (this.props.value != result)
       this.props.onChange(result);;
@@ -681,6 +696,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
   }
 
   handleKeyDown = (e: React.KeyboardEvent<any>) => {
+    console.log(e.keyCode);
     if (!this.props.validateKey(e))
       e.preventDefault();
   }
