@@ -846,6 +846,33 @@ namespace Signum.Entities
         }
     }
 
+    public class TimeOfDayValidatorAttribute : ValidatorAttribute
+    {
+        public TimeOfDayValidatorAttribute()
+        {
+        }
+
+        protected override string? OverrideError(object? value)
+        {
+            if (value == null)
+                return null;
+
+            var prec = (TimeSpan)value;
+            if (prec.Days > 0)
+                return "Days not allowed in {0}";
+
+            return null;
+        }
+       
+        public override string HelpMessage
+        {
+            get
+            {
+                return ValidationMessage.IsATimeOfTheDay.NiceToString();
+            }
+        }
+    }
+
     public class StringCaseValidatorAttribute : ValidatorAttribute
     {
         private StringCase textCase;
@@ -1177,5 +1204,6 @@ namespace Signum.Entities
         _AtLeastOneValueIsNeeded,
         PowerOf,
         BeAString,
+        IsATimeOfTheDay,
     }
 }
