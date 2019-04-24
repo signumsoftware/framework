@@ -557,6 +557,7 @@ export module ValidationMessage {
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
   export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
+  export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
 }
 
 export module VoidEnumMessage {
