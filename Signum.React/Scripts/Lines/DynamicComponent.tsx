@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic } from '../Globals'
 import { getTypeInfos } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
@@ -113,9 +113,6 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
       if (tr.isEmbedded)
         return <EntityDetail ctx={ctx} />;
-
-      if (ValueLine.getValueLineType(tr) == "Checkbox")
-        return <ValueLine ctx={ctx} inlineCheckbox="block" />;
 
       if (ValueLine.getValueLineType(tr) != undefined)
         return <ValueLine ctx={ctx} />;
