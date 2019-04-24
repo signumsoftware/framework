@@ -116,7 +116,7 @@ export function toMomentDurationFormat(format: string | undefined): string | und
   if (format == undefined)
     return undefined;
 
-  return format.replace("\:", ":");
+  return format.replace("\\:", ":");
 }
 
 export function toNumbroFormat(format: string | undefined) {

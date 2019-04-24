@@ -11,14 +11,15 @@ export function useForceUpdate(): () => void {
   return () => setCount(count + 1);
 }
 
-export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>): T {
+export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>, avoidReset?: boolean): T {
 
   const [data, updateData] = React.useState<T>(defaultValue)
 
   React.useEffect(() => {
     var abortController = new AbortController();
 
-    updateData(defaultValue);
+    if (!avoidReset)
+      updateData(defaultValue);
 
     makeCall(abortController.signal)
       .then(result => !abortController.signal.aborted && updateData(result))
