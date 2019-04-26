@@ -15,6 +15,7 @@ export interface EntityComboProps extends EntityBaseProps {
   data?: Lite<Entity>[];
   labelTextWithData?: (data: Lite<Entity>[] | undefined | null) => React.ReactChild;
   refreshKey?: string;
+  initiallyFocused?: boolean;
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
@@ -25,6 +26,16 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     state.view = false;
     state.viewOnCreate = true;
     state.find = false;
+  }
+
+  componentDidMount() {
+    if (this.props.initiallyFocused)
+      setTimeout(() => {
+        let select = this.entityComboSelect && this.entityComboSelect.select;
+        if (select) {
+          select.focus();
+        }
+      }, 0);
   }
 
   entityComboSelect?: EntityComboSelect | null;
@@ -141,6 +152,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     return Finder.findOptionsPath(fo);
   }
 
+  select?: HTMLSelectElement | null;
+
   render() {
 
     const lite = this.getLite();
@@ -151,7 +164,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
       return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(ctx.value)}</FormControlReadonly>;
 
     return (
-      <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly} >
+      <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""}
+        disabled={ctx.readOnly} ref={s => this.select = s} >
         {this.renderOptions()}
       </select>
     );
