@@ -29,9 +29,13 @@ table.sf-search-results > tbody > tr > td {
     cursor: pointer;
 }
 
-table.sf-search-results > tbody > tr > td > span {
-    cursor: initial;
-}
+    table.sf-search-results > tbody > tr > td > * {
+        cursor: initial;
+    }
+
+    table.sf-search-results > tbody > tr > td > a {
+        cursor: pointer;
+    }
 /*.sf-filter-table div.sf-query-token-builder {
     display: table;
 }*/
