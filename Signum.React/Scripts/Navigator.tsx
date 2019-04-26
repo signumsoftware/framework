@@ -619,7 +619,7 @@ export interface NavigateOptions {
   avoidPromptLooseChange?: boolean;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
   extraComponentProps?: {};
-  createNew?: () => Promise<ModifiableEntity>;
+  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
 }
 
 export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
@@ -1075,6 +1075,11 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
       return Promise.resolve(value);
 
     return undefined;
+  }
+
+  if (type.name == "boolean") {
+    if (typeof value === "boolean")
+      return Promise.resolve(value);
   }
 
   if (type.name == "number") {

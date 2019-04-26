@@ -116,7 +116,7 @@ export abstract class OperationSettings {
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
   constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
     super(operationSymbol);
@@ -128,7 +128,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 export interface ConstructorOperationOptions<T extends Entity> {
   text?: () => string;
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
 export class ConstructorOperationContext<T extends Entity> {

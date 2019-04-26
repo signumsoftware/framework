@@ -5,11 +5,11 @@ import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 
-export const customConstructors: { [typeName: string]: (pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
+export const customConstructors: { [typeName: string]: (pr?: PropertyRoute, props?: any) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
-export function construct<T extends ModifiableEntity>(type: Type<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
-export function construct(type: string, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
-export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
+export function construct<T extends ModifiableEntity>(type: Type<T>, pr?: PropertyRoute, props?: Partial<T>): Promise<EntityPack<T> | undefined>;
+export function construct(type: string, pr?: PropertyRoute, props?: any): Promise<EntityPack<ModifiableEntity> | undefined>;
+export function construct(type: string | Type<any>, pr?: PropertyRoute, props?: any): Promise<EntityPack<ModifiableEntity> | undefined> {
 
   const typeName = (type as Type<any>).typeName || type as string;
 
@@ -20,7 +20,7 @@ export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise
   
   const c = customConstructors[typeName];
   if (c)
-    return asPromise(c(pr)).then<EntityPack<ModifiableEntity> | undefined>(e => {
+    return asPromise(c(pr, props)).then<EntityPack<ModifiableEntity> | undefined>(e => {
       if (e == undefined)
         return undefined;
 
@@ -51,7 +51,7 @@ export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise
           var ctx = new Operations.ConstructorOperationContext(oi, settings, ti);
 
           if (settings && settings.onConstruct)
-            return settings.onConstruct(ctx);
+            return settings.onConstruct(ctx, props);
 
           return ctx.defaultConstruct();
         }).then((p: EntityPack<Entity> | undefined) => {
@@ -64,7 +64,7 @@ export function construct(type: string | Type<any>, pr?: PropertyRoute): Promise
     }
   }
 
-  const result = New(typeName, undefined, pr);
+  const result = New(typeName, props, pr);
 
   assertCorrect(result);
 

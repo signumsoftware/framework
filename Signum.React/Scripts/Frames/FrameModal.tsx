@@ -34,7 +34,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   isNavigate?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
-  createNew?: () => Promise<ModifiableEntity>;
+  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
 }
 
 interface FrameModalState {

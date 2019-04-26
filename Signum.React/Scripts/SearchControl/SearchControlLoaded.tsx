@@ -651,19 +651,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             Navigator.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
 
           } else {
-            Constructor.construct(tn).then(e => {
-              if (e == undefined)
-                return;
 
-              Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                .then(() => Navigator.navigate(e!, {
-                  getViewPromise: getViewPromise as any,
-                  createNew: () => Constructor.construct(tn)
-                    .then(pack => Finder.setFilters(pack!.entity as Entity, this.props.findOptions.filterOptions)),
-                }))
-                .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
-                .done();
-            }).done();
+            Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
+              .then(props => Constructor.construct(tn, undefined, props))
+              .then(e => e && Navigator.navigate(e!, {
+                getViewPromise: getViewPromise as any,
+                createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
+                  .then(props => Constructor.construct(tn, undefined, props)!),
+              }))
+              .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+              .done();
           }
         }
       }).done();

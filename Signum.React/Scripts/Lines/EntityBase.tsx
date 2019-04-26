@@ -201,19 +201,20 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
   defaultCreate(pr: PropertyRoute): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
     return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.getViewPromise, false))
-      .then(typeName => typeName ? Constructor.construct(typeName, pr) : undefined)
-      .then(pack => {
-        if (!pack)
+      .then(typeName => {
+        if (!typeName)
           return Promise.resolve(undefined);
 
         var fo = this.state.findOptions;
         if (!fo || !fo.filterOptions)
-          return pack.entity as Entity;
+          return Constructor.construct(typeName, pr);
 
         return Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], false, qd))
-          .then(filters => Finder.setFilters(pack!.entity as Entity, filters));
-      });
+          .then(filters => Finder.getPropsFromFilters(typeName, filters))
+          .then(props => Constructor.construct(typeName, pr, props));
+      })
+      .then(a => a && a.entity);
   }
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {

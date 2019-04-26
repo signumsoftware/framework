@@ -126,16 +126,15 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<ModifiableEntity>) | undefined);
+        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<EntityPack<ModifiableEntity> | undefined>) | undefined);
 
         if (createNew)
           createNew()
-            .then(e => Navigator.toEntityPack(e))
-            .then(newPack => eoc.frame.onReload(newPack))
+            .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
         else
           Constructor.construct(pack.entity.Type)
-            .then(newPack => eoc.frame.onReload(newPack))
+            .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
       };
       eoc.defaultClick();
