@@ -287,6 +287,10 @@ tr.sf-entity-ctxmenu-success {
     opacity: .5;
 }
 
+.sf-th-entity {
+    width: 1px;
+}
+
 span.sf-search-entity-error {
     border: 1px solid red;
     /* color: red; */

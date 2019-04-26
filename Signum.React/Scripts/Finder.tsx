@@ -33,6 +33,7 @@ import { SearchControl } from "./Search";
 import ButtonBar from "./Frames/ButtonBar";
 import { json, namespace } from "d3";
 import { ButtonBarElement } from "./TypeContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -1432,9 +1433,8 @@ export const entityFormatRules: EntityFormatRule[] = [
         inSearch={true}
         onNavigated={sc && sc.handleOnNavigated}
         getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}
-        inPlaceNavigation={sc && sc.props.navigate == "InPlace"}
-      >
-        {EntityControlMessage.View.niceToString()}
+        inPlaceNavigation={sc && sc.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        <FontAwesomeIcon icon={["fas", "arrow-right"]} title={EntityControlMessage.View.niceToString()} />
       </EntityLink>
   },
 ];
