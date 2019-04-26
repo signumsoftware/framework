@@ -26,8 +26,12 @@ table.sf-search-results > thead {
 table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
     vertical-align: middle;
+    cursor: pointer;
 }
 
+table.sf-search-results > tbody > tr > td > span {
+    cursor: initial;
+}
 /*.sf-filter-table div.sf-query-token-builder {
     display: table;
 }*/
