@@ -10,6 +10,9 @@ namespace Signum.Entities.Authorization
     {
         [StringLengthValidator(Max = 200)]
         public string? DomainName { get; set; }
+
+        [StringLengthValidator(Max = 250)]
+        public string? DomainServer { get; set; }
     }
 
     public enum ActiveDirectoryAuthorizerMessage
