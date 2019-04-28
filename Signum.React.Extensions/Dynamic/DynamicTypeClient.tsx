@@ -90,6 +90,7 @@ export interface DynamicTypeDefinition {
   operationCreate?: OperationConstruct;
   operationSave?: OperationExecute;
   operationDelete?: OperationDelete;
+  operationClone?: OperationConstructFrom;
   customInheritance?: DynamicTypeCustomCode;
   customEntityMembers?: DynamicTypeCustomCode;
   customStartCode?: DynamicTypeCustomCode;
@@ -154,6 +155,11 @@ export interface OperationConstruct {
 export interface OperationExecute {
   canExecute?: string;
   execute: string;
+}
+
+export interface OperationConstructFrom {
+  canConstruct?: string;
+  construct: string;
 }
 
 export interface OperationDelete {

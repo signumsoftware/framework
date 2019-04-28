@@ -168,6 +168,9 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;
 
+        [JsonProperty(PropertyName = "operationClone")]
+        public OperationConstructFrom OperationClone;
+
         [JsonProperty(PropertyName = "customInheritance")]
         public DynamicTypeCustomCode CustomInheritance;
 
@@ -228,6 +231,15 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "delete")]
         public string Delete;
+    }
+
+    public class OperationConstructFrom
+    {
+        [JsonProperty(PropertyName = "canConstruct")]
+        public string CanConstruct;
+
+        [JsonProperty(PropertyName = "construct")]
+        public string Construct;
     }
 
     public class DynamicTypeCustomCode

@@ -286,6 +286,26 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
                       </div>}
                   />
+
+                  <CloneOperationFieldsetComponent
+                    binding={Binding.create(def, d => d.operationClone)}
+                    title="Clone"
+                    onCreate={() => ({
+                      construct:
+                        "// NOTE: This sample code is only for simple properties\r\n" +
+                        "// MList/Embedded/Mixin properties were ignored if exists\r\n" +
+                        "return new " + dt.typeName + "Entity\r\n{\r\n" +
+                        def.properties
+                          .filter(p => !p.isMList && !isEmbedded(p.type))
+                          .map(p => "    " + p.name + " = e." + p.name).join(", \r\n") +
+                        "\r\n};"
+                    })}
+                    renderContent={oc =>
+                      <div>
+                        <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.canConstruct)} title="CanConstruct" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                        <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} title="OperationClone" signature={`${dt.typeName}Entity (${dt.typeName}Entity e, object[] args) =>`} />
+                      </div>}
+                  />
                 </div>
                 <div className="col-sm-5">
                   {!dt.isNew &&
@@ -757,6 +777,9 @@ const DeleteOperationFieldsetComponent = CustomFieldsetComponent as DeleteOperat
 
 type SaveOperationFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.OperationExecute>;
 const SaveOperationFieldsetComponent = CustomFieldsetComponent as SaveOperationFieldsetComponent;
+
+type CloneOperationFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.OperationConstructFrom>;
+const CloneOperationFieldsetComponent = CustomFieldsetComponent as CloneOperationFieldsetComponent;
 
 type IsMListFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeBackMListDefinition>;
 const IsMListFieldsetComponent = CustomFieldsetComponent as IsMListFieldsetComponent;

@@ -330,7 +330,8 @@ namespace Signum.Engine.Dynamic
 
             if (this.Def.OperationCreate == null &&
                  this.Def.OperationSave == null &&
-                 this.Def.OperationDelete == null)
+                 this.Def.OperationDelete == null &&
+                 this.Def.OperationClone == null)
                 return null;
 
             StringBuilder sb = new StringBuilder();
@@ -340,7 +341,6 @@ namespace Signum.Engine.Dynamic
 
             if (this.Def.OperationCreate != null)
                 sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
-
 
             var requiresSaveOperation = (this.Def.EntityKind != null && EntityKindAttribute.CalculateRequiresSaveOperation(this.Def.EntityKind.Value));
             if ((this.Def.OperationSave != null) && !requiresSaveOperation)
@@ -353,6 +353,9 @@ namespace Signum.Engine.Dynamic
 
             if (this.Def.OperationDelete != null)
                 sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
+
+            if (this.Def.OperationClone != null)
+                sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.From<{this.TypeName}Entity> Clone = OperationSymbol.Construct<{this.TypeName}Entity>.From<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Clone\");");
 
             sb.AppendLine("}");
 
@@ -874,6 +877,21 @@ namespace Signum.Engine.Dynamic
                     sb.AppendLine($"    CanDelete = e => {operationCanDelete},");
 
                 sb.AppendLine("    Delete = (e, args) => {\r\n" + (operationDelete.DefaultText("e.Delete();")).Indent(8) + "\r\n}");
+                sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
+            }
+
+            var operationClone = this.Def.OperationClone?.Construct.Trim();
+            var operationCanClone = this.Def.OperationClone?.CanConstruct?.Trim();
+            if (!string.IsNullOrWhiteSpace(operationClone) || !string.IsNullOrEmpty(operationCanClone))
+            {
+                sb.AppendLine();
+                sb.AppendLine("new Graph<{0}Entity>.ConstructFrom<{0}Entity>({1}Operation.Clone)".FormatWith(this.TypeName, (this.IsTreeEntity ? "Tree" : this.TypeName)));
+                sb.AppendLine("{");
+
+                if (!string.IsNullOrWhiteSpace(operationCanClone))
+                    sb.AppendLine($"    CanConstruct = e => {operationCanClone},");
+
+                sb.AppendLine("    Construct = (e, args) => {\r\n" + (operationClone.DefaultText($"return new {this.TypeName}Entity();")).Indent(8) + "\r\n}");
                 sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
             }
 
