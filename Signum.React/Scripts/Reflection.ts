@@ -843,8 +843,8 @@ function cloneIfNeeded(original: any, pr: PropertyRoute) {
   if (tr.isCollection)
     return cloneCollection(original, pr);
 
-  if (original == null)
-    return null;
+  if (original === null || original === undefined)
+    return original;
 
   if (tr.isEmbedded)
     return clone(original, pr);
