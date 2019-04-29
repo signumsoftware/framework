@@ -116,6 +116,7 @@ namespace Signum.Engine.Scheduler
                     });
 
                 sb.Include<ScheduledTaskLogEntity>()
+                    .WithIndex(s => s.ScheduledTask, includeFields: s=> s.StartTime)
                     .WithQuery(() => cte => new
                     {
                         Entity = cte,
