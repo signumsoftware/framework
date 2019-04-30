@@ -624,7 +624,8 @@ namespace Signum.Engine.Word
         public ForeachNode(INodeProvider nodeProvider, ValueProviderBase valueProvider) : base(nodeProvider)
         {
             this.ValueProvider = valueProvider;
-            valueProvider.IsForeach = true;
+            if (valueProvider != null)
+                valueProvider.IsForeach = true;
         }
 
         public ForeachNode(ForeachNode original)

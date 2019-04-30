@@ -90,7 +90,7 @@ namespace Signum.Engine.Mailing
                 if (valueProvider?.Variable.HasText() == true)
                 {
                     if (Variables.ContainsKey(valueProvider!.Variable!))
-                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(valueProvider.Variable));
+                        AddError(true, "There is already a variable '{0}' defined in this scope".FormatWith(valueProvider.Variable));
 
                     Variables.Add(valueProvider.Variable!, valueProvider);
                 }

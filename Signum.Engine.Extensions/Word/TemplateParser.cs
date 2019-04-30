@@ -384,7 +384,7 @@ namespace Signum.Engine.Word
                 if (Variables.TryGetValue(token!.Variable!, out ValueProviderBase t))
                 {
                     if (!t.Equals(token))
-                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
+                        AddError(true, "There is already a variable '{0}' defined in this scope".FormatWith(token.Variable));
                 }
                 else
                 {
