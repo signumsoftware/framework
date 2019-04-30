@@ -15,6 +15,7 @@ using Signum.Entities.Dynamic;
 using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Engine.Basics;
+using Signum.Engine;
 
 namespace Signum.Engine.Workflow
 {
@@ -333,7 +334,6 @@ namespace Signum.Engine.Workflow
                     });
 
                 sb.Include<WorkflowEventEntity>()
-                    .WithSave(WorkflowEventOperation.Save)
                     .WithExpressionFrom((WorkflowEntity p) => p.WorkflowEvents())
                     .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowEvents())
                     .WithQuery(() => e => new
@@ -346,6 +346,28 @@ namespace Signum.Engine.Workflow
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
+
+
+                new Graph<WorkflowEventEntity>.Execute(WorkflowEventOperation.Save)
+                {
+                    CanBeNew = true,
+                    CanBeModified = true,
+                    Execute = (e, _) => {
+                        if (e.Timer == null && e.Type.IsTimer())
+                            throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.Timer), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+
+                        if (e.Timer != null && !e.Type.IsTimer())
+                            throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.Timer), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+
+                        if (e.BoundaryOf == null && e.Type.IsBoundaryTimer())
+                            throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.BoundaryOf), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+
+                        if (e.BoundaryOf != null && !e.Type.IsBoundaryTimer())
+                            throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.BoundaryOf), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+
+                        e.Save();
+                    },
+                }.Register();
 
                 new Graph<WorkflowEventEntity>.Delete(WorkflowEventOperation.Delete)
                 {

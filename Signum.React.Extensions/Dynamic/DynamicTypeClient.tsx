@@ -49,7 +49,8 @@ export function start(options: { routes: JSX.Element[] }) {
         })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
         .done();
-    }
+    },
+    alternatives: eoc => [],
   }));
 
   QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
