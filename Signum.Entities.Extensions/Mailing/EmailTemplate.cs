@@ -63,7 +63,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
         [NotifyChildProperty]
-        public TemplateApplicableEval Applicable { get; set; }
+        public TemplateApplicableEval? Applicable { get; set; }
 
 
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)

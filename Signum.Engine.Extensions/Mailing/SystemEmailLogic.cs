@@ -346,7 +346,7 @@ namespace Signum.Engine.Mailing
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
             template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
-
+          
             return template;
         }
 
