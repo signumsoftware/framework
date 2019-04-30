@@ -47,8 +47,8 @@ class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $C
   }
 
   answer?: $AnswerType$;
-  handleOkClicked = (val: $AnswerType$) => {
-    this.answer = val;
+  handleOkClicked = () => {
+    this.answer = true;
     this.setState({ show: false });
   }
 
