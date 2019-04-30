@@ -58,29 +58,6 @@ namespace Signum.Entities.Workflow
             this.BpmnElementId = wModel.BpmnElementId;
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
         }
-
-        protected override string? PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(Timer))
-            {
-                if (Timer == null && this.Type.IsTimer())
-                    return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-
-                if (Timer != null && !this.Type.IsTimer())
-                    return ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-            }
-
-            if (pi.Name == nameof(BoundaryOf))
-            {
-                if (BoundaryOf == null && this.Type.IsBoundaryTimer())
-                    return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-
-                if (BoundaryOf != null && !this.Type.IsBoundaryTimer())
-                    return ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-            }
-
-            return base.PropertyValidation(pi);
-        }
     }
 
     [Serializable]

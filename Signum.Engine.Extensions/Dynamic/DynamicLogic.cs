@@ -106,7 +106,6 @@ namespace Signum.Engine.Dynamic
                         Dictionary<string, CodeFile> codeFiles = GetCodeFilesDictionary();
 
                         cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false);
-                        //cr = Compile(codeFiles, inMemory: false);
 
                         if (cr.Errors.Count == 0)
                             DynamicCode.CodeGenAssemblyPath = cr.OutputAssembly;
@@ -119,7 +118,6 @@ namespace Signum.Engine.Dynamic
                 {
                     Dictionary<string, CodeFile> codeFiles = DynamicApiLogic.GetCodeFiles().ToDictionary(a => a.FileContent);
                     cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true);
-                    //cr = CompileDynamicApi(inMemory: false);
 
                     if (cr.Errors.Count == 0)
                         DynamicCode.CodeGenControllerAssemblyPath = cr.OutputAssembly;

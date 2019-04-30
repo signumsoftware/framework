@@ -146,7 +146,7 @@ export function start(options: { routes: JSX.Element[] }) {
     workflowActivityMonitorUrl(ctx.lite),
     { icon: "tachometer-alt", iconColor: "green" }));
 
-  Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
+  Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
     contextual: { icon: "heartbeat", iconColor: "red" },
