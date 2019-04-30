@@ -82,7 +82,7 @@ namespace Signum.Engine.DynamicQuery
         /// <summary>
         /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses typeof(T) NiceName as niceName.
         /// </summary>
-        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, T>> lambdaToMethodOrProperty)
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, T?>> lambdaToMethodOrProperty)
             where F : Entity
             where T : Entity
         {
@@ -93,7 +93,7 @@ namespace Signum.Engine.DynamicQuery
         /// <summary>
         /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
         /// </summary>
-        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, T?>> lambdaToMethodOrProperty, Func<string> niceName)
             where F : Entity
             where T : Entity
         {
@@ -104,7 +104,7 @@ namespace Signum.Engine.DynamicQuery
         /// <summary>
         /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses typeof(T) NiceName as niceName.
         /// </summary>
-        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty)
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, Lite<T>?>> lambdaToMethodOrProperty)
             where F : Entity
             where T : Entity
         {
@@ -115,7 +115,7 @@ namespace Signum.Engine.DynamicQuery
         /// <summary>
         /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
         /// </summary>
-        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty, Func<string> niceName)
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, Lite<T>?>> lambdaToMethodOrProperty, Func<string> niceName)
             where F : Entity
             where T : Entity
         {
