@@ -37,6 +37,16 @@ export interface ValueSearchControlState {
   token?: QueryToken;
 }
 
+function getQueryRequest(fo: FindOptionsParsed, valueToken?: string | QueryTokenString<any>): QueryValueRequest {
+
+  return {
+    queryKey: fo.queryKey,
+    filters: toFilterRequests(fo.filterOptions),
+    valueToken: valueToken && valueToken.toString(),
+    systemTime: fo.systemTime && { ...fo.systemTime }
+  };
+}
+
 export default class ValueSearchControl extends React.Component<ValueSearchControlProps, ValueSearchControlState> {
 
   static defaultProps = {
@@ -49,15 +59,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     this.state = { value: props.initialValue };
   }
 
-  getQueryRequest(fo: FindOptionsParsed): QueryValueRequest {
-
-    return {
-      queryKey: fo.queryKey,
-      filters: toFilterRequests(fo.filterOptions),
-      valueToken: this.props.valueToken && this.props.valueToken.toString(),
-      systemTime: fo.systemTime && { ...fo.systemTime }
-    };
-  }
+  
 
   componentDidMount() {
     if (this.props.initialValue == undefined) {
@@ -105,8 +107,11 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     this.abortableQuery.abort();
   }
 
-  abortableQuery = new AbortableRequest<{ request: QueryValueRequest; avoidNotify: boolean | undefined }, number>(
-    (abortController, a) => Finder.API.queryValue(a.request, a.avoidNotify, abortController));
+  abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, avoidNotify: boolean | undefined }, number>(
+    (abortSignal, a) =>
+      Finder.getQueryDescription(a.findOptions.queryName)
+        .then(qd => Finder.parseFindOptions(a.findOptions, qd))
+        .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken), a.avoidNotify, abortSignal)));
 
   refreshValue(props?: ValueSearchControlProps) {
     if (!props)
@@ -120,9 +125,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (Finder.validateNewEntities(fo))
       return;
 
-    Finder.getQueryDescription(fo.queryName)
-      .then(qd => Finder.parseFindOptions(fo, qd))
-      .then(fo => this.abortableQuery.getData({ request: this.getQueryRequest(fo), avoidNotify: props!.avoidNotifyPendingRequest }))
+    this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest })
       .then(value => {
         this.setState({ value });
         this.props.onValueChange && this.props.onValueChange(value);
