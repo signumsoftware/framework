@@ -88,6 +88,6 @@ function assertCorrect(m: ModifiableEntity) {
     throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (pr?: PropertyRoute) => T | Promise<T | undefined>) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (pr?: PropertyRoute, props?: Partial<T>) => T | Promise<T | undefined>) {
   customConstructors[type.typeName] = constructor;
 }
