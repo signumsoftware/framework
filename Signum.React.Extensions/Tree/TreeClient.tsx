@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
-import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -19,6 +19,7 @@ import TreeButton from './TreeButton'
 import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { LiteAutocompleteConfig } from '../../../Framework/Signum.React/Scripts/Lines';
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
@@ -121,11 +122,30 @@ function getQuerySetting(typeName: string) {
   return qs;
 }
 
+function getEntitySetting(typeName: string) {
+  var es = Navigator.getSettings(typeName);
+  if (!es) {
+    es = new Navigator.EntitySettings(typeName);
+    Navigator.addSettings(es);
+  }
+  return es;
+}
+
 export function overrideOnFind(ti: TypeInfo) {
   var qs = getQuerySetting(ti.name);
 
   if (!qs.onFind)
     qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+}
+
+export function overrideAutocomplete(ti: TypeInfo) {
+  var es = getEntitySetting(ti.name);
+
+  if (!es.autocomplete)
+    es.autocomplete = new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac), false, false);
+
+  if (!es.autocompleteDelay)
+    es.autocompleteDelay = 750;
 }
 
 export function overrideDefaultOrder(ti: TypeInfo) {
@@ -203,6 +223,10 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 
 export namespace API {
+  export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
+    return ajaxGet<Array<Lite<TreeEntity>>>({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+  }
+
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
     return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
   }
