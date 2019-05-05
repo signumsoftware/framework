@@ -1224,7 +1224,9 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
   }
 
-
+  static parseFull(fullPropertyRoute: string): PropertyRoute {
+    return PropertyRoute.parse(fullPropertyRoute.after("(").before(")."), fullPropertyRoute.after(")."));
+  }
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     let result = PropertyRoute.root(rootType);
