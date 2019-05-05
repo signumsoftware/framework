@@ -48,7 +48,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   throwIfNotFindable?: boolean;
   refreshKey?: string | number;
   enableAutoFocus?: boolean;
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], search: () => void) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onSelectionChanged?: (entity: ResultRow[]) => void;
