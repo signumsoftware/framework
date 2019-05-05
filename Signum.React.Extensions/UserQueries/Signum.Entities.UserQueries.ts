@@ -77,6 +77,7 @@ export module UserQueryMessage {
   export const _0ShouldBeSetIf1Is2 = new MessageKey("UserQueryMessage", "_0ShouldBeSetIf1Is2");
   export const UserQueries_CreateNew = new MessageKey("UserQueryMessage", "UserQueries_CreateNew");
   export const UserQueries_Edit = new MessageKey("UserQueryMessage", "UserQueries_Edit");
+  export const UserQueries_BackToDefault = new MessageKey("UserQueryMessage", "UserQueries_BackToDefault");
   export const UserQueries_UserQueries = new MessageKey("UserQueryMessage", "UserQueries_UserQueries");
   export const TheFilterOperation0isNotCompatibleWith1 = new MessageKey("UserQueryMessage", "TheFilterOperation0isNotCompatibleWith1");
   export const _0IsNotFilterable = new MessageKey("UserQueryMessage", "_0IsNotFilterable");
