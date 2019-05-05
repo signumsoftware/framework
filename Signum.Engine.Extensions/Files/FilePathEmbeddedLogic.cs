@@ -1,3 +1,4 @@
+using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities.Files;
 using Signum.Utilities;
@@ -12,29 +13,22 @@ namespace Signum.Engine.Files
 {
     public static class FilePathEmbeddedLogic
     {
-        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebImage?>> WebImageExpression =
-            (efp, ft) => efp == null ? null : new WebImage
-            {
-                FullWebPath = efp.FullWebPath()
-            };
+        static Expression<Func<FilePathEmbedded, WebImage>> WebImageExpression =
+            fp => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
-        public static WebImage? WebImage(this FilePathEmbedded efp, FileTypeSymbol fileType)
+        public static WebImage? WebImage(this FilePathEmbedded fp)
         {
-            return WebImageExpression.Evaluate(efp, fileType);
+            return WebImageExpression.Evaluate(fp);
         }
 
-        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebDownload?>> WebDownloadExpression =
-           (efp, ft) => efp == null ? null : new WebDownload
-           {
-               FullWebPath = efp.FullWebPath(),
-               FileName = efp.FileName
-           };
+        static Expression<Func<FilePathEmbedded, WebDownload>> WebDownloadExpression =
+           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName };
         [ExpressionField]
-        public static WebDownload? WebDownload(this FilePathEmbedded fp, FileTypeSymbol fileType)
+        public static WebDownload WebDownload(this FilePathEmbedded fp)
         {
-            return WebDownloadExpression.Evaluate(fp, fileType);
+            return WebDownloadExpression.Evaluate(fp);
         }
-        
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathEmbeddedLogic.Start(null!)));
@@ -55,6 +49,9 @@ namespace Signum.Engine.Files
                         efp.SaveFile();
                     }
                 };
+
+                QueryLogic.Expressions.Register((FilePathEmbedded f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                QueryLogic.Expressions.Register((FilePathEmbedded f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
                 FilePathEmbedded.CalculatePrefixPair += CalculatePrefixPair;
             }

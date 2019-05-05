@@ -107,6 +107,9 @@ namespace Signum.Entities.Files
             return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
 
+        public static Func<string, string> ToAbsolute = str => str;
+
+
         public string? FullWebPath()
         {
             var pp = this.GetPrefixPair();
@@ -114,9 +117,9 @@ namespace Signum.Entities.Files
             if (string.IsNullOrEmpty(pp.WebPrefix))
                 return null;
 
-            string url = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+            var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
 
-            return url;
+            return result;
         }
 
         public override string ToString()

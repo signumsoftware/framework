@@ -52,6 +52,29 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
       .then(list => this.setState({ userQueries: list }));
   }
 
+  handleBackToDefault = () => {
+
+    const sc = this.props.searchControl
+    const ofo = sc.props.findOptions;
+    Finder.getQueryDescription(sc.props.findOptions.queryKey)
+      .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd))
+      .then(nfo => {
+
+        ofo.filterOptions = nfo.filterOptions;
+        ofo.columnOptions = nfo.columnOptions;
+        ofo.orderOptions = nfo.orderOptions;
+        ofo.groupResults = nfo.groupResults;
+        ofo.pagination = nfo.pagination;
+        ofo.systemTime = nfo.systemTime;
+        sc.setState({ showFilters: false });
+        this.setState({ currentUserQuery: undefined });
+        if (ofo.pagination.mode != "All") {
+          sc.doSearchPage1();
+        }
+      }).done();
+  }
+
+
   applyUserQuery(uq: Lite<UserQueryEntity>) {
 
     Navigator.API.fetchAndForget(uq).then(userQuery => {
@@ -140,8 +163,9 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
               </DropdownItem>)
           }
           {userQueries && userQueries.length > 0 && <DropdownItem divider />}
-          {this.state.currentUserQuery && <DropdownItem onClick={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
-          {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <DropdownItem onClick={() => { this.createUserQuery().done() }}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>}
+          <DropdownItem onClick={this.handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</DropdownItem>
+          {this.state.currentUserQuery && <DropdownItem onClick={this.handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
+          {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <DropdownItem onClick={() => { this.createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>}
         </DropdownMenu>
       </Dropdown>
     );

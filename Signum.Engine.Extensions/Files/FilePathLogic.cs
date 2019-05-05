@@ -25,7 +25,7 @@ namespace Signum.Engine.Files
         }
 
         static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
-           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath() };
+           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName };
         [ExpressionField]
         public static WebDownload WebDownload(this FilePathEntity fp)
         {

@@ -12,6 +12,7 @@ import * as Components from '@framework/Components'
 import * as AuthClient from '../../Authorization/AuthClient'
 import * as Services from '@framework/Services'
 import * as TreeClient from '../../Tree/TreeClient'
+import * as AutoCompleteConfig from '@framework/Lines/AutoCompleteConfig'
 
 
 export const globalModules: any = {
@@ -29,4 +30,5 @@ export const globalModules: any = {
   Constructor,
   Services,
   TreeClient,
+  AutoCompleteConfig,
 };
