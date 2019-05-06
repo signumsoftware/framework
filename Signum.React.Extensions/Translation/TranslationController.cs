@@ -229,18 +229,6 @@ namespace Signum.React.Translation
             public string name;
             public string englishName;
             public List<PronomInfo>? pronoms;
-
-            /*
-            public static CulturesTS FromCultureInfo(CultureInfo ci)
-            {
-                return new CulturesTS()
-                {
-                    name = ci.Name,
-                    englishName = ci.EnglishName,
-                    pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(ci.TwoLetterISOLanguageName)?.Pronoms.ToList(),
-                };
-            }
-            */
         }
 
         public class LocalizableTypeTS
@@ -252,21 +240,6 @@ namespace Signum.React.Translation
             public bool hasPluralDescription;
 
             public Dictionary<string, LocalizedTypeTS> cultures = null!;
-
-            /*
-            public static LocalizableTypeTS FromType(Type type)
-            {
-                var options = LocalizedAssembly.GetDescriptionOptions(type);
-                return new LocalizableTypeTS()
-                {
-                    type = type.Name,
-                    hasDescription = options.IsSet(DescriptionOptions.Description),
-                    hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription),
-                    hasMembers = options.IsSet(DescriptionOptions.Members),
-                    hasGender = options.IsSet(DescriptionOptions.Gender),
-                };
-            }
-            */
 
             internal void FixMembers(CultureInfo defaultCulture)
             {
