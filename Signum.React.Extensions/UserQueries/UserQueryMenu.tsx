@@ -147,7 +147,11 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
   }
 
   render() {
-    const label = <span><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
+    const currentUserQueryToStr = this.state.currentUserQuery ? this.state.currentUserQuery.toStr : undefined;
+    const labelText = this.props.searchControl.props.largeToolbarButtons == true ?
+      (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
+
+    const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
     const userQueries = this.state.userQueries;
     return (
       <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"
