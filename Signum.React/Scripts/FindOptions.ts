@@ -181,25 +181,23 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
   return hasAggregate(token.parent);
 }
 
-export function withoutAggregateAndPinned(fop: FilterOptionParsed): FilterOptionParsed | undefined {
+export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {
 
   if (hasAggregate(fop.token))
     return undefined;
 
   if (isFilterGroupOptionParsed(fop)) {
-    var newFilters = fop.filters.map(f => withoutAggregateAndPinned(f)).filter(Boolean);
+    var newFilters = fop.filters.map(f => withoutAggregate(f)).filter(Boolean);
     if (newFilters.length == 0)
       return undefined;
     return ({
       ...fop,
       filters: newFilters,
-      pinned: undefined
     }) as FilterOptionParsed;
   };
 
   return {
     ...fop,
-    pinned: undefined
   };
 }
 

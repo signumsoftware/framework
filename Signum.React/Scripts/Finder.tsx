@@ -33,6 +33,8 @@ import { SearchControl } from "./Search";
 import ButtonBar from "./Frames/ButtonBar";
 import { json, namespace } from "d3";
 import { ButtonBarElement } from "./TypeContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { EntityBase } from "./Lines";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -368,7 +370,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     }) as ColumnOptionParsed));
 }
 
-export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[]): Promise<Entity> {
+export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[]): Promise<any> {
 
   function getMemberForToken(ti: TypeInfo, fullKey: string) {
     var token = fullKey.tryAfter("Entity.") || fullKey;
@@ -379,7 +381,9 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
     return ti.members[token];
   }
 
-  const ti = getTypeInfo(e.Type);
+  const ti = getTypeInfo(type);
+
+  var result: any = {};
 
   return Promise.all(filterOptionsParsed.map(fo => {
 
@@ -391,20 +395,14 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
     if (!mi)
       return null;
 
-    var val = (e as any)[mi.name.firstLower()];
+    const promise = Navigator.tryConvert(fo.value, mi.type);
 
-    if (val == null || val == 0) {
-      const promise = Navigator.tryConvert(fo.value, mi.type);
+    if (promise == null)
+      return null;
 
-      if (promise == null)
-        return null;
+    return promise.then(v => result[mi.name.firstLower()] = v);
 
-      return promise.then(v => (e as any)[mi.name.firstLower()] = v);
-    }
-
-    return null;
-
-  }).filter(p => !!p)).then(() => e);
+  }).filter(p => !!p)).then(() => result);
 }
 
 export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): FindOptions {
@@ -1432,9 +1430,10 @@ export const entityFormatRules: EntityFormatRule[] = [
         inSearch={true}
         onNavigated={sc && sc.handleOnNavigated}
         getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}
-        inPlaceNavigation={sc && sc.props.navigate == "InPlace"}
-      >
-        {EntityControlMessage.View.niceToString()}
+        inPlaceNavigation={sc && sc.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        <span title={EntityControlMessage.View.niceToString()}>
+          {EntityBase.viewIcon}
+        </span>
       </EntityLink>
   },
 ];

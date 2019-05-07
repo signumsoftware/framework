@@ -116,7 +116,7 @@ export abstract class OperationSettings {
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
   constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
     super(operationSymbol);
@@ -128,7 +128,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 export interface ConstructorOperationOptions<T extends Entity> {
   text?: () => string;
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
 export class ConstructorOperationContext<T extends Entity> {
@@ -426,20 +426,20 @@ export namespace Defaults {
 
   export function getColor(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
-      oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "light";
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {
-    return oi.operationType == OperationType.ConstructorFrom ?CreateGroup: undefined;
+    return oi.operationType == OperationType.ConstructorFrom ? CreateGroup : undefined;
   }
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
     return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == OperationType.Execute && isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
-    if (isSave(eoc.operationInfo)) {
+    if (Defaults.isSave(eoc.operationInfo)) {
       return [
         andClose(eoc),
         andNew(eoc)

@@ -284,41 +284,41 @@ namespace Signum.React.Json
                     var pr = GetCurrentPropertyRoute(mod);
 
                     var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
-
-                    while (reader.TokenType == JsonToken.PropertyName)
-                    {
-                        if ((string)reader.Value == "mixins")
+                    using (JsonSerializerExtensions.SetAllowDirectMListChanges(markedAsModified))
+                        while (reader.TokenType == JsonToken.PropertyName)
                         {
-                            var entity = (Entity)mod;
-                            reader.Read();
-                            reader.Assert(JsonToken.StartObject);
-
-                            reader.Read();
-                            while (reader.TokenType == JsonToken.PropertyName)
+                            if ((string)reader.Value == "mixins")
                             {
-                                var mixin = entity[(string)reader.Value];
+                                var entity = (Entity)mod;
+                                reader.Read();
+                                reader.Assert(JsonToken.StartObject);
 
                                 reader.Read();
+                                while (reader.TokenType == JsonToken.PropertyName)
+                                {
+                                    var mixin = entity[(string)reader.Value];
 
-                                using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
-                                    serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+                                    reader.Read();
+
+                                    using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
+                                        serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+
+                                    reader.Read();
+                                }
+
+                                reader.Assert(JsonToken.EndObject);
+                                reader.Read();
+                            }
+                            else
+                            {
+                                PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+
+                                reader.Read();
+                                ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
 
                                 reader.Read();
                             }
-
-                            reader.Assert(JsonToken.EndObject);
-                            reader.Read();
                         }
-                        else
-                        {
-                            PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
-
-                            reader.Read();
-                            ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
-
-                            reader.Read();
-                        }
-                    }
 
                     reader.Assert(JsonToken.EndObject);
 

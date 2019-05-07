@@ -90,6 +90,8 @@ namespace Signum.Test
         public void SaveMList()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<LabelEntity>())
+            using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
@@ -103,7 +105,8 @@ namespace Signum.Test
                     Author = new ArtistEntity { Name = ".Net Framework" },
                     Year = 2001,
                     Songs = types.Select(t => new SongEmbedded() { Name = t.Name }).ToMList(),
-                    State = AlbumState.Saved
+                    State = AlbumState.Saved,
+                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany"} },
                 }.Save();
 
                 Assert.All(GraphExplorer.FromRoot(album), a => Assert.False(a.IsGraphModified));
@@ -127,6 +130,8 @@ namespace Signum.Test
         public void SmartSaveMList()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<LabelEntity>())
+            using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
@@ -141,6 +146,7 @@ namespace Signum.Test
                     Year = 2000,
                     Songs = { new SongEmbedded { Name = "Song 1" } },
                     State = AlbumState.Saved,
+                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" } },
                 };
 
                 var innerList = ((IMListPrivate<SongEmbedded>)album.Songs).InnerList;
@@ -195,6 +201,8 @@ namespace Signum.Test
         public void SmartSaveMListOrder()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<LabelEntity>())
+            using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
@@ -207,11 +215,12 @@ namespace Signum.Test
                     Year = 2000,
                     Songs = { new SongEmbedded { Name = "Song 0" }, new SongEmbedded { Name = "Song 1" }, new SongEmbedded { Name = "Song 2" }, },
                     State = AlbumState.Saved,
+                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" } },
                 };
 
                 album.Save();
 
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a=>a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
                     new Dictionary<int, string> { { 0, "Song 0" }, { 1, "Song 1" }, { 2, "Song 2" } });
 
                 var ids = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
@@ -242,7 +251,7 @@ namespace Signum.Test
 
                 AssertSequenceEquals(album.ToLite().Retrieve().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });
 
-                 //tr.Commit();
+                //tr.Commit();
             }
         }
 
@@ -255,6 +264,8 @@ namespace Signum.Test
         public void SaveManyMList()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<LabelEntity>())
+            using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
@@ -264,13 +275,16 @@ namespace Signum.Test
                     Database.Query<BandEntity>().Take(6).ToList().Concat<IAuthorEntity>(
                     Database.Query<ArtistEntity>().Take(8).ToList()).ToList();
 
+                var label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" } };
+
                 List<AlbumEntity> albums = 0.To(16).Select(i => new AlbumEntity()
                 {
                     Name = "System Greatest hits {0}".FormatWith(i),
                     Author = i < authors.Count ? authors[i] : new ArtistEntity { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs =  { new SongEmbedded { Name = "Compilation {0}".FormatWith(i) }},
-                    State = AlbumState.Saved
+                    Songs = { new SongEmbedded { Name = "Compilation {0}".FormatWith(i) } },
+                    State = AlbumState.Saved,
+                    Label = label,
                 }).ToList();
 
                 albums.SaveList();
@@ -344,7 +358,7 @@ namespace Signum.Test
 
                 Assert.Equal(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
-                tr.Commit();
+                //tr.Commit();
             }
         }
 
@@ -367,7 +381,7 @@ namespace Signum.Test
 
                 Database.Query<NoteWithDateEntity>().Where(a => a.Id > max).UnsafeDelete();
 
-                tr.Commit();
+                //tr.Commit();
             }
 
         }
@@ -391,7 +405,7 @@ namespace Signum.Test
 
                 Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 
-                tr.Commit();
+                //tr.Commit();
             }
 
         }

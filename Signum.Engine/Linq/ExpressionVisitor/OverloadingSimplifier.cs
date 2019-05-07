@@ -438,6 +438,20 @@ namespace Signum.Engine.Linq
                 return Expression.Call(mCount, source);
             }
 
+            if(m.Expression != null && m.Member.Name == "Value" && m.Expression.Type.IsNullable())
+            {
+                var source = Visit(m.Expression);
+
+                return source.UnNullify();
+            }
+
+            if (m.Expression != null && m.Member.Name == "HasValue" && m.Expression.Type.IsNullable())
+            {
+                var source = Visit(m.Expression);
+
+                return Expression.NotEqual(source, Expression.Constant(null, source.Type.Nullify()));
+            }
+
             return base.VisitMember(m);
         }
 

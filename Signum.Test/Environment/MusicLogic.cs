@@ -156,7 +156,7 @@ namespace Signum.Test.Environment
                     entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
 
                 Validator.PropertyValidator((NoteWithDateEntity n) => n.Text)
-                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict);
+                    .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
             }
         }
 

@@ -26,8 +26,16 @@ table.sf-search-results > thead {
 table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
     vertical-align: middle;
+    cursor: pointer;
 }
 
+    table.sf-search-results > tbody > tr > td > * {
+        cursor: initial;
+    }
+
+    table.sf-search-results > tbody > tr > td > a {
+        cursor: pointer;
+    }
 /*.sf-filter-table div.sf-query-token-builder {
     display: table;
 }*/
@@ -281,6 +289,10 @@ bdi.date {
 /* sf-entity-ctxmenu-success */
 tr.sf-entity-ctxmenu-success {
     opacity: .5;
+}
+
+.sf-th-entity {
+    width: 1px;
 }
 
 span.sf-search-entity-error {

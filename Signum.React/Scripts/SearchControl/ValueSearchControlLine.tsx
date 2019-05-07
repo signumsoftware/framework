@@ -11,7 +11,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { TitleManager } from '../../Scripts/Lines/EntityBase';
+import { TitleManager, EntityBase } from '../../Scripts/Lines/EntityBase';
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
   ctx: StyleContext;
@@ -99,18 +99,18 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     let value = this.valueSearchControl && this.valueSearchControl.state.value;
     let find = value != undefined && coalesce(this.props.findButton, isQuery) &&
-      <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.valueSearchControl!.handleClick}
-        title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
-        <FontAwesomeIcon icon="search" />
+      title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
+      {EntityBase.findIcon}
       </a>;
 
 
     let view = value != undefined && coalesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
-      <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.handleViewEntityClick}
-        title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
-        <FontAwesomeIcon icon="arrow-right" />
+      title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
+        {EntityBase.viewIcon}
       </a>
 
     let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);

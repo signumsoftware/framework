@@ -86,6 +86,7 @@ namespace Signum.Entities
                 this.entityOrNull = entity;
                 this.id = entity.IdOrNull;
                 this.toStr = toStr;
+                this.Modified = entity.Modified;
             }
 
             public Entity? UntypedEntityOrNull

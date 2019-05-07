@@ -47,12 +47,12 @@ class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $C
   }
 
   answer?: $AnswerType$;
-  handleButtonClicked = (val: $AnswerType$) => {
-    this.answer = val;
+  handleOkClicked = () => {
+    this.answer = true;
     this.setState({ show: false });
   }
 
-  handleClosedClicked = () => {
+  handleCancelClicked = () => {
     this.setState({ show: false });
   }
 
@@ -62,10 +62,10 @@ class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $C
 
   render() {
     return (
-      <Modal onHide={this.handleClosedClicked} show={this.state.show} className="message-modal">
+      <Modal onHide={this.handleCancelClicked} show={this.state.show} className="message-modal" onExited={this.handleOnExited}>
         <div className="modal-header">
           <h5 className="modal-title">Important Question</h5>
-          <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleClosedClicked}>
+          <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -73,10 +73,10 @@ class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $C
           {this.props.question}
         </div>
         <div className="modal-footer">
-          <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={() => this.handleButtonClicked(true)}>
+          <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClicked}>
             {JavascriptMessage.ok.niceToString()}
           </button>
-          <button className="btn btn-light sf-entity-button sf-close-button" onClick={() => this.handleButtonClicked(false)}>
+          <button className="btn btn-light sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
             {JavascriptMessage.cancel.niceToString()}
           </button>
         </div>

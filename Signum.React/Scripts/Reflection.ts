@@ -843,8 +843,8 @@ function cloneIfNeeded(original: any, pr: PropertyRoute) {
   if (tr.isCollection)
     return cloneCollection(original, pr);
 
-  if (original == null)
-    return null;
+  if (original === null || original === undefined)
+    return original;
 
   if (tr.isEmbedded)
     return clone(original, pr);
@@ -1224,7 +1224,9 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
   }
 
-
+  static parseFull(fullPropertyRoute: string): PropertyRoute {
+    return PropertyRoute.parse(fullPropertyRoute.after("(").before(")."), fullPropertyRoute.after(")."));
+  }
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     let result = PropertyRoute.root(rootType);

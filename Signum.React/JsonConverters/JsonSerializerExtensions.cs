@@ -46,5 +46,21 @@ namespace Signum.React.Json
 
             return new Disposable(() => { currentPropertyRoute.Value = old; });
         }
+
+        static readonly ThreadVariable<bool> allowDirectMListChangesVariable = Statics.ThreadVariable<bool>("allowDirectMListChanges");
+
+        public static bool AllowDirectMListChanges
+        {
+            get { return allowDirectMListChangesVariable.Value; }
+        }
+
+        public static IDisposable SetAllowDirectMListChanges(bool allowMListDirectChanges)
+        {
+            var old = allowDirectMListChangesVariable.Value;
+
+            allowDirectMListChangesVariable.Value = allowMListDirectChanges;
+
+            return new Disposable(() => { allowDirectMListChangesVariable.Value = old; });
+        }
     }
 }
