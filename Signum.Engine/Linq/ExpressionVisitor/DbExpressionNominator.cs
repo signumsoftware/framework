@@ -1147,20 +1147,6 @@ namespace Signum.Engine.Linq
                 return nullable;
             }
 
-            if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
-            {
-                Expression expression = this.Visit(m.Expression);
-                Expression nullable;
-                if (m.Member.Name == "Value")
-                    nullable = Expression.Convert(expression, m.Expression.Type.UnNullify());
-                else
-                    nullable = new IsNotNullExpression(expression);
-
-                if (Has(expression))
-                    return Add(nullable);
-
-                return nullable;
-            }
 
             Expression? hardResult = HardCodedMembers(m);
             if (hardResult != null)

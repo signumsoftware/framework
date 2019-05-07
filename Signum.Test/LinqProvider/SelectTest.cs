@@ -327,6 +327,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
+        public void CoallesceNullable()
+        {
+            var list = Database.Query<ArtistEntity>()
+                .Where(a => a.Status != null)
+                .Select(a => (a.Status ?? a.Status).Value)
+                .ToArray();
+        }
+
+        [Fact]
         public void SelectEmbeddedNullable()
         {
             var bonusTracks = Database.Query<AlbumEntity>().Select(a => a.BonusTrack).ToArray();
