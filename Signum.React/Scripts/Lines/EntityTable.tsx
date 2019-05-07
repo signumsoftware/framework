@@ -218,7 +218,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
             {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={this.props.onRemove}
               title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-              <FontAwesomeIcon icon="times" />
+              {EntityBase.removeIcon}
             </a>}
             &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
@@ -226,7 +226,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
               title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
-              <FontAwesomeIcon icon="bars" />
+              {EntityBase.moveIcon}
             </a>}
           </div>
         </td>

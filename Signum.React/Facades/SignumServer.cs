@@ -46,6 +46,7 @@ namespace Signum.React.Facades
             options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new CleanThreadContextAndAssertFilter());
             options.Filters.Add(new SignumEnableBufferingFilter());
+            options.Filters.Add(new SignumCurrentContextFilter());
             options.Filters.Add(new SignumTimesTrackerFilter());
             options.Filters.Add(new SignumHeavyProfilerFilter());
             options.Filters.Add(new SignumAuthenticationFilter());
