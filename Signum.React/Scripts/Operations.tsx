@@ -426,20 +426,20 @@ export namespace Defaults {
 
   export function getColor(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
-      oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "light";
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {
-    return oi.operationType == OperationType.ConstructorFrom ?CreateGroup: undefined;
+    return oi.operationType == OperationType.ConstructorFrom ? CreateGroup : undefined;
   }
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
     return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == OperationType.Execute && isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
-    if (isSave(eoc.operationInfo)) {
+    if (Defaults.isSave(eoc.operationInfo)) {
       return [
         andClose(eoc),
         andNew(eoc)
