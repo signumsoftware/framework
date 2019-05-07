@@ -1,4 +1,4 @@
-﻿using Signum.React.Json;
+using Signum.React.Json;
 using Signum.Utilities;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Signum.Entities.Files;
 using Signum.Engine;
 using Signum.Engine.Files;
+using Signum.React.Filters;
 
 namespace Signum.React.Files
 {
@@ -60,6 +61,8 @@ namespace Signum.React.Files
                     });
                 }
             };
+
+            FilePathEntity.ToAbsolute = FilePathEmbedded.ToAbsolute = url => SignumCurrentContextFilter.Url!.Content(url);
         }
     }
 }

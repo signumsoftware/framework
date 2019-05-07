@@ -35,7 +35,7 @@ namespace Signum.Entities.Files
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} - {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         public string? FullWebPath()

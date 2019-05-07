@@ -554,6 +554,8 @@ namespace Signum.Entities.UserQueries
         UserQueries_CreateNew,
         [Description("Edit")]
         UserQueries_Edit,
+        [Description("Back to Default")]
+        UserQueries_BackToDefault,
         [Description("User Queries")]
         UserQueries_UserQueries,
         [Description("The Filter Operation {0} is not compatible with {1}")]

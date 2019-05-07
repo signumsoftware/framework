@@ -181,7 +181,7 @@ class CaseActivityStatsButtonComponent extends React.Component<CaseActivityButto
     const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
 
     return (
-      [
+      <>
         <div ref={comp => Div = comp}>
           <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
             onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
@@ -191,7 +191,7 @@ class CaseActivityStatsButtonComponent extends React.Component<CaseActivityButto
         <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
           {WorkflowActivityMessage.OpenCaseActivityStats.niceToString()}
         </UncontrolledTooltip>
-      ]
+      </>
     );
   }
 
@@ -216,7 +216,7 @@ class WorkflowActivityLocateButtonComponent extends React.Component<WorkflowActi
 
     const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
     return (
-      [
+      <>
         <div ref={comp => Div = comp}>
           <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
             onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
@@ -226,7 +226,7 @@ class WorkflowActivityLocateButtonComponent extends React.Component<WorkflowActi
         <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
           {WorkflowActivityMessage.LocateWorkflowActivityInDiagram.niceToString()}
         </UncontrolledTooltip>
-      ]
+      </>
     );
   }
 
