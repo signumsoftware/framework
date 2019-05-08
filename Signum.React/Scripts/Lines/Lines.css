@@ -19,13 +19,9 @@ input[type=checkbox].form-control {
     flex-wrap:nowrap;
 }
 
-.form-control.readonly {
+.form-control.readonly, .form-control:disabled, .form-control[readonly] {
     background-color: #ddd;
-    opacity: 1;
-}
-
-.form-control:disabled, .form-control[readonly] {
-    background-color: #ddd;
+    overflow: hidden;
 }
 
 .form-control.readonly.readonly-textarea {

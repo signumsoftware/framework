@@ -37,10 +37,10 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   }
 
   renderItem(item: Lite<T>, subStr: string) {
-    var text = Typeahead.highlightedText(getToString(item), subStr);
-
+    var toStr = getToString(item);
+    var text = Typeahead.highlightedText(toStr, subStr);
     if (this.showType)
-      return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
     else
       return text;
   }
@@ -151,10 +151,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 
   renderItem(item: ResultRow, subStr: string) {
-    var text = Typeahead.highlightedText(getToString(item.entity!), subStr);
-
+    var toStr = getToString(item.entity!);
+    var text = Typeahead.highlightedText(toStr, subStr);
     if (this.showType)
-      return <span><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
     else
       return text;
   }
