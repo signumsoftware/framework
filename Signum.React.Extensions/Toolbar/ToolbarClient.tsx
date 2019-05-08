@@ -11,7 +11,7 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElemen
 import * as Constructor from '@framework/Constructor'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
-import { ValueSearchControl } from '../../../Framework/Signum.React/Scripts/Search';
+import { ValueSearchControl } from '@framework/Search';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));

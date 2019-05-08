@@ -10,7 +10,7 @@ import { ModifiableEntity, Lite, Entity, isLite, registerToString } from "@frame
 import FileImageLine from './FileImageLine';
 import { MultiFileLine } from './MultiFileLine';
 import FileDownloader from './FileDownloader';
-import { Retrieve } from '../../../Framework/Signum.React/Scripts/Retrieve';
+import { Retrieve } from '@framework/Retrieve';
 import { FileImage } from './FileImage';
 
 export function start(options: { routes: JSX.Element[] }) {

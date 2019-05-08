@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { ValueLine, EntityLine } from '@framework/Lines'
+import { Lite } from '@framework/Signum.Entities'
+import { TypeContext } from '@framework/TypeContext'
 import { MoveTreeModel, TreeEntity } from '../Signum.Entities.Tree'
 import * as TreeClient from '../TreeClient'
-import { TypeReference, QueryTokenString } from "../../../../Framework/Signum.React/Scripts/Reflection";
+import { TypeReference, QueryTokenString } from "@framework/Reflection";
 import { useForceUpdate } from '@framework/Hooks'
 
 export interface MoveTreeModelComponentProps {
