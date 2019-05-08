@@ -22,7 +22,7 @@ namespace Signum.React.Authorization
 
         public static Action<ActionContext, UserEntity> UserPreLogin;
         public static Action<ActionContext, UserEntity> UserLogged;
-        public static Action UserLoggingOut;
+        public static Action<UserEntity> UserLoggingOut;
 
 
         public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
