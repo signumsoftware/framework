@@ -41,7 +41,7 @@ export function useQuery(fo: FindOptions | null): ResultTable | undefined | null
         .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)));
 }
 
-export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): AddToLite<R> | null | undefined {
+export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): Finder.AddToLite<R> | null | undefined {
   var resultTable = useQuery(entity == null ? null : {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
@@ -59,7 +59,7 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   return resultTable.rows[0] && resultTable.rows[0].columns[0] || null; 
 }
 
-type AddToLite<T> = T extends Entity ? Lite<T> : T;
+
 
 export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
   return useAPI(undefined, [lite && liteKey(lite)], signal =>

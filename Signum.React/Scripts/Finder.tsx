@@ -978,6 +978,24 @@ export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<Q
   });
 }
 
+export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null | undefined> {
+
+  var fo: FindOptions = {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: [{ token: token }],
+    columnOptionsMode: "Replace",
+  };
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd))
+    .then(fop => API.executeQuery(getQueryRequest(fop)))
+    .then(rt => rt && rt.rows[0] && rt.rows[0].columns[0]);
+}
+
+export type AddToLite<T> = T extends Entity ? Lite<T> : T;
+
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
