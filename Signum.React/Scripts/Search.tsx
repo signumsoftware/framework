@@ -35,7 +35,7 @@ export function extractFilter(filters: FilterOptionParsed[], token: string | Que
 export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
   var f = filters.firstOrNull(f => !isFilterGroupOptionParsed(f) &&
     f.token!.fullKey == token.toString() &&
-    f.operation == operation &&
+    (typeof operation == "function" ? operation(f.operation!) : f.operation == operation) &&
     (valueCondition == null || valueCondition(f.value))) as FilterConditionOptionParsed | undefined;
 
   if (!f) {
