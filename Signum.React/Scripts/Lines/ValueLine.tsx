@@ -268,7 +268,7 @@ function internalComboBox(vl: ValueLine) {
           <FormControlReadonly htmlAttributes={{
             ...vl.state.valueHtmlAttributes,
             ...({ 'data-value': s.ctx.value } as any) /*Testing*/
-          }} ctx={s.ctx}>
+          }} ctx={s.ctx} innerRef={elment => vl.inputElement = elment}>
             {label}
           </FormControlReadonly>)}
       </FormGroup>
@@ -309,7 +309,9 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx}>{s.ctx.value}</FormControlReadonly>)}
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx} innerRef={elment => vl.inputElement = elment}>
+          {s.ctx.value}
+        </FormControlReadonly>)}
       </FormGroup>
     );
 
@@ -424,7 +426,7 @@ function numericTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {ValueLine.withItemGroup(vl,
-          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className="numeric">
+          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={elment => vl.inputElement = elment}>
             {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
           </FormControlReadonly>)}
       </FormGroup>
@@ -552,7 +554,9 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={elment => vl.inputElement = elment}>
+          {m && m.format(momentFormat)}
+        </FormControlReadonly>)}
       </FormGroup>
     );
 
@@ -602,7 +606,9 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {ValueLine.withItemGroup(vl,
-          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.state.valueHtmlAttributes, "numeric")}>{d && d.format(durationFormat)}</FormControlReadonly>
+          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.state.valueHtmlAttributes, "numeric")} innerRef={elment => vl.inputElement = elment}>
+            {d && d.format(durationFormat)}
+          </FormControlReadonly>
         )}
       </FormGroup>
     );
