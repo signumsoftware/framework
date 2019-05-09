@@ -16,18 +16,30 @@ export { ValueSearchControl, ValueSearchControlProps };
 import ValueSearchControlLine, { ValueSearchControlLineProps } from './SearchControl/ValueSearchControlLine'
 import { QueryTokenString } from './Reflection';
 export { ValueSearchControlLine, ValueSearchControlLineProps };
+import { AddToLite } from './Finder';
+import { bool } from 'prop-types';
 
-export function extractFilterValue(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation): any {
+export function extractFilterValue<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<T> | null) => boolean): AddToLite<T> | null | undefined;
+export function extractFilterValue(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: any) => boolean): any;
+export function extractFilterValue(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: any) => boolean): any {
 
-  var f = extractFilter(filters, token, operation);
+  var f = extractFilter(filters, token, operation, valueCondition);
+  if (f == null)
+    return undefined; 
 
-  return f && f.value;
+  return f.value;
 }
 
-export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation): FilterOptionParsed | null {
-  var f = filters.filter(f => !isFilterGroupOptionParsed(f) && f.token!.fullKey == token.toString() && f.operation == operation).firstOrNull() as FilterConditionOptionParsed | undefined;
+export function extractFilter<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<T> | null) => boolean): FilterConditionOptionParsed | undefined;
+export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined;
+export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
+  var f = filters.firstOrNull(f => !isFilterGroupOptionParsed(f) &&
+    f.token!.fullKey == token.toString() &&
+    f.operation == operation &&
+    (valueCondition == null || valueCondition(f.value))) as FilterConditionOptionParsed | undefined;
+
   if (!f) {
-    return null;
+    return undefined;
   }
 
   filters.remove(f);
