@@ -215,7 +215,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
   isBodyHtml: boolean;
   messages: Entities.MList<EmailTemplateMessageEmbedded>;
-  applicable: Templating.TemplateApplicableEval;
+  applicable: Templating.TemplateApplicableEval | null;
 }
 
 export module EmailTemplateMessage {
