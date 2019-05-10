@@ -136,7 +136,7 @@ export enum SubTokensOptions {
 }
 
 export interface QueryToken {
-  toString: string;
+  toStr: string;
   niceName: string;
   key: string;
   format?: string;
@@ -213,7 +213,7 @@ export function getTokenParents(token: QueryToken | null | undefined): QueryToke
 
 export function toQueryToken(cd: ColumnDescription): QueryToken {
   return {
-    toString: cd.displayName,
+    toStr: cd.displayName,
     niceName: cd.displayName,
     key: cd.name,
     fullKey: cd.name,

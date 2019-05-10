@@ -497,7 +497,7 @@ namespace Signum.React.ApiControllers
         public QueryTokenTS() { }
         public QueryTokenTS(QueryToken qt, bool recursive)
         {
-            this.toString = qt.ToString();
+            this.toStr = qt.ToString();
             this.niceName = qt.NiceName();
             this.key = qt.Key;
             this.fullKey = qt.FullKey();
@@ -535,7 +535,7 @@ namespace Signum.React.ApiControllers
             return null;
         }
 
-        public string toString;
+        public string toStr;
         public string niceName;
         public string key;
         public string fullKey;
