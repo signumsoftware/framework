@@ -352,7 +352,7 @@ namespace Signum.React.Json
 
                 using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
                 {
-                    object newValue = serializer.DeserializeValue(reader, pi.PropertyType, oldValue);
+                    object newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
 
                     if (!IsEquals(newValue, oldValue))
                     {
@@ -374,8 +374,11 @@ namespace Signum.React.Json
                         else
                         {
                             AssertCanWrite(pr);
-                            if (newValue == null && pc.IsNotNull()) //JSON.Net already complaining
+                            if (newValue == null && pc.IsNotNull())
+                            {
+                                entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
                                 return;
+                            }
 
                             pc.SetValue?.Invoke(entity, newValue);
                         }

@@ -427,6 +427,27 @@ namespace Signum.Entities
             NotifyPrivate(propertyName);
             NotifyError();
         }
+
+        public void SetTemporalError(PropertyInfo pi, string? error)
+        {
+            if (error == null)
+            {
+                if (this.temporalErrors != null)
+                {
+                    this.temporalErrors.Remove(pi.Name);
+                    if (this.temporalErrors.Count == 0)
+                        this.temporalErrors = null;
+                }
+            }
+            else
+            {
+                if (this.temporalErrors == null)
+                    this.temporalErrors = new Dictionary<string, string>();
+
+
+                this.temporalErrors.Add(pi.Name, error);
+            }
+        }
     }
 
     [Serializable]
