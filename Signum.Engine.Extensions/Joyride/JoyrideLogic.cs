@@ -5,7 +5,7 @@ using Signum.Engine.UserAssets;
 using Signum.Entities.Joyride;
 using System.Reflection;
 
-namespace Signum.Logic.Joyride
+namespace Signum.Engine.Joyride
 {
     public static class JoyrideLogic
     {
