@@ -20,7 +20,7 @@ export function construct(type: string | Type<any>, props?: any, pr?: PropertyRo
   
   const c = customConstructors[typeName];
   if (c)
-    return asPromise(c(pr, props)).then<EntityPack<ModifiableEntity> | undefined>(e => {
+    return asPromise(c(props, pr)).then<EntityPack<ModifiableEntity> | undefined>(e => {
       if (e == undefined)
         return undefined;
 
