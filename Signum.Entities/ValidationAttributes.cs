@@ -92,10 +92,12 @@ namespace Signum.Entities
     {
         public static string? IsSetOnlyWhen(this (PropertyInfo pi, object? nullableValue) tuple, bool shouldBeSet)
         {
-            if (tuple.nullableValue == null && shouldBeSet)
+            var isNull = tuple.nullableValue == null || tuple.nullableValue is string s && string.IsNullOrEmpty(s);
+
+            if (isNull && shouldBeSet)
                 return ValidationMessage._0IsNotSet.NiceToString(tuple.pi.NiceName());
 
-            else if (tuple.nullableValue != null && !shouldBeSet)
+            else if (!isNull && !shouldBeSet)
                 return ValidationMessage._0ShouldBeNull.NiceToString(tuple.pi.NiceName());
 
             return null;
