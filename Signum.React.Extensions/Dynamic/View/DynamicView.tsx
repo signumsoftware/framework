@@ -5,8 +5,8 @@ import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
 import MessageModal from '@framework/Modals/MessageModal'
-import { DynamicViewTree } from './DynamicViewTree'
-import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
+import { DynamicViewTabs } from './DynamicViewTabs'
+import { CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
 import { DesignerNode, DesignerContext } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
@@ -86,7 +86,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
   }
 
   getZeroNode() {
-    const context = {
+    const context: DesignerContext = {
       refreshView: () => {
         this.updateStateSelectedNode(this.state.selectedNode!.reCreateNode());
         this.props.ctx.value.modified = true;
@@ -95,8 +95,11 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
       setSelectedNode: (newNode) => {
         this.updateStateSelectedNode(newNode);
         this.props.ctx.value.modified = true;
-      }
-    } as DesignerContext;
+      },
+      onClose: () => { },
+      props: {},
+      propTypes: this.props.ctx.value.props.toObject(a => a.element.name, a => a.element.type)
+    };
 
     return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);
   }
@@ -156,8 +159,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
           <div className="code-container">
             <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.forceUpdate()} formGroupStyle="Basic"
               type={{ name: this.props.ctx.value.entityType!.cleanName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
-            <DynamicViewTree rootNode={root} />
-            <DynamicViewInspector selectedNode={root.context.getSelectedNode()} />
+            <DynamicViewTabs ctx={this.props.ctx} rootNode={root} />
             <CollapsableTypeHelp initialTypeName={ctx.value.entityType!.cleanName} />
           </div>
         </div>
