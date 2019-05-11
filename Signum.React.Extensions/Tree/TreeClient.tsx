@@ -1,25 +1,25 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
+import { Type } from '@framework/Reflection'
+import { Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
-import { FilterRequest, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
-import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { FilterRequest, FilterOption } from "@framework/FindOptions";
+import { ImportRoute } from "@framework/AsyncImport";
+import { getAllTypes, getTypeInfo } from "@framework/Reflection";
+import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
-import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
+import { toLite } from "@framework/Signum.Entities";
+import { SearchControlLoaded } from "@framework/Search";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
-import { LiteAutocompleteConfig } from '../../../Framework/Signum.React/Scripts/Lines';
+import { LiteAutocompleteConfig } from '@framework/Lines';
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);

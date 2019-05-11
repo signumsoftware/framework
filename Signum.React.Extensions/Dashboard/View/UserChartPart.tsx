@@ -8,7 +8,7 @@ import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
 import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
-import PinnedFilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/PinnedFilterBuilder';
+import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 
 export interface UserChartPartProps {
   part: UserChartPartEntity

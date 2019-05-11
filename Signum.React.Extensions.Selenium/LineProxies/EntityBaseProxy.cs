@@ -147,11 +147,12 @@ namespace Signum.React.Selenium
 
         public void WaitEntityInfoChanges(Action action, string actionDescription, int? index = null)
         {
-            var changes = EntityInfoString(index);
+            var entityInfo = EntityInfoString(index);
 
             action();
 
-            Element.GetDriver().Wait(() => GetChanges() != changes, () => "Waiting for entity info changes after {0} in {1}".FormatWith(actionDescription, this.Route.ToString()));
+            Element.GetDriver().Wait(() => entityInfo != EntityInfoString(index), 
+                () => "Waiting for entity info changes after {0} in {1}".FormatWith(actionDescription, this.Route.ToString()));
         }
 
         protected string EntityInfoString(int? index)

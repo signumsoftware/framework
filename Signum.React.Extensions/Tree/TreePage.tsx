@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
-import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { getTypeInfo } from '@framework/Reflection'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
-import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import { FilterOption } from "@framework/FindOptions";
 import * as QueryString from 'query-string'
 import { TreeOperation } from "./Signum.Entities.Tree";
 

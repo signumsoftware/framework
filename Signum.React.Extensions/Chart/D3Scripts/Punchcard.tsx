@@ -4,7 +4,7 @@ import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { ChartColumn, ChartRow } from '../ChartClient';
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { Dic } from '@framework/Globals';
 import { XKeyTicks, YKeyTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
