@@ -587,9 +587,9 @@ export interface ViewOptions {
   isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
   validate?: boolean;
   requiresSaveOperation?: boolean;
-  avoidPromptLooseChange?: boolean;
+  avoidPromptLoseChange?: boolean;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  extraComponentProps?: {};
+  extraProps?: {};
 }
 
 export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T | undefined>;
@@ -618,7 +618,7 @@ export interface NavigateOptions {
   modalSize?: BsSize;
   avoidPromptLooseChange?: boolean;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  extraComponentProps?: {};
+  extraProps?: {};
   createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
 }
 

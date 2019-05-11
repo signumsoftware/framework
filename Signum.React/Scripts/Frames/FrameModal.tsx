@@ -28,8 +28,8 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   isOperationVisible?: (eoc: EntityOperationContext<any /*Entity*/>) => boolean;
   validate?: boolean;
   requiresSaveOperation?: boolean;
-  avoidPromptLooseChange?: boolean;
-  extraComponentProps?: {}
+  avoidPromptLoseChange?: boolean;
+  extraProps?: {}
   getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   isNavigate?: boolean;
   readOnly?: boolean;
@@ -125,8 +125,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     var viewPromise = result instanceof ViewPromise ? result : Navigator.getViewPromise(pack.entity, result);
 
-    if (this.props.extraComponentProps)
-      viewPromise = viewPromise.withProps(this.props.extraComponentProps);
+    if (this.props.extraProps)
+      viewPromise = viewPromise.withProps(this.props.extraProps);
 
     return viewPromise.promise
       .then(c => this.setState({ getComponent: c }));
@@ -168,7 +168,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
   handleCancelClicked = () => {
 
-    if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
+    if (this.hasChanges() && !this.props.avoidPromptLoseChange) {
       MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: NormalWindowMessage.LoseChanges.niceToString(),
@@ -347,8 +347,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       getViewPromise={options.getViewPromise}
       isOperationVisible={options.isOperationVisible}
       requiresSaveOperation={options.requiresSaveOperation}
-      avoidPromptLooseChange={options.avoidPromptLooseChange}
-      extraComponentProps={options.extraComponentProps}
+      avoidPromptLoseChange={options.avoidPromptLoseChange}
+      extraProps={options.extraProps}
       validate={options.validate == undefined ? FrameModal.isModelEntity(entityOrPack) : options.validate}
       title={options.title}
       isNavigate={false} />);
@@ -370,8 +370,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       propertyRoute={undefined}
       getViewPromise={options.getViewPromise}
       requiresSaveOperation={undefined}
-      avoidPromptLooseChange={options.avoidPromptLooseChange}
-      extraComponentProps={options.extraComponentProps}
+      avoidPromptLoseChange={options.avoidPromptLooseChange}
+      extraProps={options.extraProps}
       createNew={options.createNew}
       isNavigate={true}
     />);
