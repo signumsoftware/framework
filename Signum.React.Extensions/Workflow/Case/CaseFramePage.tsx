@@ -99,9 +99,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     if (!this.state.pack)
       return Promise.resolve(undefined);
 
-    const a = this.state.pack!.activity;
-
-    return Navigator.viewDispatcher.getViewPromise(a.case.mainEntity, (a.workflowActivity as WorkflowActivityEntity).viewName || undefined).promise
+    return WorkflowClient.getViewPromiseCompoment(this.state.pack!.activity)
       .then(c => this.setState({ getComponent: c }));
   }
 
@@ -260,3 +258,4 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 }
+

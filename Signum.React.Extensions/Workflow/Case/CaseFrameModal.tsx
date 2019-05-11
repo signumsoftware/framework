@@ -82,9 +82,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
   loadComponent(pack: WorkflowClient.CaseEntityPack): Promise<void> {
     const ca = pack.activity;
-    const wa = ca.workflowActivity as WorkflowActivityEntity;
 
-    return Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined).promise
+    return WorkflowClient.getViewPromiseCompoment(ca)
       .then(c => this.setState({ getComponent: c }));
   }
 
@@ -354,3 +353,4 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     />) as Promise<void>;
   }
 }
+

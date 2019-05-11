@@ -111,7 +111,7 @@ namespace Signum.React.Authorization
         [HttpPost("api/auth/logout")]
         public void Logout()
         {
-            AuthServer.UserLoggingOut?.Invoke();
+            AuthServer.UserLoggingOut?.Invoke(UserEntity.Current);
 
             UserTicketServer.RemoveCookie(ControllerContext);
         }
