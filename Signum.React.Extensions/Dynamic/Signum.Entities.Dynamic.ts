@@ -200,6 +200,7 @@ export interface DynamicViewEntity extends Entities.Entity {
   Type: "DynamicView";
   viewName: string;
   entityType: Basics.TypeEntity;
+  props: Entities.MList<DynamicViewPropEmbedded>;
   viewContent: string;
 }
 
@@ -241,6 +242,13 @@ export module DynamicViewOverrideOperation {
   export const Delete : Entities.DeleteSymbol<DynamicViewOverrideEntity> = registerSymbol("Operation", "DynamicViewOverrideOperation.Delete");
 }
 
+export const DynamicViewPropEmbedded = new Type<DynamicViewPropEmbedded>("DynamicViewPropEmbedded");
+export interface DynamicViewPropEmbedded extends Entities.EmbeddedEntity {
+  Type: "DynamicViewPropEmbedded";
+  name: string;
+  type: string;
+}
+
 export const DynamicViewSelectorEntity = new Type<DynamicViewSelectorEntity>("DynamicViewSelector");
 export interface DynamicViewSelectorEntity extends Entities.Entity {
   Type: "DynamicViewSelector";
@@ -267,6 +275,8 @@ export module DynamicViewValidationMessage {
   export const AggregateIsMandatoryFor01 = new MessageKey("DynamicViewValidationMessage", "AggregateIsMandatoryFor01");
   export const ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity = new MessageKey("DynamicViewValidationMessage", "ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity");
   export const ViewNameIsNotAllowedWhileHavingChildren = new MessageKey("DynamicViewValidationMessage", "ViewNameIsNotAllowedWhileHavingChildren");
+  export const _0ShouldStartByLowercase = new MessageKey("DynamicViewValidationMessage", "_0ShouldStartByLowercase");
+  export const _0CanNotBe1 = new MessageKey("DynamicViewValidationMessage", "_0CanNotBe1");
 }
 
 export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {

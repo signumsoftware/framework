@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { TreeMessage } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { Button } from '../../../Framework/Signum.React/Scripts/Components';
+import { Button } from '@framework/Components';
 
 export interface TreeButtonProps {
   searchControl: SearchControlLoaded;

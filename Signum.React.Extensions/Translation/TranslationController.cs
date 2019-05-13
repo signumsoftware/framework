@@ -100,10 +100,11 @@ namespace Signum.React.Translation
                      members = t.Members.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
-                 select KVP.Create(g.Key.Name, new LocalizableTypeTS(g.Key)
+                 select KVP.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
                  {
-                     cultures = g.ToDictionary(a => a.culture)
-                 }))
+                     localizedTypes.cultures = g.ToDictionary(a => a.culture);
+                     return localizedTypes;
+                 })))
                  .ToDictionaryEx("types");
 
 
@@ -143,8 +144,8 @@ namespace Signum.React.Translation
             return new AssemblyResultTS
             {
                 types = types.OrderBy(a => a.Key).ToDictionary(),
-                cultures = cultures.Select(c => new CulturesTS(c)
-               ).ToDictionary(a => a.name)
+                cultures = cultures.Select(c => c.ToCulturesTS())
+                .ToDictionary(a => a.name)
             };
         }
 
@@ -170,11 +171,12 @@ namespace Signum.React.Translation
             return new AssemblyResultTS
             {
                 totalTypes = totalTypes,
-                cultures = cultures.Select(c => new CulturesTS(c)).ToDictionary(a => a.name),
-                types = changes.Types.Select(t => new LocalizableTypeTS(t.Type.Type)
+                cultures = cultures.Select(c => c.ToCulturesTS()).ToDictionary(a => a.name),
+                types = changes.Types.Select(t => t.Type.Type.ToLocalizableTypeTS().Let(localizedTypes =>
                 {
-                    cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)))
-                }).ToDictionary(lt => lt.type),
+                    localizedTypes.cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)));
+                    return localizedTypes;
+                })).ToDictionary(lt => lt.type),
             };
         }
 
@@ -227,13 +229,6 @@ namespace Signum.React.Translation
             public string name;
             public string englishName;
             public List<PronomInfo>? pronoms;
-            
-            public CulturesTS(CultureInfo c)
-            {
-                name = c.Name;
-                englishName = c.EnglishName;
-                pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(c.TwoLetterISOLanguageName)?.Pronoms.ToList();
-            }
         }
 
         public class LocalizableTypeTS
@@ -245,16 +240,6 @@ namespace Signum.React.Translation
             public bool hasPluralDescription;
 
             public Dictionary<string, LocalizedTypeTS> cultures = null!;
-
-            public LocalizableTypeTS(Type type)
-            {
-                var options = LocalizedAssembly.GetDescriptionOptions(type);
-                this.type = type.Name;
-                hasDescription = options.IsSet(DescriptionOptions.Description);
-                hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription);
-                hasMembers = options.IsSet(DescriptionOptions.Members);
-                hasGender = options.IsSet(DescriptionOptions.Gender);
-            }
 
             internal void FixMembers(CultureInfo defaultCulture)
             {
@@ -346,6 +331,32 @@ namespace Signum.React.Translation
         public string? Gender(string culture, [Required, FromBody]string text)
         {
             return NaturalLanguageTools.GetGender(text, CultureInfo.GetCultureInfo(culture))?.ToString();
+        }
+    }
+
+    public static class Extensions
+    {
+        public static TranslationController.LocalizableTypeTS ToLocalizableTypeTS(this Type type)
+        {
+            var options = LocalizedAssembly.GetDescriptionOptions(type);
+            return new TranslationController.LocalizableTypeTS()
+            {
+                type = type.Name,
+                hasDescription = options.IsSet(DescriptionOptions.Description),
+                hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription),
+                hasMembers = options.IsSet(DescriptionOptions.Members),
+                hasGender = options.IsSet(DescriptionOptions.Gender),
+            };
+        }
+
+        public static TranslationController.CulturesTS ToCulturesTS(this CultureInfo ci)
+        {
+            return new TranslationController.CulturesTS()
+            {
+                name = ci.Name,
+                englishName = ci.EnglishName,
+                pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(ci.TwoLetterISOLanguageName)?.Pronoms.ToList(),
+            };
         }
     }
 }

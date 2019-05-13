@@ -1,24 +1,25 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
-import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
+import { Type } from '@framework/Reflection'
+import { Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
-import { FilterRequest, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
-import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { FilterRequest, FilterOption } from "@framework/FindOptions";
+import { ImportRoute } from "@framework/AsyncImport";
+import { getAllTypes, getTypeInfo } from "@framework/Reflection";
+import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
-import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
+import { toLite } from "@framework/Signum.Entities";
+import { SearchControlLoaded } from "@framework/Search";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { LiteAutocompleteConfig } from '@framework/Lines';
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
@@ -70,7 +71,7 @@ function moveModal(lite: Lite<TreeEntity>) {
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
       title: TreeMessage.Move0.niceToString(lite.toStr),
       modalSize: "md",
-      extraComponentProps: { lite },
+      extraProps: { lite },
     })
 }
 
@@ -82,7 +83,7 @@ function copyModal(lite: Lite<TreeEntity>) {
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
       title: TreeMessage.Copy0.niceToString(lite.toStr),
       modalSize: "md",
-      extraComponentProps: { lite },
+      extraProps: { lite },
     });
 }
 
@@ -121,11 +122,30 @@ function getQuerySetting(typeName: string) {
   return qs;
 }
 
+function getEntitySetting(typeName: string) {
+  var es = Navigator.getSettings(typeName);
+  if (!es) {
+    es = new Navigator.EntitySettings(typeName);
+    Navigator.addSettings(es);
+  }
+  return es;
+}
+
 export function overrideOnFind(ti: TypeInfo) {
   var qs = getQuerySetting(ti.name);
 
   if (!qs.onFind)
     qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+}
+
+export function overrideAutocomplete(ti: TypeInfo) {
+  var es = getEntitySetting(ti.name);
+
+  if (!es.autocomplete)
+    es.autocomplete = new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac), false, false);
+
+  if (!es.autocompleteDelay)
+    es.autocompleteDelay = 750;
 }
 
 export function overrideDefaultOrder(ti: TypeInfo) {
@@ -203,6 +223,10 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 
 export namespace API {
+  export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
+    return ajaxGet<Array<Lite<TreeEntity>>>({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+  }
+
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
     return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
   }

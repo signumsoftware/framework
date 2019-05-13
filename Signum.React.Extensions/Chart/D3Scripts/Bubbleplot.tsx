@@ -9,7 +9,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components';
+import { KeyCodes } from '@framework/Components';
 
 
 export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {

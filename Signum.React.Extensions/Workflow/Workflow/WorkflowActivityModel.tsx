@@ -2,7 +2,7 @@ import * as React from 'react'
 import {
   WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity
 } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater } from '@framework/Lines'
+import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
@@ -91,7 +91,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
         {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
           <div>
-            {ctx.value.mainEntityType ?
+            {ctx.value.mainEntityType ?<>
               <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
                 {
                   <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control form-control-sm" onChange={this.handleViewNameChange}>
@@ -99,7 +99,11 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                     {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
                   </select>
                 }
-              </FormGroup>
+            </FormGroup>
+            <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}>
+              <EntityTable ctx={ctx.subCtx(d => d.viewNameProps)} avoidFieldSet />
+            </FormGroup>
+            </>
               : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
 

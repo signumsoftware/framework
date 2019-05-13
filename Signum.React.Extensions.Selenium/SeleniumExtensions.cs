@@ -343,8 +343,8 @@ namespace Signum.React.Selenium
             var result = selenium.Wait(() =>
             {
                 var newLast = body.FindElement(By.XPath("./*[last()]"));
-
-                if (last == newLast)
+                
+                if (object.Equals(last, newLast))
                     return null;
 
                 return newLast.TryFindElement(By.CssSelector(".modal.fade.show"));

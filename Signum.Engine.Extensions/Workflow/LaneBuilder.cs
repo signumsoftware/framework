@@ -426,6 +426,11 @@ namespace Signum.Engine.Workflow
                         Xml = a.Xml,
                         Type = a.Type,
                         ViewName = a.ViewName,
+                        ViewNameProps = a.ViewNameProps.Select(p=> new ViewNamePropEmbedded
+                        {
+                            Name = p.Name,
+                            Expression = p.Expression
+                        }).ToMList(),
                         RequiresOpen = a.RequiresOpen,
                         EstimatedDuration = a.EstimatedDuration,
                         Script = a.Script?.Clone(),

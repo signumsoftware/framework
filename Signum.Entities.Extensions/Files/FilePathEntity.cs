@@ -117,7 +117,7 @@ namespace Signum.Entities.Files
             if (string.IsNullOrEmpty(pp.WebPrefix))
                 return null;
 
-            var result = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+            var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
 
             return result;
         }

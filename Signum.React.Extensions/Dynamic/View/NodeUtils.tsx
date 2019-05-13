@@ -234,7 +234,14 @@ export interface DesignerContext {
   onClose: () => void;
   getSelectedNode: () => DesignerNode<BaseNode> | undefined;
   setSelectedNode: (newSelectedNode: DesignerNode<BaseNode>) => void;
+  props: any;
+  propTypes: { [name: string]: string /*type*/ };
 }
+
+//export interface DesignerRoot {
+//  //hooks
+//  rootNode: DesignerNode<BaseNode>;
+//}
 
 export class DesignerNode<N extends BaseNode> {
   parent?: DesignerNode<BaseNode>;
@@ -333,6 +340,27 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
   if (result == null)
     return null;
 
+
+  if (dn.context.props) {
+
+    var allKeys = Dic.getKeys(dn.context.props).concat(Dic.getKeys(dn.context.propTypes)).distinctBy(a => a);
+
+    var errors = allKeys.map(key => validatePropType(key, dn.context.props[key], dn.context.propTypes[key])).notNull();
+
+    if (errors.length)
+      result = (
+        <div>
+          <div className="alert alert-danger">
+            <strong>Invalid Props:</strong>
+            <ul>
+              {errors.map((e, i) => <li key={i}>{e}</li>)}
+            </ul>
+          </div>
+          {result}
+        </div>
+      );
+  }
+
   const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
   if (vos.length) {
     const replacer = new ViewReplacer(result, parentCtx);
@@ -343,6 +371,38 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
   }
 }
 
+
+function validatePropType(propName: string, value: any, typeScriptType: string | undefined) {
+
+  if (typeScriptType == null)
+    return `Unexpected prop '${propName}' with value: ${value}`;
+
+  typeScriptType = typeScriptType.trim();
+
+  if (typeScriptType.contains("|") || typeScriptType.contains("&"))
+    return null;
+
+  if (value == null) {
+    if (!typeScriptType.endsWith("?"))
+      return `Mandatory prop '${propName}' has value: ${value}`;
+    return null;
+  }
+
+  var cleanType = typeScriptType.tryBeforeLast("?") || typeScriptType;
+
+  var isOk = cleanType == "string" ? typeof value == "string" :
+    cleanType == "number" ? typeof value == "number" :
+      cleanType == "boolean" ? typeof value == "boolean" :
+        cleanType.startsWith("(") ? typeof value == "function" :
+          cleanType.startsWith("{") ? typeof value == "object" :
+            cleanType.endsWith("[]") ? Array.isArray(value) :
+              true;
+
+  if (!isOk)
+    return `Property '${propName}' should be a ${cleanType} but is a ${typeof (value)}, value: ${value}`;
+
+  return null;
+}
 
 export function renderCode(node: BaseNode, cc: CodeContext) {
 
@@ -363,7 +423,7 @@ export function renderCode(node: BaseNode, cc: CodeContext) {
 
 export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
   try {
-    if (evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
+    if (evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
       return null;
 
     const error = validate(dn, parentCtx);
@@ -402,18 +462,18 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
   );
 }
 
-export function asFunction(thisObject: React.Component<any, any>, expression: Expression<any>, getFieldName: () => string): (e: TypeContext<ModifiableEntity>) => any {
+export function asFunction(thisObject: React.Component<any, any>, expression: Expression<any>, getFieldName: () => string, props: any): (e: TypeContext<ModifiableEntity>) => any {
 
   const code = "ctx => " + expression.__code__;
 
   try {
-    return evalWithScope.call(thisObject, code, globalModules);
+    return evalWithScope.call(thisObject, code, globalModules, props);
   } catch (e) {
     throw new Error("Syntax in '" + getFieldName() + "':\r\n" + code + "\r\n" + (e as Error).message);
   }
 }
 
-export function evalWithScope(code: string, modules: any) {
+export function evalWithScope(code: string, modules: any, props: any) {
 
   // Lines
   var ValueLine = Lines.ValueLine;
@@ -433,12 +493,12 @@ export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
   }
 }
 
-export function evaluate<F, T>(parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T> | undefined): T | undefined {
+export function evaluate<F, T>(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T> | undefined): T | undefined {
 
-  return evaluateUntyped(parentCtx, fieldAccessor(object), () => Binding.getSingleMember(fieldAccessor));
+  return evaluateUntyped(dn, parentCtx, fieldAccessor(object), () => Binding.getSingleMember(fieldAccessor));
 }
 
-export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<any> | undefined, getFieldName: () => string): any {
+export function evaluateUntyped(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<any> | undefined, getFieldName: () => string): any {
   if (expressionOrValue == null)
     return undefined;
 
@@ -448,7 +508,7 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
   if (!expressionOrValue.__code__)
     return undefined;
 
-  var f = asFunction(parentCtx.frame!.entityComponent!, expressionOrValue, getFieldName);
+  var f = asFunction(parentCtx.frame!.entityComponent!, expressionOrValue, getFieldName, dn.context.props);
 
   try {
     return f(parentCtx);
@@ -457,8 +517,8 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
   }
 }
 
-export function evaluateAndValidate<F, T>(parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null) {
-  var result = evaluate(parentCtx, object, fieldAccessor);
+export function evaluateAndValidate<F, T>(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null) {
+  var result = evaluate(dn, parentCtx, object, fieldAccessor);
 
   var error = validate(result);
   if (error)
@@ -517,6 +577,10 @@ export function isObject(val: any) {
   return val != null && typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object`;
 }
 
+export function isObjectOrNull(val: any) {
+  return val == null || typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object or null`;
+}
+
 export function isInList(val: any, values: string[]) {
   return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
@@ -558,7 +622,7 @@ export function isFindOptionsOrNull(val: any) {
 }
 
 export function withChildrensSubCtx(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
-  var ctx = subCtx(parentCtx, (dn.node as any).field, (dn.node as any).styleOptions);
+  var ctx = subCtx(dn, parentCtx, (dn.node as any).field, (dn.node as any).styleOptions);
   return withChildrens(dn, ctx, element);
 }
 
@@ -649,38 +713,38 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
 export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean }): EntityBaseProps {
 
   var result: EntityBaseProps = {
-    ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(parentCtx, dn.node.styleOptions)),
-    labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
-    labelHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
-    formGroupHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
+    ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions)),
+    labelText: evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, isStringOrNull),
+    labelHtmlAttributes: toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes),
+    formGroupHtmlAttributes: toHtmlAttributes(dn, parentCtx, dn.node.formGroupHtmlAttributes),
     ...(options.isEntityLine ?
-      { itemHtmlAttributes: toHtmlAttributes(parentCtx, (dn.node as EntityLineNode).itemHtmlAttributes) }
+      { itemHtmlAttributes: toHtmlAttributes(dn, parentCtx, (dn.node as EntityLineNode).itemHtmlAttributes) }
       : undefined),
-    visible: evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull),
-    readOnly: evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
-    create: evaluateAndValidate(parentCtx, dn.node, n => n.create, isBooleanOrNull),
-    onCreate: evaluateAndValidate(parentCtx, dn.node, n => n.onCreate, isFunctionOrNull),
-    remove: evaluateAndValidate(parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
-    onRemove: evaluateAndValidate(parentCtx, dn.node, n => n.onRemove, isFunctionOrNull),
-    find: evaluateAndValidate(parentCtx, dn.node, n => n.find, isBooleanOrNull),
+    visible: evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, isBooleanOrNull),
+    readOnly: evaluateAndValidate(dn, parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
+    create: evaluateAndValidate(dn, parentCtx, dn.node, n => n.create, isBooleanOrNull),
+    onCreate: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onCreate, isFunctionOrNull),
+    remove: evaluateAndValidate(dn, parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
+    onRemove: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onRemove, isFunctionOrNull),
+    find: evaluateAndValidate(dn, parentCtx, dn.node, n => n.find, isBooleanOrNull),
     ...(options.findMany ?
-      { onFindMany: evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.onFindMany, isFunctionOrNull) } as any :
-      { onFind: evaluateAndValidate(parentCtx, dn.node, n => n.onFind, isFunctionOrNull) }
+      { onFindMany: evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.onFindMany, isFunctionOrNull) } as any :
+      { onFind: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onFind, isFunctionOrNull) }
     ),
-    view: evaluateAndValidate(parentCtx, dn.node, n => n.view, isBooleanOrFunctionOrNull),
-    onView: evaluateAndValidate(parentCtx, dn.node, n => n.onView, isFunctionOrNull),
-    viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
-    onChange: evaluateAndValidate(parentCtx, dn.node, n => n.onChange, isFunctionOrNull),
-    findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
+    view: evaluateAndValidate(dn, parentCtx, dn.node, n => n.view, isBooleanOrFunctionOrNull),
+    onView: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onView, isFunctionOrNull),
+    viewOnCreate: evaluateAndValidate(dn, parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
+    onChange: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onChange, isFunctionOrNull),
+    findOptions: dn.node.findOptions && toFindOptions(dn, parentCtx, dn.node.findOptions),
     getComponent: options.avoidGetComponent == true ? undefined : getGetComponent(dn),
-    getViewPromise: toStringFunction(evaluateAndValidate(parentCtx, dn.node, n => n.viewName, isStringOrNull))
+    getViewPromise: toStringFunction(evaluateAndValidate(dn, parentCtx, dn.node, n => n.viewName, isStringOrNull))
   };
 
   if (options.showAutoComplete)
-    (result as any).autoComplete = evaluateAndValidate(parentCtx, dn.node, n => (n as EntityLineNode).autoComplete, isBooleanOrNull) == false ? null : undefined;
+    (result as any).autoComplete = evaluateAndValidate(dn, parentCtx, dn.node, n => (n as EntityLineNode).autoComplete, isBooleanOrNull) == false ? null : undefined;
 
   if (options.showMove)
-    (result as any).move = evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull);
+    (result as any).move = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull);
 
   return result;
 }
@@ -722,7 +786,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onView)} type={null} defaultValue={null} exampleExpression={"e => modules.Navigator.view(e)"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewOnCreate)} type="boolean" defaultValue={null} />
       {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
-      {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} />}
+      {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} exampleExpression={"new modules.AutoCompleteConfig.LiteAutocompleteConfig((ac, str) => [Custom API call here ...] , false, false)"} />}
       <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
     </div>

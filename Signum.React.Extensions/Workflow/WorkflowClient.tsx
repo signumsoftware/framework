@@ -67,7 +67,7 @@ export function start(options: { routes: JSX.Element[] }) {
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       Navigator.API.fetchAndForget(ctx.lite)
-        .then(ca => Navigator.navigate(ca.case, { extraComponentProps: { caseActivity: ca } }))
+        .then(ca => Navigator.navigate(ca.case, { extraProps: { caseActivity: ca } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
     }, { icon: "random", iconColor: "green" })
@@ -146,7 +146,7 @@ export function start(options: { routes: JSX.Element[] }) {
     workflowActivityMonitorUrl(ctx.lite),
     { icon: "tachometer-alt", iconColor: "green" }));
 
-  Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
+  Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
     contextual: { icon: "heartbeat", iconColor: "red" },
@@ -393,7 +393,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
         if (!pr || pr.model.replacements.length == 0)
           saveAndSetErrors(eoc.entity, model, undefined);
         else
-          Navigator.view(pr.model, { extraComponentProps: { previewTasks: pr.newTasks } }).then(replacementModel => {
+          Navigator.view(pr.model, { extraProps: { previewTasks: pr.newTasks } }).then(replacementModel => {
             if (!replacementModel)
               return;
 
@@ -533,6 +533,22 @@ export function inWorkflow(ctx: TypeContext<any>, workflowName: string, activity
 
   return wa.lane!.pool!.workflow!.name == workflowName && wa.name == activityName;
 }
+
+
+export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: TypeContext<ICaseMainEntity>) => React.ReactElement<any>> {
+
+  const wa = ca.workflowActivity as WorkflowActivityEntity;
+
+  var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined);
+
+  if (wa.viewNameProps.length) {
+    var props = wa.viewNameProps.toObject(a => a.element.name, a => eval(a.element.expression));
+    viewPromise = viewPromise.withProps(props);
+  }
+
+  return viewPromise.promise;
+}
+
 
 export namespace API {
   export function fetchActivityForViewing(caseActivity: Lite<CaseActivityEntity>): Promise<CaseEntityPack> {

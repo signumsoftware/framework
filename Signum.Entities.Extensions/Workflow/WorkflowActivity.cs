@@ -42,6 +42,9 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 255)]
         public string? ViewName { get; set; }
 
+        [PreserveOrder, NoRepeatValidator]
+        public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
+
         [NotifyChildProperty]
         public WorkflowScriptPartEmbedded? Script { get; set; }
 
@@ -110,6 +113,7 @@ namespace Signum.Entities.Workflow
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
+            model.ViewNameProps.AssignMList(this.ViewNameProps);
             model.UserHelp = this.UserHelp;
             model.SubWorkflow = this.SubWorkflow;
             model.Comments = this.Comments;
@@ -127,10 +131,21 @@ namespace Signum.Entities.Workflow
             this.EstimatedDuration = wModel.EstimatedDuration;
             this.Script = wModel.Script;
             this.ViewName = wModel.ViewName;
+            this.ViewNameProps.AssignMList(wModel.ViewNameProps);
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
             this.SubWorkflow = wModel.SubWorkflow;
         }
+    }
+
+    [Serializable]
+    public class ViewNamePropEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Max = 100), IdentifierValidator(IdentifierType.Ascii)]
+        public string Name { get; set; }
+
+        [StringLengthValidator(Max = 100)]
+        public string Expression { get; set; }
     }
 
     public class WorkflowActivityInfo
@@ -283,6 +298,9 @@ namespace Signum.Entities.Workflow
 
         [StringLengthValidator(Min = 3, Max = 255)]
         public string? ViewName { get; set; }
+
+        [PreserveOrder, NoRepeatValidator]
+        public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
 
         [StringLengthValidator(Min = 3, Max = 400, MultiLine = true)]
         public string? Comments { get; set; }

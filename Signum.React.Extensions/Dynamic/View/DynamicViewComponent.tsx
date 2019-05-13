@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine } from '@framework/Lines'
+import { ValueLine, EntityTable } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'
 import { classes } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
@@ -13,17 +13,18 @@ import { BaseNode } from './Nodes'
 import { DesignerContext, DesignerNode } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
+import { DynamicViewTabs } from './DynamicViewTabs'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
-import { DynamicViewTree } from './DynamicViewTree'
 import ShowCodeModal from './ShowCodeModal'
-import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from '@framework/Components';
+import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
+import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu, UncontrolledTabs, Tab } from '@framework/Components';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
   initialDynamicView: DynamicViewEntity;
+  //...extraProps
 }
 
 export interface DynamicViewComponentState {
@@ -56,16 +57,18 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
   getZeroNode() {
 
-    const typeName = this.props.ctx.value.Type;
+    var { ctx, children, initialDynamicView, ...extraProps } = this.props;
 
     var context = {
       onClose: this.handleClose,
       refreshView: () => { this.setState({ selectedNode: this.state.selectedNode.reCreateNode() }); },
       getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
-      setSelectedNode: (newNode) => this.setState({ selectedNode: newNode })
+      setSelectedNode: (newNode) => this.setState({ selectedNode: newNode }),
+      props: extraProps,
+      propTypes: initialDynamicView.props.toObject(mle => mle.element.name, mle => mle.element.type)
     } as DesignerContext;
 
-    return DesignerNode.zero(context, typeName);
+    return DesignerNode.zero(context, ctx.value.Type);
   }
 
   handleReload = (dynamicView: DynamicViewEntity) => {
@@ -76,8 +79,6 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
       selectedNode: this.getZeroNode().createChild(this.state.rootNode)
     });
   }
-
-
 
   handleOpen = () => {
     this.setState({ isDesignerOpen: true });
@@ -175,8 +176,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
         </h3>
         <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="SrOnly" placeholderLabels={true} />
         {this.renderButtonBar()}
-        <DynamicViewTree rootNode={this.props.rootNode} />
-        <DynamicViewInspector selectedNode={this.props.rootNode.context.getSelectedNode()} />
+        <DynamicViewTabs ctx={ctx} rootNode={this.props.rootNode}/>
         <CollapsableTypeHelp initialTypeName={dv.entityType!.cleanName} />
       </div>
     );

@@ -7,12 +7,14 @@ import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
-import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import { Modal, Typeahead } from '@framework/Components';
+import { Modal, Typeahead, UncontrolledTabs, Tab } from '@framework/Components';
 import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { TypeContext, EntityTable, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
+import { DynamicViewTree } from './DynamicViewTree';
 
 export interface ExpressionOrValueProps {
   binding: Binding<any>;
