@@ -12,6 +12,7 @@ export interface RenderEntityProps {
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<any>;
   onEntityLoaded?: () => void;
+  extraProps?: any;
 }
 
 export interface RenderEntityState {
@@ -167,10 +168,15 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
     const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
+    var element = getComponent(newCtx);
+
+    if (this.props.extraProps)
+      element = React.cloneElement(element, this.props.extraProps);
+
     return (
       <div data-property-path={ctx.propertyPath}>
         <ErrorBoundary>
-          {FunctionalAdapter.withRef(getComponent(newCtx), c => this.setComponent(c))}
+          {FunctionalAdapter.withRef(element, c => this.setComponent(c))}
         </ErrorBoundary>
       </div>
     );
