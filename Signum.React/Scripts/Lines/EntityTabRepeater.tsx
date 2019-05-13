@@ -32,6 +32,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
     state.selectedIndex = this.state == null ? 0 :
       coerce(this.state.selectedIndex, this.state.ctx.value.length);
 
+    state.createAsLink = true;
     state.viewOnCreate = false;
   }
 
@@ -65,7 +66,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
   renderButtons() {
     const buttons = (
       <span className="ml-2">
-        {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
+        {!this.state.createAsLink && this.renderCreateButton(false, this.props.createMessage)}
         {this.renderFindButton(false)}
         {this.props.extraButtons && this.props.extraButtons(this)}
       </span>
