@@ -978,7 +978,7 @@ export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<Q
   });
 }
 
-export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null | undefined> {
+export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null> {
 
   var fo: FindOptions = {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
@@ -991,8 +991,9 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
   return getQueryDescription(fo.queryName)
     .then(qd => parseFindOptions(fo!, qd))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
-    .then(rt => rt && rt.rows[0] && rt.rows[0].columns[0]);
+    .then(rt => rt.rows[0].columns[0]);
 }
+
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
 
