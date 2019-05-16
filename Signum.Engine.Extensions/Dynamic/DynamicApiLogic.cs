@@ -64,7 +64,7 @@ namespace Signum.Engine.Dynamic
                             .Where(a => a.Mixin<DisabledMixin>().IsDisabled == false)
                             .ToList();
 
-                    var dtcg = new DynamicApiCodeGenerator(DynamicCode.CodeGenControllerNamespace, controllers, DynamicCode.Namespaces);
+                    var dtcg = new DynamicApiCodeGenerator(DynamicCode.CodeGenControllerNamespace, controllers, DynamicCode.GetNamespaces().ToHashSet());
 
                     var content = dtcg.GetFileCode();
                     result.Add(new CodeFile("CodeGenController.cs", content));
