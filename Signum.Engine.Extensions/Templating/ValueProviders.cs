@@ -76,9 +76,16 @@ namespace Signum.Engine.Templating
         public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
             if (Variable.HasText())
-                variables.Add(Variable, this);
+            {
+                if(variables.TryGetValue(Variable, out var value))
+                {
+                    if (value != null && value.Equals(this))
+                        return;
+
+                    variables.Add(Variable, this);
+                }
+            } 
         }
-        
 
         public virtual void Foreach(TemplateParameters p, Action forEachElement)
         {
