@@ -289,8 +289,9 @@ export class QuickLinkExplore extends QuickLink {
 
 export class QuickLinkNavigate extends QuickLink {
   lite: Lite<Entity>;
+  viewName?: string;
 
-  constructor(lite: Lite<Entity>, options?: QuickLinkOptions) {
+  constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions) {
     super(lite.EntityType, {
       isVisible: Navigator.isNavigable(lite.EntityType),
       text: getTypeInfo(lite.EntityType).niceName,
@@ -298,6 +299,7 @@ export class QuickLinkNavigate extends QuickLink {
     });
 
     this.lite = lite;
+    this.viewName = viewName;
   }
 
   toDropDownItem() {
@@ -314,8 +316,8 @@ export class QuickLinkNavigate extends QuickLink {
 
     const es = Navigator.getSettings(this.lite.EntityType);
     if (e.ctrlKey || e.button == 1 || es && es.avoidPopup)
-      window.open(Navigator.navigateRoute(this.lite));
+      window.open(Navigator.navigateRoute(this.lite, this.viewName));
     else
-      Navigator.navigate(this.lite);
+      Navigator.navigate(this.lite, { getViewPromise: e => this.viewName });
   }
 }
