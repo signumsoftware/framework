@@ -386,7 +386,7 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
   return member.permissionAllowed;
 }
 
-export function asserPermissionAuthorized(permission: PermissionSymbol | string) {
+export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
   var key = (permission as PermissionSymbol).key || permission as string;
   if (!isPermissionAuthorized(key))
     throw new Error(`Permission ${key} is denied`);
