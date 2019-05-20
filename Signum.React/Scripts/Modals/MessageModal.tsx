@@ -183,6 +183,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         message={options.message}
         buttons={options.buttons}
         icon={options.icon}
+        size={options.size}
         customIcon={options.customIcon}
         style={options.style}
       />
