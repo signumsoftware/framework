@@ -95,7 +95,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
           </Tab>
           <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
             <SearchControl
-              showContextMenu="Basic"
+              showContextMenu={() => "Basic"}
               navigate={false}
               findOptions={{
                 queryName: CaseActivityEntity,
@@ -123,7 +123,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
           </Tab>
           <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
             <SearchControl
-              showContextMenu="Basic"
+              showContextMenu={() => "Basic"}
               navigate={false}
               findOptions={{
                 queryName: CaseActivityEntity,
