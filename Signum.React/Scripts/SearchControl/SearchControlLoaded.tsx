@@ -50,7 +50,7 @@ export interface SearchControlLoadedProps {
 
   searchOnLoad: boolean;
   allowSelection: boolean;
-  showContextMenu: boolean | "Basic";
+  showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
   showSelectedButton: boolean;
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
@@ -435,7 +435,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
-          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
+          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
             <thead ref={th => this.thead = th}>
               {this.renderHeaders()}
             </thead>
@@ -573,7 +573,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         </button>
       },
 
-      this.props.showContextMenu != false && this.props.showSelectedButton && this.renderSelectedButton(),
+      this.props.showContextMenu(this.props.findOptions) != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
       p.create && {
         order: -2,
@@ -702,6 +702,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return this.state.selectedRows.map(a => a.entity!);
   }
 
+  getGroupedSelectedEntities(): Promise<Lite<Entity>[]> {
+
+    if (!this.props.findOptions.groupResults)
+      throw new Error("Results are not grouped")
+
+    if (this.state.selectedRows == null || this.state.resultFindOptions == null)
+      return Promise.resolve([]); 
+
+    var resFO = this.state.resultFindOptions;
+    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
+
+    return Promise.all(filters.map(fs => Finder.fetchEntitiesWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
+  }
+
   // SELECT BUTTON
 
   handleSelectedToggle = () => {
@@ -712,17 +726,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   loadMenuItems() {
-    if (this.props.showContextMenu == "Basic" || this.props.findOptions.groupResults)
+    var cm = this.props.showContextMenu(this.state.resultFindOptions || this.props.findOptions);
+
+    if (cm == "Basic")
       this.setState({ currentMenuItems: [] });
     else {
-      const options: ContextualItemsContext<Entity> = {
-        lites: this.getSelectedEntities(),
-        queryDescription: this.props.queryDescription,
-        markRows: this.markRows,
-        container: this,
-      };
 
-      renderContextualItems(options)
+      var litesPromise = !this.props.findOptions.groupResults ? Promise.resolve(this.getSelectedEntities()) : this.getGroupedSelectedEntities();
+
+      litesPromise
+        .then(lites => renderContextualItems({
+          lites: lites,
+          queryDescription: this.props.queryDescription,
+          markRows: this.markRows,
+          container: this,
+        }))
         .then(menuItems => this.setState({ currentMenuItems: menuItems }))
         .done();
     }
@@ -1095,6 +1113,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ currentMenuItems: undefined });
   }
 
+  static getGroupFilters(row: ResultRow, resFo: FindOptionsParsed): FilterOption[] {
+    var keyFilters = resFo.columnOptions
+      .map((col, i) => ({ col, value: row.columns[i] }))
+      .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
+      .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
+
+    var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
+
+    return [...originalFilters, ...keyFilters];
+  }
+
   handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
 
     if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
@@ -1116,19 +1145,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var resFo = this.state.resultFindOptions;
     if (resFo && resFo.groupResults) {
 
-      var keyFilters = resFo.columnOptions
-        .map((col, i) => ({ col, value: row.columns[i] }))
-        .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
-        .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
-
-      var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
-
       var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
         .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
 
+      var filters = SearchControlLoaded.getGroupFilters(row, resFo);
+
       Finder.explore({
         queryName: resFo.queryKey,
-        filterOptions: originalFilters.concat(keyFilters),
+        filterOptions: filters,
         columnOptions: extraColumns,
         columnOptionsMode: "Add",
         systemTime: resFo.systemTime && { ...resFo.systemTime },

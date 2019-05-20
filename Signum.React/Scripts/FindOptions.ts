@@ -261,7 +261,7 @@ export interface QueryEntitiesRequest {
   queryKey: string;
   filters: FilterRequest[];
   orders: OrderRequest[];
-  count: number;
+  count: number | null;
 }
 
 export interface QueryRequest {

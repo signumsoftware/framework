@@ -26,7 +26,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   tag?: string | {};
   searchOnLoad?: boolean;
   allowSelection?: boolean
-  showContextMenu?: boolean | "Basic";
+  showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
   showHeader?: boolean | "PinnedFilters";
@@ -199,7 +199,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
 
           allowSelection={p.allowSelection != null ? p.allowSelection : true}
-          showContextMenu={p.showContextMenu != null ? p.showContextMenu : true}
+          showContextMenu={p.showContextMenu || qs && qs.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
           hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
           hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
           showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
