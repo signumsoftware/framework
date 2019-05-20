@@ -57,6 +57,8 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
 
   componentWillReceiveProps(newProps: CollapsableCardProps) {
     CollapsableCard.checkProps(newProps);
+    if (newProps.defaultOpen != this.props.defaultOpen)
+      this.setState({ isOpen: newProps.defaultOpen == true });
   }
 
   handleToggle = () => {
@@ -80,7 +82,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
           {(this.props.collapsable == undefined || this.props.collapsable == true) &&
             <span
               className={this.state.isRTL ? "float-left" : "float-right"}
-              style={{ cursor: "pointer", margin: "4px" }}
+              style={{ cursor: "pointer" }}
               onClick={this.handleToggle}>
               <FontAwesomeIcon icon={isOpen ? "chevron-up" : "chevron-down"} />
             </span>

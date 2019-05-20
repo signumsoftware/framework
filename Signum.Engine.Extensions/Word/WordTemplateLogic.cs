@@ -516,7 +516,7 @@ namespace Signum.Engine.Word
             return result;
         }
 
-        public static void GenerateDefaultTemplates()
+        public static void GenerateWordTemplates()
         {
             var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any()).ToList();
 
@@ -538,6 +538,51 @@ namespace Signum.Engine.Word
 
             if (exceptions.Any())
                 throw new Exception(exceptions.ToString("\r\n\r\n"));
+        }
+
+        public static void OverrideWordTemplatesConsole()
+        {
+            var wordTemplates = Database.Query<WordTemplateEntity>().Where(a=>a.SystemWordTemplate != null).GroupToDictionary(a => a.SystemWordTemplate);
+
+
+            var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().ToList();
+
+            List<string> exceptions = new List<string>();
+
+            foreach (var se in systemWordTemplates)
+            {
+                try
+                {
+                    var defaultTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(se);
+                    if (defaultTemplate != null)
+                    {
+                        var already = wordTemplates.TryGetC(se);
+
+                        if (already == null)
+                        {
+                            defaultTemplate.Save();
+                            SafeConsole.WriteLineColor(ConsoleColor.Green, $"Created {se.FullClassName}");
+                        }
+                        else
+                        {
+                            var toModify = already.Only() ?? already.ChooseConsole();
+
+                            if(toModify != null)
+                            {
+                                toModify.Template = defaultTemplate.Template;
+                                toModify.Save();
+                                SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Overriden {se.FullClassName}");
+                            }
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, se.FullClassName);
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                }
+            }
         }
     }
 }

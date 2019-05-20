@@ -64,7 +64,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
   }
 
   render() {
-    AuthClient.asserPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
+    AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
     let step = QueryString.parse(this.props.location.search).step as DynamicPanelTab | undefined;
 

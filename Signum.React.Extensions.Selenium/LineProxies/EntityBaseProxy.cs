@@ -45,7 +45,7 @@ namespace Signum.React.Selenium
 
             string changes = GetChanges();
 
-            var popup = this.CreateButton.Find().CaptureOnClick();
+            var popup = this.CreateButton.WaitVisible().CaptureOnClick();
 
             popup = ChooseTypeCapture(typeof(T), popup);
 

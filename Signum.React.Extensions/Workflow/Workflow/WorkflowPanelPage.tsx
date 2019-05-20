@@ -15,7 +15,7 @@ interface WorkflowPanelPageProps extends RouteComponentProps<{}> {
 
 export default class WorkflowPanelPage extends React.Component<WorkflowPanelPageProps, {}> {
   componentWillMount() {
-    AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    AuthClient.assertPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
     Navigator.setTitle("WorkflowPanel State");
   }
 
@@ -46,7 +46,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
 
   componentWillMount() {
     this.loadState().done();
-    AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    AuthClient.assertPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
   }
 
   loadState() {
