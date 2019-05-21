@@ -103,7 +103,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
         <br />
         <h4>Next activities to execute</h4>
         <SearchControl
-          showContextMenu="Basic"
+          showContextMenu={() => "Basic"}
           navigate={false}
           findOptions={{
             queryName: CaseActivityEntity,
@@ -144,7 +144,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
           </Tab>
           <Tab title="Last executed activities" eventKey="lastActivities">
             <SearchControl
-              showContextMenu="Basic"
+              showContextMenu={() => "Basic"}
               navigate={false}
               findOptions={{
                 queryName: CaseActivityEntity,

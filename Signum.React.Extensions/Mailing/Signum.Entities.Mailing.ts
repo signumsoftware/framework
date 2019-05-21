@@ -215,7 +215,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
   isBodyHtml: boolean;
   messages: Entities.MList<EmailTemplateMessageEmbedded>;
-  applicable: Templating.TemplateApplicableEval;
+  applicable: Templating.TemplateApplicableEval | null;
 }
 
 export module EmailTemplateMessage {
@@ -367,7 +367,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   emailTemplate: Entities.Lite<EmailTemplateEntity>;
   uniqueTarget: Entities.Lite<Entities.Entity>;
   targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity> | null;
-  modelConverter: Templating.ModelConverterSymbol;
+  modelConverter: Templating.ModelConverterSymbol | null;
 }
 
 export module SendEmailTaskOperation {
