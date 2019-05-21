@@ -228,6 +228,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
 export interface ISimpleFilterBuilder {
   getFilters(): FilterOption[];
+  onDataChanged?(): void;
 }
 
 

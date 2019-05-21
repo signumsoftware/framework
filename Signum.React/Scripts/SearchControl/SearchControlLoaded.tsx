@@ -209,6 +209,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (this.props.onSearch)
         this.props.onSearch(fop, dataChanged || false);
 
+      if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
+        this.simpleFilterBuilderInstance.onDataChanged();
+
       this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
       var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
       return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
