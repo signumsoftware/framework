@@ -5,6 +5,7 @@ import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity }
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
+import { AggregateType } from './FindOptions';
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
@@ -1049,6 +1050,42 @@ export class QueryTokenString<T> {
 
   any<S = ArrayElement<T>>(): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + ".Any");
+  }
+
+  all<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".All");
+  }
+
+  anyNo<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".AnyNo");
+  }
+
+  noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".NoOne");
+  }
+
+  element<S = ArrayElement<T>>(index = 1): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
+  }
+
+  count(): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count");
+  }
+
+  min(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Min");
+  }
+
+  max(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Max");
+  }
+
+  sum(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Sum");
+  }
+
+  average(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Average");
   }
 }
 

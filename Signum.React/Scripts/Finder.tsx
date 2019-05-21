@@ -1290,10 +1290,18 @@ export interface QuerySettings {
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], refresh: () => void) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
+}
+
+
+export interface SimpleFilterBuilderContext {
+  queryDescription: QueryDescription;
+  initialFilterOptions: FilterOptionParsed[];
+  search: () => void;
+  searchControl?: SearchControlLoaded
 }
 
 export interface FormatRule {
