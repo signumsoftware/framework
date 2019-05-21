@@ -98,8 +98,11 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol converter)
+        public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol? converter)
         {
+            if (converter == null)
+                return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template } }.CreateLines(targets));
+
             return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template, converter } }.CreateLines(targets));
         }
     }
