@@ -125,7 +125,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qs = Finder.getSettings(fo.queryKey);
     const qd = this.props.queryDescription;
 
-    const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
+    const sfb = this.props.showSimpleFilterBuilder == false ? undefined :
       this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
         qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
           undefined;
@@ -1159,6 +1159,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         columnOptions: extraColumns,
         columnOptionsMode: "Add",
         systemTime: resFo.systemTime && { ...resFo.systemTime },
+      }).then(() => {
+        this.doSearch(true);
       }).done();
 
       return;
