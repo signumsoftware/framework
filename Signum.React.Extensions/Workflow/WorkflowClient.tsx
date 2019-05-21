@@ -104,8 +104,8 @@ export function start(options: { routes: JSX.Element[] }) {
       "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />)
     },
     defaultOrderColumn: "StartDate",
-    simpleFilterBuilder: (qd, fos) => {
-      var model = InboxFilter.extract(fos);
+    simpleFilterBuilder: sfbc => {
+      var model = InboxFilter.extract(sfbc.initialFilterOptions);
 
       if (!model)
         return undefined;
