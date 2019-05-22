@@ -1085,3 +1085,16 @@ export module DomUtils {
     return element;
   }
 }
+
+export class KeyGenerator {
+  map = new Map<object, number>();
+  maxIndex = 0;
+  getKey(o: object) {
+    var result = this.map.get(o);
+    if (result == undefined) {
+      result = this.maxIndex++;
+      this.map.set(o, result);
+    }
+    return result;
+  }
+}

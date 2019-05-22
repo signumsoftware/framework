@@ -92,7 +92,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
           mlistItemContext(ctx).map((mlec, i) => {
             const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
 
-            return <Tab eventKey={i} key={i}
+            return <Tab eventKey={i} key={this.keyGenerator.getKey(mlec.value)}
               {...EntityListBase.entityHtmlAttributes(mlec.value)}
               className="sf-repeater-element"
               title={

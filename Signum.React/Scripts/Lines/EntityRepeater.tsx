@@ -70,7 +70,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
       <div className="sf-repater-elements">
         {
           mlistItemContext(ctx).map((mlec, i) =>
-            (<EntityRepeaterElement key={i}
+            (<EntityRepeaterElement key={this.keyGenerator.getKey(mlec.value)}
               onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
               ctx={mlec}
               draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}

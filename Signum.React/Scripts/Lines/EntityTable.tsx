@@ -197,7 +197,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
               mlistItemContext(ctx)
                 .map((mlec, i) => ({ mlec, i }))
                 .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a.mlec))
-                .map(a => <EntityTableRow key={a.i}
+                .map(a => <EntityTableRow key={this.keyGenerator.getKey(a.mlec.value)}
                   index={a.i}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}

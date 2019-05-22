@@ -50,7 +50,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
           <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
             {
               mlistItemContext(s.ctx).map((mlec, i) =>
-                (<EntityStripElement key={i}
+                (<EntityStripElement key={this.keyGenerator.getKey(mlec.value)}
                   ctx={mlec}
                   iconStart={s.iconStart}
                   autoComplete={s.autocomplete}
