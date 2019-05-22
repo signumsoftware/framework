@@ -15,11 +15,12 @@ export interface CollapsableCardProps {
   cardStyle?: CardStyle;
   headerStyle?: CardStyle;
   bodyStyle?: CardStyle;
+  size?: "sm" | "xs";
 }
 interface CardStyle {
   border?: BsColor;
   text?: BsColor;
-  background?: BsColor
+  background?: BsColor;
 }
 
 function cardStyleClasses(style?: CardStyle) {
@@ -77,7 +78,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
       this.props.isOpen;
 
     return (
-      <div className={classes("card", cardStyleClasses(this.props.cardStyle))}>
+      <div className={classes("card", cardStyleClasses(this.props.cardStyle), this.props.size && ("card-" + this.props.size))}>
         <div className={classes("card-header", cardStyleClasses(this.props.headerStyle))} style={{ cursor: "pointer" }} onClick={this.handleToggle}>
           {(this.props.collapsable == undefined || this.props.collapsable == true) &&
             <span
