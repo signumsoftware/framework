@@ -156,3 +156,13 @@ a.expand-window:hover {
 .sf-guid-id:hover{
     opacity: 1;
 }
+
+.card.card-sm .card-header,
+.card.card-sm .card-body {
+    padding: 0.5em 0.75em;
+}
+
+.card.card-xs .card-header,
+.card.card-xs .card-body {
+    padding: 0.3em 0.5em;
+}
