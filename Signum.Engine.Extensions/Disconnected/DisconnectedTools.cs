@@ -154,7 +154,7 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
             if (info.Identity.HasValue)
                 return info.Identity.Value + 1;
 
-            return (long)(decimal)Executor.ExecuteScalar("SELECT IDENT_CURRENT ('{0}') ".FormatWith(table.Name));
+            return (long)(decimal)Executor.ExecuteScalar("SELECT IDENT_CURRENT ('{0}') ".FormatWith(table.Name))!;
         }
 
         public static void SetNextId(ITable table, long nextId)

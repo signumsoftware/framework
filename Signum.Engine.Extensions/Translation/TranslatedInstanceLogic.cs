@@ -450,7 +450,7 @@ namespace Signum.Engine.Translation
             {
                 Dictionary<LocalizedInstanceKey, string> routeConflicts =
                     (from kvp in gr
-                     let t = target.TryGetC(kvp.Key)
+                     let t = target?.TryGetC(kvp.Key)
                      where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
                      select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
 
@@ -461,7 +461,7 @@ namespace Signum.Engine.Translation
                               from c in cultures
                               let str = c.Equals(DefaultCulture) ? rc.Value : support.TryGetC(c)?.TryGetC(rc.Key)?.Let(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
                               where str.HasText()
-                              let old = c.Equals(DefaultCulture) ? target.TryGetC(rc.Key) : null
+                              let old = c.Equals(DefaultCulture) ? target?.TryGetC(rc.Key) : null
                               select new
                               {
                                   rc.Key.Route,
@@ -582,7 +582,6 @@ namespace Signum.Engine.Translation
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class TranslationRecord
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public CultureInfo Culture;
         public LocalizedInstanceKey Key;
@@ -594,10 +593,10 @@ namespace Signum.Engine.Translation
             return "{0} {1} {2} -> {3}".FormatWith(Culture, Key.Instance, Key.Route, TranslatedText);
         }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class InstanceChanges
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public Lite<Entity> Instance { get; set; }
 
@@ -613,6 +612,7 @@ namespace Signum.Engine.Translation
             return RouteConflicts.Values.Sum(dic => dic[TranslatedInstanceLogic.DefaultCulture].Original.Length);
         }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public struct IndexedPropertyRoute : IEquatable<IndexedPropertyRoute>
     {
@@ -648,10 +648,9 @@ namespace Signum.Engine.Translation
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class PropertyRouteConflict
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
-        public string OldOriginal;
-        public string OldTranslation;
+        public string? OldOriginal;
+        public string? OldTranslation;
 
         public string Original;
         public string? AutomaticTranslation;
@@ -661,10 +660,10 @@ namespace Signum.Engine.Translation
             return "Conflict {0} -> {1}".FormatWith(Original, AutomaticTranslation);
         }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     class ExcelRow
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public string Instance; 
         public string Path;
@@ -672,6 +671,7 @@ namespace Signum.Engine.Translation
         public string Original; 
         public string? Translated; 
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public struct LocalizedInstanceKey : IEquatable<LocalizedInstanceKey>
     {
@@ -712,12 +712,12 @@ namespace Signum.Engine.Translation
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class TranslatedTypeSummary
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public Type Type;
         public CultureInfo CultureInfo;
         public TranslatedSummaryState? State;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public enum TranslatedSummaryState
     {

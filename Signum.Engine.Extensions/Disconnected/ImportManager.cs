@@ -373,7 +373,7 @@ namespace Signum.Engine.Disconnected
         {
             DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
 
-            var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar();
+            var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar()!;
 
             if (count == 0)
                 return 0;

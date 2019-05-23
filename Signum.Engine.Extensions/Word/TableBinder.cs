@@ -84,21 +84,17 @@ namespace Signum.Engine.Word
             }
         }
 
- 
-
-        static string GetTitle(OpenXmlElement nonVisualProps)
+        static string? GetTitle(OpenXmlElement nonVisualProps)
         {
-            if (nonVisualProps is Drawing.NonVisualDrawingProperties)
-                return ((Drawing.NonVisualDrawingProperties)nonVisualProps).Title?.Value;
+            if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
+                return draw.Title?.Value;
 
-            if (nonVisualProps is Presentation.NonVisualDrawingProperties)
-                return ((Presentation.NonVisualDrawingProperties)nonVisualProps).Title?.Value;
+            if (nonVisualProps is Presentation.NonVisualDrawingProperties pres)
+                return pres.Title?.Value;
             
             throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps.GetType().FullName);
         }
 
- 
-        
         static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)
             where N : OpenXmlElement
         {

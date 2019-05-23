@@ -325,7 +325,6 @@ namespace Signum.Engine.Migrations
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class MigrationInfo
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             public string? FileName;
             public string Version;
@@ -337,7 +336,7 @@ namespace Signum.Engine.Migrations
             {
                 return Version;
             }
-
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     }
 }

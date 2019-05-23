@@ -105,7 +105,7 @@ namespace Signum.Entities.UserAssets
 
     public static class FromXmlExtensions
     {
-        public static void Synchronize<T>(this MList<T> entities, List<XElement> xElements, Action<T, XElement> syncAction)
+        public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
             where T : new()
         {
             if (xElements == null)

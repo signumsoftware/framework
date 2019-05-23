@@ -75,12 +75,6 @@ namespace Signum.Entities.Chart
         {
             bool result = false;
 
-            if (chartScript == null)
-            {
-                result = true;
-                chart.Columns.Clear();
-            }
-
             for (int i = 0; i < chartScript.Columns.Count; i++)
             {
                 if (chart.Columns.Count <= i)

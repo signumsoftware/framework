@@ -216,12 +216,12 @@ namespace Signum.Engine.MachineLearning.CNTK
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class FinalCandidate
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             public byte[] Model;
             public PredictorMetricsEmbedded ResultTraining;
             public PredictorMetricsEmbedded ResultValidation;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn, DeviceDescriptor device)
         {

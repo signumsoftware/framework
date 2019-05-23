@@ -336,7 +336,7 @@ namespace Signum.Engine.SMS
                                 select new Combination
                                 {
                                     Name = m.Groups["name"].Value,
-                                    Value = t.GetProperty(m.Groups["name"].Value)?.Let(fi => fi.GetValue(obj, null))?.ToString()
+                                    Value = t.GetProperty(m.Groups["name"].Value)?.Let(fi => fi.GetValue(obj, null))?.ToString() ?? ""
                                 }).ToList();
 
             return CombineText(template, templateMessage, combinations);

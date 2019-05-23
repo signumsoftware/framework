@@ -94,14 +94,14 @@ namespace Signum.Engine.Word
                     if (start.Interval.Min < interval.Min)
                     {
                         var firstRunPart = nodeProvider.NewRun(
-                            (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true),
+                            (OpenXmlCompositeElement?)nodeProvider.GetRunProperties(startRun)?.CloneNode(true),
                              start.Text!.Substring(0, m.Index - start.Interval.Min),
                              SpaceProcessingModeValues.Preserve
                             );
                         par.Append(firstRunPart);
                     }
 
-                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true) });
+                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = (OpenXmlCompositeElement?)nodeProvider.GetRunProperties(startRun)?.CloneNode(true) });
 
                     ElementInfo end = start;
                     while (end.Interval.Max < interval.Max) //Ignore

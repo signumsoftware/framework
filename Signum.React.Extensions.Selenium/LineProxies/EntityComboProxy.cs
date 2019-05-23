@@ -40,7 +40,7 @@ namespace Signum.React.Selenium
             }
         }
 
-        public List<Lite<Entity>> Options()
+        public List<Lite<Entity>?> Options()
         {
             return this.ComboElement.Options
                 .Select(o => Lite.Parse(o.GetAttribute("value"))?.Do(l => l.SetToString(o.Text)))
@@ -83,10 +83,10 @@ namespace Signum.React.Selenium
             {
                 var options = this.Options();
                 if (removeNullElement)
-                    options = options.NotNull().ToList();
+                    options = options.NotNull().ToList()!;
 
                 if (orderIndependent)
-                    return options.OrderBy(a => a.Id).SequenceEqual(list.OrderBy(a => a.Id));
+                    return options.OrderBy(a => a?.Id).SequenceEqual(list.OrderBy(a => a?.Id));
                 else
                     return options.SequenceEqual(list);
             });

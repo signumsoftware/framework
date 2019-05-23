@@ -433,7 +433,7 @@ namespace Signum.Entities.Omnibox
 
         [JsonConverter(typeof(QueryTokenJsonConverter))]
         public QueryToken QueryToken { get; set; }
-        public string QueryTokenOmniboxPascal => QueryToken?.Follow(a => a.Parent).Reverse().ToString(a => a.ToString().ToOmniboxPascal(), ".");
+        public string? QueryTokenOmniboxPascal => QueryToken?.Follow(a => a.Parent).Reverse().ToString(a => a.ToString().ToOmniboxPascal(), ".");
 
         public OmniboxMatch[]? QueryTokenMatches { get; set; }
         public FilterOperation? Operation { get; set; }

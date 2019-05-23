@@ -570,16 +570,15 @@ namespace Signum.Engine.Dynamic
 
         private string ParseTableName(string value)
         {
-
             var objName = ObjectName.Parse(value);
 
             return new List<string?>
-                {
-                     Literal(objName.Name),
-                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
-                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+            {
+                Literal(objName.Name),
+                !objName.Schema.IsDefault() ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
                 objName.Schema.Database?.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
-                }.NotNull().ToString(", ");
+            }.NotNull().ToString(", ");
         }
 
         public virtual string GetPropertyType(DynamicProperty property)

@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -91,8 +91,6 @@ namespace Signum.Entities.Mailing
             this.CultureInfo = culture;
         }
 
-
-        
         public CultureInfoEntity CultureInfo { get; set; }
 
         [StringLengthValidator(MultiLine = true)]
@@ -100,7 +98,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return CultureInfo?.ToString();
+            return CultureInfo?.ToString()!;
         }
 
         protected override string? PropertyValidation(PropertyInfo pi)

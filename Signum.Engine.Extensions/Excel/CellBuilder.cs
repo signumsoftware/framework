@@ -93,7 +93,7 @@ namespace Signum.Engine.Excel
                         (template == DefaultStyle.Date || template == DefaultStyle.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
                         (template.ToString().StartsWith("Decimal")) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
                         (template == DefaultStyle.Boolean) ? ToYesNo((bool)value) :
-                        (template == DefaultStyle.Enum) ? ((Enum)value)?.NiceToString() :
+                        (template == DefaultStyle.Enum) ? ((Enum)value).NiceToString() :
                         value.ToString();
 
             Cell cell = IsInlineString(template)? 

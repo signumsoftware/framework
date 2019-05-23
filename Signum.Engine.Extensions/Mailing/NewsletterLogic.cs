@@ -208,13 +208,13 @@ namespace Signum.Engine.Mailing
     {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         class SendLine
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             public IGrouping<Lite<Entity>, ResultRow> Rows;
             public Lite<NewsletterDeliveryEntity> NewsletterDelivery;
             public EmailOwnerData Email;
             public Exception Exception;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public int NotificationSteps = 100;
 
@@ -268,13 +268,13 @@ namespace Signum.Engine.Mailing
             var entityColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity");
             var deliveryColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
             var emailOwnerColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
-            
+
             var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]!).Select(g => new SendLine
-                {
-                    NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn)!,
-                    Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn)!,
-                    Rows = g,
-                }).ToList();
+            {
+                NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn)!,
+                Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn)!,
+                Rows = g,
+            }).ToList();
             
             if (newsletter.SubjectParsedNode == null)
                 newsletter.SubjectParsedNode = EmailTemplateParser.Parse(newsletter.Subject, qd, null);

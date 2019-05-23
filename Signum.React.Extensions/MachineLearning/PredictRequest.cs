@@ -171,7 +171,7 @@ namespace Signum.React.MachineLearning
             };
         }
 
-        static object?[] CreateRow(List<PredictorSubQueryColumnEmbedded> groupKeys, List<PredictorSubQueryColumnEmbedded> values, object?[] key, PredictSubQueryDictionary inputs, PredictSubQueryDictionary originalOutputs, PredictSubQueryDictionary predictedOutputs)
+        static object?[] CreateRow(List<PredictorSubQueryColumnEmbedded> groupKeys, List<PredictorSubQueryColumnEmbedded> values, object?[] key, PredictSubQueryDictionary? inputs, PredictSubQueryDictionary? originalOutputs, PredictSubQueryDictionary? predictedOutputs)
         {
             var row = new object?[groupKeys.Count + values.Count];
 
@@ -188,10 +188,10 @@ namespace Signum.React.MachineLearning
             {
                 var v = values[i];
                 row[i + key.Length] = v.Usage == PredictorSubQueryColumnUsage.Input ? inputsGR?.GetOrThrow(v) :
-                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(v) :
+                    originalOutputs == null ? predictedOutputsGR!.GetOrThrow(v) :
                     new PredictOutputTuple
                     {
-                        predicted = predictedOutputsGR.GetOrThrow(v),
+                        predicted = predictedOutputsGR!.GetOrThrow(v),
                         original = originalOutputsGR?.GetOrThrow(v),
                     };
             }

@@ -142,7 +142,7 @@ namespace Signum.Entities.UserQueries
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
-            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             AppendFilters = element.Attribute("AppendFilters")?.Let(a => a.Value == true.ToString()) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());

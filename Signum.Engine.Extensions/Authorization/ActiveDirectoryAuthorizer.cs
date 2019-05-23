@@ -48,7 +48,7 @@ namespace Signum.Engine.Authorization
                 var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
                 var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
                 
-                UserEntity user;
+                UserEntity? user;
 
                 if (domainName != null)
                 {

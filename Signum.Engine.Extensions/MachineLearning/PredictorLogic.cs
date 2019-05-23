@@ -623,8 +623,8 @@ namespace Signum.Engine.MachineLearning
                         ResultSaver = e.ResultSaver,
                         MainQuery = e.MainQuery.Clone(),
                         SubQueries = e.SubQueries.Select(a => a.Clone()).ToMList(),
-                        AlgorithmSettings = e.AlgorithmSettings?.Clone(),
-                        Settings = e.Settings?.Clone(),
+                        AlgorithmSettings = e.AlgorithmSettings.Clone(),
+                        Settings = e.Settings.Clone(),
                     },
                 }.Register();
             }

@@ -19,7 +19,7 @@ namespace Signum.Engine.Word
 {
     public class WordTemplateParameters : TemplateParameters
     {
-        public WordTemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
+        public WordTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
             IEnumerable<ResultRow> rows, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate) : 
               base(entity, culture, columns, rows)
         {

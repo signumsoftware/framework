@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>Signum.Engine</RootNamespace>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <NullableContextOptions>enable</NullableContextOptions>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

@@ -79,7 +79,7 @@ namespace Signum.Engine.Mailing
                 {
                     if (er.UniqueTarget != null)
                     {
-                        ModifiableEntity entity = er.UniqueTarget?.Retrieve();
+                        ModifiableEntity entity = er.UniqueTarget.Retrieve();
 
                         if (er.ModelConverter != null)
                             entity = er.ModelConverter.Convert(entity);

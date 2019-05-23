@@ -56,7 +56,7 @@ namespace Signum.Engine.DiffLog
 
             return new Disposable(() =>
             {
-                var target = log.GetTarget();
+                var target = log.GetTemporalTarget();
 
                 if (target != null && ShouldLog.Invoke(target, operation) && operation.OperationType != OperationType.Delete)
                 {

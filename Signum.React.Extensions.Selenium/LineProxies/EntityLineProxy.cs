@@ -11,7 +11,7 @@ namespace Signum.React.Selenium
         {
         }
 
-        public void SetLite(Lite<IEntity> value)
+        public void SetLite(Lite<IEntity>? value)
         {
             if (this.EntityInfo() != null)
                 this.Remove();

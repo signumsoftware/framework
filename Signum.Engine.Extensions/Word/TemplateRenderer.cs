@@ -16,12 +16,12 @@ namespace Signum.Engine.Word
     {
         OpenXmlPackage document;
         QueryDescription queryDescription;
-        Entity entity;
+        Entity? entity;
         CultureInfo culture;
         WordTemplateEntity template;
         ISystemWordTemplate? systemWordTemplate;
 
-        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate, Entity entity)
+        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate, Entity? entity)
         {
             this.document = document;
             this.culture = culture;

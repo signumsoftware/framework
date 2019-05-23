@@ -190,8 +190,7 @@ namespace Signum.Engine.Workflow
 
             Stack<WorkflowConnectionEntity> partialPath = new Stack<WorkflowConnectionEntity>(); 
             HashSet<IWorkflowNodeEntity> visited = new HashSet<IWorkflowNodeEntity>();
-            Action<IWorkflowNodeEntity>? flood = null;
-            flood = node =>
+            void Flood(IWorkflowNodeEntity node)
             {
                 if (node.Is(to))
                 {
@@ -210,14 +209,14 @@ namespace Signum.Engine.Workflow
                     {
                         visited.Add(con.To);
                         partialPath.Push(con);
-                        flood(con.To);
+                        Flood(con.To);
                         partialPath.Pop();
                         visited.Remove(con.To);
                     }
                 }
             };
 
-            flood(from);
+            Flood(from);
 
             return result;
         }
@@ -225,7 +224,6 @@ namespace Signum.Engine.Workflow
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class CaseActivityStats
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public Lite<CaseActivityEntity> CaseActivity;
         public Lite<CaseActivityEntity>? PreviousActivity;
@@ -244,6 +242,7 @@ namespace Signum.Engine.Workflow
 
         public string BpmnElementId { get; internal set; }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class CaseConnectionStats
     {
@@ -276,11 +275,11 @@ namespace Signum.Engine.Workflow
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class CaseFlow
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public Dictionary<string, List<CaseActivityStats>> Activities;
         public Dictionary<string, List<CaseConnectionStats>> Connections;
         public List<CaseConnectionStats> Jumps;
         public List<string> AllNodes;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

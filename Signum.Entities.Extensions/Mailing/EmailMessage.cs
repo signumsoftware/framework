@@ -174,7 +174,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return file?.ToString();
+            return file?.ToString() ?? "";
         }
     }
 

@@ -50,7 +50,7 @@ namespace Signum.Engine.Workflow
                 Activities = rt.Rows.Select(row => new WorkflowActivityStats
                 {
                     WorkflowActivity = (Lite<IWorkflowNodeEntity>)row[0]!,
-                    CaseActivityCount = (int)row[1],
+                    CaseActivityCount = (int)row[1]!,
                     CustomValues = row.GetValues(customCols),
                 }).ToList(),
             };
