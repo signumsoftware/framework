@@ -653,6 +653,10 @@ export interface DurationTextBoxProps {
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
 
+  static defaultProps: {
+    format: "hh:mm:ss"
+  };
+
   constructor(props: DurationTextBoxProps) {
     super(props);
     this.state = { text: undefined };
@@ -660,7 +664,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
   render() {
     const value = this.state.text != undefined ? this.state.text :
-      this.props.value != undefined ? moment.duration(this.props.value).format(this.props.format) :
+      this.props.value != undefined ? moment.duration(this.props.value).format(this.props.format, { forceLength: true } as any) :
         "";
 
     return <input ref={this.props.innerRef}
@@ -676,21 +680,34 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
   }
 
+
   handleOnBlur = (e: React.FocusEvent<any>) => {
 
-    function fix(val: string, format: string | undefined) {
-      if (!val.contains(":") && format != null && format) {
-        if (format.contains("hh"))
+    var format = this.props.format!;
+
+    function fixNumber(val: string) {
+      if (!val.contains(":")) {
+        if (format.startsWith("hh"))
           return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
-        if (format.contains("mm"))
+        if (format.startsWith("mm"))
           return format.replace("mm", val.toString()).replace("ss", "00");
         return val;
       }
+      return val;
+    }
+
+    function normalize(val: string) {
+
+      if (!"hh:mm:ss".contains(format))
+        throw new Error("not implemented");
+
+      return "hh:mm:ss".replace(format, val).replace("hh", "00").replace("mm", "00").replace("ss", "00")
     }
 
 
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(fix(input.value, this.props.format)).format("hh:mm:ss:");
+    const result = input.value == undefined || input.value.length == 0 ? null :
+      moment.duration(normalize(fixNumber(input.value))).format("hh:mm:ss", { forceLength: true } as any);
     this.setState({ text: undefined });
     if (this.props.value != result)
       this.props.onChange(result);;
@@ -704,7 +721,6 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
   }
 
   handleKeyDown = (e: React.KeyboardEvent<any>) => {
-    console.log(e.keyCode);
     if (!this.props.validateKey(e))
       e.preventDefault();
   }
