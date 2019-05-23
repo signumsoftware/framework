@@ -17,7 +17,7 @@ namespace Signum.React.Filters
             this.requestKey = requestKey;
         }
 
-        public string? RequestKey
+        public string? RequestKey 
         {
             get { return requestKey; }
         }
@@ -28,14 +28,14 @@ namespace Signum.React.Filters
 
             var action = cad.ControllerName + "." + cad.ActionName;
 
-            var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
-            if (attr != null)
-            {
-                var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
+            //var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
+            //if (attr != null)
+            //{
+            //    var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
 
-                if (obj != null)
-                    action += " " + obj.ToString();
-            }
+            //    if (obj != null)
+            //        action += " " + obj.ToString();
+            //}
 
             return action;
         }
