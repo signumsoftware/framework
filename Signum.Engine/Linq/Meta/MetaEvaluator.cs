@@ -56,7 +56,7 @@ namespace Signum.Engine.Linq
         static GenericInvoker<Func<ConstantExpression>> miConstant = new GenericInvoker<Func<ConstantExpression>>(() => Constant<int>());
         static ConstantExpression Constant<T>()
         {
-            return Expression.Constant(default(T), typeof(T));
+            return Expression.Constant(default(T)!, typeof(T));
         }
     }
 }

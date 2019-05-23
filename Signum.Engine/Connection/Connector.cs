@@ -57,8 +57,8 @@ namespace Signum.Engine
 
         public Schema Schema { get; private set; }
 
-        static readonly Variable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
-        public static TextWriter CurrentLogger
+        static readonly Variable<TextWriter?> logger = Statics.ThreadVariable<TextWriter?>("connectionlogger");
+        public static TextWriter? CurrentLogger
         {
             get { return logger.Value; }
             set { logger.Value = value; }

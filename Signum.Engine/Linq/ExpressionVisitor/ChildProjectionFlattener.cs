@@ -179,7 +179,7 @@ namespace Signum.Engine.Linq
 
         internal static class KeyFinder
         {
-            public static IEnumerable<ColumnExpression> Keys(SourceExpression source)
+            public static IEnumerable<ColumnExpression?> Keys(SourceExpression source)
             {
                 if (source is SelectExpression)
                     return KeysSelect((SelectExpression)source);
@@ -193,12 +193,12 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("Unexpected source");
             }
 
-            private static IEnumerable<ColumnExpression> KeysSet(SetOperatorExpression set)
+            private static IEnumerable<ColumnExpression?> KeysSet(SetOperatorExpression set)
             {
                 return Keys(set.Left).Concat(Keys(set.Right));
             }
 
-            private static IEnumerable<ColumnExpression> KeysJoin(JoinExpression join)
+            private static IEnumerable<ColumnExpression?> KeysJoin(JoinExpression join)
             {
                 switch (join.JoinType)
                 {
@@ -251,19 +251,19 @@ namespace Signum.Engine.Linq
                     yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name);
             }
 
-            private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
+            private static IEnumerable<ColumnExpression?> KeysSelect(SelectExpression select)
             {
                 if (select.GroupBy.Any())
                     return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be improved*/)?.Let(cd => cd.GetReference(select.Alias))).ToList();
 
-                IEnumerable<ColumnExpression> inner = Keys(select.From!);
+                IEnumerable<ColumnExpression?> inner = Keys(select.From!);
 
                 var result = inner.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce))?.Let(cd => cd.GetReference(select.Alias))).ToList();
 
                 if (!select.IsDistinct)
                     return result;
 
-                var result2 = select.Columns.Select(cd => cd.GetReference(select.Alias)).ToList();
+                var result2 = select.Columns.Select(cd => (ColumnExpression?)cd.GetReference(select.Alias)).ToList();
 
                 if (result.Any(c => c == null))
                     return result2;

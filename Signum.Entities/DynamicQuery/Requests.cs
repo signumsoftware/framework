@@ -32,7 +32,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Pagination Pagination { get; set; }
 
-        public SystemTime SystemTime { get; set; }
+        public SystemTime? SystemTime { get; set; }
 
         public List<CollectionElementToken> Multiplications()
         {

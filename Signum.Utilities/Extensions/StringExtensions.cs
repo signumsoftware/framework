@@ -22,7 +22,7 @@ namespace Signum.Utilities
         }
 
 #pragma warning disable IDE0052 // Remove unread private members
-        static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
+        static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a! : b;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("DefaultTextExpression")]
         public static string DefaultText(this string? str, string defaultText)

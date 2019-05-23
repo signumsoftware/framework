@@ -61,7 +61,7 @@ namespace Signum.Entities
 
             var dic = validators.GetDefinition(typeof(T))!;
 
-            PropertyValidator<T>? result = (PropertyValidator<T>?)dic?.TryGetC(pi.Name);
+            PropertyValidator<T>? result = (PropertyValidator<T>?)dic.TryGetC(pi.Name);
 
             if (result == null)
             {

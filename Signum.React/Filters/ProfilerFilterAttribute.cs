@@ -28,16 +28,13 @@ namespace Signum.React.Filters
 
             var action = cad.ControllerName + "." + cad.ActionName;
 
-            if (cad == null)
+            var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
+            if (attr != null)
             {
-                var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
-                if (attr != null)
-                {
-                    var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
+                var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
 
-                    if (obj != null)
-                        action += " " + obj.ToString();
-                }
+                if (obj != null)
+                    action += " " + obj.ToString();
             }
 
             return action;

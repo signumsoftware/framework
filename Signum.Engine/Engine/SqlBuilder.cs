@@ -339,7 +339,7 @@ WHERE {oldPrimaryKey} NOT IN
     FROM {oldTableName}
     {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}");
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
         }
 
         public static SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)

@@ -146,7 +146,7 @@ namespace Signum.Utilities.ExpressionTrees
             return GetFieldExpansion(type, mi) != null || mi is MethodInfo && mi.HasAttribute<MethodExpanderAttribute>();
         }
 
-        public static LambdaExpression? GetFieldExpansion(Type decType, MemberInfo mi)
+        public static LambdaExpression? GetFieldExpansion(Type? decType, MemberInfo mi)
         {
             if (decType == null || decType == mi.DeclaringType || IsStatic(mi))
                 return GetExpansion(mi);

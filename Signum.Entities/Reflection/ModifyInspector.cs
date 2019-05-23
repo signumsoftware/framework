@@ -64,9 +64,9 @@ namespace Signum.Entities.Reflection
             }
             else
             {
-                foreach (Func<object, object> getter in ModifiableFieldGetters(obj.GetType()))
+                foreach (Func<object, object?> getter in ModifiableFieldGetters(obj.GetType()))
                 {
-                    object field = getter(obj);
+                    object? field = getter(obj);
 
                     if (field == null)
                         continue;
@@ -102,9 +102,9 @@ namespace Signum.Entities.Reflection
             }
             else
             {
-                foreach (Func<object, object> getter in ModifiableFieldGettersVirtual(obj.GetType()))
+                foreach (Func<object, object?> getter in ModifiableFieldGettersVirtual(obj.GetType()))
                 {
-                    object field = getter(obj);
+                    object? field = getter(obj);
 
                     if (field == null)
                         continue;
@@ -141,9 +141,9 @@ namespace Signum.Entities.Reflection
             }
             else
             {
-                foreach (Func<object, object> getter in ModifiableFieldGetters(obj.GetType()))
+                foreach (Func<object, object?> getter in ModifiableFieldGetters(obj.GetType()))
                 {
-                    object field = getter(obj);
+                    object? field = getter(obj);
 
                     if (field == null || field is Entity)
                         continue;

@@ -1358,12 +1358,12 @@ Consider Synchronize.");
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class JoinStrictResult<O, N, R>
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public List<O> Extra;
         public List<N> Missing;
         public List<R> Result;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public enum BiSelectOptions
     {

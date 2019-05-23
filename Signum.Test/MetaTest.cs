@@ -118,7 +118,7 @@ namespace Signum.Test
         {
             var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
-                    select new { Author = (ArtistEntity)a.Author ?? (IAuthorEntity)(BandEntity)a.Author }
+                    select new { Author = (ArtistEntity?)a.Author ?? (IAuthorEntity?)(BandEntity?)a.Author }
                     )!;
 
             DirtyMeta meta = (DirtyMeta)dic["Author"]!;

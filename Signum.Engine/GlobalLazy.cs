@@ -12,13 +12,13 @@ namespace Signum.Engine
     {
         static readonly Type[] Empty = new Type[0];
 
-        readonly Type[] types;
+        readonly Type[]? types;
         public Type[] Types
         {
             get { return types ?? Empty; }
         }
 
-        public InvalidateWith(params Type[] types)
+        public InvalidateWith(params Type[]? types)
         {
             if(types != null)
                 foreach (var type in types)

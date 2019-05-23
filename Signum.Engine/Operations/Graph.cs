@@ -65,7 +65,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current?.ToLite()
+                        User = UserHolder.Current!.ToLite()
                     };
 
                     try
@@ -108,7 +108,7 @@ namespace Signum.Engine.Operations
 
                             using (Transaction tr2 = Transaction.ForceNew())
                             {
-                                log.Exception = exLog.ToLite();
+                                log!.Exception = exLog.ToLite();
 
                                 log.SaveLog();
 
@@ -228,7 +228,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current?.ToLite(),
+                        User = UserHolder.Current!.ToLite(),
                         Origin = origin.ToLite(origin.IsNew),
                     };
 
@@ -275,7 +275,7 @@ namespace Signum.Engine.Operations
 
                             using (Transaction tr2 = Transaction.ForceNew())
                             {
-                                log.Exception = exLog.ToLite();
+                                log!.Exception = exLog.ToLite();
 
                                 log.SaveLog();
 
@@ -367,7 +367,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current?.ToLite()
+                        User = UserHolder.Current?.ToLite()!
                     };
 
                     try
@@ -414,7 +414,7 @@ namespace Signum.Engine.Operations
 
                             using (Transaction tr2 = Transaction.ForceNew())
                             {
-                                log.Exception = exLog.ToLite();
+                                log!.Exception = exLog.ToLite();
 
                                 log.SaveLog();
 
@@ -516,7 +516,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current?.ToLite()
+                        User = UserHolder.Current!.ToLite()
                     };
 
                     try
@@ -655,7 +655,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current?.ToLite()
+                        User = UserHolder.Current!.ToLite()
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))

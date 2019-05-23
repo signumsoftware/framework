@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine
 {
@@ -242,12 +243,12 @@ namespace Signum.Engine
                         {
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
-                            bool alterColumnToNotNullableHistory = false;
+                            bool disableEnableSystemVersioning = false;
 
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && 
                             (tab.SystemVersioned == null || 
                             !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) || 
-                            (alterColumnToNotNullableHistory = NullabilityChanges(tab, dif) && (replacements.Interactive ? SafeConsole.Ask($"Table {tab.Name} has nullability changes. Disable and re-enable System Versioning?") : true))) ?
+                            (disableEnableSystemVersioning = NullabilityChanges(tab, dif) && (replacements.Interactive ? SafeConsole.Ask($"Table {tab.Name} has nullability changes. Disable and re-enable System Versioning?") : true))) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : null);
 
                             var dropPeriod = (dif.Period != null &&
@@ -292,6 +293,8 @@ namespace Signum.Engine
                                     )
                             );
 
+                            var columnsHistory = columns != null && disableEnableSystemVersioning ? columns.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.Name)}\b"), m => tab.SystemVersioned!.TableName.Name) : null;/*HACK*/
+
                             var addPeriod = ((tab.SystemVersioned != null &&
                                 (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
@@ -299,7 +302,7 @@ namespace Signum.Engine
                             var addSystemVersioning = (tab.SystemVersioned != null &&
                                 (dif.Period == null || dif.TemporalTableName == null || 
                                 !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
-                                alterColumnToNotNullableHistory) ?
+                                disableEnableSystemVersioning) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a => a.GoBefore = true) : null);
 
 
@@ -320,7 +323,7 @@ namespace Signum.Engine
                                 }
                             }
 
-                            return SqlPreCommand.Combine(Spacing.Simple, rename, disableSystemVersioning, dropPeriod, combinedAddPeriod, columns, addPeriod, addSystemVersioning);
+                            return SqlPreCommand.Combine(Spacing.Simple, rename, disableSystemVersioning, dropPeriod, combinedAddPeriod, columns, columnsHistory, addPeriod, addSystemVersioning);
                         });
 
                 if (tables != null)
@@ -444,13 +447,9 @@ namespace Signum.Engine
 
             bool goBefore = difCol.Name != tabCol.Name;
 
-            bool history = dif.TemporalType != SysTableTemporalType.None && tab.SystemVersioned != null;
-
             return SqlPreCommand.Combine(Spacing.Simple,
                 NotNullUpdate(tab.Name, tabCol, defaultValue, goBefore),
-                SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name),
-                history ? NotNullUpdate(tab.SystemVersioned!.TableName, tabCol, defaultValue, goBefore) : null,
-                history ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name, tab.SystemVersioned!.TableName) : null
+                SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name)
             )!;
         }
 

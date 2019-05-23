@@ -27,7 +27,7 @@ namespace Signum.Engine
 
         public static bool IsVirtualMList(this PropertyRoute pr)
         {
-            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType())?.Equals(pr) ?? false);
+            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType()!)?.Equals(pr) ?? false);
         }
 
         /// <param name="elementType">Use null for every type</param>
@@ -218,7 +218,7 @@ namespace Signum.Engine
                         if (setter == null)
                             setter = CreateSetter(backReference);
 
-                        mlist.ForEach(line => setter(line, e.ToLite()));
+                        mlist.ForEach(line => setter!(line, e.ToLite()));
                         if (onSave == null)
                             mlist.SaveList();
                         else
@@ -302,7 +302,7 @@ namespace Signum.Engine
                 if (setter == null)
                     setter = CreateSetter(backReference);
 
-                mlist.ForEach(line => setter(line, e.ToLite()));
+                mlist.ForEach(line => setter!(line, e.ToLite()));
                 if (onSave == null)
                     mlist.SaveList();
                 else

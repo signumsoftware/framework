@@ -161,14 +161,14 @@ namespace Signum.Utilities
             var currentValue = definitions.TryGetC(type);
 
             if (minimumType != null && !minimumType.IsInterface)
-                return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), new List<KeyValuePair<Type, T?>>());
+                return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType!, baseValue), new List<KeyValuePair<Type, T?>>());
 
             IEnumerable<Type> interfaces = type.GetInterfaces().Where(IsAllowed);
 
             if (type.BaseType != null)
                 interfaces = interfaces.Except(type.BaseType.GetInterfaces());
 
-            return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), interfaces.Select(inter => KVP.Create(inter, TryGetValue(inter))).ToList());
+            return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType!, baseValue), interfaces.Select(inter => KVP.Create(inter, TryGetValue(inter))).ToList());
         }
 
         public void SetDefinition(Type type, T value)

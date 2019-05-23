@@ -984,7 +984,7 @@ namespace Signum.Entities
 
         public void Add(S state, params bool?[] necessary)
         {
-            if (necessary != null && necessary.Length != propertyNames.Length)
+            if (necessary.Length != propertyNames.Length)
                 throw new ArgumentException("The StateValidator {0} for state {1} has {2} values instead of {3}"
                     .FormatWith(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
 

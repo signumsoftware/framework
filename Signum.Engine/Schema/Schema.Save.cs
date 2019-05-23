@@ -751,14 +751,12 @@ namespace Signum.Engine.Maps
             object[] BulkInsertDataRow(Entity entity, object value, int order);
         }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         internal class TableMListCache<T> : IMListCache
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
-            internal TableMList table;
+            internal TableMList table = null!;
 
-            internal Func<string, string> sqlDelete;
-            public Func<Entity, string, DbParameter> DeleteParameter;
+            internal Func<string, string> sqlDelete = null!;
+            public Func<Entity, string, DbParameter> DeleteParameter = null!;
             public ConcurrentDictionary<int, Action<List<Entity>>> deleteCache = new ConcurrentDictionary<int, Action<List<Entity>>>();
 
             Action<List<Entity>> GetDelete(int numEntities)
@@ -779,8 +777,8 @@ namespace Signum.Engine.Maps
                 });
             }
 
-            internal Func<int, string> sqlDeleteExcept;
-            public Func<MListDelete, List<DbParameter>> DeleteExceptParameter;
+            internal Func<int, string> sqlDeleteExcept = null!;
+            public Func<MListDelete, List<DbParameter>> DeleteExceptParameter = null!;
             public ConcurrentDictionary<int, Action<MListDelete>> deleteExceptCache = new ConcurrentDictionary<int, Action<MListDelete>>();
 
             Action<MListDelete> GetDeleteExcept(int numExceptions)
@@ -810,8 +808,8 @@ namespace Signum.Engine.Maps
 
             internal bool hasOrder = false;
             internal bool isEmbeddedEntity = false;
-            internal Func<string, string> sqlUpdate;
-            public Func<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>> UpdateParameters;
+            internal Func<string, string> sqlUpdate = null!;
+            public Func<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>> UpdateParameters = null!;
             public ConcurrentDictionary<int, Action<List<MListUpdate>>> updateCache =
                 new ConcurrentDictionary<int, Action<List<MListUpdate>>>();
 
@@ -853,8 +851,8 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            internal Func<string, bool, string> sqlInsert;
-            public Func<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters;
+            internal Func<string, bool, string> sqlInsert = null!;
+            public Func<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters = null!;
             public ConcurrentDictionary<int, Action<List<MListInsert>>> insertCache =
                 new ConcurrentDictionary<int, Action<List<MListInsert>>>();
 
@@ -912,7 +910,7 @@ namespace Signum.Engine.Maps
                 return InsertParameters(entity, (T)value, order, new Forbidden(null), "").Select(a => a.Value).ToArray();
             }
 
-            public Func<Entity, MList<T>> Getter;
+            public Func<Entity, MList<T>> Getter = null!;
 
             public void RelationalInserts(List<EntityForbidden> entities)
             {
@@ -1375,7 +1373,7 @@ namespace Signum.Engine.Maps
 
         static MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null!));
 
-        Type CheckType(Type type)
+        Type? CheckType(Type? type)
         {
             if (type != null && !ImplementationColumns.ContainsKey(type))
                 throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".FormatWith(type.Name, ImplementationColumns.ToString(kvp => "{0} -> {1}".FormatWith(kvp.Key.Name, kvp.Value.Name), "\r\n")));

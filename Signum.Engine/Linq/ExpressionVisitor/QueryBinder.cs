@@ -1405,10 +1405,11 @@ namespace Signum.Engine.Linq
             if (ExpressionCleaner.HasExpansions(source.Type, m.Method) && source is EntityExpression) //new expansions discovered
             {
                 Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
-                Func<Expression, ParameterInfo?, Expression> replace = (e, pi) =>
+                Func<Expression?, ParameterInfo?, Expression?> replace = (e, pi) =>
                 {
                     if (e == null || e.NodeType == ExpressionType.Quote || e.NodeType == ExpressionType.Lambda || pi != null && pi.HasAttribute<EagerBindingAttribute>())
                         return e;
+
                     ParameterExpression pe = Expression.Parameter(e.Type, "p" + replacements.Count);
                     replacements.Add(pe, e);
                     return pe;
@@ -1546,7 +1547,7 @@ namespace Signum.Engine.Linq
                     BindMemberAccess(Expression.MakeMemberAccess(bin.Right, m.Member)));
             }
 
-            if (source != null && m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member) && source is EntityExpression) //new expansions discovered
+            if (m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member) && source is EntityExpression) //new expansions discovered
             {
                 ParameterExpression parameter = Expression.Parameter(m.Expression.Type, "temp");
                 MemberExpression simple = Expression.MakeMemberAccess(parameter, m.Member);
@@ -1630,7 +1631,7 @@ namespace Signum.Engine.Linq
                                         if (fi == null)
                                             throw new InvalidOperationException("The member {0} of {1} is not accessible on queries".FormatWith(m.Member.Name, ee.Type.TypeName()));
 
-                                        if (fi != null && ReflectionTools.FieldEquals(fi, EntityExpression.IdField))
+                                        if (ReflectionTools.FieldEquals(fi, EntityExpression.IdField))
                                             return ee.ExternalId.UnNullify();
 
                                         Expression result = Completed(ee).GetBinding(fi);
@@ -3550,12 +3551,12 @@ namespace Signum.Engine.Linq
                 colExpression is ImplementedByExpression ||
                 colExpression is ImplementedByAllExpression)
             {
-                var ident = (Entity)c.Value;
+                var ident = (Entity?)c.Value;
 
                 Type type = ident?.Let(a => PrimaryKey.Type(a.GetType()).Nullify()) ?? typeof(object);
 
                 return GetEntityConstant(
-                    ident == null ? Expression.Constant(null, type) : Expression.Constant(ident.Id.Object, type),
+                    Expression.Constant(ident?.Id.Object, type),
                     ident?.GetType());
             }
 
@@ -3564,7 +3565,7 @@ namespace Signum.Engine.Linq
 
             if (colExpression is LiteReferenceExpression colLite)
             {
-                var lite = (Lite<IEntity>)c.Value;
+                var lite = (Lite<IEntity>?)c.Value;
 
                 using (OverrideColExpression(colLite.Reference))
                 {
@@ -3581,12 +3582,12 @@ namespace Signum.Engine.Linq
             return c;
         }
 
-        private Expression GetEntityConstant(Expression id, Type type)
+        private Expression GetEntityConstant(Expression id, Type? type)
         {
             if (colExpression is EntityExpression)
             {
                 if (!id.IsNull() && type != colExpression.Type)
-                    throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(type.TypeName(), colExpression.Type.TypeName()));
+                    throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(type!.TypeName(), colExpression.Type.TypeName()));
 
                 return new EntityExpression(colExpression.Type, new PrimaryKeyExpression(id), null, null, null, null, null, false);
             }
@@ -3596,7 +3597,7 @@ namespace Signum.Engine.Linq
                     new SqlCastExpression(typeof(string), id),
                     new TypeImplementedByAllExpression(new PrimaryKeyExpression(id.IsNull() ?
                         Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()) :
-                        QueryBinder.TypeConstant(type).Nullify())), null);
+                        QueryBinder.TypeConstant(type!).Nullify())), null);
 
             if (colExpression is ImplementedByExpression ib)
             {

@@ -240,8 +240,7 @@ namespace Signum.React.Json
             {
                 var pr = route.Add(pc.PropertyValidator!.PropertyInfo);
 
-                string error = CanReadPropertyRoute?.Invoke(pr);
-
+                string? error = CanReadPropertyRoute?.Invoke(pr);
                 if (error != null)
                     return;
 
@@ -402,7 +401,7 @@ namespace Signum.React.Json
         public static Func<PropertyRoute, string> CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
         {
-            string error = CanWritePropertyRoute?.Invoke(pr);
+            string? error = CanWritePropertyRoute?.Invoke(pr);
             if (error != null)
                 throw new UnauthorizedAccessException(error);
         }
