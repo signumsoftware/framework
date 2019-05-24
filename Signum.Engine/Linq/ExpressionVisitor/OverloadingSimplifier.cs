@@ -460,12 +460,12 @@ namespace Signum.Engine.Linq
             return Expression.Call(m.Object, m.Method, m.Arguments.Zip(m.Method.GetParameters(), (aExp, p) =>
             {
                 if (p.Name == "arg0" || p.Name == "arg1" || p.Name == "arg2")
-                    return CallToString(aExp);
+                    return CallToString(Visit(aExp));
 
                 if (p.Name == "args")
                 {
                     var arr = (NewArrayExpression)aExp;
-                    return Expression.NewArrayInit(typeof(string), arr.Expressions.Select(e => CallToString(e)).ToArray());
+                    return Expression.NewArrayInit(typeof(string), arr.Expressions.Select(e => CallToString(Visit(e))).ToArray());
                 }
 
                 return aExp;
