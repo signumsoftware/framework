@@ -76,7 +76,7 @@ function formatDuration(minutes: number | undefined, token: QueryToken) {
   if (minutes == undefined)
     return "";
 
-  return moment.duration(minutes, "minutes").format("d[d] h[h] m[m] s[s]");
+  return moment.duration(minutes, "minutes").humanize();
 }
 
 export const __init__ = ['workflowActivityMonitorRenderer'];
