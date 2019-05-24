@@ -25,23 +25,25 @@ namespace Signum.Engine.Word
 
             if (adaptSize && AvoidAdaptSize == false)
             {
-                using (var oldBmp = doc.GetBlipBitmap(blip))
-                    bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
+                var size = doc.GetBlipBitmapSize(blip);
+                bitmap = ImageResizer.Resize(bitmap, size.Width, size.Height);
             }
 
             doc.ReplaceBlipContent(blip, bitmap, newImagePartId, imagePartType);
         }
 
-        public static Bitmap GetBlipBitmap(this WordprocessingDocument doc, Blip blip)
+        public static Size GetBlipBitmapSize(this WordprocessingDocument doc, Blip blip)
         {
             var part = doc.MainDocumentPart.GetPartById(blip.Embed);
 
-            return (Bitmap)Bitmap.FromStream(part.GetStream());
+            using (var str = part.GetStream())
+                return Bitmap.FromStream(str).Size;
         }
 
         public static void ReplaceBlipContent(this WordprocessingDocument doc, Blip blip, Bitmap bitmap, string newImagePartId, ImagePartType imagePartType = ImagePartType.Png)
         {
-            doc.MainDocumentPart.DeletePart(blip.Embed);
+            if (doc.MainDocumentPart.Parts.Any(p => p.RelationshipId == blip.Embed))
+                doc.MainDocumentPart.DeletePart(blip.Embed);
             ImagePart img = CreateImagePart(doc, bitmap, newImagePartId, imagePartType);
             blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
         }
@@ -123,8 +125,8 @@ namespace Signum.Engine.Word
             var brush = new SolidBrush(System.Drawing.Color.White);
 
             float scale = maxWidth.HasValue && maxHeight.HasValue ? Math.Min(maxWidth.Value / (float)image.Width, maxHeight.Value / (float)image.Height) :
-                maxWidth.HasValue ? maxHeight.Value / (float)image.Height :
-                maxHeight.HasValue ? maxWidth.Value / (float)image.Width :
+                maxHeight.HasValue ? maxHeight.Value / (float)image.Height :
+                maxWidth.HasValue ? maxWidth.Value / (float)image.Width :
                 throw new ArgumentNullException("maxWidth and maxHeight");
 
             int scaleWidth = (int)(image.Width * scale);
