@@ -84,11 +84,16 @@ namespace Signum.React.Filters
             }
         }
 
-        private bool ExpectsJsonResult(ResourceExecutedContext context)
+        public static Func<ResourceExecutedContext, bool> ExpectsJsonResult = (context) =>
         {
-            return context.ActionDescriptor is ControllerActionDescriptor cad &&
-                !typeof(IActionResult).IsAssignableFrom(cad.MethodInfo.ReturnType);
-        }
+            if (context.ActionDescriptor is ControllerActionDescriptor cad)
+            {
+                return !typeof(IActionResult).IsAssignableFrom(cad.MethodInfo.ReturnType) ||
+                    typeof(FileResult).IsAssignableFrom(cad.MethodInfo.ReturnType) && context.HttpContext.Request.Method != "GET";
+
+            }
+            return false;
+        };
 
         public string ReadAllBody(HttpContext httpContext)
         {
