@@ -78,10 +78,6 @@ declare module "moment" {
   }
 
   function smartNow(this: moment.Moment): moment.Moment;
-
-  interface Duration {
-    format(template?: string, precision?: string, settings?: any): string;
-  }
 }
 
 export function asumeGlobalUtcMode(m: typeof moment, utcMode: boolean) {

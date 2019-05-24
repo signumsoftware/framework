@@ -112,7 +112,7 @@ export function toMomentFormat(format: string | undefined): string | undefined {
 
 //https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
 //https://github.com/jsmreese/moment-duration-format
-export function toMomentDurationFormat(format: string | undefined): string | undefined {
+export function toDurationFormat(format: string | undefined): string | undefined {
 
   if (format == undefined)
     return undefined;
@@ -180,8 +180,18 @@ export function durationToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var dur = moment.duration(val);
-  return dur.format(toMomentDurationFormat(format));
+  var momentDurationFormat = toDurationFormat(format);
+
+  var result = /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(val);
+
+  if (result == undefined)
+    throw new Error("Invalid date");
+
+  var hh = result[1];
+  var mm = result[2];
+  var ss = result[3];
+
+  return (format || "hh:mm:ss").replace("hh", hh).replace("mm", mm).replace("ss", ss);
 }
 
 

@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
 import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -597,17 +597,14 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
 
   const s = vl.state;
 
-  const durationFormat = toMomentDurationFormat(s.formatText);
-
-  const ticksPerMillisecond = 10000;
+  const durationFormat = toDurationFormat(s.formatText);
 
   if (s.ctx.readOnly) {
-    const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {ValueLine.withItemGroup(vl,
           <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.state.valueHtmlAttributes, "numeric")} innerRef={elment => vl.inputElement = elment}>
-            {d && d.format(durationFormat)}
+            {durationToString(s.ctx.value, durationFormat)}
           </FormControlReadonly>
         )}
       </FormGroup>
@@ -664,7 +661,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
   render() {
     const value = this.state.text != undefined ? this.state.text :
-      this.props.value != undefined ? moment.duration(this.props.value).format(this.props.format, { forceLength: true } as any) :
+      this.props.value != undefined ? durationToString(this.props.value, this.props.format) :
         "";
 
     return <input ref={this.props.innerRef}
@@ -697,7 +694,6 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
     }
 
     function normalize(val: string) {
-
       if (!"hh:mm:ss".contains(format))
         throw new Error("not implemented");
 
@@ -707,7 +703,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
     const input = e.currentTarget as HTMLInputElement;
     const result = input.value == undefined || input.value.length == 0 ? null :
-      moment.duration(normalize(fixNumber(input.value))).format("hh:mm:ss", { forceLength: true } as any);
+      normalize(fixNumber(input.value));
     this.setState({ text: undefined });
     if (this.props.value != result)
       this.props.onChange(result);;
