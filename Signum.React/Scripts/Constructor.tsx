@@ -53,7 +53,10 @@ export function construct(type: string | Type<any>, props?: any, pr?: PropertyRo
           if (settings && settings.onConstruct)
             return settings.onConstruct(ctx, props);
 
-          return ctx.defaultConstruct();
+          return ctx.defaultConstruct().then(p => {
+            p && props && Dic.assign(p.entity, props);
+            return p;
+          });
         }).then((p: EntityPack<Entity> | undefined) => {
           if (p == undefined)
             return undefined;
