@@ -10,6 +10,7 @@ import { Modal, Typeahead, UncontrolledTabs, Tab } from '@framework/Components';
 import { TypeContext, EntityTable, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
 import { DynamicViewInspector } from './Designer';
+import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror';
 
 export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }) {
 
@@ -28,6 +29,12 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
             { property: a => a.name, template: sctx => <ValueLine ctx={sctx.subCtx(a => a.name)} onChange={handleChange} /> },
             { property: a => a.type, template: sctx => <ValueLine ctx={sctx.subCtx(a => a.type)} onChange={handleChange} /> },
           ])} />
+      </Tab>
+      <Tab eventKey="locals" title="Locals">
+        <div className="code-container">
+          <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + rootNode.route!.typeReference().name + "Entity>, modules, props) =>"}</pre>
+          <JavascriptCodeMirror code={ctx.value.locals || ""} onChange={newCode => { ctx.value.locals = newCode; handleChange(); }} />
+        </div>
       </Tab>
     </UncontrolledTabs>
   );

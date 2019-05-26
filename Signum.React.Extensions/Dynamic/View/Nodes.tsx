@@ -17,7 +17,7 @@ import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescripti
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
-import { registeredCustomContexts } from '../DynamicViewClient'
+import { registeredCustomContexts, API } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
@@ -35,6 +35,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
+import { useAPI } from '@framework/Hooks';
 
 export interface BaseNode {
   kind: string;
@@ -348,11 +349,29 @@ NodeUtils.register<RenderEntityNode>({
     <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
     <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
     <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={dn.route && dn.route.typeReference().name} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={`({ prop1: "" })`} />
+    <ExtraPropsComponent dn={dn} />
   </div>,
 });
 
+function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
 
+  const typeName = dn.route && dn.route.typeReference().name;
+  const fixedViewName = dn.route && dn.node.viewName && typeof dn.node.viewName == "string" ? dn.node.viewName : undefined;
+  var exampleExpression: string | undefined = undefined;
+
+  if (typeName && fixedViewName) {
+    const viewProps = useAPI(undefined, [typeName, fixedViewName], signal => API.getDynamicViewProps(typeName, fixedViewName));
+    if (viewProps && viewProps.length > 0)
+      exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
+  }
+  else
+    if (typeName && dn.node.viewName)
+      exampleExpression = `({ prop1: "" })`;
+
+  return (
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={exampleExpression} />
+  );
+}
 
 export interface CustomContextNode extends ContainerNode {
   kind: "CustomContext",

@@ -20,6 +20,9 @@ namespace Signum.Entities.Dynamic
         [PreserveOrder]
         public MList<DynamicViewPropEmbedded> Props { get; set; } = new MList<DynamicViewPropEmbedded>();
 
+        [StringLengthValidator(Max = int.MaxValue, MultiLine = true)]
+        public string? Locals { get; set; }
+
         [StringLengthValidator(Min = 3)]
         public string ViewContent { get; set; }
 

@@ -201,6 +201,7 @@ export interface DynamicViewEntity extends Entities.Entity {
   viewName: string;
   entityType: Basics.TypeEntity;
   props: Entities.MList<DynamicViewPropEmbedded>;
+  locals: string | null;
   viewContent: string;
 }
 

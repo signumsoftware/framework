@@ -222,7 +222,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     const typeName = dn.parent!.fixRoute()!.typeReference().name.split(",").map(tn => tn.endsWith("Entity") ? tn : tn + "Entity").join(" | ");
     return (
       <div className="code-container">
-        <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, modules) =>"}</pre>
+        <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, modules, props, locals) =>"}</pre>
         <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() }} />
       </div>
     );
