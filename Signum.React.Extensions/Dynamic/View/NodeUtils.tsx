@@ -235,6 +235,8 @@ export interface DesignerContext {
   getSelectedNode: () => DesignerNode<BaseNode> | undefined;
   setSelectedNode: (newSelectedNode: DesignerNode<BaseNode>) => void;
   props: any;
+  locals: any;
+  localsCode: string | null;
   propTypes: { [name: string]: string /*type*/ };
 }
 
@@ -334,12 +336,27 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 }
 
 
-export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos: Navigator.ViewOverride<ModifiableEntity>[]) {
+export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos: Navigator.ViewOverride<ModifiableEntity>[] }) {
 
-  var result = render(dn, parentCtx);
-  if (result == null)
-    return null;
+  var resultWithErrors: JSX.Element | null | undefined;
 
+  if (dn.context.localsCode) {
+    try {
+      dn.context.locals = asFunction(parentCtx.frame!.entityComponent!, { __code__: dn.context.localsCode }, () => "Locals", dn.context.props, {})(parentCtx);
+    }
+    catch (e) {
+      resultWithErrors = (
+        <div>
+          <div className="alert alert-danger">
+            <strong>Invalid Locals:</strong>
+            <br />
+            {(e as Error).message}
+          </div>
+          {resultWithErrors}
+        </div>
+      );
+    }
+  }
 
   if (dn.context.props) {
 
@@ -348,7 +365,7 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
     var errors = allKeys.map(key => validatePropType(key, dn.context.props[key], dn.context.propTypes[key])).notNull();
 
     if (errors.length)
-      result = (
+      resultWithErrors = (
         <div>
           <div className="alert alert-danger">
             <strong>Invalid Props:</strong>
@@ -356,10 +373,22 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
               {errors.map((e, i) => <li key={i}>{e}</li>)}
             </ul>
           </div>
-          {result}
+          {resultWithErrors}
         </div>
       );
   }
+
+  var result = render(dn, parentCtx);
+  if (result == null)
+    return null;
+
+  if (resultWithErrors)
+    result = (
+      <div>
+        {resultWithErrors}
+        {result}
+      </div>
+    );
 
   const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
   if (vos.length) {
@@ -370,7 +399,6 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
     return result;
   }
 }
-
 
 function validatePropType(propName: string, value: any, typeScriptType: string | undefined) {
 
@@ -462,18 +490,18 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
   );
 }
 
-export function asFunction(thisObject: React.Component<any, any>, expression: Expression<any>, getFieldName: () => string, props: any): (e: TypeContext<ModifiableEntity>) => any {
+export function asFunction(thisObject: React.Component<any, any>, expression: Expression<any>, getFieldName: () => string, props: any, locals: any): (e: TypeContext<ModifiableEntity>) => any {
 
   const code = "ctx => " + expression.__code__;
 
   try {
-    return evalWithScope.call(thisObject, code, globalModules, props);
+    return evalWithScope.call(thisObject, code, globalModules, props, locals);
   } catch (e) {
     throw new Error("Syntax in '" + getFieldName() + "':\r\n" + code + "\r\n" + (e as Error).message);
   }
 }
 
-export function evalWithScope(code: string, modules: any, props: any) {
+export function evalWithScope(code: string, modules: any, props: any, locals: any) {
 
   // Lines
   var ValueLine = Lines.ValueLine;
@@ -508,7 +536,7 @@ export function evaluateUntyped(dn: DesignerNode<BaseNode>, parentCtx: TypeConte
   if (!expressionOrValue.__code__)
     return undefined;
 
-  var f = asFunction(parentCtx.frame!.entityComponent!, expressionOrValue, getFieldName, dn.context.props);
+  var f = asFunction(parentCtx.frame!.entityComponent!, expressionOrValue, getFieldName, dn.context.props, dn.context.locals);
 
   try {
     return f(parentCtx);
@@ -599,6 +627,10 @@ export function isNumberOrStringOrNull(val: any) {
 
 export function isBooleanOrNull(val: any) {
   return val == null || typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or null`;
+}
+
+export function isBooleanOrStringOrNull(val: any) {
+  return val == null || typeof val == "boolean" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or string or null`;
 }
 
 export function isBooleanOrFunctionOrNull(val: any) {

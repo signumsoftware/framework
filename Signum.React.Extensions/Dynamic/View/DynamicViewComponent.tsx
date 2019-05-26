@@ -10,8 +10,7 @@ import { TypeContext } from '@framework/TypeContext'
 import * as Operations from '@framework/Operations'
 import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { BaseNode } from './Nodes'
-import { DesignerContext, DesignerNode } from './NodeUtils'
-import * as NodeUtils from './NodeUtils'
+import { DesignerContext, DesignerNode, RenderWithViewOverrides } from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewTabs } from './DynamicViewTabs'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
@@ -59,14 +58,16 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
     var { ctx, children, initialDynamicView, ...extraProps } = this.props;
 
-    var context = {
+    var context: DesignerContext = {
       onClose: this.handleClose,
       refreshView: () => { this.setState({ selectedNode: this.state.selectedNode.reCreateNode() }); },
       getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
       setSelectedNode: (newNode) => this.setState({ selectedNode: newNode }),
       props: extraProps,
-      propTypes: initialDynamicView.props.toObject(mle => mle.element.name, mle => mle.element.type)
-    } as DesignerContext;
+      propTypes: initialDynamicView.props.toObject(mle => mle.element.name, mle => mle.element.type),
+      locals: {},
+      localsCode: initialDynamicView.locals,
+    };
 
     return DesignerNode.zero(context, ctx.value.Type);
   }
@@ -105,7 +106,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     if (!Navigator.isViewable(DynamicViewEntity)) {
       return (
         <div className="design-content">
-          {NodeUtils.renderWithViewOverrides(rootNode, ctx, vos)}
+          <RenderWithViewOverrides dn={rootNode} parentCtx={ctx} vos={vos} />
         </div>
       );
     }
@@ -122,7 +123,9 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         }
       </div>
       <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-        <AutoFocus disabled={topMostEntity != ctx.value}>{NodeUtils.renderWithViewOverrides(rootNode, ctx, vos)}</AutoFocus>
+        <AutoFocus disabled={topMostEntity != ctx.value}>
+          <RenderWithViewOverrides dn={rootNode} parentCtx={ctx} vos={vos} />
+        </AutoFocus>
       </div>
     </div>);
   }

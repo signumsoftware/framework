@@ -4,7 +4,7 @@ import { classes, Dic } from '@framework/Globals'
 import { Binding } from '@framework/Reflection'
 import { EntityControlMessage } from '@framework/Signum.Entities'
 import { ExpressionOrValueComponent, DesignerModal } from './Designer'
-import { DesignerNode } from './NodeUtils'
+import { DesignerNode, isExpression } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { StyleOptionsExpression, formGroupStyle, formSize } from './StyleOptionsExpression'
 
@@ -71,7 +71,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
         </label>
         <div>
           {val ?
-            <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
+            <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none", color: "blue" }}>{this.getDescription(val)}</pre></a>
             :
             <a href="#" title={EntityControlMessage.Create.niceToString()}
               className="sf-line-button sf-create"
@@ -85,7 +85,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
 
   getDescription(soe: StyleOptionsExpression) {
 
-    var keys = Dic.map(soe as any, (key, value) => key + ":" + value);
+    var keys = Dic.map(soe as any, (key, value) => key + ": " + (isExpression(value) ? value.__code__ : value));
     return keys.join("\n");
   }
 }

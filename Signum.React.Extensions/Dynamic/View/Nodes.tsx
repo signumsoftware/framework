@@ -17,7 +17,7 @@ import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescripti
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
-import { registeredCustomContexts } from '../DynamicViewClient'
+import { registeredCustomContexts, API } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
@@ -35,6 +35,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
+import { useAPI } from '@framework/Hooks';
 
 export interface BaseNode {
   kind: string;
@@ -142,7 +143,8 @@ export interface TabsNode extends ContainerNode {
   field?: string;
   styleOptions?: StyleOptionsExpression;
   id: ExpressionOrValue<string>;
-  defaultEventKey?: string;
+  defaultEventKey?: ExpressionOrValue<string>;
+  hideOnly?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<TabsNode>({
@@ -155,18 +157,22 @@ NodeUtils.register<TabsNode>({
   renderTreeNode: NodeUtils.treeNodeKind,
   renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("Tabs", {
     id: { __code__: cc.ctxName + ".compose(" + toCodeEx(node.id) + ")" } as Expression<string>,
-    defaultActiveKey: node.defaultEventKey
+    defaultActiveKey: node.defaultEventKey,
+    hideOnly: node.hideOnly,
   }, node),
   render: (dn, parentCtx) => {
     return NodeUtils.withChildrensSubCtx(dn, parentCtx, <UncontrolledTabs
       id={parentCtx.getUniqueId(NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
-      defaultEventKey={dn.node.defaultEventKey} />);
+      defaultEventKey={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.defaultEventKey, NodeUtils.isStringOrNull)}
+      hideOnly={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.hideOnly, NodeUtils.isBooleanOrNull)}
+    />);
   },
   renderDesigner: (dn) => (<div>
     <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
     <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.id)} type="string" defaultValue={null} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.defaultEventKey)} type="string" defaultValue={null} allowsExpression={false} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.defaultEventKey)} type="string" defaultValue={null} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.hideOnly)} type="boolean" defaultValue={false} />
   </div>),
 });
 
@@ -348,11 +354,29 @@ NodeUtils.register<RenderEntityNode>({
     <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
     <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
     <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={dn.route && dn.route.typeReference().name} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={`({ prop1: "" })`} />
+    <ExtraPropsComponent dn={dn} />
   </div>,
 });
 
+function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
 
+  const typeName = dn.route && dn.route.typeReference().name;
+  const fixedViewName = dn.route && dn.node.viewName && typeof dn.node.viewName == "string" ? dn.node.viewName : undefined;
+  var exampleExpression: string | undefined = undefined;
+
+  if (typeName && fixedViewName) {
+    const viewProps = useAPI(undefined, [typeName, fixedViewName], signal => API.getDynamicViewProps(typeName, fixedViewName));
+    if (viewProps && viewProps.length > 0)
+      exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
+  }
+  else
+    if (typeName && dn.node.viewName)
+      exampleExpression = `({ prop1: "" })`;
+
+  return (
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={exampleExpression} />
+  );
+}
 
 export interface CustomContextNode extends ContainerNode {
   kind: "CustomContext",
@@ -625,6 +649,7 @@ NodeUtils.register<EntityComboNode>({
 
 export interface EntityDetailNode extends EntityBaseNode, ContainerNode {
   kind: "EntityDetail",
+  avoidFieldSet?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<EntityDetailNode>({
@@ -635,11 +660,20 @@ NodeUtils.register<EntityDetailNode>({
   hasEntity: true,
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
-  renderCode: (node, cc) => cc.elementCode("EntityDetail", cc.getEntityBasePropsEx(node, {})),
-  render: (dn, ctx) => (<EntityDetail {...NodeUtils.getEntityBaseProps(dn, ctx, {})} />),
-  renderDesigner: dn => NodeUtils.designEntityBase(dn, {}),
-});
-
+  renderCode: (node, cc) => cc.elementCode("EntityDetail", {
+    ctx: cc.getEntityBasePropsEx(node, {}),
+    avoidFieldSet: node.avoidFieldSet,
+  }),
+  render: (dn, ctx) => (<EntityDetail
+    avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
+    {...NodeUtils.getEntityBaseProps(dn, ctx, {})} />),
+  renderDesigner: dn =>
+    <div>
+      {NodeUtils.designEntityBase(dn, {})}
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
+    </div> 
+  });
+  
 export interface FileLineNode extends EntityBaseNode {
   kind: "FileLine",
   download?: ExpressionOrValue<DownloadBehaviour>;
@@ -1142,6 +1176,7 @@ export interface SearchControlNode extends BaseNode {
   kind: "SearchControl",
   findOptions?: FindOptionsExpr;
   searchOnLoad?: ExpressionOrValue<boolean>;
+  showContextMenu?: Expression<boolean | string>;
   viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
@@ -1173,6 +1208,7 @@ NodeUtils.register<SearchControlNode>({
   renderCode: (node, cc) => cc.elementCode("SearchControl", {
     findOptions: node.findOptions,
     searchOnLoad: node.searchOnLoad,
+    showContextMenu: node.showContextMenu,
     showHeader: node.showHeader,
     showFilters: node.showFilters,
     showFilterButton: node.showFilterButton,
@@ -1197,6 +1233,7 @@ NodeUtils.register<SearchControlNode>({
     findOptions={toFindOptions(dn, ctx, dn.node.findOptions!)}
     getViewPromise={NodeUtils.toStringFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
+    showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isBooleanOrStringOrNull)}
     showHeader={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showHeader, NodeUtils.isBooleanOrNull)}
     showFilters={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilters, NodeUtils.isBooleanOrNull)}
     showFilterButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
@@ -1225,6 +1262,7 @@ NodeUtils.register<SearchControlNode>({
       {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd && qd.columns["Entity"].type.name} />}
     </FetchQueryDescription>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"\"Basic\""} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilters)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />

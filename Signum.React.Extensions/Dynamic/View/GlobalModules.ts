@@ -13,6 +13,7 @@ import * as AuthClient from '../../Authorization/AuthClient'
 import * as Services from '@framework/Services'
 import * as TreeClient from '../../Tree/TreeClient'
 import * as AutoCompleteConfig from '@framework/Lines/AutoCompleteConfig'
+import * as Hooks from '@framework/Hooks'
 
 
 export const globalModules: any = {
@@ -31,4 +32,5 @@ export const globalModules: any = {
   Services,
   TreeClient,
   AutoCompleteConfig,
+  Hooks,
 };
