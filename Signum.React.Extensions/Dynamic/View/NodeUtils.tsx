@@ -170,7 +170,7 @@ ${childrenString}
       onChange: node.onChange,
       findOptions: node.findOptions,
       getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node, true),
-      getViewPromise: toStringFunctionCode(node.viewName)
+      getViewPromise: toFunctionCode(node.viewName)
     };
 
 
@@ -208,7 +208,7 @@ ${assignments.indent(4)}
 
 }
 
-export function toStringFunction(val: string | undefined | ((e: ModifiableEntity) => string)): undefined | ((e: ModifiableEntity) => string) {
+export function toFunction(val: string | undefined | ((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)): undefined | ((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>) {
   if (!val)
     return undefined;
 
@@ -218,7 +218,7 @@ export function toStringFunction(val: string | undefined | ((e: ModifiableEntity
   return () => val;
 }
 
-export function toStringFunctionCode(val: ExpressionOrValue<string | ((e: ModifiableEntity) => string) | undefined>): Expression<((e: ModifiableEntity) => string)> | undefined {
+export function toFunctionCode(val: ExpressionOrValue<string | ((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>) | undefined>): Expression<((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)> | undefined {
   if (!val)
     return undefined;
 
@@ -769,7 +769,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
     onChange: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onChange, isFunctionOrNull),
     findOptions: dn.node.findOptions && toFindOptions(dn, parentCtx, dn.node.findOptions),
     getComponent: options.avoidGetComponent == true ? undefined : getGetComponent(dn),
-    getViewPromise: toStringFunction(evaluateAndValidate(dn, parentCtx, dn.node, n => n.viewName, isStringOrNull))
+    getViewPromise: toFunction(evaluateAndValidate(dn, parentCtx, dn.node, n => n.viewName, isFunctionOrStringOrNull))
   };
 
   if (options.showAutoComplete)
