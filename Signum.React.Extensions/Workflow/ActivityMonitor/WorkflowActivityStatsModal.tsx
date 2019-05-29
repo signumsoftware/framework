@@ -126,7 +126,7 @@ function formatDuration(duration: number | undefined, unit: string | undefined) 
 
     var unit = WorkflowActivityEntity.memberInfo(a => a.estimatedDuration).unit;
 
-  return <span>{numbro(duration).format("0.00")} {unit} <mark>({moment.duration(duration, "minutes").humanize()})</mark></span>
+  return <span>{numbro(duration).format("0.00")} {unit} <mark>({WorkflowClient.durationFormat(moment.duration(duration, "minutes"))})</mark></span>
 }
 
 

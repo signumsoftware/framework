@@ -4,7 +4,7 @@ import * as moment from 'moment'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
-import { CaseFlow, CaseActivityStats } from '../WorkflowClient'
+import { CaseFlow, CaseActivityStats, durationFormat } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
 import "moment-duration-format"
@@ -195,7 +195,7 @@ function formatDuration(minutes: number | undefined) {
   if (minutes == undefined)
     return "";
 
-  return moment.duration(minutes, "minutes").humanize();
+  return durationFormat(moment.duration(minutes, "minutes"));
 }
 
 export const __init__ = ['caseFlowRenderer'];

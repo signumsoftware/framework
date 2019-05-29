@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Entities.Workflow'
 import { Color, Gradient } from '../../Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
-import { WorkflowActivityStats, WorkflowActivityMonitor } from '../WorkflowClient'
+import { WorkflowActivityStats, WorkflowActivityMonitor, durationFormat } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
@@ -76,7 +76,7 @@ function formatDuration(minutes: number | undefined, token: QueryToken) {
   if (minutes == undefined)
     return "";
 
-  return moment.duration(minutes, "minutes").humanize();
+  return durationFormat(moment.duration(minutes, "minutes"));
 }
 
 export const __init__ = ['workflowActivityMonitorRenderer'];
