@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as moment from 'moment';
 import * as QueryString from 'query-string';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
@@ -549,6 +550,9 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   return viewPromise.promise;
 }
 
+export function durationFormat(d: moment.Duration) {
+  return `${d.days()}d ${d.hours()}h ${d.minutes()}m ${d.seconds()}s`;
+}
 
 export namespace API {
   export function fetchActivityForViewing(caseActivity: Lite<CaseActivityEntity>): Promise<CaseEntityPack> {
