@@ -318,7 +318,7 @@ NodeUtils.register<ImageNode>({
 export interface RenderEntityNode extends ContainerNode {
   kind: "RenderEntity";
   field?: string;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
   styleOptions?: StyleOptionsExpression;
   extraProps?: Expression<{}>;
 }
@@ -335,7 +335,7 @@ NodeUtils.register<RenderEntityNode>({
   renderCode: (node, cc) => cc.elementCode("RenderEntity", {
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     getComponent: cc.getGetComponentEx(node, true),
-    getViewName: NodeUtils.toStringFunctionCode(node.viewName),
+    getViewName: NodeUtils.toFunctionCode(node.viewName),
   }),
   render: (dn, ctx) => {
     var styleOptions = toStyleOptions(dn, ctx, dn.node.styleOptions);
@@ -345,7 +345,7 @@ NodeUtils.register<RenderEntityNode>({
       <RenderEntity
         ctx={sctx}
         getComponent={NodeUtils.getGetComponent(dn)}
-        getViewPromise={NodeUtils.toStringFunction(NodeUtils.evaluateAndValidate(dn, sctx, dn.node, n => n.viewName, NodeUtils.isFunctionOrStringOrNull))}
+        getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, sctx, dn.node, n => n.viewName, NodeUtils.isFunctionOrStringOrNull))}
         extraProps={NodeUtils.evaluateAndValidate(dn, sctx, dn.node, n => n.extraProps, NodeUtils.isObjectOrNull)}
       />
     );
@@ -607,7 +607,7 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
   onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>;
   viewOnCreate?: ExpressionOrValue<boolean>;
   findOptions?: FindOptionsExpr;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
 }
 
 export interface EntityLineNode extends EntityBaseNode {
@@ -1177,7 +1177,7 @@ export interface SearchControlNode extends BaseNode {
   findOptions?: FindOptionsExpr;
   searchOnLoad?: ExpressionOrValue<boolean>;
   showContextMenu?: Expression<boolean | string>;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
   showFilterButton?: ExpressionOrValue<boolean>;
@@ -1209,6 +1209,7 @@ NodeUtils.register<SearchControlNode>({
     findOptions: node.findOptions,
     searchOnLoad: node.searchOnLoad,
     showContextMenu: node.showContextMenu,
+    getViewPromise: NodeUtils.toFunctionCode(node.viewName),
     showHeader: node.showHeader,
     showFilters: node.showFilters,
     showFilterButton: node.showFilterButton,
@@ -1231,7 +1232,7 @@ NodeUtils.register<SearchControlNode>({
   }),
   render: (dn, ctx) => <SearchControl
     findOptions={toFindOptions(dn, ctx, dn.node.findOptions!)}
-    getViewPromise={NodeUtils.toStringFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isStringOrNull))}
+    getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isFunctionOrStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
     showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isBooleanOrStringOrNull)}
     showHeader={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showHeader, NodeUtils.isBooleanOrNull)}
