@@ -61,7 +61,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
     </Modal>;
   }
 
-  static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
+  static chooseElement<T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
 
     const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
 

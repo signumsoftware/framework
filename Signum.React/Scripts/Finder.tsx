@@ -256,7 +256,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
     }
   };
 
-  return Dic.simplify(result);
+  return Dic.simplify(result)!;
 }
 
 export function mergeColumns(columnDescriptions: ColumnDescription[], mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
