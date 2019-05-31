@@ -70,7 +70,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
       <div className="sf-repater-elements">
         {
           mlistItemContext(ctx).map((mlec, i) =>
-            (<EntityRepeaterElement key={i}
+            (<EntityRepeaterElement key={this.keyGenerator.getKey(mlec.value)}
               onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
               ctx={mlec}
               draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
@@ -84,7 +84,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
             <a href="#" title={TitleManager.useTitle ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={this.handleCreateClick}>
-              <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
+              {EntityBase.createIcon}&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
             </a>)
         }
       </div>
@@ -119,7 +119,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
               {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={this.props.onRemove}
                 title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-                <FontAwesomeIcon icon="times" />
+                {EntityBase.removeIcon}
               </a>}
               &nbsp;
             {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
@@ -127,7 +127,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                 onDragStart={drag.onDragStart}
                 onDragEnd={drag.onDragEnd}
                 title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
-                <FontAwesomeIcon icon="bars" />
+                {EntityBase.moveIcon}
               </a>}
               {this.props.title && '\xa0'}
               {this.props.title}

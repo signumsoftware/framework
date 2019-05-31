@@ -21,7 +21,7 @@ namespace Signum.Utilities
         public static CultureInfo? DefaultCulture = null;
 
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>>? toStringFactory = null)
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
                 ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
@@ -30,7 +30,7 @@ namespace Signum.Utilities
         }
 
         public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>>? toStringFactory = null)
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -40,7 +40,7 @@ namespace Signum.Utilities
         }
 
         public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>>? toStringFactory = null)
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
         {
             var defEncoding = encoding ?? DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -100,7 +100,7 @@ namespace Signum.Utilities
         }
 
 
-        static string? EncodeCsv(string p, CultureInfo culture)
+        static string? EncodeCsv(string? p, CultureInfo culture)
         {
             if (p == null)
                 return null;
@@ -114,7 +114,7 @@ namespace Signum.Utilities
             return p;
         }
 
-        private static Func<object, string> GetToString<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>>? toStringFactory)
+        private static Func<object?, string?> GetToString<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory)
         {
             if (toStringFactory != null)
             {
@@ -127,7 +127,7 @@ namespace Signum.Utilities
             return obj => ConvertToString(obj, column.Format, culture);
         }
 
-        static string ConvertToString(object obj, string? format, CultureInfo culture)
+        static string ConvertToString(object? obj, string? format, CultureInfo culture)
         {
             if (obj == null)
                 return "";
@@ -335,7 +335,7 @@ namespace Signum.Utilities
             return s;
         }
 
-        static object? ConvertTo(string s, Type type, CultureInfo culture, string format)
+        static object? ConvertTo(string s, Type type, CultureInfo culture, string? format)
         {
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
@@ -372,14 +372,14 @@ namespace Signum.Utilities
     {
         public readonly int Index;
         public readonly MemberEntry<T> MemberEntry;
-        public readonly string Format;
+        public readonly string? Format;
 
         public MemberInfo MemberInfo
         {
             get { return this.MemberEntry.MemberInfo; }
         }
 
-        internal CsvColumnInfo(int index, MemberEntry<T> memberEntry, string format)
+        internal CsvColumnInfo(int index, MemberEntry<T> memberEntry, string? format)
         {
             this.Index = index;
             this.MemberEntry = memberEntry;

@@ -19,6 +19,7 @@ namespace Signum.Test.Environment
         [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
+        [ForceNullable]
         [ImplementedByAll]
         public IEntity Target { get; set; }
 
@@ -296,11 +297,12 @@ namespace Signum.Test.Environment
 
         public SongEmbedded? BonusTrack { get; set; }
 
+        [ForceNullable]
         public LabelEntity Label { get; set; }
 
         public AlbumState State { get; set; }
 
-        string ISecretContainer.Secret { get; set; }
+        string? ISecretContainer.Secret { get; set; }
 
         static Expression<Func<AlbumEntity, string>> ToStringExpression = a => a.Name;
         [ExpressionField]
@@ -312,7 +314,7 @@ namespace Signum.Test.Environment
 
     public interface ISecretContainer
     {
-        string Secret { get; set; }
+        string? Secret { get; set; }
     }
 
     public enum AlbumState
@@ -366,11 +368,12 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class AwardNominationEntity : Entity, ICanBeOrdered
     {
+        [NotNullValidator(Disabled = true)]
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
         public Lite<IAuthorEntity> Author { get; set; }
 
         [ForceNullable]
-        [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
+        [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity)), NotNullValidator(Disabled = true)]
         public Lite<AwardEntity> Award { get; set; }
 
         public int Year { get; set; }
@@ -457,7 +460,7 @@ END");
         [StringLengthValidator(Max = 100)]
         public string Name { get; set; }
 
-        public Lite<FolderEntity> Parent { get; set; }
+        public Lite<FolderEntity>? Parent { get; set; }
 
         static Expression<Func<FolderEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]

@@ -88,14 +88,16 @@ namespace Signum.Entities
         
     }
 
-    public static class NotNullaValidatorExtensions
+    public static class NotNullValidatorExtensions
     {
-        public static string? IsSetOnlyWhen(this (PropertyInfo pi, object nullableValue) tuple, bool shouldBeSet)
+        public static string? IsSetOnlyWhen(this (PropertyInfo pi, object? nullableValue) tuple, bool shouldBeSet)
         {
-            if (tuple.nullableValue == null && shouldBeSet)
+            var isNull = tuple.nullableValue == null || tuple.nullableValue is string s && string.IsNullOrEmpty(s);
+
+            if (isNull && shouldBeSet)
                 return ValidationMessage._0IsNotSet.NiceToString(tuple.pi.NiceName());
 
-            else if (tuple.nullableValue != null && !shouldBeSet)
+            else if (!isNull && !shouldBeSet)
                 return ValidationMessage._0ShouldBeNull.NiceToString(tuple.pi.NiceName());
 
             return null;
@@ -846,6 +848,33 @@ namespace Signum.Entities
         }
     }
 
+    public class TimeOfDayValidatorAttribute : ValidatorAttribute
+    {
+        public TimeOfDayValidatorAttribute()
+        {
+        }
+
+        protected override string? OverrideError(object? value)
+        {
+            if (value == null)
+                return null;
+
+            var prec = (TimeSpan)value;
+            if (prec.Days > 0)
+                return "Days not allowed in {0}";
+
+            return null;
+        }
+       
+        public override string HelpMessage
+        {
+            get
+            {
+                return ValidationMessage.IsATimeOfTheDay.NiceToString();
+            }
+        }
+    }
+
     public class StringCaseValidatorAttribute : ValidatorAttribute
     {
         private StringCase textCase;
@@ -955,7 +984,7 @@ namespace Signum.Entities
 
         public void Add(S state, params bool?[] necessary)
         {
-            if (necessary != null && necessary.Length != propertyNames.Length)
+            if (necessary.Length != propertyNames.Length)
                 throw new ArgumentException("The StateValidator {0} for state {1} has {2} values instead of {3}"
                     .FormatWith(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
 
@@ -1177,5 +1206,6 @@ namespace Signum.Entities
         _AtLeastOneValueIsNeeded,
         PowerOf,
         BeAString,
+        IsATimeOfTheDay,
     }
 }

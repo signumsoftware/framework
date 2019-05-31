@@ -15,6 +15,8 @@ export interface EntityComboProps extends EntityBaseProps {
   data?: Lite<Entity>[];
   labelTextWithData?: (data: Lite<Entity>[] | undefined | null) => React.ReactChild;
   refreshKey?: string;
+  initiallyFocused?: boolean;
+  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
@@ -25,6 +27,16 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     state.view = false;
     state.viewOnCreate = true;
     state.find = false;
+  }
+
+  componentDidMount() {
+    if (this.props.initiallyFocused)
+      setTimeout(() => {
+        let select = this.entityComboSelect && this.entityComboSelect.select;
+        if (select) {
+          select.focus();
+        }
+      }, 0);
   }
 
   entityComboSelect?: EntityComboSelect | null;
@@ -62,6 +74,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
               onDataLoaded={s.labelTextWithData == null ? undefined : () => this.forceUpdate()}
               mandatoryClass={this.mandatoryClass}
               refreshKey={s.refreshKey}
+              selectHtmlAttributes={s.selectHtmlAttributes}
             />
             {EntityBase.hasChildrens(buttons) ? buttons : undefined}
           </div>
@@ -105,6 +118,7 @@ export interface EntityComboSelectProps {
   mandatoryClass: string | null; 
   onDataLoaded?: (data: Lite<Entity>[] | undefined) => void;
   refreshKey?: string;
+  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
 }
 
 //Extracted to another component
@@ -141,6 +155,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     return Finder.findOptionsPath(fo);
   }
 
+  select?: HTMLSelectElement | null;
+
   render() {
 
     const lite = this.getLite();
@@ -151,7 +167,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
       return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(ctx.value)}</FormControlReadonly>;
 
     return (
-      <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly} >
+      <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""}
+        disabled={ctx.readOnly} {...this.props.selectHtmlAttributes} ref={s => this.select = s} >
         {this.renderOptions()}
       </select>
     );

@@ -5,6 +5,7 @@ import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity }
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
+import { AggregateType } from './FindOptions';
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
@@ -111,12 +112,12 @@ export function toMomentFormat(format: string | undefined): string | undefined {
 
 //https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
 //https://github.com/jsmreese/moment-duration-format
-export function toMomentDurationFormat(format: string | undefined): string | undefined {
+export function toDurationFormat(format: string | undefined): string | undefined {
 
   if (format == undefined)
     return undefined;
 
-  return format.replace("\:", ":");
+  return format.replace("\\:", ":");
 }
 
 export function toNumbroFormat(format: string | undefined) {
@@ -179,8 +180,18 @@ export function durationToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var dur = moment.duration(val);
-  return dur.format(toMomentDurationFormat(format));
+  var momentDurationFormat = toDurationFormat(format);
+
+  var result = /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(val);
+
+  if (result == undefined)
+    throw new Error("Invalid date");
+
+  var hh = result[1];
+  var mm = result[2];
+  var ss = result[3];
+
+  return (format || "hh:mm:ss").replace("hh", hh).replace("mm", mm).replace("ss", ss);
 }
 
 
@@ -843,8 +854,8 @@ function cloneIfNeeded(original: any, pr: PropertyRoute) {
   if (tr.isCollection)
     return cloneCollection(original, pr);
 
-  if (original == null)
-    return null;
+  if (original === null || original === undefined)
+    return original;
 
   if (tr.isEmbedded)
     return clone(original, pr);
@@ -1050,6 +1061,42 @@ export class QueryTokenString<T> {
   any<S = ArrayElement<T>>(): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + ".Any");
   }
+
+  all<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".All");
+  }
+
+  anyNo<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".AnyNo");
+  }
+
+  noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".NoOne");
+  }
+
+  element<S = ArrayElement<T>>(index = 1): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
+  }
+
+  count(): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count");
+  }
+
+  min(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Min");
+  }
+
+  max(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Max");
+  }
+
+  sum(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Sum");
+  }
+
+  average(): QueryTokenString<T> {
+    return new QueryTokenString<T>(this.token + ".Average");
+  }
 }
 
 type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveMListElement<ElementType> : never;
@@ -1224,7 +1271,9 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
   }
 
-
+  static parseFull(fullPropertyRoute: string): PropertyRoute {
+    return PropertyRoute.parse(fullPropertyRoute.after("(").before(")."), fullPropertyRoute.after(")."));
+  }
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     let result = PropertyRoute.root(rootType);

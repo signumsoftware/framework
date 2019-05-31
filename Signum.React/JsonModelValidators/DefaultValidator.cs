@@ -103,7 +103,7 @@ namespace Signum.React
         /// <param name="model">The model object.</param>
         /// <param name="alwaysValidateAtTopLevel">If <c>true</c>, applies validation rules even if the top-level value is <c>null</c>.</param>
         /// <returns><c>true</c> if the object is valid, otherwise <c>false</c>.</returns>
-        public virtual bool Validate(ModelMetadata? metadata, string key, object model, bool alwaysValidateAtTopLevel)
+        public virtual bool Validate(ModelMetadata? metadata, string key, object? model, bool alwaysValidateAtTopLevel)
         {
             if (model == null && key != null && !alwaysValidateAtTopLevel)
             {
@@ -116,7 +116,7 @@ namespace Signum.React
                 return true;
             }
 
-            return Visit(metadata, key, model);
+            return Visit(metadata, key!, model!);
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace Signum.React
             }
         }
 
-        protected virtual ValidationStateEntry? GetValidationEntry(object model)
+        protected virtual ValidationStateEntry? GetValidationEntry(object? model)
         {
             if (model == null || ValidationState == null)
                 return null;

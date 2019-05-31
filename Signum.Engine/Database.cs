@@ -1195,6 +1195,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
 
+            //return Database.Query<E>().Where(e => e.Is(lite));
+
             return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.EntityType).Invoke(lite);
         }
 
@@ -1284,7 +1286,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     int rows;
                     using (Schema.Current.OnPreUnsafeDelete<T>(query))
-                        rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar());
+                        rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }
@@ -1307,7 +1309,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     int rows;
                     using (Schema.Current.OnPreUnsafeMListDelete<E>(mlistQuery, mlistQuery.Select(mle => mle.Parent)))
-                        rows = DbQueryProvider.Single.Delete(mlistQuery, sql => (int)sql.ExecuteScalar());
+                        rows = DbQueryProvider.Single.Delete(mlistQuery, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }
@@ -1329,7 +1331,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
                 using (Transaction tr = new Transaction())
                 {
-                    int rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }
@@ -1429,7 +1431,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     int rows;
                     using (Schema.Current.OnPreUnsafeUpdate(update))
-                        rows = DbQueryProvider.Single.Update(update, sql => (int)sql.ExecuteScalar());
+                        rows = DbQueryProvider.Single.Update(update, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }
@@ -1483,7 +1485,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.Table(typeof(E));
-                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }
@@ -1516,7 +1518,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     constructor = (Expression<Func<T, MListElement<E, V>>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c => c.Parent));
                     var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }
@@ -1542,7 +1544,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.View(typeof(E));
-                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar()!);
 
                     return tr.Commit(rows);
                 }

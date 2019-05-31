@@ -26,7 +26,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   tag?: string | {};
   searchOnLoad?: boolean;
   allowSelection?: boolean
-  showContextMenu?: boolean | "Basic";
+  showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
   showHeader?: boolean | "PinnedFilters";
@@ -48,7 +48,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   throwIfNotFindable?: boolean;
   refreshKey?: string | number;
   enableAutoFocus?: boolean;
-  simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onSelectionChanged?: (entity: ResultRow[]) => void;
@@ -199,7 +199,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
 
           allowSelection={p.allowSelection != null ? p.allowSelection : true}
-          showContextMenu={p.showContextMenu != null ? p.showContextMenu : true}
+          showContextMenu={p.showContextMenu || qs && qs.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
           hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
           hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
           showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
@@ -228,6 +228,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
 export interface ISimpleFilterBuilder {
   getFilters(): FilterOption[];
+  onDataChanged?(): void;
 }
 
 

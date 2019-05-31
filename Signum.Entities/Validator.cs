@@ -47,7 +47,7 @@ namespace Signum.Entities
                 GenerateType(typeof(T).BaseType);
 
             var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                       where !Attribute.IsDefined(pi, typeof(HiddenPropertyAttribute))
+                       where !pi.HasAttribute<HiddenPropertyAttribute>() && !pi.HasAttribute<ExpressionFieldAttribute>() 
                        select KVP.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
 
             validators.SetDefinition(typeof(T), dic);
@@ -61,7 +61,7 @@ namespace Signum.Entities
 
             var dic = validators.GetDefinition(typeof(T))!;
 
-            PropertyValidator<T>? result = (PropertyValidator<T>?)dic?.TryGetC(pi.Name);
+            PropertyValidator<T>? result = (PropertyValidator<T>?)dic.TryGetC(pi.Name);
 
             if (result == null)
             {
@@ -165,7 +165,7 @@ namespace Signum.Entities
             this.Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
             
             var nullable = pi.GetCustomAttribute<NullableAttribute>();
-            if (nullable != null && nullable.IsNullableMain == false && this.Validators.Any(v => v is ValidatorAttribute))
+            if (nullable != null && nullable.IsNullableMain == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
                 this.Validators.Add(new NotNullValidatorAttribute());
 
             this.GetValue = ReflectionTools.CreateGetter<T>(pi)!;

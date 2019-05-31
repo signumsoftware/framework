@@ -47,7 +47,7 @@ namespace Signum.Entities.Reflection
             if ((x == null) != (y == null))
                 return false;
 
-            if (x.GetType() != y.GetType())
+            if (x!.GetType() != y!.GetType())
                 return false;
 
             foreach (var p in Properties.Values)
@@ -120,7 +120,7 @@ namespace Signum.Entities.Reflection
             if ((x == null) != (y == null))
                 return false;
 
-            if (x.GetType() != y.GetType())
+            if (x!.GetType() != y!.GetType())
                 return false;
 
             foreach (var p in Properties.Values)
@@ -183,7 +183,7 @@ namespace Signum.Entities.Reflection
             if ((x == null) != (y == null))
                 return false;
 
-            if (x.Count != y.Count)
+            if (x!.Count != y!.Count)
                 return false;
 
             for (int i = 0; i < x.Count; i++)
@@ -229,7 +229,7 @@ namespace Signum.Entities.Reflection
             if ((mx == null) != (my == null))
                 return false;
 
-            if (mx.Count != my.Count)
+            if (mx!.Count != my!.Count)
                 return false;
 
             var dic = mx.GroupToDictionary(x => ElementComparer.GetHashCode(x));

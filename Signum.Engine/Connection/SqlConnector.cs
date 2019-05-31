@@ -484,23 +484,23 @@ namespace Signum.Engine
 
         public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
 
-        public override SqlPreCommand ShrinkDatabase(string schemaName)
+        public override SqlPreCommand ShrinkDatabase(string databaseName)
         {
             return new[]
             {
                 this.Version == SqlServerVersion.SqlServer2005 ?
-                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(schemaName)):
+                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(databaseName)):
                     new []
                     {
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".FormatWith(schemaName)),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".FormatWith(databaseName)),
                         new[]{
                             new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
                             new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
                             new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
                         }.Combine(Spacing.Simple)!.PlainSqlCommand(),
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(schemaName)),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(databaseName)),
                     }.Combine(Spacing.Simple),
-                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(schemaName))
+                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(databaseName))
             }.Combine(Spacing.Simple)!;
         }
 
@@ -713,9 +713,9 @@ deallocate cur";
             return "use " + databaseName + "\r\n" + script;
         }
 
-        internal static SqlPreCommand ShrinkDatabase(string schemaName)
+        internal static SqlPreCommand ShrinkDatabase(string databaseName)
         {
-            return Connector.Current.ShrinkDatabase(schemaName);
+            return Connector.Current.ShrinkDatabase(databaseName);
 
         }
     }

@@ -872,7 +872,7 @@ export module Dic {
     return akeys.every(k => equals((objA as any)[k], (objB as any)[k], deep, depth + 1, visited));
   }
 
-  export function assign<O extends P, P>(obj: O, other: P) {
+  export function assign<O extends P, P extends {}>(obj: O, other: P | undefined) {
     if (!other)
       return;
 
@@ -954,7 +954,7 @@ export module Dic {
     dic[key] = value;
   }
 
-  export function simplify<T>(a: T): T {
+  export function simplify<T extends {}>(a: T | undefined): T | undefined{
     if (a == null)
       return a;
 
@@ -1083,5 +1083,18 @@ export module DomUtils {
     }
 
     return element;
+  }
+}
+
+export class KeyGenerator {
+  map = new Map<object, number>();
+  maxIndex = 0;
+  getKey(o: object) {
+    var result = this.map.get(o);
+    if (result == undefined) {
+      result = this.maxIndex++;
+      this.map.set(o, result);
+    }
+    return result;
   }
 }

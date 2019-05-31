@@ -458,12 +458,12 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-        public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object?>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);
         }
 
-        public static string NicePropertyName<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static string NicePropertyName<T>(this T entity, Expression<Func<T, object?>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property).NiceName();
         }

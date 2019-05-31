@@ -67,7 +67,7 @@ namespace Signum.Utilities.ExpressionTrees
                 }
                 this.hasDependencies |= saveHasDependencies;
             }
-            return expression;
+            return expression!;
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)

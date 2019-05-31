@@ -35,6 +35,13 @@ export interface EntityBaseProps extends LineBaseProps {
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseProps> extends LineBase<T, S>
 {
+
+  static createIcon = <FontAwesomeIcon icon="plus"  />;
+  static findIcon = <FontAwesomeIcon icon="search" />;
+  static removeIcon = <FontAwesomeIcon icon="times" />;
+  static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
+  static moveIcon = <FontAwesomeIcon icon="bars" />;
+
   static hasChildrens(element: React.ReactElement<any>) {
     return element.props.children && React.Children.toArray(element.props.children).length;
   }
@@ -178,7 +185,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleViewClick}
         title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
-        <FontAwesomeIcon icon="arrow-right" />
+        {EntityBase.viewIcon}
       </a>
     );
   }
@@ -201,19 +208,20 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
   defaultCreate(pr: PropertyRoute): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
     return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.getViewPromise, false))
-      .then(typeName => typeName ? Constructor.construct(typeName, pr) : undefined)
-      .then(pack => {
-        if (!pack)
+      .then(typeName => {
+        if (!typeName)
           return Promise.resolve(undefined);
 
         var fo = this.state.findOptions;
         if (!fo || !fo.filterOptions)
-          return pack.entity as Entity;
+          return Constructor.construct(typeName, undefined, pr);
 
         return Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], false, qd))
-          .then(filters => Finder.setFilters(pack!.entity as Entity, filters));
-      });
+          .then(filters => Finder.getPropsFromFilters(typeName, filters))
+          .then(props => Constructor.construct(typeName, props, pr));
+      })
+      .then(a => a && a.entity);
   }
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {
@@ -254,7 +262,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleCreateClick}
         title={TitleManager.useTitle ? createMessage || EntityControlMessage.Create.niceToString() : undefined}>
-        <FontAwesomeIcon icon="plus" className="sf-create" />
+        {EntityBase.createIcon}
       </a>
     );
   }
@@ -301,7 +309,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleFindClick}
         title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
-        <FontAwesomeIcon icon="search" />
+        {EntityBase.findIcon}
       </a>
     );
   }
@@ -327,7 +335,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
         title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-        <FontAwesomeIcon icon="times" />
+        {EntityBase.removeIcon}
       </a>
     );
   }

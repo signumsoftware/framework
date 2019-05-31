@@ -213,6 +213,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         innerRef={b => innerRef = b}
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
+        style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}>
         {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}

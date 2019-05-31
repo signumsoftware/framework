@@ -54,7 +54,7 @@ namespace Signum.Engine
                 if (parent == null)
                     throw new ArgumentNullException(nameof(parent));
 
-                if (parent != null && parent.IsRolledback != null)
+                if (parent.IsRolledback != null)
                     throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\r\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
 
                 this.parent = parent;

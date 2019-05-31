@@ -44,23 +44,25 @@ export class FormGroup extends React.Component<FormGroupProps> {
     );
 
     const formGroupClasses = classes(this.props.ctx.formGroupClass, this.props.ctx.formGroupStyle == "LabelColumns" ? "row" : undefined, errorClass);
-    return <div
-      title={ctx.titleLabels && typeof labelText == "string" ? labelText : undefined}
-      {...this.props.htmlAttributes}
-      className={addClass(this.props.htmlAttributes, formGroupClasses)}
-      {...errorAtts}>
-      {ctx.formGroupStyle != "BasicDown" && label}
-      {
-        ctx.formGroupStyle != "LabelColumns" ? this.props.children :
-          (
-            <div className={this.props.ctx.valueColumnsCss} >
-              {this.props.children}
-              {this.props.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text text-muted">{this.props.helpText}</small>}
-            </div>
-          )
-      }
-      {ctx.formGroupStyle == "BasicDown" && label}
-      {this.props.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text text-muted">{this.props.helpText}</small>}
-    </div>;
+    return (
+      <div
+        title={ctx.titleLabels && typeof labelText == "string" ? labelText : undefined}
+        {...this.props.htmlAttributes}
+        className={addClass(this.props.htmlAttributes, formGroupClasses)}
+        {...errorAtts}>
+        {ctx.formGroupStyle != "BasicDown" && label}
+        {
+          ctx.formGroupStyle != "LabelColumns" ? this.props.children :
+            (
+              <div className={this.props.ctx.valueColumnsCss} >
+                {this.props.children}
+                {this.props.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text text-muted">{this.props.helpText}</small>}
+              </div>
+            )
+        }
+        {ctx.formGroupStyle == "BasicDown" && label}
+        {this.props.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text text-muted">{this.props.helpText}</small>}
+      </div>
+    );
   }
 }

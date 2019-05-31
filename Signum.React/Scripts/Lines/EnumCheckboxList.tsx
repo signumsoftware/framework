@@ -103,7 +103,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
     return (
       <div className="sf-checkbox-elements" style={this.getColumnStyle()}>
         {data.map((val, i) =>
-          <label className="sf-checkbox-element" key={i}>
+          <label className="sf-checkbox-element" key={val}>
             <input type="checkbox"
               checked={this.state.ctx.value.some(mle => mle.element == val)}
               disabled={this.state.ctx.readOnly}

@@ -2,17 +2,19 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../Modals';
 import { FindOptions, FindMode, ResultRow, ModalFindOptions } from '../FindOptions'
-import { getQueryNiceName } from '../Reflection'
+import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps } from './SearchControl'
 import { Modal } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
 import { AutoFocus } from '../Components/AutoFocus';
+import { SearchMessage } from '../Signum.Entities';
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
   findOptions: FindOptions;
   findMode: FindMode;
   isMany: boolean;
-  title?: string;
+  title?: React.ReactNode;
+  message?: React.ReactNode;
   searchControlProps?: Partial<SearchControlProps>;
 }
 
@@ -86,11 +88,18 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
           onOk={this.props.findMode == "Find" ? this.handleOkClicked : undefined}
           onCancel={this.props.findMode == "Find" ? this.handleCancelClicked : undefined}
           okDisabled={!okEnabled}>
-          <span className="sf-entity-title"> {this.props.title}</span>
+          <span className="sf-entity-title">
+            {this.props.title}
           &nbsp;
-                    <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
+          </span>
+          <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
             <FontAwesomeIcon icon="external-link-alt" />
           </a>
+          {this.props.message && <>
+            <br />
+            <small className="sf-type-nice-name text-muted"> {this.props.message}</small>
+          </>
+          }
         </ModalHeaderButtons>
         <div className="modal-body">
           <SearchControl
@@ -119,6 +128,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
       findMode={"Find"}
       isMany={false}
       title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+      message={modalOptions && modalOptions.message || defaultSelectMessage(findOptions.queryName, false)}
       searchControlProps={modalOptions && modalOptions.searchControlProps}
     />)
       .then(a => a ? a[0] : undefined);
@@ -130,6 +140,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
       findMode={"Find"}
       isMany={true}
       title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+      message={modalOptions && modalOptions.message || defaultSelectMessage(findOptions.queryName, true)}
       searchControlProps={modalOptions && modalOptions.searchControlProps}
     />);
   }
@@ -140,7 +151,23 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
       findMode={"Explore"}
       isMany={true}
       title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+      message={modalOptions && modalOptions.message}
       searchControlProps={modalOptions && modalOptions.searchControlProps}
     />);
+  }
+}
+
+export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean) {
+
+  var type = queryName instanceof QueryKey ? null : getTypeInfo(queryName);
+
+  if (plural) {
+    return type ?
+      SearchMessage.PleaseSelectOneOrMore0_G.niceToString().forGenderAndNumber(type.gender, 2).formatWith(type.nicePluralName) :
+      SearchMessage.PleaseSelectOneOrSeveralEntities.niceToString();
+  } else {
+    return type ?
+      SearchMessage.PleaseSelectA0_G.niceToString().forGenderAndNumber(type.gender, 2).formatWith(type.niceName) :
+      SearchMessage.PleaseSelectAnEntity.niceToString();
   }
 }

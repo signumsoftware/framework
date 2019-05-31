@@ -216,9 +216,19 @@ namespace Signum.Entities
         [NonSerialized, Ignore]
         ModifiableEntity? parentEntity;
 
-        public ModifiableEntity? GetParentEntity()
+        public T? TryGetParentEntity<T>()
+            where T: ModifiableEntity
         {
-            return parentEntity;
+            return parentEntity as T;
+        }
+
+        public T GetParentEntity<T>()
+            where T : ModifiableEntity
+        {
+            if (parentEntity == null)
+                throw new InvalidOperationException("parentEntity is null");
+
+            return (T)parentEntity;
         }
 
         private void SetParentEntity(ModifiableEntity? p)
@@ -255,7 +265,7 @@ namespace Signum.Entities
 
         void NotifyPrivate(string propertyName)
         {
-            var parent = this.GetParentEntity();
+            var parent = this.parentEntity;
             if (parent != null)
                 parent.ChildPropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 
@@ -416,6 +426,27 @@ namespace Signum.Entities
             this.temporalErrors.Remove(propertyName);
             NotifyPrivate(propertyName);
             NotifyError();
+        }
+
+        public void SetTemporalError(PropertyInfo pi, string? error)
+        {
+            if (error == null)
+            {
+                if (this.temporalErrors != null)
+                {
+                    this.temporalErrors.Remove(pi.Name);
+                    if (this.temporalErrors.Count == 0)
+                        this.temporalErrors = null;
+                }
+            }
+            else
+            {
+                if (this.temporalErrors == null)
+                    this.temporalErrors = new Dictionary<string, string>();
+
+
+                this.temporalErrors.Add(pi.Name, error);
+            }
         }
     }
 

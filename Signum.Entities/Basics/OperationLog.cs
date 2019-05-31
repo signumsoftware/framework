@@ -37,19 +37,18 @@ namespace Signum.Entities.Basics
             return "{0} {1} {2:d}".FormatWith(Operation, User, Start);
         }
 
-        public void SetTarget(IEntity target)
+        public void SetTarget(IEntity? target)
         {
-            this.TemporalTarget = target;
+            this.temporalTarget = target;
             this.Target = target == null || target.IsNew ? null : target.ToLite();
         }
 
-        public IEntity GetTarget()
-        {
-            return TemporalTarget;
-        }
-
         [Ignore]
-        IEntity TemporalTarget;
+        IEntity? temporalTarget;
+        public IEntity? GetTemporalTarget()
+        {
+            return temporalTarget;
+        }
     }
 
 

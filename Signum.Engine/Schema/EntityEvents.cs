@@ -213,7 +213,7 @@ namespace Signum.Engine.Maps
                     if (mlist == null)
                         return;
 
-                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value);
+                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value!);
 
                     retriever.ModifiablePostRetrieving((Modifiable)(object)mlist);
                 };
@@ -222,7 +222,7 @@ namespace Signum.Engine.Maps
             {
                 var setter = ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo!);
 
-                return (e, value, retriever) => setter(e, value);
+                return (e, value, retriever) => setter!(e, value);
             }
             else
             {
@@ -236,7 +236,7 @@ namespace Signum.Engine.Maps
                     if (part == null)
                         return;
 
-                    setter(part, value);
+                    setter!(part, value);
                 };
             }
         }

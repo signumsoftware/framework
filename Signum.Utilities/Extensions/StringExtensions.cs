@@ -22,7 +22,7 @@ namespace Signum.Utilities
         }
 
 #pragma warning disable IDE0052 // Remove unread private members
-        static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
+        static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a! : b;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("DefaultTextExpression")]
         public static string DefaultText(this string? str, string defaultText)
@@ -529,16 +529,16 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static string PadChopRight(this string str, int length)
+        public static string PadChopRight(this string str, int length, char paddingChar = ' ')
         {
             str = str ?? "";
-            return str.Length > length ? str.Substring(0, length) : str.PadRight(length);
+            return str.Length > length ? str.Substring(0, length) : str.PadRight(length, paddingChar);
         }
 
-        public static string PadChopLeft(this string str, int length)
+        public static string PadChopLeft(this string str, int length, char paddingChar = ' ')
         {
             str = str ?? "";
-            return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length);
+            return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length, paddingChar);
         }
 
         public static string? FirstNonEmptyLine(this string? str)

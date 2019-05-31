@@ -225,7 +225,7 @@ namespace Signum.Utilities.DataStructures
                     IndirectlyRelatedTo(item.Key, set, condition);
         }
 
-        public void DepthExplore(T node, Func<T, bool> condition, Action<T> preAction, Action<T> postAction)
+        public void DepthExplore(T node, Func<T, bool>? condition, Action<T>? preAction, Action<T>? postAction)
         {
             if (condition != null && !condition(node))
                 return;
@@ -609,6 +609,7 @@ namespace Signum.Utilities.DataStructures
     public static class DirectedEdgedGraphExtensions
     {
         public static E GetOrCreate<T, E>(this DirectedEdgedGraph<T, E> graph, T from, T to)
+            where T : object
             where E : new()
         {
             var dic = graph.TryRelatedTo(from);

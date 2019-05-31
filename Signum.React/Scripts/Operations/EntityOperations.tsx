@@ -126,16 +126,15 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<ModifiableEntity>) | undefined);
+        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<EntityPack<ModifiableEntity> | undefined>) | undefined);
 
         if (createNew)
           createNew()
-            .then(e => Navigator.toEntityPack(e))
-            .then(newPack => eoc.frame.onReload(newPack))
+            .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
         else
           Constructor.construct(pack.entity.Type)
-            .then(newPack => eoc.frame.onReload(newPack))
+            .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
       };
       eoc.defaultClick();
@@ -238,17 +237,12 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     if (this.props.children)
       return this.props.children;
 
-    let text: string;
-
     const eoc = this.props.eoc;
-    if (eoc.settings && eoc.settings.text)
-      text = eoc.settings.text();
-
     const group = this.props.group;
-    if (group && group.simplifyName)
-      text = group.simplifyName(eoc.operationInfo.niceName);
 
-    text = eoc.operationInfo.niceName;
+    let text: string = eoc.settings && eoc.settings.text ? eoc.settings.text() :
+      group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
+        eoc.operationInfo.niceName;
 
     const s = eoc.settings;
     return withIcon(text, s && s.icon, s && s.iconColor, s && s.iconAlign);

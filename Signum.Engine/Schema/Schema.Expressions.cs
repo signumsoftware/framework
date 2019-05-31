@@ -22,7 +22,7 @@ namespace Signum.Engine.Maps
 
             if (IsView)
             {
-                var bindings = this.Fields.Values.Select(ef => new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id, null))).ToReadOnly();
+                var bindings = this.Fields.Values.Select(ef => new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id!, null))).ToReadOnly();
 
                 var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, Expression.Constant(null, id.Type.Nullify()));
 

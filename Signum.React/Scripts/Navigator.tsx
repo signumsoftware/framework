@@ -587,9 +587,9 @@ export interface ViewOptions {
   isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
   validate?: boolean;
   requiresSaveOperation?: boolean;
-  avoidPromptLooseChange?: boolean;
+  avoidPromptLoseChange?: boolean;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  extraComponentProps?: {};
+  extraProps?: {};
 }
 
 export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T | undefined>;
@@ -618,8 +618,8 @@ export interface NavigateOptions {
   modalSize?: BsSize;
   avoidPromptLooseChange?: boolean;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  extraComponentProps?: {};
-  createNew?: () => Promise<ModifiableEntity>;
+  extraProps?: {};
+  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
 }
 
 export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
@@ -956,7 +956,7 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
   component.prototype.render.withViewOverrides = true;
 }
 
-function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
     if (view == null)
@@ -1075,6 +1075,11 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
       return Promise.resolve(value);
 
     return undefined;
+  }
+
+  if (type.name == "boolean") {
+    if (typeof value === "boolean")
+      return Promise.resolve(value);
   }
 
   if (type.name == "number") {

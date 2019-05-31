@@ -116,7 +116,7 @@ export abstract class OperationSettings {
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
   constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
     super(operationSymbol);
@@ -128,7 +128,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 export interface ConstructorOperationOptions<T extends Entity> {
   text?: () => string;
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
-  onConstruct?: (coc: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+  onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
 export class ConstructorOperationContext<T extends Entity> {
@@ -206,14 +206,22 @@ export class EntityOperationContext<T extends Entity> {
 
   static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string): EntityOperationContext<T> {
 
-    var operationKey = (operation as OperationSymbol).key || operation as string;
     if (!ctx.frame)
       throw new Error("a frame is necessary");
-    var oi = getTypeInfo(ctx.value.Type).operations![operationKey];
 
-    var result = new EntityOperationContext<T>(ctx.frame, ctx.value, oi);
+    if (!ctx.frame.pack)
+      throw new Error("a pack is necessary");
+
+    return EntityOperationContext.fromEntityPack(ctx.frame, ctx.frame.pack! as EntityPack<T>, operation);
+  }
+
+  static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string) {
+    var operationKey = (operation as OperationSymbol).key || operation as string;
+
+    var oi = getTypeInfo(pack.entity.Type).operations![operationKey];
+
+    var result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
-    const pack = ctx.frame && ctx.frame.pack;
     result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
     result.complete();
     return result;
@@ -238,7 +246,7 @@ export class EntityOperationContext<T extends Entity> {
   constructor(frame: EntityFrame, entity: T, operationInfo: OperationInfo) {
     this.frame = frame;
     this.entity = entity;
-    this.operationInfo = operationInfo;
+    this.operationInfo =  operationInfo;
   }
 
   complete() {
@@ -426,20 +434,20 @@ export namespace Defaults {
 
   export function getColor(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
-      oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "light";
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {
-    return oi.operationType == OperationType.ConstructorFrom ?CreateGroup: undefined;
+    return oi.operationType == OperationType.ConstructorFrom ? CreateGroup : undefined;
   }
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
     return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == OperationType.Execute && isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
-    if (isSave(eoc.operationInfo)) {
+    if (Defaults.isSave(eoc.operationInfo)) {
       return [
         andClose(eoc),
         andNew(eoc)

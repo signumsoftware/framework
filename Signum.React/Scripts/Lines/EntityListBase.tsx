@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { classes } from '../Globals'
+import { classes, KeyGenerator } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
@@ -21,6 +21,7 @@ export interface EntityListBaseState extends EntityListBaseProps {
 
 export abstract class EntityListBase<T extends EntityListBaseProps, S extends EntityListBaseState> extends EntityBase<T, S>
 {
+  keyGenerator = new KeyGenerator();
   calculateDefaultState(state: S) {
 
     if (state.onFind)

@@ -356,9 +356,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     public sealed class TableNameAttribute : Attribute
     {
         public string Name { get; set; }
-        public string SchemaName { get; set; }
-        public string DatabaseName { get; set; }
-        public string ServerName { get; set; }
+        public string? SchemaName { get; set; }
+        public string? DatabaseName { get; set; }
+        public string? ServerName { get; set; }
 
         public TableNameAttribute(string fullName)
         {

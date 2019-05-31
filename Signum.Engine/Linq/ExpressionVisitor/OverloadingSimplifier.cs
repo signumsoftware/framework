@@ -438,6 +438,20 @@ namespace Signum.Engine.Linq
                 return Expression.Call(mCount, source);
             }
 
+            if(m.Expression != null && m.Member.Name == "Value" && m.Expression.Type.IsNullable())
+            {
+                var source = Visit(m.Expression);
+
+                return source.UnNullify();
+            }
+
+            if (m.Expression != null && m.Member.Name == "HasValue" && m.Expression.Type.IsNullable())
+            {
+                var source = Visit(m.Expression);
+
+                return Expression.NotEqual(source, Expression.Constant(null, source.Type.Nullify()));
+            }
+
             return base.VisitMember(m);
         }
 
@@ -446,12 +460,12 @@ namespace Signum.Engine.Linq
             return Expression.Call(m.Object, m.Method, m.Arguments.Zip(m.Method.GetParameters(), (aExp, p) =>
             {
                 if (p.Name == "arg0" || p.Name == "arg1" || p.Name == "arg2")
-                    return CallToString(aExp);
+                    return CallToString(Visit(aExp));
 
                 if (p.Name == "args")
                 {
                     var arr = (NewArrayExpression)aExp;
-                    return Expression.NewArrayInit(typeof(string), arr.Expressions.Select(e => CallToString(e)).ToArray());
+                    return Expression.NewArrayInit(typeof(string), arr.Expressions.Select(e => CallToString(Visit(e))).ToArray());
                 }
 
                 return aExp;

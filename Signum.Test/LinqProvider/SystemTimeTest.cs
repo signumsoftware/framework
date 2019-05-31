@@ -25,7 +25,7 @@ namespace Signum.Test.LinqProvider
 
             var list = (from f in Database.Query<FolderEntity>()
                         where f.Parent != null
-                        select new { f.Name, Parent = f.Parent.Entity.Name }).ToList();
+                        select new { f.Name, Parent = f.Parent!.Entity.Name }).ToList();
 
             Assert.Empty(list);
         }
@@ -45,8 +45,8 @@ namespace Signum.Test.LinqProvider
                             {
                                 f.Name,
                                 Period = f.SystemPeriod(),
-                                Parent = f.Parent.Entity.Name,
-                                ParentPeriod = f.Parent.Entity.SystemPeriod()
+                                Parent = f.Parent!.Entity.Name,
+                                ParentPeriod = f.Parent!.Entity.SystemPeriod()
                             }).ToList();
 
                 Assert.True(list.All(a => a.Period.Overlaps(a.ParentPeriod)));

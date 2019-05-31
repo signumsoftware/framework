@@ -229,7 +229,7 @@ namespace Signum.React.ApiControllers
         public string queryKey;
         public List<FilterTS> filters;
         public List<OrderTS> orders;
-        public int count;
+        public int? count;
 
         public override string ToString() => queryKey;
 

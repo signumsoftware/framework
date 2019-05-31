@@ -144,8 +144,11 @@ namespace Signum.React.Json
 
             bool orderMatters = GetPreserveOrderFromAttribute(pr);
 
-            if (!existingValue.IsEqualTo(newList,orderMatters))
+            if (!existingValue.IsEqualTo(newList, orderMatters))
             {
+                if (!JsonSerializerExtensions.AllowDirectMListChanges)
+                    return new MList<T>(newList);
+
                 EntityJsonConverter.AssertCanWrite(pr);
 
                 existingValue.AssignMList(newList);

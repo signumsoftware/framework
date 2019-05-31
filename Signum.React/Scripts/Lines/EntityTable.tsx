@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { classes, Dic } from '../Globals'
+import { classes, Dic, DomUtils } from '../Globals'
 import { TypeContext, mlistItemContext } from '../TypeContext'
-import { ModifiableEntity, MList, EntityControlMessage } from '../Signum.Entities'
+import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite } from '../Signum.Entities'
 import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent from './DynamicComponent'
@@ -23,6 +23,7 @@ export interface EntityTableProps extends EntityListBaseProps {
   tableClasses?: string;
   theadClasses?: string;
   createMessage?: string;
+  createOnBlurLastRow?: boolean;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -118,6 +119,53 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
   containerDiv?: HTMLDivElement | null;
   thead?: HTMLTableSectionElement | null;
+  tfoot?: HTMLTableSectionElement | null;
+
+  recentlyCreated?: Lite<Entity> | ModifiableEntity | null;
+  handleBlur = (sender: EntityTableRow, e: React.FocusEvent<HTMLTableRowElement>) => {
+
+    var tr = DomUtils.closest(e.target, "tr")!;
+
+    if (tr == DomUtils.closest(e.relatedTarget as HTMLElement, "tr")) {
+      if (this.recentlyCreated && sender.props.ctx.value == this.recentlyCreated)
+        this.recentlyCreated = null;
+
+      return;
+    }
+
+    if (this.recentlyCreated && sender.props.ctx.value == this.recentlyCreated) {
+      this.props.ctx.value.extract(a => a.element == this.recentlyCreated);
+      this.setValue(this.props.ctx.value);
+
+      return;
+    }
+
+    var last = this.props.ctx.value.last();
+
+    if (sender.props.ctx.value == last.element && DomUtils.closest(e.relatedTarget as HTMLElement, "tfoot") == this.tfoot) {
+      var focusable = Array.from(tr.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+        .filter(e => {
+          var html = e as HTMLInputElement;
+          return html.tabIndex >= 0 && html.disabled != true;
+        });
+
+      if (focusable.last() == e.target) {
+        var pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
+        const promise = this.props.onCreate ? this.props.onCreate(pr) : this.defaultCreate(pr);
+        if (promise == null)
+          return;
+
+        promise.then(entity => {
+
+          if (!entity)
+            return;
+
+          this.recentlyCreated = entity;
+          this.addElement(entity);
+        }).done();
+      }
+    }
+  }
 
   renderTable(ctx: TypeContext<MList<ModifiableEntity>>) {
 
@@ -149,19 +197,22 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
               mlistItemContext(ctx)
                 .map((mlec, i) => ({ mlec, i }))
                 .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a.mlec))
-                .map(a => <EntityTableRow key={a.i}
+                .map(a => <EntityTableRow key={this.keyGenerator.getKey(a.mlec.value)}
                   index={a.i}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}
                   onRemove={this.canRemove(a.mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, a.i) : undefined}
                   draggable={this.canMove(a.mlec.value) && !readOnly ? this.getDragConfig(a.i, "v") : undefined}
                   columns={this.state.columns!}
-                  ctx={this.props.rowSubContext ? this.props.rowSubContext(a.mlec) : a.mlec} />)
+                  ctx={this.props.rowSubContext ? this.props.rowSubContext(a.mlec) : a.mlec}
+                  onBlur={this.props.createOnBlurLastRow && this.state.create && !readOnly? this.handleBlur : undefined}
+                />
+                )
             }
           </tbody>
           {
             this.state.createAsLink && this.state.create && !readOnly &&
-            <tfoot>
+            <tfoot ref={tf => this.tfoot = tf}>
               <tr>
                 <td colSpan={1 + this.state.columns!.length} className={isEmpty ? "border-0" : undefined}>
                   {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
@@ -188,6 +239,7 @@ export interface EntityTableRowProps {
   draggable?: DragConfig;
   fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
   onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+  onBlur?: (sender: EntityTableRow, e: React.FocusEvent<HTMLTableRowElement>) => void;
 }
 
 export class EntityTableRow extends React.Component<EntityTableRowProps, { rowState?: any }> {
@@ -202,7 +254,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
         .then(val => this.setState({ rowState: val }))
         .done();
   }
-
+  
   render() {
     var ctx = this.props.ctx;
     var rowAtts = this.props.onRowHtmlAttributes && this.props.onRowHtmlAttributes(ctx, this, this.state.rowState);
@@ -212,13 +264,14 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
         onDragEnter={drag && drag.onDragOver}
         onDragOver={drag && drag.onDragOver}
         onDrop={drag && drag.onDrop}
-        className={drag && drag.dropClass}>
+        className={drag && drag.dropClass}
+        onBlur={this.props.onBlur && (e => this.props.onBlur!(this, e))}>
         <td>
           <div className="item-group">
             {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={this.props.onRemove}
               title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-              <FontAwesomeIcon icon="times" />
+              {EntityBase.removeIcon}
             </a>}
             &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
@@ -226,7 +279,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
               title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
-              <FontAwesomeIcon icon="bars" />
+              {EntityBase.moveIcon}
             </a>}
           </div>
         </td>

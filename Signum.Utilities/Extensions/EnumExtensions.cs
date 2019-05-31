@@ -8,17 +8,17 @@ namespace Signum.Utilities
 {
     public static class EnumExtensions
     {
-        public static T ToEnum<T>(this string str) where T : struct
+        public static T ToEnum<T>(this string str) where T : struct, Enum
         {
             return (T)Enum.Parse(typeof(T), str);
         }
 
-        public static T ToEnum<T>(this string str, bool ignoreCase) where T : struct
+        public static T ToEnum<T>(this string str, bool ignoreCase) where T : struct, Enum
         {
             return (T)Enum.Parse(typeof(T), str, ignoreCase);
         }
 
-        public static T ToEnumStrict<T>(this string str, bool ignoreCase) where T : struct
+        public static T ToEnumStrict<T>(this string str, bool ignoreCase) where T : struct, Enum
         {
             if (str.ToInt().HasValue)
                 throw new InvalidOperationException("Number is not allowed in ToEnumStrict");
@@ -26,17 +26,17 @@ namespace Signum.Utilities
             return (T)Enum.Parse(typeof(T), str, ignoreCase);
         }
 
-        public static T? TryToEnum<T>(this string str) where T : struct
+        public static T? TryToEnum<T>(this string str) where T : struct, Enum
         {
             return Enum.TryParse(str, out T result) ? result : (T?)null;
         }
 
-        public static T? TryToEnum<T>(this string str, bool ignoreCase) where T : struct
+        public static T? TryToEnum<T>(this string str, bool ignoreCase) where T : struct, Enum
         {
             return Enum.TryParse(str, ignoreCase, out T result) ? result : (T?)null;
         }
 
-        public static T? TryToEnumStrict<T>(this string str, bool ignoreCase) where T : struct
+        public static T? TryToEnumStrict<T>(this string str, bool ignoreCase) where T : struct, Enum
         {
             if (str.ToInt().HasValue)
                 return null;
@@ -49,7 +49,7 @@ namespace Signum.Utilities
             return (T[])Enum.GetValues(typeof(T));
         }
 
-        public static bool IsDefined<T>(T value) where T : struct
+        public static bool IsDefined<T>(T value) where T : struct, Enum
         {
             return Enum.IsDefined(typeof(T), value);
         }
@@ -106,7 +106,7 @@ namespace Signum.Utilities
         }
 
         public static T? GetByCode<T>(string code)
-            where T: struct
+            where T: struct, Enum
         {
             return (T?)(object)EnumFieldCache.Get(typeof(T))
                 .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code == code)

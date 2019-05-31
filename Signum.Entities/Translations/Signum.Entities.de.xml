@@ -237,7 +237,7 @@
   <Type Name="OperationMessage">
     <Member Name="Confirm" Description="Bestätigen" />
     <Member Name="Create" Description="Erstellen..." />
-    <Member Name="CreateFromRegex" Description="^Erstellen (.*) aus .*$" />
+    <Member Name="CreateFromRegex" Description="^(.*) aus .* erstellen$" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />

@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.ToString());
 
 
-            return result;
+            return result!;
         }
 
         private bool IsExcluded(Expression exp)
@@ -347,7 +347,7 @@ namespace Signum.Engine.Linq
         {
             var expression = m.Object;
 
-            if (expression != null && expression.Type.UnNullify() == typeof(PrimaryKey))
+            if (expression.Type.UnNullify() == typeof(PrimaryKey))
                 expression = SmartEqualizer.UnwrapPrimaryKey(expression);
 
             if (IsFullNominateOrAggresive && m.Arguments.Any() && (expression.Type.UnNullify() == typeof(DateTime) || ReflectionTools.IsNumber(expression.Type.UnNullify())) && Connector.Current.SupportsFormat)
@@ -369,7 +369,7 @@ namespace Signum.Engine.Linq
         {
             var culture = m.TryGetArgument("culture")?.Let(e => (CultureInfo)((ConstantExpression)Visit(e)).Value) ?? CultureInfo.CurrentCulture;
 
-            string format = m.TryGetArgument("format")?.Let(e => (string)((ConstantExpression)Visit(e)).Value) ?? defaultFormat!;
+            string? format = m.TryGetArgument("format")?.Let(e => (string)((ConstantExpression)Visit(e)).Value) ?? defaultFormat!;
 
             var obj = Visit(m.Object);
 
@@ -378,7 +378,7 @@ namespace Signum.Engine.Linq
 
             return Add(new SqlFunctionExpression(typeof(string), null, "Format", new[] {
                 obj,
-                new SqlConstantExpression(format),
+                new SqlConstantExpression(format, typeof(string)),
                 new SqlConstantExpression(culture.Name) }));
         }
 
@@ -1147,20 +1147,6 @@ namespace Signum.Engine.Linq
                 return nullable;
             }
 
-            if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
-            {
-                Expression expression = this.Visit(m.Expression);
-                Expression nullable;
-                if (m.Member.Name == "Value")
-                    nullable = Expression.Convert(expression, m.Expression.Type.UnNullify());
-                else
-                    nullable = new IsNotNullExpression(expression);
-
-                if (Has(expression))
-                    return Add(nullable);
-
-                return nullable;
-            }
 
             Expression? hardResult = HardCodedMembers(m);
             if (hardResult != null)

@@ -8,7 +8,7 @@ import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { TitleManager } from './EntityBase';
+import { TitleManager, EntityBase } from './EntityBase';
 
 export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -50,7 +50,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
           <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
             {
               mlistItemContext(s.ctx).map((mlec, i) =>
-                (<EntityStripElement key={i}
+                (<EntityStripElement key={this.keyGenerator.getKey(mlec.value)}
                   ctx={mlec}
                   iconStart={s.iconStart}
                   autoComplete={s.autocomplete}
@@ -259,8 +259,8 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
         <a className="sf-line-button sf-remove"
           onClick={this.props.onRemove}
           href="#"
-          title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-          <FontAwesomeIcon icon="times" />
+        title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
+        {EntityBase.removeIcon}
         </a>
       </span>
   }
@@ -272,7 +272,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
       title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
-      <FontAwesomeIcon icon="bars" />
+      {EntityBase.moveIcon}
     </span>;
   }
 }

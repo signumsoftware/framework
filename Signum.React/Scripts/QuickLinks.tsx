@@ -48,17 +48,40 @@ export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGene
   col.push(quickLinkGenerator);
 }
 
+export var ignoreErrors = false;
+
+export function setIgnoreErrors(value: boolean) {
+  ignoreErrors = value;
+}
+
 export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
 
-  let promises = onGlobalQuickLinks.map(f => asPromiseArray<QuickLink>(f(ctx)));
+  let promises = onGlobalQuickLinks.map(f => safeCall(f, ctx));
 
   if (onQuickLinks[ctx.lite.EntityType]) {
-    const specificPromises = onQuickLinks[ctx.lite.EntityType].map(f => asPromiseArray<QuickLink>(f(ctx)));
+    const specificPromises = onQuickLinks[ctx.lite.EntityType].map(f => safeCall(f, ctx));
 
     promises = promises.concat(specificPromises);
   }
 
   return Promise.all(promises).then(links => links.flatMap(a => a || []).filter(a => a && a.isVisible).orderBy(a => a.order));
+}
+
+
+function safeCall(f: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
+  if (!ignoreErrors)
+    return asPromiseArray<QuickLink>(f(ctx));
+  else {
+    try {
+      return asPromiseArray<QuickLink>(f(ctx)).catch(e => {
+        console.error(e);
+        return [];
+      })
+    } catch (e) {
+      console.error(e);
+      return Promise.resolve([]);
+    }
+  }
 }
 
 function asPromiseArray<T>(value: Seq<T> | Promise<Seq<T>>): Promise<T[]> {
@@ -266,8 +289,9 @@ export class QuickLinkExplore extends QuickLink {
 
 export class QuickLinkNavigate extends QuickLink {
   lite: Lite<Entity>;
+  viewName?: string;
 
-  constructor(lite: Lite<Entity>, options?: QuickLinkOptions) {
+  constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions) {
     super(lite.EntityType, {
       isVisible: Navigator.isNavigable(lite.EntityType),
       text: getTypeInfo(lite.EntityType).niceName,
@@ -275,6 +299,7 @@ export class QuickLinkNavigate extends QuickLink {
     });
 
     this.lite = lite;
+    this.viewName = viewName;
   }
 
   toDropDownItem() {
@@ -291,8 +316,8 @@ export class QuickLinkNavigate extends QuickLink {
 
     const es = Navigator.getSettings(this.lite.EntityType);
     if (e.ctrlKey || e.button == 1 || es && es.avoidPopup)
-      window.open(Navigator.navigateRoute(this.lite));
+      window.open(Navigator.navigateRoute(this.lite, this.viewName));
     else
-      Navigator.navigate(this.lite);
+      Navigator.navigate(this.lite, { getViewPromise: e => this.viewName });
   }
 }

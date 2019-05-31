@@ -46,6 +46,7 @@ namespace Signum.React.Facades
             options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new CleanThreadContextAndAssertFilter());
             options.Filters.Add(new SignumEnableBufferingFilter());
+            options.Filters.Add(new SignumCurrentContextFilter());
             options.Filters.Add(new SignumTimesTrackerFilter());
             options.Filters.Add(new SignumHeavyProfilerFilter());
             options.Filters.Add(new SignumAuthenticationFilter());
@@ -89,7 +90,14 @@ namespace Signum.React.Facades
 
             foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
             {
-                action(result);
+                try
+                {
+                    action(result);
+                }
+                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                {
+
+                }
             }
 
             return result;

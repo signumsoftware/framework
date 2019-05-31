@@ -601,7 +601,7 @@ Consider the following options:
             return typeOperations.Concat(returnTypeOperations);
         }
 
-        public static string? InState<T>(this T state, params T[] fromStates) where T : struct
+        public static string? InState<T>(this T state, params T[] fromStates) where T : struct, Enum
         {
             if (!fromStates.Contains(state))
                 return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(

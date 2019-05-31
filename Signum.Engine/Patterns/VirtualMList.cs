@@ -27,7 +27,7 @@ namespace Signum.Engine
 
         public static bool IsVirtualMList(this PropertyRoute pr)
         {
-            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType())?.Equals(pr) ?? false);
+            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType()!)?.Equals(pr) ?? false);
         }
 
         /// <param name="elementType">Use null for every type</param>
@@ -85,6 +85,9 @@ namespace Signum.Engine
             where L : Entity
         {
             var mListPropertRoute = PropertyRoute.Construct(mListField);
+            if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
+                throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
+
             RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
 
             
@@ -215,7 +218,7 @@ namespace Signum.Engine
                         if (setter == null)
                             setter = CreateSetter(backReference);
 
-                        mlist.ForEach(line => setter(line, e.ToLite()));
+                        mlist.ForEach(line => setter!(line, e.ToLite()));
                         if (onSave == null)
                             mlist.SaveList();
                         else
@@ -299,7 +302,7 @@ namespace Signum.Engine
                 if (setter == null)
                     setter = CreateSetter(backReference);
 
-                mlist.ForEach(line => setter(line, e.ToLite()));
+                mlist.ForEach(line => setter!(line, e.ToLite()));
                 if (onSave == null)
                     mlist.SaveList();
                 else

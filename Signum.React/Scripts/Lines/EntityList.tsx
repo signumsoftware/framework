@@ -66,7 +66,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         <div className="SF-entity-line">
           <div className={s.ctx.inputGroupClass}>
             <select className={s.ctx.formControlClass} size={this.props.size} onChange={this.handleOnSelect} ref={this.handleSelectLoad}>
-              {list.map((e, i) => <option key={i} title={TitleManager.useTitle ? this.getTitle(e.element) : undefined} {...EntityListBase.entityHtmlAttributes(e.element)}>{getToString(e.element)}</option>)}
+              {list.map(mle => <option key={this.keyGenerator.getKey(mle)} title={TitleManager.useTitle ? this.getTitle(mle.element) : undefined} {...EntityListBase.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}
             </select>
             <span className="input-group-append input-group-vertical">
               {this.renderCreateButton(true)}

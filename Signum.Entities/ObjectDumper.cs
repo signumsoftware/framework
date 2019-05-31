@@ -36,7 +36,7 @@ namespace Signum.Entities
             {
                 var od = new DumpVisitor(showIgnoredFields, showByteArrays);
                 od.DumpObject(o);
-                return od.Sb?.ToString();
+                return od.Sb.ToString();
             }
         }
 
@@ -47,7 +47,7 @@ namespace Signum.Entities
 
         class DumpVisitor
         {
-            HashSet<object> objects = new HashSet<Object>(ReferenceEqualityComparer<object>.Default);
+            HashSet<object> objects = new HashSet<object>(ReferenceEqualityComparer<object>.Default);
             public StringBuilder Sb = new StringBuilder();
             int level = 0;
             readonly ShowIgnoredFields showIgnoredFields;

@@ -149,7 +149,7 @@ namespace Signum.Engine.Linq
 
         public Expression GetViewId()
         {
-            var field = ViewTable!.GetViewPrimaryKey();
+            var field = ViewTable!.GetViewPrimaryKey()!;
 
             return this.Bindings.SingleEx(b => ReflectionTools.FieldEquals(b.FieldInfo, field.FieldInfo)).Binding;
         }

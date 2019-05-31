@@ -102,15 +102,15 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                   showPinnedFilters={this.props.showPinnedFilters || false} disableValue={false} />
               )}
               {!this.props.readOnly &&
-                <tr >
+                <tr className="sf-filter-create">
                 <td colSpan={4}>
                   <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
-                      className="sf-line-button sf-create"
+                    className="sf-line-button sf-create sf-create-condition"
                       onClick={e => this.handlerNewFilter(e, false)}>
                       <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddFilter.niceToString()}
                   </a>
                   <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
-                      className="sf-line-button sf-create ml-3"
+                      className="sf-line-button sf-create sf-create-group ml-3"
                       onClick={e => this.handlerNewFilter(e, true)}>
                       <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
                     </a>
@@ -212,7 +212,7 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
     const readOnly = fg.frozen || this.props.readOnly;
 
     return (
-      <tr>
+      <tr className="sf-filter-group">
         <td style={{ verticalAlign: "top" }}>
           {!readOnly &&
             <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
@@ -288,8 +288,8 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
                   />
                 )}
                 {!this.props.readOnly &&
-                  <tr >
-                  <td colSpan={4}>
+                  <tr className="sf-filter-create">
+                    <td colSpan={4}>
                       <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
                         className="sf-line-button sf-create"
                         onClick={e => this.handlerNewFilter(e, false)}>
@@ -412,7 +412,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
 
     return (
       <>
-        <tr>
+        <tr className="sf-filter-condition">
           <td>
             {!readOnly &&
               <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
@@ -495,7 +495,7 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
   render() {
     var p = this.props.pinned;
     return (
-      <tr style={{ backgroundColor: "#fff6e6", verticalAlign: "top" }}>
+      <tr className="sf-pinned-filter" style={{ backgroundColor: "#fff6e6", verticalAlign: "top" }}>
         <td></td>
         <td>
           <div>

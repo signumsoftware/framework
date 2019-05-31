@@ -11,7 +11,7 @@ namespace Signum.Entities
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), InTypeScript(false), PrimaryKey(typeof(int), Identity = false, IdentityBehaviour = false)]
     [TicksColumn(false)]
     public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
-        where T : struct
+        where T : struct, Enum
     {
         public EnumEntity()
         {

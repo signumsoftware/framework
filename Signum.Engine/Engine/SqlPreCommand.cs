@@ -66,7 +66,7 @@ namespace Signum.Engine
             return new SqlPreCommandConcat(spacing, sentences as SqlPreCommand[]);
         }
 
-
+        public abstract SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator);
     }
 
     public static class SqlPreCommandExtensions
@@ -242,6 +242,12 @@ namespace Signum.Engine
             Parameters!.Remove(first);
             return this;
         }
+
+        public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator) => new SqlPreCommandSimple(regex.Replace(this.Sql, matchEvaluator), this.Parameters?.Select(p => Connector.Current.CloneParameter(p)).ToList())
+        {
+            GoAfter = GoAfter,
+            GoBefore = GoBefore,
+        };
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
@@ -302,6 +308,11 @@ namespace Signum.Engine
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());
+        }
+
+        public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)
+        {
+            return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Replace(regex, matchEvaluator)).ToArray());
         }
     }
 

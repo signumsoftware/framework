@@ -5,7 +5,7 @@ import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DynamicComponent from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
-import { TitleManager } from "./EntityBase";
+import { TitleManager, EntityBase } from "./EntityBase";
 
 interface MultiValueLineProps extends LineBaseProps {
   ctx: TypeContext<MList<any>>;
@@ -79,7 +79,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                   <a href="#" title={TitleManager.useTitle ? this.props.addValueText || SearchMessage.AddValue.niceToString() : undefined}
                     className="sf-line-button sf-create"
                     onClick={this.handleAddValue}>
-                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                    {EntityBase.createIcon}&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
                   </a>}
               </td>
             </tr>

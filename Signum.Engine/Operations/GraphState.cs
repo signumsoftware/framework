@@ -288,7 +288,7 @@ namespace Signum.Engine.Operations
             set
             {
                 getState = value;
-                GetStateFunc = getState?.Compile();
+                GetStateFunc = getState.Compile();
             }
         }
 

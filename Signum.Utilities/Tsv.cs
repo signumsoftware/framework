@@ -42,7 +42,7 @@ namespace Signum.Utilities
         }
 
         public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
-            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
+            Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
                 ToTsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
@@ -51,7 +51,7 @@ namespace Signum.Utilities
         }
 
         public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
+            Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -63,7 +63,7 @@ namespace Signum.Utilities
         private const string tab = "\t";
 
         public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
+            Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
 
@@ -120,7 +120,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory)
+        private static Func<object?, string?> GetToString<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory)
         {
             if (toStringFactory != null)
             {
@@ -145,7 +145,7 @@ namespace Signum.Utilities
                 var p = obj!.ToString();
                 if (p != null && p.Contains(tab))
                     throw new InvalidDataException("TSV fields can't contain the tab character, found one in value: " + p);
-                return p;
+                return p!;
             }
         }
 
@@ -274,7 +274,7 @@ namespace Signum.Utilities
                 .Select((me, i) => new TsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
         }
 
-        static object? ConvertTo(string s, Type type, string format, CultureInfo culture)
+        static object? ConvertTo(string s, Type type, string? format, CultureInfo culture)
         {
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
@@ -308,14 +308,14 @@ namespace Signum.Utilities
     {
         public readonly int Index;
         public readonly MemberEntry<T> MemberEntry;
-        public readonly string Format;
+        public readonly string? Format;
 
         public MemberInfo MemberInfo
         {
             get { return this.MemberEntry.MemberInfo; }
         }
 
-        internal TsvColumnInfo(int index, MemberEntry<T> memberEntry, string format)
+        internal TsvColumnInfo(int index, MemberEntry<T> memberEntry, string? format)
         {
             this.Index = index;
             this.MemberEntry = memberEntry;

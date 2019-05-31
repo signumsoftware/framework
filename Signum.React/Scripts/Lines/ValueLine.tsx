@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
 import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -11,6 +11,7 @@ import { BooleanEnum } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
+import { format } from 'd3';
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
   valueLineType?: ValueLineType;
@@ -175,7 +176,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
   static isDuration(e: React.KeyboardEvent<any>): boolean {
     const c = e.keyCode;
     return (ValueLine.isNumber(e) ||
-      (c == 186) /*Colon*/);
+      (c == 190) /*. Colon*/);
   }
 }
 
@@ -267,7 +268,7 @@ function internalComboBox(vl: ValueLine) {
           <FormControlReadonly htmlAttributes={{
             ...vl.state.valueHtmlAttributes,
             ...({ 'data-value': s.ctx.value } as any) /*Testing*/
-          }} ctx={s.ctx}>
+          }} ctx={s.ctx} innerRef={elment => vl.inputElement = elment}>
             {label}
           </FormControlReadonly>)}
       </FormGroup>
@@ -308,7 +309,9 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx}>{s.ctx.value}</FormControlReadonly>)}
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx} innerRef={elment => vl.inputElement = elment}>
+          {s.ctx.value}
+        </FormControlReadonly>)}
       </FormGroup>
     );
 
@@ -394,12 +397,14 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
-        onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
-        onInput={isIE11() ? handleTextOnChange : undefined}
-        onBlur={handleBlur || htmlAtts && htmlAtts.onBlur}
-        placeholder={getPlaceholder(vl)}
-        innerRef={elment => vl.inputElement = elment} />
+      {ValueLine.withItemGroup(vl,
+        <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+          onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
+          onInput={isIE11() ? handleTextOnChange : undefined}
+          onBlur={handleBlur || htmlAtts && htmlAtts.onBlur}
+          placeholder={getPlaceholder(vl)}
+          innerRef={elment => vl.inputElement = elment} />
+      )}
     </FormGroup>
   );
 };
@@ -421,7 +426,7 @@ function numericTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {ValueLine.withItemGroup(vl,
-          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className="numeric">
+          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={elment => vl.inputElement = elment}>
             {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
           </FormControlReadonly>)}
       </FormGroup>
@@ -549,7 +554,9 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={elment => vl.inputElement = elment}>
+          {m && m.format(momentFormat)}
+        </FormControlReadonly>)}
       </FormGroup>
     );
 
@@ -573,7 +580,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {ValueLine.withItemGroup(vl,
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
+          <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} autoFocus={vl.state.initiallyFocused}
             format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
       )}
@@ -590,31 +597,31 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
 
   const s = vl.state;
 
-  const durationFormat = toMomentDurationFormat(s.formatText);
-
-  const ticksPerMillisecond = 10000;
+  const durationFormat = toDurationFormat(s.formatText);
 
   if (s.ctx.readOnly) {
-    const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {ValueLine.withItemGroup(vl,
-          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.state.valueHtmlAttributes, "numeric")}>{d && d.format(durationFormat)}</FormControlReadonly>
+          <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.state.valueHtmlAttributes, "numeric")} innerRef={elment => vl.inputElement = elment}>
+            {durationToString(s.ctx.value, durationFormat)}
+          </FormControlReadonly>
         )}
       </FormGroup>
     );
   }
 
-  const handleOnChange = (newValue: number | null) => {
-    const d = newValue == null ? null : moment.duration(newValue);
-
-    vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
+  const handleOnChange = (newValue: string | null) => {
+    vl.setValue(newValue);
   };
 
   const htmlAttributes = {
     placeholder: getPlaceholder(vl),
     ...vl.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
+
+  if (htmlAttributes.placeholder == undefined)
+    htmlAttributes.placeholder = durationFormat;
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -632,8 +639,8 @@ function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any
 }
 
 export interface DurationTextBoxProps {
-  value: number;
-  onChange: (newValue: number | null) => void;
+  value: string | null;
+  onChange: (newValue: string | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
   format?: string;
@@ -643,31 +650,60 @@ export interface DurationTextBoxProps {
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
 
+  static defaultProps: {
+    format: "hh:mm:ss"
+  };
+
   constructor(props: DurationTextBoxProps) {
     super(props);
     this.state = { text: undefined };
   }
 
   render() {
-    const ticksPerMillisecond = 10000;
     const value = this.state.text != undefined ? this.state.text :
-      this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
+      this.props.value != undefined ? durationToString(this.props.value, this.props.format) :
         "";
 
-    return <input ref={this.props.innerRef} {...this.props.htmlAttributes}
+    return <input ref={this.props.innerRef}
+      {...this.props.htmlAttributes}
       type="text"
       autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
-      className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))} value={value}
+      className={addClass(this.props.htmlAttributes, classes(this.props.formControlClass, "numeric"))}
+      value={value}
       onBlur={this.handleOnBlur}
       onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
       onInput={isIE11() ? this.handleOnChange : undefined}
-      onKeyDown={this.handleKeyDown} />
+      onKeyDown={this.handleKeyDown}/>
 
   }
 
+
   handleOnBlur = (e: React.FocusEvent<any>) => {
+
+    var format = this.props.format!;
+
+    function fixNumber(val: string) {
+      if (!val.contains(":")) {
+        if (format.startsWith("hh"))
+          return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
+        if (format.startsWith("mm"))
+          return format.replace("mm", val.toString()).replace("ss", "00");
+        return val;
+      }
+      return val;
+    }
+
+    function normalize(val: string) {
+      if (!"hh:mm:ss".contains(format))
+        throw new Error("not implemented");
+
+      return "hh:mm:ss".replace(format, val).replace("hh", "00").replace("mm", "00").replace("ss", "00")
+    }
+
+
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
+    const result = input.value == undefined || input.value.length == 0 ? null :
+      normalize(fixNumber(input.value));
     this.setState({ text: undefined });
     if (this.props.value != result)
       this.props.onChange(result);;

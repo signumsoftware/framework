@@ -256,9 +256,7 @@ namespace Signum.Utilities
             }
 
             var result = Fallback(type, lt => lt.Members!.TryGetC(memberInfo.Name), lt => OnNotLocalizedMember(memberInfo));
-            if (result != null)
-                return result;
-
+    
             return result;
         }
 

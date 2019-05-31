@@ -195,6 +195,14 @@ Lose changes?")]
         [Description("When pressed, the filter value will be splited and all the words have to be found")]
         WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound,
         ParentValue,
+        [Description("Please select a {0}")]
+        PleaseSelectA0_G,
+        [Description("Please select one or several {0}")]
+        PleaseSelectOneOrMore0_G,
+        [Description("Please select an Entity")]
+        PleaseSelectAnEntity,
+        [Description("Please select one or several Entities")]
+        PleaseSelectOneOrSeveralEntities,
     }
 
     public enum SelectorMessage

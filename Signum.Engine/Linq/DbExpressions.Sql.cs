@@ -665,7 +665,7 @@ namespace Signum.Engine.Linq
             return visitor.VisitToDayOfWeek(this);
         }
 
-        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
+        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
 
         internal static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
         public static DayOfWeek? ToDayOfWeek(int? sqlServerWeekDay, byte dateFirst)

@@ -215,7 +215,7 @@ namespace Signum.Utilities.DataStructures
         }
 
 
-        public void DepthExplore(T node, Func<T, bool> condition, Action<T> preAction, Action<T> postAction)
+        public void DepthExplore(T node, Func<T, bool>? condition, Action<T>? preAction, Action<T>? postAction)
         {
             if (condition != null && !condition(node))
                 return;

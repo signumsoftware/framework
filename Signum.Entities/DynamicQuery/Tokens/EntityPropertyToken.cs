@@ -63,7 +63,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 var entityExpression = baseExpression.ExtractEntity(false);
 
-                if (PropertyRoute != null && PropertyRoute.Parent != null && PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Mixin)
+                if (PropertyRoute.Parent != null && PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Mixin)
                     entityExpression = Expression.Call(entityExpression, MixinDeclarations.miMixin.MakeGenericMethod(PropertyRoute.Parent.Type));
 
                 Expression result = Expression.Property(entityExpression, PropertyInfo);
