@@ -2,7 +2,7 @@
   <Target Name="GenerateSignumTS">
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
-    <Exec command="dotnet &quot;$(MSBuildThisFileDirectory)\Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
+    <Exec command="dotnet &quot;$(MSBuildThisFileDirectory)Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
     </Exec>
   </Target>
