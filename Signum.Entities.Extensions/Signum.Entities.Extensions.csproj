@@ -7,7 +7,7 @@
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <NullableContextOptions>enable</NullableContextOptions>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Platforms>x64;x86</Platforms>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   
   <PropertyGroup>
