@@ -281,6 +281,13 @@ export type TriggeredOn =
   "ConditionIsTrue" |
   "ConditionChangesToTrue";
 
+export const ViewNamePropEmbedded = new Type<ViewNamePropEmbedded>("ViewNamePropEmbedded");
+export interface ViewNamePropEmbedded extends Entities.EmbeddedEntity {
+  Type: "ViewNamePropEmbedded";
+  name: string;
+  expression: string;
+}
+
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
 export interface WorkflowActionEntity extends Entities.Entity {
   Type: "WorkflowAction";
@@ -312,6 +319,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
   boundaryTimers: Entities.MList<WorkflowEventEntity>;
   estimatedDuration: number | null;
   viewName: string | null;
+  viewNameProps: Entities.MList<ViewNamePropEmbedded>;
   script: WorkflowScriptPartEmbedded | null;
   xml: WorkflowXmlEmbedded;
   subWorkflow: SubWorkflowEmbedded | null;
@@ -333,7 +341,7 @@ export module WorkflowActivityMessage {
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
 export interface WorkflowActivityModel extends Entities.ModelEntity {
   Type: "WorkflowActivityModel";
-  workflowActivity: Entities.Lite<WorkflowActivityEntity>;
+  workflowActivity: Entities.Lite<WorkflowActivityEntity> | null;
   workflow: WorkflowEntity | null;
   mainEntityType: Basics.TypeEntity;
   name: string;
@@ -343,6 +351,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
   estimatedDuration: number | null;
   script: WorkflowScriptPartEmbedded | null;
   viewName: string | null;
+  viewNameProps: Entities.MList<ViewNamePropEmbedded>;
   comments: string | null;
   userHelp: string | null;
   subWorkflow: SubWorkflowEmbedded | null;

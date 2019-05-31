@@ -47,7 +47,7 @@ namespace Signum.Entities.Dynamic
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()!).FullName;
+            var entityTypeName = DynamicValidationEntity.GetMainType(this.GetParentEntity<DynamicValidationEntity>()).FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +

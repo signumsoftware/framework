@@ -318,6 +318,8 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
+        where R : object
+        where A : object
     {
         public A[] CoercedValues { get; internal set; }
     }

@@ -137,7 +137,7 @@ namespace Signum.Engine.Translation
             if (pack == null)
                 return result;
 
-            return result.Select(s => s == null ? s : pack.Regex.Replace(s, m =>
+            return result.Select(s => pack.Regex.Replace(s, m =>
             {
                 string replacement = pack.Dictionary.GetOrThrow(m.Value);
 

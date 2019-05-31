@@ -278,7 +278,7 @@ namespace Signum.Engine.Workflow
                 NewTasks = newNodes.Select(kvp => new PreviewTask
                 {
                     BpmnId = kvp.Key,
-                    Name = kvp.Value.Attribute("name")?.Value,
+                    Name = kvp.Value.Attribute("name")?.Value!,
                     SubWorkflow = (entities.GetOrThrow(kvp.Key).Model as WorkflowActivityModel)?.SubWorkflow?.Workflow.ToLite()
                 }).ToList(),
             };

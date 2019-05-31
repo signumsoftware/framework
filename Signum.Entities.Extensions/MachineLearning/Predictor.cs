@@ -315,7 +315,7 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        
+        [NotNullValidator(Disabled =true)]
         public Lite<PredictorEntity> Predictor { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]

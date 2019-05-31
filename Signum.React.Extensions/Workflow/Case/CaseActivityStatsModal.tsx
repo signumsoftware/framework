@@ -3,10 +3,11 @@ import * as numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
+import { durationToString } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Navigator from '@framework/Navigator';
 import { JavascriptMessage } from '@framework/Signum.Entities'
-import { CaseActivityStats } from "../WorkflowClient";
+import { CaseActivityStats, durationFormat } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
@@ -169,5 +170,5 @@ function formatDuration(duration: number | undefined) {
 
   var unit = CaseActivityEntity.memberInfo(a => a.duration).unit;
 
-  return <span>{numbro(duration).format("0.00")} {unit} <mark>({moment.duration(duration, "minutes").format("d[d] h[h] m[m] s[s]")})</mark></span>
+  return <span>{numbro(duration).format("0.00")} {unit} <mark>({durationFormat(moment.duration(duration, "minutes"))})</mark></span>
 }

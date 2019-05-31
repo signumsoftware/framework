@@ -82,8 +82,8 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
               </DropdownItem>)
           }
           {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider />}
-          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>}
-          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>}
+          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</DropdownItem>}
+          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</DropdownItem>}
         </DropdownMenu>
       </Dropdown>
     );

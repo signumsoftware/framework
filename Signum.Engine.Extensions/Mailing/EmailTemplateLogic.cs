@@ -191,7 +191,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    message.TextParsedNode = ParseTemplate((EmailTemplateEntity)message.GetParentEntity()!, message.Text, out string errorMessage);
+                    message.TextParsedNode = ParseTemplate(message.GetParentEntity<EmailTemplateEntity>(), message.Text, out string errorMessage);
                     return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)
@@ -209,7 +209,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    message.SubjectParsedNode = ParseTemplate((EmailTemplateEntity)message.GetParentEntity()!, message.Subject, out string errorMessage);
+                    message.SubjectParsedNode = ParseTemplate(message.GetParentEntity<EmailTemplateEntity>(), message.Subject, out string errorMessage);
                     return errorMessage.DefaultToNull();
                 }
                 catch (Exception ex)

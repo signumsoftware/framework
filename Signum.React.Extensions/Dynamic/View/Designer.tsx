@@ -7,12 +7,14 @@ import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
-import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import { Modal, Typeahead } from '@framework/Components';
+import { Modal, Typeahead, UncontrolledTabs, Tab } from '@framework/Components';
 import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { TypeContext, EntityTable, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
+import { DynamicViewTree } from './DynamicViewTree';
 
 export interface ExpressionOrValueProps {
   binding: Binding<any>;
@@ -220,7 +222,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     const typeName = dn.parent!.fixRoute()!.typeReference().name.split(",").map(tn => tn.endsWith("Entity") ? tn : tn + "Entity").join(" | ");
     return (
       <div className="code-container">
-        <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, modules) =>"}</pre>
+        <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, modules, props, locals) =>"}</pre>
         <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() }} />
       </div>
     );

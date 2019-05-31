@@ -282,7 +282,7 @@ export class ViewNameComponent extends React.Component<ViewNameComponentProps, V
   }
 
   render() {
-    return <ExpressionOrValueComponent dn={this.props.dn} binding={this.props.binding} type="string" defaultValue={null} options={this.state.viewNames} exampleExpression={"\"MyStaticOrDynamicViewName\""} />;
+    return <ExpressionOrValueComponent dn={this.props.dn} binding={this.props.binding} type="string" defaultValue={null} options={this.state.viewNames} exampleExpression={"e => modules.Navigator.viewDispatcher.getViewPromiseWithName(e, \"View Name\").withProps({ ... })"} />;
   }
 }
 

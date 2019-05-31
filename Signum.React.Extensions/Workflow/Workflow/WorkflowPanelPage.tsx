@@ -15,7 +15,7 @@ interface WorkflowPanelPageProps extends RouteComponentProps<{}> {
 
 export default class WorkflowPanelPage extends React.Component<WorkflowPanelPageProps, {}> {
   componentWillMount() {
-    AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    AuthClient.assertPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
     Navigator.setTitle("WorkflowPanel State");
   }
 
@@ -46,7 +46,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
 
   componentWillMount() {
     this.loadState().done();
-    AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    AuthClient.assertPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
   }
 
   loadState() {
@@ -103,7 +103,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
         <br />
         <h4>Next activities to execute</h4>
         <SearchControl
-          showContextMenu="Basic"
+          showContextMenu={fo => "Basic"}
           navigate={false}
           findOptions={{
             queryName: CaseActivityEntity,
@@ -144,7 +144,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
           </Tab>
           <Tab title="Last executed activities" eventKey="lastActivities">
             <SearchControl
-              showContextMenu="Basic"
+              showContextMenu={fo => "Basic"}
               navigate={false}
               findOptions={{
                 queryName: CaseActivityEntity,

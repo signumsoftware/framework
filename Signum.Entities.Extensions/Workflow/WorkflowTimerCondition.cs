@@ -41,7 +41,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowTimerConditionEntity)this.GetParentEntity()!;
+            var parent = this.GetParentEntity<WorkflowTimerConditionEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");

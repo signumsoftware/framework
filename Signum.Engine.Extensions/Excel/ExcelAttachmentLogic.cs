@@ -76,7 +76,7 @@ namespace Signum.Engine.Excel
 
         static string? ExcelAttachmentFileName_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity()!;
+            var template = excelAttachment.TryGetParentEntity<EmailTemplateEntity>()!;
             if (template != null && excelAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
             {
                 try
@@ -95,7 +95,7 @@ namespace Signum.Engine.Excel
 
         static string? ExcelAttachmentTitle_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity()!;
+            var template = excelAttachment.GetParentEntity<EmailTemplateEntity>()!;
             if (template != null && excelAttachment.TitleNode as EmailTemplateParser.BlockNode == null)
             {
                 try

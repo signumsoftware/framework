@@ -23,7 +23,7 @@ namespace Signum.Engine.MachineLearning
 
             ctx.Codifications.Select(pc =>
             {
-                string? ToStringValue(QueryToken token, object? obj, int limit)
+                string? ToStringValue(QueryToken? token, object? obj, int limit)
                 {
                     if (token == null || obj == null)
                         return null;
@@ -33,7 +33,6 @@ namespace Signum.Engine.MachineLearning
 
                     return FilterValueConverter.ToString(obj, token.Type)?.TryStart(limit);
                 }
-
 
                 var valueToken = pc.Column.Token;
                 

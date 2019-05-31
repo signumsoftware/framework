@@ -19,7 +19,7 @@ namespace Signum.Engine.Word
 {
     public class WordTemplateParameters : TemplateParameters
     {
-        public WordTemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
+        public WordTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
             IEnumerable<ResultRow> rows, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate) : 
               base(entity, culture, columns, rows)
         {
@@ -168,7 +168,7 @@ namespace Signum.Engine.Word
                 new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
                 {
                     CanConstruct = se => HasDefaultTemplateConstructor(se) ? null : WordTemplateMessage.NoDefaultTemplateDefined.NiceToString(),
-                    Construct = (se, _) => CreateDefaultTemplate(se).Save()
+                    Construct = (se, _) => CreateDefaultTemplate(se)!.Save()
                 }.Register();
 
                 SystemWordTemplateToWordTemplates = sb.GlobalLazy(() => (
@@ -204,12 +204,12 @@ namespace Signum.Engine.Word
             return info.DefaultTemplateConstructor != null;
         }
 
-        internal static WordTemplateEntity CreateDefaultTemplate(SystemWordTemplateEntity systemWordReport)
+        internal static WordTemplateEntity? CreateDefaultTemplate(SystemWordTemplateEntity systemWordReport)
         {
             SystemWordTemplateInfo info = systemWordReports.GetOrThrow(systemWordReport.ToType());
 
             if (info.DefaultTemplateConstructor == null)
-                throw new InvalidOperationException($"SystemWordTemplate {systemWordReport} does not have a DefaultTemplateConstructor");
+                return null;
 
             WordTemplateEntity template = info.DefaultTemplateConstructor();
 
@@ -251,7 +251,7 @@ namespace Signum.Engine.Word
                 using (OperationLogic.AllowSave<WordTemplateEntity>())
                 using (Transaction tr = Transaction.ForceNew())
                 {
-                    var template = CreateDefaultTemplate(systemWordTemplate);
+                    var template = CreateDefaultTemplate(systemWordTemplate)!;
                     
                     template.Save();
 

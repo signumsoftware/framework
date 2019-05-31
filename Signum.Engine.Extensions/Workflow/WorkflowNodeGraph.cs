@@ -9,10 +9,9 @@ using System.Linq;
 
 namespace Signum.Engine.Workflow
 {
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class WorkflowNodeGraph
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public WorkflowEntity Workflow { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> NextGraph { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> PreviousGraph { get; internal set; }
@@ -21,6 +20,7 @@ namespace Signum.Engine.Workflow
         public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
         {
@@ -67,8 +67,10 @@ namespace Signum.Engine.Workflow
             this.PreviousGraph = graph.Inverse();
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public Dictionary<IWorkflowNodeEntity, int> TrackId;
         public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy;
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public IWorkflowNodeEntity GetSplit(WorkflowGatewayEntity entity)
         {

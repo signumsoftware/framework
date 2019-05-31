@@ -88,21 +88,21 @@ namespace Signum.Engine.Help
             //Properties (key)
             foreach (var p in  entity.Properties.Values)
             {
-                if (p.PropertyInfo != null)
                 {
                     m = regex.Match(p.PropertyInfo.NiceName().RemoveDiacritics());
                     if (m.Success)
                     {
-                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.DefaultText(p.Info).Etc(etcLength), type, m, 
+                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.DefaultText(p.Info).Etc(etcLength), type, m,
                             HelpUrls.PropertyUrl(p.PropertyRoute));
                         continue;
                     }
                 }
-                else if (p.UserDescription.HasText())
+
+                if (p.UserDescription.HasText())
                 {
                     m = regex.Match(p.UserDescription.RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo?.NiceName(), p.UserDescription.Extract(m), type, m, 
+                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.Extract(m), type, m, 
                             HelpUrls.PropertyUrl(p.PropertyRoute), isDescription: true);
                 }
             }

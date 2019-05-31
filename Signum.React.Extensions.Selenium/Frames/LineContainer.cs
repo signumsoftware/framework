@@ -175,7 +175,7 @@ namespace Signum.React.Selenium
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : IModifiableEntity
         {
-            lineContainer.EntityLine(property).SetLite( value as Lite<IEntity> ?? ((IEntity)value)?.ToLite());
+            lineContainer.EntityLine(property).SetLite( value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite());
         }
 
         public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -199,7 +199,7 @@ namespace Signum.React.Selenium
         {
             var combo = lineContainer.EntityCombo(property);
 
-            combo.LiteValue = value as Lite<IEntity> ?? ((IEntity)value)?.ToLite();
+            combo.LiteValue = value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite();
 
             if (loseFocus)
                 combo.ComboElement.WrappedElement.LoseFocus();

@@ -102,6 +102,11 @@ namespace Signum.Entities.Mailing
         {
             return ToStringExpression.Evaluate(this);
         }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            return validator.Validate(this, pi);
+        }
     }
 
 
@@ -174,7 +179,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return file?.ToString();
+            return file?.ToString() ?? "";
         }
     }
 

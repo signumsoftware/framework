@@ -13,7 +13,7 @@ import { ModalHeaderButtons } from '@framework/Components/Modal';
 interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
   typeName: string;
   filterOptions: FilterOption[];
-  title?: string;
+  title?: React.ReactNode;
 }
 
 export default class TreeModal extends React.Component<TreeModalProps, { show: boolean; }>  {

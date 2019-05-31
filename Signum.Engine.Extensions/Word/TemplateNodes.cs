@@ -174,8 +174,8 @@ namespace Signum.Engine.Word
 
         public string GetText(OpenXmlElement run)
         {
-            return run is S.Run r ? r.ChildElements.OfType<S.Text>().SingleOrDefault()?.Text :
-                run is S.Text s ? s.Text :
+            return run is S.Run r ? r.ChildElements.OfType<S.Text>().SingleOrDefault()?.Text ?? "" :
+                run is S.Text s ? s.Text ?? "" :
                 "";
         }
 
@@ -376,7 +376,7 @@ namespace Signum.Engine.Word
 
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
         {
-            var tempText = this.NodeProvider.NewText(ValueProvider?.ToString());
+            var tempText = this.NodeProvider.NewText(ValueProvider?.ToString() ?? "");
 
             this.AppendChild(tempText);
             base.WriteTo(xmlWriter);
@@ -395,7 +395,7 @@ namespace Signum.Engine.Word
             ValueProvider.Declare(sc.Variables);
         }
 
-        public override string InnerText => this.ValueProvider?.ToString();
+        public override string InnerText => this.ValueProvider?.ToString() ?? "";
     }
 
     public class DeclareNode : BaseNode
@@ -519,7 +519,7 @@ namespace Signum.Engine.Word
 
         public BlockContainerNode(BlockContainerNode original) : base(original) { }
 
-        public static string UserString(Type type)
+        public static string UserString(Type? type)
         {
             if (type == typeof(ForeachNode))
                 return "foreach";
@@ -624,7 +624,8 @@ namespace Signum.Engine.Word
         public ForeachNode(INodeProvider nodeProvider, ValueProviderBase valueProvider) : base(nodeProvider)
         {
             this.ValueProvider = valueProvider;
-            valueProvider.IsForeach = true;
+            if (valueProvider != null)
+                valueProvider.IsForeach = true;
         }
 
         public ForeachNode(ForeachNode original)

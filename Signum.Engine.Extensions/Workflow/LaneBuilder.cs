@@ -40,7 +40,7 @@ namespace Signum.Engine.Workflow
             public void ApplyChanges(XElement processElement, XElement laneElement, Locator locator)
             {
                 var laneIds = laneElement.Elements(bpmn + "flowNodeRef").Select(a => a.Value).ToHashSet();
-                var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value));
+                var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value!));
 
                 var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
                 var oldEvents = this.events.Values.Where(a => a.Entity.BoundaryOf == null).ToDictionaryEx(a => a.bpmnElementId, "events");
@@ -426,6 +426,11 @@ namespace Signum.Engine.Workflow
                         Xml = a.Xml,
                         Type = a.Type,
                         ViewName = a.ViewName,
+                        ViewNameProps = a.ViewNameProps.Select(p=> new ViewNamePropEmbedded
+                        {
+                            Name = p.Name,
+                            Expression = p.Expression
+                        }).ToMList(),
                         RequiresOpen = a.RequiresOpen,
                         EstimatedDuration = a.EstimatedDuration,
                         Script = a.Script?.Clone(),

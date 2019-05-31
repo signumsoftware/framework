@@ -5,7 +5,7 @@ import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
-import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components';
+import { KeyCodes } from '@framework/Components';
 
 export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 

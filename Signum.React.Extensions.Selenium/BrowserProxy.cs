@@ -70,7 +70,7 @@ namespace Signum.React.Selenium
 
         public FramePageProxy<T> NormalPage<T>(Lite<T> lite) where T : Entity
         {
-            if(lite != null && lite.EntityType != typeof(T))
+            if(lite.EntityType != typeof(T))
                 throw new InvalidOperationException("Use NormalPage<{0}> instead".FormatWith(lite.EntityType.Name));
 
             var url = Url(NavigateRoute(lite));

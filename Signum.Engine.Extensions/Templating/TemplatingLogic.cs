@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Templating;
 using Signum.Utilities;

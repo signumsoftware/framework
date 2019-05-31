@@ -33,7 +33,8 @@ namespace Signum.Entities.Tree
             get { return RouteToStringExpression.Evaluate(this); }
         }
 
-        [ForceNotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
+        [NotNullValidator(Disabled = true)]
+        [SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
         public string ParentRoute { get; set; }
 
         static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
@@ -60,6 +61,7 @@ namespace Signum.Entities.Tree
         [StringLengthValidator(Min = 1, Max = 255)]
         public string Name { get; set; }
 
+        [NotNullValidator(Disabled = true)]
         [StringLengthValidator(Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
         public string FullName { get; private set; }
 

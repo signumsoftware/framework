@@ -94,14 +94,14 @@ namespace Signum.Engine.Word
                     if (start.Interval.Min < interval.Min)
                     {
                         var firstRunPart = nodeProvider.NewRun(
-                            (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true),
+                            (OpenXmlCompositeElement?)nodeProvider.GetRunProperties(startRun)?.CloneNode(true),
                              start.Text!.Substring(0, m.Index - start.Interval.Min),
                              SpaceProcessingModeValues.Preserve
                             );
                         par.Append(firstRunPart);
                     }
 
-                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true) });
+                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = (OpenXmlCompositeElement?)nodeProvider.GetRunProperties(startRun)?.CloneNode(true) });
 
                     ElementInfo end = start;
                     while (end.Interval.Max < interval.Max) //Ignore
@@ -384,7 +384,7 @@ namespace Signum.Engine.Word
                 if (Variables.TryGetValue(token!.Variable!, out ValueProviderBase t))
                 {
                     if (!t.Equals(token))
-                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
+                        AddError(true, "There is already a variable '{0}' defined in this scope".FormatWith(token.Variable));
                 }
                 else
                 {

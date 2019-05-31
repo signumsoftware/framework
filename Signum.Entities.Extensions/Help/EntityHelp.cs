@@ -56,7 +56,6 @@ namespace Signum.Entities.Help
     [Serializable]
     public class PropertyRouteHelpEmbedded : EmbeddedEntity
     {
-        
         public PropertyRouteEntity Property { get; set; }
 
 		[StringLengthValidator(Min = 3, MultiLine = true)]
@@ -64,7 +63,7 @@ namespace Signum.Entities.Help
 
         public override string ToString()
         {
-            return this.Property?.ToString();
+            return this.Property?.ToString() ?? "";
         }
     }
 
@@ -78,7 +77,7 @@ namespace Signum.Entities.Help
 
         public override string ToString()
         {
-            return this.Operation?.ToString();
+            return this.Operation?.ToString() ?? "";
         }
     }
 

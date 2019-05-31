@@ -87,7 +87,7 @@ namespace Signum.React.Profiler
                             Method = est.MethodName,
                             Color = est.Namespace == null ? null : ColorExtensions.ToHtmlColor(est.Namespace.Split('.').Take(2).ToString(".").GetHashCode()),
                             Type = est.Type,
-                            Namespace = est.Namespace,
+                            Namespace = est.Namespace!,
                             FileName = est.FileName,
                             LineNumber = est.LineNumber ?? 0
                         }).ToList();
@@ -99,9 +99,9 @@ namespace Signum.React.Profiler
                         let t = mi.DeclaringType
                         select new StackTraceTS
                         {
-                            Namespace = t?.Namespace,
+                            Namespace = t?.Namespace!,
                             Color = t == null ? null : ColorExtensions.ToHtmlColor(t.Assembly.FullName.GetHashCode()),
-                            Type = t?.TypeName(),
+                            Type = t?.TypeName()!,
                             Method = mi.Name,
                             FileName = sf.GetFileName(),
                             LineNumber = sf.GetFileLineNumber(),

@@ -2,6 +2,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
@@ -48,6 +49,8 @@ namespace Signum.Engine.Dynamic
                         ViewName = "",
                         EntityType = e.EntityType,
                         ViewContent = e.ViewContent,
+                        Props = e.Props.Select(a => new DynamicViewPropEmbedded() {  Name = a.Name, Type = a.Type } ).ToMList(),
+                        Locals = e.Locals,
                     },
                 }.Register();
 

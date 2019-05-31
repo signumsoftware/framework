@@ -182,7 +182,7 @@ namespace Signum.Engine.Authorization
 
         public static IDisposable UnsafeUserSession(string username)
         {
-            UserEntity user;
+            UserEntity? user;
             using (AuthLogic.Disable())
             {
                 user = RetrieveUser(username);
@@ -193,9 +193,9 @@ namespace Signum.Engine.Authorization
             return UserHolder.UserSession(user);
         }
 
-        public static Func<string, UserEntity> RetrieveUserByUsername = (username) => Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
+        public static Func<string, UserEntity?> RetrieveUserByUsername = (username) => Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
 
-        public static UserEntity RetrieveUser(string username)
+        public static UserEntity? RetrieveUser(string username)
         {
             var result = RetrieveUserByUsername(username);
 
@@ -286,7 +286,7 @@ namespace Signum.Engine.Authorization
         {
             using (AuthLogic.Disable())
             {
-                UserEntity user = RetrieveUser(username);
+                UserEntity? user = RetrieveUser(username);
                 if (user == null)
                     throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
@@ -568,8 +568,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Action? syncRoles = null;
-            Action import = () =>
+            void Import()
             {
                 Console.Write("Reading {0}...".FormatWith(fileName));
                 var doc = XDocument.Load(fileName);
@@ -586,7 +585,7 @@ namespace Signum.Engine.Authorization
                     SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
 
                     if (SafeConsole.Ask("Sync roles first?"))
-                        syncRoles();
+                        SyncRoles();
 
                     return;
                 }
@@ -596,9 +595,9 @@ namespace Signum.Engine.Authorization
                 else
                     command.OpenSqlFileRetry();
 
-            };
+            }
 
-            Action export = () =>
+            void Export()
             {
                 var doc = ExportRules();
                 doc.Save(fileName);
@@ -606,9 +605,9 @@ namespace Signum.Engine.Authorization
 
                 if (SafeConsole.Ask("Publish to Load?"))
                     File.Copy(fileName, "../../../" + Path.GetFileName(fileName), overwrite: true);
-            };
+            }
 
-            syncRoles = () =>
+            void SyncRoles()
             {
                 Console.Write("Reading {0}...".FormatWith(fileName));
                 var doc = XDocument.Load(fileName);
@@ -619,15 +618,15 @@ namespace Signum.Engine.Authorization
 
                 SynchronizeRoles(doc);
                 if (SafeConsole.Ask("Import rules now?"))
-                    import();
+                    Import();
 
-            };
+            }
 
             var action = new ConsoleSwitch<char, Action>("What do you want to do with AuthRules?")
             {
-                { 'i', import, "Import into database" },
-                { 'e', export, "Export to local folder" },
-                { 'r', syncRoles, "Sync roles"},
+                { 'i', Import, "Import into database" },
+                { 'e', Export, "Export to local folder" },
+                { 'r', SyncRoles, "Sync roles"},
             }.Choose();
 
             action?.Invoke();

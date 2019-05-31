@@ -39,8 +39,8 @@ namespace Signum.Engine.Authorization
                      .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role });
 
                 cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed>(sb,
-                     toKey: s => (operation: s.Operation, type: s.Type?.ToType()),
-                     toEntity: s => new OperationTypeEmbedded { Operation = s.operation, Type = s.type?.ToTypeEntity() },
+                     toKey: s => (operation: s.Operation, type: s.Type.ToType()),
+                     toEntity: s => new OperationTypeEmbedded { Operation = s.operation, Type = s.type.ToTypeEntity() },
                      isEquals: (o1, o2) => o1.Operation == o2.Operation && o1.Type == o2.Type,
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
@@ -63,34 +63,6 @@ namespace Signum.Engine.Authorization
                       allResources.Select(a => a.TryBefore("/") ?? a).ToHashSet(),
                       SymbolLogic<OperationSymbol>.AllUniqueKeys(),
                       operationReplacementKey);
-
-
-                    if (allResources.Any(a => string.IsNullOrEmpty(a.TryAfter("/")))) //Only for transition
-                    {
-                        var groups = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).GroupToDictionary(p => p.Attribute("Resource").Value);
-
-                        foreach (var gr in groups.Where(gr => string.IsNullOrEmpty(gr.Key.TryAfter("/"))))
-                        {
-                            var operationKey = gr.Key.TryBefore("/") ?? gr.Key;
-
-                            var operation = SymbolLogic<OperationSymbol>.TryToSymbol(replacements.Apply(operationReplacementKey, operationKey));
-
-                            var types = Schema.Current.Tables.Keys.Where(t => OperationLogic.IsDefined(t, operation)).ToList();
-
-                            foreach (var xElem in gr.Value)
-                            {
-                                xElem.AddAfterSelf(types.Select(t =>
-                                {
-                                    var copy = new XElement(xElem);
-                                    copy.SetAttributeValue("Resource", operationKey + "/" + t.ToTypeEntity().CleanName);
-                                    return copy;
-                                }));
-                                xElem.Remove();
-                            }
-                        }
-
-                        allResources = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet();
-                    }
 
                     string typeReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
                     replacements.AskForReplacements(

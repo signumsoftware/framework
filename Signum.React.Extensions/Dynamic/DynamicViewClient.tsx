@@ -15,7 +15,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as Lines from '@framework/Lines'
 import * as FileLineModule from '../Files/FileLine'
-import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation } from './Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation, DynamicViewPropEmbedded } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as Nodes from './View/Nodes' //Typings-only
@@ -168,8 +168,6 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
     return ViewPromise.flat(promise);
   }
-
-
 
   fallback(entity: ModifiableEntity, viewName?: string): ViewPromise<ModifiableEntity> {
 
@@ -405,11 +403,14 @@ export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromis
     .withProps({ initialDynamicView: dynamicView });
 }
 
-
 export namespace API {
 
   export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
     return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
+  }
+
+  export function getDynamicViewProps(typeName: string, viewName: string): Promise<DynamicViewProps[]> {
+    return ajaxGet<DynamicViewProps[]>({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {
@@ -432,5 +433,10 @@ export namespace API {
 export interface SuggestedFindOptions {
   queryKey: string;
   parentToken: string;
+}
+
+export interface DynamicViewProps {
+  name: string;
+  type: string;
 }
 

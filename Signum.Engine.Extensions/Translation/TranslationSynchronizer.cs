@@ -40,7 +40,7 @@ namespace Signum.Engine.Translation
                 var ltt = target.Types.TryGetC(kvp.Key);
 
                 var count = (ltm.Description != null && ltt?.Description == null ? 1 : 0) +
-                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt.Members!.TryGetC(kvp2.Key) == null);
+                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt?.Members!.TryGetC(kvp2.Key) == null);
 
                 return new { Type = kvp.Key, count };
             })

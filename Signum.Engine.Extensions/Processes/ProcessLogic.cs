@@ -464,7 +464,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string? str)
+        public static void WriteLineColor(this ExecutingProcess? ep, ConsoleColor color, string? str)
         {
             if (ep != null)
             {

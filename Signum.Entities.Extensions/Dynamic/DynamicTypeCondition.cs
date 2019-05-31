@@ -16,7 +16,7 @@ namespace Signum.Entities.Dynamic
         
         public TypeEntity EntityType { get; set; }
 
-        [InTypeScript(Undefined = false, Null = false)]
+        [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicTypeConditionEval Eval { get; set; }
 
         static Expression<Func<DynamicTypeConditionEntity, string>> ToStringExpression = @this => (@this.EntityType == null ? "" : @this.EntityType.CleanName + " : ") + @this.SymbolName;
@@ -40,7 +40,7 @@ namespace Signum.Entities.Dynamic
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()!).EntityType.ToType().FullName;
+            var entityTypeName = this.GetParentEntity<DynamicTypeConditionEntity>().EntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +

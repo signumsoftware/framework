@@ -24,7 +24,7 @@ export default function QueryModelComponent(p : QueryModelComponentProps){
       <p>{QueryModelMessage.ConfigureYourQueryAndPressSearchBeforeOk.niceToString()}</p>
       <SearchControl ref={searchControl}
         hideButtonBar={true}
-        showContextMenu="Basic"
+        showContextMenu={fo => "Basic"}
         allowSelection={false}
         findOptions={{ queryName: ctx.value.queryKey }}
         onSearch={handleOnSearch} />

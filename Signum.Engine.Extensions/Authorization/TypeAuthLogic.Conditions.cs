@@ -279,9 +279,9 @@ namespace Signum.Engine.Authorization
         {
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
+                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
 
-                bool inUserInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2]) : ExecutionMode.InUserInterface;
+                bool inUserInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2])! : ExecutionMode.InUserInterface;
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
@@ -348,9 +348,9 @@ namespace Signum.Engine.Authorization
         {
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
+                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
 
-                bool inUserInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2]) : ExecutionMode.InUserInterface;
+                bool inUserInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2])! : ExecutionMode.InUserInterface;
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
@@ -453,8 +453,8 @@ namespace Signum.Engine.Authorization
         {
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
-                bool inUserInterface = (bool)ExpressionEvaluator.Eval(arguments[2]);
+                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
+                bool inUserInterface = (bool)ExpressionEvaluator.Eval(arguments[2])!;
 
                 return miCallWhereIsAllowedFor.GetInvoker(mi.GetGenericArguments())(arguments[0], allowed, inUserInterface);
             }

@@ -97,7 +97,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
       e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
+      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red" }));
   }
 
   if (options.operations) {
@@ -118,7 +118,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
       e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
+      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange" }));
   }
 
   OmniboxClient.registerSpecialAction({
@@ -386,7 +386,7 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
   return member.permissionAllowed;
 }
 
-export function asserPermissionAuthorized(permission: PermissionSymbol | string) {
+export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
   var key = (permission as PermissionSymbol).key || permission as string;
   if (!isPermissionAuthorized(key))
     throw new Error(`Permission ${key} is denied`);

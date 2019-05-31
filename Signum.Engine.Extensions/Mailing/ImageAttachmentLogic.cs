@@ -63,7 +63,7 @@ namespace Signum.Engine.Mailing
 
         static string? ImageAttachmentFileName_StaticPropertyValidation(ImageAttachmentEntity WordAttachment, PropertyInfo pi)
         {
-            var template = (EmailTemplateEntity)WordAttachment.GetParentEntity()!;
+            var template = WordAttachment.TryGetParentEntity<EmailTemplateEntity>()!;
             if (template != null && WordAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
             {
                 try

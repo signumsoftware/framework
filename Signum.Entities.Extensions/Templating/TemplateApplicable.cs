@@ -13,7 +13,7 @@ namespace Signum.Entities.Templating
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var parentEntity = this.GetParentEntity()!;
+            var parentEntity = this.TryGetParentEntity<Entity>()!;
             var query = 
                 parentEntity is WordTemplateEntity wt ? wt.Query :
                 parentEntity is EmailTemplateEntity et ? et.Query :

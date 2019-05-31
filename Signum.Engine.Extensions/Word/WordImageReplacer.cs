@@ -14,69 +14,41 @@ using System.Linq;
 
 namespace Signum.Engine.Word
 {
-    public class WordImageReplacer
+    public static class WordImageReplacer
     {
         public static bool AvoidAdaptSize = false; //Jpeg compression creates different images in TeamCity
 
         /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
-        public static void ReplaceImage(WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, bool allowMultiple = false, ImagePartType imagePartType = ImagePartType.Png)
+        public static void ReplaceImage(this WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
         {
-            Blip blip = FindBlip(doc, titleOrDescription);
+            var blip = doc.FindBlip(titleOrDescription);
 
-            if (adaptSize && !AvoidAdaptSize)
+            if (adaptSize && AvoidAdaptSize == false)
             {
-                var part = doc.MainDocumentPart.GetPartById(blip.Embed);
-
-                using (var stream = part.GetStream())
-                {
-                    Bitmap oldBmp = (Bitmap)Bitmap.FromStream(stream);
-
-                    bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
-                }
+                var size = doc.GetBlipBitmapSize(blip);
+                bitmap = ImageResizer.Resize(bitmap, size.Width, size.Height);
             }
 
-            doc.MainDocumentPart.DeletePart(blip.Embed);
+            doc.ReplaceBlipContent(blip, bitmap, newImagePartId, imagePartType);
+        }
 
+        public static Size GetBlipBitmapSize(this WordprocessingDocument doc, Blip blip)
+        {
+            var part = doc.MainDocumentPart.GetPartById(blip.Embed);
+
+            using (var str = part.GetStream())
+                return Bitmap.FromStream(str).Size;
+        }
+
+        public static void ReplaceBlipContent(this WordprocessingDocument doc, Blip blip, Bitmap bitmap, string newImagePartId, ImagePartType imagePartType = ImagePartType.Png)
+        {
+            if (doc.MainDocumentPart.Parts.Any(p => p.RelationshipId == blip.Embed))
+                doc.MainDocumentPart.DeletePart(blip.Embed);
             ImagePart img = CreateImagePart(doc, bitmap, newImagePartId, imagePartType);
-
             blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
         }
 
-        /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
-        public static void ReplaceMultipleImages(WordprocessingDocument doc, string titleOrDescription, Bitmap[] bitmaps, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
-        {
-            Blip[] blips = FindAllBlips(doc, titleOrDescription);
-
-            if (blips.Count() != bitmaps.Length)
-                throw new ApplicationException("Images count does not match the images count in word");
-
-            if (adaptSize && !AvoidAdaptSize)
-            {
-                Array.ForEach(bitmaps, bitmap =>
-                {
-                    var part = doc.MainDocumentPart.GetPartById(blips.First().Embed);
-
-                    using (var stream = part.GetStream())
-                    {
-                        Bitmap oldBmp = (Bitmap)Bitmap.FromStream(stream);
-                        bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
-                    }
-                });
-            }
-
-            doc.MainDocumentPart.DeletePart(blips.First().Embed);
-
-            var i = 0;
-            var bitmapStack = new Stack<Bitmap>(bitmaps.Reverse());
-            foreach (var blip in blips)
-            {
-                ImagePart img = CreateImagePart(doc, bitmapStack.Pop(), newImagePartId + i, imagePartType);
-                blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
-                i++;
-            }
-        }
-
-        public static void RemoveImage(WordprocessingDocument doc, string title, bool removeFullDrawing)
+        public static void RemoveImage(this WordprocessingDocument doc, string title, bool removeFullDrawing)
         {
             Blip blip = FindBlip(doc, title);
             doc.MainDocumentPart.DeletePart(blip.Embed);
@@ -87,7 +59,7 @@ namespace Signum.Engine.Word
                 blip.Remove();
         }
 
-        static ImagePart CreateImagePart(WordprocessingDocument doc, Bitmap bitmap, string id, ImagePartType imagePartType = ImagePartType.Png)
+        static ImagePart CreateImagePart(this WordprocessingDocument doc, Bitmap bitmap, string id, ImagePartType imagePartType = ImagePartType.Png)
         {
             ImagePart img = doc.MainDocumentPart.AddImagePart(imagePartType, id);
 
@@ -117,7 +89,7 @@ namespace Signum.Engine.Word
             throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
         }
 
-        static Blip FindBlip(WordprocessingDocument doc, string titleOrDescription)
+        public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription)
         {
             var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().Single(r =>
             {
@@ -130,15 +102,12 @@ namespace Signum.Engine.Word
             return drawing.Descendants<Blip>().SingleEx();
         }
 
-        static Blip[] FindAllBlips(WordprocessingDocument doc, string titleOrDescription)
+        public static Blip[] FindAllBlips(this WordprocessingDocument doc, Func<DocProperties, bool> predicate)
         {
-            var i = 0;
             var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().Where(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
-                var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
-                prop.Title += i;
-                i++;
+                var match = prop != null && predicate(prop);
 
                 return match;
             });
@@ -149,23 +118,30 @@ namespace Signum.Engine.Word
 
     public static class ImageResizer
     {
+
         //http://stackoverflow.com/a/10445101/38670
-        public static Bitmap Resize(Bitmap image, int width, int height)
+        public static Bitmap Resize(Bitmap image, int? maxWidth, int? maxHeight)
         {
             var brush = new SolidBrush(System.Drawing.Color.White);
 
-            float scale = Math.Min(width / (float)image.Width, height / (float)image.Height);
+            float scale = maxWidth.HasValue && maxHeight.HasValue ? Math.Min(maxWidth.Value / (float)image.Width, maxHeight.Value / (float)image.Height) :
+                maxHeight.HasValue ? maxHeight.Value / (float)image.Height :
+                maxWidth.HasValue ? maxWidth.Value / (float)image.Width :
+                throw new ArgumentNullException("maxWidth and maxHeight");
 
-            var bmp = new Bitmap((int)width, (int)height);
+            int scaleWidth = (int)(image.Width * scale);
+            int scaleHeight = (int)(image.Height * scale);
+
+            int width = maxWidth ?? scaleWidth;
+            int height = maxHeight ?? scaleHeight;
+
+            var bmp = new Bitmap(width, height);
             var graph = Graphics.FromImage(bmp);
 
             // uncomment for higher quality output
             graph.InterpolationMode = InterpolationMode.High;
             graph.CompositingQuality = CompositingQuality.HighQuality;
             graph.SmoothingMode = SmoothingMode.AntiAlias;
-
-            var scaleWidth = (int)(image.Width * scale);
-            var scaleHeight = (int)(image.Height * scale);
 
             graph.FillRectangle(brush, new RectangleF(0, 0, width, height));
             graph.DrawImage(image, new System.Drawing.Rectangle(((int)width - scaleWidth) / 2, ((int)height - scaleHeight) / 2, scaleWidth, scaleHeight));

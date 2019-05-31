@@ -23,11 +23,7 @@ namespace Signum.Entities.Files
 
         static string UrlEncodeSpaces(string str)
         {
-            if ((str != null) && (str.IndexOf(' ') >= 0))
-            {
-                str = str.Replace(" ", "%20");
-            }
-            return str;
+            return str.Replace(" ", "%20");
         }
 
         static string UrlEncodeNonAscii(string str, Encoding e)

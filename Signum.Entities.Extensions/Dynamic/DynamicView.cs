@@ -3,7 +3,9 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Entities.Dynamic
 {
@@ -13,8 +15,13 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, Max = 100)]
         public string ViewName { get; set; } = "Default";
 
-        
         public TypeEntity EntityType { get; set; }
+
+        [PreserveOrder]
+        public MList<DynamicViewPropEmbedded> Props { get; set; } = new MList<DynamicViewPropEmbedded>();
+
+        [StringLengthValidator(Max = int.MaxValue, MultiLine = true)]
+        public string? Locals { get; set; }
 
         [StringLengthValidator(Min = 3)]
         public string ViewContent { get; set; }
@@ -25,6 +32,48 @@ namespace Signum.Entities.Dynamic
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(Props))
+                return NoRepeatValidatorAttribute.ByKey(Props, a => a.Name);
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    [Serializable]
+    public class DynamicViewPropEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Max = 100), IdentifierValidator(IdentifierType.Ascii)]
+        public string Name { get; set; }
+
+        [StringLengthValidator(Max = 100)]
+        public string Type { get; set; }
+
+        static string[] ForbiddenNames = new string[]
+        {
+            "ctx",
+            "initialDynamicView",
+            "ref",
+            "key",
+            "children"
+        };
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+
+            if(pi.Name == nameof(Name) && Name.HasText())
+            {
+                if(Name != Name.FirstLower())
+                    return DynamicViewValidationMessage._0ShouldStartByLowercase.NiceToString(pi.NiceName());
+
+                if (ForbiddenNames.Contains(Name))
+                    return DynamicViewValidationMessage._0CanNotBe1.NiceToString(pi.NiceName(), Name);
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 
@@ -144,5 +193,7 @@ namespace Signum.Entities.Dynamic
         ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity,
 
         ViewNameIsNotAllowedWhileHavingChildren,
+        _0ShouldStartByLowercase,
+        _0CanNotBe1,
     }
 }

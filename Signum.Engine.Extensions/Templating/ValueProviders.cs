@@ -39,6 +39,10 @@ namespace Signum.Engine.Templating
         
         public abstract Type? Type { get; }
 
+        public abstract override bool Equals(object obj);
+
+        public abstract override int GetHashCode();
+
         public abstract void FillQueryTokens(List<QueryToken> list);
 
         public abstract void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables);
@@ -72,9 +76,16 @@ namespace Signum.Engine.Templating
         public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
             if (Variable.HasText())
-                variables.Add(Variable, this);
+            {
+                if(variables.TryGetValue(Variable, out var value))
+                {
+                    if (value != null && value.Equals(this))
+                        return;
+
+                    variables.Add(Variable, this);
+                }
+            } 
         }
-        
 
         public virtual void Foreach(TemplateParameters p, Action forEachElement)
         {
@@ -200,6 +211,9 @@ namespace Signum.Engine.Templating
         public readonly ParsedToken ParsedToken;
         public readonly bool IsExplicit;
 
+        public override int GetHashCode() => ParsedToken.GetHashCode();
+        public override bool Equals(object obj) => obj is TokenValueProvider tvp && tvp.ParsedToken.Equals(ParsedToken);
+
         public TokenValueProvider (ParsedToken token, bool isExplicit)
         {
             this.ParsedToken = token;
@@ -264,7 +278,8 @@ namespace Signum.Engine.Templating
         public readonly QueryToken? EntityToken;
         public readonly PropertyRoute? Route;
         public readonly bool IsExplicit;
-        
+
+
 
         public TranslateInstanceValueProvider(ParsedToken token, bool isExplicit, Action<bool, string> addError)
         {
@@ -348,6 +363,13 @@ namespace Signum.Engine.Templating
         {
             get { return typeof(string); }
         }
+
+        public override int GetHashCode() => ParsedToken.GetHashCode();
+        public override bool Equals(object obj) => obj is TranslateInstanceValueProvider tivp &&
+            Equals(tivp.ParsedToken, ParsedToken) &&
+            Equals(tivp.EntityToken, EntityToken) &&
+            Equals(tivp.Route, Route) &&
+            Equals(tivp.IsExplicit, IsExplicit);
     }
 
 
@@ -430,12 +452,16 @@ namespace Signum.Engine.Templating
 
             return SimplifyToken(variables, QueryToken.FullKey());
         }
+
+        public override int GetHashCode() => (this.QueryToken?.FullKey() ?? this.String).GetHashCode();
+        public override bool Equals(object obj) => obj is ParsedToken pt && Equals(pt.String, String) && Equals(pt.QueryToken, QueryToken);
     }
 
     public class ModelValueProvider : ValueProviderBase
     {
         string? fieldOrPropertyChain;
         List<MemberInfo>? Members;
+
 
         public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, PropertyInfo modelProperty, Action<bool, string> addError)
         {
@@ -510,6 +536,9 @@ namespace Signum.Engine.Templating
 
             Declare(sc.Variables);
         }
+
+        public override int GetHashCode() => fieldOrPropertyChain?.GetHashCode() ?? 0;
+        public override bool Equals(object obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
     }
 
     public class GlobalValueProvider : ValueProviderBase
@@ -624,6 +653,11 @@ namespace Signum.Engine.Templating
 
             Declare(sc.Variables);
         }
+
+        public override int GetHashCode() => globalKey.GetHashCode() + (remainingFieldsOrProperties?.GetHashCode() ?? 0);
+        public override bool Equals(object obj) => obj is GlobalValueProvider gvp 
+            && Equals(gvp.globalKey, globalKey)
+            && Equals(gvp.remainingFieldsOrProperties, remainingFieldsOrProperties);
     }
 
     public class DateValueProvider : ValueProviderBase
@@ -666,6 +700,10 @@ namespace Signum.Engine.Templating
         }
 
         public override string? Format => "G";
+
+        public override int GetHashCode() => dateTimeExpression?.GetHashCode() ?? 0;
+        public override bool Equals(object obj) => obj is DateValueProvider gvp
+            && Equals(gvp.dateTimeExpression, dateTimeExpression);
 
     }
 
@@ -755,5 +793,10 @@ namespace Signum.Engine.Templating
 
             Declare(sc.Variables);
         }
+
+        public override int GetHashCode() => (fieldOrPropertyChain?.GetHashCode() ?? 0) ^ this.Parent.GetHashCode();
+        public override bool Equals(object obj) => obj is ContinueValueProvider gvp
+            && Equals(gvp.fieldOrPropertyChain, fieldOrPropertyChain)
+            && Equals(gvp.Parent, Parent);
     }
 }

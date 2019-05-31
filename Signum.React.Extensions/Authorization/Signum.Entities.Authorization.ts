@@ -20,6 +20,7 @@ export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConf
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
   domainName: string | null;
+  domainServer: string | null;
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {

@@ -73,10 +73,10 @@ namespace Signum.Entities.Dynamic
                 {
                     try
                     {
-                        var tree = SyntaxFactory.ParseSyntaxTree(code);
+                        var tree = SyntaxFactory.ParseSyntaxTree(code, options: new CSharpParseOptions(LanguageVersion.CSharp8));
                         
                         var compilation = CSharpCompilation.Create($"{Guid.NewGuid()}.dll")
-                         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
                          .AddReferences(references)
                          .AddSyntaxTrees(tree);
 
