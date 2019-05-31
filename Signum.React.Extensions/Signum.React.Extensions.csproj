@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <TypeScriptToolsVersion>3.4</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>3.5</TypeScriptToolsVersion>
     <LangVersion>8.0</LangVersion>
     <OutputType>Library</OutputType>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.4.5">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

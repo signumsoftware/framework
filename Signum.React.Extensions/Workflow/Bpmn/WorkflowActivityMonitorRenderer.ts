@@ -6,7 +6,6 @@ import { CustomRenderer } from './CustomRenderer'
 import { WorkflowActivityStats, WorkflowActivityMonitor, durationFormat } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
-import "moment-duration-format"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
 import { QueryToken } from "@framework/FindOptions";
 import { is } from "@framework/Signum.Entities";

@@ -7,7 +7,6 @@ import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseActivityStats, durationFormat } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
-import "moment-duration-format"
 
 export class CaseFlowRenderer extends CustomRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
