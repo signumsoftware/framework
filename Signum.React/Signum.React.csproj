@@ -9,7 +9,13 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;win64</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='win64'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
