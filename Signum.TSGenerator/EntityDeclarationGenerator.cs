@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -556,6 +556,9 @@ namespace Signum.TSGenerator
                 return "string";
 
             if (type.FullName == typeof(DateTime).FullName)
+                return "string";
+
+            if (type.FullName == typeof(DateTimeOffset).FullName)
                 return "string";
 
             if (type.FullName == typeof(Guid).FullName ||
