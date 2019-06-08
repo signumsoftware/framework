@@ -372,6 +372,11 @@ namespace Signum.React.Json
             if (newValue is DateTime && oldValue is DateTime)
                 return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //JSon dates get rounded
 
+
+            if (newValue is DateTimeOffset && oldValue is DateTimeOffset)
+                return Math.Abs(((DateTimeOffset)newValue).Subtract((DateTimeOffset)oldValue).TotalMilliseconds) < 10; //JSon dates get rounded
+
+
             return object.Equals(newValue, oldValue);
         }
 
