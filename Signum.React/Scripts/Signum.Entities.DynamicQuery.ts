@@ -43,7 +43,6 @@ export type FilterType =
   "Decimal" |
   "String" |
   "DateTime" |
-  "DateTimeOffset" |
   "Lite" |
   "Embedded" |
   "Boolean" |
