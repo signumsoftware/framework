@@ -27,7 +27,7 @@ namespace Signum.Entities
 
         public static Func<ModifiableEntity, PropertyInfo, string?> GlobalValidation { get; set; }
 
-        static Polymorphic<Dictionary<string, IPropertyValidator>> validators =
+        static readonly Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
 
         static void GenerateType(Type type)
@@ -35,7 +35,7 @@ namespace Signum.Entities
             giGenerateType.GetInvoker(type)();
         }
 
-        static GenericInvoker<Action> giGenerateType =
+        static readonly GenericInvoker<Action> giGenerateType =
             new GenericInvoker<Action>(() => GenerateType<ModifiableEntity>());
 
         static void GenerateType<T>() where T : ModifiableEntity
