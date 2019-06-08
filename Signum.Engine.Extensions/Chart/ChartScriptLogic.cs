@@ -11,7 +11,7 @@ using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
-using Signum.Logic.Chart.Scripts;
+using Signum.Engine.Chart.Scripts;
 
 namespace Signum.Engine.Chart
 {
