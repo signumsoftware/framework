@@ -293,11 +293,12 @@ namespace Signum.Engine.Maps
                         foreach (var item in table.Mixins.Values)
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
-                    Func<string, bool, string> sqlInsertPattern = (suffix, output) =>
-                        "INSERT {0} ({1})\r\n{2} VALUES ({3})".FormatWith(table.Name,
-                        trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
-                        output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
-                        trios.ToString(p => p.ParameterName + suffix, ", "));
+                    Func<string, bool, string> sqlInsertPattern =  = (suffix, output) =>
+                  "INSERT {0} ({1})\r\n{2} VALUES ({3})".FormatWith(
+                  table.Name,
+                  trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
+                  output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
+                  trios.ToString(p => p.ParameterName + suffix, ", "));
 
 
                     var expr = Expression.Lambda<Func<Entity, Forbidden, string, List<DbParameter>>>(
@@ -610,37 +611,57 @@ namespace Signum.Engine.Maps
 
         ResetLazy<CollectionsCache?> saveCollections;
 
+        
+        private SqlPreCommand GetCollections(Entity ident, bool includeCollections , string suffix )
+        {
+            if (!includeCollections)
+                return null;
+
+            var cc = saveCollections.Value;
+            if (cc == null)
+                return null;
+
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix, false);
+            return collections;
+        }
 
         public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "")
         {
             PrepareEntitySync(ident);
             SetToStrField(ident);
 
+            SqlPreCommand collections = GetCollections(ident, includeCollections, suffix);
+
             SqlPreCommandSimple insert = IdentityBehaviour ?
                 new SqlPreCommandSimple(
-                    inserterIdentity.Value.SqlInsertPattern(suffix, false),
+                    inserterIdentity.Value.SqlInsertPattern(suffix, collections != null),
                     inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix)).AddComment(comment) :
                 new SqlPreCommandSimple(
                     inserterDisableIdentity.Value.SqlInsertPattern(suffix),
                     inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix)).AddComment(comment);
 
-            if (!includeCollections)
-                return insert;
-
-            var cc = saveCollections.Value;
-            if (cc == null)
-                return insert;
-
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix, false);
-
             if (collections == null)
                 return insert;
 
-            SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId INT") { GoBefore = true };
 
-            SqlPreCommand setParent = new SqlPreCommandSimple("SET @parentId = @@Identity");
 
-            return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections)!;
+            if (this.PrimaryKey.SqlDbType == SqlDbType.UniqueIdentifier)
+            {
+                SqlPreCommand idTable = new SqlPreCommandSimple("DECLARE @MyTable  table (Id UNIQUEIDENTIFIER)") { GoBefore = true };
+
+                SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId UNIQUEIDENTIFIER");
+                SqlPreCommand setParent = new SqlPreCommandSimple("SELECT @parentId= ID FROM @MyTable");
+
+                return SqlPreCommand.Combine(Spacing.Simple, idTable, insert, declareParent, setParent, collections);
+            }
+            else
+            {
+
+                SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId INT") { GoBefore = true };
+                SqlPreCommand setParent = new SqlPreCommandSimple("SET @parentId = @@Identity");
+
+                return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections);
+            }
         }
 
         public SqlPreCommand? UpdateSqlSync<T>(T entity, Expression<Func<T, bool>>? where, bool includeCollections = true, string? comment = null, string suffix = "")

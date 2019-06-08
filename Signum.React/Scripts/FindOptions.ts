@@ -390,6 +390,18 @@ filterOperations["DateTime"] = [
   "IsNotIn"
 ];
 
+
+filterOperations["DateTimeOffset"] = [
+  "EqualTo",
+  "DistinctTo",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "IsIn",
+  "IsNotIn"
+];
+
 filterOperations["Integer"] = [
   "EqualTo",
   "DistinctTo",

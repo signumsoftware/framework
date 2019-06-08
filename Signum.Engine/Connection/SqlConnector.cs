@@ -625,6 +625,7 @@ DECLARE @sql nvarchar(255)
 declare cur cursor fast_forward for
 select distinct table_schema, table_name
 from information_schema.tables where table_type = 'VIEW'
+and table_schema not in ({0})
 open cur
     fetch next from cur into @schema, @view
     while @@fetch_status <> -1
@@ -697,7 +698,7 @@ deallocate cur";
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
-                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript).FormatWith(schemas)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
                 Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),

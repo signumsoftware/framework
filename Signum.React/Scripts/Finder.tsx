@@ -226,6 +226,7 @@ export function getSimpleTypeNiceName(name: string) {
     case "guid":
       return QueryTokenMessage.Text.niceToString();
     case "datetime": return QueryTokenMessage.DateTime.niceToString();
+    case "datetimeoffset": return QueryTokenMessage.DateTimeOffset.niceToString();
     case "number": return QueryTokenMessage.Number.niceToString();
     case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
     case "boolean": return QueryTokenMessage.Check.niceToString();
@@ -919,6 +920,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     case "Integer": return nanToNull(parseInt(val));
     case "Decimal": return nanToNull(parseFloat(val));
     case "DateTime": return val == null ? null : val;
+    case "DateTimeOffset": return val == null ? null : val;
     case "Lite":
       {
         const lite = convertToLite(val);
@@ -1320,6 +1322,7 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  entity?: Lite<Entity>;
 }
 
 
@@ -1380,6 +1383,14 @@ export const formatRules: FormatRule[] = [
   {
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
+    formatter: col => {
+      const momentFormat = toMomentFormat(col.token!.format);
+      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+    }
+  },
+  {
+    name: "DateOffset",
+    isApplicable: col => col.token!.filterType == "DateTimeOffset",
     formatter: col => {
       const momentFormat = toMomentFormat(col.token!.format);
       return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures

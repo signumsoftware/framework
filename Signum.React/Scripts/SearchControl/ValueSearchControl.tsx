@@ -212,6 +212,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       case "DateTime":
         const momentFormat = toMomentFormat(this.props.format || token.format);
         return moment(value).format(momentFormat);
+      case "DateTimeOffset":
+        const momentFormatOffset = toMomentFormat(this.props.format || token.format);
+        return moment(value).format(momentFormatOffset);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);

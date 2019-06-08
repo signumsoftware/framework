@@ -43,6 +43,7 @@ export type FilterType =
   "Decimal" |
   "String" |
   "DateTime" |
+  "DateTimeOffset" |
   "Lite" |
   "Embedded" |
   "Boolean" |
@@ -70,6 +71,7 @@ export module QueryTokenMessage {
   export const Count = new MessageKey("QueryTokenMessage", "Count");
   export const Date = new MessageKey("QueryTokenMessage", "Date");
   export const DateTime = new MessageKey("QueryTokenMessage", "DateTime");
+  export const DateTimeOffset = new MessageKey("QueryTokenMessage", "DateTimeOffset");
   export const Day = new MessageKey("QueryTokenMessage", "Day");
   export const DayOfWeek = new MessageKey("QueryTokenMessage", "DayOfWeek");
   export const DayOfYear = new MessageKey("QueryTokenMessage", "DayOfYear");
@@ -106,6 +108,13 @@ export module QueryTokenMessage {
   export const Not = new MessageKey("QueryTokenMessage", "Not");
   export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
 }
+
+export const RoundingType = new EnumType<RoundingType>("RoundingType");
+export type RoundingType =
+  "Floor" |
+  "Ceil" |
+  "Round" |
+  "RoundMiddle";
 
 export const SystemTimeMode = new EnumType<SystemTimeMode>("SystemTimeMode");
 export type SystemTimeMode =

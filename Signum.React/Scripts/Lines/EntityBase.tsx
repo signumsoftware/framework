@@ -168,9 +168,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         if (e == undefined)
           return;
 
-        //Modifying the sub entity, saving and coming back should change the entity in the UI (ToString, or EntityDetails), 
-        //the parent entity is not really modified, but I'm not sure it his is a real problem in practice, till then the line is commented out
-        //if (e.modified || !is(e, entity)) 
+        if (e.modified || !is(e, entity)
+          || ((entity as Lite<Entity>) && e.toStr != (entity as Lite<Entity>).toStr)
+          || ((entity as Entity) && e.toStr != (entity as Entity).toStr))
           this.convert(e).then(m => this.setValue(m)).done();
       }).done();
     }
