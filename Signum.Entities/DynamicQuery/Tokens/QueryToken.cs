@@ -453,6 +453,8 @@ namespace Signum.Entities.DynamicQuery
         Date,
         [Description("date and time")]
         DateTime,
+        [Description("date and time with time zone")]
+        DateTimeOffset,
         Day,
         DayOfWeek,
         DayOfYear,

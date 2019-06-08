@@ -60,9 +60,6 @@ namespace Signum.React.Filters
 
                     if (ExpectsJsonResult(context))
                     {
-
-                       
-
                         var error = new HttpError(context.Exception,IncludeErrorDetails(context.Exception));
 
                         var response = context.HttpContext.Response;
@@ -106,8 +103,7 @@ namespace Signum.React.Filters
 
         private object? TryGetProp(HttpContext context, string key)
         {
-            object? result;
-            context.Items.TryGetValue(key, out result);
+            context.Items.TryGetValue(key, out object? result);
             return result;
         }
 
@@ -133,22 +129,22 @@ namespace Signum.React.Filters
 
     public class HttpError
     {
-        public HttpError(Exception e, bool includeErrorDetails=true)
+        public HttpError(Exception e, bool includeErrorDetails = true)
         {
             this.ExceptionMessage = e.Message;
             this.ExceptionType = e.GetType().FullName;
             if (includeErrorDetails)
             {
-                this.StackTrace = e.StackTrace;
                 this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
+                this.StackTrace = e.StackTrace;
                 this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
             }
         }
 
-        public string? ExceptionId;
-        public string ExceptionMessage;
         public string ExceptionType;
-        public string StackTrace;
+        public string ExceptionMessage;
+        public string? ExceptionId;
+        public string? StackTrace;
         public HttpError? InnerException;
     }
 }

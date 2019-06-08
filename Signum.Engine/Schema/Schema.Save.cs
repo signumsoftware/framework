@@ -293,12 +293,12 @@ namespace Signum.Engine.Maps
                         foreach (var item in table.Mixins.Values)
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
-                    Func<string, bool, string> sqlInsertPattern =  = (suffix, output) =>
-                  "INSERT {0} ({1})\r\n{2} VALUES ({3})".FormatWith(
-                  table.Name,
-                  trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
-                  output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
-                  trios.ToString(p => p.ParameterName + suffix, ", "));
+                    Func<string, bool, string> sqlInsertPattern = (suffix, output) =>
+                    "INSERT {0} ({1})\r\n{2} VALUES ({3})".FormatWith(
+                    table.Name,
+                    trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
+                    output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
+                    trios.ToString(p => p.ParameterName + suffix, ", "));
 
 
                     var expr = Expression.Lambda<Func<Entity, Forbidden, string, List<DbParameter>>>(
@@ -612,7 +612,7 @@ namespace Signum.Engine.Maps
         ResetLazy<CollectionsCache?> saveCollections;
 
         
-        private SqlPreCommand GetCollections(Entity ident, bool includeCollections , string suffix )
+        private SqlPreCommand? GetCollections(Entity ident, bool includeCollections , string suffix )
         {
             if (!includeCollections)
                 return null;
@@ -630,7 +630,7 @@ namespace Signum.Engine.Maps
             PrepareEntitySync(ident);
             SetToStrField(ident);
 
-            SqlPreCommand collections = GetCollections(ident, includeCollections, suffix);
+            SqlPreCommand? collections = GetCollections(ident, includeCollections, suffix);
 
             SqlPreCommandSimple insert = IdentityBehaviour ?
                 new SqlPreCommandSimple(
@@ -652,15 +652,14 @@ namespace Signum.Engine.Maps
                 SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId UNIQUEIDENTIFIER");
                 SqlPreCommand setParent = new SqlPreCommandSimple("SELECT @parentId= ID FROM @MyTable");
 
-                return SqlPreCommand.Combine(Spacing.Simple, idTable, insert, declareParent, setParent, collections);
+                return SqlPreCommand.Combine(Spacing.Simple, idTable, insert, declareParent, setParent, collections)!;
             }
             else
             {
-
                 SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId INT") { GoBefore = true };
                 SqlPreCommand setParent = new SqlPreCommandSimple("SET @parentId = @@Identity");
 
-                return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections);
+                return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections)!;
             }
         }
 
@@ -741,7 +740,7 @@ namespace Signum.Engine.Maps
                 return "{0} {1} {2}".FormatWith(SourceColumn, ParameterName, ParameterBuilder.ToString());
             }
 
-            static MethodInfo miConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
+            static readonly MethodInfo miConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
             internal static Expression Concat(string baseName, Expression suffix)
             {
@@ -1262,9 +1261,9 @@ namespace Signum.Engine.Maps
 
     public static partial class FieldReferenceExtensions
     {
-        static MethodInfo miGetIdForLite = ReflectionTools.GetMethodInfo(() => GetIdForLite(null!, new Forbidden()));
-        static MethodInfo miGetIdForEntity = ReflectionTools.GetMethodInfo(() => GetIdForEntity(null!, new Forbidden()));
-        static MethodInfo miGetIdForLiteCleanEntity = ReflectionTools.GetMethodInfo(() => GetIdForLiteCleanEntity(null!, new Forbidden()));
+        static readonly MethodInfo miGetIdForLite = ReflectionTools.GetMethodInfo(() => GetIdForLite(null!, new Forbidden()));
+        static readonly MethodInfo miGetIdForEntity = ReflectionTools.GetMethodInfo(() => GetIdForEntity(null!, new Forbidden()));
+        static readonly MethodInfo miGetIdForLiteCleanEntity = ReflectionTools.GetMethodInfo(() => GetIdForLiteCleanEntity(null!, new Forbidden()));
 
         public static void AssertIsLite(this IFieldReference fr)
         {
@@ -1392,7 +1391,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        static MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null!));
+        static readonly MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null!));
 
         Type? CheckType(Type? type)
         {
@@ -1456,7 +1455,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        static MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null!));
+        static readonly MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null!));
         object CheckNull(object obj)
         {
             if (obj == null)
