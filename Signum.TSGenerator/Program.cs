@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,26 +9,10 @@ namespace Signum.TSGenerator
 {
     public static class Program
     {
-
-
-        public static string FixString(this string cadena )
-        {
-            return cadena.Replace("\\win-x64\\", "\\")
-                  .Replace("\\win-x86\\", "\\")
-                  .Replace("\\win-x64\\", "\\")
-                  .Replace("\\osx-x64\\", "\\")
-                  .Replace("\\linux-x64\\", "\\");
-
-        }
-
-
         public static int Main(string[] args)
         {
-            string projectFile = args[0].FixString();
-            string[] references = File.ReadAllLines(args[1]).Select(r => r.FixString()).ToArray();
-
-            //string projectFile = args[0];
-            //string[] references = File.ReadAllLines(args[1]);
+            string projectFile = args[0];
+            string[] references = File.ReadAllLines(args[1]);
             string[] content = File.ReadAllLines(args[2]);
 
             var log = Console.Out;

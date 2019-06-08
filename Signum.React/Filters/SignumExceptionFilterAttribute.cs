@@ -101,12 +101,6 @@ namespace Signum.React.Filters
             return Encoding.UTF8.GetString(httpContext.Request.Body.ReadAllBytes());
         }
 
-        private object? TryGetProp(HttpContext context, string key)
-        {
-            context.Items.TryGetValue(key, out object? result);
-            return result;
-        }
-
         private HttpStatusCode GetStatus(Type type)
         {
             if (type == typeof(UnauthorizedAccessException))

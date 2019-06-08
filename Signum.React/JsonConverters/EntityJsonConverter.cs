@@ -278,7 +278,7 @@ namespace Signum.React.Json
                 {
                     reader.Assert(JsonToken.StartObject);
 
-                    ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out bool markedAsModified);
+                    ModifiableEntity mod = GetEntity(reader, objectType, existingValue, out bool markedAsModified);
 
                     var pr = GetCurrentPropertyRoute(mod);
 
@@ -392,12 +392,10 @@ namespace Signum.React.Json
                 return MemCompare.Compare((byte[])newValue, (byte[])oldValue);
 
             if (newValue is DateTime && oldValue is DateTime)
-                return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //JSon dates get rounded
-
+                return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
 
             if (newValue is DateTimeOffset && oldValue is DateTimeOffset)
-                return Math.Abs(((DateTimeOffset)newValue).Subtract((DateTimeOffset)oldValue).TotalMilliseconds) < 10; //JSon dates get rounded
-
+                return Math.Abs(((DateTimeOffset)newValue).Subtract((DateTimeOffset)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
 
             return object.Equals(newValue, oldValue);
         }
@@ -411,7 +409,7 @@ namespace Signum.React.Json
                 throw new UnauthorizedAccessException(error);
         }
 
-        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer, out bool isModified)
+        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, out bool isModified)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
             isModified = identityInfo.Modified == true;
