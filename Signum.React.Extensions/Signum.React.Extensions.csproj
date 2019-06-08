@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.TSGenerator" Version="2.0.1" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
