@@ -64,8 +64,7 @@ namespace Signum.Engine.Maps
         };
 
         internal Dictionary<Type, string>? desambiguatedNames;
-
-        Dictionary<SqlDbType, int> defaultSize = new Dictionary<SqlDbType, int>()
+        readonly Dictionary<SqlDbType, int> defaultSize = new Dictionary<SqlDbType, int>()
         {
             {SqlDbType.NVarChar, 200},
             {SqlDbType.VarChar, 200},
@@ -76,7 +75,7 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 18},
         };
 
-        Dictionary<SqlDbType, int> defaultScale = new Dictionary<SqlDbType, int>()
+        readonly Dictionary<SqlDbType, int> defaultScale = new Dictionary<SqlDbType, int>()
         {
             {SqlDbType.Decimal, 2},
         };
@@ -382,9 +381,8 @@ namespace Signum.Engine.Maps
 
     public class AttributeCollection : Collection<Attribute>
     {
-        AttributeTargets Targets;
-
-        Action assertNotIncluded;
+        readonly AttributeTargets Targets;
+        readonly Action assertNotIncluded;
 
         public AttributeCollection(AttributeTargets targets, IList<Attribute> attributes, Action assertNotIncluded):base(attributes)
         {
@@ -402,7 +400,7 @@ namespace Signum.Engine.Maps
             base.InsertItem(index, item);
         }
 
-        static Dictionary<Type, AttributeUsageAttribute> AttributeUssageCache = new Dictionary<Type, AttributeUsageAttribute>();
+        static readonly Dictionary<Type, AttributeUsageAttribute> AttributeUssageCache = new Dictionary<Type, AttributeUsageAttribute>();
 
         public static bool IsCompatibleWith(Attribute a, AttributeTargets targets)
         {
