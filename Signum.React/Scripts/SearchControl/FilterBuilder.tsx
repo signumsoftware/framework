@@ -372,6 +372,9 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
         f.value = f.value && this.trimDateToFormat(f.value, toMomentFormat(newToken.format));
       }
+      else if (f.token && f.token.filterType == "DateTimeOffset" && newToken.filterType == "DateTimeOffset" && newToken.format && f.token.format != newToken.format) {
+        f.value = f.value && this.trimDateToFormat(f.value, toMomentFormat(newToken.format));
+      }
     }
     f.token = newToken || undefined;
 

@@ -34,6 +34,7 @@ export type ValueLineType =
   "Checkbox" |
   "ComboBox" |
   "DateTime" |
+  "DateTimeOffset" |
   "TextBox" |
   "TextArea" |
   "Number" |
@@ -86,6 +87,11 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     if (t.name == "datetime")
       return "DateTime";
+
+
+    if (t.name == "DateTimeOffset")
+      return "DateTimeOffset";
+    
 
     if (t.name == "string" || t.name == "Guid")
       return "TextBox";
@@ -544,6 +550,11 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
         m.format());
   };
 
+
+
+ 
+
+
   let currentDate = moment();
   if (!showTime)
     currentDate = currentDate.startOf("day");
@@ -564,6 +575,59 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     </FormGroup>
   );
 }
+
+
+
+ValueLine.renderers["DateTimeOffset" as ValueLineType] = (vl) => {
+
+  const s = vl.state;
+
+  const momentFormat = toMomentFormat(s.formatText);
+
+  const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601) : undefined;
+  const showTime = momentFormat != "L" && momentFormat != "LL";
+
+  if (s.ctx.readOnly)
+    return (
+      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlReadonly>)}
+      </FormGroup>
+    );
+
+  const handleDatePickerOnChange = (date?: Date, str?: string) => {
+    const m = moment(date);
+    vl.setValue(!m.isValid() ? null :
+      !showTime ? m.format("YYYY-MM-DDTHH:mm:ssZ" ) :
+        m.format());
+  };
+
+
+
+
+
+
+  let currentDate = moment();
+  if (!showTime)
+    currentDate = currentDate.startOf("day");
+
+  const htmlAttributes = {
+    placeholder: getPlaceholder(vl),
+    ...vl.state.valueHtmlAttributes,
+  } as React.AllHTMLAttributes<any>;
+
+  return (
+    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {ValueLine.withItemGroup(vl,
+        <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
+          <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
+            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
+        </div>
+      )}
+    </FormGroup>
+  );
+}
+
+
 
 
 ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {

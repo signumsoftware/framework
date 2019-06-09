@@ -465,6 +465,7 @@ namespace Signum.React.Facades
 
             switch (Type.GetTypeCode(type))
             {
+               
                 case TypeCode.Boolean: return "boolean";
                 case TypeCode.Char: return "string";
                 case TypeCode.SByte:
@@ -480,6 +481,7 @@ namespace Signum.React.Facades
                 case TypeCode.Decimal: return "decimal";
                 case TypeCode.DateTime: return "datetime";
                 case TypeCode.String: return "string";
+                case (TypeCode)17: return "datetimeoffset";
             }
             return null;
         }
