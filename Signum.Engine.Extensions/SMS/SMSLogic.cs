@@ -108,8 +108,11 @@ namespace Signum.Engine.SMS
 
                 Validator.PropertyValidator<SMSTemplateEntity>(et => et.Messages).StaticPropertyValidation += (t, pi) =>
                 {
-                    if (!t.Messages.Any(m => m.CultureInfo.Is(SMSLogic.Configuration.DefaultCulture)))
-                        return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(SMSLogic.Configuration.DefaultCulture.EnglishName);
+
+                    var dc = SMSLogic.Configuration?.DefaultCulture;
+
+                    if (dc != null && !t.Messages.Any(m => m.CultureInfo.Is(dc)))
+                        return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(dc.EnglishName);
 
                     return null;
                 };
