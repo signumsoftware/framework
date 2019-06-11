@@ -1,4 +1,4 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.d.ts" />
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as moment from 'moment'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Entities.Workflow'
@@ -161,13 +161,13 @@ export class CaseFlowRenderer extends CustomRenderer {
 
 function getDoneColor(doneType: DoneType) {
   switch (doneType) {
-    case "Jump": return "#ff7504";
+    case "Jump": return "blue";
     case "Timeout": return "gold";
     case "ScriptSuccess": return "green";
     case "ScriptFailure": return "violet";
     case "Approve": return "darkgreen";
     case "Decline": return "darkred";
-    case "Next": return "blue";
+    case "Next": return "#ff7504";
     default: return "magenta";
   }
 }
