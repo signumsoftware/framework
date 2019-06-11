@@ -718,7 +718,10 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            var prec = ((DateTime)value).GetPrecision();
+
+            var dto= value as DateTimeOffset?;
+
+            var prec = dto!=null?dto.Value.Date.GetPrecision():((DateTime)value).GetPrecision();
             if (prec > Precision)
                 return ValidationMessage._0HasAPrecisionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
