@@ -24,8 +24,7 @@ namespace Signum.Engine.Word
         public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
         public Type? ModelType { get; private set; }
 
-        static PropertyInfo piSystemWordTemplate = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
-        public PropertyInfo ModelProperty => piSystemWordTemplate;
+        public PropertyInfo ModelProperty { get; private set; } = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
 
         OpenXmlPackage document;
         WordTemplateEntity template;

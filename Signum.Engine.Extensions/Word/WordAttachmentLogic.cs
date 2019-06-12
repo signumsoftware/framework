@@ -36,7 +36,7 @@ namespace Signum.Engine.Word
 
             EmailTemplateLogic.GenerateAttachment.Register((WordAttachmentEntity wa, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var entity = wa.OverrideModel?.Retrieve() ??  (Entity?)ctx.Entity ?? ctx.SystemEmail!.UntypedEntity;
+                var entity = wa.OverrideModel?.Retrieve() ??  (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity;
 
                 if (wa.ModelConverter != null)
                     entity = wa.ModelConverter.Convert(entity);
@@ -69,7 +69,7 @@ namespace Signum.Engine.Word
             var block = titleNode != null ? (EmailTemplateParser.BlockNode)titleNode :
                 (EmailTemplateParser.BlockNode)(titleNode = EmailTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
 
-            return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { SystemEmail = ctx.SystemEmail });
+            return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
         }
 
         static string? WordAttachmentFileName_StaticPropertyValidation(WordAttachmentEntity wordAttachment, PropertyInfo pi)

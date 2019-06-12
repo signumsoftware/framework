@@ -487,14 +487,14 @@ namespace Signum.Engine.Templating
             return value;
         }
 
-        internal static object Getter(MemberInfo member, object systemEmail)
+        internal static object Getter(MemberInfo member, object model)
         {
             try
             {
                 if (member is PropertyInfo pi)
-                    return pi.GetValue(systemEmail, null);
+                    return pi.GetValue(model, null);
 
-                return ((FieldInfo)member).GetValue(systemEmail);
+                return ((FieldInfo)member).GetValue(model);
             }
             catch (TargetInvocationException e)
             {

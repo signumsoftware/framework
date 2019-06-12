@@ -14,7 +14,7 @@ export interface MailingMenuProps {
 export default function MailingMenu(p : MailingMenuProps){
   function handleClick(et: Lite<EmailTemplateEntity>) {
     Navigator.API.fetchAndForget(et)
-      .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.systemEmail!))
+      .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.model!))
       .then(ct => {
 
         var s = MailingClient.settings[ct];

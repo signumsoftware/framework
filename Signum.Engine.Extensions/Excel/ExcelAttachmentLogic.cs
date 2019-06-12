@@ -42,7 +42,7 @@ namespace Signum.Engine.Excel
 
             EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var finalEntity = ea.Related?.Retrieve() ?? (Entity?)ctx.Entity ?? ctx.SystemEmail!.UntypedEntity as Entity;
+                var finalEntity = ea.Related?.Retrieve() ?? (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity as Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
@@ -71,7 +71,7 @@ namespace Signum.Engine.Excel
             var block = titleNode != null ? (EmailTemplateParser.BlockNode)titleNode :
                 (EmailTemplateParser.BlockNode)(titleNode = EmailTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
 
-            return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { SystemEmail = ctx.SystemEmail });
+            return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
         }
 
         static string? ExcelAttachmentFileName_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)

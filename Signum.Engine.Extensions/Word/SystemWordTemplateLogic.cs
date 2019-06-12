@@ -344,7 +344,7 @@ namespace Signum.Engine.Word
                 return baseType.GetGenericArguments()[0];
             }
 
-            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterSystemEmail".FormatWith(systemWordTemplate.TypeName()));
+            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterWordModel".FormatWith(systemWordTemplate.TypeName()));
         }
 
         public static Type ToType(this SystemWordTemplateEntity systemWordTemplate)

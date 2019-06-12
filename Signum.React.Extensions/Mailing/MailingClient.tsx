@@ -8,9 +8,9 @@ import { Lite, Entity, registerToString, JavascriptMessage } from '@framework/Si
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
-import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, SystemEmailEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
+import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -60,7 +60,7 @@ export function start(options: {
   Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
     onClick: (ctx) => {
 
-      var promise: Promise<string | undefined> = ctx.entity.systemEmail ? API.getConstructorType(ctx.entity.systemEmail) : Promise.resolve(undefined);
+      var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
       promise
 
       Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
@@ -158,7 +158,7 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
 export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
 
   Navigator.API.fetchAndForget(et)
-    .then(emailTemplate => emailTemplate.systemEmail ? API.getConstructorType(emailTemplate.systemEmail) : Promise.resolve(undefined))
+    .then(emailTemplate => emailTemplate.model ? API.getConstructorType(emailTemplate.model) : Promise.resolve(undefined))
     .then(ct => {
       if (!ct)
         return createAndViewEmail(et, ctx.lites.single());
@@ -207,8 +207,8 @@ export module API {
     lite: Lite<Entity> | null;
   }
 
-  export function getConstructorType(systemEmailTemplate: SystemEmailEntity): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/email/constructorType" }, systemEmailTemplate);
+  export function getConstructorType(emailModelEntity: EmailModelEntity): Promise<string> {
+    return ajaxPost<string>({ url: "~/api/email/constructorType" }, emailModelEntity);
   }
 
   export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, request: GetEmailTemplatesRequest): Promise<Lite<EmailTemplateEntity>[]> {

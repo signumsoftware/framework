@@ -157,6 +157,12 @@ export type EmailMessageState =
   "Received" |
   "Outdated";
 
+export const EmailModelEntity = new Type<EmailModelEntity>("EmailModel");
+export interface EmailModelEntity extends Entities.Entity {
+  Type: "EmailModel";
+  fullClassName: string;
+}
+
 export const EmailPackageEntity = new Type<EmailPackageEntity>("EmailPackage");
 export interface EmailPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "EmailPackage";
@@ -207,7 +213,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   editableMessage: boolean;
   disableAuthorization: boolean;
   query: Signum.QueryEntity;
-  systemEmail: SystemEmailEntity | null;
+  model: EmailModelEntity | null;
   sendDifferentMessages: boolean;
   from: EmailTemplateContactEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;
@@ -242,7 +248,7 @@ export interface EmailTemplateMessageEmbedded extends Entities.EmbeddedEntity {
 }
 
 export module EmailTemplateOperation {
-  export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail");
+  export const CreateEmailTemplateFromModel : Entities.ConstructSymbol_From<EmailTemplateEntity, EmailModelEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromModel");
   export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Create");
   export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Save");
   export const Delete : Entities.DeleteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Delete");
@@ -400,12 +406,6 @@ export interface SmtpNetworkDeliveryEmbedded extends Entities.EmbeddedEntity {
   useDefaultCredentials: boolean;
   enableSSL: boolean;
   clientCertificationFiles: Entities.MList<ClientCertificationFileEmbedded>;
-}
-
-export const SystemEmailEntity = new Type<SystemEmailEntity>("SystemEmail");
-export interface SystemEmailEntity extends Entities.Entity {
-  Type: "SystemEmail";
-  fullClassName: string;
 }
 
 export namespace External {
