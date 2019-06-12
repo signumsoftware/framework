@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Authorization;
@@ -33,7 +33,7 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateEntity
+                EmailModelLogic.RegisterEmailModel<ResetPasswordRequestMail>(() => new EmailTemplateEntity
                 {
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                     {
@@ -70,7 +70,7 @@ namespace Signum.Engine.Authorization
         public static Func<string, UserEntity> GetUserByEmail = (email) => Database.Query<UserEntity>().Where(u => u.Email == email).SingleOrDefaultEx();
     }
 
-    public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestEntity>
+    public class ResetPasswordRequestMail : EmailModel<ResetPasswordRequestEntity>
     {
         public string Url;
 

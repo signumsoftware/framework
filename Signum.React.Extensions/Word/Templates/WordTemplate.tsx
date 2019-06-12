@@ -26,7 +26,7 @@ export default function WordTemplate(p : { ctx: TypeContext<WordTemplateEntity> 
     <div>
       <ValueLine ctx={ctx.subCtx(f => f.name)} />
       <EntityLine ctx={ctx.subCtx(f => f.query)} />
-      <EntityCombo ctx={ctx.subCtx(f => f.systemWordTemplate)} />
+      <EntityCombo ctx={ctx.subCtx(f => f.model)} />
       <EntityCombo ctx={ctx.subCtx(f => f.culture)} />
       <EntityCombo ctx={ctx.subCtx(f => f.wordTransformer)} />
       <EntityCombo ctx={ctx.subCtx(f => f.wordConverter)} />

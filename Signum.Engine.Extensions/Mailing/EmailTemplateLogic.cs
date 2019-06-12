@@ -29,10 +29,10 @@ namespace Signum.Engine.Mailing
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
      
-        static Expression<Func<SystemEmailEntity, IQueryable<EmailTemplateEntity>>> EmailTemplatesExpression =
-            se => Database.Query<EmailTemplateEntity>().Where(et => et.SystemEmail == se);
+        static Expression<Func<EmailModelEntity, IQueryable<EmailTemplateEntity>>> EmailTemplatesExpression =
+            se => Database.Query<EmailTemplateEntity>().Where(et => et.Model == se);
         [ExpressionField]
-        public static IQueryable<EmailTemplateEntity> EmailTemplates(this SystemEmailEntity se)
+        public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se)
         {
             return EmailTemplatesExpression.Evaluate(se);
         }
@@ -69,7 +69,7 @@ namespace Signum.Engine.Mailing
             public CultureInfo Culture;
             public Type? ModelType;
             public IEntity? Entity;
-            public ISystemEmail? SystemEmail;
+            public IEmailModel? Model;
 
             public GenerateAttachmentContext(QueryDescription queryDescription, EmailTemplateEntity template, 
                 Dictionary<QueryToken, ResultColumn> resultColumns, 
@@ -114,14 +114,14 @@ namespace Signum.Engine.Mailing
                     return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
-                SystemEmailLogic.Start(sb);
+                EmailModelLogic.Start(sb);
                 EmailMasterTemplateLogic.Start(sb);
                 
                 sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
-                sb.Schema.Table<SystemEmailEntity>().PreDeleteSqlSync += e =>
+                sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += e =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>()
-                        .Where(a => a.SystemEmail.Is(e)));
+                        .Where(a => a.Model.Is(e)));
 
                 Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Text).StaticPropertyValidation +=
                     EmailTemplateMessageText_StaticPropertyValidation;
@@ -138,7 +138,7 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
                 sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
 
-                sb.Schema.Table<SystemEmailEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
+                sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
 
                 Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
@@ -152,9 +152,9 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(Entity arg)
         {
-            SystemEmailEntity systemEmail = (SystemEmailEntity)arg;
+            EmailModelEntity emailModel = (EmailModelEntity)arg;
 
-            var emailTemplates = Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.SystemEmail == systemEmail));
+            var emailTemplates = Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model == emailModel));
 
             return emailTemplates;
         }
@@ -229,7 +229,7 @@ namespace Signum.Engine.Mailing
                 QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
-                return EmailTemplateParser.TryParse(text, qd, template.SystemEmail?.ToType(), out errorMessage);
+                return EmailTemplateParser.TryParse(text, qd, template.Model?.ToType(), out errorMessage);
             }
         }
 
@@ -244,41 +244,41 @@ namespace Signum.Engine.Mailing
 
                 foreach (var message in template.Messages)
                 {
-                    message.Text = EmailTemplateParser.Parse(message.Text, qd, template.SystemEmail?.ToType()).ToString();
-                    message.Subject = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail?.ToType()).ToString();
+                    message.Text = EmailTemplateParser.Parse(message.Text, qd, template.Model?.ToType()).ToString();
+                    message.Subject = EmailTemplateParser.Parse(message.Subject, qd, template.Model?.ToType()).ToString();
                 }
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? model = null, ISystemEmail? systemEmail = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
 
-            return CreateEmailMessage(template, model, ref systemEmail);
+            return CreateEmailMessage(template, modifiableEntity, ref model);
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity? model = null, ISystemEmail? systemEmail = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
         {
-            return CreateEmailMessage(template, model, ref systemEmail);
+            return CreateEmailMessage(template, modifiableEntity, ref model);
         }
 
-        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? model, ref ISystemEmail? systemEmail)
+        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? modifiableEntity, ref IEmailModel? model)
         {
             Entity? entity = null;
-            if (template.SystemEmail != null)
+            if (template.Model != null)
             {
-                if (systemEmail == null)
-                    systemEmail = SystemEmailLogic.CreateSystemEmail(template.SystemEmail, model);
-                else if (template.SystemEmail.ToType() != systemEmail.GetType())
-                    throw new ArgumentException("systemEmail should be a {0} instead of {1}".FormatWith(template.SystemEmail.FullClassName, systemEmail.GetType().FullName));
+                if (model == null)
+                    model = EmailModelLogic.CreateModel(template.Model, modifiableEntity);
+                else if (template.Model.ToType() != model.GetType())
+                    throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.FullClassName, model.GetType().FullName));
             }
             else
             {
-                entity = model as Entity ?? throw new InvalidOperationException("Model should be an Entity");
+                entity = modifiableEntity as Entity ?? throw new InvalidOperationException("Model should be an Entity");
             }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
+                return new EmailMessageBuilder(template, entity, model).CreateEmailMessageInternal().ToList();
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>
@@ -342,23 +342,23 @@ namespace Signum.Engine.Mailing
 
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));
 
-            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any()).ToList();
+            var emailModels = Database.Query<EmailModelEntity>().Where(se => !se.EmailTemplates().Any()).ToList();
 
             string cis = Database.Query<CultureInfoEntity>().Select(a => a.Name).ToString(", ").Etc(60);
 
-            if (!systemEmails.Any())
+            if (!emailModels.Any())
                 return null;
 
-            if (!replacements.Interactive || !SafeConsole.Ask("{0}\r\n have no EmailTemplates. Create in {1}?".FormatWith(systemEmails.ToString("\r\n"), cis.DefaultText("No CultureInfos registered!"))))
+            if (!replacements.Interactive || !SafeConsole.Ask("{0}\r\n have no EmailTemplates. Create in {1}?".FormatWith(emailModels.ToString("\r\n"), cis.DefaultText("No CultureInfos registered!"))))
                 return null;
 
             using (replacements.WithReplacedDatabaseName())
             {
-                var cmd = systemEmails.Select(se =>
+                var cmd = emailModels.Select(se =>
                 {
                     try
                     {
-                        return table.InsertSqlSync(SystemEmailLogic.CreateDefaultTemplate(se), includeCollections: true);
+                        return table.InsertSqlSync(EmailModelLogic.CreateDefaultTemplate(se), includeCollections: true);
                     }
                     catch (Exception e)
                     {
@@ -375,7 +375,7 @@ namespace Signum.Engine.Mailing
 
         public static void GenerateDefaultTemplates()
         {
-            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any()).ToList();
+            var systemEmails = Database.Query<EmailModelEntity>().Where(se => !se.EmailTemplates().Any()).ToList();
 
             List<string> exceptions = new List<string>();
 
@@ -383,7 +383,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    SystemEmailLogic.CreateDefaultTemplate(se).Save();
+                    EmailModelLogic.CreateDefaultTemplate(se).Save();
                 }
                 catch (Exception ex)
                 {
@@ -414,13 +414,13 @@ namespace Signum.Engine.Mailing
 
         public static bool IsVisible(EmailTemplateEntity et, EmailTemplateVisibleOn visibleOn)
         {
-            if (et.SystemEmail == null)
+            if (et.Model == null)
                 return visibleOn == EmailTemplateVisibleOn.Single;
 
-            if (SystemEmailLogic.HasDefaultTemplateConstructor(et.SystemEmail))
+            if (EmailModelLogic.HasDefaultTemplateConstructor(et.Model))
                 return false;
 
-            var entityType = SystemEmailLogic.GetEntityType(et.SystemEmail.ToType());
+            var entityType = EmailModelLogic.GetEntityType(et.Model.ToType());
 
             if (entityType.IsEntity())
                 return visibleOn == EmailTemplateVisibleOn.Single;

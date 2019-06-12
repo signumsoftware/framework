@@ -80,9 +80,9 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static void SendMail(this ISystemEmail systemEmail)
+        public static void SendMail(this IEmailModel model)
         {
-            foreach (var email in systemEmail.CreateEmailMessage())
+            foreach (var email in model.CreateEmailMessage())
                 SenderManager.Send(email);
         }
 
@@ -97,9 +97,9 @@ namespace Signum.Engine.Mailing
             SenderManager.Send(email);
         }
 
-        public static void SendMailAsync(this ISystemEmail systemEmail)
+        public static void SendMailAsync(this IEmailModel model)
         {
-            foreach (var email in systemEmail.CreateEmailMessage())
+            foreach (var email in model.CreateEmailMessage())
                 email.SendMailAsync();
         }
 
@@ -175,7 +175,7 @@ namespace Signum.Engine.Mailing
         }
 
         public static void SendAllAsync<T>(List<T> emails)
-                   where T : ISystemEmail
+                   where T : IEmailModel
         {
             var list = emails.SelectMany(a => a.CreateEmailMessage()).ToList();
 
@@ -207,8 +207,8 @@ namespace Signum.Engine.Mailing
                     ToStates = { EmailMessageState.Created },
                     CanConstruct = et => 
                     {
-                        if (et.SystemEmail != null && SystemEmailLogic.RequiresExtraParameters(et.SystemEmail))
-                            return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(SystemEmailEntity).NiceName(), et.SystemEmail);
+                        if (et.Model != null && EmailModelLogic.RequiresExtraParameters(et.Model))
+                            return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(EmailModelEntity).NiceName(), et.Model);
 
                         if (et.SendDifferentMessages)
                             return ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo(() => et.SendDifferentMessages).NiceName());

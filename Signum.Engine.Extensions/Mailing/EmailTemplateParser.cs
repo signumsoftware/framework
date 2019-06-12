@@ -42,8 +42,7 @@ namespace Signum.Engine.Mailing
 
             public Type? ModelType { get; private set; }
 
-            static PropertyInfo piSystemEmail = ReflectionTools.GetPropertyInfo((EmailTemplateEntity e) => e.SystemEmail);
-            public PropertyInfo ModelProperty => piSystemEmail;
+            public PropertyInfo ModelProperty { get; private set; } = ReflectionTools.GetPropertyInfo((EmailTemplateEntity e) => e.Model);
             public QueryDescription QueryDescription { get; private set; }
 
             public TemplateWalker(string? text, QueryDescription qd, Type? modelType)
@@ -282,7 +281,7 @@ namespace Signum.Engine.Mailing
                     if (et.From != null && et.From.Token != null)
                     {
                         QueryTokenEmbedded token = et.From.Token;
-                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
+                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.Model != null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
@@ -300,7 +299,7 @@ namespace Signum.Engine.Mailing
                             foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                             {
                                 QueryTokenEmbedded token = item.Token!;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.Model != null))
                                 {
                                     case FixTokenResult.Nothing: break;
                                     case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
@@ -319,7 +318,7 @@ namespace Signum.Engine.Mailing
 
                         foreach (var item in et.Messages)
                         {
-                            SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, et.SystemEmail?.ToType());
+                            SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, et.Model?.ToType());
 
                             item.Subject = Synchronize(item.Subject, sc);
                             item.Text = Synchronize(item.Text, sc);
@@ -351,7 +350,7 @@ namespace Signum.Engine.Mailing
 
         internal static SqlPreCommand? Regenerate(EmailTemplateEntity et, Replacements? replacements, Table table)
         {
-            var newTemplate = SystemEmailLogic.CreateDefaultTemplate(et.SystemEmail!);
+            var newTemplate = EmailModelLogic.CreateDefaultTemplate(et.Model!);
 
             newTemplate.SetId(et.IdOrNull);
             newTemplate.SetIsNew(false);
@@ -370,14 +369,14 @@ namespace Signum.Engine.Mailing
 
         public StringBuilder StringBuilder = new StringBuilder();
         public bool IsHtml;
-        public ISystemEmail? SystemEmail;
+        public IEmailModel? Model;
 
         public override object GetModel()
         {
-            if (SystemEmail == null)
-                throw new ArgumentException("There is no SystemEmail set");
+            if (Model == null)
+                throw new ArgumentException("There is no Model set");
 
-            return SystemEmail;
+            return Model;
         }
     }
 }

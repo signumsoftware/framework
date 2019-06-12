@@ -168,9 +168,9 @@ namespace Signum.Engine.UserAssets
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
 
-            public SystemEmailEntity GetSystemEmail(string fullClassName)
+            public EmailModelEntity GetEmailModel(string fullClassName)
             {
-                return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
+                return EmailModelLogic.GetEmailModelEntity(fullClassName);
             }
 
             public CultureInfoEntity GetCultureInfoEntity(string cultureName)
@@ -247,9 +247,9 @@ namespace Signum.Engine.UserAssets
                 return TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
             }
 
-            public SystemEmailEntity GetSystemEmail(string fullClassName)
+            public EmailModelEntity GetEmailModel(string fullClassName)
             {
-                return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
+                return EmailModelLogic.GetEmailModelEntity(fullClassName);
             }
 
             public IPartEntity GetPart(IPartEntity old, XElement element)

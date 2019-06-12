@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as Constructor from '@framework/Constructor'
-import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
 import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
 import ButtonBar from '@framework/Frames/ButtonBar';
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
@@ -59,7 +59,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
   Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
     onClick: ctx => {
 
-      var promise: Promise<string | undefined> = ctx.entity.systemWordTemplate ? API.getConstructorType(ctx.entity.systemWordTemplate) : Promise.resolve(undefined);
+      var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
       promise
         .then<Response | undefined>(ct => {
           var template = toLite(ctx.entity);
@@ -144,7 +144,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
 export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
 
   Navigator.API.fetchAndForget(wt)
-    .then(wordTemplate => wordTemplate.systemWordTemplate ? API.getConstructorType(wordTemplate.systemWordTemplate) : Promise.resolve(undefined))
+    .then(wordTemplate => wordTemplate.model ? API.getConstructorType(wordTemplate.model) : Promise.resolve(undefined))
     .then(ct => {
       if (!ct || ctx.lites.length == 1 && ctx.lites.single().EntityType == ct)
         return API.createAndDownloadReport({ template: wt, lite: ctx.lites.single() });
@@ -179,8 +179,8 @@ export namespace API {
     return ajaxPostRaw({ url: "~/api/word/createReport" }, request);
   }
 
-  export function getConstructorType(systemWordTemplate: SystemWordTemplateEntity): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/word/constructorType" }, systemWordTemplate);
+  export function getConstructorType(wordModel: WordModelEntity): Promise<string> {
+    return ajaxPost<string>({ url: "~/api/word/constructorType" }, wordModel);
   }
 
   export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, request: GetWordTemplatesRequest): Promise<Lite<WordTemplateEntity>[]> {

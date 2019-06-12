@@ -218,7 +218,7 @@ namespace Signum.Engine.Word
 
             var provider = WordTemplateLogic.ToDataTableProviders.GetOrThrow(key);
 
-            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext(parameters.Template, (Entity?)parameters.Entity, parameters.SystemWordTemplate));
+            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext(parameters.Template, (Entity?)parameters.Entity, parameters.Model));
 
             return table;
         }
@@ -233,7 +233,7 @@ namespace Signum.Engine.Word
             object result;
             try
             {
-                result = mi.Invoke(ctx.SystemWordTemplate, null);
+                result = mi.Invoke(ctx.Model, null);
             }
             catch (TargetInvocationException e)
             {
@@ -243,17 +243,17 @@ namespace Signum.Engine.Word
             }
 
             if (!(result is Data.DataTable))
-                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.SystemWordTemplate!.GetType().Name}' did not return a DataTable");
+                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.Model!.GetType().Name}' did not return a DataTable");
 
             return (Data.DataTable)result;
         }
 
         private static MethodInfo GetMethod(WordTemplateEntity template, string method)
         {
-            if (template.SystemWordTemplate == null)
-                throw new InvalidOperationException($"No SystemWordTemplate found in template '{template}' to call '{method}'");
+            if (template.Model == null)
+                throw new InvalidOperationException($"No WordModel found in template '{template}' to call '{method}'");
 
-            var type = template.SystemWordTemplate.ToType();
+            var type = template.Model.ToType();
             var mi = type.GetMethod(method);
             if (mi == null)
                 throw new InvalidOperationException($"No Method with name '{method}' found in type '{type.Name}'");

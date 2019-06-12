@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
@@ -58,9 +58,9 @@ namespace Signum.React.Mailing
 #pragma warning restore IDE1006 // Naming Styles
 
         [HttpPost("api/email/constructorType")]
-        public string GetConstructorType([Required, FromBody]SystemEmailEntity systemEmailTemplate)
+        public string GetConstructorType([Required, FromBody]EmailModelEntity model)
         {
-            var type = SystemEmailLogic.GetEntityType(systemEmailTemplate.ToType());
+            var type = EmailModelLogic.GetEntityType(model.ToType());
 
             return ReflectionServer.GetTypeName(type);
         }
