@@ -47,10 +47,10 @@ namespace Signum.Engine.Word
 
                     var fileName = GetTemplateString(wa.FileName, ref wa.FileNameNode, ctx);
 
-                    var systemWordTemplate = template.SystemWordTemplate != null && !SystemWordTemplateLogic.RequiresExtraParameters(template.SystemWordTemplate) ?
-                    SystemWordTemplateLogic.CreateDefaultSystemWordTemplate(template.SystemWordTemplate, entity) : null;
+                    var model = template.Model != null && !WordModelLogic.RequiresExtraParameters(template.Model) ?
+                    WordModelLogic.CreateDefaultWordModel(template.Model, entity) : null;
 
-                    var bytes = WordTemplateLogic.CreateReport(template, entity, systemWordTemplate);
+                    var bytes = WordTemplateLogic.CreateReport(template, entity, model);
 
                     return new List<EmailAttachmentEmbedded>
                     {

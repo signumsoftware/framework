@@ -19,7 +19,7 @@ namespace Signum.Entities.Word
         
         public QueryEntity Query { get; set; }
 
-        public SystemWordTemplateEntity? SystemWordTemplate { get; set; }
+        public WordModelEntity? Model { get; set; }
         
         public CultureInfoEntity Culture { get; set; }
 
@@ -69,7 +69,7 @@ namespace Signum.Entities.Word
         public static DeleteSymbol<WordTemplateEntity> Delete;
         public static ExecuteSymbol<WordTemplateEntity> CreateWordReport;
 
-        public static ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate;
+        public static ConstructSymbol<WordTemplateEntity>.From<WordModelEntity> CreateWordTemplateFromWordModel;
     }
 
     public enum WordTemplateMessage

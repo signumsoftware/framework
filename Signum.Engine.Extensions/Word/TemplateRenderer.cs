@@ -19,16 +19,16 @@ namespace Signum.Engine.Word
         Entity? entity;
         CultureInfo culture;
         WordTemplateEntity template;
-        ISystemWordTemplate? systemWordTemplate;
+        IWordModel? model;
 
-        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate, Entity? entity)
+        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity)
         {
             this.document = document;
             this.culture = culture;
             this.queryDescription = queryDescription;
             this.template = template;
             this.entity = entity;
-            this.systemWordTemplate = systemWordTemplate;
+            this.model = model;
         }
 
         ResultTable? table;
@@ -48,17 +48,17 @@ namespace Signum.Engine.Word
 
             var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
-            var filters = systemWordTemplate != null ? systemWordTemplate.GetFilters(this.queryDescription) :
+            var filters = model != null ? model.GetFilters(this.queryDescription) :
                 entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
-                throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(systemWordTemplate)}' are both null");
+                throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
 
             this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
             {
                 QueryName = this.queryDescription.QueryName,
                 Columns = columns,
-                Pagination = systemWordTemplate?.GetPagination() ?? new Pagination.All(),
+                Pagination = model?.GetPagination() ?? new Pagination.All(),
                 Filters = filters,
-                Orders = systemWordTemplate?.GetOrders(this.queryDescription) ?? new List<Order>(),
+                Orders = model?.GetOrders(this.queryDescription) ?? new List<Order>(),
             });
 
             var dt = this.table.ToDataTable();
@@ -68,7 +68,7 @@ namespace Signum.Engine.Word
 
         internal void RenderNodes()
         {
-            var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows, template, systemWordTemplate);
+            var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows, template, model);
             
             foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {

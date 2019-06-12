@@ -24,15 +24,15 @@ namespace Signum.Engine.Word
         public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
         public Type? ModelType { get; private set; }
 
-        public PropertyInfo ModelProperty { get; private set; } = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
+        public PropertyInfo ModelProperty { get; private set; } = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.Model);
 
         OpenXmlPackage document;
         WordTemplateEntity template;
 
-        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type? systemWordTemplateType, WordTemplateEntity template)
+        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type? modelType, WordTemplateEntity template)
         {
             this.QueryDescription = queryDescription;
-            this.ModelType = systemWordTemplateType;
+            this.ModelType = modelType;
             this.document = document;
             this.template = template;
         }

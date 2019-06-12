@@ -12,12 +12,6 @@ import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
-export interface SystemWordTemplateEntity extends Entities.Entity {
-  Type: "SystemWordTemplate";
-  fullClassName: string;
-}
-
 export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
 export interface WordAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
   Type: "WordAttachment";
@@ -32,12 +26,18 @@ export interface WordConverterSymbol extends Entities.Symbol {
   Type: "WordConverter";
 }
 
+export const WordModelEntity = new Type<WordModelEntity>("WordModel");
+export interface WordModelEntity extends Entities.Entity {
+  Type: "WordModel";
+  fullClassName: string;
+}
+
 export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
   Type: "WordTemplate";
   name: string;
   query: Basics.QueryEntity;
-  systemWordTemplate: SystemWordTemplateEntity | null;
+  model: WordModelEntity | null;
   culture: Signum.CultureInfoEntity;
   applicable: Templating.TemplateApplicableEval | null;
   disableAuthorization: boolean;
@@ -62,7 +62,7 @@ export module WordTemplateOperation {
   export const Save : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Save");
   export const Delete : Entities.DeleteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Delete");
   export const CreateWordReport : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordReport");
-  export const CreateWordTemplateFromSystemWordTemplate : Entities.ConstructSymbol_From<WordTemplateEntity, SystemWordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate");
+  export const CreateWordTemplateFromWordModel : Entities.ConstructSymbol_From<WordTemplateEntity, WordModelEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordTemplateFromWordModel");
 }
 
 export module WordTemplatePermission {

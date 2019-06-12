@@ -35,9 +35,9 @@ namespace Signum.React.Word
         }
 
         [HttpPost("api/word/constructorType")]
-        public string GetConstructorType([Required, FromBody]SystemWordTemplateEntity systemWordTemplate)
+        public string GetConstructorType([Required, FromBody]WordModelEntity wordModel)
         {
-            var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
+            var type = WordModelLogic.GetEntityType(wordModel.ToType());
 
             return ReflectionServer.GetTypeName(type);
         }

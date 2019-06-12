@@ -20,28 +20,28 @@ namespace Signum.Engine.Word
     public class WordTemplateParameters : TemplateParameters
     {
         public WordTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
-            IEnumerable<ResultRow> rows, WordTemplateEntity template, ISystemWordTemplate? systemWordTemplate) : 
+            IEnumerable<ResultRow> rows, WordTemplateEntity template, IWordModel? wordModel) : 
               base(entity, culture, columns, rows)
         {
             this.Template = template;
-            this.SystemWordTemplate = systemWordTemplate;
+            this.Model = wordModel;
 
         }
 
-        public ISystemWordTemplate? SystemWordTemplate;
+        public IWordModel? Model;
 
         public WordTemplateEntity Template;
 
         public override object GetModel()
         {
-            if (SystemWordTemplate == null)
-                throw new ArgumentException("There is no SystemWordTemplate set");
+            if (Model == null)
+                throw new ArgumentException("There is no Model set");
 
-            return SystemWordTemplate;
+            return Model;
         }
     }
 
-    public interface ISystemWordTemplate
+    public interface IWordModel
     {
         ModifiableEntity UntypedEntity { get; }
 
@@ -52,10 +52,10 @@ namespace Signum.Engine.Word
         List<Order> GetOrders(QueryDescription queryDescription);
     }
 
-    public abstract class SystemWordTemplate<T> : ISystemWordTemplate
+    public abstract class WordModel<T> : IWordModel
        where T : ModifiableEntity
     {
-        public SystemWordTemplate(T entity)
+        public WordModel(T entity)
         {
             this.Entity = entity;
         }
@@ -64,7 +64,7 @@ namespace Signum.Engine.Word
 
         public virtual Entity? ApplicableTo => this.Entity as Entity;
 
-        ModifiableEntity ISystemWordTemplate.UntypedEntity
+        ModifiableEntity IWordModel.UntypedEntity
         {
             get { return Entity; }
         }
@@ -93,7 +93,7 @@ namespace Signum.Engine.Word
         }        
     }
 
-    public class MultiEntityWordTemplate : SystemWordTemplate<MultiEntityModel>
+    public class MultiEntityWordTemplate : WordModel<MultiEntityModel>
     {
         public MultiEntityWordTemplate(MultiEntityModel entity) : base(entity)
         {
@@ -108,7 +108,7 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class QueryWordTemplate : SystemWordTemplate<QueryModel>
+    public class QueryWordTemplate : WordModel<QueryModel>
     {
         public QueryWordTemplate(QueryModel entity) : base(entity)
         {
@@ -130,23 +130,23 @@ namespace Signum.Engine.Word
         }
     }
 
-    public static class SystemWordTemplateLogic
+    public static class WordModelLogic
     {
-        class SystemWordTemplateInfo
+        class WordModelInfo
         {
             public object QueryName;
             public Func<WordTemplateEntity>? DefaultTemplateConstructor;
 
-            public SystemWordTemplateInfo(object queryName)
+            public WordModelInfo(object queryName)
             {
                 QueryName = queryName;
             }
         }
 
-        static ResetLazy<Dictionary<Lite<SystemWordTemplateEntity>, List<Lite<WordTemplateEntity>>>> SystemWordTemplateToWordTemplates;
-        static Dictionary<Type, SystemWordTemplateInfo> systemWordReports = new Dictionary<Type, SystemWordTemplateInfo>();
-        public static ResetLazy<Dictionary<Type, SystemWordTemplateEntity>> TypeToSystemWordTemplate;
-        public static ResetLazy<Dictionary<SystemWordTemplateEntity, Type>> SystemWordTemplateToType;
+        static ResetLazy<Dictionary<Lite<WordModelEntity>, List<Lite<WordTemplateEntity>>>> WordModelToTemplates;
+        static Dictionary<Type, WordModelInfo> registeredWordModels = new Dictionary<Type, WordModelInfo>();
+        public static ResetLazy<Dictionary<Type, WordModelEntity>> WordModelTypeToEntity;
+        public static ResetLazy<Dictionary<WordModelEntity, Type>> WordModelEntityToType;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -154,7 +154,7 @@ namespace Signum.Engine.Word
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
-                sb.Include<SystemWordTemplateEntity>()
+                sb.Include<WordModelEntity>()
                     .WithQuery(() => se => new
                     {
                         Entity = se,
@@ -165,48 +165,48 @@ namespace Signum.Engine.Word
                 RegisterSystemWordReport<MultiEntityWordTemplate>(null);
                 RegisterSystemWordReport<QueryWordTemplate>(null);
 
-                new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
+                new Graph<WordTemplateEntity>.ConstructFrom<WordModelEntity>(WordTemplateOperation.CreateWordTemplateFromWordModel)
                 {
                     CanConstruct = se => HasDefaultTemplateConstructor(se) ? null : WordTemplateMessage.NoDefaultTemplateDefined.NiceToString(),
                     Construct = (se, _) => CreateDefaultTemplate(se)!.Save()
                 }.Register();
 
-                SystemWordTemplateToWordTemplates = sb.GlobalLazy(() => (
+                WordModelToTemplates = sb.GlobalLazy(() => (
                     from et in Database.Query<WordTemplateEntity>()
-                    where et.SystemWordTemplate != null
-                    select new { swe = et.SystemWordTemplate, et = et.ToLite() })
+                    where et.Model != null
+                    select new { swe = et.Model, et = et.ToLite() })
                     .GroupToDictionary(pair => pair.swe!.ToLite(), pair => pair.et!),
-                    new InvalidateWith(typeof(SystemWordTemplateEntity), typeof(WordTemplateEntity)));
+                    new InvalidateWith(typeof(WordModelEntity), typeof(WordTemplateEntity)));
 
-                TypeToSystemWordTemplate = sb.GlobalLazy(() =>
+                WordModelTypeToEntity = sb.GlobalLazy(() =>
                 {
-                    var dbSystemWordReports = Database.RetrieveAll<SystemWordTemplateEntity>();
+                    var dbSystemWordReports = Database.RetrieveAll<WordModelEntity>();
                     return EnumerableExtensions.JoinRelaxed(
                         dbSystemWordReports, 
-                        systemWordReports.Keys, 
+                        registeredWordModels.Keys, 
                         swr => swr.FullClassName, 
                         type => type.FullName,
                         (swr, type) => KVP.Create(type, swr), 
-                        "caching " + nameof(SystemWordTemplateEntity)).ToDictionary();
-                }, new InvalidateWith(typeof(SystemWordTemplateEntity)));
+                        "caching " + nameof(WordModelEntity)).ToDictionary();
+                }, new InvalidateWith(typeof(WordModelEntity)));
 
-                sb.Schema.Initializing += () => TypeToSystemWordTemplate.Load();
+                sb.Schema.Initializing += () => WordModelTypeToEntity.Load();
 
-                SystemWordTemplateToType = sb.GlobalLazy(() => TypeToSystemWordTemplate.Value.Inverse(),
-                    new InvalidateWith(typeof(SystemWordTemplateEntity)));
+                WordModelEntityToType = sb.GlobalLazy(() => WordModelTypeToEntity.Value.Inverse(),
+                    new InvalidateWith(typeof(WordModelEntity)));
             }
         }
 
-        internal static bool HasDefaultTemplateConstructor(SystemWordTemplateEntity systemWordReport)
+        internal static bool HasDefaultTemplateConstructor(WordModelEntity systemWordReport)
         {
-            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(systemWordReport.ToType());
+            WordModelInfo info = registeredWordModels.GetOrThrow(systemWordReport.ToType());
 
             return info.DefaultTemplateConstructor != null;
         }
 
-        internal static WordTemplateEntity? CreateDefaultTemplate(SystemWordTemplateEntity systemWordReport)
+        internal static WordTemplateEntity? CreateDefaultTemplate(WordModelEntity systemWordReport)
         {
-            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(systemWordReport.ToType());
+            WordModelInfo info = registeredWordModels.GetOrThrow(systemWordReport.ToType());
 
             if (info.DefaultTemplateConstructor == null)
                 return null;
@@ -216,42 +216,42 @@ namespace Signum.Engine.Word
             if (template.Name == null)
                 template.Name = systemWordReport.FullClassName;
 
-            template.SystemWordTemplate = systemWordReport;
+            template.Model = systemWordReport;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
             return template;
         }
 
 
-        public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, bool avoidConversion = false)
+        public static byte[] CreateReport(this IWordModel model, bool avoidConversion = false)
         {
-            return systemWordTemplate.CreateReport(out WordTemplateEntity rubish, avoidConversion);
+            return model.CreateReport(out WordTemplateEntity rubish, avoidConversion);
         }
 
-        public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, out WordTemplateEntity template, bool avoidConversion = false)
+        public static byte[] CreateReport(this IWordModel model, out WordTemplateEntity template, bool avoidConversion = false)
         {
-            SystemWordTemplateEntity system = GetSystemWordTemplate(systemWordTemplate.GetType());
+            WordModelEntity system = GetWordModelEntity(model.GetType());
 
-            template = GetDefaultTemplate(system, systemWordTemplate.UntypedEntity as Entity);
+            template = GetDefaultTemplate(system, model.UntypedEntity as Entity);
 
-            return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate: systemWordTemplate, avoidConversion: avoidConversion); 
+            return WordTemplateLogic.CreateReport(template.ToLite(), model: model, avoidConversion: avoidConversion); 
         }
 
-        public static SystemWordTemplateEntity GetSystemWordTemplate(Type type)
+        public static WordModelEntity GetWordModelEntity(Type type)
         {
-            return TypeToSystemWordTemplate.Value.GetOrThrow(type);
+            return WordModelTypeToEntity.Value.GetOrThrow(type);
         }
 
-        public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate, Entity? entity)
+        public static WordTemplateEntity GetDefaultTemplate(WordModelEntity model, Entity? entity)
         {
-            var templates = SystemWordTemplateToWordTemplates.Value.TryGetC(systemWordTemplate.ToLite()).EmptyIfNull().Select(a => WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(a));
-            if (templates.IsNullOrEmpty() && HasDefaultTemplateConstructor(systemWordTemplate))
+            var templates = WordModelToTemplates.Value.TryGetC(model.ToLite()).EmptyIfNull().Select(a => WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(a));
+            if (templates.IsNullOrEmpty() && HasDefaultTemplateConstructor(model))
             {
                 using (ExecutionMode.Global())
                 using (OperationLogic.AllowSave<WordTemplateEntity>())
                 using (Transaction tr = Transaction.ForceNew())
                 {
-                    var template = CreateDefaultTemplate(systemWordTemplate)!;
+                    var template = CreateDefaultTemplate(model)!;
                     
                     template.Save();
 
@@ -261,32 +261,32 @@ namespace Signum.Engine.Word
 
             var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: false);
             var candidates = templates.Where(isAllowed).Where(t => t.IsApplicable(entity));
-            return GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture) ??
-                GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture.Parent) ??
+            return GetTemplate(candidates, model, CultureInfo.CurrentCulture) ??
+                GetTemplate(candidates, model, CultureInfo.CurrentCulture.Parent) ??
                 candidates.SingleEx(
-                    () => $"No active WordTemplate for {systemWordReports} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}",
-                    () => $"More than one active WordTemplate for {systemWordReports} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
+                    () => $"No active WordTemplate for {registeredWordModels} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}",
+                    () => $"More than one active WordTemplate for {registeredWordModels} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
         }
 
-        private static WordTemplateEntity GetTemplate(IEnumerable<WordTemplateEntity> candidates, SystemWordTemplateEntity systemWordTemplate, CultureInfo culture)
+        private static WordTemplateEntity GetTemplate(IEnumerable<WordTemplateEntity> candidates, WordModelEntity model, CultureInfo culture)
         {
             return candidates
                 .Where(a => a.Culture.Name == culture.Name)
-                .SingleOrDefaultEx(() => $"More than one active WordTemplate for SystemWordTemplate {systemWordTemplate} in {culture.Name} found");
+                .SingleOrDefaultEx(() => $"More than one active WordTemplate for WordModel {model} in {culture.Name} found");
         }
 
         static SqlPreCommand? Schema_Generating()
         {
-            Table table = Schema.Current.Table<SystemWordTemplateEntity>();
+            Table table = Schema.Current.Table<WordModelEntity>();
 
             return (from ei in GenerateTemplates()
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
         }
 
-        internal static List<SystemWordTemplateEntity> GenerateTemplates()
+        internal static List<WordModelEntity> GenerateTemplates()
         {
-            var list = (from type in systemWordReports.Keys
-                        select new SystemWordTemplateEntity
+            var list = (from type in registeredWordModels.Keys
+                        select new WordModelEntity
                         {
                             FullClassName = type.FullName
                         }).ToList();
@@ -297,17 +297,17 @@ namespace Signum.Engine.Word
 
         static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
-            Table table = Schema.Current.Table<SystemWordTemplateEntity>();
+            Table table = Schema.Current.Table<WordModelEntity>();
 
-            Dictionary<string, SystemWordTemplateEntity> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
-            Dictionary<string, SystemWordTemplateEntity> old = Administrator.TryRetrieveAll<SystemWordTemplateEntity>(replacements).ToDictionary(c =>
+            Dictionary<string, WordModelEntity> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
+            Dictionary<string, WordModelEntity> old = Administrator.TryRetrieveAll<WordModelEntity>(replacements).ToDictionary(c =>
                 c.FullClassName);
 
             replacements.AskForReplacements(
                 old.Keys.ToHashSet(),
                 should.Keys.ToHashSet(), systemTemplatesReplacementKey);
 
-            Dictionary<string, SystemWordTemplateEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
+            Dictionary<string, WordModelEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
@@ -322,39 +322,39 @@ namespace Signum.Engine.Word
         }
 
         public static void RegisterSystemWordReport<T>(Func<WordTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
-         where T : ISystemWordTemplate
+         where T : IWordModel
         {
             RegisterSystemWordReport(typeof(T), defaultTemplateConstructor, queryName);
         }
 
-        public static void RegisterSystemWordReport(Type systemWordTemplate, Func<WordTemplateEntity>? defaultTemplateConstructor = null, object? queryName = null)
+        public static void RegisterSystemWordReport(Type wordModelType, Func<WordTemplateEntity>? defaultTemplateConstructor = null, object? queryName = null)
         {
-            systemWordReports[systemWordTemplate] = new SystemWordTemplateInfo(queryName ?? GetEntityType(systemWordTemplate))
+            registeredWordModels[wordModelType] = new WordModelInfo(queryName ?? GetEntityType(wordModelType))
             {
                 DefaultTemplateConstructor = defaultTemplateConstructor,
             };
         }
 
-        public static Type GetEntityType(Type systemWordTemplate)
+        public static Type GetEntityType(Type wordModelType)
         {
-            var baseType = systemWordTemplate.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemWordTemplate<>)));
+            var baseType = wordModelType.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(WordModel<>)));
 
             if (baseType != null)
             {
                 return baseType.GetGenericArguments()[0];
             }
 
-            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterWordModel".FormatWith(systemWordTemplate.TypeName()));
+            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterWordModel".FormatWith(wordModelType.TypeName()));
         }
 
-        public static Type ToType(this SystemWordTemplateEntity systemWordTemplate)
+        public static Type ToType(this WordModelEntity modelEntity)
         {
-            return SystemWordTemplateToType.Value.GetOrThrow(systemWordTemplate);
+            return WordModelEntityToType.Value.GetOrThrow(modelEntity);
         }
 
-        public static bool RequiresExtraParameters(SystemWordTemplateEntity systemWordTemplateEntity)
+        public static bool RequiresExtraParameters(WordModelEntity modelEntity)
         {
-            return GetEntityConstructor(systemWordTemplateEntity.ToType()) == null;
+            return GetEntityConstructor(modelEntity.ToType()) == null;
         }
 
         public static ConstructorInfo GetEntityConstructor(Type systemWordTempalte)
@@ -367,9 +367,9 @@ namespace Signum.Engine.Word
                     select ci).SingleOrDefaultEx();
         }
 
-        public static ISystemWordTemplate CreateDefaultSystemWordTemplate(SystemWordTemplateEntity systemWordTemplate, ModifiableEntity? entity)
+        public static IWordModel CreateDefaultWordModel(WordModelEntity wordModel, ModifiableEntity? entity)
         {
-            return (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(systemWordTemplate.ToType()).Invoke(new[] { entity });
+            return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType()).Invoke(new[] { entity });
         }
     }
 }
