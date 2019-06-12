@@ -72,7 +72,6 @@ namespace Signum.Entities.SMS
         public static ConstructSymbol<ProcessEntity>.FromMany<SMSMessageEntity> CreateUpdateStatusPackage;
         public static ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromSMSTemplate;
         public static ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSWithTemplateFromEntity;
-        public static ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSFromEntity;
 
         public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessages;
         public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessagesFromTemplate;
