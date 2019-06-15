@@ -92,6 +92,12 @@ export module CaseActivityMessage {
   export const NoActorsFoundToInsertCaseActivityNotifications = new MessageKey("CaseActivityMessage", "NoActorsFoundToInsertCaseActivityNotifications");
 }
 
+export const CaseActivityMixin = new Type<CaseActivityMixin>("CaseActivityMixin");
+export interface CaseActivityMixin extends Entities.MixinEntity {
+  Type: "CaseActivityMixin";
+  caseActivity: Entities.Lite<CaseActivityEntity> | null;
+}
+
 export module CaseActivityOperation {
   export const CreateCaseActivityFromWorkflow : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseActivityFromWorkflow");
   export const CreateCaseFromWorkflowEventTask : Entities.ConstructSymbol_From<CaseEntity, WorkflowEventTaskEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseFromWorkflowEventTask");
