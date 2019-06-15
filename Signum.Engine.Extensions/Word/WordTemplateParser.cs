@@ -17,19 +17,17 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Word
 {
-    public class TemplateParser : ITemplateParser
+    public class WordTemplateParser : ITemplateParser
     {
         public List<TemplateError> Errors = new List<TemplateError>();
         public QueryDescription QueryDescription { get; private set; }
         public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
         public Type? ModelType { get; private set; }
 
-        public PropertyInfo ModelProperty { get; private set; } = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.Model);
-
         OpenXmlPackage document;
         WordTemplateEntity template;
 
-        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type? modelType, WordTemplateEntity template)
+        public WordTemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type? modelType, WordTemplateEntity template)
         {
             this.QueryDescription = queryDescription;
             this.ModelType = modelType;

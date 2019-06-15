@@ -21,7 +21,6 @@ namespace Signum.Engine.Templating
     public interface ITemplateParser
     {
         Type? ModelType { get; }
-        PropertyInfo ModelProperty { get; }
         QueryDescription QueryDescription { get; }
         ScopedDictionary<string, ValueProviderBase> Variables { get; }
         void AddError(bool fatal, string error);
@@ -149,7 +148,7 @@ namespace Signum.Engine.Templating
                         return new TranslateInstanceValueProvider(result, true, tp.AddError) { Variable = variable };
                     }
                 case "m":
-                    return new ModelValueProvider(token, tp.ModelType, tp.ModelProperty, tp.AddError) { Variable = variable };
+                    return new ModelValueProvider(token, tp.ModelType, tp.AddError) { Variable = variable };
                 case "g":
                     return new GlobalValueProvider(token, tp.AddError) { Variable = variable };
                 case "d":
@@ -463,11 +462,11 @@ namespace Signum.Engine.Templating
         List<MemberInfo>? Members;
 
 
-        public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, PropertyInfo modelProperty, Action<bool, string> addError)
+        public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, Action<bool, string> addError)
         {
             if (modelType == null)
             {
-                addError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, modelProperty.NiceName()));
+                addError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, "Model"));
                 return;
             }
 

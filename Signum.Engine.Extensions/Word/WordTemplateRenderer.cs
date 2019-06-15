@@ -12,7 +12,7 @@ using Signum.Engine.Basics;
 
 namespace Signum.Engine.Word
 {
-    class TemplateRenderer
+    class WordTemplateRenderer
     {
         OpenXmlPackage document;
         QueryDescription queryDescription;
@@ -21,7 +21,7 @@ namespace Signum.Engine.Word
         WordTemplateEntity template;
         IWordModel? model;
 
-        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity)
+        public WordTemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity)
         {
             this.document = document;
             this.culture = culture;

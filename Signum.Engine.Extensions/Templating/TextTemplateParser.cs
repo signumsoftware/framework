@@ -17,21 +17,21 @@ using Signum.Utilities.DataStructures;
 using Signum.Engine.Templating;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Mailing
+namespace Signum.Engine.Templating
 {
-    public static partial class EmailTemplateParser
+    public static partial class TextTemplateParser
     {
         public static BlockNode Parse(string? text, QueryDescription qd, Type? modelType)
         {
-            return new TemplateWalker(text, qd, modelType).Parse();      
+            return new TextTemplateParserImp(text, qd, modelType).Parse();      
         }
 
         public static BlockNode TryParse(string? text, QueryDescription qd, Type? modelType, out string errorMessage)
         {
-            return new TemplateWalker(text, qd, modelType).TryParse(out errorMessage);
+            return new TextTemplateParserImp(text, qd, modelType).TryParse(out errorMessage);
         }
 
-        internal class TemplateWalker: ITemplateParser
+        internal class TextTemplateParserImp: ITemplateParser
         {
             string text;
             
@@ -42,10 +42,9 @@ namespace Signum.Engine.Mailing
 
             public Type? ModelType { get; private set; }
 
-            public PropertyInfo ModelProperty { get; private set; } = ReflectionTools.GetPropertyInfo((EmailTemplateEntity e) => e.Model);
             public QueryDescription QueryDescription { get; private set; }
 
-            public TemplateWalker(string? text, QueryDescription qd, Type? modelType)
+            public TextTemplateParserImp(string? text, QueryDescription qd, Type? modelType)
             {
                 this.text = text ?? "";
                 this.QueryDescription = qd ?? throw new ArgumentNullException(nameof(qd));
@@ -254,129 +253,15 @@ namespace Signum.Engine.Mailing
             }
         }
 
-
-
-        private static string Synchronize(string text, SynchronizationContext sc)
+        public static string Synchronize(string text, SynchronizationContext sc)
         {
-            BlockNode node = new TemplateWalker(text, sc.QueryDescription, sc.ModelType).ParseSync();
+            BlockNode node = new TextTemplateParserImp(text, sc.QueryDescription, sc.ModelType).ParseSync();
 
             node.Synchronize(sc);
 
             return node.ToString(); 
         }
-
-
-        internal static SqlPreCommand? ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateEntity et, StringDistance sd)
-        {
-            Console.Write(".");
-            try
-            {
-                var queryName = QueryLogic.ToQueryName(et.Query.Key);
-
-                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
-
-                using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name)))
-                using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + et.Query.Key)))
-                {
-                    if (et.From != null && et.From.Token != null)
-                    {
-                        QueryTokenEmbedded token = et.From.Token;
-                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.Model != null))
-                        {
-                            case FixTokenResult.Nothing: break;
-                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
-                            case FixTokenResult.SkipEntity: return null;
-                            case FixTokenResult.Fix: et.From.Token = token; break;
-                            case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
-                            default: break;
-                        }
-                    }
-
-                    if (et.Recipients.Any(a => a.Token != null))
-                    {
-                        using (DelayedConsole.Delay(() => Console.WriteLine(" Recipients:")))
-                        {
-                            foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
-                            {
-                                QueryTokenEmbedded token = item.Token!;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.Model != null))
-                                {
-                                    case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
-                                    case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
-                                    case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: item.Token = token; break;
-                                    case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
-                                    default: break;
-                                }
-                            }
-                        }
-                    }
-
-                    try
-                    {
-
-                        foreach (var item in et.Messages)
-                        {
-                            SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, et.Model?.ToType());
-
-                            item.Subject = Synchronize(item.Subject, sc);
-                            item.Text = Synchronize(item.Text, sc);
-                        }
-
-                        using (replacements.WithReplacedDatabaseName())
-                            return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
-                    }
-                    catch (TemplateSyncException ex)
-                    {
-                        if (ex.Result == FixTokenResult.SkipEntity)
-                            return null;
-
-                        if (ex.Result == FixTokenResult.DeleteEntity)
-                            return table.DeleteSqlSync(et, e => e.Name == et.Name);
-
-                        if (ex.Result == FixTokenResult.ReGenerateEntity)
-                            return Regenerate(et, replacements, table);
-
-                        throw new UnexpectedValueException(ex.Result);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                return new SqlPreCommandSimple("-- Exception on {0}. {1}\r\n{2}".FormatWith(et.BaseToString(), e.GetType().Name, e.Message.Indent(2, '-')));
-            }
-        }
-
-        internal static SqlPreCommand? Regenerate(EmailTemplateEntity et, Replacements? replacements, Table table)
-        {
-            var newTemplate = EmailModelLogic.CreateDefaultTemplate(et.Model!);
-
-            newTemplate.SetId(et.IdOrNull);
-            newTemplate.SetIsNew(false);
-            newTemplate.Ticks = et.Ticks; 
-
-            using (replacements?.WithReplacedDatabaseName())
-                return table.UpdateSqlSync(newTemplate, e=> e.Name == newTemplate.Name, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
-        }
     }
 
-    public class EmailTemplateParameters : TemplateParameters
-    {
-        public EmailTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows): 
-              base(entity, culture, columns, rows)
-        { }
-
-        public StringBuilder StringBuilder = new StringBuilder();
-        public bool IsHtml;
-        public IEmailModel? Model;
-
-        public override object GetModel()
-        {
-            if (Model == null)
-                throw new ArgumentException("There is no Model set");
-
-            return Model;
-        }
-    }
+   
 }

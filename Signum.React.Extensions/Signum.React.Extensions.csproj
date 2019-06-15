@@ -78,6 +78,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="SMS\SMSClient.tsx" />
     <None Remove="SMS\Templates\MultipleSMS.tsx" />
     <None Remove="SMS\Templates\SMSMessage.tsx" />
     <None Remove="SMS\Templates\SMSSendPackage.tsx" />

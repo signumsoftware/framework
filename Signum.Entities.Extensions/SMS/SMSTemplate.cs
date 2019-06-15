@@ -5,6 +5,8 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Collections.Specialized;
+using Signum.Entities.UserAssets;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.SMS
 {
@@ -18,13 +20,19 @@ namespace Signum.Entities.SMS
 
         public bool EditableMessage { get; set; } = AllowEditMessages;
 
-        public TypeEntity? AssociatedType { get; set; }
+        public bool DisableAuthorization { get; set; }
+
+        public QueryEntity Query { get; set; }
+
+        public SMSModelEntity? Model { get; set; }
 
         [NotifyCollectionChanged]
         public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
         [StringLengthValidator(Max = 200)]
         public string From { get; set; }
+
+        public QueryTokenEmbedded To { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
 
@@ -69,6 +77,11 @@ namespace Signum.Entities.SMS
             return base.PropertyValidation(pi);
         }
 
+        internal void ParseData(QueryDescription queryDescription)
+        {
+            To.ParseData(this, queryDescription, 0);
+        }
+
         static readonly Expression<Func<SMSTemplateEntity, string>> ToStringExpression = e => e.Name;
         [ExpressionField]
         public override string ToString()
@@ -81,8 +94,10 @@ namespace Signum.Entities.SMS
     [AutoInit]
     public static class SMSTemplateOperation
     {
+        public static ConstructSymbol<SMSTemplateEntity>.From<SMSModelEntity> CreateSMSTemplateFromModel;
         public static ConstructSymbol<SMSTemplateEntity>.Simple Create;
         public static ExecuteSymbol<SMSTemplateEntity> Save;
+
     }
 
     public enum MessageLengthExceeded
@@ -124,5 +139,53 @@ namespace Signum.Entities.SMS
         [Description("There's more than one message for the same language")]
         TheresMoreThanOneMessageForTheSameLanguage,
         NewCulture
+    }
+
+
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+    public class SMSModelEntity : Entity
+    {
+        [UniqueIndex]
+        public string FullClassName { get; set; }
+
+        static Expression<Func<SMSModelEntity, string>> ToStringExpression = e => e.FullClassName;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+    public interface ISMSOwnerEntity : IEntity
+    {
+
+    }
+
+    [DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
+    public class SMSOwnerData : IEquatable<SMSOwnerData>
+    {
+        public Lite<ISMSOwnerEntity>? Owner { get; set; }
+        public string TelephoneNumber { get; set; }
+        public CultureInfoEntity? CultureInfo { get; set; }
+
+        public bool Equals(SMSOwnerData other)
+        {
+            return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SMSOwnerData && Equals((SMSOwnerData)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Owner == null ? base.GetHashCode() : Owner.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return "{0} ({1})".FormatWith(TelephoneNumber, Owner);
+        }
     }
 }

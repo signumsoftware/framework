@@ -1,6 +1,8 @@
 using System;
 using Signum.Entities.Processes;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
@@ -46,7 +48,7 @@ namespace Signum.Entities.SMS
         public bool UpdatePackageProcessed { get; set; }
 
         [ImplementedBy()]
-        public Lite<Entity> Referred { get; set; }
+        public Lite<ISMSOwnerEntity>? Referred { get; set; }
 
         public Lite<ExceptionEntity>? Exception { get; set; }
 
@@ -70,11 +72,9 @@ namespace Signum.Entities.SMS
         public static ExecuteSymbol<SMSMessageEntity> Send;
         public static ExecuteSymbol<SMSMessageEntity> UpdateStatus;
         public static ConstructSymbol<ProcessEntity>.FromMany<SMSMessageEntity> CreateUpdateStatusPackage;
-        public static ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromSMSTemplate;
-        public static ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSWithTemplateFromEntity;
+        public static ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromTemplate;
 
-        public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessages;
-        public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessagesFromTemplate;
+        public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendMultipleSMSMessages;
     }
 
     [Serializable]
@@ -94,4 +94,5 @@ namespace Signum.Entities.SMS
         public static ProcessAlgorithmSymbol Send;
         public static ProcessAlgorithmSymbol UpdateStatus;
     }
+
 }

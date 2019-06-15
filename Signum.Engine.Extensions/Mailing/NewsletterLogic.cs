@@ -100,7 +100,7 @@ namespace Signum.Engine.Mailing
 
             try
             {
-                EmailTemplateParser.TryParse(text, qd, null, out string error);
+                TextTemplateParser.TryParse(text, qd, null, out string error);
 
                 return error.DefaultToNull();
             }
@@ -116,8 +116,8 @@ namespace Signum.Engine.Mailing
             var queryname = QueryLogic.ToQueryName(newsletter.Query!.Key);
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryname);
 
-            newsletter.Subject = EmailTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
-            newsletter.Text = EmailTemplateParser.Parse(newsletter.Text, qd, null).ToString();
+            newsletter.Subject = TextTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
+            newsletter.Text = TextTemplateParser.Parse(newsletter.Text, qd, null).ToString();
         }
     }
 
@@ -234,8 +234,8 @@ namespace Signum.Engine.Mailing
                 list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, SubTokensOptions.CanElement));
                 list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, 0));
 
-                EmailTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
-                EmailTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
+                TextTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
+                TextTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
 
                 list = list.Distinct().ToList();
             }
@@ -277,10 +277,10 @@ namespace Signum.Engine.Mailing
             }).ToList();
             
             if (newsletter.SubjectParsedNode == null)
-                newsletter.SubjectParsedNode = EmailTemplateParser.Parse(newsletter.Subject, qd, null);
+                newsletter.SubjectParsedNode = TextTemplateParser.Parse(newsletter.Subject, qd, null);
 
             if (newsletter.TextParsedNode == null)
-                newsletter.TextParsedNode = EmailTemplateParser.Parse(newsletter.Text, qd, null);
+                newsletter.TextParsedNode = TextTemplateParser.Parse(newsletter.Text, qd, null);
 
             var conf = EmailLogic.Configuration;
 
@@ -309,14 +309,14 @@ namespace Signum.Engine.Mailing
                             
                             message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
 
-                            message.Subject = ((EmailTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
-                                new EmailTemplateParameters(null, null!, dicTokenColumn, s.Rows)
+                            message.Subject = ((TextTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
+                                new TextTemplateParameters(null, null!, dicTokenColumn, s.Rows)
                                 {
                                     IsHtml = false,
                                 });
 
-                            message.Body = ((EmailTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
-                                new EmailTemplateParameters(null, null!, dicTokenColumn, s.Rows)
+                            message.Body = ((TextTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
+                                new TextTemplateParameters(null, null!, dicTokenColumn, s.Rows)
                                 {
                                     IsHtml = true,
                                 });

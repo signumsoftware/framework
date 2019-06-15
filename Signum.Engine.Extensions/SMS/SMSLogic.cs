@@ -17,6 +17,9 @@ using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using System.Threading.Tasks;
 using System.Globalization;
+using Signum.Engine.Mailing;
+using Signum.Engine.Templating;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.SMS
 {
@@ -28,10 +31,10 @@ namespace Signum.Engine.SMS
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
-        public static Expression<Func<Entity, IQueryable<SMSMessageEntity>>> SMSMessagesExpression =
+        public static Expression<Func<ISMSOwnerEntity, IQueryable<SMSMessageEntity>>> SMSMessagesExpression =
             e => Database.Query<SMSMessageEntity>().Where(m => m.Referred.Is(e));
         [ExpressionField]
-        public static IQueryable<SMSMessageEntity> SMSMessages(this Entity e)
+        public static IQueryable<SMSMessageEntity> SMSMessages(this ISMSOwnerEntity e)
         {
             return SMSMessagesExpression.Evaluate(e);
         }
@@ -64,6 +67,9 @@ namespace Signum.Engine.SMS
 
         public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
+        public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy;
+        public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName;
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null!, null!)));
@@ -78,12 +84,15 @@ namespace Signum.Engine.SMS
                 SMSLogic.getConfiguration = getConfiguration;
                 SMSLogic.Provider = provider;
 
+
+             
+
                 sb.Include<SMSMessageEntity>()
                     .WithQuery(() => m => new
                     {
                         Entity = m,
                         m.Id,
-                        Source = m.From,
+                        m.From,
                         m.DestinationNumber,
                         m.State,
                         m.SendDate,
@@ -97,12 +106,23 @@ namespace Signum.Engine.SMS
                         t.Id,
                         t.Name,
                         IsActive = t.IsActiveNow(),
-                        Source = t.From,
-                        t.AssociatedType,
+                        t.From,
+                        t.Query,
+                        t.Model,
                         t.StartDate,
                         t.EndDate,
                     });
-                
+
+                SMSTemplatesLazy = sb.GlobalLazy(() =>
+                    Database.Query<SMSTemplateEntity>().ToDictionary(et => et.ToLite())
+                    , new InvalidateWith(typeof(SMSTemplateEntity)));
+
+                SMSTemplatesByQueryName = sb.GlobalLazy(() =>
+                {
+                    return SMSTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
+                }, new InvalidateWith(typeof(SMSTemplateEntity)));
+
+
                 SMSMessageGraph.Register();
                 SMSTemplateGraph.Register();
 
@@ -119,260 +139,21 @@ namespace Signum.Engine.SMS
             }
         }
 
-        static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
-        static Dictionary<Type, LambdaExpression> cultureProviders = new Dictionary<Type, LambdaExpression>();
-
-        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo?>> cultureExpression) where T : Entity
-        {
-            phoneNumberProviders[typeof(T)] = phoneExpression;
-            cultureProviders[typeof(T)] = cultureExpression;
-
-            new Graph<ProcessEntity>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessages)
-            {
-                Construct = (providers, args) =>
-                {
-                    var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
-                        .Select(pr => new { Exp = phoneExpression.Evaluate(pr), Referred = pr.ToLite() }).AsEnumerable().NotNull().Distinct().ToList();
-
-                    var splitNumbers = (from p in numbers.Where(p => p.Exp!.Contains(','))
-                                        from n in p.Exp!.Split('n')
-                                        select new { Exp = n.Trim(), p.Referred }).Concat(numbers.Where(p => !p.Exp!.Contains(','))).Distinct().ToList();
-
-                    numbers = splitNumbers;
-
-                    MultipleSMSModel model = args.GetArg<MultipleSMSModel>();
-
-                    IntegrityCheck? ic = model.IntegrityCheck();
-
-                    if (!model.Message.HasText())
-                        throw new ApplicationException("The text for the SMS message has not been set");
-
-                    SMSSendPackageEntity package = new SMSSendPackageEntity().Save();
-
-                    var packLite = package.ToLite();
-
-                    using (OperationLogic.AllowSave<SMSMessageEntity>())
-                        numbers.Select(n => new SMSMessageEntity
-                        {
-                            DestinationNumber = n.Exp!,
-                            SendPackage = packLite,
-                            Referred = n.Referred!,/*CSBUG*/
-
-                            Message = model.Message,
-                            From = model.From,
-                            Certified = model.Certified,
-                            State = SMSMessageState.Created,
-                        }).SaveList();
-
-                    var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
-
-                    process.Execute(ProcessOperation.Execute);
-
-                    return process;
-                }
-            }.Register();
-        }
-
-
-
-        public static string GetPhoneNumber<T>(T entity) where T : IEntity
-        {
-            var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders
-                .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".FormatWith(typeof(T).NiceName()));
-
-            return phoneFunc.Evaluate(entity);
-        }
-
-        public static CultureInfo? GetCulture<T>(T entity) where T : IEntity
-        {
-            var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
-                .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".FormatWith(typeof(T).NiceName()));
-
-            return cultureFunc.Evaluate(entity);
-        }
+    
 
         #region Message composition
 
-        static Dictionary<Type, LambdaExpression> dataObjectProviders = new Dictionary<Type, LambdaExpression>();
-
-        public static List<Lite<TypeEntity>> RegisteredDataObjectProviders()
+        static string CheckLength(string result, SMSTemplateEntity template)
         {
-            return dataObjectProviders.Keys.Select(t => t.ToTypeEntity().ToLite()).ToList();
-        }
-
-        public static List<string> GetLiteralsFromDataObjectProvider(Type type)
-        {
-            if (!dataObjectProviders.ContainsKey(type))
-                throw new ArgumentOutOfRangeException("The type {0} is not a registered data provider"
-                    .FormatWith(type.FullName));
-
-            return dataObjectProviders[type].GetType().GetGenericArguments()[0]
-                .GetGenericArguments()[1].GetProperties().Select(p => "{{{0}}}".FormatWith(p.Name)).ToList();
-        }
-
-        public static void RegisterDataObjectProvider<T, A>(Expression<Func<T, A>> func) where T : Entity
-            where A : object
-        {
-            dataObjectProviders[typeof(T)] = func;
-
-            new Graph<ProcessEntity>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessagesFromTemplate)
-            {
-                Construct = (providers, args) =>
-                {
-                    var template = args.GetArg<SMSTemplateEntity>();
-
-                    if (TypeLogic.EntityToType[template.AssociatedType!] != typeof(T))
-                        throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
-                            .FormatWith(template.AssociatedType!.FullClassName, typeof(T).FullName));
-
-                    var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders
-                        .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".FormatWith(typeof(T).NiceName()));
-
-                    var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
-                        .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".FormatWith(typeof(T).NiceName()));
-
-                    var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
-                          .Select(p => new
-                          {
-                              Phone = phoneFunc.Evaluate(p),
-                              Data = func.Evaluate(p),
-                              Referred = p.ToLite(),
-                              Culture = cultureFunc.Evaluate(p)
-                          }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
-
-                    var splitdNumbers = (from p in numbers.Where(p => p.Phone!.Contains(','))
-                                         from n in p.Phone!.Split(',')
-                                         select new
-                                         {
-                                             Phone = n.Trim(),
-                                             p.Data,
-                                             p.Referred,
-                                             p.Culture
-                                         }).Concat(numbers.Where(p => !p.Phone!.Contains(','))).Distinct().ToList();
-
-                    numbers = splitdNumbers;
-
-                    SMSSendPackageEntity package = new SMSSendPackageEntity().Save();
-                    var packLite = package.ToLite();
-
-                    using (OperationLogic.AllowSave<SMSMessageEntity>())
-                    {
-                        numbers.Select(n => new SMSMessageEntity
-                        {
-                            Message = template.ComposeMessage(n.Data!, n.Culture!),
-                            EditableMessage = template.EditableMessage,
-                            From = template.From,
-                            DestinationNumber = n.Phone!,
-                            SendPackage = packLite,
-                            State = SMSMessageState.Created,
-                            Referred = n.Referred!
-                        }).SaveList();
-                    }
-
-                    var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
-
-                    process.Execute(ProcessOperation.Execute);
-
-                    return process;
-                }
-            }.Register();
-
-            new Graph<SMSMessageEntity>.ConstructFrom<T>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
-            {
-                Construct = (provider, args) =>
-                {
-                    var template = args.GetArg<SMSTemplateEntity>();
-
-                    if (template.AssociatedType != null &&
-                        TypeLogic.EntityToType[template.AssociatedType] != typeof(T))
-                        throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
-                            .FormatWith(template.AssociatedType.FullClassName, typeof(T).FullName));
-
-                    return new SMSMessageEntity
-                    {
-                        Message = template.ComposeMessage(func.Evaluate(provider), GetCulture(provider)),
-                        EditableMessage = template.EditableMessage,
-                        From = template.From,
-                        DestinationNumber = GetPhoneNumber(provider),
-                        State = SMSMessageState.Created,
-                        Referred = provider.ToLite(),
-                        Certified = template.Certified
-                    };
-                }
-            }.Register();
-        }
-
-        static string literalDelimiterStart = "{";
-        public static string LiteralDelimiterStart
-        {
-            get { return literalDelimiterStart; }
-        }
-
-        static string literalDelimiterEnd = "}";
-        public static string LiteralDelimiterEnd
-        {
-            get { return literalDelimiterEnd; }
-        }
-
-
-        static Regex literalFinder = new Regex(@"{(?<name>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)}");
-
-        public static string ComposeMessage(this SMSTemplateEntity template, object obj, CultureInfo? culture)
-        {
-            var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
-            var templateMessage = template.GetCultureMessage(culture ?? defaultCulture) ??
-                template.GetCultureMessage(defaultCulture);
-
-            var message = templateMessage.Message;
-
-            if (obj == null)
-                return message;
-
-            var matches = literalFinder.Matches(message);
-
-            if (matches.Count == 0)
-                return message;
-
-            Type t = obj.GetType();
-
-            var combinations = (from Match m in literalFinder.Matches(message)
-                                select new Combination
-                                {
-                                    Name = m.Groups["name"].Value,
-                                    Value = t.GetProperty(m.Groups["name"].Value)?.Let(fi => fi.GetValue(obj, null))?.ToString() ?? ""
-                                }).ToList();
-
-            return CombineText(template, templateMessage, combinations);
-        }
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-        internal class Combination
-        {
-            public string Name;
-            public string Value;
-        }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
-
-        static string CombineText(SMSTemplateEntity template, SMSTemplateMessageEmbedded templateMessage, List<Combination> combinations)
-        {
-            string text = templateMessage.Message;
-
             if (template.RemoveNoSMSCharacters)
             {
-                text = SMSCharacters.RemoveNoSMSCharacters(templateMessage.Message);
-                combinations.ForEach(c => c.Value = SMSCharacters.RemoveNoSMSCharacters(c.Value));
+                result = SMSCharacters.RemoveNoSMSCharacters(result);
             }
 
-            return CombineText(text, combinations, template.MessageLengthExceeded);
-        }
-
-        static string CombineText(string text, List<Combination> combinations, MessageLengthExceeded onExceeded)
-        {
-            string result = literalFinder.Replace(text, m => combinations.FirstEx(c => c.Name == m.Groups["name"].Value).Value);
             int remainingLength = SMSCharacters.RemainingLength(result);
             if (remainingLength < 0)
             {
-                switch (onExceeded)
+                switch (template.MessageLengthExceeded)
                 {
                     case MessageLengthExceeded.NotAllowed:
                         throw new ApplicationException(SMSCharactersMessage.TheTextForTheSMSMessageExceedsTheLengthLimit.NiceToString());
@@ -386,76 +167,12 @@ namespace Signum.Engine.SMS
             return result;
         }
         #endregion
-        
+
         #region processes
-
-        public static void StartProcesses(SchemaBuilder sb)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<SMSSendPackageEntity>();
-                sb.Include<SMSUpdatePackageEntity>();
-                SMSLogic.AssertStarted(sb);
-                ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
-                ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
-
-                new Graph<ProcessEntity>.ConstructFromMany<SMSMessageEntity>(SMSMessageOperation.CreateUpdateStatusPackage)
-                {
-                    Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
-                }.Register();
-
-                QueryLogic.Queries.Register(typeof(SMSSendPackageEntity), () =>
-                    from e in Database.Query<SMSSendPackageEntity>()
-                    let p = e.LastProcess()
-                    select new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.Name,
-                        NumLines = e.SMSMessages().Count(),
-                        LastProcess = p,
-                        NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
-                    });
-
-                QueryLogic.Queries.Register(typeof(SMSUpdatePackageEntity), () =>
-                    from e in Database.Query<SMSUpdatePackageEntity>()
-                    let p = e.LastProcess()
-                    select new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.Name,
-                        NumLines = e.SMSMessages().Count(),
-                        LastProcess = p,
-                        NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
-                    });
-            }
-        }
-
-        private static ProcessEntity UpdateMessages(List<SMSMessageEntity> messages)
-        {
-            SMSUpdatePackageEntity package = new SMSUpdatePackageEntity().Save();
-
-            var packLite = package.ToLite();
-
-            if (messages.Any(m => m.State != SMSMessageState.Sent))
-                throw new ApplicationException("SMS messages must be sent prior to update the status");
-
-            messages.ForEach(ms => ms.UpdatePackage = packLite);
-            messages.SaveList();
-
-            var process = ProcessLogic.Create(SMSMessageProcess.UpdateStatus, package);
-
-            process.Execute(ProcessOperation.Execute);
-
-            return process;
-        }
-
 
 
         #endregion
-        
+
         public static void SendSMS(SMSMessageEntity message)
         {
             if (!message.DestinationNumber.Contains(','))
@@ -522,33 +239,77 @@ namespace Signum.Engine.SMS
 
             return messages;
         }
+        
+        public static SMSMessageEntity CreateSMSMessage(Lite<SMSTemplateEntity> template, Entity entity, ISMSModel? model, CultureInfo? forceCulture)
+        {
+            var t = SMSLogic.SMSTemplatesLazy.Value.GetOrThrow(template);
+
+            var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
+
+            var qd = QueryLogic.Queries.QueryDescription(t.Query.ToQueryName());
+
+            List<QueryToken> tokens = new List<QueryToken>();
+            t.ParseData(qd);
+            tokens.Add(t.To.Token);
+            var parsedNodes = t.Messages.ToDictionary(
+                tm => tm.CultureInfo.ToCultureInfo(),
+                tm => TextTemplateParser.Parse(tm.Message, qd, t.Model?.ToType())
+            );
+
+            var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
+
+            var filters = model != null ? model.GetFilters(qd) :
+                new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
+
+
+            var table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+            {
+                QueryName = qd.QueryName,
+                Columns = columns,
+                Pagination = model?.GetPagination() ?? new Pagination.All(),
+                Filters = filters,
+                Orders = model?.GetOrders(qd) ?? new List<Order>(),
+            });
+
+            var columnTokens = table.Columns.ToDictionary(a => a.Column.Token);
+
+            var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To.Token)]!;
+
+            var ci = forceCulture ?? ownerData.CultureInfo?.ToCultureInfo() ?? defaultCulture;
+
+            var node = parsedNodes.TryGetC(ci) ?? parsedNodes.GetOrThrow(defaultCulture);
+
+            return new SMSMessageEntity
+            {
+                Template = t.ToLite(),
+                Message = node.Print(new TextTemplateParameters(entity, ci, columnTokens, table.Rows) { Model = model }),
+                From = t.From,
+                EditableMessage = t.EditableMessage,
+                State = SMSMessageState.Created,
+                Referred = ownerData.Owner,
+                DestinationNumber = ownerData.TelephoneNumber,
+                Certified = t.Certified
+            };
+        }
     }
 
     public class SMSMessageGraph : Graph<SMSMessageEntity, SMSMessageState>
     {
+
         public static void Register()
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateEntity>(SMSMessageOperation.CreateSMSFromSMSTemplate)
+            new ConstructFrom<SMSTemplateEntity>(SMSMessageOperation.CreateSMSFromTemplate)
             {
                 CanConstruct = t => !t.Active ? SMSCharactersMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
                 ToStates = { SMSMessageState.Created },
                 Construct = (t, args) =>
                 {
-                    var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
-                    var ci = args.TryGetArgC<CultureInfo>() ?? defaultCulture;
-
-                    return new SMSMessageEntity
-                    {
-                        Template = t.ToLite(),
-                        Message = (t.GetCultureMessage(ci) ?? t.GetCultureMessage(defaultCulture)).Message,
-                        From = t.From,
-                        EditableMessage = t.EditableMessage,
-                        State = SMSMessageState.Created,
-                        DestinationNumber = args.TryGetArgC<string>(),
-                        Certified = t.Certified
-                    };
+                    return SMSLogic.CreateSMSMessage(t.ToLite(),
+                        args.GetArg<Lite<Entity>>().Retrieve(),
+                        args.TryGetArgC<ISMSModel>(),
+                        args.TryGetArgC<CultureInfo>());
                 }
             }.Register();
 
@@ -596,6 +357,33 @@ namespace Signum.Engine.SMS
         }
     }
 
+    public class SMSTemplateGraph : Graph<SMSTemplateEntity>
+    {
+        public static void Register()
+        {
+            new Construct(SMSTemplateOperation.Create)
+            {
+                Construct = _ => new SMSTemplateEntity
+                {
+                    Messages =
+                    {
+                        new SMSTemplateMessageEmbedded
+                        {
+                            CultureInfo = SMSLogic.Configuration.DefaultCulture
+                        }
+                    }
+                },
+            }.Register();
+
+            new Execute(SMSTemplateOperation.Save)
+            {
+                CanBeModified = true,
+                CanBeNew = true,
+                Execute = (t, _) => { }
+            }.Register();
+        }
+    }
+
     public interface ISMSProvider
     {
         string SMSSendAndGetTicket(SMSMessageEntity message);
@@ -603,5 +391,5 @@ namespace Signum.Engine.SMS
         SMSMessageState SMSUpdateStatusAction(SMSMessageEntity message);
     }
 
-  
+
 }

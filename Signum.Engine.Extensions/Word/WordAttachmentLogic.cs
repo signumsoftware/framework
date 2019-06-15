@@ -29,7 +29,7 @@ namespace Signum.Engine.Word
             EmailTemplateLogic.FillAttachmentTokens.Register((WordAttachmentEntity wa, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
             {
                 if (wa.FileName != null)
-                    EmailTemplateParser.Parse(wa.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
+                    TextTemplateParser.Parse(wa.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
             });
 
             Validator.PropertyValidator((WordAttachmentEntity e) => e.FileName).StaticPropertyValidation = WordAttachmentFileName_StaticPropertyValidation;
@@ -66,16 +66,16 @@ namespace Signum.Engine.Word
 
         private static string GetTemplateString(string title, ref object? titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
         {
-            var block = titleNode != null ? (EmailTemplateParser.BlockNode)titleNode :
-                (EmailTemplateParser.BlockNode)(titleNode = EmailTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
+            var block = titleNode != null ? (TextTemplateParser.BlockNode)titleNode :
+                (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
 
-            return block.Print(new EmailTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
+            return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
         }
 
         static string? WordAttachmentFileName_StaticPropertyValidation(WordAttachmentEntity wordAttachment, PropertyInfo pi)
         {
             var template = wordAttachment.TryGetParentEntity<EmailTemplateEntity>();
-            if (template != null && wordAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
+            if (template != null && wordAttachment.FileNameNode as TextTemplateParser.BlockNode == null)
             {
                 try
                 {

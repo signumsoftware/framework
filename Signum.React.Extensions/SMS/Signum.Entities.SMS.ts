@@ -7,7 +7,11 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as Processes from '../Processes/Signum.Entities.Processes'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
+
+export interface ISMSOwnerEntity extends Entities.Entity {
+}
 
 export const MessageLengthExceeded = new EnumType<MessageLengthExceeded>("MessageLengthExceeded");
 export type MessageLengthExceeded =
@@ -56,7 +60,7 @@ export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLin
   sendPackage: Entities.Lite<SMSSendPackageEntity> | null;
   updatePackage: Entities.Lite<SMSUpdatePackageEntity> | null;
   updatePackageProcessed: boolean;
-  referred: Entities.Lite<Entities.Entity>;
+  referred: Entities.Lite<ISMSOwnerEntity> | null;
   exception: Entities.Lite<Signum.ExceptionEntity> | null;
 }
 
@@ -64,10 +68,8 @@ export module SMSMessageOperation {
   export const Send : Entities.ExecuteSymbol<SMSMessageEntity> = registerSymbol("Operation", "SMSMessageOperation.Send");
   export const UpdateStatus : Entities.ExecuteSymbol<SMSMessageEntity> = registerSymbol("Operation", "SMSMessageOperation.UpdateStatus");
   export const CreateUpdateStatusPackage : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, SMSMessageEntity> = registerSymbol("Operation", "SMSMessageOperation.CreateUpdateStatusPackage");
-  export const CreateSMSFromSMSTemplate : Entities.ConstructSymbol_From<SMSMessageEntity, SMSTemplateEntity> = registerSymbol("Operation", "SMSMessageOperation.CreateSMSFromSMSTemplate");
-  export const CreateSMSWithTemplateFromEntity : Entities.ConstructSymbol_From<SMSMessageEntity, Entities.Entity> = registerSymbol("Operation", "SMSMessageOperation.CreateSMSWithTemplateFromEntity");
-  export const SendSMSMessages : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol("Operation", "SMSMessageOperation.SendSMSMessages");
-  export const SendSMSMessagesFromTemplate : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol("Operation", "SMSMessageOperation.SendSMSMessagesFromTemplate");
+  export const CreateSMSFromTemplate : Entities.ConstructSymbol_From<SMSMessageEntity, SMSTemplateEntity> = registerSymbol("Operation", "SMSMessageOperation.CreateSMSFromTemplate");
+  export const SendMultipleSMSMessages : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol("Operation", "SMSMessageOperation.SendMultipleSMSMessages");
 }
 
 export module SMSMessageProcess {
@@ -81,6 +83,12 @@ export type SMSMessageState =
   "Sent" |
   "Delivered" |
   "Failed";
+
+export const SMSModelEntity = new Type<SMSModelEntity>("SMSModel");
+export interface SMSModelEntity extends Entities.Entity {
+  Type: "SMSModel";
+  fullClassName: string;
+}
 
 export interface SMSPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
   name: string | null;
@@ -97,9 +105,12 @@ export interface SMSTemplateEntity extends Entities.Entity {
   name: string;
   certified: boolean;
   editableMessage: boolean;
-  associatedType: Signum.TypeEntity | null;
+  disableAuthorization: boolean;
+  query: Signum.QueryEntity;
+  model: SMSModelEntity | null;
   messages: Entities.MList<SMSTemplateMessageEmbedded>;
   from: string;
+  to: UserAssets.QueryTokenEmbedded;
   messageLengthExceeded: MessageLengthExceeded;
   removeNoSMSCharacters: boolean;
   active: boolean;
@@ -123,6 +134,7 @@ export interface SMSTemplateMessageEmbedded extends Entities.EmbeddedEntity {
 }
 
 export module SMSTemplateOperation {
+  export const CreateSMSTemplateFromModel : Entities.ConstructSymbol_From<SMSTemplateEntity, SMSModelEntity> = registerSymbol("Operation", "SMSTemplateOperation.CreateSMSTemplateFromModel");
   export const Create : Entities.ConstructSymbol_Simple<SMSTemplateEntity> = registerSymbol("Operation", "SMSTemplateOperation.Create");
   export const Save : Entities.ExecuteSymbol<SMSTemplateEntity> = registerSymbol("Operation", "SMSTemplateOperation.Save");
 }

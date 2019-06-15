@@ -5,34 +5,27 @@ import { SMSTemplateEntity, SMSCharactersMessage } from '../Signum.Entities.SMS'
 
 export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) {
 
+  var ctx = p.ctx.subCtx({ labelColumns: 4 });
   return (
     <div>
       <ValueLine ctx={p.ctx.subCtx(a => a.name)} />
-      <div className="Row">
-        <div className="col-sm-8">
-          <ValueLine ctx={p.ctx.subCtx(a => a.active)} />
-          <ValueLine ctx={p.ctx.subCtx(a => a.startDate)} />
-          <ValueLine ctx={p.ctx.subCtx(a => a.endDate)} />
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(a => a.active)} />
+          <ValueLine ctx={ctx.subCtx(a => a.startDate)} />
+          <ValueLine ctx={ctx.subCtx(a => a.endDate)} />
+          <ValueLine ctx={ctx.subCtx(a => a.from)} />
         </div>
-        <div className="col-sm-4">
-          <ValueLine ctx={p.ctx.subCtx(a => a.certified)} />
-          <ValueLine ctx={p.ctx.subCtx(a => a.editableMessage)} />
-          <ValueLine ctx={p.ctx.subCtx(a => a.removeNoSMSCharacters)} />
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(a => a.certified)} />
+          <ValueLine ctx={ctx.subCtx(a => a.editableMessage)} />
+          <ValueLine ctx={ctx.subCtx(a => a.removeNoSMSCharacters)} />
+          <ValueLine ctx={ctx.subCtx(a => a.messageLengthExceeded)} />
         </div>
       </div>
 
-      <ValueLine ctx={p.ctx.subCtx(a => a.from)} />
-      <ValueLine ctx={p.ctx.subCtx(a => a.messageLengthExceeded)} />
 
-      <div className="Row">
-        <div className="col-sm-7">
-          <EntityTabRepeater ctx={p.ctx.subCtx(a => a.messages)} />
-        </div>
-        <div className="col-sm-5">
-          <fieldset>
-            <legend>{SMSCharactersMessage.Replacements.niceToString()}</legend>
-          </fieldset>
-        </div>
-      </div>
-    </div>);
+      <EntityTabRepeater ctx={p.ctx.subCtx(a => a.messages)} />
+    </div>
+  );
 }
