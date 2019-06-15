@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
-import { CaseActivityEntity, WorkflowActivityType, WorkflowPanelPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UncontrolledTabs, Tab } from '@framework/Components/Tabs';
 
@@ -15,7 +15,7 @@ interface WorkflowPanelPageProps extends RouteComponentProps<{}> {
 
 export default class WorkflowPanelPage extends React.Component<WorkflowPanelPageProps, {}> {
   componentWillMount() {
-    AuthClient.assertPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
     Navigator.setTitle("WorkflowPanel State");
   }
 
@@ -46,7 +46,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
 
   componentWillMount() {
     this.loadState().done();
-    AuthClient.assertPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
   }
 
   loadState() {

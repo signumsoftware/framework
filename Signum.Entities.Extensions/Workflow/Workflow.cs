@@ -256,8 +256,9 @@ namespace Signum.Entities.Workflow
     }
 
     [AutoInit]
-    public static class WorkflowPanelPermission
+    public static class WorkflowPermission
     {
         public static PermissionSymbol ViewWorkflowPanel;
+        public static PermissionSymbol ViewCaseFlow;
     }
 }

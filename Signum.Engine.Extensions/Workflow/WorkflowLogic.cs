@@ -261,7 +261,8 @@ namespace Signum.Engine.Workflow
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                PermissionAuthLogic.RegisterPermissions(WorkflowPanelPermission.ViewWorkflowPanel);
+                PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewWorkflowPanel);
+                PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
 
                 WorkflowLogic.getConfiguration = getConfiguration;
 

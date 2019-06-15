@@ -37,7 +37,7 @@ import {
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
   WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
   WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimerEmbedded, CaseTagsModel, CaseTagTypeEntity,
-  WorkflowPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType
+  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -71,7 +71,12 @@ export function start(options: { routes: JSX.Element[] }) {
         .then(ca => Navigator.navigate(ca.case, { extraProps: { caseActivity: ca } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
-    }, { icon: "random", iconColor: "green" })
+    },
+      {
+        isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
+        icon: "random",
+        iconColor: "green"
+      })
   ]);
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
@@ -80,7 +85,7 @@ export function start(options: { routes: JSX.Element[] }) {
   ]);
 
   OmniboxClient.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel),
+    allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
     key: "WorkflowPanel",
     onClick: () => Promise.resolve("~/workflow/panel")
   });

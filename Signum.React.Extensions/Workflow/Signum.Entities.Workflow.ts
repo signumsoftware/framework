@@ -645,8 +645,9 @@ export module WorkflowOperation {
   export const Deactivate : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Deactivate");
 }
 
-export module WorkflowPanelPermission {
-  export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPanelPermission.ViewWorkflowPanel");
+export module WorkflowPermission {
+  export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewWorkflowPanel");
+  export const ViewCaseFlow : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewCaseFlow");
 }
 
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");
