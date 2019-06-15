@@ -465,7 +465,7 @@ namespace Signum.Engine.CodeGeneration
             return table.Columns.TryGetC("Order") ?? table.Columns.TryGetC("Row") ?? table.Columns.TryGetC("Index");
         }
 
-        protected virtual DiffColumn GetMListParentColumn(DiffTable table)
+        protected virtual DiffColumn? GetMListParentColumn(DiffTable table)
         {
             return table.Columns.Values.Where(c => c.ForeignKey != null && c.Nullable == false && table.Name.Name.StartsWith(c.ForeignKey.TargetTable.Name)).OrderByDescending(a => a.ForeignKey.TargetTable.Name.Length).FirstOrDefault();
         }
