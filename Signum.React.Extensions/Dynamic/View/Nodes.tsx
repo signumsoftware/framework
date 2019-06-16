@@ -1176,7 +1176,7 @@ export interface SearchControlNode extends BaseNode {
   kind: "SearchControl",
   findOptions?: FindOptionsExpr;
   searchOnLoad?: ExpressionOrValue<boolean>;
-  showContextMenu?: Expression<boolean | string>;
+  showContextMenu?: Expression<(fop: FindOptionsParsed) => boolean | "Basic">;
   viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
@@ -1236,7 +1236,7 @@ NodeUtils.register<SearchControlNode>({
     findOptions={toFindOptions(dn, ctx, dn.node.findOptions!)}
     getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isFunctionOrStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
-    showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isBooleanOrStringOrNull)}
+    showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isFunctionOrNull)}
     showHeader={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showHeader, NodeUtils.isBooleanOrNull)}
     showFilters={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilters, NodeUtils.isBooleanOrNull)}
     showFilterButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
@@ -1266,7 +1266,7 @@ NodeUtils.register<SearchControlNode>({
       {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd && qd.columns["Entity"].type.name} />}
     </FetchQueryDescription>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"\"Basic\""} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"fop => \"Basic\""} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilters)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />
