@@ -1189,6 +1189,7 @@ export interface SearchControlNode extends BaseNode {
   showUserQuery?: ExpressionOrValue<boolean>;
   showWordReport?: ExpressionOrValue<boolean>;
   hideFullScreenButton?: ExpressionOrValue<boolean>;
+  allowSelection?: ExpressionOrValue<boolean>;
   allowChangeColumns?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
   onCreate?: Expression<() => void>;
@@ -1221,6 +1222,7 @@ NodeUtils.register<SearchControlNode>({
     showUserQuery: node.showUserQuery,
     showWordReport: node.showWordReport,
     hideFullScreenButton: node.hideFullScreenButton,
+    allowSelection: node.allowSelection,
     allowChangeColumns: node.allowChangeColumns,
     create: node.create,
     onCreate: node.onCreate,
@@ -1248,6 +1250,7 @@ NodeUtils.register<SearchControlNode>({
       showWordReport: NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showWordReport, NodeUtils.isBooleanOrNull),
     }}
     hideFullScreenButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.hideFullScreenButton, NodeUtils.isBooleanOrNull)}
+    allowSelection={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowSelection, NodeUtils.isBooleanOrNull)}
     allowChangeColumns={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
     create={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
     onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
@@ -1275,15 +1278,18 @@ NodeUtils.register<SearchControlNode>({
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showUserQuery)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showWordReport)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.hideFullScreenButton)} type="boolean" defaultValue={null} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowSelection)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onCreate)} type={null} defaultValue={null} exampleExpression={`() =>
 {
-    modules.Constructor.construct("YourTypeHere").then(e => {
-        if (e == undefined)
+    modules.Constructor.construct("YourTypeHere").then(pack => {
+        if (pack == undefined)
             return;
+
         /* Set entity properties here... */
-        modules.Navigator.navigate(e).done();
+        /* pack.entity.[propertyName] = ... */
+        modules.Navigator.navigate(pack).done();
     }).done();
 }`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
