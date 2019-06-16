@@ -14,16 +14,16 @@ namespace Signum.Entities
     [Serializable, DescriptionOptions(DescriptionOptions.Members), InTypeScript(false)]
     public abstract class MixinEntity : ModifiableEntity
     {
-        protected MixinEntity(Entity mainEntity, MixinEntity next)
+        protected MixinEntity(Entity mainEntity, MixinEntity? next)
         {
             this.mainEntity = mainEntity;
             this.next = next;
         }
 
         [Ignore]
-        readonly MixinEntity next;
+        readonly MixinEntity? next;
         [HiddenProperty]
-        public MixinEntity Next
+        public MixinEntity? Next
         {
             get { return next; }
         }
