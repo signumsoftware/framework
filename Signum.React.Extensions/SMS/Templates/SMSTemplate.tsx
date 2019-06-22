@@ -10,7 +10,6 @@ import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbe
 import { SubTokensOptions } from '@framework/FindOptions';
 
 export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) {
-  debugger;
   var forceUpdate = useForceUpdate();
   var ctx = p.ctx.subCtx({ labelColumns: 3 });
   var ctx8 = p.ctx.subCtx({ labelColumns: 8 });

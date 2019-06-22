@@ -68,7 +68,7 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
   }
 
   defaultCreate() {
-    return Constructor.construct(this.state.type!.name).then(a => a && a.entity);
+    return Constructor.construct(this.state.type!.name);
   }
 
   renderInternal() {
