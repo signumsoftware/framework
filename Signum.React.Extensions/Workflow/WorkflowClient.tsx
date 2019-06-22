@@ -6,8 +6,7 @@ import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import {
-  EntityPack, Lite, toLite,
-  newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity
+  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
@@ -37,7 +36,7 @@ import {
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
   WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
   WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimerEmbedded, CaseTagsModel, CaseTagTypeEntity,
-  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType
+  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin,
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -48,8 +47,11 @@ import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
+import { EntityLine } from '@framework/Lines';
+import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
+import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
   options.routes.push(
     <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
@@ -204,6 +206,23 @@ export function start(options: { routes: JSX.Element[] }) {
     element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
     order: 0,
   })]);
+
+  if (options.overrideCaseActivityMixin == true) {
+
+    if (SMSMessageEntity.hasMixin(CaseActivityMixin))
+      Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
+        vr.insertAfterLine(a => a.referred, ctx => [
+          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+        ]);
+      });
+
+    if (EmailMessageEntity.hasMixin(CaseActivityMixin))
+      Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
+        vr.insertAfterLine(a => a.target, ctx => [
+          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+        ]);
+      });
+  }
 }
 
 function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {

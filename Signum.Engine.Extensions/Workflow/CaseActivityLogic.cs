@@ -18,6 +18,8 @@ using Signum.Engine.Scheduler;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
+using Signum.Entities.SMS;
+using Signum.Entities.Mailing;
 
 namespace Signum.Engine.Workflow
 {
@@ -209,7 +211,7 @@ namespace Signum.Engine.Workflow
 
                 new Graph<CaseEntity>.Execute(CaseOperation.SetTags)
                 {
-                    Execute = (e, args) => 
+                    Execute = (e, args) =>
                     {
                         var current = e.Tags().ToList();
 
@@ -375,6 +377,7 @@ namespace Signum.Engine.Workflow
                 });
 
                 CaseActivityGraph.Register();
+                OverrideCaseActivityMixin(sb);
             }
         }
 
@@ -397,6 +400,7 @@ namespace Signum.Engine.Workflow
         }
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
+
         public static void FixCaseDescriptions<T>() where T : Entity
         {
             Database.Query<CaseEntity>()
@@ -508,7 +512,6 @@ namespace Signum.Engine.Workflow
             return true;
         }
 
-
         static void SaveEntity(ICaseMainEntity mainEntity)
         {
             var options = CaseActivityLogic.Options.GetOrThrow(mainEntity.GetType());
@@ -569,7 +572,7 @@ namespace Signum.Engine.Workflow
                 GetState = ca => ca.State;
                 new ConstructFrom<WorkflowEntity>(CaseActivityOperation.CreateCaseActivityFromWorkflow)
                 {
-                    ToStates = { CaseActivityState.New},
+                    ToStates = { CaseActivityState.New },
                     Construct = (w, args) =>
                     {
                         if (w.HasExpired())
@@ -841,12 +844,16 @@ namespace Signum.Engine.Workflow
                     ToStates = { CaseActivityState.Done },
                     Execute = (ca, args) =>
                     {
-                        var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.Script!.RetrieveFromCache();
-                        script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
+                        using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca }))
                         {
-                            CaseActivity = ca,
-                            RetryCount = ca.ScriptExecution!.RetryCount,
-                        });
+                            var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.Script!.RetrieveFromCache();
+                            script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
+                            {
+                                CaseActivity = ca,
+                                RetryCount = ca.ScriptExecution!.RetryCount,
+                            });
+                        }
+
                         ExecuteStep(ca, DoneType.ScriptSuccess, null);
                     },
                 }.Register();
@@ -1277,6 +1284,49 @@ namespace Signum.Engine.Workflow
                 }
                 throw new UnexpectedValueException(node);
             }
+        }
+
+        private static void OverrideCaseActivityMixin(SchemaBuilder sb)
+        {
+            sb.Schema.WhenIncluded<SMSMessageEntity>(() =>
+            {
+                if (MixinDeclarations.IsDeclared(typeof(SMSMessageEntity), typeof(CaseActivityMixin)))
+                    QueryLogic.Queries.Register(typeof(SMSMessageEntity), () =>
+                        from m in Database.Query<SMSMessageEntity>()
+                        select new
+                        {
+                            Entity = m,
+                            m.Id,
+                            m.From,
+                            m.DestinationNumber,
+                            m.State,
+                            m.SendDate,
+                            m.Template,
+                            m.Referred,
+                            m.Mixin<CaseActivityMixin>().CaseActivity,
+                            m.Exception,
+                        });
+            });
+
+            sb.Schema.WhenIncluded<EmailMessageEntity>(() =>
+            {
+                if (MixinDeclarations.IsDeclared(typeof(EmailMessageEntity), typeof(CaseActivityMixin)))
+                    QueryLogic.Queries.Register(typeof(EmailMessageEntity), () =>
+                        from e in Database.Query<EmailMessageEntity>()
+                        select new
+                        {
+                            Entity = e,
+                            e.Id,
+                            e.State,
+                            e.Subject,
+                            e.Template,
+                            e.Sent,
+                            e.Target,
+                            e.Mixin<CaseActivityMixin>().CaseActivity,
+                            e.Package,
+                            e.Exception,
+                        });
+            });
         }
     }
 }
