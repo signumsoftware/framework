@@ -7,9 +7,16 @@ import * as Navigator from './Navigator';
 
 export const customConstructors: { [typeName: string]: (props?: any, pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
-export function construct<T extends ModifiableEntity>(type: Type<T>, props?: Partial<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
-export function construct(type: string, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
-export function construct(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
+export function construct<T extends ModifiableEntity>(type: Type<T>, props?: Partial<T>, pr?: PropertyRoute): Promise<T | undefined>;
+export function construct(type: string, props?: any, pr?: PropertyRoute): Promise<ModifiableEntity | undefined>;
+export function construct(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<ModifiableEntity | undefined> {
+  return constructPack(type as string, props, pr)
+    .then(pack => pack && pack.entity);
+}
+
+export function constructPack<T extends ModifiableEntity>(type: Type<T>, props?: Partial<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
+export function constructPack(type: string, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
+export function constructPack(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
 
   const typeName = (type as Type<any>).typeName || type as string;
 

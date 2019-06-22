@@ -216,8 +216,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         return Finder.getPropsFromFindOptions(typeName, fo)
           .then(props => Constructor.construct(typeName, props, pr));
-      })
-      .then(a => a && a.entity);
+      });
   }
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {

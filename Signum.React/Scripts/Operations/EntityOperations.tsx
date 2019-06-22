@@ -133,7 +133,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
             .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
         else
-          Constructor.construct(pack.entity.Type)
+          Constructor.constructPack(pack.entity.Type)
             .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
       };
