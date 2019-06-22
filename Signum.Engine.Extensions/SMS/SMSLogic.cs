@@ -111,6 +111,13 @@ namespace Signum.Engine.SMS
                         t.Model,
                     });
 
+
+                sb.Schema.EntityEvents<SMSTemplateEntity>().PreSaving += new PreSavingEventHandler<SMSTemplateEntity>(EmailTemplate_PreSaving);
+                sb.Schema.EntityEvents<SMSTemplateEntity>().Retrieved += SMSTemplateLogic_Retrieved;
+                sb.Schema.Table<SMSModelEntity>().PreDeleteSqlSync += e =>
+                    Administrator.UnsafeDeletePreCommand(Database.Query<SMSTemplateEntity>()
+                        .Where(a => a.Model.Is(e)));
+
                 SMSTemplatesLazy = sb.GlobalLazy(() =>
                     Database.Query<SMSTemplateEntity>().ToDictionary(et => et.ToLite())
                     , new InvalidateWith(typeof(SMSTemplateEntity)));
@@ -139,7 +146,35 @@ namespace Signum.Engine.SMS
             } 
         }
 
-        #region Message composition
+
+        static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate)
+        {
+            using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                object queryName = QueryLogic.ToQueryName(smsTemplate.Query.Key);
+                QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
+
+                using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+                    smsTemplate.ParseData(description);
+            }
+        }
+
+
+        static void EmailTemplate_PreSaving(SMSTemplateEntity smsTemplate, PreSavingContext ctx)
+        {
+            using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                var queryName = QueryLogic.ToQueryName(smsTemplate.Query.Key);
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+
+                List<QueryToken> list = new List<QueryToken>();
+
+                foreach (var message in smsTemplate.Messages)
+                {
+                    message.Message = TextTemplateParser.Parse(message.Message, qd, smsTemplate.Model?.ToType()).ToString();
+                }
+            }
+        }
 
         static string CheckLength(string result, SMSTemplateEntity template)
         {
@@ -164,12 +199,6 @@ namespace Signum.Engine.SMS
 
             return result;
         }
-        #endregion
-
-        #region processes
-
-
-        #endregion
 
         public static void SendSMS(SMSMessageEntity message)
         {
@@ -372,6 +401,7 @@ namespace Signum.Engine.SMS
                     }
                 }
             }.Register();
+
 
             new Graph<SMSMessageEntity>.Execute(SMSMessageOperation.UpdateStatus)
             {
