@@ -207,6 +207,23 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     if (alternatives == undefined || alternatives.length == 0)
       return button;
 
+      if (alternatives.length == 1 && alternatives[0].icon) {
+        let aos = alternatives[0];
+        return [
+            <div className="btn-group"
+                ref={r => elem = r} key="buttonGroup">
+                {button}
+                <Button color={eoc.color}
+                    className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined, aos.classes)}
+                    onClick={() => aos.onClick(this.props.eoc)}
+                    title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}>
+                    <FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth />
+                </Button>
+            </div>,
+            tooltip
+        ];
+    }
+
     return (
       <UncontrolledDropdown group>
         {button}

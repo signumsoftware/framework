@@ -43,8 +43,7 @@
         public string $Name$ { get; set; }
         
         $end$
-
-
+        
         static Expression<Func<$entityName$Entity, string>> ToStringExpression = @this => @this.$Name$;
         [ExpressionField]
         public override string ToString()

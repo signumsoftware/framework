@@ -272,7 +272,7 @@ namespace Signum.Entities.DynamicQuery
 
         public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter? converter = null)
         {
-            var defConverter = converter  ?? new InvariantDataTableValueConverter();
+            var defConverter = converter ?? new InvariantDataTableValueConverter();
 
             string Null = "- NULL -";
 

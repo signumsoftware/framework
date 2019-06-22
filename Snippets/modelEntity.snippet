@@ -38,12 +38,11 @@
         <![CDATA[[Serializable]
     public class $entityName$Model: ModelEntity
     {
-    [NotNullable, SqlDbType( Size = 100)]
-    [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
-    public string $Name$ { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string $Name$ { get; set; }
       
-    $end$    
-  }
+        $end$    
+    }
     ]]>
       </Code>
     </Snippet>
