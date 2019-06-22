@@ -80,12 +80,10 @@ namespace Signum.Engine.SMS
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
+                sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
 
                 SMSLogic.getConfiguration = getConfiguration;
                 SMSLogic.Provider = provider;
-
-
-             
 
                 sb.Include<SMSMessageEntity>()
                     .WithQuery(() => m => new
@@ -96,7 +94,9 @@ namespace Signum.Engine.SMS
                         m.DestinationNumber,
                         m.State,
                         m.SendDate,
-                        m.Template
+                        m.Template,
+                        m.Referred,
+                        m.Exception,
                     });
 
                 sb.Include<SMSTemplateEntity>()
@@ -105,12 +105,10 @@ namespace Signum.Engine.SMS
                         Entity = t,
                         t.Id,
                         t.Name,
-                        IsActive = t.IsActiveNow(),
+                        t.IsActive,
                         t.From,
                         t.Query,
                         t.Model,
-                        t.StartDate,
-                        t.EndDate,
                     });
 
                 SMSTemplatesLazy = sb.GlobalLazy(() =>
@@ -136,10 +134,10 @@ namespace Signum.Engine.SMS
 
                     return null;
                 };
-            }
-        }
 
-    
+                sb.AddUniqueIndex((SMSTemplateEntity t) => new { t.Model }, where: t => t.Model != null && t.IsActive == true);
+            } 
+        }
 
         #region Message composition
 
@@ -206,11 +204,27 @@ namespace Signum.Engine.SMS
 
         private static void SendOneMessage(SMSMessageEntity message)
         {
-            message.MessageID = GetProvider().SMSSendAndGetTicket(message);
-            message.SendDate = TimeZoneManager.Now.TrimToSeconds();
-            message.State = SMSMessageState.Sent;
-            using (OperationLogic.AllowSave<SMSMessageEntity>())
-                message.Save();
+            try
+            {
+                message.MessageID = GetProvider().SMSSendAndGetTicket(message);
+                message.SendDate = TimeZoneManager.Now.TrimToSeconds();
+                message.State = SMSMessageState.Sent;
+                using (OperationLogic.AllowSave<SMSMessageEntity>())
+                    message.Save();
+
+            }
+            catch (Exception e)
+            {
+                var ex = e.LogException();
+                using (Transaction tr = Transaction.ForceNew())
+                {
+                    message.Exception = ex.ToLite();
+                    message.State = SMSMessageState.SendFailed;
+                    message.Save();
+                    tr.Commit();
+                }
+                throw;
+            }
         }
 
         public static void SendAsyncSMS(SMSMessageEntity message)
@@ -250,11 +264,14 @@ namespace Signum.Engine.SMS
 
             List<QueryToken> tokens = new List<QueryToken>();
             t.ParseData(qd);
+
             tokens.Add(t.To.Token);
             var parsedNodes = t.Messages.ToDictionary(
                 tm => tm.CultureInfo.ToCultureInfo(),
                 tm => TextTemplateParser.Parse(tm.Message, qd, t.Model?.ToType())
             );
+
+            parsedNodes.Values.ToList().ForEach(n => n.FillQueryTokens(tokens));
 
             var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
@@ -291,6 +308,23 @@ namespace Signum.Engine.SMS
                 Certified = t.Certified
             };
         }
+
+        private static void Schema_SchemaCompleted(SchemaBuilder sb)
+        {
+            var types = sb.Schema.Tables.Keys.Where(t => typeof(ISMSOwnerEntity).IsAssignableFrom(t));
+
+            foreach (var type in types)
+            {
+                giRegisterSMSMessagesExpression.GetInvoker(type)(sb);
+            }
+        }
+
+        static GenericInvoker<Action<SchemaBuilder>> giRegisterSMSMessagesExpression = new GenericInvoker<Action<SchemaBuilder>>(sb => RegisterSMSMessagesExpression<ISMSOwnerEntity>(sb));
+        private static void RegisterSMSMessagesExpression<T>(SchemaBuilder sb)
+            where T : ISMSOwnerEntity
+        {
+            QueryLogic.Expressions.Register((T a) => a.SMSMessages(), () => typeof(SMSMessageEntity).NicePluralName());
+        }
     }
 
     public class SMSMessageGraph : Graph<SMSMessageEntity, SMSMessageState>
@@ -302,7 +336,7 @@ namespace Signum.Engine.SMS
 
             new ConstructFrom<SMSTemplateEntity>(SMSMessageOperation.CreateSMSFromTemplate)
             {
-                CanConstruct = t => !t.Active ? SMSCharactersMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
+                CanConstruct = t => !t.IsActive ? SMSCharactersMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
                 ToStates = { SMSMessageState.Created },
                 Construct = (t, args) =>
                 {
@@ -354,6 +388,11 @@ namespace Signum.Engine.SMS
                         sms.UpdatePackageProcessed = true;
                 }
             }.Register();
+
+            new Graph<ISMSOwnerEntity>.Execute(SMSMessageOperation.SMSMessages)
+            {
+                Execute = (sms, args) => { }
+            }.Register();
         }
     }
 
@@ -390,6 +429,4 @@ namespace Signum.Engine.SMS
         List<string> SMSMultipleSendAction(MultipleSMSModel template, List<string> phones);
         SMSMessageState SMSUpdateStatusAction(SMSMessageEntity message);
     }
-
-
 }

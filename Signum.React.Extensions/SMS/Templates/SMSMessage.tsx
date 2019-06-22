@@ -15,6 +15,7 @@ export default function SMSMessage(p: { ctx: TypeContext<SMSMessageEntity> }) {
           <ValueLine ctx={ctx4.subCtx(a => a.from)} readOnly={p.ctx.value.state != "Created"} />
           <ValueLine ctx={ctx4.subCtx(a => a.destinationNumber)} readOnly={p.ctx.value.state != "Created"} />
           <ValueLine ctx={ctx4.subCtx(a => a.certified)} readOnly={p.ctx.value.state != "Created"} />
+          <EntityLine ctx={ctx4.subCtx(a => a.referred)} readOnly={true} />
         </div>
         <div className="col-sm-6">
           <ValueLine ctx={ctx4.subCtx(a => a.messageID)} readOnly={true} />

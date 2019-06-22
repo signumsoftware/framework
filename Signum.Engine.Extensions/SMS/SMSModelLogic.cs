@@ -66,7 +66,7 @@ namespace Signum.Engine.SMS
         }
     }
 
- 
+
     public static class SMSModelLogic
     {
         class SMSModelInfo
@@ -173,7 +173,7 @@ namespace Signum.Engine.SMS
                 throw new ArgumentNullException(nameof(defaultTemplateConstructor));
 
             registeredModels[model] = new SMSModelInfo(queryName ?? GetEntityType(model))
-            { 
+            {
                 DefaultTemplateConstructor = defaultTemplateConstructor,
             };
         }
@@ -195,7 +195,7 @@ namespace Signum.Engine.SMS
             var list = (from type in registeredModels.Keys
                         select new SMSModelEntity
                         {
-                             FullClassName = type.FullName
+                            FullClassName = type.FullName
                         }).ToList();
             return list;
         }
@@ -229,7 +229,19 @@ namespace Signum.Engine.SMS
             return entityToType.Value.GetOrThrow(smsModelEntity, "The SMSModel {0} was not registered");
         }
 
-        public static SMSMessageEntity CreateSMSMessage(this ISMSModel smsModel, CultureInfo? forceCultureInfo)
+        public static void SendSMS(this ISMSModel smsModel, CultureInfo? forceCultureInfo = null)
+        {
+            var result = smsModel.CreateSMSMessage(forceCultureInfo);
+            SMSLogic.SendSMS(result);
+        }
+
+        public static void SendAsyncSMS(this ISMSModel smsModel, CultureInfo? forceCultureInfo = null)
+        {
+            var result = smsModel.CreateSMSMessage(forceCultureInfo);
+            SMSLogic.SendAsyncSMS(result);
+        }
+
+        public static SMSMessageEntity CreateSMSMessage(this ISMSModel smsModel, CultureInfo? forceCultureInfo = null)
         {
             if (smsModel.UntypedEntity == null)
                 throw new InvalidOperationException("Entity property not set on SMSModel");
@@ -264,7 +276,7 @@ namespace Signum.Engine.SMS
             }
 
             templates = templates.Where(isAllowed);
-            return templates.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(smsModelEntity));
+            return templates.Where(t => t.IsActive).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(smsModelEntity));
         }
 
         internal static SMSTemplateEntity CreateDefaultTemplate(SMSModelEntity smsModel)

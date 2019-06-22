@@ -42,9 +42,8 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export module API {
-  /*
-  export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, request: GetEmailTemplatesRequest): Promise<Lite<EmailTemplateEntity>[]> {
-    return ajaxPost<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+ 
+  export function getRemainingCharacters(message: string, removeNoSMSCharacters: boolean,): Promise<number> {
+    return ajaxPost<number>({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
   }
-  */
 }

@@ -18,7 +18,8 @@ namespace Signum.Entities.SMS
 
         public bool Certified { get; set; }
 
-        public bool EditableMessage { get; set; } = AllowEditMessages;
+        public static bool DefaultEditableMessage = true;
+        public bool EditableMessage { get; set; } = DefaultEditableMessage;
 
         public bool DisableAuthorization { get; set; }
 
@@ -30,41 +31,20 @@ namespace Signum.Entities.SMS
         public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
         [StringLengthValidator(Max = 200)]
-        public string From { get; set; }
+        public string? From { get; set; }
 
         public QueryTokenEmbedded To { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
 
-        public bool RemoveNoSMSCharacters { get; set; } = true;
+        public static bool DefaultRemoveNoSMSCharacters = false;
+        public bool RemoveNoSMSCharacters { get; set; } = DefaultRemoveNoSMSCharacters;
 
-        public bool Active { get; set; }
-
-        [MinutesPrecisionValidator]
-        public DateTime StartDate { get; set; } = TimeZoneManager.Now.TrimToMinutes();
-
-        [MinutesPrecisionValidator]
-        public DateTime? EndDate { get; set; }
-
-
-        static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
-        [ExpressionField]
-        public bool IsActiveNow()
-        {
-            return IsActiveNowExpression.Evaluate(this);
-        }
-
-        public static bool AllowEditMessages = true;
+        public static bool DefaultIsActive = false;
+        public bool IsActive { get; set; } = DefaultIsActive;
 
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
-            {
-                if (EndDate != null && StartDate >= EndDate)
-                    return SMSTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
-            }
-
             if (pi.Name == nameof(Messages))
             {
                 if (Messages == null || !Messages.Any())
@@ -130,15 +110,15 @@ namespace Signum.Entities.SMS
 
     public enum SMSTemplateMessage
     {
-        [Description("End date must be higher than start date")]
-        EndDateMustBeHigherThanStartDate,
         [Description("There are no messages for the template")]
         ThereAreNoMessagesForTheTemplate,
         [Description("There must be a message for {0}")]
         ThereMustBeAMessageFor0,
         [Description("There's more than one message for the same language")]
         TheresMoreThanOneMessageForTheSameLanguage,
-        NewCulture
+        NewCulture,
+        [Description("{0} characters remaining (before replacements)")]
+        _0CharactersRemainingBeforeReplacements
     }
 
 

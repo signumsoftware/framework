@@ -7,7 +7,7 @@ export default function MultipleSMS(p: { ctx: TypeContext<MultipleSMSModel> }){
 
   return (
     <div>
-      <ValueLine formGroupHtmlAttributes={{ className: "sf-sms-msg-text" }} ctx={p.ctx.subCtx(a => a.message)} />
+      <ValueLine ctx={p.ctx.subCtx(a => a.message)} formGroupHtmlAttributes={{ className: "sf-sms-msg-text" }} />
       <ValueLine ctx={p.ctx.subCtx(a => a.from)} />
     </div>);
 }

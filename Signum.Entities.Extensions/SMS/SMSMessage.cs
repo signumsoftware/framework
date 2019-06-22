@@ -3,6 +3,7 @@ using Signum.Entities.Processes;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.SMS
 {
@@ -17,7 +18,7 @@ namespace Signum.Entities.SMS
         public bool EditableMessage { get; set; } = true;
 
         [StringLengthValidator(Max = 200)]
-        public string From { get; set; }
+        public string? From { get; set; }
 
         [SecondsPrecisionValidator]
         public DateTime? SendDate { get; set; }
@@ -47,7 +48,7 @@ namespace Signum.Entities.SMS
 
         public bool UpdatePackageProcessed { get; set; }
 
-        [ImplementedBy()]
+        [ImplementedByAll()]
         public Lite<ISMSOwnerEntity>? Referred { get; set; }
 
         public Lite<ExceptionEntity>? Exception { get; set; }
@@ -62,8 +63,9 @@ namespace Signum.Entities.SMS
     {
         Created,
         Sent,
+        SendFailed,
         Delivered,
-        Failed,
+        DeliveryFailed,
     }
 
     [AutoInit]
@@ -71,9 +73,9 @@ namespace Signum.Entities.SMS
     {
         public static ExecuteSymbol<SMSMessageEntity> Send;
         public static ExecuteSymbol<SMSMessageEntity> UpdateStatus;
+        public static ExecuteSymbol<ISMSOwnerEntity> SMSMessages;
         public static ConstructSymbol<ProcessEntity>.FromMany<SMSMessageEntity> CreateUpdateStatusPackage;
         public static ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromTemplate;
-
         public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendMultipleSMSMessages;
     }
 
@@ -93,6 +95,12 @@ namespace Signum.Entities.SMS
     {
         public static ProcessAlgorithmSymbol Send;
         public static ProcessAlgorithmSymbol UpdateStatus;
+    }
+
+    [AutoInit]
+    public static class SMSMessageTask
+    {
+        public static SimpleTaskSymbol UpdateSMSStatus;
     }
 
 }

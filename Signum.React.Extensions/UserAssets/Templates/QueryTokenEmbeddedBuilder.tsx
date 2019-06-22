@@ -13,7 +13,7 @@ interface QueryTokenEmbeddedBuilderProps {
   helpText?: React.ReactChild;
 }
 
-export default function QueryTokenEntityBuilder(p : QueryTokenEmbeddedBuilderProps){
+export default function QueryTokenEntityBuilder(p: QueryTokenEmbeddedBuilderProps) {
   function handleTokenChanged(newToken: QueryToken | undefined) {
     if (newToken == undefined)
       p.ctx.value = undefined;

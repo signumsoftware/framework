@@ -4,6 +4,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.Processes;
+using Signum.Engine.Scheduler;
 using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Entities.SMS;
@@ -30,6 +31,7 @@ namespace Signum.Engine.SMS
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
+                SimpleTaskLogic.Register(SMSMessageTask.UpdateSMSStatus, ctx => UpdateAllSentSMS()?.ToLite());
 
                 new Graph<ProcessEntity>.ConstructFromMany<SMSMessageEntity>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
@@ -128,6 +130,19 @@ namespace Signum.Engine.SMS
             process.Execute(ProcessOperation.Execute);
 
             return process;
+        }
+
+        public static ProcessEntity? UpdateAllSentSMS()
+        {
+            var messages = Database.Query<SMSMessageEntity>().Where(a => a.State == SMSMessageState.Sent);
+
+            if (!messages.Any())
+                return null;
+
+            SMSUpdatePackageEntity package = new SMSUpdatePackageEntity();
+            package.Save();
+            messages.UnsafeUpdate().Set(a => a.UpdatePackage, a => package.ToLite()).Execute();
+            return SMSMessageProcess.UpdateStatus.Create(package).Execute(ProcessOperation.Execute);
         }
 
 
