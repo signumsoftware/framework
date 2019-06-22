@@ -480,11 +480,9 @@ namespace Signum.Engine.Dynamic
             if (property.NotifyChanges == true)
             {
                 if (property.IsMList != null)
-                {
                     atts.Add("NotifyCollectionChanged");
-                    atts.Add("NotifyChildProperty");
-                }
-                else if (property.Type.EndsWith("Embedded"))
+
+                if (property.Type.EndsWith("Embedded") || property.Type.EndsWith("Entity") && !property.IsLite)
                     atts.Add("NotifyChildProperty");
             }
 
