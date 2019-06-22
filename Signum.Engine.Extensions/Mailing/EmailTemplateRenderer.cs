@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Signum.Engine.Basics;
+using Signum.Engine.Templating;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
@@ -71,14 +72,14 @@ namespace Signum.Engine.Mailing
                     using (CultureInfoUtils.ChangeBothCultures(ci))
                     {
                         email.Subject = SubjectNode(message).Print(
-                            new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                            new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                             {
                                 IsHtml = false,
                                 Model = model
                             });
 
                         email.Body = TextNode(message).Print(
-                            new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                            new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                             {
                                 IsHtml = template.IsBodyHtml,
                                 Model = model,
@@ -91,7 +92,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        EmailTemplateParser.BlockNode TextNode(EmailTemplateMessageEmbedded message)
+        TextTemplateParser.BlockNode TextNode(EmailTemplateMessageEmbedded message)
         {
             if (message.TextParsedNode == null)
             {
@@ -107,18 +108,18 @@ namespace Signum.Engine.Mailing
                         body = EmailMasterTemplateEntity.MasterTemplateContentRegex.Replace(emtm.Text, m => body);
                 }
 
-                message.TextParsedNode = EmailTemplateParser.Parse(body, qd, template.Model?.ToType());
+                message.TextParsedNode = TextTemplateParser.Parse(body, qd, template.Model?.ToType());
             }
 
-            return (EmailTemplateParser.BlockNode)message.TextParsedNode;
+            return (TextTemplateParser.BlockNode)message.TextParsedNode;
         }
 
-        EmailTemplateParser.BlockNode SubjectNode(EmailTemplateMessageEmbedded message)
+        TextTemplateParser.BlockNode SubjectNode(EmailTemplateMessageEmbedded message)
         {
             if (message.SubjectParsedNode == null)
-                message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, qd, template.Model?.ToType());
+                message.SubjectParsedNode = TextTemplateParser.Parse(message.Subject, qd, template.Model?.ToType());
 
-            return (EmailTemplateParser.BlockNode)message.SubjectParsedNode;
+            return (TextTemplateParser.BlockNode)message.SubjectParsedNode;
         }
 
         IEnumerable<EmailAddressEmbedded> GetFrom()
@@ -265,7 +266,7 @@ namespace Signum.Engine.Mailing
 
         void ExecuteQuery()
         {
-            using (ExecutionMode.Global())
+            using (this.template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
                 List<QueryToken> tokens = new List<QueryToken>();
                 if (template.From != null && template.From.Token != null)

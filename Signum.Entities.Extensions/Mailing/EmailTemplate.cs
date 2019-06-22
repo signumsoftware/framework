@@ -38,7 +38,6 @@ namespace Signum.Entities.Mailing
         public bool EditableMessage { get; set; } = true;
 
         public bool DisableAuthorization { get; set; }
-
         
         public QueryEntity Query { get; set; }
 

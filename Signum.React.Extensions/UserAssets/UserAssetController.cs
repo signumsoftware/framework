@@ -75,7 +75,7 @@ namespace Signum.React.UserAssets
                 {
                     var group = gr.Key;
 
-                    var token = group.token == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
+                    var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
 
                     var value = FilterValueConverter.Parse(group.valueString, typeof(string), false);
 

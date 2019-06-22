@@ -1176,7 +1176,7 @@ export interface SearchControlNode extends BaseNode {
   kind: "SearchControl",
   findOptions?: FindOptionsExpr;
   searchOnLoad?: ExpressionOrValue<boolean>;
-  showContextMenu?: Expression<boolean | string>;
+  showContextMenu?: Expression<(fop: FindOptionsParsed) => boolean | "Basic">;
   viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
@@ -1189,6 +1189,7 @@ export interface SearchControlNode extends BaseNode {
   showUserQuery?: ExpressionOrValue<boolean>;
   showWordReport?: ExpressionOrValue<boolean>;
   hideFullScreenButton?: ExpressionOrValue<boolean>;
+  allowSelection?: ExpressionOrValue<boolean>;
   allowChangeColumns?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
   onCreate?: Expression<() => void>;
@@ -1221,6 +1222,7 @@ NodeUtils.register<SearchControlNode>({
     showUserQuery: node.showUserQuery,
     showWordReport: node.showWordReport,
     hideFullScreenButton: node.hideFullScreenButton,
+    allowSelection: node.allowSelection,
     allowChangeColumns: node.allowChangeColumns,
     create: node.create,
     onCreate: node.onCreate,
@@ -1234,7 +1236,7 @@ NodeUtils.register<SearchControlNode>({
     findOptions={toFindOptions(dn, ctx, dn.node.findOptions!)}
     getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isFunctionOrStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
-    showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isBooleanOrStringOrNull)}
+    showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isFunctionOrNull)}
     showHeader={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showHeader, NodeUtils.isBooleanOrNull)}
     showFilters={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilters, NodeUtils.isBooleanOrNull)}
     showFilterButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
@@ -1248,6 +1250,7 @@ NodeUtils.register<SearchControlNode>({
       showWordReport: NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showWordReport, NodeUtils.isBooleanOrNull),
     }}
     hideFullScreenButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.hideFullScreenButton, NodeUtils.isBooleanOrNull)}
+    allowSelection={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowSelection, NodeUtils.isBooleanOrNull)}
     allowChangeColumns={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
     create={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
     onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
@@ -1263,7 +1266,7 @@ NodeUtils.register<SearchControlNode>({
       {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd && qd.columns["Entity"].type.name} />}
     </FetchQueryDescription>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"\"Basic\""} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"fop => \"Basic\""} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilters)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />
@@ -1275,15 +1278,18 @@ NodeUtils.register<SearchControlNode>({
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showUserQuery)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showWordReport)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.hideFullScreenButton)} type="boolean" defaultValue={null} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowSelection)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onCreate)} type={null} defaultValue={null} exampleExpression={`() =>
 {
-    modules.Constructor.construct("YourTypeHere").then(e => {
-        if (e == undefined)
+    modules.Constructor.construct("YourTypeHere").then(pack => {
+        if (pack == undefined)
             return;
+
         /* Set entity properties here... */
-        modules.Navigator.navigate(e).done();
+        /* pack.entity.[propertyName] = ... */
+        modules.Navigator.navigate(pack).done();
     }).done();
 }`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />

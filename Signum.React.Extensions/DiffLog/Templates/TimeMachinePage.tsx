@@ -38,7 +38,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
 
   componentWillMount() {
     var p = this.props.match.params;
-    var lite = newLite(p.type, p.id);
+    var lite = newLite(p.type, p.id!);
 
     Navigator.API.fillToStrings(lite).then(() => {
       this.setState({ lite });

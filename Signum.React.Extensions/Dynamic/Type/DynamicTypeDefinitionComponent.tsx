@@ -228,7 +228,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                 renderContent={item =>
                   <div className="row">
                     <div className="col-sm-6">
-                      <ComboBoxRepeaterComponent options={propNames} list={item.fields} />
+                      <ComboBoxRepeaterComponent options={def.properties.filter(p => p.isMList == null).map(p => "e." + p.name)} list={item.fields} />
                     </div>
                     <div className="col-sm-6">
                       <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
@@ -257,11 +257,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                   <CreateOperationFieldsetComponent
                     binding={Binding.create(def, d => d.operationCreate)}
                     title="Create"
-                    onCreate={() => ({
-                      construct: "return new " + dt.typeName + "Entity\r\n{\r\n" +
-                        def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-                        "\r\n};"
-                    })}
+                    onCreate={() => ({ construct: getConstructor(dt.typeName, def) })}
                     renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
                   />
 
@@ -379,10 +375,12 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
               <div>
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
                   {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
-                    <input type="button" className="btn btn-success btn-sm sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
+                    <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
 
                   {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
-                    <input type="button" className="btn btn-warning btn-sm sf-button" value="Tree" onClick={this.handleTreeCustomInheritanceClick} />}
+                    <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={this.handleTreeCustomInheritanceClick} />}
+                  {dt.baseType == "Entity" &&
+                    <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS" onClick={this.handleSMSInheritanceClick} />}
                 </div>
                 <div className="code-container">
                   <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
@@ -399,9 +397,11 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             renderContent={e =>
               <div>
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-warning btn-sm sf-button" value="Pre Saving" onClick={this.handlePreSavingClick} />
-                  <input type="button" className="btn btn-success btn-sm sf-button" value="Post Retrieving" onClick={this.handlePostRetrievingClick} />
-                  <input type="button" className="btn btn-danger btn-sm sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
+                  <input type="button" className="btn btn-warning btn-xs sf-button" value="Pre Saving" onClick={this.handlePreSavingClick} />
+                  <input type="button" className="btn btn-success btn-xs sf-button" value="Post Retrieving" onClick={this.handlePostRetrievingClick} />
+                  <input type="button" className="btn btn-info btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
+                  {dt.baseType == "Entity" &&
+                    <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Owner Data" onClick={this.handleSMSOwnerDataClick} />}
                 </div>
                 <div className="code-container">
                   <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}
@@ -413,28 +413,37 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             }
           />
 
-                    <CustomCodeFieldsetComponent
-                        binding={Binding.create(def, d => d.customStartCode)}
-                        title="Start Code"
-                        onCreate={() => ({ code: "" })}
-                        renderContent={e =>
-                            <div>
-                                {dt.baseType == "Entity" &&
-                                    <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-sm sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
-                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
-                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="CreateRoot" onClick={this.handleOverrideCreateRoot} />}
-                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="CreateChild" onClick={this.handleOverrideCreateChild} />}
-                                        {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-sm sf-button" value="NextSibling" onClick={this.handleOverrideNextSibling} />}
-                                        <input type="button" className="btn btn-warning btn-sm sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
-                                        <input type="button" className="btn btn-danger btn-sm sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
-                                    </div>}
-                                <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
-                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                                </div>
-                            </div>
-                        } />
+          <CustomCodeFieldsetComponent
+              binding={Binding.create(def, d => d.customStartCode)}
+              title="Start Code"
+              onCreate={() => ({ code: "" })}
+              renderContent={e =>
+                  <div>
+                    {dt.baseType == "Entity" &&
+                      <div>
+                          <div className="btn-group" style={{ marginBottom: "3px" }}>
+                              {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
+                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
+                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateRoot" onClick={this.handleOverrideCreateRoot} />}
+                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateChild" onClick={this.handleOverrideCreateChild} />}
+                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="NextSibling" onClick={this.handleOverrideNextSibling} />}
+                              <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
+                              <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
+                              <input type="button" className="btn btn-info btn-xs sf-button" value="Add Unit" onClick={this.handleAddUnitClick} />
+                          </div>
+                      </div>}
+                    <div className="btn-group" style={{ marginBottom: "3px" }}>
+                      {dt.baseType == "Entity" &&
+                        <input type="button" className="btn btn-success btn-xs sf-button" value="Register SMS Owner Data" onClick={this.handleRegisterSMSOwnerDataClick} />}
+                      <input type="button" className="btn btn-danger btn-xs sf-button" value="Register SMS Model" onClick={this.handleRegisterSMSModelClick} />
+                      <input type="button" className="btn btn-info btn-xs sf-button" value="Override SMS Provider" onClick={this.handleOverrideSMSProviderClick} />
+                    </div>
+                    <div className="code-container">
+                        <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
+                        <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                    </div>
+                  </div>
+              } />
 
           <CustomCodeFieldsetComponent
             binding={Binding.create(def, d => d.customLogicMembers)}
@@ -443,8 +452,10 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             renderContent={e =>
               <div>
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-sm sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />}
-                  {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-sm sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />}
+                  {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />}
+                  {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />}
+                  <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Model" onClick={this.handleCreateSMSModelClick} />
+                  <input type="button" className="btn btn-info btn-xs sf-button" value="SMS Provider" onClick={this.handleSMSProviderClick} />
                 </div>
                 <div className="code-container">
                   <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
@@ -463,8 +474,8 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             renderContent={e =>
               <div>
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-success btn-sm sf-button" value="Enum" onClick={this.handleEnumClick} />
-                  {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-sm sf-button" value="Operation" onClick={this.handleOperationClick} />}
+                  <input type="button" className="btn btn-success btn-xs sf-button" value="Enum" onClick={this.handleEnumClick} />
+                  {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Operation" onClick={this.handleOperationClick} />}
                 </div>
                 <div className="code-container">
                   <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
@@ -484,7 +495,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             renderContent={e =>
               <div>
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-success btn-sm sf-button" value="Override" onClick={this.handleOverrideClick} />
+                  <input type="button" className="btn btn-success btn-xs sf-button" value="Override" onClick={this.handleOverrideClick} />
                 </div>
                 <div className="code-container">
                   <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
@@ -520,6 +531,15 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     this.popupCodeSnippet("TreeEntity");
   }
 
+  handleSMSInheritanceClick = () => {
+    this.popupCodeSnippet("ISMSOwnerEntity");
+  }
+
+  handleEmailInheritanceClick = () => {
+    this.popupCodeSnippet("IEmailOwnerEntity");
+  }
+
+
   handlePreSavingClick = () => {
     this.popupCodeSnippet(`protected override void PreSaving(PreSavingContext ctx)
 {
@@ -536,7 +556,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
   }
 
   handlePropertyValidatorClick = () => {
-    this.popupCodeSnippet(`protected override string PropertyValidation(PropertyInfo pi)
+    this.popupCodeSnippet(`protected override string? PropertyValidation(PropertyInfo pi)
 {
     if (pi.Name == nameof(YourProperty))
     {
@@ -548,13 +568,46 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
 }`);
   }
 
+  handleSMSOwnerDataClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`public static Expression<Func<${entityName}Entity, SMSOwnerData>> SMSOwnerDataExpression =
+@this =>  new SMSOwnerData
+{
+    CultureInfo = null,
+    Owner = @this.ToLite(),
+    TelephoneNumber = @this.[property that points to telephone number],
+};
+[ExpressionField("SMSOwnerDataExpression")]
+public SMSOwnerData SMSOwnerData
+{
+    get { return SMSOwnerDataExpression.Evaluate(this); }
+}`);
+  }
+
+  handleEmailOwnerDataClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`public static Expression<Func<${entityName}Entity, EmailOwnerData>> EmailOwnerDataExpression = @this => new EmailOwnerData
+{
+    CultureInfo = null,
+    DisplayName = null,
+    Owner = @this.ToLite(),
+    Email = @this.[property that points to email],
+};
+[ExpressionField("EmailOwnerDataExpression")]
+public EmailOwnerData EmailOwnerData
+{
+    get { return EmailOwnerDataExpression.Evaluate(this); }
+}`) 
+  }
+
   handleWithWorkflowClick = () => {
     let entityName = this.props.dynamicType.typeName!;
-    var os = this.props.definition.operationSave;
-    var oc = this.props.definition.operationCreate;
+    const def = this.props.definition;
+    var os = def.operationSave;
+    var oc = def.operationCreate;
 
     this.popupCodeSnippet(`fi.WithWorkflow(
-constructor: () => ${oc ? `{ ${oc.construct} }` : `new ${entityName}Entity()`},
+constructor: () => ${oc ? `OperationLogic.Construct(${entityName}Operation.Create)` : getConstructor(entityName, def)}
 save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 );`);
   }
@@ -642,7 +695,7 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
     this.popupCodeSnippet(
       `static Expression<Func<[Your Entity], IQueryable<${entityName}Entity>>> QueryExpression =
     e => Database.Query<${entityName}Entity>().Where(a => [Your conditions here]);
-[ExpressionField]
+[ExpressionField("QueryExpression")]
 public static IQueryable<${entityName}Entity> Queries(this [Your Entity] e)
 {
     return QueryExpression.Evaluate(e);
@@ -658,6 +711,72 @@ public static bool IsDisabled(this ${entityName}Entity entity)
 {
     return IsDisabledExpression.Evaluate(entity);
 }`);
+  }
+
+  handleCreateSMSModelClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`public class ${entityName}SMS : SMSModel<${entityName}Entity>
+{
+    public ${entityName}SMS(${entityName}Entity entity) : base(entity)
+    { }
+}`);
+  }
+
+  handleSMSProviderClick = () => {
+    this.popupCodeSnippet(`public class SMSProvider : ISMSProvider
+{
+    public List<string> SMSMultipleSendAction(MultipleSMSModel template, List<string> phones)
+    {
+        return phones.Select(p => Guid.NewGuid().ToString()).ToList();
+    }
+
+    public string SMSSendAndGetTicket(SMSMessageEntity message)
+    {
+        return Guid.NewGuid().ToString();
+    }
+
+    public SMSMessageState SMSUpdateStatusAction(SMSMessageEntity message)
+    {
+        return SMSMessageState.Delivered;
+    }
+}`);
+  }
+
+  handleCreateEmailModelClassClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`public class ${entityName}Email : EmailModel<${entityName}Entity>
+{
+    public ${entityName}Email(${entityName}Entity entity) : base(entity)
+    { }
+}`);
+  }
+
+  handleRegisterSMSOwnerDataClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`SMSProcessLogic.RegisterSMSOwnerData((${entityName}Entity e) => e.SMSOwnerData);`);
+  }
+
+  handleRegisterSMSModelClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`SMSModelLogic.RegisterSMSModel<${entityName}SMS>(() => null!);`);
+  }
+
+  handleOverrideSMSProviderClick = () => {
+    this.popupCodeSnippet(`SMSLogic.Provider = new SMSProvider();`);
+  }
+
+  handleRegisterEmailOwnerDataClick = () => {
+
+  }
+
+  handleRegisterEmailModelClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`EmailModelLogic.RegisterEmailModel<${entityName}Email>(() => null!);`);
+  }
+
+  handleAddUnitClick = () => {
+    let entityName = this.props.dynamicType.typeName!;
+    this.popupCodeSnippet(`UnitAttribute.UnitTranslations.Add("$", () => ${entityName}Message.Dollar.NiceToString());`);
   }
 
   handleEnumClick = () => {
@@ -953,6 +1072,11 @@ function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
   }).done()
 }
 
+function getConstructor(typeName: string, definition: DynamicTypeDefinition) {
+    return "return new " + typeName + "Entity()\r\n{\r\n" +
+      definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+      "\r\n};"
+}
 
 export interface PropertyComponentProps {
   property: DynamicProperty;

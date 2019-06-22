@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
-import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
@@ -12,6 +12,7 @@ import * as Navigator from "@framework/Navigator";
 import { Tab, Tabs } from '@framework/Components/Tabs';
 import { UncontrolledTooltip } from "@framework/Components";
 import { ResultRow } from '@framework/FindOptions';
+import * as AuthClient from '../../Authorization/AuthClient'
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 
@@ -38,6 +39,10 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
   caseFlowViewerComponent?: CaseFlowViewerComponent | null;
 
   loadState(props: CaseComponentProps) {
+
+    if (!AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow))
+      return;
+
     API.getWorkflowModel(toLite(props.ctx.value.workflow))
       .then(pair => this.setState({
         initialXmlDiagram: pair.model.diagramXml,
@@ -80,79 +85,80 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
           </div>
         </div>
 
-        <Tabs id="caseTabs" hideOnly={true} activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
-          <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
-            {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
-              <div>
-                <CaseFlowViewerComponent ref={m => this.caseFlowViewerComponent = m}
-                  diagramXML={this.state.initialXmlDiagram}
-                  entities={this.state.entities}
-                  caseFlow={this.state.caseFlow}
-                  case={ctx.value}
-                  caseActivity={this.props.caseActivity}
-                /></div> :
-              <h3>{JavascriptMessage.loading.niceToString()}</h3>}
-          </Tab>
-          <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
-            <SearchControl
-              showContextMenu={fo => "Basic"}
-              navigate={false}
-              findOptions={{
-                queryName: CaseActivityEntity,
-                parentToken: CaseActivityEntity.token(e => e.case),
-                parentValue: ctx.value,
-                columnOptionsMode: "Replace",
-                columnOptions: [
-                  { token: CaseActivityEntity.token(e => e.id) },
-                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
-                  { token: CaseActivityEntity.token(e => e.startDate) },
-                  { token: CaseActivityEntity.token(e => e.doneDate) },
-                  { token: CaseActivityEntity.token(e => e.doneBy) },
-                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
-                ],
-                orderOptions: [{
-                  token: CaseActivityEntity.token(e => e.startDate),
-                  orderType: "Ascending",
-                }],
-              }}
-              extraButtons={sc => [
-                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
-                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
-              ]}
-            />
-          </Tab>
-          <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
-            <SearchControl
-              showContextMenu={fo => "Basic"}
-              navigate={false}
-              findOptions={{
-                queryName: CaseActivityEntity,
-                parentToken: CaseActivityEntity.token(e => e.case),
-                parentValue: ctx.value,
-                filterOptions: [
-                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
-                ],
-                columnOptionsMode: "Replace",
-                columnOptions: [
-                  { token: CaseActivityEntity.token(e => e.id) },
-                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
-                  { token: CaseActivityEntity.token(e => e.startDate) },
-                  { token: CaseActivityEntity.token(e => e.doneDate) },
-                  { token: CaseActivityEntity.token(e => e.doneBy) },
-                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
-                ],
-                orderOptions: [{
-                  token: CaseActivityEntity.token(e => e.startDate),
-                  orderType: "Descending",
-                }]
-              }}
-              extraButtons={sc => [
-                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
-                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
-              ]}
-            />
-          </Tab>
-        </Tabs>
+        {AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
+          <Tabs id="caseTabs" hideOnly={true} activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
+            <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
+              {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
+                <div>
+                  <CaseFlowViewerComponent ref={m => this.caseFlowViewerComponent = m}
+                    diagramXML={this.state.initialXmlDiagram}
+                    entities={this.state.entities}
+                    caseFlow={this.state.caseFlow}
+                    case={ctx.value}
+                    caseActivity={this.props.caseActivity}
+                  /></div> :
+                <h3>{JavascriptMessage.loading.niceToString()}</h3>}
+            </Tab>
+            <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
+              <SearchControl
+                showContextMenu={fo => "Basic"}
+                navigate={false}
+                findOptions={{
+                  queryName: CaseActivityEntity,
+                  parentToken: CaseActivityEntity.token(e => e.case),
+                  parentValue: ctx.value,
+                  columnOptionsMode: "Replace",
+                  columnOptions: [
+                    { token: CaseActivityEntity.token(e => e.id) },
+                    { token: CaseActivityEntity.token(e => e.workflowActivity) },
+                    { token: CaseActivityEntity.token(e => e.startDate) },
+                    { token: CaseActivityEntity.token(e => e.doneDate) },
+                    { token: CaseActivityEntity.token(e => e.doneBy) },
+                    { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
+                  ],
+                  orderOptions: [{
+                    token: CaseActivityEntity.token(e => e.startDate),
+                    orderType: "Ascending",
+                  }],
+                }}
+                extraButtons={sc => [
+                  { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
+                  { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
+                ]}
+              />
+            </Tab>
+            <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
+              <SearchControl
+                showContextMenu={fo => "Basic"}
+                navigate={false}
+                findOptions={{
+                  queryName: CaseActivityEntity,
+                  parentToken: CaseActivityEntity.token(e => e.case),
+                  parentValue: ctx.value,
+                  filterOptions: [
+                    { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
+                  ],
+                  columnOptionsMode: "Replace",
+                  columnOptions: [
+                    { token: CaseActivityEntity.token(e => e.id) },
+                    { token: CaseActivityEntity.token(e => e.workflowActivity) },
+                    { token: CaseActivityEntity.token(e => e.startDate) },
+                    { token: CaseActivityEntity.token(e => e.doneDate) },
+                    { token: CaseActivityEntity.token(e => e.doneBy) },
+                    { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
+                  ],
+                  orderOptions: [{
+                    token: CaseActivityEntity.token(e => e.startDate),
+                    orderType: "Descending",
+                  }]
+                }}
+                extraButtons={sc => [
+                  { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
+                  { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
+                ]}
+              />
+            </Tab>
+          </Tabs>}
       </div>
     );
   }

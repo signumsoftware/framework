@@ -9,7 +9,7 @@ import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, 
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import ValidationErrors from '@framework/Frames/ValidationErrors'
 import ButtonBar from '@framework/Frames/ButtonBar'
-import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
@@ -22,6 +22,7 @@ import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Frames/FrameModal';
+import * as AuthClient from '../../Authorization/AuthClient'
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
   title?: string;
@@ -306,7 +307,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;
                 {this.renderExpandLink()}
         <br />
-        {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
+        {!activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
+          <CaseFlowButton caseActivity={this.state.pack.activity} />}
         <small className="sf-type-nice-name text-muted"> {Navigator.getTypeTitle(activity, undefined)}</small>
       </div>
     );

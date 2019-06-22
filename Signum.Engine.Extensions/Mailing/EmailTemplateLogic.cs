@@ -16,6 +16,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Templating;
 using Signum.Entities.Templating;
 using Signum.Entities.Reflection;
+using Signum.Engine.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Engine.Mailing
 {
@@ -187,7 +189,7 @@ namespace Signum.Engine.Mailing
 
         static string? EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageEmbedded message, PropertyInfo pi)
         {
-            if (message.TextParsedNode as EmailTemplateParser.BlockNode == null)
+            if (message.TextParsedNode as TextTemplateParser.BlockNode == null)
             {
                 try
                 {
@@ -205,7 +207,7 @@ namespace Signum.Engine.Mailing
 
         static string? EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageEmbedded message, PropertyInfo pi)
         {
-            if (message.SubjectParsedNode as EmailTemplateParser.BlockNode == null)
+            if (message.SubjectParsedNode as TextTemplateParser.BlockNode == null)
             {
                 try
                 {
@@ -221,7 +223,7 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        public static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string? text, out string errorMessage)
+        public static TextTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string? text, out string errorMessage)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
@@ -229,7 +231,7 @@ namespace Signum.Engine.Mailing
                 QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
-                return EmailTemplateParser.TryParse(text, qd, template.Model?.ToType(), out errorMessage);
+                return TextTemplateParser.TryParse(text, qd, template.Model?.ToType(), out errorMessage);
             }
         }
 
@@ -244,8 +246,8 @@ namespace Signum.Engine.Mailing
 
                 foreach (var message in template.Messages)
                 {
-                    message.Text = EmailTemplateParser.Parse(message.Text, qd, template.Model?.ToType()).ToString();
-                    message.Subject = EmailTemplateParser.Parse(message.Subject, qd, template.Model?.ToType()).ToString();
+                    message.Text = TextTemplateParser.Parse(message.Text, qd, template.Model?.ToType()).ToString();
+                    message.Subject = TextTemplateParser.Parse(message.Subject, qd, template.Model?.ToType()).ToString();
                 }
             }
         }
@@ -330,9 +332,91 @@ namespace Signum.Engine.Mailing
 
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));
 
-            SqlPreCommand? cmd = emailTemplates.Select(uq => EmailTemplateParser.ProcessEmailTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
+            SqlPreCommand? cmd = emailTemplates.Select(uq => ProcessEmailTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
 
             return cmd;
+        }
+
+        internal static SqlPreCommand? ProcessEmailTemplate(Replacements replacements, Table table, EmailTemplateEntity et, StringDistance sd)
+        {
+            Console.Write(".");
+            try
+            {
+                var queryName = QueryLogic.ToQueryName(et.Query.Key);
+
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+
+                using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name)))
+                using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + et.Query.Key)))
+                {
+                    if (et.From != null && et.From.Token != null)
+                    {
+                        QueryTokenEmbedded token = et.From.Token;
+                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.Model != null))
+                        {
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: et.From.Token = token; break;
+                            case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
+                            default: break;
+                        }
+                    }
+
+                    if (et.Recipients.Any(a => a.Token != null))
+                    {
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Recipients:")))
+                        {
+                            foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
+                            {
+                                QueryTokenEmbedded token = item.Token!;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.Model != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                                    case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
+                                    default: break;
+                                }
+                            }
+                        }
+                    }
+
+                    try
+                    {
+
+                        foreach (var item in et.Messages)
+                        {
+                            SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, et.Model?.ToType());
+
+                            item.Subject = TextTemplateParser.Synchronize(item.Subject, sc);
+                            item.Text = TextTemplateParser.Synchronize(item.Text, sc);
+                        }
+
+                        using (replacements.WithReplacedDatabaseName())
+                            return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
+                    }
+                    catch (TemplateSyncException ex)
+                    {
+                        if (ex.Result == FixTokenResult.SkipEntity)
+                            return null;
+
+                        if (ex.Result == FixTokenResult.DeleteEntity)
+                            return table.DeleteSqlSync(et, e => e.Name == et.Name);
+
+                        if (ex.Result == FixTokenResult.ReGenerateEntity)
+                            return Regenerate(et, replacements, table);
+
+                        throw new UnexpectedValueException(ex.Result);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception on {0}. {1}\r\n{2}".FormatWith(et.BaseToString(), e.GetType().Name, e.Message.Indent(2, '-')));
+            }
         }
 
         static SqlPreCommand? Schema_Synchronizing_DefaultTemplates(Replacements replacements)
@@ -397,13 +481,27 @@ namespace Signum.Engine.Mailing
 
         public static bool Regenerate(EmailTemplateEntity et)
         {
-            var leaves = EmailTemplateParser.Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>());
+            var leaves = Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>());
             
             if (leaves == null)
                 return false;
             
             leaves.ExecuteLeaves();
             return true;
+        }
+
+
+
+        internal static SqlPreCommand? Regenerate(EmailTemplateEntity et, Replacements? replacements, Table table)
+        {
+            var newTemplate = EmailModelLogic.CreateDefaultTemplate(et.Model!);
+
+            newTemplate.SetId(et.IdOrNull);
+            newTemplate.SetIsNew(false);
+            newTemplate.Ticks = et.Ticks;
+
+            using (replacements?.WithReplacedDatabaseName())
+                return table.UpdateSqlSync(newTemplate, e => e.Name == newTemplate.Name, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
         }
 
         public static Dictionary<Type, EmailTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, EmailTemplateVisibleOn>()

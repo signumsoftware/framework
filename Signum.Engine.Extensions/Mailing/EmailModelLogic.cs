@@ -198,7 +198,7 @@ namespace Signum.Engine.Mailing
         {
             Table table = Schema.Current.Table<EmailModelEntity>();
 
-            Dictionary<string, EmailModelEntity> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
+            Dictionary<string, EmailModelEntity> should = GenerateEmailModelEntities().ToDictionary(s => s.FullClassName);
             Dictionary<string, EmailModelEntity> old = Administrator.TryRetrieveAll<EmailModelEntity>(replacements).ToDictionary(c =>
                 c.FullClassName);
 
@@ -249,7 +249,7 @@ namespace Signum.Engine.Mailing
             throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterEmailModel".FormatWith(model.TypeName()));
         }
 
-        internal static List<EmailModelEntity> GenerateTemplates()
+        internal static List<EmailModelEntity> GenerateEmailModelEntities()
         {
             var list = (from type in registeredModels.Keys
                         select new EmailModelEntity
@@ -263,7 +263,7 @@ namespace Signum.Engine.Mailing
         {
             Table table = Schema.Current.Table<EmailModelEntity>();
 
-            return (from ei in GenerateTemplates()
+            return (from ei in GenerateEmailModelEntities()
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
         }
 
@@ -278,14 +278,14 @@ namespace Signum.Engine.Mailing
             return typeToEntity.Value.Where(x => x.Key.FullName == fullClassName).FirstOrDefault().Value;
         }
 
-        public static EmailModelEntity ToEmailModelEntity(Type type)
+        public static EmailModelEntity ToEmailModelEntity(Type emailModelType)
         {
-            return typeToEntity.Value.GetOrThrow(type, "The system email {0} was not registered");
+            return typeToEntity.Value.GetOrThrow(emailModelType, "The EmailModel {0} was not registered");
         }
 
         public static Type ToType(this EmailModelEntity modelEntity)
         {
-            return entityToType.Value.GetOrThrow(modelEntity, "The system email {0} was not registered");
+            return entityToType.Value.GetOrThrow(modelEntity, "The EmailModel {0} was not registered");
         }
 
         public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this IEmailModel emailModel)

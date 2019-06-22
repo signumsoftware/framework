@@ -8,14 +8,16 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Templating;
 using Microsoft.AspNetCore.Html;
+using Signum.Entities;
+using System.Globalization;
 
-namespace Signum.Engine.Mailing
+namespace Signum.Engine.Templating
 {
-    public static partial class EmailTemplateParser
+    public static partial class TextTemplateParser
     {
         public abstract class TextNode
         {
-            public abstract void PrintList(EmailTemplateParameters p);
+            public abstract void PrintList(TextTemplateParameters p);
             public abstract void FillQueryTokens(List<QueryToken> list);
 
             public override string ToString()
@@ -40,7 +42,7 @@ namespace Signum.Engine.Mailing
                 Text = text;
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
                 p.StringBuilder.Append(Text);
             }
@@ -73,7 +75,7 @@ namespace Signum.Engine.Mailing
                 this.ValueProvider = valueProvider;
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
             }
 
@@ -109,7 +111,7 @@ namespace Signum.Engine.Mailing
                 this.IsRaw = isRaw;
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
                 var obj = ValueProvider!.GetValue(p);
 
@@ -151,13 +153,13 @@ namespace Signum.Engine.Mailing
                 this.owner = owner;
             }
 
-            public string Print(EmailTemplateParameters p)
+            public string Print(TextTemplateParameters p)
             {
                 this.PrintList(p);
                 return p.StringBuilder.ToString();
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
                 foreach (var node in Nodes)
                 {
@@ -215,7 +217,7 @@ namespace Signum.Engine.Mailing
                 this.Block = new BlockNode(this);
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
                 ValueProvider!.Foreach(p, () => Block.PrintList(p));
             }
@@ -270,7 +272,7 @@ namespace Signum.Engine.Mailing
                 return NotAnyBlock;
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
                 var filtered = this.Condition.GetFilteredRows(p);
 
@@ -346,7 +348,7 @@ namespace Signum.Engine.Mailing
             public readonly BlockNode IfBlock;
             public BlockNode? ElseBlock;
 
-            internal IfNode(ConditionBase condition, TemplateWalker walker)
+            internal IfNode(ConditionBase condition, TextTemplateParserImp walker)
             {
                 this.Condition = condition;
                 this.IfBlock = new BlockNode(this);
@@ -366,7 +368,7 @@ namespace Signum.Engine.Mailing
                     ElseBlock.FillQueryTokens(list);
             }
 
-            public override void PrintList(EmailTemplateParameters p)
+            public override void PrintList(TextTemplateParameters p)
             {
                 if (Condition.Evaluate(p))
                 {
@@ -422,6 +424,25 @@ namespace Signum.Engine.Mailing
                     }
                 }
             }
+        }
+    }
+
+    public class TextTemplateParameters : TemplateParameters
+    {
+        public TextTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows) :
+              base(entity, culture, columns, rows)
+        { }
+
+        public StringBuilder StringBuilder = new StringBuilder();
+        public bool IsHtml;
+        public object? Model;
+
+        public override object GetModel()
+        {
+            if (Model == null)
+                throw new ArgumentException("There is no Model set");
+
+            return Model;
         }
     }
 }
