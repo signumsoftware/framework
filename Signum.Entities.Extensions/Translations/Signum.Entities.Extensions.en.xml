@@ -53,19 +53,16 @@
   </Type>
   <Type Name="ChartPaletteModel" />
   <Type Name="ChartParameterEmbedded" />
-  <Type Name="ChartParameterType" />
   <Type Name="ChartPermission" />
-  <Type Name="ChartRequest" />
-  <Type Name="ChartScriptColumnEmbedded" />
-  <Type Name="ChartScriptEntity" />
-  <Type Name="ChartScriptOperation" />
-  <Type Name="ChartScriptParameterEmbedded" />
+  <Type Name="ChartRequestModel" />
+  <Type Name="ChartScriptSymbol" />
   <Type Name="ClientCertificationFileEmbedded" />
   <Type Name="CNTKPredictorAlgorithm" />
   <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" />
   <Type Name="CultureInfoEntity" />
   <Type Name="CultureInfoOperation" />
+  <Type Name="D3ChartScript" />
   <Type Name="DashboardEmbedededInEntity" />
   <Type Name="DashboardEntity" />
   <Type Name="DashboardMessage" />
@@ -94,7 +91,12 @@
   <Type Name="DisconnectedMessage" />
   <Type Name="DisconnectedSubsetMixin" />
   <Type Name="DoneType" />
+  <Type Name="DynamicApiEntity" />
+  <Type Name="DynamicApiEval" />
+  <Type Name="DynamicApiOperation" />
   <Type Name="DynamicBaseType" />
+  <Type Name="DynamicCSSOverrideEntity" />
+  <Type Name="DynamicCSSOverrideOperation" />
   <Type Name="DynamicExpressionEntity" />
   <Type Name="DynamicExpressionOperation" />
   <Type Name="DynamicExpressionTranslation" />
@@ -115,6 +117,7 @@
   <Type Name="DynamicTypeOperation" />
   <Type Name="DynamicValidationEntity" />
   <Type Name="DynamicValidationEval" />
+  <Type Name="DynamicValidationMessage" />
   <Type Name="DynamicValidationOperation" />
   <Type Name="DynamicViewEntity" />
   <Type Name="DynamicViewMessage" />
@@ -141,14 +144,14 @@
   <Type Name="EmailPackageEntity" />
   <Type Name="EmailReceptionInfoEmbedded" />
   <Type Name="EmailReceptionMixin" />
-  <Type Name="EmailRecipientEntity" />
+  <Type Name="EmailRecipientEmbedded" />
   <Type Name="EmailRecipientKind" />
   <Type Name="EmailTemplateContactEmbedded" />
   <Type Name="EmailTemplateEntity" />
   <Type Name="EmailTemplateMessage" />
   <Type Name="EmailTemplateMessageEmbedded" />
   <Type Name="EmailTemplateOperation" />
-  <Type Name="EmailTemplateRecipientEntity" />
+  <Type Name="EmailTemplateRecipientEmbedded" />
   <Type Name="EmailTemplateViewMessage" />
   <Type Name="EntityAction" />
   <Type Name="EntityHelpEntity" />
@@ -165,7 +168,7 @@
   <Type Name="FilePathEntity" />
   <Type Name="FilePathOperation" />
   <Type Name="FileTypeSymbol" />
-  <Type Name="GroupByChart" />
+  <Type Name="GoogleMapsCharScript" />
   <Type Name="HelpKindMessage" />
   <Type Name="HelpMessage">
     <Member Name="From0OfThe1" Description="from {0} of the {1} " />
@@ -255,6 +258,7 @@
   <Type Name="PermissionAllowedRule" />
   <Type Name="PermissionRulePack" />
   <Type Name="PermissionSymbol" />
+  <Type Name="PinnedQueryFilterEmbedded" />
   <Type Name="Pop3ConfigurationAction" />
   <Type Name="Pop3ConfigurationEntity" />
   <Type Name="Pop3ConfigurationOperation" />
@@ -375,6 +379,7 @@
   <Type Name="TemplateApplicableEval" />
   <Type Name="TemplateTokenMessage" />
   <Type Name="TimeMachineMessage" />
+  <Type Name="TimeMachinePermission" />
   <Type Name="TimeSpanEmbedded" />
   <Type Name="ToolbarElementEmbedded" />
   <Type Name="ToolbarElementType" />

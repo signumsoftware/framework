@@ -155,7 +155,7 @@ namespace Signum.Engine.Translation
                     fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
                     throw new InvalidOperationException("Unexpected file with name " + fi.Name);
 
-                if (Directory.Exists(targetDirectory))
+                if (!Directory.Exists(targetDirectory))
                     Directory.CreateDirectory(targetDirectory);
 
                 var targetFilePath = Path.Combine(targetDirectory, fi.Name);
