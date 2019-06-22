@@ -296,7 +296,11 @@ namespace Signum.Engine.DynamicQuery
                 else if (me?.Meta is DirtyMeta dirtyMeta)
                 {
                     result.PropertyRoute = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Only()).Distinct().Only();
-                    result.Implementations = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
+                    var metaImps = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
+                    if (metaImps.HasValue && metaImps.Value.Types.All(t => t.IsAssignableFrom(Type)))
+                    {
+                        result.Implementations = metaImps;
+                    }
                     result.Format = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
                     result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
                 }
