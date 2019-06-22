@@ -14,7 +14,12 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Hoy" />
   </Type>
-  <Type Name="CollectionAnyAllType" />
+  <Type Name="CollectionAnyAllType">
+    <Member Name="All" Description="todo" />
+    <Member Name="Any" Description="Cualquier" />
+    <Member Name="AnyNo" Description="Ninguno" />
+    <Member Name="NoOne" Description="Ninguno" />
+  </Type>
   <Type Name="CollectionElementType">
     <Member Name="Element" Description="Elemento" />
     <Member Name="Element2" Description="Elemento (2)" />
@@ -25,6 +30,7 @@
   </Type>
   <Type Name="ColumnOptionsMode" Description="Modo de las columnas">
     <Member Name="Add" Description="Añadir" />
+    <Member Name="InsertStart" Description="Insertar Inicio" />
     <Member Name="Remove" Description="Quitar" />
     <Member Name="Replace" Description="Reemplazar" />
   </Type>
@@ -38,6 +44,8 @@
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Es necesario tener conexión con el servidor para continuar" />
+    <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="¡Se acaba de desplegar una nueva versión! Guarde los cambios y {0}" />
+    <Member Name="Refresh" Description="Actualizar" />
     <Member Name="SessionExpired" Description="Sesión caducada" />
   </Type>
   <Type Name="CorruptMixin">
@@ -45,10 +53,12 @@
   </Type>
   <Type Name="DeleteLogParametersEmbedded" Description="Parámetros eliminación de registros">
     <Member Name="ChunkSize" Description="Tamaño" />
+    <Member Name="DeleteLogs" Description="Eliminar registros" />
     <Member Name="MaxChunks" Description="Max trozos" />
     <Member Name="PauseTime" Description="Tiempo de pausa" />
   </Type>
   <Type Name="DeleteLogsTypeOverridesEmbedded" Description="Borrar registros de sobrescritura de tipo">
+    <Member Name="CleanLogsWithMoreThan" Description="Limpie los registros con más de" />
     <Member Name="DeleteLogsWithMoreThan" Description="Eliminar registros con más de" />
     <Member Name="Type" Description="Tipo" />
   </Type>
@@ -110,7 +120,10 @@
     <Member Name="UserHostName" Description="Nombre de Host del usuario" />
     <Member Name="Version" Description="Versión" />
   </Type>
-  <Type Name="FilterGroupOperation" />
+  <Type Name="FilterGroupOperation" Description="Filtrar operación en grupo">
+    <Member Name="And" Description="Y" />
+    <Member Name="Or" Description="O" />
+  </Type>
   <Type Name="FilterOperation" Description="Operación de filtro">
     <Member Name="Contains" Description="contiene" />
     <Member Name="DistinctTo" Description="distinto de" />
@@ -137,11 +150,13 @@
   </Type>
   <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
+    <Member Name="activateTimeMachine" Description="Activar Máquina del tiempo" />
     <Member Name="addFilter" Description="Añadir filtro" />
     <Member Name="cancel" Description="Cancelar" />
     <Member Name="chooseAType" Description="Elija un tipo" />
     <Member Name="chooseAValue" Description="Elija un valor" />
     <Member Name="create" Description="Crear" />
+    <Member Name="deactivateTimeMachine" Description="Desactivar Máquina del tiempo" />
     <Member Name="editColumn" Description="Editar columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
     <Member Name="error" Description="Error" />
@@ -175,6 +190,9 @@
     <Member Name="selectOnlyOneElement" Description="Seleccione sólo un elemento" />
     <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
     <Member Name="showFilters" Description="Mostrar filtros" />
+    <Member Name="showPeriod" Description="Mostrar período" />
+    <Member Name="showPreviousOperation" Description="Mostrar operación anterior" />
+    <Member Name="showRecords" Description="Mostrar registros" />
     <Member Name="ungroupResults" Description="Desagrupar resultados" />
     <Member Name="view" Description="Ver" />
   </Type>
@@ -197,7 +215,6 @@
     <Member Name="ViewForType0IsNotAllowed" Description="View para el tipo {0} no está permitido" />
   </Type>
   <Type Name="NormalWindowMessage">
-    <Member Name="_0AndClose" Description="{0} y Cerrar" />
     <Member Name="_0Errors1" Description="{0} Errores: {1}" />
     <Member Name="_1Error" Description="1 Error: {0}" />
     <Member Name="Cancel" Description="Cancelar" />
@@ -229,6 +246,8 @@
     <Member Name="User" Description="Usuario" />
   </Type>
   <Type Name="OperationMessage">
+    <Member Name="_0AndClose" Description="{0} y cerrar" />
+    <Member Name="_0AndNew" Description="{0} y nuevo" />
     <Member Name="Confirm" Description="Confirmar" />
     <Member Name="Create" Description="Crear..." />
     <Member Name="CreateFromRegex" Description="^Crear (.*) desde .*$" />
@@ -238,6 +257,7 @@
     <Member Name="PleaseConfirmYouDLikeToDelete0FromTheSystem" Description="Por favor confirme que desea eliminar {0} del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
+    <Member Name="PreviousOperationLog" Description="Registro de operación anterior" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} no devolvió ninguna entidad" />
   </Type>
@@ -278,24 +298,33 @@
     <Member Name="DayOfWeek" Description="Día de la semana" />
     <Member Name="DayOfYear" Description="Día del año" />
     <Member Name="DecimalNumber" Description="número decimal" />
+    <Member Name="Distinct" Description="Distinto" />
     <Member Name="Embedded0" Description="{0} embebido" />
     <Member Name="GlobalUniqueIdentifier" Description="Identificador único global" />
     <Member Name="HasValue" Description="Tiene valor" />
     <Member Name="Hour" Description="Hora" />
+    <Member Name="HourStart" Description="Hora de inicio" />
     <Member Name="Length" Description="Longitud" />
     <Member Name="ListOf0" Description="lista de {0}" />
     <Member Name="Millisecond" Description="Milisegundo" />
     <Member Name="Minute" Description="Minuto" />
+    <Member Name="MinuteStart" Description="Minuto de inicio" />
     <Member Name="Modulo0" Description="Modulo {0}" />
     <Member Name="Month" Description="Mes" />
     <Member Name="MonthStart" Description="Inicio de mes " />
     <Member Name="MoreThanOneColumnNamed0" Description="Más de una columna llamada {0}" />
+    <Member Name="Not" Description="No" />
+    <Member Name="Null" Description="Nulo" />
     <Member Name="Number" Description="número" />
     <Member Name="Of" Description=" de " />
+    <Member Name="Quarter" Description="Trimestre" />
+    <Member Name="QuarterStart" Description="Trimestre de inicio" />
     <Member Name="Second" Description="Segundo" />
+    <Member Name="SecondStart" Description="Segundo de inicio" />
     <Member Name="Step0" Description="Paso {0}" />
     <Member Name="Text" Description="texto" />
     <Member Name="WeekNumber" Description="Número semana" />
+    <Member Name="WeekStart" Description="Semana de inicio" />
     <Member Name="Year" Description="Año" />
   </Type>
   <Type Name="QuickLinkMessage">
@@ -313,18 +342,22 @@
     <Member Name="_0Results_N" Description="{0} resultado[s]." />
     <Member Name="AddColumn" Description="Añadir columna" />
     <Member Name="AddFilter" Description="Añadir filtro" />
+    <Member Name="AddGroup" Description="Añadir Grupo" />
     <Member Name="AddValue" Description="Agregar valor" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Colecciones no se pueden agregar columnas" />
+    <Member Name="Column" Description="Columna" />
     <Member Name="Create" Description="Crear" />
     <Member Name="CreateNew0_G" Description="Crear nuev[m:o|f:a] {0}" />
     <Member Name="DeleteFilter" Description="Borrar filtro" />
+    <Member Name="DisableOnNull" Description="Deshabilitar si nulo" />
     <Member Name="Explore" Description="Explorar" />
     <Member Name="Field" Description="Campo" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
     <Member Name="First0Results_N" Description="primer[os] {0} resultado[s]." />
+    <Member Name="Label" Description="Etiqueta" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NewColumnSName" Description="Nombre de la nueva columna" />
     <Member Name="NoActionsFound" Description="No se encontraron acciones" />
@@ -334,16 +367,23 @@
     <Member Name="Of" Description="de" />
     <Member Name="Operation" Description="Operación" />
     <Member Name="Operations" Description="Operaciones" />
+    <Member Name="ParentValue" Description="Valor padre" />
+    <Member Name="PinnedFilter" Description="Filtro fijado" />
     <Member Name="Query0IsNotAllowed" Description="No se permite la consulta {0}" />
     <Member Name="Query0NotAllowed" Description="La query {0} no está permitida" />
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en QueryLogic.Queries" />
+    <Member Name="Refresh" Description="Actualizar" />
     <Member Name="Rename" Description="Renombrar" />
+    <Member Name="Row" Description="Fila" />
     <Member Name="Search" Description="Buscar" />
     <Member Name="SearchControl_Pagination_All" Description="Todos" />
+    <Member Name="SplitText" Description="Dividir texto" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
     <Member Name="Value" Description="Valor" />
     <Member Name="View" Description="Ver" />
     <Member Name="ViewSelected" Description="Ver seleccionada" />
+    <Member Name="WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound" Description="Cuando se presiona, el valor del filtro será dividido y todas las palabras tienen que ser encontradas" />
+    <Member Name="WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull" Description="Cuando se presiona, el filtro no surte ningún efecto si el valor es nulo" />
   </Type>
   <Type Name="SelectorMessage">
     <Member Name="ChooseAValue" Description="Elige un valor" />
@@ -371,8 +411,16 @@
     <Member Name="EndOfSyncScript" Description="--- FIN DEL SCRIPT DE SINCRONIZACION" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACIÓN GENERADO EL {0}" />
   </Type>
-  <Type Name="SystemTimeMode" />
-  <Type Name="SystemTimeProperty" />
+  <Type Name="SystemTimeMode">
+    <Member Name="All" Description="todo" />
+    <Member Name="AsOf" Description="A partir de" />
+    <Member Name="Between" Description="Entre" />
+    <Member Name="ContainedIn" Description="Contenida en" />
+  </Type>
+  <Type Name="SystemTimeProperty">
+    <Member Name="SystemValidFrom" Description="Sistema válido desde" />
+    <Member Name="SystemValidTo" Description="Sistema válido hasta" />
+  </Type>
   <Type Name="TypeEntity" Description="Tipo">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
@@ -381,16 +429,23 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
+    <Member Name="_0And1And2CanNotBeSetAtTheSameTime" Description="{0} y {1} y {2} no se pueden establecer al mismo tiempo" />
     <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} y {1} pueden no ajustarse al mismo tiempo" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} no tiene un formato válido {1}" />
+    <Member Name="_0DoesNotHaveAValid1IdentifierFormat" Description="'{0}' no tiene un formato de identificador {1} válido" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
+    <Member Name="_0HasAPrecisionOf1InsteadOf2" Description="{0} tiene una precisión de {1} en lugar de {2}" />
     <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} tiene más de {1} decimales " />
     <Member Name="_0HasSomeRepeatedElements1" Description="{0} tiene elementos repetidos: {1}" />
     <Member Name="_0HasToBeBetween1And2" Description="{0} tiene que ser entre {1} y {2}" />
     <Member Name="_0HasToBeLowercase" Description="{0} debe estar en minúsculas" />
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
+    <Member Name="_0Have1ElementsButAllowedOnly2" Description="{0} tiene {1} elementos, pero solo se permite {2}" />
+    <Member Name="_0IsEmpty" Description="{0} está vacío" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} es obligatorio si {1} no está establecido" />
+    <Member Name="_0IsMandatoryWhen1IsNotSetTo2" Description="{0} es obligatorio cuando {1} no está establecido en {2}." />
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} es obligatorio si se establece {1}" />
+    <Member Name="_0IsMandatoryWhen1IsSetTo2" Description="{0} es obligatorio cuando {1} se establece en {2}." />
     <Member Name="_0IsNecessary" Description="es necesario {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
     <Member Name="_0IsNotA1_G" Description="{0} no es [m:un|f:una] {1}" />
@@ -398,7 +453,9 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
     <Member Name="_0IsSet" Description="{0} está establecido" />
+    <Member Name="_0Or1ShouldBeSet" Description="{0} o {1} deben establecerse" />
     <Member Name="_0ShouldBe12" Description="{0} debe ser {1} {2}" />
+    <Member Name="_0ShouldBe1InsteadOf2" Description="{0} debe ser {1} en lugar de {2}" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} debe ser una fecha pasada" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} debe ser mayor que {1}" />
     <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} debe ser  mayor o igual que {1}" />
@@ -406,12 +463,15 @@
     <Member Name="_0ShouldBeLessThanOrEqual1" Description="{0} debe ser menor o igual a {1}" />
     <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} debe ser nulo si {1} no está establecido" />
+    <Member Name="_0ShouldBeNullWhen1IsNotSetTo2" Description="{0} debe ser nulo cuando {1} no está establecido en {2}." />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} debe ser nulo si {1} se establece" />
+    <Member Name="_0ShouldBeNullWhen1IsSetTo2" Description="{0} debe ser nulo cuando {1} se establece en {2}." />
     <Member Name="_0ShouldBeOfType1" Description="{0} debe ser de tipo {1}" />
     <Member Name="_0ShouldHaveJustOneLine" Description="{0} debe tener una sola línea" />
     <Member Name="_0ShouldNotBeOfType1" Description="{0} no debe ser de tipo {1}" />
     <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} no debe tener espacios finales" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} no debe tener espacios iniciales" />
+    <Member Name="_AtLeastOneValueIsNeeded" Description="Se necesita al menos un valor" />
     <Member Name="Be" Description="ser " />
     <Member Name="BeA0_G" Description="ser [m:un|f:una] {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
@@ -431,6 +491,7 @@
     <Member Name="NotPossibleToaAssign0" Description="No es posible asignar {0}" />
     <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="o ser nulo" />
+    <Member Name="PowerOf" Description="El poder de" />
     <Member Name="Telephone" Description="Teléfono" />
     <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="La longitud de {0} tiene que ser igual a {1}" />
     <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="La longitud de {0} tiene que ser mayor o igual a {1}" />

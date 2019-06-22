@@ -1386,7 +1386,7 @@ export const formatRules: FormatRule[] = [
       return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
-  {
+
     name: "SystemValidFrom",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
     formatter: col => {
