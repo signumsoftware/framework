@@ -14,6 +14,7 @@ import * as Services from '@framework/Services'
 import * as TreeClient from '../../Tree/TreeClient'
 import * as AutoCompleteConfig from '@framework/Lines/AutoCompleteConfig'
 import * as Hooks from '@framework/Hooks'
+import * as SelectorModal from '@framework/SelectorModal'
 
 
 export const globalModules: any = {
@@ -33,4 +34,5 @@ export const globalModules: any = {
   TreeClient,
   AutoCompleteConfig,
   Hooks,
+  SelectorModal,
 };
