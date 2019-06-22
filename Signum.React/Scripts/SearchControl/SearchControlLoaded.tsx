@@ -656,11 +656,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           } else {
 
             Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
-              .then(props => Constructor.construct(tn, props))
-              .then(e => e && Navigator.navigate(e!, {
+              .then(props => Constructor.constructPack(tn, props))
+              .then(pack => pack && Navigator.navigate(pack!, {
                 getViewPromise: getViewPromise as any,
                 createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
-                  .then(props => Constructor.construct(tn, props)!),
+                  .then(props => Constructor.constructPack(tn, props)!),
               }))
               .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
               .done();

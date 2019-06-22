@@ -311,6 +311,7 @@ export interface AlternativeOperationSetting<T extends Entity> {
   iconAlign?: "start" | "end";
   iconColor?: string;
   isVisible?: boolean;
+  inDropdown?: boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick: (eoc: EntityOperationContext<T>) => void;
   keyboardShortcut?: KeyboardShortcut;

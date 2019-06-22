@@ -406,6 +406,15 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
   }).filter(p => !!p)).then(() => result);
 }
 
+export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | undefined): Promise<any> {
+  if (fo == null)
+    return Promise.resolve(undefined);
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFilterOptions(fo!.filterOptions || [], false, qd))
+    .then(filters => getPropsFromFilters(type, filters));
+}
+
 export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): FindOptions {
 
   const pair = smartColumns(fo.columnOptions, Dic.getValues(qd.columns));
@@ -979,6 +988,8 @@ export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<Q
   });
 }
 
+
+
 export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null> {
 
   var fo: FindOptions = {
@@ -1386,7 +1397,7 @@ export const formatRules: FormatRule[] = [
       return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
-
+  {
     name: "SystemValidFrom",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
     formatter: col => {

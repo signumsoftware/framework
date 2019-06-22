@@ -11,14 +11,18 @@ export function useForceUpdate(): () => void {
   return () => setCount(count + 1);
 }
 
-export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>, avoidReset?: boolean): T {
+interface APIHookOptions{
+  avoidReset?: boolean;
+}
+
+export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>, options?: APIHookOptions): T {
 
   const [data, updateData] = React.useState<T>(defaultValue)
 
   React.useEffect(() => {
     var abortController = new AbortController();
 
-    if (!avoidReset)
+    if (options == null || !options.avoidReset)
       updateData(defaultValue);
 
     makeCall(abortController.signal)
@@ -32,6 +36,29 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
 
   return data;
 }
+
+export function useThrottle<T>(value: T, limit: number) : T {
+  const [throttledValue, setThrottledValue] = React.useState(value);
+  const lastRan = React.useRef(Date.now());
+
+  React.useEffect(
+    () => {
+      const handler = setTimeout(function () {
+        if (Date.now() - lastRan.current >= limit) {
+          setThrottledValue(value);
+          lastRan.current = Date.now();
+        }
+      }, limit - (Date.now() - lastRan.current));
+
+      return () => {
+        clearTimeout(handler);
+      };
+    },
+    [value, limit]
+  );
+
+  return throttledValue;
+};
 
 export function useQuery(fo: FindOptions | null): ResultTable | undefined | null {
   return useAPI(undefined, [fo && Finder.findOptionsPath(fo)], signal =>

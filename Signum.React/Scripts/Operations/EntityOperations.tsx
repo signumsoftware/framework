@@ -95,7 +95,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
   return result;
 }
 
-export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
+export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean): AlternativeOperationSetting<T> {
   
   return ({
     name: "andClose",
@@ -103,6 +103,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
     icon: "times",
     keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
     isVisible: true,
+    inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         eoc.frame.onReload(pack);
@@ -114,7 +115,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>): Alte
   });
 }
 
-export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T> {
+export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean): AlternativeOperationSetting<T> {
 
   return ({
     name: "andNew",
@@ -122,6 +123,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
     icon: "plus",
     keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
     isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
+    inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
@@ -133,7 +135,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>): Altern
             .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
         else
-          Constructor.construct(pack.entity.Type)
+          Constructor.constructPack(pack.entity.Type)
             .then(newPack => newPack && eoc.frame.onReload(newPack))
             .done();
       };
@@ -149,7 +151,10 @@ interface OperationButtonProps extends ButtonProps {
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
 }
 
+
+
 export class OperationButton extends React.Component<OperationButtonProps> {
+
   render() {
     let { eoc, group, onOperationClick, canExecute, color, ...props } = this.props;
 
@@ -207,29 +212,36 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     if (alternatives == undefined || alternatives.length == 0)
       return button;
 
-      if (alternatives.length == 1 && alternatives[0].icon) {
-        let aos = alternatives[0];
-        return [
-            <div className="btn-group"
-                ref={r => elem = r} key="buttonGroup">
-                {button}
-                <Button color={eoc.color}
-                    className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined, aos.classes)}
-                    onClick={() => aos.onClick(this.props.eoc)}
-                    title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}>
-                    <FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth />
-                </Button>
-            </div>,
-            tooltip
-        ];
+    var buttonAlternatives = alternatives.filter(a => !a.inDropdown);
+
+    if (buttonAlternatives.length) {
+      button =
+        (
+          <div className="btn-group"
+            key="buttonGroup">
+            {button}
+            {buttonAlternatives.map((aos, i) =>
+              <Button key={i} color={eoc.color}
+                className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
+                onClick={() => aos.onClick(this.props.eoc)}
+                title={aos.text() + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
+                <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
+              </Button>
+            )}
+          </div>
+        );
     }
+
+    var dropdownAlternatives = alternatives.filter(a => a.inDropdown);
+    if (dropdownAlternatives.length == 0)
+      return button;
 
     return (
       <UncontrolledDropdown group>
         {button}
         <DropdownToggle caret split color={eoc.color}/>
         <DropdownMenu right>
-          {alternatives.map(a => this.renderAlternative(a))}
+          {dropdownAlternatives.map(a => this.renderAlternative(a))}
         </DropdownMenu>
       </UncontrolledDropdown>
     );

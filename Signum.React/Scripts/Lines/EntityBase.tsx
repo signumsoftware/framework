@@ -213,15 +213,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
           return Promise.resolve(undefined);
 
         var fo = this.state.findOptions;
-        if (!fo || !fo.filterOptions)
-          return Constructor.construct(typeName, undefined, pr);
 
-        return Finder.getQueryDescription(fo.queryName)
-          .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], false, qd))
-          .then(filters => Finder.getPropsFromFilters(typeName, filters))
+        return Finder.getPropsFromFindOptions(typeName, fo)
           .then(props => Constructor.construct(typeName, props, pr));
-      })
-      .then(a => a && a.entity);
+      });
   }
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {

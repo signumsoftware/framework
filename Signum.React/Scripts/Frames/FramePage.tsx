@@ -109,7 +109,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
     } else {
 
-      return Constructor.construct(ti.name)
+      return Constructor.constructPack(ti.name)
         .then(pack => {
           this.setState({ pack: pack as EntityPack<Entity> });
           return Promise.resolve(pack as EntityPack<Entity>);

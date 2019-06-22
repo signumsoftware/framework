@@ -301,7 +301,7 @@ input[type=checkbox].form-control-xs {
 .input-group-xs > .input-group-append > .btn {
     height: 24px;
     padding: 1px 5px;
-    font-size: 0.875rem;
+    font-size: 0.74375rem;
     line-height: 1.5;
     border-radius: 0.2rem;
     height: 24px;
@@ -310,14 +310,14 @@ input[type=checkbox].form-control-xs {
 .col-form-label-xs {
     padding-top: 2px;
     padding-bottom: 2px;
-    font-size: 0.875rem;
+    font-size: 0.74375rem;
     line-height: 1.5;
 }
 
 
 
 .label-xs {
-    font-size: 0.875rem;
+    font-size: 0.74375rem;
     margin-bottom: 0px;
 }
 .rw-widget-xs .rw-input {
@@ -342,7 +342,7 @@ input[type=checkbox].form-control-xs {
 
 .btn-xs, .btn-group-xs > .btn {
     padding: 0rem 0.2rem;
-    font-size: 0.875rem;
+    font-size: 0.74375rem;
     /*line-height: 1.5;*/
     border-radius: 0.2rem;
 }
@@ -350,7 +350,7 @@ input[type=checkbox].form-control-xs {
 /*form sm (adjustments)*/
 
 .label-sm {
-    font-size: 0.875rem;
+    font-size: 0.74375rem;
     margin-bottom: 0px;
 }
 
