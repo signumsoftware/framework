@@ -9,7 +9,7 @@ import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
   operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString
+  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString, isOperationAllowed
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button, Dropdown } from "../Components";
 import { TitleManager } from "../../Scripts/Lines/EntityBase";
@@ -157,6 +157,9 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
   render() {
     let { eoc, group, onOperationClick, canExecute, color, ...props } = this.props;
+
+    if (!isOperationAllowed(eoc.operationInfo.key, (eoc.entity as Entity).Type))
+      return null;
 
     if (canExecute === undefined)
       canExecute = eoc.canExecute;
