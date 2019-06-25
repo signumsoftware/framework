@@ -611,8 +611,8 @@ namespace Signum.Engine.Maps
 
         ResetLazy<CollectionsCache?> saveCollections;
 
-        
-        private SqlPreCommand? GetCollections(Entity ident, bool includeCollections , string suffix )
+
+        private SqlPreCommand? GetInsertCollectionSync(Entity ident, bool includeCollections, string suffix)
         {
             if (!includeCollections)
                 return null;
@@ -621,8 +621,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return null;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix, false);
-            return collections;
+            return cc.InsertCollectionsSync(ident, suffix, false);
         }
 
         public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "")
@@ -630,11 +629,13 @@ namespace Signum.Engine.Maps
             PrepareEntitySync(ident);
             SetToStrField(ident);
 
-            SqlPreCommand? collections = GetCollections(ident, includeCollections, suffix);
+            bool isGuid = this.PrimaryKey.SqlDbType == SqlDbType.UniqueIdentifier;
+
+            SqlPreCommand? collections = GetInsertCollectionSync(ident, includeCollections, suffix);
 
             SqlPreCommandSimple insert = IdentityBehaviour ?
                 new SqlPreCommandSimple(
-                    inserterIdentity.Value.SqlInsertPattern(suffix, collections != null),
+                    inserterIdentity.Value.SqlInsertPattern(suffix, isGuid && collections != null),
                     inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix)).AddComment(comment) :
                 new SqlPreCommandSimple(
                     inserterDisableIdentity.Value.SqlInsertPattern(suffix),
@@ -643,11 +644,9 @@ namespace Signum.Engine.Maps
             if (collections == null)
                 return insert;
 
-
-
-            if (this.PrimaryKey.SqlDbType == SqlDbType.UniqueIdentifier)
+            if (isGuid)
             {
-                SqlPreCommand idTable = new SqlPreCommandSimple("DECLARE @MyTable  table (Id UNIQUEIDENTIFIER)") { GoBefore = true };
+                SqlPreCommand idTable = new SqlPreCommandSimple("DECLARE @MyTable table (Id UNIQUEIDENTIFIER)") { GoBefore = true };
 
                 SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId UNIQUEIDENTIFIER");
                 SqlPreCommand setParent = new SqlPreCommandSimple("SELECT @parentId= ID FROM @MyTable");
