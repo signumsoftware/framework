@@ -159,7 +159,11 @@ namespace Signum.Entities.Dynamic
         SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually,
         ExampleEntity,
         ShowHelp,
-        HideHelp
+        HideHelp,
+        [Description("modules")]
+        ModulesHelp,
+        [Description("props")]
+        PropsHelp,
     }
 
     public enum DynamicViewValidationMessage

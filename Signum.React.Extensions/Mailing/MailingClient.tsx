@@ -8,7 +8,7 @@ import { Lite, Entity, registerToString, JavascriptMessage } from '@framework/Si
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -26,6 +26,8 @@ import { DropdownItem } from '@framework/Components';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
 
+
+export var allTypes: string[] = [];
 
 export function start(options: {
   routes: JSX.Element[], smtpConfig: boolean,
@@ -116,10 +118,35 @@ export function start(options: {
 
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
     });
+
+  API.getAllTypes().then(types => {
+    allTypes = types;
+    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("emailMessages",
+      EmailMessageEntity.nicePluralName(),
+      e => getEmailMessages(ctx.lite),
+      {
+        isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(EmailMessageEntity),
+        icon: "envelope",
+        iconColor: "orange"
+      }));
+  }).done();
+
   registerExportAssertLink(EmailTemplateEntity);
   registerExportAssertLink(EmailMasterTemplateEntity);
 
 }
+
+function getEmailMessages(target: Lite<IEmailOwnerEntity>) {
+  return Finder.find(
+    {
+      queryName: EmailMessageEntity,
+      parentToken: "Target",
+      parentValue: target,
+      columnOptionsMode: "Remove",
+      columnOptions: [{ token: "Target" }],
+    }).done();
+}
+
 
 export interface EmailModelSettings<T extends ModelEntity> {
   createFromTemplate?: (et: EmailTemplateEntity) => Promise<ModelEntity | undefined>;
@@ -213,6 +240,10 @@ export module API {
 
   export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, request: GetEmailTemplatesRequest): Promise<Lite<EmailTemplateEntity>[]> {
     return ajaxPost<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+  }
+
+  export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
+    return ajaxGet<string[]>({ url: "~/api/email/getAllTypes", signal });
   }
 }
 

@@ -9,12 +9,12 @@ import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '
 import { Modal, Typeahead, UncontrolledTabs, Tab } from '@framework/Components';
 import { TypeContext, EntityTable, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
-import { DynamicViewInspector } from './Designer';
+import { DynamicViewInspector, ModulesHelp, PropsHelp } from './Designer';
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror';
 
 export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }) {
 
-
+  const typeName = rootNode.route!.typeReference().name;
   const handleChange = () => rootNode.context.refreshView();
 
   return (
@@ -32,7 +32,12 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
       </Tab>
       <Tab eventKey="locals" title="Locals">
         <div className="code-container">
-          <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + rootNode.route!.typeReference().name + "Entity>, modules, props) =>"}</pre>
+          <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
+            {"(ctx: TypeContext<" + typeName + "Entity>, "}
+            <div style={{ display: "inline-flex" }}>
+              <ModulesHelp cleanName={typeName} />{", "}<PropsHelp node={rootNode} />{") =>"}
+            </div>
+          </pre>
           <JavascriptCodeMirror code={ctx.value.locals || ""} onChange={newCode => { ctx.value.locals = newCode; handleChange(); }} />
         </div>
       </Tab>

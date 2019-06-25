@@ -4,6 +4,7 @@ using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Scheduler;
+using System.ComponentModel;
 
 namespace Signum.Entities.SMS
 {
@@ -73,7 +74,6 @@ namespace Signum.Entities.SMS
     {
         public static ExecuteSymbol<SMSMessageEntity> Send;
         public static ExecuteSymbol<SMSMessageEntity> UpdateStatus;
-        public static ExecuteSymbol<ISMSOwnerEntity> SMSMessages;
         public static ConstructSymbol<ProcessEntity>.FromMany<SMSMessageEntity> CreateUpdateStatusPackage;
         public static ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromTemplate;
         public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendMultipleSMSMessages;
