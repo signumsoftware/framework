@@ -221,6 +221,8 @@ export module DynamicViewMessage {
   export const ExampleEntity = new MessageKey("DynamicViewMessage", "ExampleEntity");
   export const ShowHelp = new MessageKey("DynamicViewMessage", "ShowHelp");
   export const HideHelp = new MessageKey("DynamicViewMessage", "HideHelp");
+  export const ModulesHelp = new MessageKey("DynamicViewMessage", "ModulesHelp");
+  export const PropsHelp = new MessageKey("DynamicViewMessage", "PropsHelp");
 }
 
 export module DynamicViewOperation {

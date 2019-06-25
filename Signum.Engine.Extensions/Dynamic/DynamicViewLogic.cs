@@ -39,7 +39,12 @@ namespace Signum.Engine.Dynamic
 
                 new Graph<DynamicViewEntity>.Construct(DynamicViewOperation.Create)
                 {
-                    Construct = (_) => new DynamicViewEntity(),
+                    Construct = (_) => new DynamicViewEntity() {
+                        Locals = "{\r\n" +
+                        "  const forceUpdate = moduels.Hooks.useForceUpdate(0);\r\n" +
+                        "  return { forceUpdate };\r\n" +
+                        "}",
+                    },
                 }.Register();
 
                 new Graph<DynamicViewEntity>.ConstructFrom<DynamicViewEntity>(DynamicViewOperation.Clone)
