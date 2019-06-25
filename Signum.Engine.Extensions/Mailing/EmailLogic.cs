@@ -80,6 +80,14 @@ namespace Signum.Engine.Mailing
             }
         }
 
+        public static HashSet<Type> GetAllTypes()
+        {
+            return TypeLogic.TypeToEntity
+                      .Where(kvp => typeof(IEmailOwnerEntity).IsAssignableFrom(kvp.Key))
+                      .Select(kvp => kvp.Key)
+                      .ToHashSet();
+        }
+
         public static void SendMail(this IEmailModel model)
         {
             foreach (var email in model.CreateEmailMessage())

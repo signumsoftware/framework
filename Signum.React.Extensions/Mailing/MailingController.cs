@@ -10,6 +10,8 @@ using Signum.Engine.Basics;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.React.Filters;
+using System.Linq;
+using Signum.Utilities;
 
 namespace Signum.React.Mailing
 {
@@ -73,6 +75,14 @@ namespace Signum.React.Mailing
             var entity = request.lite?.RetrieveAndForget();
 
             return EmailTemplateLogic.GetApplicableEmailTemplates(queryName, entity, visibleOn);
+        }
+
+        [HttpGet("api/email/getAllTypes")]
+        public List<string> GetAllTypes()
+        {
+            return EmailLogic.GetAllTypes()
+                      .Select(type => TypeLogic.TypeToEntity.GetOrThrow(type).CleanName)
+                      .ToList();
         }
 
         public class GetEmailTemplatesRequest

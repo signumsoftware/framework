@@ -146,6 +146,13 @@ namespace Signum.Engine.SMS
             } 
         }
 
+        public static HashSet<Type> GetAllTypes()
+        {
+            return TypeLogic.TypeToEntity
+                      .Where(kvp => typeof(ISMSOwnerEntity).IsAssignableFrom(kvp.Key))
+                      .Select(kvp => kvp.Key)
+                      .ToHashSet();
+        }
 
         static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate)
         {
@@ -343,9 +350,7 @@ namespace Signum.Engine.SMS
             var types = sb.Schema.Tables.Keys.Where(t => typeof(ISMSOwnerEntity).IsAssignableFrom(t));
 
             foreach (var type in types)
-            {
                 giRegisterSMSMessagesExpression.GetInvoker(type)(sb);
-            }
         }
 
         static GenericInvoker<Action<SchemaBuilder>> giRegisterSMSMessagesExpression = new GenericInvoker<Action<SchemaBuilder>>(sb => RegisterSMSMessagesExpression<ISMSOwnerEntity>(sb));
@@ -417,11 +422,6 @@ namespace Signum.Engine.SMS
                     if (sms.UpdatePackage != null)
                         sms.UpdatePackageProcessed = true;
                 }
-            }.Register();
-
-            new Graph<ISMSOwnerEntity>.Execute(SMSMessageOperation.SMSMessages)
-            {
-                Execute = (sms, args) => { }
             }.Register();
         }
     }

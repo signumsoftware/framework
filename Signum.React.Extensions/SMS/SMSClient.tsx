@@ -4,11 +4,11 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
+import { Lite, Entity, registerToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName } from '@framework/Reflection'
+import { PseudoType, Type, getTypeName, getAllTypes } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel } from './Signum.Entities.SMS'
+import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, SMSMessageOperation, ISMSOwnerEntity } from './Signum.Entities.SMS'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -16,12 +16,14 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { ModifiableEntity } from "@framework/Signum.Entities";
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
-import { QueryRequest } from "@framework/FindOptions";
+import { QueryRequest, ColumnOption } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { DropdownItem } from '@framework/Components';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
+import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
 
+export var allTypes: string[] = [];
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -33,17 +35,37 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(SMSUpdatePackageEntity, e => import('./Templates/SMSUpdatePackage')));
   Navigator.addSettings(new EntitySettings(MultipleSMSModel, e => import('./Templates/MultipleSMS')));
 
-  /*
-  Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.ReadyToSend, {
-    contextual: { isVisible: em => true },
-    contextualFromMany: { isVisible: em => true }
-  }));
-  */
+  API.getAllTypes().then(types => {
+    allTypes = types;
+    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("smsMessages",
+      SMSMessageEntity.nicePluralName(),
+      e => getSMSMessages(ctx.lite),
+      {
+        isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(SMSMessageEntity),
+        icon: "sms",
+        iconColor: "green"
+      }));
+  }).done();
+}
+
+function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
+  return Finder.find(
+    {
+      queryName: SMSMessageEntity,
+      parentToken: "Referred",
+      parentValue: referred,
+      columnOptionsMode: "Remove",
+      columnOptions: [{ token: "Referred" }],
+    }).done();
 }
 
 export module API {
  
   export function getRemainingCharacters(message: string, removeNoSMSCharacters: boolean,): Promise<number> {
     return ajaxPost<number>({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
+  }
+
+  export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
+    return ajaxGet<string[]>({ url: "~/api/sms/getAllTypes", signal });
   }
 }
