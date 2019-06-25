@@ -457,7 +457,12 @@ export function ModulesHelp(p: {cleanName: string}) {
   var modules: { [name: string]: string } = {};
   modules["numbro"] = "";
   modules["moment"] = `modules.moment(dateValue1).diff(modules.moment(dateValue2), "days");
-moment(dateValue).fromNow();`;
+moment(dateValue).fromNow();
+modules.moment().format("L LT"); /* "2019/06/25 14:21", other formats are:  L LL LLL LLLL */
+moment("date string");
+
+/* See: https://momentjs.com/docs/ */
+`;
 
   modules["React"] = `const [count, setCount] = modules.React.useState(0);
 modules.React.useEffect(() => {
