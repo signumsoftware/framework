@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -145,7 +145,11 @@ namespace Signum.Entities.Authorization
         [Description("You can reset your password by following the link below")]
         YouCanResetYourPasswordByFollowingTheLinkBelow,
         [Description("Reset password request")]
-        ResetPasswordRequestSubject
+        ResetPasswordRequestSubject,
+        [Description("Your reset password request is lapsed")]
+        YourResetPasswordRequestIsLapsed,
+        [Description("We have send you an email to reset your password")]
+        WeHaveSendYouAnEmailToResetYourPassword
     }
 
     public enum AuthAdminMessage

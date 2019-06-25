@@ -58,6 +58,8 @@ export module AuthEmailMessage {
   export const YourUsernameIs = new MessageKey("AuthEmailMessage", "YourUsernameIs");
   export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("AuthEmailMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
   export const ResetPasswordRequestSubject = new MessageKey("AuthEmailMessage", "ResetPasswordRequestSubject");
+  export const YourResetPasswordRequestIsLapsed = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestIsLapsed");
+  export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
 }
 
 export module AuthMessage {
@@ -265,6 +267,10 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   user?: UserEntity | null;
   requestDate?: string;
   lapsed?: boolean;
+}
+
+export module ResetPasswordRequestOperation {
+  export const Execute : Entities.ExecuteSymbol<ResetPasswordRequestEntity> = registerSymbol("Operation", "ResetPasswordRequestOperation.Execute");
 }
 
 export const RoleEntity = new Type<RoleEntity>("Role");

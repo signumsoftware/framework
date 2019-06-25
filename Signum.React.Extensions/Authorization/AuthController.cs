@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -136,6 +136,25 @@ namespace Signum.React.Authorization
             return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
         }
 
+
+
+        [HttpPost("api/auth/ForgotPassword")]
+        public ActionResult<LoginResponse> ForgotPassword([Required, FromBody]ForgotPasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.password))
+                return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+            if (string.IsNullOrEmpty(request.repeatPassword))
+                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+            var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.password);
+
+            return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User) };
+        }
+
+
+
+
         private BadRequestObjectResult ModelError(string field, string error)
         {
             ModelState.AddModelError(field, error);
@@ -161,6 +180,14 @@ namespace Signum.React.Authorization
         {
             public string oldPassword { get; set; }
             public string newPassword { get; set; }
+        }
+
+
+        public class ForgotPasswordRequest
+        {
+            public string code { get; set; }
+            public string password { get; set; }
+            public string repeatPassword { get; set; }
         }
 #pragma warning restore IDE1006 // Naming Styles
     }

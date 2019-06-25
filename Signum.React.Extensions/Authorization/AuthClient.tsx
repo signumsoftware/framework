@@ -424,6 +424,17 @@ export module API {
     newPassword: string;
   }
 
+  export interface ForgotPasswordRequest {
+    code: string;
+    password: string;
+    repeatPassword: string;
+  }
+
+
+  export function forgotPassword(request: ForgotPasswordRequest): Promise<LoginResponse> {
+    return ajaxPost<LoginResponse>({ url: "~/api/auth/ForgotPassword" }, request);
+  }
+
   export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
   }
