@@ -299,7 +299,6 @@ input[type=checkbox].form-control-xs {
 .input-group-xs > .input-group-append > .input-group-text,
 .input-group-xs > .input-group-prepend > .btn,
 .input-group-xs > .input-group-append > .btn {
-    height: 24px;
     padding: 1px 5px;
     font-size: 0.74375rem;
     line-height: 1.5;
@@ -323,6 +322,7 @@ input[type=checkbox].form-control-xs {
 .rw-widget-xs .rw-input {
     padding: 0px 3px;
     height: 22px;
+    font-size: 0.74375rem;
 }
 
 .rw-widget-xs .rw-widget > .rw-widget-picker {
