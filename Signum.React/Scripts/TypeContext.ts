@@ -255,6 +255,9 @@ export class TypeContext<T> extends StyleContext {
     this.binding.setError(val);
   }
 
+  get index(): number | undefined {
+    return (this.binding as MListElementBinding<any>).index;
+  }
 
   static root<T extends ModifiableEntity>(value: T, styleOptions?: StyleOptions, parent?: StyleContext): TypeContext<T> {
     return new TypeContext(parent, styleOptions, PropertyRoute.root(value.Type), new ReadonlyBinding<T>(value, ""));

@@ -89,10 +89,10 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
     return (
       <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={this.handleSelectTab}>
         {
-          mlistItemContext(ctx).map((mlec, i) => {
-            const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
+          this.getMListItemContext(ctx).map(mlec => {
+            const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, "h") : undefined;
 
-            return <Tab eventKey={i} key={this.keyGenerator.getKey(mlec.value)}
+            return <Tab eventKey={mlec.index!} key={this.keyGenerator.getKey(mlec.value)}
               {...EntityListBase.entityHtmlAttributes(mlec.value)}
               className="sf-repeater-element"
               title={
@@ -104,7 +104,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                   {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
                 {this.canRemove(mlec.value) && !readOnly &&
                     <span className={classes("sf-line-button", "sf-remove", "ml-2")}
-                      onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
+                      onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, mlec.index!) }}
                     title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
                       {EntityBase.removeIcon}
                     </span>

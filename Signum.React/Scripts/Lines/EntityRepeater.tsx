@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
-import { TypeContext, mlistItemContext } from '../TypeContext'
+import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.Entities'
 import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
@@ -69,11 +69,11 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
     return (
       <div className="sf-repater-elements">
         {
-          mlistItemContext(ctx).map((mlec, i) =>
+          this.getMListItemContext(ctx).map(mlec =>
             (<EntityRepeaterElement key={this.keyGenerator.getKey(mlec.value)}
-              onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+              onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
-              draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
+              draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, "v") : undefined}
               getComponent={this.props.getComponent}
               getViewPromise={this.props.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type || mlec.value.EntityType).niceName}</span> : undefined} />))

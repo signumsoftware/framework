@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic, DomUtils } from '../Globals'
-import { TypeContext, mlistItemContext } from '../TypeContext'
+import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite } from '../Signum.Entities'
 import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
@@ -18,7 +18,6 @@ export interface EntityTableProps extends EntityListBaseProps {
   avoidEmptyTable?: boolean;
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   scrollable?: boolean;
-  isRowVisible?: (ctx: TypeContext<any /*T*/>) => boolean;
   rowSubContext?: (ctx: TypeContext<any /*T*/>) => TypeContext<any>;
   tableClasses?: string;
   theadClasses?: string;
@@ -194,17 +193,15 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           }
           <tbody>
             {
-              mlistItemContext(ctx)
-                .map((mlec, i) => ({ mlec, i }))
-                .filter(a => this.props.isRowVisible == null || this.props.isRowVisible(a.mlec))
-                .map(a => <EntityTableRow key={this.keyGenerator.getKey(a.mlec.value)}
-                  index={a.i}
+              this.getMListItemContext(ctx)
+                .map(mlec => <EntityTableRow key={this.keyGenerator.getKey(mlec.value)}
+                  index={mlec.index!}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}
-                  onRemove={this.canRemove(a.mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, a.i) : undefined}
-                  draggable={this.canMove(a.mlec.value) && !readOnly ? this.getDragConfig(a.i, "v") : undefined}
+                  onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
+                  draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, "v") : undefined}
                   columns={this.state.columns!}
-                  ctx={this.props.rowSubContext ? this.props.rowSubContext(a.mlec) : a.mlec}
+                  ctx={this.props.rowSubContext ? this.props.rowSubContext(mlec) : mlec}
                   onBlur={this.props.createOnBlurLastRow && this.state.create && !readOnly? this.handleBlur : undefined}
                 />
                 )

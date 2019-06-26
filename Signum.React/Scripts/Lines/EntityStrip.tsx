@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
-import { TypeContext, mlistItemContext } from '../TypeContext'
+import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
@@ -49,16 +49,16 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         <div className="SF-entity-strip SF-control-container">
           <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
             {
-              mlistItemContext(s.ctx).map((mlec, i) =>
+              this.getMListItemContext(s.ctx).map(mlec =>
                 (<EntityStripElement key={this.keyGenerator.getKey(mlec.value)}
                   ctx={mlec}
                   iconStart={s.iconStart}
                   autoComplete={s.autocomplete}
                   onRenderItem={s.onRenderItem}
-                  drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, this.props.vertical ? "v" : "h") : undefined}
+                  drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, this.props.vertical ? "v" : "h") : undefined}
                   onItemHtmlAttributes={s.onItemHtmlAttributes}
-                  onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                  onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
+                  onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
+                  onView={this.canView(mlec.value) ? e => this.handleViewElement(e, mlec.index!) : undefined}
                 />))
             }
             <li className={classes(s.ctx.inputGroupClass, "sf-strip-input")}>

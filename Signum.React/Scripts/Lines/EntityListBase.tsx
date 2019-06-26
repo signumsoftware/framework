@@ -3,14 +3,14 @@ import { classes, KeyGenerator } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
-import { TypeContext } from '../TypeContext'
+import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
   onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined;
-
+  filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[]; /*Not only filter, also order, skip, take is supported*/
   ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
 
@@ -37,11 +37,21 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     super.setValue(list as any);
   }
 
+  getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+    var rows = mlistItemContext(ctx);
+
+    if (this.props.filterRows)
+      return this.props.filterRows(rows);
+
+    return rows;
+  }
+
   moveUp(index: number) {
     const list = this.props.ctx.value!;
     list.moveUp(index);
     this.setValue(list);
   }
+
   renderMoveUp(btn: boolean, index: number) {
     if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
       return undefined;
@@ -79,6 +89,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         <FontAwesomeIcon icon="chevron-down" />
       </a>);
   }
+
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
