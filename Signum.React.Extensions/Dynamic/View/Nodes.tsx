@@ -535,7 +535,7 @@ NodeUtils.register<ValueLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
     </div>)
   },
 });
@@ -591,7 +591,7 @@ NodeUtils.register<MultiValueLineNode>({
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
     </div>)
   },
 });
@@ -743,7 +743,7 @@ NodeUtils.register<FileLineNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxSizeInBytes)} type="number" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
       </div>
     );
   }
@@ -815,7 +815,7 @@ NodeUtils.register<FileImageLineNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxSizeInBytes)} type="number" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
       </div>
     );
   }
@@ -884,7 +884,7 @@ NodeUtils.register<MultiFileLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxSizeInBytes)} type="number" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
     </div>)
   },
 });
@@ -943,7 +943,7 @@ NodeUtils.register<EnumCheckboxListNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
     </div>)
   },
 });
@@ -1506,7 +1506,7 @@ NodeUtils.register<ButtonNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.block)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.outline)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"(e) => this.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n(e) => locals.forceUpdate()"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.className)} type="string" defaultValue={null} />
     </div>)
   },
