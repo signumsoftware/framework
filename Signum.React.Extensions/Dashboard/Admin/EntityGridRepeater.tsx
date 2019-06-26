@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { TypeContext, mlistItemContext } from '@framework/TypeContext'
+import { TypeContext } from '@framework/TypeContext'
 import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entities'
 import { EntityListBase, EntityListBaseProps } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
@@ -61,32 +61,28 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         </div>
         <div className={s.dragMode == "move" ? "sf-dragging" : undefined} onDrop={this.handleOnDrop}>
           {
-            mlistItemContext(this.state.ctx)
-              .map((mlec, i) => ({
-                ctx: mlec as TypeContext<ModifiableEntity & IGridEntity>,
-                index: i
-              }))
-              .groupBy(p => p.ctx.value.row.toString())
+            this.getMListItemContext<ModifiableEntity & IGridEntity>(this.state.ctx)
+              .groupBy(ctx => ctx.value.row.toString())
               .orderBy(gr => parseInt(gr.key))
               .flatMap((gr, i, groups) => [
                 this.renderSeparator(parseInt(gr.key)),
                 <div className="row items-row" key={"row" + gr.key} onDragOver={e => this.handleItemsRowDragOver(e, parseInt(gr.key))}>
-                  {gr.elements.orderBy(a => a.ctx.value.startColumn).map((p, j, list) => {
-                    let item = this.props.getComponent!(p.ctx);
+                  {gr.elements.orderBy(ctx => ctx.value.startColumn).map((ctx, j, list) => {
+                    let item = this.props.getComponent!(ctx);
                     const s = this.state;
                     item = React.cloneElement(item, {
-                      onResizerDragStart: p.ctx.readOnly || !s.resize ? undefined : (resizer, e) => this.handleResizeDragStart(resizer, e, p.ctx),
-                      onTitleDragStart: p.ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragStart(e, p.ctx),
-                      onTitleDragEnd: p.ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragEnd(e, p.ctx),
-                      onRemove: p.ctx.readOnly || !s.remove ? undefined : (e) => this.handleRemoveElementClick(e, p.index),
+                      onResizerDragStart: ctx.readOnly || !s.resize ? undefined : (resizer, e) => this.handleResizeDragStart(resizer, e, ctx),
+                      onTitleDragStart: ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragStart(e, ctx),
+                      onTitleDragEnd: ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragEnd(e, ctx),
+                      onRemove: ctx.readOnly || !s.remove ? undefined : (e) => this.handleRemoveElementClick(e, ctx.index!),
                     } as EntityGridItemProps);
 
-                    const last = j == 0 ? undefined : list[j - 1].ctx.value;
+                    const last = j == 0 ? undefined : list[j - 1].value;
 
-                    const offset = p.ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
+                    const offset = ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
 
                     return (
-                      <div key={j} className={`sf-grid-element col-sm-${p.ctx.value.columns} offset-sm-${offset}`}>
+                      <div key={j} className={`sf-grid-element col-sm-${ctx.value.columns} offset-sm-${offset}`}>
                         {item}
                         {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
                       </div>

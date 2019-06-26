@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
-import { TypeContext, mlistItemContext } from '@framework/TypeContext'
+import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, } from '@framework/Signum.Entities'
@@ -84,13 +84,13 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
         <table className="sf-multi-value">
           <tbody>
             {
-              mlistItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-                <tr key={i}>
+              this.getMListItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
+                <tr key={mlec.index!}>
                   <td>
                     {!s.ctx.readOnly &&
                       <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-                        className="sf-line-button sf-remove"
-                        onClick={e => { e.preventDefault(); this.handleDeleteValue(i); }}>
+                      className="sf-line-button sf-remove"
+                      onClick={e => { e.preventDefault(); this.handleDeleteValue(mlec.index!); }}>
                         <FontAwesomeIcon icon="times" />
                       </a>}
                   </td>
