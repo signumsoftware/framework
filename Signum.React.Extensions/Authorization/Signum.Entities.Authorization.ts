@@ -60,6 +60,7 @@ export module AuthEmailMessage {
   export const ResetPasswordRequestSubject = new MessageKey("AuthEmailMessage", "ResetPasswordRequestSubject");
   export const YourResetPasswordRequestIsLapsed = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestIsLapsed");
   export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
+  export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
 }
 
 export module AuthMessage {
@@ -113,6 +114,10 @@ export module AuthMessage {
   export const PasswordDoesNotMatchCurrent = new MessageKey("AuthMessage", "PasswordDoesNotMatchCurrent");
   export const PasswordHasBeenChangedSuccessfully = new MessageKey("AuthMessage", "PasswordHasBeenChangedSuccessfully");
   export const PasswordMustHaveAValue = new MessageKey("AuthMessage", "PasswordMustHaveAValue");
+  export const AnErrorOccurredRequestNotProcessed = new MessageKey("AuthMessage", "AnErrorOccurredRequestNotProcessed");
+  export const WeHaveSentYouAnEmailToResetYourPassword = new MessageKey("AuthMessage", "WeHaveSentYouAnEmailToResetYourPassword");
+  export const EnterYourUserEmail = new MessageKey("AuthMessage", "EnterYourUserEmail");
+  export const RequestAccepted = new MessageKey("AuthMessage", "RequestAccepted");
   export const YourPasswordIsNearExpiration = new MessageKey("AuthMessage", "YourPasswordIsNearExpiration");
   export const PasswordsAreDifferent = new MessageKey("AuthMessage", "PasswordsAreDifferent");
   export const PasswordsDoNotMatch = new MessageKey("AuthMessage", "PasswordsDoNotMatch");

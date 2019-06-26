@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using Signum.Engine.Basics;
 
 namespace Signum.React.Authorization
 {
@@ -137,17 +138,34 @@ namespace Signum.React.Authorization
         }
 
 
-
-        [HttpPost("api/auth/ForgotPassword")]
-        public ActionResult<LoginResponse> ForgotPassword([Required, FromBody]ForgotPasswordRequest request)
+        [HttpPost("api/auth/ForgotPasswordEmail")]
+        public string ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
         {
-            if (string.IsNullOrEmpty(request.password))
-                return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+            if (string.IsNullOrEmpty(request.eMail))
+                return AuthMessage.PasswordMustHaveAValue.NiceToString();
 
-            if (string.IsNullOrEmpty(request.repeatPassword))
+            try
+            {
+                var rpr = ResetPasswordRequestLogic.ResetPasswordRequestByUserEmail(request.eMail);
+            }
+            catch (Exception ex)
+            {
+
+                ex.LogException();
+                return AuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
+            }
+          
+
+            return null;
+        }
+
+        [HttpPost("api/auth/ResetPassword")]
+        public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.newPassword))
                 return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
-            var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.password);
+            var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User) };
         }
@@ -183,11 +201,16 @@ namespace Signum.React.Authorization
         }
 
 
-        public class ForgotPasswordRequest
+        public class ResetPasswordRequest
         {
             public string code { get; set; }
-            public string password { get; set; }
-            public string repeatPassword { get; set; }
+            public string newPassword { get; set; }
+        }
+
+
+        public class ForgotPasswordRequest
+        {
+            public string eMail { get; set; }
         }
 #pragma warning restore IDE1006 // Naming Styles
     }

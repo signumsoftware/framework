@@ -60,7 +60,7 @@ namespace Signum.Engine.Authorization
                     Execute = (e, args) =>
                     {
                         string password = args.GetArg<string>();
-                        e.Lapsed =true;
+                        e.Lapsed = true;
                         var user = e.User;
 
                         user.PasswordHash = Security.EncodePassword(password);
@@ -73,7 +73,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        public static ResetPasswordRequestEntity ResetPasswordRequestExecute(string  code, string password)
+        public static ResetPasswordRequestEntity ResetPasswordRequestExecute(string code, string password)
         {
             using (AuthLogic.Disable())
             {
@@ -88,7 +88,28 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static ResetPasswordRequestEntity ResetPasswordRequestByUserEmail(string email)
 
+        {
+            UserEntity user;
+            using (AuthLogic.Disable())
+            {
+                user = Database.Query<UserEntity>()
+                  .Where(u => u.Email == email && u.State != UserState.Disabled)
+                .SingleOrDefault();
+
+                if (user == null)
+                    throw new ApplicationException(AuthEmailMessage.EmailNotFound.NiceToString());
+            }
+            var request= ResetPasswordRequest(user);
+
+            string url = EmailLogic.Configuration.UrlLeft+ @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
+
+            using (AuthLogic.Disable())
+                new ResetPasswordRequestMail(request, url).SendMail();
+
+            return request;
+        }
         public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user)
         {
             using (AuthLogic.Disable())

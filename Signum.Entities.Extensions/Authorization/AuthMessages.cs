@@ -87,6 +87,13 @@ namespace Signum.Entities.Authorization
         PasswordHasBeenChangedSuccessfully,
         [Description("The password must have a value")]
         PasswordMustHaveAValue,
+        [Description("An error occurred, request not processed.")]
+        AnErrorOccurredRequestNotProcessed,
+        [Description("We have sent you an email with a link that will allow you to reset your password.")]
+        WeHaveSentYouAnEmailToResetYourPassword,
+        EnterYourUserEmail,
+        RequestAccepted,
+
         YourPasswordIsNearExpiration,
         PasswordsAreDifferent,
         PasswordsDoNotMatch,
@@ -149,7 +156,9 @@ namespace Signum.Entities.Authorization
         [Description("Your reset password request is lapsed")]
         YourResetPasswordRequestIsLapsed,
         [Description("We have send you an email to reset your password")]
-        WeHaveSendYouAnEmailToResetYourPassword
+        WeHaveSendYouAnEmailToResetYourPassword,
+        [Description("Email not found")]
+        EmailNotFound,
     }
 
     public enum AuthAdminMessage

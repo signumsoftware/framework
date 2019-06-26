@@ -65,7 +65,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="Authorization\Login\ForgotPassword.tsx" />
+    <TypeScriptCompile Remove="Authorization\Login\ForgotPasswordEmail.tsx" />
+    <TypeScriptCompile Remove="Authorization\Login\ResetPassword.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Axis.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\InitialMessage.tsx" />
     <TypeScriptCompile Remove="Chart\D3Scripts\Components\Legend.tsx" />
