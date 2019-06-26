@@ -1,7 +1,7 @@
 ﻿
 .sf-query-token-builder {
     display: inline-table;
-    vertical-align: middle;
+    vertical-align: -webkit-baseline-middle;
 }
 
 .sf-query-token-part {
