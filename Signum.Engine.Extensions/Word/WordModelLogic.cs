@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using Signum.Engine.Templating;
 using Signum.Entities.Templating;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Word
 {
@@ -222,19 +223,27 @@ namespace Signum.Engine.Word
             return template;
         }
 
+     
 
         public static byte[] CreateReport(this IWordModel model, bool avoidConversion = false)
         {
             return model.CreateReport(out WordTemplateEntity rubish, avoidConversion);
         }
 
-        public static byte[] CreateReport(this IWordModel model, out WordTemplateEntity template, bool avoidConversion = false)
+        public static byte[] CreateReport(this IWordModel model, out WordTemplateEntity template, bool avoidConversion = false, WordTemplateLogic.FileNameBox? fileNameBox = null)
         {
             WordModelEntity system = GetWordModelEntity(model.GetType());
 
             template = GetDefaultTemplate(system, model.UntypedEntity as Entity);
 
-            return WordTemplateLogic.CreateReport(template.ToLite(), model: model, avoidConversion: avoidConversion); 
+            return template.ToLite().CreateReport(null, model, avoidConversion, fileNameBox); 
+        }
+
+        public static FileContent CreateReportFileContent(this IWordModel model, bool avoidConversion = false)
+        {
+            var box = new WordTemplateLogic.FileNameBox();
+            var bytes = model.CreateReport(out WordTemplateEntity rubish, avoidConversion, box);
+            return new FileContent(box.FileName!, bytes);
         }
 
         public static WordModelEntity GetWordModelEntity(Type type)

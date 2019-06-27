@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using Signum.Entities.Word;
 using Signum.Engine.Basics;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Word
 {
@@ -20,8 +21,9 @@ namespace Signum.Engine.Word
         CultureInfo culture;
         WordTemplateEntity template;
         IWordModel? model;
+        TextTemplateParser.BlockNode? fileNameBlock;
 
-        public WordTemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity)
+        public WordTemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity, TextTemplateParser.BlockNode? fileNameBlock)
         {
             this.document = document;
             this.culture = culture;
@@ -29,6 +31,7 @@ namespace Signum.Engine.Word
             this.template = template;
             this.entity = entity;
             this.model = model;
+            this.fileNameBlock = fileNameBlock;
         }
 
         ResultTable? table;
@@ -45,6 +48,9 @@ namespace Signum.Engine.Word
                     item.FillTokens(tokens);
                 }
             }
+
+            if (this.fileNameBlock != null)
+                this.fileNameBlock.FillQueryTokens(tokens);
 
             var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
@@ -108,6 +114,9 @@ namespace Signum.Engine.Word
             }
         }
 
-     
+        internal string RenderFileName()
+        {
+            return this.fileNameBlock!.Print(new TextTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows));
+        }
     }
 }

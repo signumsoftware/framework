@@ -10,6 +10,9 @@ using Signum.React.Files;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
+using Signum.Engine.Templating;
+using System;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.React.Word
 {
@@ -20,11 +23,11 @@ namespace Signum.React.Word
         public FileStreamResult CreateReport([Required, FromBody]CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
-            var model = request.entity ?? request.lite.Retrieve();
+            var modifiableEntity = request.entity ?? request.lite.Retrieve();
 
-            var bytes = template.CreateReport(model);
+            var file = template.CreateReportFileContent(modifiableEntity);
 
-            return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);
+            return FilesController.GetFileStreamResult(file);
         }
 
         public class CreateWordReportRequest

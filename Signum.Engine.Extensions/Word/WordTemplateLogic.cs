@@ -24,6 +24,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
 using Signum.Engine;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Word
 {
@@ -258,11 +259,21 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static string? DumpFileFolder = null;
-
-        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false)
+        public class FileNameBox
         {
-            return liteTemplate.GetFromCache().CreateReport(modifiableEntity, model, avoidConversion);
+            public string? FileName { get; set; }
+        }
+
+        public static FileContent CreateReportFileContent(this Lite<WordTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false)
+        {
+            var box = new FileNameBox { FileName = null  };
+            var bytes = liteTemplate.GetFromCache().CreateReport(modifiableEntity, model, avoidConversion, box);
+            return new FileContent(box.FileName!, bytes);
+        }
+
+        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false, FileNameBox? fileNameBox = null)
+        {
+            return liteTemplate.GetFromCache().CreateReport(modifiableEntity, model, avoidConversion, fileNameBox);
         }
 
         public static WordTemplateEntity GetFromCache(this Lite<WordTemplateEntity> liteTemplate)
@@ -272,7 +283,15 @@ namespace Signum.Engine.Word
             return template;
         }
 
-        public static byte[] CreateReport(this WordTemplateEntity template, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false)
+        public static FileContent CreateReportFileContent(this WordTemplateEntity template, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false)
+        {
+            var box = new FileNameBox { FileName = null };
+            var bytes = template.CreateReport(modifiableEntity, model, avoidConversion, box);
+            return new FileContent(box.FileName!, bytes);
+        }
+
+        public static string? DumpFileFolder = null;
+        public static byte[] CreateReport(this WordTemplateEntity template, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false, FileNameBox? fileNameBox = null)
         {
             WordTemplatePermission.GenerateReport.AssertAuthorized();
 
@@ -306,12 +325,17 @@ namespace Signum.Engine.Word
                     if (parser.Errors.Any())
                         throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
 
-                    var renderer = new WordTemplateRenderer(document, qd, template.Culture.ToCultureInfo(), template, model, entity);
+                    var parsedFileName = fileNameBox != null ? TextTemplateParser.Parse(template.FileName, qd, template.Model?.ToType()) : null;
+
+                    var renderer = new WordTemplateRenderer(document, qd, template.Culture.ToCultureInfo(), template, model, entity, parsedFileName);
                     renderer.MakeQuery();
                     renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
                     renderer.AssertClean();
 
                     FixDocument(document); Dump(document, "4.Fixed.txt");
+
+                    if (fileNameBox != null)
+                        fileNameBox.FileName = renderer.RenderFileName();
 
                     if (template.WordTransformer != null)
                         Transformers.GetOrThrow(template.WordTransformer)(new WordContext(template, entity, model), document);
