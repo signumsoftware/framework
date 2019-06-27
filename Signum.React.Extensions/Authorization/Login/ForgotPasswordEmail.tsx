@@ -90,8 +90,8 @@ export default class ForgotPassword extends React.Component<{}, ForgotPasswordEm
       <form onSubmit={(e) => this.handleSubmit(e)}>
         <div className="row">
           <div className="offset-sm-2 col-sm-6">
-            <h2 className="sf-entity-title">{AuthMessage.ChangePasswordAspx_ChangePassword.niceToString()}</h2>
-            <p>{AuthMessage.ChangePasswordAspx_NewPassword.niceToString()}</p>
+            <h2 className="sf-entity-title">{AuthMessage.IForgotMyPassword.niceToString()}</h2>
+            <p>{AuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
           </div>
         </div>
         <div>
@@ -108,7 +108,7 @@ export default class ForgotPassword extends React.Component<{}, ForgotPasswordEm
         </div>
         <div className="row">
           <div className="offset-sm-2 col-sm-6">
-            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{AuthMessage.ChangePassword.niceToString()}</button>
+            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{AuthMessage.SendEmail.niceToString()}</button>
           </div>
         </div>
       </form>

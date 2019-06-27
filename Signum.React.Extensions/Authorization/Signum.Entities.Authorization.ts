@@ -147,6 +147,8 @@ export module AuthMessage {
   export const Welcome0 = new MessageKey("AuthMessage", "Welcome0");
   export const LoginWithAnotherUser = new MessageKey("AuthMessage", "LoginWithAnotherUser");
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("AuthMessage", "TheUserIsNotLongerInTheDatabase");
+  export const IForgotMyPassword = new MessageKey("AuthMessage", "IForgotMyPassword");
+  export const GiveUsYourUserEmailToResetYourPassword = new MessageKey("AuthMessage", "GiveUsYourUserEmailToResetYourPassword");
 }
 
 export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");

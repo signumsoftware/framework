@@ -141,6 +141,11 @@ namespace Signum.Entities.Authorization
         Welcome0,
         LoginWithAnotherUser,
         TheUserIsNotLongerInTheDatabase,
+        [Description("I forgot my password")]
+        IForgotMyPassword,
+        [Description("Give us your user's email and we will send you an email so you can reset your password.")]
+        GiveUsYourUserEmailToResetYourPassword,
+      
     }
 
     public enum AuthEmailMessage

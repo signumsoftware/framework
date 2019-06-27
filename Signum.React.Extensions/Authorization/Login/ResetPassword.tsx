@@ -33,7 +33,7 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
         return;
 
       const request: AuthClient.API.ResetPasswordRequest = {
-        code: QueryString.parse(this.props.location.search).code!,
+        code: QueryString.parse(this.props.location.search).code! ,
         newPassword: this.newPassword.value,
       };
 
