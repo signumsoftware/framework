@@ -8,12 +8,12 @@ import * as AuthClient from '../AuthClient'
 import { RouteComponentProps } from 'react-router'
 import * as QueryString from 'query-string'
 
-interface ResetPasswordProps extends RouteComponentProps<{ }> {}
+interface ResetPasswordProps extends RouteComponentProps<{}> { }
 
 interface ResetPasswordState { modelState?: ModelState; success?: boolean }
 
 
-export default class ResetPassword extends React.Component<ResetPasswordProps, ResetPasswordState > {
+export default class ResetPassword extends React.Component<ResetPasswordProps, ResetPasswordState> {
   constructor(props: ResetPasswordProps) {
     super(props);
     this.state = {};
@@ -21,7 +21,7 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
 
   newPassword!: HTMLInputElement;
   newPassword2!: HTMLInputElement;
-
+  code: string = String(QueryString.parse(this.props.location.search).code!);
 
   handleSubmit(e: React.FormEvent<any>) {
 
@@ -33,7 +33,7 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
         return;
 
       const request: AuthClient.API.ResetPasswordRequest = {
-        code: QueryString.parse(this.props.location.search).code! ,
+        code: this.code,
         newPassword: this.newPassword.value,
       };
 
@@ -41,8 +41,10 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
         .then(lr => {
           AuthClient.setAuthToken(lr.token);
           AuthClient.setCurrentUser(lr.userEntity);
-          Navigator.resetUI();
+         
           this.setState({ success: true });
+          //Navigator.resetUI();
+          Navigator.history.push("~/auth/ResetPassword?code=OK");
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
@@ -52,7 +54,7 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
     });
   }
 
-  
+
 
 
   handleNewPasswordBlur = (event: React.SyntheticEvent<any>) => {
@@ -79,8 +81,9 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
 
   render() {
 
-    if (this.state.success) {
+    if (this.state.success || this.code=="OK") {
       return (
+
         <div>
           <h2 className="sf-entity-title">{AuthMessage.PasswordChanged.niceToString()}</h2>
           <p>{AuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
@@ -112,7 +115,7 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
               {this.error("newPassword") && <span className="help-block">{this.error("newPassword")}</span>}
             </div>
           </div>
-        
+
         </div>
         <div className="row">
           <div className="offset-sm-2 col-sm-6">
