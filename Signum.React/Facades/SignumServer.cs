@@ -110,7 +110,7 @@ namespace Signum.React.Facades
         public Dictionary<string, string> canExecute { get; set; }
 
         [JsonExtensionData]
-        public Dictionary<string, object> extension { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, object?> extension { get; set; } = new Dictionary<string, object?>();
 
         public static Action<EntityPackTS> AddExtension;
 
