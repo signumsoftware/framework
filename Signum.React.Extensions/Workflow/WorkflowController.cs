@@ -61,7 +61,7 @@ namespace Signum.React.Workflow
             public Dictionary<string, string> canExecuteMainEntity { get; set; }
 
             [JsonExtensionData]
-            public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+            public Dictionary<string, object?> Extension { get; set; } = new Dictionary<string, object?>();
         }
 
         [HttpGet("api/workflow/starts")]
