@@ -28,6 +28,7 @@ export interface EntityBaseProps extends LineBaseProps {
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
   extraButtons?: (ec: EntityBase<EntityBaseProps, EntityBaseProps>) => React.ReactNode;
+  liteToString?: (e: any /*T*/) => string;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
@@ -113,8 +114,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       }
 
       const entity = entityOrLite as Entity;
-
-      return Promise.resolve(toLiteFat(entity));
+      return Promise.resolve(toLiteFat(entity, this.props.liteToString && this.props.liteToString(entity)));
     }
   }
 

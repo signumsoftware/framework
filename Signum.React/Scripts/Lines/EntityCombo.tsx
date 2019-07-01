@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString, isEntity } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
@@ -75,6 +75,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
               mandatoryClass={this.mandatoryClass}
               refreshKey={s.refreshKey}
               selectHtmlAttributes={s.selectHtmlAttributes}
+              liteToString={s.liteToString}
             />
             {EntityBase.hasChildrens(buttons) ? buttons : undefined}
           </div>
@@ -119,6 +120,7 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | undefined) => void;
   refreshKey?: string;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  liteToString?: (e: Entity) => string;
 }
 
 //Extracted to another component
@@ -164,7 +166,7 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     const ctx = this.props.ctx;
 
     if (ctx.readOnly)
-      return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(ctx.value)}</FormControlReadonly>;
+      return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(lite, this.props.liteToString)}</FormControlReadonly>;
 
     return (
       <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""}
@@ -193,8 +195,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     if (v == undefined)
       return undefined;
 
-    if ((v as Entity).Type)
-      return toLite(v as Entity);
+    if (isEntity(v))
+      return toLite(v, v.isNew, this.props.liteToString && this.props.liteToString(v));
 
     return v as Lite<Entity>;
   }
@@ -213,11 +215,17 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     const lite = this.getLite();
 
     const elements = [undefined, ...this.state.data];
-    if (lite && !elements.some(a => is(a, lite)))
-      elements.insertAt(1, lite);
+
+    if (lite) {
+      var index = elements.findIndex(a => is(a, lite));
+      if (index == -1)
+        elements.insertAt(1, lite);
+      else
+        elements[index] = lite;
+    }
 
     return (
-      elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e) : " - "}</option>)
+      elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, this.props.liteToString) : " - "}</option>)
     );
   }
 

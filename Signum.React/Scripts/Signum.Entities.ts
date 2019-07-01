@@ -111,14 +111,14 @@ function getOrCreateToStringFunction(type: string) {
   return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null): string {
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null, toStringLite?: (e : Entity) => string): string {
   if (entityOrLite == null)
     return "";
 
   const lite = entityOrLite as Lite<Entity>;
   if (lite.EntityType) {
     if (lite.entity)
-      return getToString(lite.entity);
+      return (toStringLite || getToString)(lite.entity);
 
     if (Reflection.isLowPopulationSymbol(lite.EntityType))
       return Reflection.symbolNiceName(lite as Lite<Entity & Reflection.ISymbol>);
