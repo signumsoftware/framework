@@ -407,8 +407,6 @@ export class TypeContext<T> extends StyleContext {
     if (!this.error)
       return undefined;
 
-    debugger;
-
     return {
       title: this.error,
       "data-error-path": this.prefix

@@ -25,7 +25,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
     if (this.props.avoidFieldSet == true)
       return (
-        <div className={classes("sf-entity-line-details", s.ctx.errorClass)}
+        <div className={classes("sf-entity-line-details", s.ctx.errorClass, this.mandatoryClass)}
           {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes, ...s.ctx.errorAttributes() }}>
           {this.renderButtons()}
           {this.renderElements()}
@@ -33,7 +33,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
       );
 
     return (
-      <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass)}
+      <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass, this.mandatoryClass)}
         {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes, ...s.ctx.errorAttributes() }}>
         <legend>
           <div>
