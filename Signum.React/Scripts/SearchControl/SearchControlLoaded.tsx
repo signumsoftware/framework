@@ -75,7 +75,7 @@ export interface SearchControlLoadedProps {
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   onCreate?: () => void;
-  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
@@ -1134,14 +1134,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.onDoubleClick) {
       e.preventDefault();
-      this.props.onDoubleClick(e, row);
+      this.props.onDoubleClick(e, row, this);
       return;
     }
 
     var qs = this.props.querySettings;
     if (qs && qs.onDoubleClick) {
       e.preventDefault();
-      qs.onDoubleClick(e, row);
+      qs.onDoubleClick(e, row, this);
       return;
     }
 
