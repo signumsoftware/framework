@@ -256,7 +256,7 @@ export class TypeContext<T> extends StyleContext {
   }
 
   get index(): number | undefined {
-    return (this.binding as MListElementBinding<any>).index;
+    return this.binding && (this.binding as MListElementBinding<any>).index;
   }
 
   static root<T extends ModifiableEntity>(value: T, styleOptions?: StyleOptions, parent?: StyleContext): TypeContext<T> {
