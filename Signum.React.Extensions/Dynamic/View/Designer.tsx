@@ -225,7 +225,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
           {"(ctx: TypeContext<" + typeName + ">, "}
           <div style={{ display: "inline-flex" }}>
-            <ModulesHelp cleanName={typeName.replace("Entity", "")} />{", "}<PropsHelp node={dn} />{") =>"}
+            <ModulesHelp cleanName={typeName.replace("Entity", "")} />{", "}<PropsHelp node={dn} />{", locals) =>"}
           </div>
         </pre>
         <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() }} />
