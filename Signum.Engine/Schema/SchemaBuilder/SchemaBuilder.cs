@@ -989,17 +989,9 @@ namespace Signum.Engine.Maps
 
         public override ObjectName GenerateTableName(Type type, TableNameAttribute? tn)
         {
-            if (tn != null)
-            {
-                if (tn.SchemaName == "sys")
-                {
-                    DatabaseName? db = Administrator.sysViewDatabase.Value;
+            var name = base.GenerateTableName(type, tn);
 
-                    return new ObjectName(new SchemaName(db, tn.SchemaName ?? "dbo"), tn.Name);
-                }
-            }
-
-            return base.GenerateTableName(type, tn);
+            return Administrator.ReplaceViewName(name);
         }
 
 

@@ -120,12 +120,30 @@ namespace Signum.Engine
             SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
 
-        internal static readonly ThreadVariable<DatabaseName?> sysViewDatabase = Statics.ThreadVariable<DatabaseName?>("viewDatabase");
+        internal static readonly ThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
+        public static IDisposable OverrideViewNameReplacer(Func<ObjectName, ObjectName> replacer)
+        {
+            var old = registeredViewNameReplacer.Value;
+            registeredViewNameReplacer.Value = old == null ? replacer : n =>
+            {
+                var rep = replacer(n);
+                if (rep != n)
+                    return rep;
+
+                return old!(n);
+            };
+            return new Disposable(() => registeredViewNameReplacer.Value = old);
+        }
+
+        public static ObjectName ReplaceViewName(ObjectName name)
+        {
+            var replacer = registeredViewNameReplacer.Value;
+            return replacer == null ? name : replacer(name);
+        }
+
         public static IDisposable OverrideDatabaseInSysViews(DatabaseName? database)
         {
-            var old = sysViewDatabase.Value;
-            sysViewDatabase.Value = database;
-            return new Disposable(() => sysViewDatabase.Value = old);
+            return OverrideViewNameReplacer(n => n.Schema.Name == "sys" ? n.OnDatabase(database) : n);
         }
 
         public static bool ExistsTable<T>()
