@@ -52,11 +52,18 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => QueryTokenString<any>)[]): FilterGroupOption {
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
   return {
     groupOperation: "Or",
     pinned: { splitText: true },
-    filters: tokens.map(t => ({ token: t(type.token()), operation: "Contains" } as FilterConditionOption))
+    filters: tokens.map(t => {
+      var res = t(type.token());
+
+      if (res instanceof QueryTokenString)
+        return { token: res, operation: "Contains" } as FilterConditionOption;
+
+      return res;
+    })
   };
 } 
 
@@ -501,12 +508,16 @@ export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undef
     return qs.defaultFilters;
 
   if (qd.columns["Entity"]) {
-    return [{
-      token: "Entity.ToString",
-      operation: "Contains",
-      value: "",
-      pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true }
-    }];
+    return [
+      {
+        groupOperation: "Or",
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true },
+        filters: [
+          { token: "Entity.ToString", operation: "Contains" },
+          { token: "Entity.Id", operation: "EqualTo" },
+        ]
+      }
+    ];
   }
   else {
     return undefined;
@@ -735,7 +746,20 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value == "")) 
       return undefined;
 
-    return fop.token && ({
+    if (overridenValue && fop.token && fop.token.type.name == "number") {
+      var numVal = parseInt(overridenValue.value);
+
+      if (isNaN(numVal))
+        return undefined;
+
+      return ({
+        token: fop.token.fullKey,
+        operation: fop.operation,
+        value: numVal,
+      } as FilterConditionRequest);
+    }
+
+    return ({
       token: fop.token.fullKey,
       operation: fop.operation,
       value: overridenValue ? overridenValue.value : fop.value,
