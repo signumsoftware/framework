@@ -324,6 +324,7 @@
   <Type Name="QueryStringValueEmbedded" />
   <Type Name="QueryTokenEmbedded" />
   <Type Name="ResetPasswordRequestEntity" />
+  <Type Name="ResetPasswordRequestOperation" />
   <Type Name="RestApiKeyEntity" />
   <Type Name="RestApiKeyOperation" />
   <Type Name="RestLogEntity" />
