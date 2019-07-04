@@ -472,10 +472,42 @@ modules.React.useEffect(() => {
   modules["Components"] = "";
   modules["Globals"] = "";
   modules["Navigator"] = `modules.Navigator.navigate(e);
-modules.Navigaor.view(e);`;
+modules.Navigaor.view(e);
+modules.Navigator.API.fetchEntity("${p.cleanName}", [id]).then(entity => { /* do something here ... */ }).done();
+modules.Navigator.API.fetchAndForget([lite]).then(entity => { /* do something here ... */ }).done();
+
+NOTE: fetchAndRemember stores the result entity in lite.Entity.
+modules.Navigator.API.fetchAndRemember([lite]).then(entity => { /* do something here ... */ }).done();
+`;
 
   modules["Finder"] = `modules.Finder.find("${p.cleanName}");
 modules.Finder.findMany("${p.cleanName}");
+modules.Finder.fetchEntitiesWithFilters("${p.cleanName}", 
+  [{ token: "...", operation: "...", value: "..." }] ,  /* filterOptions */ 
+  [{ token: "...", orderType: "..." }],  /* orderOptions */
+  1 /* count */);
+
+OrderType =
+  "Ascending" |
+  "Descending";
+
+FilterOperation =
+  "EqualTo" |
+  "DistinctTo" |
+  "GreaterThan" |
+  "GreaterThanOrEqual" |
+  "LessThan" |
+  "LessThanOrEqual" |
+  "Contains" |
+  "StartsWith" |
+  "EndsWith" |
+  "Like" |
+  "NotContains" |
+  "NotStartsWith" |
+  "NotEndsWith" |
+  "NotLike" |
+  "IsIn" |
+  "IsNotIn";
 `;
 
   modules["Reflection"] = `modules.Reflection.getTypeInfo("${p.cleanName}").niceName;
