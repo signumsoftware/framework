@@ -171,7 +171,7 @@ namespace Signum.Engine
             return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable.ToBool(), id == null ? null : id.Value.Object);
         }
 
-        public DbParameter CreateParameter(string parameterName, object value, Type type)
+        public DbParameter CreateParameter(string parameterName, object? value, Type type)
         {
             var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
 
