@@ -44,7 +44,7 @@ namespace Signum.Engine.DynamicQuery
         /// <summary>
         /// Uses typeof(T) NiceName as niceName
         /// </summary>
-        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, Expression<Func<F, T?>> lambdaToMethodOrProperty)
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, Expression<Func<F, T>> lambdaToMethodOrProperty)
             where T : Entity
         {
             QueryLogic.Expressions.Register(lambdaToMethodOrProperty, () => typeof(T).NiceName());
