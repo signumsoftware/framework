@@ -284,7 +284,7 @@ export interface RoleEntity extends Entities.Entity {
 export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");
 export interface RoleMappingEmbedded extends Entities.EmbeddedEntity {
   Type: "RoleMappingEmbedded";
-  aDName: string;
+  aDNameOrGuid: string;
   role: Entities.Lite<RoleEntity>;
 }
 

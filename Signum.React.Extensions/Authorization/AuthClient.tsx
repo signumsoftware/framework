@@ -17,11 +17,6 @@ import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, 
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 
-export let windowsAuthentication: boolean;
-export let userTicket: boolean;
-export let resetPassword: boolean;
-
-
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
 export function registerUserTicketAuthenticator() {
@@ -34,16 +29,16 @@ export function registerWindowsAuthenticator() {
 }
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
-  userTicket = options.userTicket;
-  windowsAuthentication = options.windowsAuthentication;
-  resetPassword = options.resetPassword;
+  Options.userTicket = options.userTicket;
+  Options.windowsAuthentication = options.windowsAuthentication;
+  Options.resetPassword = options.resetPassword;
 
-  if (userTicket) {
+  if (Options.userTicket) {
     if (!authenticators.contains(loginFromCookie))
       throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
 
-  if (windowsAuthentication) {
+  if (Options.windowsAuthentication) {
     if (!authenticators.contains(loginWindowsAuthentication))
       throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
@@ -322,7 +317,11 @@ export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
   }
 }
 
-export function loginWindowsAuthentication() {
+export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
+
+  if (Options.disableWindowsAuthentication)
+    return Promise.resolve(undefined);
+
   return API.loginWindowsAuthentication().then(au => {
     au && console.log("loginWindowsAuthentication");
     return au;
@@ -378,7 +377,7 @@ export function logout() {
 function logoutInternal() {
   setAuthToken(undefined);
   setCurrentUser(undefined);
-
+  Options.disableWindowsAuthentication = true; 
   Options.onLogout();
 }
 
@@ -390,6 +389,11 @@ export namespace Options {
   export let onLogin: (url?: string) => void = (url?: string) => {
     throw new Error("onLogin should be defined (check Main.tsx in Southwind)");
   }
+
+  export let disableWindowsAuthentication: boolean;
+  export let windowsAuthentication: boolean;
+  export let userTicket: boolean;
+  export let resetPassword: boolean;
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {

@@ -122,11 +122,13 @@ namespace Signum.Engine.Authorization
         public virtual Lite<RoleEntity>? GetRole(AutoCreateUserContext ctx, bool throwIfNull)
         {
             var groups = ctx.GetUserPrincipal().GetGroups();
-
-            var list = groups.Select(a => new { a.Name, a.DisplayName, a.UserPrincipalName, a.DistinguishedName, a.Guid }).ToArray();
-
             var config = GetConfig();
-            var role = config.RoleMapping.FirstOrDefault(m => groups.Any(g => g.Name == m.ADName))?.Role ?? config.DefaultRole;
+            var role = config.RoleMapping.FirstOrDefault(m =>
+            {
+                Guid.TryParse(m.ADNameOrGuid, out var guid);
+                return groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
+            })?.Role ?? config.DefaultRole;
+
             if (role == null && throwIfNull)
                 throw new InvalidOperationException("No matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
 

@@ -25,8 +25,6 @@ import { ColumnRequest } from '@framework/FindOptions';
 import { toMomentFormat } from '@framework/Reflection';
 import { toNumbroFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
-import { Dic } from '@framework/Globals';
-import { resetPassword } from '../Authorization/AuthClient';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string }) {
 
@@ -67,7 +65,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
     registerChartScriptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
     registerChartScriptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
   }
-  }
+}
 
 export interface ChartComponentProps {
   data?: ChartTable;

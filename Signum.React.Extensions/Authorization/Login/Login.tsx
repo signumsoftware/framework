@@ -93,7 +93,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
               </div>
             </div>
           </div>
-          {AuthClient.userTicket &&
+          {AuthClient.Options.userTicket &&
             <div className="row">
               <div className="col-md-3"></div>
               <div className="col-md-6" style={{ paddingTop: ".35rem" }}>
@@ -111,11 +111,11 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
             <div className="col-md-6">
               <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthMessage.Login.niceToString()}</button>
               {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
-              {AuthClient.resetPassword &&
+              {AuthClient.Options.resetPassword &&
                 <span>
                   &nbsp;
-                  &nbsp;
-                                <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+                 &nbsp;
+                <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
                 </span>
               }
             </div>

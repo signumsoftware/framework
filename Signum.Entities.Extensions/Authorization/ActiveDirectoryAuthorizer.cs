@@ -29,7 +29,7 @@ namespace Signum.Entities.Authorization
     public class RoleMappingEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 100)]
-        public string ADName { get; set; }
+        public string ADNameOrGuid { get; set; }
 
         public Lite<RoleEntity> Role { get; set; }
     }
