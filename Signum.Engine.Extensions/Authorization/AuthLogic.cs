@@ -37,6 +37,7 @@ namespace Signum.Engine.Authorization
         static ResetLazy<UserEntity?> anonymousUserLazy = GlobalLazy.WithoutInvalidations(() => AnonymousUserName == null ? null :
             Database.Query<UserEntity>().Where(u => u.UserName == AnonymousUserName)
             .SingleEx(() => "AnonymousUser with name '{0}'".FormatWith(AnonymousUserName)));
+
         public static UserEntity? AnonymousUser
         {
             get { return anonymousUserLazy.Value; }
@@ -44,6 +45,7 @@ namespace Signum.Engine.Authorization
 
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse;
+        static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName;
 
         class RoleData
         {
@@ -81,6 +83,7 @@ namespace Signum.Engine.Authorization
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
                 rolesInverse = sb.GlobalLazy(()=>roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
+                rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
                     var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
@@ -213,6 +216,11 @@ namespace Signum.Engine.Authorization
         internal static DirectedGraph<Lite<RoleEntity>> RolesGraph()
         {
             return roles.Value;
+        }
+
+        public static Lite<RoleEntity> GetRole(string roleName)
+        {
+            return rolesByName.Value.GetOrThrow(roleName);
         }
 
         public static IEnumerable<Lite<RoleEntity>> RelatedTo(Lite<RoleEntity> role)

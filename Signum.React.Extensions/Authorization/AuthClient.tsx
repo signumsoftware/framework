@@ -17,6 +17,7 @@ import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, 
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 
+export let windowsAuthentication: boolean;
 export let userTicket: boolean;
 export let resetPassword: boolean;
 
@@ -27,12 +28,23 @@ export function registerUserTicketAuthenticator() {
   authenticators.push(loginFromCookie);
 }
 
-export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean, notifyLogout: boolean }) {
+/* Install and enable Windows authentication in IIS https://docs.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-2.2&tabs=visual-studio */
+export function registerWindowsAuthenticator() {
+  authenticators.push(loginWindowsAuthentication);
+}
+
+export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
   userTicket = options.userTicket;
+  windowsAuthentication = options.windowsAuthentication;
   resetPassword = options.resetPassword;
 
   if (userTicket) {
     if (!authenticators.contains(loginFromCookie))
+      throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
+  }
+
+  if (windowsAuthentication) {
+    if (!authenticators.contains(loginWindowsAuthentication))
       throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
 
@@ -222,7 +234,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
   if (options.headers == undefined)
     options.headers = {};
 
-  options.headers["Authorization"] = "Bearer " + token;
+  options.headers["Signum_Authorization"] = "Bearer " + token;
 
   return makeCall()
     .then(r => {
@@ -308,6 +320,13 @@ export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
       return au;
     });
   }
+}
+
+export function loginWindowsAuthentication() {
+  return API.loginWindowsAuthentication().then(au => {
+    au && console.log("loginWindowsAuthentication");
+    return au;
+  });
 }
 
 function getCookie(name: string) {
@@ -414,6 +433,9 @@ export module API {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
   }
 
+  export function loginWindowsAuthentication(): Promise<LoginResponse> {
+    return ajaxPost<LoginResponse>({ url: "~/api/auth/loginWindowsAuthentication", avoidAuthToken: true }, undefined);
+  }
 
   export function refreshToken(oldToken: string): Promise<LoginResponse> {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);

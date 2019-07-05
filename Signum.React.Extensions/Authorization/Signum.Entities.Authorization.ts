@@ -21,6 +21,11 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   Type: "ActiveDirectoryConfigurationEmbedded";
   domainName: string | null;
   domainServer: string | null;
+  loginWithWindowsAuthenticator: boolean;
+  loginWithActiveDirectoryRegistry: boolean;
+  autoCreateUsers: boolean;
+  roleMapping: Entities.MList<RoleMappingEmbedded>;
+  defaultRole: Entities.Lite<RoleEntity> | null;
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
@@ -274,6 +279,13 @@ export interface RoleEntity extends Entities.Entity {
   name: string;
   mergeStrategy: MergeStrategy;
   roles: Entities.MList<Entities.Lite<RoleEntity>>;
+}
+
+export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");
+export interface RoleMappingEmbedded extends Entities.EmbeddedEntity {
+  Type: "RoleMappingEmbedded";
+  aDName: string;
+  role: Entities.Lite<RoleEntity>;
 }
 
 export module RoleOperation {

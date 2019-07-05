@@ -101,6 +101,20 @@ namespace Signum.React.Authorization
             }
         }
 
+        [HttpPost("api/auth/loginWindowsAuthentication"), AllowAnonymous]
+        public LoginResponse? LoginWindowsAuthentication()
+        {
+            using (ScopeSessionFactory.OverrideSession())
+            {
+                if (!WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext))
+                    return null;
+
+                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token };
+            }
+        }
+
         [HttpGet("api/auth/currentUser")]
         public UserEntity? GetCurrentUser()
         {

@@ -1,9 +1,11 @@
 using Signum.Engine.Operations;
+using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Services;
 using Signum.Utilities;
 using System;
 using System.DirectoryServices.AccountManagement;
+using System.Linq;
 
 namespace Signum.Engine.Authorization
 {
@@ -30,17 +32,14 @@ namespace Signum.Engine.Authorization
 
     public class ActiveDirectoryAuthorizer : ICustomAuthorizer
     {
-        Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
+        public Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
 
-        public Func<AutoCreateUserContext, UserEntity>? AutoCreateUser;  
-
-        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig, Func<AutoCreateUserContext, UserEntity>? autoCreateUser = null)
+        public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig)
         {
             this.GetConfig = getConfig;
-            this.AutoCreateUser = autoCreateUser;
         }
 
-        public UserEntity Login(string userName, string password)
+        public virtual UserEntity Login(string userName, string password)
         {
             using (AuthLogic.Disable())
             {
@@ -50,7 +49,7 @@ namespace Signum.Engine.Authorization
                 
                 UserEntity? user;
 
-                if (domainName != null)
+                if (domainName != null && config.LoginWithActiveDirectoryRegistry)
                 {
                     try
                     {
@@ -62,18 +61,7 @@ namespace Signum.Engine.Authorization
 
                                 if (user == null)
                                 {
-                                    if (this.AutoCreateUser != null)
-                                    {
-                                        user = this.AutoCreateUser(new AutoCreateUserContext(pc, localName, domainName!));
-                                        if(user != null && user.IsNew)
-                                        {
-                                            using (ExecutionMode.Global())
-                                            using (OperationLogic.AllowSave<UserEntity>())
-                                            {
-                                                user.Save();
-                                            }
-                                        }
-                                    }
+                                    user = OnAutoCreateUser(pc, domainName, localName);
                                 }
 
                                 if (user != null)
@@ -98,6 +86,51 @@ namespace Signum.Engine.Authorization
 
                 return user;
             }
+        }
+
+
+        public UserEntity? OnAutoCreateUser(PrincipalContext pc, string domainName, string localName)
+        {
+            if (!GetConfig().AutoCreateUsers)
+                return null;
+
+            var user = this.AutoCreateUserInternal(new AutoCreateUserContext(pc, localName, domainName!));
+            if (user != null && user.IsNew)
+            {
+                using (ExecutionMode.Global())
+                using (OperationLogic.AllowSave<UserEntity>())
+                {
+                    user.Save();
+                }
+            }
+
+            return user;
+        }
+
+        public virtual UserEntity? AutoCreateUserInternal(AutoCreateUserContext ctx)
+        {
+            return new UserEntity
+            {
+                UserName = ctx.UserName,
+                PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                Email = ctx.GetUserPrincipal().EmailAddress,
+                Role = GetRole(ctx, throwIfNull: true)!,
+                State = UserState.Saved,
+            };
+        }
+
+        public virtual Lite<RoleEntity>? GetRole(AutoCreateUserContext ctx, bool throwIfNull)
+        {
+            var groups = ctx.GetUserPrincipal().GetGroups();
+
+            var list = groups.Select(a => new { a.Name, a.DisplayName, a.UserPrincipalName, a.DistinguishedName, a.Guid }).ToArray();
+
+            var config = GetConfig();
+            var role = config.RoleMapping.FirstOrDefault(m => groups.Any(g => g.Name == m.ADName))?.Role ?? config.DefaultRole;
+            if (role == null && throwIfNull)
+                throw new InvalidOperationException("No matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
+
+            return role;
         }
     }
 }

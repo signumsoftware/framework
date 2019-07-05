@@ -13,6 +13,25 @@ namespace Signum.Entities.Authorization
 
         [StringLengthValidator(Max = 250)]
         public string? DomainServer { get; set; }
+
+        public bool LoginWithWindowsAuthenticator { get; set; } = true;
+        public bool LoginWithActiveDirectoryRegistry { get; set; } = true;
+        
+        public bool AutoCreateUsers { get; set; }
+
+        [PreserveOrder, NoRepeatValidator]
+        public MList<RoleMappingEmbedded> RoleMapping { get; set; } = new MList<RoleMappingEmbedded>();
+
+        public Lite<RoleEntity>? DefaultRole { get; set; }
+    }
+
+    [Serializable]
+    public class RoleMappingEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Max = 100)]
+        public string ADName { get; set; }
+
+        public Lite<RoleEntity> Role { get; set; }
     }
 
     public enum ActiveDirectoryAuthorizerMessage
