@@ -116,6 +116,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
           enableAutoFocus={true}
           onHeighChanged={this.onResize}
           onSearch={result => this.changeUrl()}
+          extraButtons={qs && qs.extraButtons}
         />
       </div>
     );
