@@ -106,6 +106,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             hideFullScreenButton={true}
             throwIfNotFindable={true}
             ref={e => this.searchControl = e!}
+            create={this.props.findMode == "Explore"}
             findOptions={this.props.findOptions}
             onSelectionChanged={this.handleSelectionChanged}
             showGroupButton={this.props.findMode == "Explore"}
