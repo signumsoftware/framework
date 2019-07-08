@@ -23,6 +23,7 @@ import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "@framework/Modals/MessageModal";
 import { Dic } from "@framework/Globals";
 import * as Components from "@framework/Components";
+import * as Constructor from "@framework/Constructor"
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -379,10 +380,12 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
 
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
   return loadNodes().then(nodes =>
-    Navigator.API.getType(typeName).then(t => DynamicViewEntity.New({
-      entityType: t!,
-      viewName: "My View",
-      viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
+    Navigator.API.getType(typeName).then(t =>
+      Constructor.construct(DynamicViewEntity).then(dv => {
+        dv!.entityType = t!;
+        dv!.viewName = "My View";
+        dv!.viewContent = JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName)));
+        return dv!;
     })));
 }
 
