@@ -512,7 +512,7 @@ FilterOperation =
 
   modules["Reflection"] = `modules.Reflection.getTypeInfo("${p.cleanName}").niceName;
 modules.Reflection.getTypeInfo("${p.cleanName}").nicePluralName;
-modules.Reflection.MessageKey("${p.cleanName}Message", "Enum Member Name").niceToString();
+new modules.Reflection.MessageKey("${p.cleanName}Message", "Enum Member Name").niceToString();
 modules.Reflection.New("${p.cleanName}");
 `;
 
@@ -521,6 +521,7 @@ modules.Entities.is(entityOrLite1, entityOrLite2);`;
 
   modules["AuthClient"] = "modules.AuthClient.currentUser();";
   modules["Operations"] = "";
+  modules["WorkflowClient"] = "";
 
   modules["Constructor"] = `modules.Constructor.construct("${p.cleanName}").then(entity => { // do something here }).done();
 modules.Constructor.constructPack("${p.cleanName}").then(pack => // do something here).done();`;
