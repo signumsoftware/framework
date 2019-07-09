@@ -410,6 +410,7 @@ namespace Signum.Engine.Workflow
                     Lane = newLane,
                     Name = e.Name,
                     BpmnElementId = e.BpmnElementId,
+                    Timer = e.Timer == null ? null : e.Timer.Clone(),
                     Type = e.Type,
                     Xml = e.Xml,
                 });

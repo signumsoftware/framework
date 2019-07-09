@@ -77,6 +77,17 @@ namespace Signum.Entities.Workflow
 
             return base.PropertyValidation(pi);
         }
+
+        public WorkflowTimerEmbedded Clone()
+        {
+            WorkflowTimerEmbedded result = new WorkflowTimerEmbedded
+            {
+                Condition = this.Condition,
+                Duration = this.Duration == null ? null : this.Duration.Clone(),
+            };
+
+            return result;
+        }
     }
 
     public enum WorkflowEventType
