@@ -25,7 +25,6 @@ namespace Signum.React.Authorization
             var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
-            if (domainName != null && domainName == config.DomainName)
             {
                 UserEntity? user = AuthLogic.RetrieveUser(localName);
                 if (user != null)
