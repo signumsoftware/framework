@@ -17,7 +17,7 @@ namespace Signum.React.Authorization
     [ValidateModelFilter]
     public class AuthController : ControllerBase
     {
-        [HttpPost("api/auth/login"), AllowAnonymous]
+        [HttpPost("api/auth/login"), SignumAllowAnonymous]
         public ActionResult<LoginResponse> Login([Required, FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
@@ -85,7 +85,7 @@ namespace Signum.React.Authorization
             return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
         }
 
-        [HttpPost("api/auth/loginFromCookie"), AllowAnonymous]
+        [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
         public LoginResponse? LoginFromCookie()
         {
             using (ScopeSessionFactory.OverrideSession())
@@ -101,7 +101,7 @@ namespace Signum.React.Authorization
             }
         }
 
-        [HttpPost("api/auth/loginWindowsAuthentication"), AllowAnonymous]
+        [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
         public LoginResponse? LoginWindowsAuthentication()
         {
             using (ScopeSessionFactory.OverrideSession())

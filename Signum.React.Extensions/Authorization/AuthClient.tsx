@@ -325,7 +325,7 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
   return API.loginWindowsAuthentication().then(au => {
     au && console.log("loginWindowsAuthentication");
     return au;
-  });
+  }).catch(() => undefined);
 }
 
 function getCookie(name: string) {
