@@ -401,7 +401,7 @@ namespace Signum.Engine.Workflow
                     Name = oldLane.Name,
                     BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval != null ? oldLane.ActorsEval.Clone() : null,
+                    ActorsEval = oldLane.ActorsEval?.Clone(),
                     Xml = oldLane.Xml,
                 }.Save();
 
@@ -410,6 +410,7 @@ namespace Signum.Engine.Workflow
                     Lane = newLane,
                     Name = e.Name,
                     BpmnElementId = e.BpmnElementId,
+                    Timer = e.Timer?.Clone(),
                     Type = e.Type,
                     Xml = e.Xml,
                 });
