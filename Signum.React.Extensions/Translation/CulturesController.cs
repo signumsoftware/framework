@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using Signum.React.Authorization;
 
 namespace Signum.React.Translation
 {
@@ -29,19 +30,19 @@ namespace Signum.React.Translation
             _env = env;
         }
 
-        [HttpGet("api/culture/cultures"), AllowAnonymous]
+        [HttpGet("api/culture/cultures"), SignumAllowAnonymous]
         public List<CultureInfoEntity> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToList();
         }
 
-        [HttpGet("api/culture/currentCulture"), AllowAnonymous]
+        [HttpGet("api/culture/currentCulture"), SignumAllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.TryGetCultureInfoEntity() ?? CultureInfoLogic.CultureInfoToEntity.Value.Values.FirstEx();
         }
 
-        [HttpPost("api/culture/setCurrentCulture"), AllowAnonymous]
+        [HttpPost("api/culture/setCurrentCulture"), SignumAllowAnonymous]
         public string SetCurrentCulture([Required, FromBody]Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());

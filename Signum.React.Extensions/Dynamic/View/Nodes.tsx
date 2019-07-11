@@ -320,6 +320,7 @@ export interface RenderEntityNode extends ContainerNode {
   field?: string;
   viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
   styleOptions?: StyleOptionsExpression;
+  onEntityLoaded?: Expression<() => void>;
   extraProps?: Expression<{}>;
 }
 
@@ -336,6 +337,7 @@ NodeUtils.register<RenderEntityNode>({
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     getComponent: cc.getGetComponentEx(node, true),
     getViewName: NodeUtils.toFunctionCode(node.viewName),
+    onEntityLoaded: node.onEntityLoaded,
   }),
   render: (dn, ctx) => {
     var styleOptions = toStyleOptions(dn, ctx, dn.node.styleOptions);
@@ -346,6 +348,7 @@ NodeUtils.register<RenderEntityNode>({
         ctx={sctx}
         getComponent={NodeUtils.getGetComponent(dn)}
         getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, sctx, dn.node, n => n.viewName, NodeUtils.isFunctionOrStringOrNull))}
+        onEntityLoaded={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onEntityLoaded, NodeUtils.isFunctionOrNull)}
         extraProps={NodeUtils.evaluateAndValidate(dn, sctx, dn.node, n => n.extraProps, NodeUtils.isObjectOrNull)}
       />
     );
@@ -354,6 +357,7 @@ NodeUtils.register<RenderEntityNode>({
     <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
     <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
     <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={dn.route && dn.route.typeReference().name} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onEntityLoaded)} type={null} defaultValue={null} exampleExpression={"() => { /* do something here... */ }"} />
     <ExtraPropsComponent dn={dn} />
   </div>,
 });
@@ -650,6 +654,7 @@ NodeUtils.register<EntityComboNode>({
 export interface EntityDetailNode extends EntityBaseNode, ContainerNode {
   kind: "EntityDetail",
   avoidFieldSet?: ExpressionOrValue<boolean>;
+  onEntityLoaded?: Expression<() => void>;
 }
 
 NodeUtils.register<EntityDetailNode>({
@@ -663,14 +668,17 @@ NodeUtils.register<EntityDetailNode>({
   renderCode: (node, cc) => cc.elementCode("EntityDetail", {
     ctx: cc.getEntityBasePropsEx(node, {}),
     avoidFieldSet: node.avoidFieldSet,
+    onEntityLoaded: node.onEntityLoaded,
   }),
   render: (dn, ctx) => (<EntityDetail
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
+    onEntityLoaded={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onEntityLoaded, NodeUtils.isFunctionOrNull)}
     {...NodeUtils.getEntityBaseProps(dn, ctx, {})} />),
   renderDesigner: dn =>
     <div>
       {NodeUtils.designEntityBase(dn, {})}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onEntityLoaded)} type={null} defaultValue={null} exampleExpression={"() => { /* do something here... */ }"} />
     </div> 
   });
   
