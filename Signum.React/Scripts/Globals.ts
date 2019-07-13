@@ -996,6 +996,9 @@ export function combineFunction<F extends Function>(func1?: F | null, func2?: F 
   } as any;
 }
 
+RegExp.escape = function (s: string) {
+  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 
 
 export function areEqual<T>(a: T | undefined, b: T | undefined, field: (value: T) => any): boolean {
