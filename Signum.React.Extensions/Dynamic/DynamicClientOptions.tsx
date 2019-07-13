@@ -4,7 +4,7 @@ import { StyleContext } from '@framework/TypeContext'
 import { FindOptions } from '@framework/FindOptions';
 
 export namespace Options {
-  //export let onGetDynamicLineForPanel: ({ line: (ctx: StyleContext) => React.ReactNode, needsCompiling: boolean })[] = [];
+  export let onGetDynamicPanelSearch: ((search: string) => FindOptions)[] = [];
   export let onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
   export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
   export let checkEvalFindOptions: FindOptions[] = [];
