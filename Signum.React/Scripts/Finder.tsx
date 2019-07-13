@@ -743,8 +743,9 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (fop.token == null || fop.token.filterType == null || fop.operation == null)
       return undefined;
 
-    if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value == "")) 
+    if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value === "")) {
       return undefined;
+    }
 
     if (overridenValue && fop.token && fop.token.type.name == "number") {
       var numVal = parseInt(overridenValue.value);
