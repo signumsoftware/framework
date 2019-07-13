@@ -6,7 +6,7 @@ import { StyleContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { WebApiHttpError } from '@framework/Services'
-import { ValueSearchControl, FindOptions } from '@framework/Search'
+import { ValueSearchControl, FindOptions, ValueSearchControlLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
 import { getQueryNiceName, QueryTokenString } from '@framework/Reflection'
@@ -62,6 +62,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
       .then(info => this.setState({ panelInformation: info }))
       .done();
   }
+  
 
   render() {
     AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
@@ -71,16 +72,21 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     const errors = this.state.startErrors
     return (
       <div>
+        <h2>Dynamic Panel</h2>
         {errors && errors.length > 0 &&
           <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
             <FontAwesomeIcon icon="exclamation-triangle" />
             {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                     </div>
         }
-        {this.state.panelInformation ? this.renderPanelInformation() : JavascriptMessage.loading.niceToString()}
-        <Tabs activeEventKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
+        <Tabs activeEventKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
+
+          <Tab eventKey="search" title="Search">
+            <SearchPanel />
+          </Tab>
+
           <Tab eventKey="compile" title="1. Edit and Compile">
-            <CompileStep refreshView={() => this.loadData()} />
+            <CompileStep refreshView={() => this.loadData()} panelInformation={this.state.panelInformation} />
           </Tab>
 
           <Tab eventKey="restartServerApp" title="2. Restart Server Application">
@@ -108,44 +114,38 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     );
   }
 
-  renderPanelInformation() {
-    const lastCompile = this.state.panelInformation && this.state.panelInformation.lastDynamicCompilationDateTime;
-    const lastChange = this.state.panelInformation && this.state.panelInformation.lastDynamicChangeDateTime;
-    const loadedAssembly = this.state.panelInformation && this.state.panelInformation.loadedCodeGenAssemblyDateTime;
-    const loadedControllerAssembly = this.state.panelInformation && this.state.panelInformation.loadedCodeGenControllerAssemblyDateTime;
+}
 
-    const validStyle = { color: "green" } as React.CSSProperties;
-    const invalidStyle = { color: "red", fontWeight: "bold" } as React.CSSProperties;
+export function SearchPanel(props: {}) {
 
-    const isValidCompile = lastChange && lastCompile && moment(lastCompile).isBefore(moment(lastChange)) ? false : true;
-    const isValidAssembly = lastChange && loadedAssembly && moment(loadedAssembly).isBefore(moment(lastChange)) ? false : true;
-    const isValidControllerAssembly = lastChange && loadedControllerAssembly && moment(loadedControllerAssembly).isBefore(moment(lastChange)) ? false : true;
 
-    return (
-      <table className="table table-condensed form-vertical" style={{ width: "30%" }}>
-        <tr>
-          <th>Last Dynamic Change</th>
-          <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
-        </tr>
-        <tr>
-          <th>Last Dynamic Compilation</th>
-          <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? moment(lastCompile).format("L LT") : "-"}</td>
-        </tr>
-        <tr>
-          <th>Loaded CodeGen Assembly</th>
-          <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
-        </tr>
-        <tr>
-          <th>Loaded CodeGen Controller Assembly</th>
-          <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? moment(loadedControllerAssembly).format("L LT") : "-"}</td>
-        </tr>
-      </table>
-    );
-  }
+  const [search, setSearch] = React.useState("");
+  var sc = new StyleContext(undefined, { labelColumns: 3 });
+
+  const elements = Options.onGetDynamicPanelSearch.map(f => f(sc, search));
+
+  return (
+    <div>
+
+      <div className="row">
+        <div className="col-sm-6">
+          <div className="form-group has-search">
+            <span className="form-control-feedback"><FontAwesomeIcon icon="search" /></span>
+            <input type="text" className="form-control" value={search} onChange={e => setSearch(e.currentTarget.value)} />
+          </div>
+          {React.cloneElement(<div />, undefined, ...elements)}
+        </div>
+      </div>
+
+   
+
+    </div>
+  );
 }
 
 interface DynamicCompileStepProps {
   refreshView?: () => void;
+  panelInformation?: DynamicPanelInformation;
 }
 
 interface DynamicCompileStepState {
@@ -160,6 +160,9 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
     super(props);
     this.state = { };
   }
+
+
+
 
   handleCompile = (e: React.MouseEvent<any>) => {
     e.preventDefault();
@@ -178,7 +181,7 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
   }
 
   render() {
-    var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
+    var sc = new StyleContext(undefined, { labelColumns: { sm: 6 } });
 
     const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
     const lineContainer = React.cloneElement(<div />, undefined, ...lines);
@@ -187,12 +190,58 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
 
     return (
       <div>
-        {lineContainer}
+
+        <div className="row">
+          <div className="col-sm-6">
+            {lineContainer}
+          </div>
+          <div className="col-sm-6">
+            {this.props.panelInformation ? this.renderPanelInformation() : JavascriptMessage.loading.niceToString()}
+          </div>
+        </div>
+
+    
         <br />
           {<a href="#" className="sf-button btn btn-warning" onClick={this.handleCheck}>Check</a>}&nbsp;
           {<a href="#" className="sf-button btn btn-success" onClick={this.handleCompile}>Compile</a>}
           {errors && this.renderCompileResult(errors)}
       </div>
+    );
+  }
+
+  renderPanelInformation() {
+    var pi = this.props.panelInformation;
+    const lastCompile = pi && pi.lastDynamicCompilationDateTime;
+    const lastChange = pi && pi.lastDynamicChangeDateTime;
+    const loadedAssembly = pi && pi.loadedCodeGenAssemblyDateTime;
+    const loadedControllerAssembly = pi && pi.loadedCodeGenControllerAssemblyDateTime;
+
+    const validStyle = { color: "green" } as React.CSSProperties;
+    const invalidStyle = { color: "red", fontWeight: "bold" } as React.CSSProperties;
+
+    const isValidCompile = lastChange && lastCompile && moment(lastCompile).isBefore(moment(lastChange)) ? false : true;
+    const isValidAssembly = lastChange && loadedAssembly && moment(loadedAssembly).isBefore(moment(lastChange)) ? false : true;
+    const isValidControllerAssembly = lastChange && loadedControllerAssembly && moment(loadedControllerAssembly).isBefore(moment(lastChange)) ? false : true;
+
+    return (
+      <table className="table table-condensed form-vertical table-sm">
+        <tr>
+          <th>Last Dynamic Change</th>
+          <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
+        </tr>
+        <tr>
+          <th>Last Dynamic Compilation</th>
+          <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? moment(lastCompile).format("L LT") : "-"}</td>
+        </tr>
+        <tr>
+          <th>Loaded CodeGen Assembly</th>
+          <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
+        </tr>
+        <tr>
+          <th>Loaded CodeGen Controller Assembly</th>
+          <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? moment(loadedControllerAssembly).format("L LT") : "-"}</td>
+        </tr>
+      </table>
     );
   }
 

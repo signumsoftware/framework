@@ -3,6 +3,7 @@ import * as React from 'react'
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
@@ -12,7 +13,7 @@ import * as Operations from '@framework/Operations'
 import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { NormalControlMessage } from '@framework/Signum.Entities'
 import * as QuickLink from '@framework/QuickLinks'
-import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -69,6 +70,16 @@ export function start(options: { routes: JSX.Element[] }) {
       <h3>{DynamicRenameEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
     </Tab>;
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
+    { token: t.entity(p => p.typeName), type: "Text" },
+    { token: t.entity(p => p.typeDefinition), type: "JSon" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicMixinConnectionEntity, t => [
+    { token: t.entity(p => p.mixinName), type: "Text" },
+    { token: t.entity(p => p.entityType.entity!.cleanName), type: "Text" },
+  ]);
 }
 
 export namespace API {

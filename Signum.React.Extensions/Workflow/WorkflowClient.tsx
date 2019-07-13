@@ -81,6 +81,17 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       })
   ]);
 
+
+  Finder.addSettings({
+    queryName: CaseActivityEntity,
+    defaultFilters: [
+      { token: CaseActivityEntity.token(a => a.doneDate).expression("HasValue"), value: null, pinned: { disableOnNull: true, column: 1, label: "Is Done" } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { disableOnNull: true, column: 2, label: WorkflowActivityEntity.niceName() } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(w => w.lane.pool.workflow), pinned: { disableOnNull: true, column: 3 } },
+      { token: CaseActivityEntity.token(a => a.case), pinned: { disableOnNull: true, column: 4 } },
+    ]
+  })
+
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
     new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentToken: CaseEntity.token(e => e.workflow), parentValue: ctx.lite },
       { icon: "tasks", iconColor: "blue" })

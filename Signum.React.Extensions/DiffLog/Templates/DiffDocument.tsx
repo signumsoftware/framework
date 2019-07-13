@@ -92,7 +92,7 @@ interface LinesRemoved {
   numLines: number;
 }
 
-function expandNumbers(changes: number[], max: number): (number | LinesRemoved)[] {
+export function expandNumbers(changes: number[], max: number): (number | LinesRemoved)[] {
 
   const margin = DiffDocument.marginLines!;
 
