@@ -53,13 +53,8 @@ export function addSettings(...settings: QuerySettings[]) {
 }
 
 export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
-  return pinnedSearchFilterWithValue(type, undefined, ...tokens);
-}
-
-export function pinnedSearchFilterWithValue<T extends Entity>(type: Type<T>, value: string | undefined, ...tokens: ((t: QueryTokenString<T>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
   return {
     groupOperation: "Or",
-    value: value,
     pinned: { splitText: true },
     filters: tokens.map(t => {
       var res = t(type.token());
