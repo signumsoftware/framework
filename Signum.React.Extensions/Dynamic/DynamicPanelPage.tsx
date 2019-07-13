@@ -122,7 +122,7 @@ export function SearchPanel(props: {}) {
   const [search, setSearch] = React.useState("");
   var sc = new StyleContext(undefined, { labelColumns: 3 });
 
-  const findOptions = Options.onGetDynamicPanelSearch.map(f => f(search));
+  const elements = Options.onGetDynamicPanelSearch.map(f => f(sc, search));
 
   return (
     <div>
@@ -133,7 +133,7 @@ export function SearchPanel(props: {}) {
             <span className="form-control-feedback"><FontAwesomeIcon icon="search" /></span>
             <input type="text" className="form-control" value={search} onChange={e => setSearch(e.currentTarget.value)} />
           </div>
-          {React.cloneElement(<div />, undefined, ...findOptions.map(fo => <ValueSearchControlLine ctx={sc} findOptions={fo} />))}
+          {React.cloneElement(<div />, undefined, ...elements)}
         </div>
       </div>
 

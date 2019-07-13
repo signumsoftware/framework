@@ -71,19 +71,15 @@ export function start(options: { routes: JSX.Element[] }) {
       <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
     </Tab>;
 
-  DynamicClientOptions.Options.onGetDynamicPanelSearch.push(search => ({
-    queryName: DynamicTypeEntity, filterOptions: [Finder.pinnedSearchFilterWithValue(DynamicTypeEntity, search,
-      t => t.entity(p => p.typeName),
-      t => t.entity(p => p.typeDefinition))
-    ]
-  }));
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
+    { token: t.entity(p => p.typeName), type: "Text" },
+    { token: t.entity(p => p.typeDefinition), type: "JSon" },
+  ]);
 
-  DynamicClientOptions.Options.onGetDynamicPanelSearch.push(search => ({
-    queryName: DynamicMixinConnectionEntity, filterOptions: [Finder.pinnedSearchFilterWithValue(DynamicMixinConnectionEntity, search,
-      t => t.entity(p => p.mixinName),
-      t => t.entity(p => p.entityType.entity!.cleanName))
-    ]
-  }));
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicMixinConnectionEntity, t => [
+    { token: t.entity(p => p.mixinName), type: "Text" },
+    { token: t.entity(p => p.entityType.entity!.cleanName), type: "Text" },
+  ]);
 }
 
 export namespace API {
