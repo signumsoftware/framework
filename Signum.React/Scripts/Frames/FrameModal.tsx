@@ -240,15 +240,12 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      onReload: pack => {
+      onReload: (pack, reloadComponent) => {
         var newPack = pack || this.state.pack!;
-        
-        if (is(this.state.pack!.entity as Entity, newPack.entity as Entity))
-          this.setPack(newPack);
-        else {
-          this.setPack(newPack);
+
+        this.setPack(newPack);
+        if (reloadComponent)
           this.setState({ getComponent: undefined }, () => this.loadComponent(newPack).done()); //For AutoFocus and potentialy another view
-        }
       },
       pack: this.state.pack,
       onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),
