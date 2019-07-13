@@ -533,24 +533,28 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
   }
 }
 
-export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string): React.ReactElement<any> {
+export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string, forceNullable?: boolean): React.ReactElement<any> {
+
+  var tokenType = token.type;
+  if (forceNullable)
+    tokenType = { ...tokenType, isNotNullable: false };
 
   switch (token.filterType) {
     case "Lite":
-      if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={token.type} create={false} onChange={handleValueChange} labelText={labelText} />;
+      if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
+        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />;
       else
-        return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={handleValueChange} labelText={labelText} />
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />
     case "Embedded":
-      return <EntityLine ctx={ctx} type={token.type} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
+      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
     case "Enum":
-      const ti = getTypeInfos(token.type).single();
+      const ti = getTypeInfos(tokenType).single();
       if (!ti)
-        throw new Error(`EnumType ${token.type.name} not found`);
+        throw new Error(`EnumType ${tokenType.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={handleValueChange} labelText={labelText} />;
     default:
-      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} formatText={token.format} unitText={token.unit} onChange={handleValueChange} labelText={labelText} />;
   }
 }
 
