@@ -12,6 +12,10 @@ declare global {
     dataForChildWindow?: any;
   }
 
+  interface RegExpConstructor {
+    escape(str: string): string;
+  }
+
   interface Array<T> {
     groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
