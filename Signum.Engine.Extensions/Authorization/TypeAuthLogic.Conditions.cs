@@ -29,17 +29,22 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => queryFilterDisabled.Value = false);
         }
 
-        public static bool InSave
-        {
-            get { return inSave.Value; }
-        }
-
+        public static bool InSave => inSave.Value;//Available for Type Condition definition
         static readonly Variable<bool> inSave = Statics.ThreadVariable<bool>("inSave");
         static IDisposable? OnInSave()
         {
             if (inSave.Value) return null;
             inSave.Value = true;
             return new Disposable(() => inSave.Value = false);
+        }
+
+        public static Type? IsDelete => isDelete.Value;
+        static readonly Variable<Type?> isDelete = Statics.ThreadVariable<Type?>("isDelete");
+        static IDisposable? OnIsDelete(Type type)
+        {
+            var oldType = isDelete.Value;
+            isDelete.Value = type;
+            return new Disposable(() => isDelete.Value = type);
         }
 
         const string CreatedKey = "Created";
@@ -373,7 +378,9 @@ namespace Signum.Engine.Authorization
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
 
-            Expression body = IsAllowedExpression(e, TypeAllowedBasic.Read, ui);
+            var tab = typeof(T) == IsDelete ? TypeAllowedBasic.Modify : TypeAllowedBasic.Read; 
+
+            Expression body = IsAllowedExpression(e, tab, ui);
 
             if (body is ConstantExpression ce)
             {
@@ -381,7 +388,7 @@ namespace Signum.Engine.Authorization
                     return null;
             }
 
-            Func<T, bool>? func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), TypeAllowedBasic.Read, ui);
+            Func<T, bool>? func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), tab, ui);
 
             return new FilterQueryResult<T>(Expression.Lambda<Func<T, bool>>(body, e), func);
         }

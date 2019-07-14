@@ -43,6 +43,11 @@ namespace Signum.Engine.Authorization
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
+                sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
+                {
+                    return TypeAuthLogic.OnIsDelete(query.ElementType);
+                };
+
                 cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToEntity.Keys.ToList() : null);
