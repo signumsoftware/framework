@@ -178,7 +178,7 @@ namespace Signum.Engine.Maps
             if (ee == null)
                 return null;
 
-            return ee.OnPreUnsafeDelete(entityQuery);
+            return Disposable.Combine(ee?.OnPreUnsafeDelete(entityQuery), entityEventsGlobal.OnPreUnsafeDelete(entityQuery));
         }
 
         internal IDisposable? OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
