@@ -3,6 +3,10 @@ declare global {
   function require<T>(path: string): T;
   function require<T>(paths: string[], callback: (...modules: any[]) => void): void;
 
+  interface RegExpConstructor {
+    escape(s: string): string;
+  }
+
   interface Promise<T> {
     done(this: Promise<T>): void;
   }
