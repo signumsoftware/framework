@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import { Dic, areEqual, classes } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
-import { ValueLine, EntityLine, EntityCombo, StyleContext } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
@@ -250,7 +250,7 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
             </div>}
             <div>
               {this.props.showPinnedFilters &&
-                <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => { fg.pinned = fg.pinned ? undefined : {}; this.changeFilter(); }}>
+                <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => { fg.pinned = fg.pinned ? undefined : {}; this.changeFilter(); }} disabled={this.props.readOnly}>
                   <FontAwesomeIcon color="orange" icon={[fg.pinned ? "fas" : "far", "star"]} />
                 </button>
               }
@@ -259,7 +259,7 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
           <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
             <table className="table-sm" style={{ width: "100%" }}>
               <thead>
-                {fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => this.changeFilter()} />}
+                {fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => this.changeFilter()} readonly={readOnly} />}
                 <tr>
                   <th style={{ minWidth: "24px" }}></th>
                   <th>{SearchMessage.Field.niceToString()}</th>
@@ -446,13 +446,13 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
           </td>
           {f.token && f.token.filterType && f.operation && this.props.showPinnedFilters &&
             <td>
-              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => { f.pinned = f.pinned ? undefined : {}; this.changeFilter(); }}>
+            <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => { f.pinned = f.pinned ? undefined : {}; this.changeFilter(); }} disabled={this.props.readOnly}>
                 <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} />
               </button>
             </td>
           }
         </tr>
-        {this.props.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => this.changeFilter()} />}
+        {this.props.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => this.changeFilter()} readonly={readOnly} />}
       </>
     );
   }
@@ -488,6 +488,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
 
 interface PinnedFilterEditorProps {
   pinned: PinnedFilter;
+  readonly: boolean;
   onChange: () => void;
 }
 
@@ -499,17 +500,15 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
         <td></td>
         <td>
           <div>
-            <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()}
+            <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()} readOnly={this.props.readonly}
               value={p.label || ""}
               onChange={e => { p!.label = e.currentTarget.value; this.props.onChange(); }} />
           </div>
         </td>
         <td>
           <div className="input-group input-group-xs">
-            <NumericTextBox value={p.column == undefined ? null : p.column} onChange={n => { p!.column = n == null ? undefined : n; this.props.onChange(); }}
-              validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: SearchMessage.Column.niceToString(), style: { width: "30px" } }} />
-            <NumericTextBox value={p.row == undefined ? null : p.row} onChange={n => { p!.row = n == null ? undefined : n; this.props.onChange(); }}
-              validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: SearchMessage.Row.niceToString(), style: { width: "30px" } }} />
+            {this.numericTextBox(Binding.create(p, _ => _.column), SearchMessage.Column.niceToString())}
+            {this.numericTextBox(Binding.create(p, _ => _.row), SearchMessage.Row.niceToString())}
           </div>
         </td>
         <td colSpan={2}>
@@ -522,9 +521,21 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
     );
   }
 
+  numericTextBox(binding: Binding<number | undefined>, title: string) {
+
+    var val = binding.getValue();
+    if (this.props.readonly)
+      return <span className="numeric form-control form-control-xs" style={{ width: "30px" }}>{val}</span>;
+
+    return (
+      <NumericTextBox value={val == undefined ? null : val} onChange={n => { binding.setValue(n == null ? undefined : n); this.props.onChange(); }}
+        validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: title, style: { width: "30px" } }} />
+    );
+  }
+
   renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
     return (
-      <button type="button" className={classes("btn btn-light", binding.getValue() && "active")}
+      <button type="button" className={classes("btn btn-light", binding.getValue() && "active")} disabled={this.props.readonly}
         onClick={e => { binding.setValue(!binding.getValue()); this.props.onChange(); }}
         title={TitleManager.useTitle ? title : undefined}>
         {label}
