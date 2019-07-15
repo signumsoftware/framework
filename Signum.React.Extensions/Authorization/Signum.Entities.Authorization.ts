@@ -358,11 +358,7 @@ export type TypeAllowed =
   "Read" |
   "DBModifyUINone" |
   "DBModifyUIRead" |
-  "Modify" |
-  "DBCreateUINone" |
-  "DBCreateUIRead" |
-  "DBCreateUIModify" |
-  "Create";
+  "Modify";
 
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
@@ -375,8 +371,7 @@ export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic
 export type TypeAllowedBasic =
   "None" |
   "Read" |
-  "Modify" |
-  "Create";
+  "Modify";
 
 export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {

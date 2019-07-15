@@ -200,7 +200,7 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
 export function navigatorIsCreable(typeName: PseudoType) {
   const ti = getTypeInfo(typeName);
 
-  return ti == undefined || ti.typeAllowed == "Create";
+  return ti == undefined || ti.typeAllowed == "Modify";
 }
 
 export function currentUser(): UserEntity {

@@ -111,12 +111,7 @@ namespace Signum.Entities.Authorization
 
         DBModifyUINone =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.None,
         DBModifyUIRead =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Read,
-        Modify =           TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Modify,
-
-        DBCreateUINone =   TypeAllowedBasic.Create << 2 | TypeAllowedBasic.None,
-        DBCreateUIRead =   TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Read,
-        DBCreateUIModify = TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Modify,
-        Create =           TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Create,
+        Modify =           TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Modify
     }
 
     public static class TypeAllowedExtensions
@@ -134,22 +129,6 @@ namespace Signum.Entities.Authorization
         public static TypeAllowedBasic Get(this TypeAllowed allowed, bool userInterface)
         {
             return userInterface ? allowed.GetUI() : allowed.GetDB();
-        }
-
-        public static TypeAllowed Create(bool create, bool modify, bool read, bool none)
-        {
-            TypeAllowedBasic[] result = new[]
-            {
-                create? TypeAllowedBasic.Create: (TypeAllowedBasic?)null,
-                modify? TypeAllowedBasic.Modify: (TypeAllowedBasic?)null,
-                read? TypeAllowedBasic.Read: (TypeAllowedBasic?)null,
-                none? TypeAllowedBasic.None: (TypeAllowedBasic?)null,
-            }.NotNull().OrderByDescending(a => a).ToArray();
-
-            if (result.Length != 1 && result.Length != 2)
-                throw new FormatException();
-
-            return Create(result.Max(), result.Min());
         }
 
         public static TypeAllowed Create(TypeAllowedBasic database, TypeAllowedBasic ui)
@@ -194,6 +173,5 @@ namespace Signum.Entities.Authorization
         None = 0,
         Read = 1,
         Modify = 2,
-        Create = 3
     }
 }

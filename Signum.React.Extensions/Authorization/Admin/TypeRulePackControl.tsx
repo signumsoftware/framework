@@ -148,9 +148,6 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
               </th>
 
               <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Create")}
-              </th>
-              <th style={{ textAlign: "center" }}>
                 {TypeAllowed.niceToString("Modify")}
               </th>
               <th style={{ textAlign: "center" }}>
@@ -235,9 +232,6 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
         </td>
         <td style={{ textAlign: "center" }} className={masterClass}>
-          {this.colorRadio(fallback, "Create", "#0099FF")}
-        </td>
-        <td style={{ textAlign: "center" }} className={masterClass}>
           {this.colorRadio(fallback, "Modify", "green")}
         </td>
         <td style={{ textAlign: "center" }}>
@@ -281,10 +275,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             {"\u00A0 \u00A0".repeat(i + 1)}
             <span className="sf-condition-icon" onClick={() => this.handleRemoveConditionClick(ctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
-                        <small>{c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr}</small>
-          </td>
-          <td style={{ textAlign: "center" }} className={masterClass}>
-            {this.colorRadio(b, "Create", "#0099FF")}
+            <small>{c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr}</small>
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
             {this.colorRadio(b, "Modify", "green")}
@@ -300,7 +291,6 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         </tr>
       );
     }));
-
   }
 
   colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
@@ -394,7 +384,7 @@ function getUI(allowed: TypeAllowed): TypeAllowedBasic {
   return allowed as TypeAllowedBasic;
 }
 
-let values: TypeAllowedBasic[] = ["Create", "Modify", "Read", "None"];
+let values: TypeAllowedBasic[] = ["Modify", "Read", "None"];
 
 function combine(val1: TypeAllowedBasic, val2: TypeAllowedBasic): TypeAllowed {
 
