@@ -1420,7 +1420,9 @@ namespace Signum.Engine.Linq
                 if (!Has(exp))
                     return null;
 
-                acum = acum == null ? exp : Expression.Add(acum, exp, miSimpleConcat);
+                var coallesceExp = new SqlFunctionExpression(typeof(string), null, SqlFunction.COALESCE.ToString(), new[] { exp, new SqlConstantExpression("", typeof(string)) }); 
+
+                acum = acum == null ? (Expression)coallesceExp : Expression.Add(acum, coallesceExp, miSimpleConcat);
 
                 var nextStr = i == matches.Count - 1 ?
                     strFormat.Substring(match.EndIndex()) :
