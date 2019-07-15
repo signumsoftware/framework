@@ -12,6 +12,10 @@ declare global {
     dataForChildWindow?: any;
   }
 
+  interface RegExpConstructor {
+    escape(str: string): string;
+  }
+
   interface Array<T> {
     groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
@@ -996,6 +1000,9 @@ export function combineFunction<F extends Function>(func1?: F | null, func2?: F 
   } as any;
 }
 
+RegExp.escape = function (s: string) {
+  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 
 
 export function areEqual<T>(a: T | undefined, b: T | undefined, field: (value: T) => any): boolean {

@@ -58,7 +58,7 @@ export default class PinnedFilterBuilder extends React.Component<PinnedFilterBui
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => this.handleValueChange(f), labelText);
+    return createFilterValueControl(ctx, f.token!, () => this.handleValueChange(f), labelText, f.pinned!.disableOnNull);
   }
 
   timeoutWriteText?: number | null;
