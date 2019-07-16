@@ -79,7 +79,7 @@ namespace Signum.Engine.Mailing
                 {
                     if (er.UniqueTarget != null)
                     {
-                        ModifiableEntity entity = er.UniqueTarget.Retrieve();
+                        ModifiableEntity entity = er.UniqueTarget.RetrieveAndRemember();
 
                         if (er.ModelConverter != null)
                             entity = er.ModelConverter.Convert(entity);
@@ -94,7 +94,7 @@ namespace Signum.Engine.Mailing
                     }
                     else
                     {
-                        var qr = er.TargetsFromUserQuery!.Retrieve().ToQueryRequest();
+                        var qr = er.TargetsFromUserQuery!.RetrieveAndRemember().ToQueryRequest();
                         qr.Columns.Clear();
                         var result = QueryLogic.Queries.ExecuteQuery(qr);
 

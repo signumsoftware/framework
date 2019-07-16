@@ -524,7 +524,7 @@ namespace Signum.Engine.Translation
                         }
                         else if (o.TranslatedText != n.TranslatedText || o.OriginalText != n.OriginalText)
                         {
-                            var r = o.ToLite().Retrieve();
+                            var r = o.ToLite().RetrieveAndRemember();
                             r.OriginalText = n.OriginalText;
                             r.TranslatedText = n.TranslatedText;
                             r.Save();

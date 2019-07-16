@@ -153,7 +153,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     ctx.Progresses.Enqueue(ep);
 
                     if (ctx.StopTraining)
-                        p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
+                        p = ctx.Predictor = ctx.Predictor.ToLite().RetrieveAndRemember();
 
                     var isLast = numMinibatches - nn.BestResultFromLast <= i;
                     if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)

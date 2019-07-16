@@ -217,7 +217,7 @@ namespace Signum.Engine.Disconnected
 
         private void CopyExport(Lite<DisconnectedExportEntity> export, SqlConnector newDatabase)
         {
-            var clone = export.Retrieve().Clone();
+            var clone = export.RetrieveAndRemember().Clone();
 
             using (Connector.Override(newDatabase))
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))

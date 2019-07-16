@@ -241,7 +241,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
 
-            return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
+            return CaseFlowLogic.GetCaseFlow(lite.RetrieveAndRemember());
         }
 
         [HttpPost("api/workflow/activityMonitor")]

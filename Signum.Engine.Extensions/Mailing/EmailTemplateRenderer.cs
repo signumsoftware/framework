@@ -100,7 +100,7 @@ namespace Signum.Engine.Mailing
 
                 if (template.MasterTemplate != null)
                 {
-                    var emt = template.MasterTemplate.Retrieve();
+                    var emt = template.MasterTemplate.RetrieveAndRemember();
                     var emtm = emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
                         emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
 

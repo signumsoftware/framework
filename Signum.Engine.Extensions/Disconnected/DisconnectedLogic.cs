@@ -186,7 +186,7 @@ namespace Signum.Engine.Disconnected
                     CanConstruct = dm => dm.State.InState(DisconnectedMachineState.Faulted),
                     Construct = (dm, _) =>
                     {
-                        return ImportManager.BeginImportDatabase(dm, null).Retrieve();
+                        return ImportManager.BeginImportDatabase(dm, null).RetrieveAndRemember();
                     }
                 }.Register();
             }

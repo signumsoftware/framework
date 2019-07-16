@@ -30,7 +30,7 @@ namespace Signum.React.Rest
             {
                 using (AuthLogic.Disable())
                 {
-                    var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").User.Retrieve();
+                    var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").User.RetrieveAndRemember();
                     return new SignumAuthenticationResult { User = user };
                 }
             }

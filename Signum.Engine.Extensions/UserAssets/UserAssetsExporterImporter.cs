@@ -37,22 +37,22 @@ namespace Signum.Engine.UserAssets
 
             public Guid Include(Lite<IUserAssetEntity> content)
             {
-                return this.Include(content.Retrieve());
+                return this.Include(content.RetrieveAndRemember());
             }
 
             public string TypeToName(Lite<TypeEntity> type)
             {
-                return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.Retrieve()));
+                return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.RetrieveAndRemember()));
             }
             
             public string QueryToName(Lite<QueryEntity> query)
             {
-                return query.Retrieve().Key;
+                return query.RetrieveAndRemember().Key;
             }
 
             public string PermissionToName(Lite<PermissionSymbol> symbol)
             {
-                return symbol.Retrieve().Key;
+                return symbol.RetrieveAndRemember().Key;
             }
         }
 

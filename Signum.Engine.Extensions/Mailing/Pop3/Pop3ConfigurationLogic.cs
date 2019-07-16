@@ -359,7 +359,7 @@ namespace Signum.Engine.Mailing.Pop3
                             .Select(a => a.ToLite())
                             .FirstOrDefault();
 
-                        if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
+                        if (duplicate != null && AreDuplicates(email, duplicate.RetrieveAndRemember()))
                         {
                             var dup = duplicate.Entity;
 

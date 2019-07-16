@@ -65,7 +65,7 @@ namespace Signum.Engine.Files
                     {
                         if (!fp.IsNew)
                         {
-                            var ofp = fp.ToLite().Retrieve();
+                            var ofp = fp.ToLite().RetrieveAndRemember();
 
                             if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
                             {

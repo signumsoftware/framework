@@ -405,7 +405,7 @@ namespace Signum.Engine.Word
                 using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name)))
                 using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + template.Query.Key)))
                 {
-                    var file = template.Template.Retrieve();
+                    var file = template.Template.RetrieveAndRemember();
                     var oldHash = file.Hash;
                     try
                     {
@@ -478,7 +478,7 @@ namespace Signum.Engine.Word
 
         public static byte[] ProcessOpenXmlPackage(this WordTemplateEntity template, Action<OpenXmlPackage> processPackage)
         {
-            var file = template.Template!.Retrieve();
+            var file = template.Template!.RetrieveAndRemember();
 
             using (var memory = new MemoryStream())
             {
@@ -517,7 +517,7 @@ namespace Signum.Engine.Word
             if (newTemplate == null)
                 return null;
 
-            var file = template.Template!.Retrieve();
+            var file = template.Template!.RetrieveAndRemember();
 
             using (file.AllowChanges())
             {
