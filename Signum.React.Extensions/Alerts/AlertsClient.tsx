@@ -25,7 +25,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     queryName: AlertEntity,
     parentToken: AlertEntity.token(e => e.target),
     parentValue: ctx.lite
-  }, { isVisible: couldHaveAlerts(ctx.lite.EntityType), icon: "bell", iconColor: "orange" }));
+  }, { isVisible: couldHaveAlerts(ctx.lite.EntityType), icon: "bell", iconColor: "orange", isShy: true }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],
