@@ -155,7 +155,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
     <UncontrolledDropdown id="quickLinksWidget">
       <DropdownToggle tag="span" data-toggle="dropdown">
         <a
-          className={classes("badge badge-secondary badge-pill", "sf-widgets-active", "sf-quicklinks")}
+          className={classes("badge badge-pill", links && links.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
           title={TitleManager.useTitle ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
           role="button"
           href="#"
@@ -179,6 +179,7 @@ export interface QuickLinkOptions {
   order?: number;
   icon?: IconProp;
   iconColor?: string;
+  isShy?: boolean;
 }
 
 export abstract class QuickLink {
@@ -188,6 +189,7 @@ export abstract class QuickLink {
   name: string;
   icon?: IconProp;
   iconColor?: string;
+  isShy?: string;
 
   constructor(name: string, options?: QuickLinkOptions) {
     this.name = name;
