@@ -88,7 +88,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-        public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
+        public static T RetrieveAndRemember<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
@@ -99,7 +99,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return lite.EntityOrNull!;
         }
 
-        public static async Task<T> RetrieveAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
+        public static async Task<T> RetrieveAndRememberAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
