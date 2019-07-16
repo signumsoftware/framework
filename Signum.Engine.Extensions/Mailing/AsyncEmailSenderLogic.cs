@@ -132,7 +132,7 @@ namespace Signum.Engine.Mailing
                                                         {
                                                             using (Transaction tr = Transaction.ForceNew())
                                                             {
-                                                                var nm = email.ToLite().Retrieve();
+                                                                var nm = email.ToLite().RetrieveAndRemember();
                                                                 nm.SendRetries += 1;
                                                                 nm.State = EmailMessageState.ReadyToSend;
                                                                 nm.Save();

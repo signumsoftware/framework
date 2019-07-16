@@ -43,12 +43,12 @@ namespace Signum.Engine.Excel
 
             EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var finalEntity = ea.Related?.Retrieve() ?? (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity as Entity;
+                var finalEntity = ea.Related?.RetrieveAndRemember() ?? (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity as Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
                 {
-                    QueryRequest request = UserQueryLogic.ToQueryRequest(ea.UserQuery.Retrieve());
+                    QueryRequest request = UserQueryLogic.ToQueryRequest(ea.UserQuery.RetrieveAndRemember());
 
                     var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
                     var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);

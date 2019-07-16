@@ -362,7 +362,7 @@ namespace Signum.Engine.Scheduler
                         {
                             var pair = priorityQueue.Pop();
 
-                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.Retrieve());
+                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.RetrieveAndRemember());
 
                             pair.NextDate = pair.ScheduledTask.Rule.Next(now);
 
@@ -410,7 +410,7 @@ namespace Signum.Engine.Scheduler
 
         public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity? user)
         {
-            IUserEntity entityIUser = (user ?? (IUserEntity?)scheduledTask?.User.Retrieve())!;
+            IUserEntity entityIUser = (user ?? (IUserEntity?)scheduledTask?.User.RetrieveAndRemember())!;
 
             var isolation = entityIUser.TryIsolation();
             if (isolation == null)

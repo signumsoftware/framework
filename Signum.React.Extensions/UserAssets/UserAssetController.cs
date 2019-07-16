@@ -40,7 +40,7 @@ namespace Signum.React.UserAssets
             var qd = QueryLogic.Queries.QueryDescription(queryName);
             var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
 
-            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
+            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.RetrieveAndRemember()) : null)
             {
                 var result = ParseFilterInternal(request.filters, qd, options, 0).ToList();
 
@@ -199,7 +199,7 @@ namespace Signum.React.UserAssets
         [HttpPost("api/userAssets/export")]
         public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
         {
-            var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
+            var bytes = UserAssetsExporter.ToXml(lite.RetrieveAndRemember());
 
             return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
         }

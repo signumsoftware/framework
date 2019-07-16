@@ -169,7 +169,7 @@ namespace Signum.React.Selenium
         {
             var lite = lineContainer.EntityLine(property).GetLite();
 
-            return lite is V ? (V)lite : (V)(object)lite?.Retrieve()!;
+            return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
         }
 
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
@@ -191,7 +191,7 @@ namespace Signum.React.Selenium
         {
             var lite = lineContainer.EntityCombo(property).LiteValue;
             
-            return lite is V ? (V)lite : (V)(object)lite?.Retrieve()!;
+            return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
         }
 
         public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)

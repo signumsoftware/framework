@@ -169,7 +169,7 @@ namespace Signum.Engine.Mailing
                                 {
                                     using (Transaction tr = Transaction.ForceNew())
                                     {
-                                        var nm = m.ToLite().Retrieve();
+                                        var nm = m.ToLite().RetrieveAndRemember();
                                         nm.SendRetries += 1;
                                         nm.State = EmailMessageState.ReadyToSend;
                                         nm.Save();

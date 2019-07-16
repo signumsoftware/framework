@@ -71,7 +71,7 @@ namespace Signum.Engine.DiffLog
         private static Entity RetrieveFresh(Entity entity)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-                return entity.ToLite().Retrieve();
+                return entity.ToLite().RetrieveAndRemember();
         }
 
         public static MinMax<OperationLogEntity?> OperationLogNextPrev(OperationLogEntity log)

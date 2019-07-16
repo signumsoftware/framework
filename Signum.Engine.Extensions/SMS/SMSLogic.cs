@@ -375,7 +375,7 @@ namespace Signum.Engine.SMS
                 Construct = (t, args) =>
                 {
                     return SMSLogic.CreateSMSMessage(t.ToLite(),
-                        args.GetArg<Lite<Entity>>().Retrieve(),
+                        args.GetArg<Lite<Entity>>().RetrieveAndRemember(),
                         args.TryGetArgC<ISMSModel>(),
                         args.TryGetArgC<CultureInfo>());
                 }

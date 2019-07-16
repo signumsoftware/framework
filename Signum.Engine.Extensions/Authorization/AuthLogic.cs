@@ -144,10 +144,10 @@ namespace Signum.Engine.Authorization
 
                     DirectedGraph<RoleEntity> newRoles = new DirectedGraph<RoleEntity>();
 
-                    newRoles.Expand(role, r1 => r1.Roles.Select(a => a.Retrieve()));
+                    newRoles.Expand(role, r1 => r1.Roles.Select(a => a.RetrieveAndRemember()));
                     foreach (var r in Database.RetrieveAll<RoleEntity>())
                     {
-                        newRoles.Expand(r, r1 => r1.Roles.Select(a => a.Retrieve()));
+                        newRoles.Expand(r, r1 => r1.Roles.Select(a => a.RetrieveAndRemember()));
                     }
 
                     var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
@@ -169,7 +169,7 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache(EntityCacheType.ForceNewSealed))
                     foreach (var role in Database.RetrieveAll<RoleEntity>())
                     {
-                        newRoles.Expand(role.ToLite(), r => r.Retrieve().Roles);
+                        newRoles.Expand(role.ToLite(), r => r.RetrieveAndRemember().Roles);
                     }
 
                 var problems = newRoles.FeedbackEdgeSet().Edges.ToList();

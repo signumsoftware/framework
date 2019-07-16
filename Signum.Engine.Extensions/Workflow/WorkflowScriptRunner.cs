@@ -121,7 +121,7 @@ namespace Signum.Engine.Workflow
                                                 { 
                                                     try
                                                     {
-                                                        var ca = caseActivity.ToLite().Retrieve();
+                                                        var ca = caseActivity.ToLite().RetrieveAndRemember();
                                                         var retry = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.RetryStrategy;
                                                         var nextDate = retry?.NextDate(ca.ScriptExecution!.RetryCount);
                                                         if(nextDate == null)
