@@ -594,10 +594,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var rightButtons = ([
       ...(this.props.hideButtonBar ? [] : buttonBarElements),
 
-      !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
-      <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
-        <FontAwesomeIcon icon="external-link-alt" />
-      </button>
+      !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
+        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
+          <FontAwesomeIcon icon="external-link-alt" />
+        </button>
+      }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
