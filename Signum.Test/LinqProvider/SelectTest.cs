@@ -642,7 +642,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectRetrieve()
         {
-            var e = Assert.Throws<InvalidOperationException>(() => Database.Query<LabelEntity>().Select(l => l.Owner!.Retrieve()).ToList());
+            var e = Assert.Throws<InvalidOperationException>(() => Database.Query<LabelEntity>().Select(l => l.Owner!.RetrieveAndRemember()).ToList());
             Assert.Contains("not supported", e.Message);
         }
 

@@ -270,7 +270,7 @@ namespace Signum.Test.Environment
                 ToStates = { AlbumState.New },
                 Construct = (albumLites, _) =>
                 {
-                    List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                    List<AlbumEntity> albums = albumLites.Select(a => a.RetrieveAndRemember()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
                         throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
 
@@ -289,7 +289,7 @@ namespace Signum.Test.Environment
                 ToStates = { AlbumState.New },
                 Construct = (albumLites, _) =>
                 {
-                    List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                    List<AlbumEntity> albums = albumLites.Select(a => a.RetrieveAndRemember()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
                         throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
 
