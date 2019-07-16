@@ -84,7 +84,7 @@ namespace Signum.Engine.Authorization
             {
                 TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 
-                var requested = TypeAllowedBasic.Modify;
+                var requested = TypeAllowedBasic.Write;
 
                 var min = access.MinDB();
                 var max = access.MaxDB();
@@ -139,10 +139,10 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return new TypeAllowedAndConditions(TypeAllowed.Modify);
+                return new TypeAllowedAndConditions(TypeAllowed.Write);
 
             if (!TypeLogic.TypeToEntity.ContainsKey(type))
-                return new TypeAllowedAndConditions(TypeAllowed.Modify);
+                return new TypeAllowedAndConditions(TypeAllowed.Write);
 
             if (EnumEntity.Extract(type) != null)
                 return new TypeAllowedAndConditions(TypeAllowed.Read);
@@ -204,14 +204,14 @@ namespace Signum.Engine.Authorization
         public TypeAllowedAndConditions Merge(Type key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, TypeAllowedAndConditions>> baseValues)
         {
             if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-                return MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Modify, TypeAllowed.None);
+                return MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
             else
-                return MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Modify);
+                return MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
         }
 
         static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
         {
-            TypeAllowed result = TypeAllowed.Modify;
+            TypeAllowed result = TypeAllowed.Write;
 
             foreach (var item in collection)
             {
@@ -234,7 +234,7 @@ namespace Signum.Engine.Authorization
                 if (item > result)
                     result = item;
 
-                if (result == TypeAllowed.Modify)
+                if (result == TypeAllowed.Write)
                     return result;
 
             }
@@ -243,7 +243,7 @@ namespace Signum.Engine.Authorization
 
         public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleEntity> role)
         {
-            var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Modify : TypeAllowed.None);
+            var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Write : TypeAllowed.None);
             return new ConstantFunctionButEnums(taac).GetValue;
         }
 

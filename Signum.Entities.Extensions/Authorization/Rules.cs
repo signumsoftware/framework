@@ -98,7 +98,7 @@ namespace Signum.Entities.Authorization
     {
         None,
         Read,
-        Modify,
+        Write,
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
@@ -109,9 +109,9 @@ namespace Signum.Entities.Authorization
         DBReadUINone =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.None,
         Read =             TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
 
-        DBModifyUINone =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.None,
-        DBModifyUIRead =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Read,
-        Modify =           TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Modify
+        DBWriteUINone =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.None,
+        DBMWriteUIRead =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Read,
+        Write =           TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Write
     }
 
     public static class TypeAllowedExtensions
@@ -161,7 +161,7 @@ namespace Signum.Entities.Authorization
         {
             PropertyAllowed pa =
                 ta == TypeAllowedBasic.None ? PropertyAllowed.None :
-                ta == TypeAllowedBasic.Read ? PropertyAllowed.Read : PropertyAllowed.Modify;
+                ta == TypeAllowedBasic.Read ? PropertyAllowed.Read : PropertyAllowed.Write;
             return pa;
         }
     }
@@ -172,6 +172,6 @@ namespace Signum.Entities.Authorization
     {
         None = 0,
         Read = 1,
-        Modify = 2,
+        Write = 2,
     }
 }

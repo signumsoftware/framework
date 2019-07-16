@@ -58,7 +58,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
                 {PropertyRouteEntity.niceName()}
               </th>
               <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "Modify")}>{PropertyAllowed.niceToString("Modify")}</a>
+                <a onClick={e => this.handleHeaderClick(e, "Write")}>{PropertyAllowed.niceToString("Write")}</a>
               </th>
               <th style={{ textAlign: "center" }}>
                 <a onClick={e => this.handleHeaderClick(e, "Read")}>{PropertyAllowed.niceToString("Read")}</a>
@@ -78,7 +78,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
                   {c.value.resource.path}
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "Modify", "green")}
+                  {this.renderRadio(c.value, "Write", "green")}
                 </td>
                 <td style={{ textAlign: "center" }}>
                   {this.renderRadio(c.value, "Read", "#FFAD00")}

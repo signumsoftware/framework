@@ -139,7 +139,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   }
 
   PropertyRoute.prototype.canModify = function () {
-    return this.member != null && this.member.propertyAllowed == "Modify"
+    return this.member != null && this.member.propertyAllowed == "Write"
   }
 }
 
@@ -167,7 +167,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
       case "Read":
         state.ctx.readOnly = true;
         break;
-      case "Modify":
+      case "Write":
         break;
     }
   }
@@ -200,7 +200,7 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
 export function navigatorIsCreable(typeName: PseudoType) {
   const ti = getTypeInfo(typeName);
 
-  return ti == undefined || ti.typeAllowed == "Modify";
+  return ti == undefined || ti.typeAllowed == "Write";
 }
 
 export function currentUser(): UserEntity {

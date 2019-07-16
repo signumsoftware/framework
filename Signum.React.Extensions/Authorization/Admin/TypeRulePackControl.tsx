@@ -148,7 +148,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
               </th>
 
               <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Modify")}
+                {TypeAllowed.niceToString("Write")}
               </th>
               <th style={{ textAlign: "center" }}>
                 {TypeAllowed.niceToString("Read")}
@@ -232,7 +232,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
         </td>
         <td style={{ textAlign: "center" }} className={masterClass}>
-          {this.colorRadio(fallback, "Modify", "green")}
+          {this.colorRadio(fallback, "Write", "green")}
         </td>
         <td style={{ textAlign: "center" }}>
           {this.colorRadio(fallback, "Read", "#FFAD00")}
@@ -251,7 +251,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
           {this.link("edit", ctx.value.modified ? "Invalidated" : ctx.value.properties,
             () => API.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
             m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
-              m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
+              m.rules.every(a => a.element.allowed == "Write") ? "All" : "Mix"
           )}
         </td>}
         {operations && <td style={{ textAlign: "center" }}>
@@ -278,7 +278,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             <small>{c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr}</small>
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
-            {this.colorRadio(b, "Modify", "green")}
+            {this.colorRadio(b, "Write", "green")}
           </td>
           <td style={{ textAlign: "center" }}>
             {this.colorRadio(b, "Read", "#FFAD00")}
@@ -384,7 +384,7 @@ function getUI(allowed: TypeAllowed): TypeAllowedBasic {
   return allowed as TypeAllowedBasic;
 }
 
-let values: TypeAllowedBasic[] = ["Modify", "Read", "None"];
+let values: TypeAllowedBasic[] = ["Write", "Read", "None"];
 
 function combine(val1: TypeAllowedBasic, val2: TypeAllowedBasic): TypeAllowed {
 

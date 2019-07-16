@@ -48,7 +48,7 @@ function gradient(name: string) {
 function color(typeAllowedBasic: TypeAllowedBasic): string {
   switch (typeAllowedBasic) {
     case undefined: return "black";
-    case "Modify": return "green";
+    case "Write": return "green";
     case "Read": return "gold";
     case "None": return "red";
     default: throw new Error();

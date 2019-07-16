@@ -58,7 +58,7 @@ namespace Signum.React.Authorization
                     var typeAllowed =
                     UserEntity.Current == null ? TypeAllowedBasic.None :
                     ep.entity.IsNew ? TypeAuthLogic.GetAllowed(ep.entity.GetType()).MaxUI() :
-                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Modify, true) ? TypeAllowedBasic.Modify :
+                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Write, true) ? TypeAllowedBasic.Write :
                     TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
                     TypeAllowedBasic.None;
 

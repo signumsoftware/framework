@@ -113,7 +113,7 @@ namespace Signum.Engine.Authorization
                     using (Transaction tr = Transaction.ForceNew())
                     {
                         foreach (var gr in groups)
-                            miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+                            miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
 
                         tr.Commit();
                     }
@@ -121,7 +121,7 @@ namespace Signum.Engine.Authorization
                     //Assert after
                     foreach (var gr in groups)
                     {
-                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
                     }
                 }
 
@@ -133,7 +133,7 @@ namespace Signum.Engine.Authorization
 
                     //Assert after
                     foreach (var gr in groups)
-                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
                 }
             }
         }
@@ -306,12 +306,12 @@ namespace Signum.Engine.Authorization
             var taac = TypeAuthLogic.GetAllowed(ident.GetType());
 
             if (taac.Conditions.IsEmpty())
-                return taac.FallbackOrNone.GetDB() >= TypeAllowedBasic.Modify ? null : AuthAdminMessage.CanNotBeModified.NiceToString();
+                return taac.FallbackOrNone.GetDB() >= TypeAllowedBasic.Write ? null : AuthAdminMessage.CanNotBeModified.NiceToString();
 
             if (ident.IsNew)
                 return null;
 
-            return IsAllowedForDebug(ident, TypeAllowedBasic.Modify, false)?.CanBeModified;
+            return IsAllowedForDebug(ident, TypeAllowedBasic.Write, false)?.CanBeModified;
         }
 
         static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugEntity =
@@ -378,7 +378,7 @@ namespace Signum.Engine.Authorization
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
 
-            var tab = typeof(T) == IsDelete ? TypeAllowedBasic.Modify : TypeAllowedBasic.Read; 
+            var tab = typeof(T) == IsDelete ? TypeAllowedBasic.Write : TypeAllowedBasic.Read; 
 
             Expression body = IsAllowedExpression(e, tab, ui);
 
@@ -501,8 +501,8 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null!, TypeAllowedBasic.Modify, true, TypeAllowed.Modify, null!));
-        static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null!, true, TypeAllowed.Modify));
+        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null!, TypeAllowedBasic.Write, true, TypeAllowed.Write, null!));
+        static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null!, true, TypeAllowed.Write));
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity a) => a.ToLite()).GetGenericMethodDefinition();
 
         internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic requested, bool inUserInterface)
