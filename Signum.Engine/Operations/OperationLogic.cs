@@ -644,7 +644,7 @@ Consider the following options:
                 {
                     var operations = operationSymbols.Select(opKey => FindOperation(grLites.Key, opKey)).ToList();
 
-                    foreach (var grOperations in operations.GroupBy(a => a.GetType().GetGenericArguments().Let(arr=>Tuple.Create(arr[0], arr[1]))))
+                    foreach (var grOperations in operations.GroupBy(a => a.GetType().GetGenericArguments().Let(arr => Tuple.Create(arr[0], arr[1]))))
                     {
                         var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grOperations.Key.Item1, grOperations.Key.Item2)(grLites, grOperations);
                         if (result == null)

@@ -18,6 +18,11 @@ import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { bool } from "prop-types";
+export namespace Options {
+  export function maybeReadonly(ti: TypeInfo) {
+    return false;
+  }
+}
 
 export function start() {
   ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -157,6 +162,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
@@ -175,6 +181,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   text?: () => string;
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
@@ -189,6 +196,7 @@ export class ContextualOperationContext<T extends Entity> {
   settings?: ContextualOperationSettings<T>;
   entityOperationSettings?: EntityOperationSettings<T>;
   canExecute?: string;
+  isReadonly?: boolean;
   event?: React.MouseEvent<any>;
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
@@ -327,6 +335,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
@@ -356,6 +365,7 @@ export interface EntityOperationOptions<T extends Entity> {
   confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (ctx: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
@@ -572,6 +582,7 @@ export namespace API {
 
   export interface CanExecutesResponse {
     canExecutes: { [operationKey: string]: string };
+    isReadOnly?: boolean;
   }
 }
 

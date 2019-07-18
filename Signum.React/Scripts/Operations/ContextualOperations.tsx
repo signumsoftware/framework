@@ -12,6 +12,7 @@ import {
 } from '../Operations'
 import { DropdownItem } from "../Components/DropdownItem";
 import { UncontrolledTooltip } from "../Components/Tooltip";
+import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
@@ -107,24 +108,33 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     return undefined;
 
   let contextPromise: Promise<ContextualOperationContext<Entity>[]>;
-  if (ctx.lites.length == 1 && contexts.some(coc => coc.operationInfo.hasCanExecute)) {
-    contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
-      contexts.forEach(coc => coc.canExecute = ep.canExecute[coc.operationInfo.key]);
-      return contexts;
-    });
-  } else if (ctx.lites.length > 1 && contexts.some(coc => coc.operationInfo.hasStates)) {
-    contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates).map(a => a.operationInfo.key))
-      .then(response => {
-        contexts.forEach(coc => coc.canExecute = response.canExecutes[coc.operationInfo.key]);
+  if (contexts.some(coc => coc.operationInfo.hasCanExecute) || Operations.Options.maybeReadonly(ti)) {
+    if (ctx.lites.length == 1) {
+      contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
+        contexts.forEach(coc => {
+          coc.canExecute = ep.canExecute[coc.operationInfo.key];
+          coc.isReadonly = Navigator.isReadOnly(ep);
+        });
         return contexts;
       });
+    } else /*if (ctx.lites.length > 1)*/ {
+      contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates).map(a => a.operationInfo.key))
+        .then(response => {
+          contexts.forEach(coc => {
+            coc.canExecute = response.canExecutes[coc.operationInfo.key];
+            coc.isReadonly = response.isReadOnly;
+          });
+          return contexts;
+        });
+    }
   } else {
     contextPromise = Promise.resolve(contexts);
   }
 
-
   return contextPromise.then(ctxs => {
-    const menuItems = ctxs.filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+    const menuItems = ctxs
+      .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+      .filter(coc => !coc.isReadonly || showOnReadonly(coc))
       .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
         coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
       .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
@@ -150,6 +160,16 @@ function hideOnCanExecute(coc: ContextualOperationContext<Entity>) {
   return false;
 }
 
+
+function showOnReadonly(coc: ContextualOperationContext<Entity>) {
+  if (coc.settings && coc.settings.showOnReadOnly != undefined)
+    return coc.settings.showOnReadOnly;
+
+  if (coc.entityOperationSettings && coc.entityOperationSettings.showOnReadOnly != undefined)
+    return coc.entityOperationSettings.showOnReadOnly;
+
+  return false;
+}
 
 
 export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Promise<boolean> {
