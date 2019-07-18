@@ -107,7 +107,7 @@ namespace Signum.React.Filters
                 return HttpStatusCode.Forbidden;
 
             if (type == typeof(AuthenticationException))
-                return HttpStatusCode.Unauthorized;
+                return HttpStatusCode.Forbidden; // Unauthorized produces Login Password dialog in Mixed mode
 
             if (type == typeof(EntityNotFoundException))
                 return HttpStatusCode.NotFound;
