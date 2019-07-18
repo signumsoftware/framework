@@ -63,7 +63,9 @@ function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, ...ar
       return;
 
     API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-      Navigator.createNavigateOrTab(pack, coc.event!);
+      Navigator.createNavigateOrTab(pack, coc.event!)
+        .then(() => coc.context.markRows({}))
+        .done();
     }).done();
   }).done();
 
@@ -243,8 +245,9 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
           API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess || (pack => {
               notifySuccess();
-              coc.context.markRows({});
-              Navigator.createNavigateOrTab(pack, coc.event!);
+              Navigator.createNavigateOrTab(pack, coc.event!)
+                .then(() => coc.context.markRows({}))
+                .done();
             }))
             .done();
         } else {
