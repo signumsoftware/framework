@@ -252,10 +252,9 @@ export class EntityOperationContext<T extends Entity> {
   complete() {
     var s = this.settings;
     this.color = s && s.color || Defaults.getColor(this.operationInfo);
-    this.group = s && s.group && s.group !== undefined ? (s.group || undefined) : Defaults.getGroup(this.operationInfo);
+    this.group = s && s.group !== undefined ? (s.group || undefined) : Defaults.getGroup(this.operationInfo);
     this.keyboardShortcut = s && s.keyboardShortcut !== undefined ? (s.keyboardShortcut || undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
     this.alternatives = s && s.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
-
   }
 
   defaultClick(...args: any[]) {
