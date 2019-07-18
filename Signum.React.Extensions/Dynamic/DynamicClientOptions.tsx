@@ -50,7 +50,6 @@ export namespace Options {
 function HighlightText({ text, search, type }: { text: string, search: string, type: FormatColumnType }) {
 
   var searchParts = search.split(/\s+/).orderBy(a => a.length).map(p => new RegExp(RegExp.escape(p), "gi"));
-  debugger;
   if (type == "JSon")
     text = JSON.stringify(JSON.parse(text), undefined, 2);
 

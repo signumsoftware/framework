@@ -93,7 +93,6 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
   }
 
   handleViewNameChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
-    debugger;
     this.props.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
     this.fillViewProps();
   };
