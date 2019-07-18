@@ -234,7 +234,7 @@ export const PropertyAllowed = new EnumType<PropertyAllowed>("PropertyAllowed");
 export type PropertyAllowed =
   "None" |
   "Read" |
-  "Modify";
+  "Write";
 
 export const PropertyAllowedRule = new Type<PropertyAllowedRule>("PropertyAllowedRule");
 export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
@@ -356,13 +356,9 @@ export type TypeAllowed =
   "None" |
   "DBReadUINone" |
   "Read" |
-  "DBModifyUINone" |
-  "DBModifyUIRead" |
-  "Modify" |
-  "DBCreateUINone" |
-  "DBCreateUIRead" |
-  "DBCreateUIModify" |
-  "Create";
+  "DBWriteUINone" |
+  "DBMWriteUIRead" |
+  "Write";
 
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
@@ -375,8 +371,7 @@ export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic
 export type TypeAllowedBasic =
   "None" |
   "Read" |
-  "Modify" |
-  "Create";
+  "Write";
 
 export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {

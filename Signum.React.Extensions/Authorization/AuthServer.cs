@@ -13,6 +13,8 @@ using Signum.Services;
 using Signum.Engine.Authorization;
 using Signum.React.Maps;
 using Microsoft.AspNetCore.Builder;
+using Signum.React.ApiControllers;
+using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -47,7 +49,8 @@ namespace Signum.React.Authorization
                     {
                         var ta = UserEntity.Current != null ? TypeAuthLogic.GetAllowed(t) : null;
 
-                        ti.Extension.Add("typeAllowed", ta == null ? TypeAllowedBasic.None : ta.MaxUI());
+                        ti.Extension.Add("maxTypeAllowed", ta == null ? TypeAllowedBasic.None : ta.MaxUI());
+                        ti.Extension.Add("minTypeAllowed", ta == null ? TypeAllowedBasic.None : ta.MinUI());
                         ti.RequiresEntityPack |= ta != null && ta.Conditions.Any();
                     }
                 };
@@ -58,11 +61,27 @@ namespace Signum.React.Authorization
                     var typeAllowed =
                     UserEntity.Current == null ? TypeAllowedBasic.None :
                     ep.entity.IsNew ? TypeAuthLogic.GetAllowed(ep.entity.GetType()).MaxUI() :
-                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Modify, true) ? TypeAllowedBasic.Modify :
+                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Write, true) ? TypeAllowedBasic.Write :
                     TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
                     TypeAllowedBasic.None;
 
                     ep.extension.Add("typeAllowed", typeAllowed);
+                };
+
+                OperationController.AnyReadonly += (Lite<Entity>[] lites) =>
+                {
+                    return lites.GroupBy(ap => ap.EntityType).Any(gr =>
+                    {
+                        var ta = TypeAuthLogic.GetAllowed(gr.Key);
+
+                        if (ta.Min(inUserInterface: true) == TypeAllowedBasic.Write)
+                            return false;
+
+                        if (ta.Max(inUserInterface: true) <= TypeAllowedBasic.Read)
+                            return true;
+
+                        return giCountReadonly.GetInvoker(gr.Key)() > 0;
+                    });
                 };
             }
 
@@ -149,6 +168,12 @@ namespace Signum.React.Authorization
                 };
 
             SchemaMap.GetColorProviders += GetMapColors;
+        }
+
+        static GenericInvoker<Func<int>> giCountReadonly = new GenericInvoker<Func<int>>(() => CountReadonly<Entity>());
+        public static int CountReadonly<T>() where T : Entity
+        {
+            return Database.Query<T>().Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true));
         }
 
         public static void OnUserPreLogin(ActionContext ac, UserEntity user)

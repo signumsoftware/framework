@@ -36,7 +36,6 @@ export function start(options: {
   sendEmailTask: boolean,
   contextual: boolean,
   queryButton: boolean,
-  quickLinksFrom: PseudoType[] | undefined
 }) {
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
@@ -96,15 +95,6 @@ export function start(options: {
   if (options.pop3Config) {
     Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => import('./Pop3/Pop3Configuration')));
     Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => import('./Pop3/Pop3Reception')));
-  }
-
-  if (options.quickLinksFrom) {
-    QuickLinks.registerGlobalQuickLink(ctx => {
-      if (options.quickLinksFrom!.some(e => getTypeName(e) == ctx.lite.EntityType))
-        return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentToken: EmailMessageEntity.token(e => e.target), parentValue: ctx.lite });
-
-      return undefined;
-    });
   }
 
   if (options.contextual)

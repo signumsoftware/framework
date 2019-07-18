@@ -260,7 +260,7 @@ namespace Signum.Engine.Authorization
 
         static OperationAllowed GetDefault((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role)
         {
-            return OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+            return OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Write, t => TypeAuthLogic.GetAllowed(role, t));
         }
 
         static OperationAllowed Max(IEnumerable<OperationAllowed> baseValues)
