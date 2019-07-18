@@ -210,8 +210,10 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     const pack = this.state.pack;
 
+    var settings = pack && Navigator.getSettings(pack.entity.Type);
+
     return (
-      <Modal size={this.props.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
+      <Modal size={this.props.modalSize || settings && settings.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
         <ModalHeaderButtons
           onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
           onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}

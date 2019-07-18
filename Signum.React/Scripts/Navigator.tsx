@@ -778,6 +778,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
+  modalSize?: BsSize;
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
   getViewPromise?: (entity: T) => ViewPromise<T>;
@@ -796,6 +797,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
   avoidPopup!: boolean;
+  modalSize?: BsSize;
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
 
