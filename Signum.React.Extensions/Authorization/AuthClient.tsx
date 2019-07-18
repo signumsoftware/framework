@@ -99,7 +99,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.isCreableEvent.push(navigatorIsCreable);
     Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
     Navigator.isViewableEvent.push(navigatorIsViewable);
-
+    Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
@@ -182,7 +182,7 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   if (entityPack && entityPack.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
 
-  return ti.typeAllowed == "None" || ti.typeAllowed == "Read";
+  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed== "Read";
 }
 
 export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
@@ -194,13 +194,13 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
   if (entityPack && entityPack.typeAllowed)
     return entityPack.typeAllowed != "None";
 
-  return ti.typeAllowed != "None";
+  return ti.maxTypeAllowed != "None";
 }
 
 export function navigatorIsCreable(typeName: PseudoType) {
   const ti = getTypeInfo(typeName);
 
-  return ti == undefined || ti.typeAllowed == "Write";
+  return ti == undefined || ti.maxTypeAllowed == "Write";
 }
 
 export function currentUser(): UserEntity {
@@ -521,7 +521,8 @@ export module API {
 declare module '@framework/Reflection' {
 
   export interface TypeInfo {
-    typeAllowed: TypeAllowedBasic;
+    minTypeAllowed: TypeAllowedBasic;
+    maxTypeAllowed: TypeAllowedBasic;
     queryAllowed: QueryAllowed;
   }
 
