@@ -9,7 +9,7 @@ namespace Signum.Entities.Files
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
     public class FilePathEntity : LockableEntity, IFile, IFilePath
     {
-        public static string ForceExtensionIfEmpty = ".dat";
+        public static string? ForceExtensionIfEmpty = ".dat";
 
         public FilePathEntity() { }
 

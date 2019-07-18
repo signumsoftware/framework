@@ -8,7 +8,7 @@ namespace Signum.Entities.Files
     [Serializable]
     public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     {
-        public static string ForceExtensionIfEmpty = ".dat";
+        public static string? ForceExtensionIfEmpty = ".dat";
 
         public FilePathEmbedded() { }
 
