@@ -113,6 +113,11 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column))));
         }
 
+        public static SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateOldColumn(column)));
+        }
+
         public static bool IsNumber(SqlDbType sqlDbType)
         {
             switch (sqlDbType)
@@ -198,6 +203,26 @@ namespace Signum.Engine
             }
         }
 
+        public static string CreateOldColumn(DiffColumn c)
+        {
+            string fullType = GetColumnType(c);
+
+            var generatedAlways = c.GeneratedAlwaysType != GeneratedAlwaysType.None ?
+                $"GENERATED ALWAYS AS ROW {(c.GeneratedAlwaysType == GeneratedAlwaysType.AsRowStart ? "START" : "END")} HIDDEN" :
+                null;
+
+            var defaultConstraint = c.DefaultConstraint!= null ? $"CONSTRAINT {c.DefaultConstraint.Name} DEFAULT " + c.DefaultConstraint.Definition : null;
+
+            return $" ".Combine(
+                c.Name.SqlEscape(),
+                fullType,
+                c.Identity ? "IDENTITY " : null,
+                generatedAlways,
+                c.Collation != null ? ("COLLATE " + c.Collation) : null,
+                c.Nullable ? "NULL" : "NOT NULL",
+                defaultConstraint
+                );
+        }
 
         public static string CreateColumn(IColumn c, DefaultConstraint? constraint)
         {
@@ -223,6 +248,11 @@ namespace Signum.Engine
         public static string GetColumnType(IColumn c)
         {
             return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
+        }
+
+        public static string GetColumnType(DiffColumn c)
+        {
+            return (c.SqlDbType == SqlDbType.Udt ? c.UserTypeName! : c.SqlDbType.ToString().ToUpper()) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
         }
 
         public static string Quote(SqlDbType type, string @default)

@@ -82,7 +82,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var mli = this.GetMListInfo(t);
             if (mli != null)
-                return this.GetFileName(this.Tables.GetOrThrow(mli.BackReferenceColumn.ForeignKey.TargetTable));
+                return this.GetFileName(this.Tables.GetOrThrow(mli.BackReferenceColumn.ForeignKey!.TargetTable));
 
             string name = t.Name.ToString().Replace('.', '\\');
 
@@ -144,7 +144,7 @@ namespace Signum.Engine.CodeGeneration
                 (from t in tables
                  from c in t.Columns.Values
                  where c.ForeignKey != null
-                 let targetTable = Tables.GetOrThrow(c.ForeignKey.TargetTable)
+                 let targetTable = Tables.GetOrThrow(c.ForeignKey!.TargetTable)
                  select GetNamespace(GetFileName(targetTable)));
 
             var mListNamespaces =
@@ -325,7 +325,7 @@ namespace Signum.Engine.CodeGeneration
         {
             return from relatedTable in InverseGraph.RelatedTo(table)
                    let mListInfo2 = GetMListInfo(relatedTable)
-                   where mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey.TargetTable.Equals(table.Name)
+                   where mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey!.TargetTable.Equals(table.Name)
                    select KVP.Create(relatedTable, mListInfo2);
         }
 
@@ -467,7 +467,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual DiffColumn? GetMListParentColumn(DiffTable table)
         {
-            return table.Columns.Values.Where(c => c.ForeignKey != null && c.Nullable == false && table.Name.Name.StartsWith(c.ForeignKey.TargetTable.Name)).OrderByDescending(a => a.ForeignKey.TargetTable.Name.Length).FirstOrDefault();
+            return table.Columns.Values.Where(c => c.ForeignKey != null && c.Nullable == false && table.Name.Name.StartsWith(c.ForeignKey.TargetTable.Name)).OrderByDescending(a => a.ForeignKey!.TargetTable.Name.Length).FirstOrDefault();
         }
         protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table)
         {
@@ -780,7 +780,7 @@ namespace Signum.Engine.CodeGeneration
         {
             if (relatedEntity != null)
             {
-                if (IsEnum(Tables.GetOrThrow(col.ForeignKey.TargetTable)))
+                if (IsEnum(Tables.GetOrThrow(col.ForeignKey!.TargetTable)))
                     return col.Nullable ? relatedEntity + "?" : relatedEntity;
 
                 return IsLite(table, col) ? "Lite<" + relatedEntity + ">" : relatedEntity;
