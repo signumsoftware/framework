@@ -149,7 +149,7 @@ ${childrenString}
     return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr || "") + ")" };
   }
 
-  getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
+  getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, filterRows?: boolean }): any/*: EntityBaseProps Expr*/ {
 
     var result: any /*EntityBaseProps*/ = {
       ctx: this.subCtxCode(node.field, node.styleOptions),
@@ -180,6 +180,9 @@ ${childrenString}
 
     if (options.showMove)
       result.move = (node as EntityListBaseNode).move;
+
+    if (options.filterRows)
+      result.filterRows = (node as EntityListBaseNode).filterRows;
 
     return result;
   }
@@ -742,7 +745,7 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
   return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean }): EntityBaseProps {
+export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): EntityBaseProps {
 
   var result: EntityBaseProps = {
     ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions)),
@@ -778,6 +781,9 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
   if (options.showMove)
     (result as any).move = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull);
 
+  if (options.filterRows)
+    (result as any).filterRows = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.filterRows, isFunctionOrNull);
+
   return result;
 }
 
@@ -791,7 +797,7 @@ export function getGetComponent(dn: DesignerNode<ContainerNode>) {
   return (ctxe: TypeContext<ModifiableEntity>) => withChildrens(dn, ctxe, <div />);
 }
 
-export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, isEntityLine?: boolean }) {
+export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, isEntityLine?: boolean, filterRows?: boolean }) {
 
   const m = dn.route && dn.route.member;
 
@@ -820,6 +826,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
       {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} exampleExpression={"new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], requiresInitialLoad: false, showType: false)"} />}
       <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
+      {options.filterRows && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityListBaseNode).filterRows)} type={null} defaultValue={null} exampleExpression={"ctxs => ctxs.filter(ctx => ctx.value.code != null)"} />}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
     </div>
   );
