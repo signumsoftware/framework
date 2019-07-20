@@ -380,12 +380,15 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
 
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
   return loadNodes().then(nodes =>
-    Navigator.API.getType(typeName).then(t =>
-      Constructor.construct(DynamicViewEntity, {
-        entityType: t!,
-        viewName: "My View",
-        viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
-    }).then(dv => dv!)));
+    Navigator.API.getType(typeName).then(t => DynamicViewEntity.New({
+      entityType: t!,
+      viewName: "My View",
+      locals: `{
+  const forceUpdate = modules.Hooks.useForceUpdate(0);
+  return { forceUpdate };
+}`,
+      viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
+    })));
 }
 
 export function loadNodes(): Promise<typeof Nodes> {

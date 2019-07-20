@@ -959,6 +959,7 @@ NodeUtils.register<EnumCheckboxListNode>({
 export interface EntityListBaseNode extends EntityBaseNode {
   move?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
   onFindMany?: Expression<() => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined>;
+  filterRows?: Expression<(ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[]>;
 }
 
 export interface EntityCheckboxListNode extends EntityListBaseNode {
@@ -977,18 +978,18 @@ NodeUtils.register<EntityCheckboxListNode>({
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityCheckboxList", {
-    ...cc.getEntityBasePropsEx(node, { showMove: false }),
+    ...cc.getEntityBasePropsEx(node, { showMove: false, filterRows: true }),
     columnCount: node.columnCount,
     columnWidth: node.columnWidth,
     avoidFieldSet: node.avoidFieldSet,
   }),
-  render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false })}
+  render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false, filterRows: true })}
     columnCount={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
     columnWidth={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
   />),
   renderDesigner: dn => <div>
-    {NodeUtils.designEntityBase(dn, {})}
+    {NodeUtils.designEntityBase(dn, { filterRows: true })}
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
@@ -1008,9 +1009,9 @@ NodeUtils.register<EntityListNode>({
   hasCollection: true,
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
-  renderCode: (node, cc) => cc.elementCode("EntityList", cc.getEntityBasePropsEx(node, { findMany: true, showMove: true })),
-  render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true })} />),
-  renderDesigner: dn => NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })
+  renderCode: (node, cc) => cc.elementCode("EntityList", cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true })),
+  render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })} />),
+  renderDesigner: dn => NodeUtils.designEntityBase(dn, { findMany: true, showMove: true, filterRows: true })
 });
 
 
@@ -1031,18 +1032,18 @@ NodeUtils.register<EntityStripNode>({
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityStrip", {
-    ...cc.getEntityBasePropsEx(node, { showAutoComplete: true, findMany: true, showMove: true }),
+    ...cc.getEntityBasePropsEx(node, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true }),
     iconStart: node.iconStart,
     vertical: node.vertical,
   }),
   render: (dn, ctx) => (<EntityStrip
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true })}
+    {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true })}
     iconStart={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.iconStart, NodeUtils.isBooleanOrNull)}
     vertical={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
   />),
   renderDesigner: dn =>
     <div>
-      {NodeUtils.designEntityBase(dn, { showAutoComplete: true, findMany: true, showMove: true })}
+      {NodeUtils.designEntityBase(dn, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true })}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconStart)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.vertical)} type="boolean" defaultValue={false} />
     </div>
@@ -1063,14 +1064,14 @@ NodeUtils.register<EntityRepeaterNode>({
   hasCollection: true,
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
-  renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true }), avoidFieldSet: node.avoidFieldSet }),
+  renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true }), avoidFieldSet: node.avoidFieldSet }),
   render: (dn, ctx) => (<EntityRepeater
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true })}
+    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
   />),
   renderDesigner: dn =>
     <div>
-      {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
+      {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true, filterRows: true })}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
     </div>
 });
@@ -1089,13 +1090,13 @@ NodeUtils.register<EntityTabRepeaterNode>({
   hasCollection: true,
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
-  renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true }), avoidFieldSet: node.avoidFieldSet }),
+  renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true }), avoidFieldSet: node.avoidFieldSet }),
   render: (dn, ctx) => (<EntityTabRepeater
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true })}
+    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
   renderDesigner: dn =>
     <div>
-      {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
+      {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true, filterRows: true })}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
     </div>
 });
@@ -1118,7 +1119,7 @@ NodeUtils.register<EntityTableNode>({
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityTable", {
-    ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, avoidGetComponent: true }),
+    ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true }),
     avoidFieldSet: node.avoidFieldSet,
     scrollable: node.scrollable,
     maxResultsHeight: node.maxResultsHeight,
@@ -1126,7 +1127,7 @@ NodeUtils.register<EntityTableNode>({
   }),
   render: (dn, ctx) => (<EntityTable
     columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true })}
+    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
     scrollable={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.scrollable, NodeUtils.isBooleanOrNull)}
     maxResultsHeight={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
@@ -1134,7 +1135,7 @@ NodeUtils.register<EntityTableNode>({
 
   renderDesigner: dn =>
     <div>
-      {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
+      {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true, filterRows: true })}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.scrollable)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxResultsHeight)} type={null} defaultValue={null} />
