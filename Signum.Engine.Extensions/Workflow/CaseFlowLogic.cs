@@ -102,8 +102,21 @@ namespace Signum.Engine.Workflow
                     };
                 }).ToList();
 
-      
+            var isInPrevious = caseActivities.Values.Select(a => a.PreviousActivity).ToHashSet();
 
+
+            connections.AddRange(caseActivities.Values
+                .Where(c => c.DoneDate.HasValue && !isInPrevious.Contains(c.CaseActivity))
+                .Select(c =>
+                {
+                    var from = gr.GetNode(c.WorkflowActivity);
+                    var nextConnection = gr.NextConnections(from).SingleEx(a => c.DoneType == DoneType.ScriptFailure ? a.Type == ConnectionType.ScriptException : a.Type != ConnectionType.ScriptException);
+                    if (gr.IsParallelGateway(nextConnection.To, WorkflowGatewayDirection.Join))
+                        return new CaseConnectionStats().WithConnection(nextConnection).WithDone(c);
+
+                    return null;
+
+                }).NotNull());
            
             var firsts = caseActivities.Values.Where(a => (a.PreviousActivity == null || !caseActivities.ContainsKey(a.PreviousActivity)));
             foreach (var f in firsts)

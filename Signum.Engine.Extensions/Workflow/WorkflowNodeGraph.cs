@@ -418,7 +418,7 @@ namespace Signum.Engine.Workflow
             return type == ConnectionType.Approve || type == ConnectionType.Decline;
         }
 
-        private bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
+        public bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
         {
             var gateway = a as WorkflowGatewayEntity;
 

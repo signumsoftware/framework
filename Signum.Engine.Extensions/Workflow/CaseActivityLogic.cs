@@ -1184,7 +1184,7 @@ namespace Signum.Engine.Workflow
                             }
                             else //if (gateway.Direction == WorkflowGatewayDirection.Join)
                             {
-                                if (!AllTrackCompleted(0, gateway, ctx))
+                                if (!AllTrackCompleted(0, gateway, ctx, new HashSet<IWorkflowNodeEntity>()))
                                     return false;
 
                                 var singleConnection = gateway.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
@@ -1209,7 +1209,13 @@ namespace Signum.Engine.Workflow
                     return null;
             }
 
-            private static bool AllTrackCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
+            public static IDisposable Visiting(HashSet<IWorkflowNodeEntity> visited, IWorkflowNodeEntity node)
+            {
+                visited.Add(node);
+                return new Disposable(() => visited.Remove(node));
+            }
+
+            private static bool AllTrackCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx, HashSet<IWorkflowNodeEntity> visited)
             {
                 if (node is WorkflowActivityEntity || node is WorkflowEventEntity we && we.Type == WorkflowEventType.IntermediateTimer)
                 {
@@ -1218,8 +1224,12 @@ namespace Signum.Engine.Workflow
                     if (completed.HasValue)
                         return completed.Value;
 
+                    if (visited.Contains(node))
+                        return false;
+
                     var previous = node.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                    return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+                    using (Visiting(visited, node))
+                        return previous.Any(wn => AllTrackCompleted(depth, wn, ctx, visited));
                 }
                 if (node is WorkflowEventEntity e && (e.Type == WorkflowEventType.BoundaryForkTimer || e.Type == WorkflowEventType.BoundaryInterruptingTimer))
                 {
@@ -1229,17 +1239,24 @@ namespace Signum.Engine.Workflow
 
                     if (completed.HasValue)
                         return completed.Value;
-                    
-                    var previous = parentActivity.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                    if (parentActivity.BoundaryTimers.Any(a => a.Type == WorkflowEventType.BoundaryForkTimer))
-                    {
-                        if (depth <= 1)
-                            return true;
 
-                        return previous.Any(wn => AllTrackCompleted(depth - 1, wn, ctx));
+
+                    if (visited.Contains(parentActivity))
+                        return false;
+
+                    using (Visiting(visited, parentActivity))
+                    {
+                        var previous = parentActivity.PreviousConnectionsFromCache().Select(a => a.From).ToList();
+                        if (parentActivity.BoundaryTimers.Any(a => a.Type == WorkflowEventType.BoundaryForkTimer))
+                        {
+                            if (depth <= 1)
+                                return true;
+
+                            return previous.Any(wn => AllTrackCompleted(depth - 1, wn, ctx, visited));
+                        }
+                        else
+                            return previous.Any(wn => AllTrackCompleted(depth, wn, ctx, visited));
                     }
-                    else
-                        return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
 
                 }
                 else if (node is WorkflowGatewayEntity g)
@@ -1247,17 +1264,16 @@ namespace Signum.Engine.Workflow
                     if (g.Direction == WorkflowGatewayDirection.Split)
                     {
                         var from = g.PreviousConnectionsFromCache().Select(a => a.From).SingleEx();
-
                         switch (g.Type)
                         {
                             case WorkflowGatewayType.Exclusive:
-                                return AllTrackCompleted(depth, from, ctx);
+                                return AllTrackCompleted(depth, from, ctx, visited);
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
                                 if (depth <= 1)
                                     return true;
 
-                                return AllTrackCompleted(depth - 1, from, ctx);
+                                return AllTrackCompleted(depth - 1, from, ctx, visited);
                             default:
                                 throw new UnexpectedValueException(g.Type);
                         }
@@ -1269,10 +1285,10 @@ namespace Signum.Engine.Workflow
                         switch (g.Type)
                         {
                             case WorkflowGatewayType.Exclusive:
-                                return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+                                return previous.Any(wn => AllTrackCompleted(depth, wn, ctx, visited));
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
-                                return previous.All(wn => AllTrackCompleted(depth + 1, wn, ctx));
+                                return previous.All(wn => AllTrackCompleted(depth + 1, wn, ctx, visited));
                             default:
                                 throw new UnexpectedValueException(g.Type);
 
