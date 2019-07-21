@@ -392,8 +392,15 @@ namespace Signum.Entities.Dynamic
         {
             [JsonProperty(PropertyName = "disabled", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public bool Disabled;
-        }
 
+            public override string? ExtraArguments()
+            {
+                return new string?[]
+                {
+                    Disabled ? "Disabled=true" : null,
+                }.NotNull().ToString(", ");
+            }
+        }
 
         public class StringLength : DynamicValidator
         {
