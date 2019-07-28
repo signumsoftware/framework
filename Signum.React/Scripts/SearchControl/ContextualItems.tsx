@@ -3,6 +3,7 @@ import { QueryDescription, } from '../FindOptions'
 import { Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
 import { DropdownItem } from '../Components';
+import { StyleContext } from '../TypeContext';
 
 export interface MenuItemBlock {
   header: string;
@@ -14,6 +15,7 @@ export interface ContextualItemsContext<T extends Entity> {
   queryDescription: QueryDescription;
   markRows: (dictionary: MarkedRowsDictionary) => void;
   container?: SearchControlLoaded | React.Component<any, any>;
+  styleContext?: StyleContext;
 }
 
 export interface MarkedRowsDictionary {
