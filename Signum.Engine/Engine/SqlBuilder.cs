@@ -33,7 +33,7 @@ namespace Signum.Engine
 
             var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
 
-            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, GetDefaultConstaint(t, c)))
+            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, GetDefaultConstaint(t, c), isChange: false))
                 .And(primaryKeyConstraint)
                 .And(systemPeriod)
                 .NotNull()
@@ -110,7 +110,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint? tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column))));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
         }
 
         public static SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
@@ -167,7 +167,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null, isChange: true)));
 
             if (column.Default == null)
                 return alterColumn;
@@ -224,7 +224,7 @@ namespace Signum.Engine
                 );
         }
 
-        public static string CreateColumn(IColumn c, DefaultConstraint? constraint)
+        public static string CreateColumn(IColumn c, DefaultConstraint? constraint, bool isChange)
         {
             string fullType = GetColumnType(c);
 
@@ -237,7 +237,7 @@ namespace Signum.Engine
             return $" ".Combine(
                 c.Name.SqlEscape(),
                 fullType,
-                c.Identity ? "IDENTITY " : null, 
+                c.Identity && !isChange ? "IDENTITY " : null, 
                 generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
                 c.Nullable.ToBool() ? "NULL" : "NOT NULL",
@@ -543,9 +543,9 @@ FROM {1} as [table]".FormatWith(
             return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".FormatWith(schemaName.Name.SqlEscape(), oldName));
         }
 
-        public static SqlPreCommand RenameColumn(ITable table, string oldName, string newName)
+        public static SqlPreCommand RenameColumn(ObjectName tableName, string oldName, string newName)
         {
-            return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "COLUMN");
+            return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "COLUMN");
         }
 
         public static SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)

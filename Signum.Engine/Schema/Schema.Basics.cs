@@ -35,6 +35,8 @@ namespace Signum.Engine.Maps
         void GenerateColumns();
 
         SystemVersionedInfo? SystemVersioned { get; }
+
+        FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
     }
 
     public class SystemVersionedInfo
@@ -283,6 +285,11 @@ namespace Signum.Engine.Maps
             return this.Fields.Values.Concat(
                 this.Mixins == null ? Enumerable.Empty<EntityField>() :
                 this.Mixins.Values.SelectMany(fm => fm.Fields.Values));
+        }
+
+        public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
         }
     }
 
@@ -653,6 +660,13 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<TableMList> TablesMList()
         {
             return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList());
+        }
+
+        internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            var subHasValue = this.EmbeddedFields.Select(a => a.Value).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+
+            return subHasValue ?? (this.Columns().Contains(column) ? this.HasValue : null);
         }
     }
 
@@ -1112,6 +1126,7 @@ namespace Signum.Engine.Maps
                 Type = type;
                 Name = name;
             }
+
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
@@ -1151,7 +1166,7 @@ namespace Signum.Engine.Maps
         {
             List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference };
 
-            if(Order != null)
+            if (Order != null)
                 cols.Add(Order);
 
             cols.AddRange(Field.Columns());
@@ -1164,8 +1179,12 @@ namespace Signum.Engine.Maps
 
         public List<Index> GeneratAllIndexes()
         {
-            var result = BackReference.GenerateIndexes(this).ToList();
+            var result = new List<Index>
+            {
+                new PrimaryClusteredIndex(this)
+            };
 
+            result.AddRange(BackReference.GenerateIndexes(this));
             result.AddRange(Field.GenerateIndexes(this));
 
             if (MultiColumnIndexes != null)
@@ -1178,7 +1197,7 @@ namespace Signum.Engine.Maps
         {
             Field? result = TryGetField(member);
 
-            if(result  == null)
+            if (result == null)
                 throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
 
             return result;
@@ -1219,6 +1238,14 @@ namespace Signum.Engine.Maps
         public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             return this.Field.GetTables();
+        }
+
+        public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            if (this.Field is FieldEmbedded f)
+                return f.GetHasValueColumn(column);
+
+            return null;
         }
     }
 }

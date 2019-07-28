@@ -262,9 +262,11 @@ namespace Signum.Engine
 
             while (oldOnly.Count > 0 && newOnly.Count > 0)
             {
-                var old = distances.WithMin(kvp => kvp.Value.Values.Min());
+                var oldDist = distances.WithMin(kvp => kvp.Value.Values.Min());
 
-                Selection selection = SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
+                var alternatives = oldDist.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList();
+
+                Selection selection = SelectInteractive(oldDist.Key, alternatives, replacementsKey, Interactive);
 
                 oldOnly.Remove(selection.OldValue);
                 distances.Remove(selection.OldValue);
