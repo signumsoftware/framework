@@ -458,6 +458,7 @@ export function ModulesHelp(p: {cleanName: string}) {
   modules["numbro"] = "";
   modules["moment"] = `modules.moment(dateValue1).diff(modules.moment(dateValue2), "days");
 moment(dateValue).fromNow();
+ctx.value.applyDate = modules.moment.format();
 modules.moment().format("L LT"); /* "2019/06/25 14:21", other formats are:  L LL LLL LLLL */
 moment("date string");
 
