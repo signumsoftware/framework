@@ -325,3 +325,13 @@ ul.sf-context-menu li a:not([disabled]) {
 .sf-query-token-part .rw-list-empty, .rw-list-option, .rw-list-optgroup {
     padding: 0 .5em;
 }
+
+.sf-hide-group-button{
+    font-weight: bold;
+    color: dimgray;
+}
+
+.sf-show-group-button {
+    font-weight: bold;
+    color: black;
+}

@@ -915,6 +915,8 @@ export class TokenCompleter {
         value: fo.value,
         pinned: fo.pinned && { ...fo.pinned },
         filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
+        frozen: false,
+        expanded: false,
       } as FilterGroupOptionParsed);
     else
       return ({
@@ -926,8 +928,6 @@ export class TokenCompleter {
       } as FilterConditionOptionParsed);
   }
 }
-
-
 
 export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<void> {
 
