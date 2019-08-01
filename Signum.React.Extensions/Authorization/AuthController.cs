@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Signum.React.Authorization
 {
@@ -107,6 +109,21 @@ namespace Signum.React.Authorization
             using (ScopeSessionFactory.OverrideSession())
             {
                 if (!WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext))
+                    return null;
+
+                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token };
+            }
+        }
+
+        [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
+        public LoginResponse? LoginWithOpenID([FromBody, Required]string jwt)
+        {
+            using (ScopeSessionFactory.OverrideSession())
+            {
+                
+                if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
                     return null;
 
                 var token = AuthTokenServer.CreateToken(UserEntity.Current);

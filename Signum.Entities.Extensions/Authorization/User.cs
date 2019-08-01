@@ -124,4 +124,16 @@ namespace Signum.Entities.Authorization
             : base(info, context)
         { }
     }
+
+
+    [Serializable]
+    public class UserOIDMixin : MixinEntity
+    {
+        UserOIDMixin(Entity mainEntity, MixinEntity? next)
+            : base(mainEntity, next)
+        {
+        }
+
+        public Guid? OID { get; set; }
+    }
 }

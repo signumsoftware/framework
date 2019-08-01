@@ -6,27 +6,52 @@ using Signum.Utilities;
 using System;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Signum.Engine.Authorization
 {
-    public class AutoCreateUserContext
+    public interface IAutoCreateUserContext
+    {
+        public string UserName { get; }
+        public string EmailAddress { get; }
+    }
+
+    public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
     {
         public readonly PrincipalContext PrincipalContext;
-        public readonly string UserName;
-        public readonly string DomainName;
+        public string UserName { get; private set; }
+        public string DomainName { get; private set; }
+        public string EmailAddress => this.GetUserPrincipal().EmailAddress;
 
         UserPrincipal? userPrincipal;
 
-        public AutoCreateUserContext(PrincipalContext principalContext, string userName, string domainName)
+        public DirectoryServiceAutoCreateUserContext(PrincipalContext principalContext, string localName, string domainName)
         {
             PrincipalContext = principalContext;
-            UserName = userName;
+            UserName = localName;
             DomainName = domainName;
         }
 
         public UserPrincipal GetUserPrincipal() //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
         {
             return userPrincipal ?? (userPrincipal = UserPrincipal.FindByIdentity(PrincipalContext, UserName));
+        }
+    }
+
+    public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
+    {
+        public ClaimsPrincipal ClaimsPrincipal { get; private set; }
+
+        string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
+
+        public Guid OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
+
+        public string UserName => GetClaim("preferred_username");
+        public string EmailAddress => GetClaim("preferred_username");
+
+        public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal)
+        {
+            this.ClaimsPrincipal = claimsPrincipal;
         }
     }
 
@@ -46,22 +71,25 @@ namespace Signum.Engine.Authorization
                 var config = this.GetConfig();
                 var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
                 var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
-                
-                UserEntity? user;
 
                 if (domainName != null && config.LoginWithActiveDirectoryRegistry)
                 {
+                    var passwordHash = Security.EncodePassword(password);
+
+                    if (AuthLogic.TryRetrieveUser(userName, passwordHash) != null)
+                        return AuthLogic.Login(userName, passwordHash); //Database is faster than Active Directory
+
                     try
                     {
                         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
                         {
                             if (pc.ValidateCredentials(localName + "@" + domainName, password))
                             {
-                                user = AuthLogic.RetrieveUser(userName);
+                                UserEntity? user = AuthLogic.RetrieveUser(userName);
 
                                 if (user == null)
                                 {
-                                    user = OnAutoCreateUser(pc, domainName, localName);
+                                    user = OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
                                 }
 
                                 if (user != null)
@@ -82,19 +110,17 @@ namespace Signum.Engine.Authorization
                     }
                 }
 
-                user = AuthLogic.Login(userName, Security.EncodePassword(password));
-
-                return user;
+                return AuthLogic.Login(userName, Security.EncodePassword(password));
             }
         }
 
 
-        public UserEntity? OnAutoCreateUser(PrincipalContext pc, string domainName, string localName)
+        public UserEntity? OnAutoCreateUser(IAutoCreateUserContext ctx)
         {
             if (!GetConfig().AutoCreateUsers)
                 return null;
 
-            var user = this.AutoCreateUserInternal(new AutoCreateUserContext(pc, localName, domainName!));
+            var user = this.AutoCreateUserInternal(ctx);
             if (user != null && user.IsNew)
             {
                 using (ExecutionMode.Global())
@@ -107,32 +133,58 @@ namespace Signum.Engine.Authorization
             return user;
         }
 
-        public virtual UserEntity? AutoCreateUserInternal(AutoCreateUserContext ctx)
+        public virtual UserEntity? AutoCreateUserInternal(IAutoCreateUserContext ctx)
         {
-            return new UserEntity
+            var result = new UserEntity
             {
                 UserName = ctx.UserName,
                 PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                Email = ctx.GetUserPrincipal().EmailAddress,
+                Email = ctx.EmailAddress,
                 Role = GetRole(ctx, throwIfNull: true)!,
                 State = UserState.Saved,
             };
+
+            if(ctx is AzureClaimsAutoCreateUserContext ac)
+            {
+                var mixin = result.TryMixin<UserOIDMixin>();
+                if (mixin != null)
+                    mixin.OID = ac.OID;
+            }
+
+            return result;
         }
 
-        public virtual Lite<RoleEntity>? GetRole(AutoCreateUserContext ctx, bool throwIfNull)
+        public virtual Lite<RoleEntity>? GetRole(IAutoCreateUserContext ctx, bool throwIfNull)
         {
-            var groups = ctx.GetUserPrincipal().GetGroups();
             var config = GetConfig();
-            var role = config.RoleMapping.FirstOrDefault(m =>
+            if (ctx is DirectoryServiceAutoCreateUserContext ds)
             {
-                Guid.TryParse(m.ADNameOrGuid, out var guid);
-                return groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
-            })?.Role ?? config.DefaultRole;
+                var groups = ds.GetUserPrincipal().GetGroups();
+                var role = config.RoleMapping.FirstOrDefault(m =>
+                {
+                    Guid.TryParse(m.ADNameOrGuid, out var guid);
+                    return groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
+                })?.Role ?? config.DefaultRole;
 
-            if (role == null && throwIfNull)
-                throw new InvalidOperationException("No matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
+                if (role != null)
+                    return null;
 
-            return role;
+                if (throwIfNull)
+                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
+                else
+                    return null;
+            }
+            else
+            {
+                if (config.DefaultRole != null)
+                    return config.DefaultRole;
+
+                if (throwIfNull)
+                    throw new InvalidOperationException("No default role set");
+                else
+                    return null;
+
+            }
         }
     }
 }

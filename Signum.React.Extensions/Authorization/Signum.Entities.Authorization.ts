@@ -21,8 +21,12 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   Type: "ActiveDirectoryConfigurationEmbedded";
   domainName: string | null;
   domainServer: string | null;
+  azure_ApplicationID: string | null;
+  azure_DirectoryID: string | null;
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
+  loginWithAzureAD: boolean;
+  allowSimpleUserNames: boolean;
   autoCreateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;
@@ -399,13 +403,17 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
   Type: "User";
   userName: string;
   passwordHash: string;
-  passwordSetDate: string;
-  passwordNeverExpires: boolean;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
-  anulationDate: string | null;
+  disabledOn: string | null;
   state: UserState;
+}
+
+export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");
+export interface UserOIDMixin extends Entities.MixinEntity {
+  Type: "UserOIDMixin";
+  oID: string | null;
 }
 
 export module UserOperation {

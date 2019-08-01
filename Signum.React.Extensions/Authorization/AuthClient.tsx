@@ -441,6 +441,10 @@ export module API {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/loginWindowsAuthentication", avoidAuthToken: true }, undefined);
   }
 
+  export function loginWithAzureAD(jwt: string): Promise<LoginResponse> {
+    return ajaxPost<LoginResponse>({ url: "~/api/auth/loginWithAzureAD", avoidAuthToken: true }, jwt);
+  }
+
   export function refreshToken(oldToken: string): Promise<LoginResponse> {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
   }

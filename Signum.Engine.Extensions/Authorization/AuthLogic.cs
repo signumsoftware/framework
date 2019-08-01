@@ -305,6 +305,21 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static UserEntity? TryRetrieveUser(string username, byte[] passwordHash)
+        {
+            using (AuthLogic.Disable())
+            {
+                UserEntity? user = RetrieveUser(username);
+                if (user == null)
+                    return null;
+
+                if (!user.PasswordHash.SequenceEqual(passwordHash))
+                    return null;
+
+                return user;
+            }
+        }
+
         public static UserEntity ChangePasswordLogin(string username, byte[] passwordHash, byte[] newPasswordHash)
         {
             var userEntity = RetrieveUser(username, passwordHash);
