@@ -40,7 +40,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   if (Options.windowsAuthentication) {
     if (!authenticators.contains(loginWindowsAuthentication))
-      throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
+      throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
