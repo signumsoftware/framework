@@ -83,4 +83,27 @@ namespace Signum.Utilities
             this.Name = name;
         }
     }
+
+    [System.AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public sealed class AutoExpressionFieldAttribute : Attribute
+    {
+        public AutoExpressionFieldAttribute()
+        {
+        }
+    }
+
+
+    public static class As
+    {
+        /// <summary>
+        /// In Combination with AutoExpressionFieldAttribute, allows the extraction from an Expression field by Signum.MSBuildTask.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="exp"></param>
+        /// <returns></returns>
+        public static T Expression<T>(Expression<Func<T>> exp)
+        {
+            throw new InvalidOperationException("This method is not meant to be called. Missing reference to Signum.MSBuildTask in this assembly?");
+        }
+    }
 }

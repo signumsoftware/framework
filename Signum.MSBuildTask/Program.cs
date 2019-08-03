@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using Mono.Cecil.Pdb;
 using System;
 using System.CodeDom.Compiler;
@@ -51,9 +51,10 @@ namespace Signum.MSBuildTask
                     return 0;
                 }
 
-                var errors = new AutoPropertyConverter(assembly, resolver).FixProperties();
-                errors |= new FieldAutoInitializer(assembly, resolver, log).FixAutoInitializer();
-                errors |= new AutoExpressionField(assembly, resolver, log).FixAutoExpressionField();
+                var errors = new ExpressionFieldGenerator(assembly, resolver, log).FixAutoExpressionField();
+                //errors |= new FieldAutoInitializer(assembly, resolver, log).FixAutoInitializer();
+                //errors |= new ExpressionFieldFinder(assembly, resolver, log).FixAutoExpressionField();
+                //errors |= new AutoPropertyConverter(assembly, resolver).FixProperties();
 
                 if (errors)
                     return -1;

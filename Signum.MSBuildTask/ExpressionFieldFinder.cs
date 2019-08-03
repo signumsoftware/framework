@@ -1,11 +1,11 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System.Linq;
 using Mono.Cecil.Cil;
 using System.IO;
 
 namespace Signum.MSBuildTask
 {
-    internal class AutoExpressionField
+    internal class ExpressionFieldFinder
     {
         private AssemblyDefinition Assembly;
         private TextWriter Log;
@@ -15,7 +15,7 @@ namespace Signum.MSBuildTask
         bool hasErrors = false;
 
 
-        public AutoExpressionField(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver, TextWriter log)
+        public ExpressionFieldFinder(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver, TextWriter log)
         {
             this.Assembly = assembly;
             this.Resolver = resolver;
