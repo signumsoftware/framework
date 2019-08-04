@@ -13,6 +13,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace Signum.React.TypeHelp
 {
@@ -207,9 +209,16 @@ namespace Signum.React.TypeHelp
                 pr.PropertyInfo?.Name.FirstLower() :
                 pr.PropertyInfo?.Name;
 
-            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
-                PrimaryKey.Type(pr.RootType).Nullify().TypeName():
-                pr.Type.TypeName();
+            this.type = mode == TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
+                PrimaryKey.Type(pr.RootType).Nullify().TypeName() :
+                pr.Let(propertyRoute =>
+                {
+                    var typeName = propertyRoute.Type.TypeName();
+                    var nullable = propertyRoute.PropertyInfo?.GetCustomAttribute<NullableAttribute>();
+
+                    return typeName + (nullable != null && nullable.IsNullableMain == true ? "?" : "");
+                });
+
 
             this.isExpression = false;
             this.isEnum = pr.Type.UnNullify().IsEnum;
