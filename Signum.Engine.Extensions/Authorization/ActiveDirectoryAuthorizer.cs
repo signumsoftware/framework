@@ -167,7 +167,7 @@ namespace Signum.Engine.Authorization
                 })?.Role ?? config.DefaultRole;
 
                 if (role != null)
-                    return null;
+                    return role;
 
                 if (throwIfNull)
                     throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
