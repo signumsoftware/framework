@@ -1283,7 +1283,7 @@ NodeUtils.register<SearchControlNode>({
   { 
     order: -1.1,
     button: modules.React.createElement("button", { className: "btn btn-light", title: "Setting", onClick: e => alert(e) },
-                                          [modules.React.createElement(modules.FontAwesomeIcon, { icon: "cog", color: "green" }), " Setting"])
+                                          modules.React.createElement(modules.FontAwesomeIcon, { icon: "cog", color: "green" }), " ", "Setting")
   },
 ]`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
