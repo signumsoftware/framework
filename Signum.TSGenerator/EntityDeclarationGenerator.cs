@@ -13,9 +13,13 @@ namespace Signum.TSGenerator
         public AssemblyDefinition SignumUtilities { get; private set; }
         public AssemblyDefinition SignumEntities { get; private set; }
 
+        Dictionary<string, string> assemblyLocations;
+
         public PreloadingAssemblyResolver(string[] references)
         {
-            foreach (var dll in references)
+            this.assemblyLocations = references.ToDictionary(a => Path.GetFileNameWithoutExtension(a));
+
+            foreach (var dll in references.Where(r => r.Contains("Signum")))
             {
                 var assembly = ModuleDefinition.ReadModule(dll, new ReaderParameters { AssemblyResolver = this }).Assembly;
 
@@ -27,6 +31,15 @@ namespace Signum.TSGenerator
 
                 RegisterAssembly(assembly);
             }
+        }
+
+        public override AssemblyDefinition Resolve(AssemblyNameReference name)
+        {
+            var assembly = ModuleDefinition.ReadModule(this.assemblyLocations[name.Name], new ReaderParameters { AssemblyResolver = this }).Assembly;
+
+            this.RegisterAssembly(assembly);
+
+            return assembly;
         }
     }
 
