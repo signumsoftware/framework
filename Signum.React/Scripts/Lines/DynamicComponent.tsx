@@ -7,6 +7,7 @@ import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 import { Type } from '../Reflection';
 import { EntityRepeater } from './EntityRepeater';
+import { MultiValueLine } from './MultiValueLine';
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity>, viewName?: string }> {
   render() {
@@ -91,7 +92,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
       if (tr.isEmbedded)
         return <EntityTable ctx={ctx} />;
 
-      return undefined;
+      return <MultiValueLine ctx={ctx} />;
 
     } else {
 
