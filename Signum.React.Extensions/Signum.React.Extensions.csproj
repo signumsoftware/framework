@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.2">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.TSGenerator" Version="2.0.3" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
   </ItemGroup>
 
   <ItemGroup>
