@@ -26,7 +26,7 @@ namespace Signum.Utilities.Reflection
 
         public static bool? IsNullable(this PropertyInfo pi, int position = 0)
         {
-            var result = pi.GetCustomAttribute<NullableContextAttribute>();
+            var result = pi.GetCustomAttribute<NullableAttribute>();
 
             if (result != null)
                 return result.GetNullable(position);
