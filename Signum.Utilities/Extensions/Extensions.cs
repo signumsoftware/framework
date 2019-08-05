@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -262,7 +263,7 @@ namespace Signum.Utilities
             return value == -1 ? defaultValue : value;
         }
 
-        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, string message)
+        public static T ThrowIfNull<T>([NotNull]this T? t, string message)
          where T : struct
         {
             if (t == null)
@@ -270,7 +271,7 @@ namespace Signum.Utilities
             return t.Value;
         }
 
-        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, string message)
+        public static T ThrowIfNull<T>([NotNull]this T? t, string message)
             where T : class
         {
             if (t == null)
@@ -279,7 +280,7 @@ namespace Signum.Utilities
         }
 
 
-        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, Func<string> message)
+        public static T ThrowIfNull<T>([NotNull]this T? t, Func<string> message)
          where T : struct
         {
             if (t == null)
@@ -287,7 +288,7 @@ namespace Signum.Utilities
             return t.Value;
         }
 
-        public static T ThrowIfNull<T>([EnsuresNotNull]this T? t, Func<string> message)
+        public static T ThrowIfNull<T>([NotNull]this T? t, Func<string> message)
             where T : class
         {
             if (t == null)

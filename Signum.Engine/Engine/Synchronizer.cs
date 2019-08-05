@@ -14,7 +14,7 @@ namespace Signum.Engine
           Action<K, N>? createNew,
           Action<K, O>? removeOld,
           Action<K, N, O>? merge)
-            where K : object
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -48,7 +48,7 @@ namespace Signum.Engine
           Action<K, N, O>? merge,
           bool showProgress = true,
           bool transactional = true)
-            where K : object
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -120,7 +120,7 @@ namespace Signum.Engine
             Func<K, N, O, SqlPreCommand?>? mergeBoth)
             where O : class
             where N : class
-            where K : object
+            where K : notnull
         {
             return newDictionary.OuterJoinDictionaryCC(oldDictionary, (key, newVal, oldVal) =>
             {

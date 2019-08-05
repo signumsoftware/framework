@@ -164,8 +164,8 @@ namespace Signum.Entities
 
             this.Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
             
-            var nullable = pi.GetCustomAttribute<NullableAttribute>();
-            if (nullable != null && nullable.IsNullableMain == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
+            var nullable = pi.IsNullable();
+            if (nullable == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
                 this.Validators.Add(new NotNullValidatorAttribute());
 
             this.GetValue = ReflectionTools.CreateGetter<T>(pi)!;

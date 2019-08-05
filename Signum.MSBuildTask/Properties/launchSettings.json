@@ -1,7 +1,7 @@
 {
   "profiles": {
     "Signum.Test": {
-      "commandName": "Project",
+      "commandName": "Signum.Test",
       "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp2.2\\Signum.Test.dll\" \"D:\\Signum\\southwind\\Framework\\Signum.Test\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum.Test\\"
     }

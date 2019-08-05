@@ -108,7 +108,7 @@ namespace Signum.Engine.DynamicQuery
             Expression<Func<KVP, V>> valueSelector,
             ResetLazy<HashSet<K>>? allKeys = null)
             where T : Entity
-            where K : object
+            where K : notnull
         {
             var mei = new ExtensionDictionaryInfo<T, KVP, K, V>(collectionSelector, keySelector, valueSelector,
                 allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector));
@@ -126,7 +126,7 @@ namespace Signum.Engine.DynamicQuery
                 ResetLazy<HashSet<K>>? allKeys = null)
             where T : Entity
             where M : ModifiableEntity
-            where K : object
+            where K : notnull
         {
             var mei = new ExtensionDictionaryInfo<M, KVP, K, V>(collectionSelector, keySelector, valueSelector,
                 allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector));
@@ -173,7 +173,7 @@ namespace Signum.Engine.DynamicQuery
     }
 
     public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
-        where K : object
+        where K : notnull
     {
         public ResetLazy<HashSet<K>> AllKeys;
 

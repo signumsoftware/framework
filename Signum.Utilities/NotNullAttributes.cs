@@ -6,57 +6,89 @@ using System.Text;
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    public class NullableContextAttribute : Attribute
+    {
+        //0 : Dont't know
+        //1 : Not nullable
+        //2 : nullable
+        public readonly byte[] NullableFlags;
+        public NullableContextAttribute(byte flag)
+        {
+            NullableFlags = new byte[] { flag };
+        }
+        public NullableContextAttribute(byte[] flags)
+        {
+            NullableFlags = flags;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class NullableAttribute : Attribute
     {
-        public NullableAttribute(byte b)
+        //0 : Dont't know
+        //1 : Not nullable
+        //2 : nullable
+        public readonly byte[] NullableFlags;
+        public NullableAttribute(byte flag)
         {
-            B = b;
+            NullableFlags = new byte[] { flag };
         }
-
-        public NullableAttribute(byte[] bs)
+        public NullableAttribute(byte[] flags)
         {
-            Bs = bs;
+            NullableFlags = flags;
         }
+    }
+}
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
+    public class AllowNullAttribute : Attribute
+    {
+    }
 
-        public bool? IsNullableMain
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
+    public class DisallowNullAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    public class MaybeNullAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    public class NotNullAttribute : Attribute
+    {
+    }
+
+
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    public class MaybeNullWhenAttribute : Attribute
+    {
+        public bool ReturnValue { get; private set; }
+        public MaybeNullWhenAttribute(bool returnValue)
         {
-            get
-            {
-                var first = B ?? Bs![0];
-
-                return first == 1 ? (bool?)false :
-                    first == 2 ? (bool?)true :
-                    null;
-            }
+            this.ReturnValue = returnValue;
         }
-
-        public byte? B { get; }
-        public byte[]? Bs { get; }
     }
 
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class AssertsTrueAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    public class NotNullWhenAttribute : Attribute
     {
-        public AssertsTrueAttribute() { }
+        public bool ReturnValue { get; private set; }
+        public NotNullWhenAttribute(bool returnValue)
+        {
+            this.ReturnValue = returnValue;
+        }
     }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class AssertsFalseAttribute : Attribute
+
+    [AttributeUsage(AttributeTargets.Property |  AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    public class NotNullIfNotNullAttribute : Attribute
     {
-        public AssertsFalseAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class EnsuresNotNullAttribute : Attribute
-    {
-        public EnsuresNotNullAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class NotNullWhenFalseAttribute : Attribute
-    {
-        public NotNullWhenFalseAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class NotNullWhenTrueAttribute : Attribute
-    {
-        public NotNullWhenTrueAttribute() { }
+        public string Name { get; private set; }
+        public NotNullIfNotNullAttribute(string name)
+        {
+            this.Name = name;
+        }
     }
 }

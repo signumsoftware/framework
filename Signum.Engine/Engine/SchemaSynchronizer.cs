@@ -559,15 +559,15 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
             if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-            var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
-            if (defaultValue == "force")
-                return SqlBuilder.AlterTableAddColumn(table, column);
-
-            if(column.Nullable == IsNullable.Forced)
+            if (column.Nullable == IsNullable.Forced)
             {
                 var hasValueColumn = table.GetHasValueColumn(column);
 
-                if(hasValueColumn != null && hasValueFalse.Contains(hasValueColumn))
+                if (hasValueColumn != null && hasValueFalse.Contains(hasValueColumn))
+                    return SqlBuilder.AlterTableAddColumn(table, column);
+
+                var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
+                if (defaultValue == "force")
                     return SqlBuilder.AlterTableAddColumn(table, column);
 
                 var where = hasValueColumn != null ? $"{hasValueColumn.Name} = 1" : "??";
@@ -578,21 +578,25 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
     {column.Name} = {SqlBuilder.Quote(column.SqlDbType, defaultValue)}
 WHERE {where}"))!;
             }
-
-            if(column is FieldEmbedded.EmbeddedHasValueColumn hv && defaultValue == "0")
+            else
             {
-                hasValueFalse.Add(hv);
+                var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
+                if (defaultValue == "force")
+                    return SqlBuilder.AlterTableAddColumn(table, column);
+
+                if (column is FieldEmbedded.EmbeddedHasValueColumn hv && defaultValue == "0")
+                    hasValueFalse.Add(hv);
+
+                var tempDefault = new SqlBuilder.DefaultConstraint(
+                    columnName: column.Name,
+                    name: "DF_TEMP_" + column.Name,
+                    quotedDefinition: SqlBuilder.Quote(column.SqlDbType, defaultValue)
+                );
+
+                return SqlPreCommand.Combine(Spacing.Simple,
+                    SqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                    SqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
             }
-
-            var tempDefault = new SqlBuilder.DefaultConstraint(
-                columnName: column.Name, 
-                name: "DF_TEMP_" + column.Name, 
-                quotedDefinition : SqlBuilder.Quote(column.SqlDbType, defaultValue)
-            );
-
-            return SqlPreCommand.Combine(Spacing.Simple,
-                SqlBuilder.AlterTableAddColumn(table, column, tempDefault),
-                SqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
         }
 
         private static SqlPreCommand AlterTableAddColumnDefaultZero(ITable table, IColumn column)
