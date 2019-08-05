@@ -489,7 +489,7 @@ namespace Signum.Engine.Processes
             string? status = null)
             where O : class
             where N : class
-            where K : object
+            where K : notnull
         {
 
             if (ep == null)
@@ -532,7 +532,7 @@ namespace Signum.Engine.Processes
             Action<K, N, O> merge)
             where O : class
             where N : class
-            where K : object
+            where K : notnull
         {
 
             if (ep == null)

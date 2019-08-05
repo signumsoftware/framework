@@ -101,8 +101,8 @@ namespace Signum.Entities.Authorization
 
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class AllowedRule<R, A> : ModelEntity
-        where R : object
-        where A : object
+        where R : notnull
+        where A : notnull
     {
         A allowedBase;
         [InTypeScript(Null = false)]
@@ -318,8 +318,8 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
-        where R : object
-        where A : object
+        where R : notnull
+        where A : notnull
     {
         public A[] CoercedValues { get; internal set; }
     }
