@@ -82,7 +82,6 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     return undefined;
 
   const ti = getTypeInfo(types[0].key);
-
   const contexts = operationInfos(ti)
     .filter(oi => isEntityOperation(oi.operationType))
     .map(oi => {
@@ -130,6 +129,11 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
         });
     }
   } else {
+
+    if (Navigator.isReadOnly(ti)) {
+      contexts.forEach(a => a.isReadonly = true);
+    }
+
     contextPromise = Promise.resolve(contexts);
   }
 
