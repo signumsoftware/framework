@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -61,6 +62,7 @@ namespace Signum.Engine.Linq
             return n.candidates;
         }
 
+        [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominate(Expression? expression)
         {
             DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true };
@@ -69,6 +71,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominateNotNullable(Expression? expression)
         {
             DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };

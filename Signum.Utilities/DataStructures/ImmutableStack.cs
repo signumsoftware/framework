@@ -51,12 +51,12 @@ namespace Signum.Utilities.DataStructures
 
     public static class ImmutableStackExtensions
     {
-        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack) where T : object
+        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack) where T : notnull
         {
             return Reverse(stack, ImmutableStack<T>.Empty);
         }
 
-        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack, ImmutableStack<T> initial) where T : object
+        public static ImmutableStack<T> Reverse<T>(this ImmutableStack<T> stack, ImmutableStack<T> initial) where T : notnull
         {
             ImmutableStack<T> r = initial;
             for (ImmutableStack<T> f = stack; !f.IsEmpty; f = f.Pop())

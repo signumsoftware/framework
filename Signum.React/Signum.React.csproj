@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <TypeScriptToolsVersion>3.5</TypeScriptToolsVersion>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>

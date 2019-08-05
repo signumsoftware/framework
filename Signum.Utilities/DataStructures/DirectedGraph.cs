@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace Signum.Utilities.DataStructures
 {
     public class DirectedGraph<T> : IEnumerable<T>
-        where T : object
+        where T : notnull
     {
         readonly Dictionary<T, HashSet<T>> adjacency;
         public IEqualityComparer<T> Comparer { get; private set; }

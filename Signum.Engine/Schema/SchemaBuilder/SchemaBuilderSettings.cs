@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -224,8 +225,8 @@ namespace Signum.Engine.Maps
             if (propertyRoute.Type.IsValueType)
                 return propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
 
-            var nullable = FieldAttribute<NullableAttribute>(propertyRoute);
-            if (nullable != null && nullable.IsNullableMain == true)
+            var nullable = propertyRoute.FieldInfo?.IsNullable();
+            if (nullable == true)
                 return IsNullable.Yes;
 
             return IsNullable.No;

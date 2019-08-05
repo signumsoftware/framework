@@ -99,7 +99,7 @@ namespace Signum.Engine.Linq
 
         [DebuggerStepThrough]
         protected static ReadOnlyDictionary<K, V> Visit<K, V>(ReadOnlyDictionary<K, V> dictionary, Func<V, V> newValue)
-            where K : object
+            where K : notnull
             where V : class
         {
             Dictionary<K, V>? alternate = null;

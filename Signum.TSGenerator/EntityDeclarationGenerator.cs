@@ -334,10 +334,13 @@ namespace Signum.TSGenerator
 
             var properties = GetProperties(type);
 
+            var defaultNullableCustomAttribute = type.NullableContextAttribute();
+
+
             foreach (var prop in properties)
             {
                 string context = $"By type {type.Name} and property {prop.Name}";
-                var propertyType = TypeScriptNameInternal(prop.PropertyType, type, options, context) + (prop.GetTypescriptNull() ? " | null" : "");
+                var propertyType = TypeScriptNameInternal(prop.PropertyType, type, options, context) + (prop.GetTypescriptNull(defaultNullableCustomAttribute) ? " | null" : "");
 
                 var undefined = prop.GetTypescriptUndefined() ? "?" : "";
 
@@ -347,6 +350,13 @@ namespace Signum.TSGenerator
 
             return sb.ToString();
         }
+
+        static CustomAttribute NullableContextAttribute(this TypeDefinition type)
+        {
+            return type.CustomAttributes.SingleOrDefault(a => a.AttributeType.Name == "NullableContextAttribute") ?? type.DeclaringType?.NullableContextAttribute();
+        }
+
+
 
         static bool IsModifiableEntity(TypeDefinition t)
         {
@@ -465,7 +475,7 @@ namespace Signum.TSGenerator
             return (bool?)inTSAttr?.Properties.SingleOrDefault(a => a.Name == "Undefined").Argument.Value;
         }
 
-        public static bool GetTypescriptNull(this PropertyDefinition p)
+        public static bool GetTypescriptNull(this PropertyDefinition p, CustomAttribute defaultCustomAttribute)
         {
             var inTSAttr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == Cache.InTypeScriptAttribute.FullName);
 
@@ -478,6 +488,9 @@ namespace Signum.TSGenerator
             else
             {
                 var nullableAttr = p.CustomAttributes.SingleOrDefault(a => a.AttributeType.Name == "NullableAttribute");
+
+                if (nullableAttr == null)
+                    nullableAttr = defaultCustomAttribute;
 
                 if (nullableAttr == null)
                     return false;

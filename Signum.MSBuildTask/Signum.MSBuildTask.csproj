@@ -8,17 +8,13 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <LangVersion>latest</LangVersion>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;AnyCPU</Platforms>
 	<NuSpecFile>Signum.MSBuildTask.nuspec</NuSpecFile>
 	<Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   
 </Project>

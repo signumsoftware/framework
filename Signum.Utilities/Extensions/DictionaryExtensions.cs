@@ -55,7 +55,7 @@ namespace Signum.Utilities
         }
 
         public static V GetOrAdd<K, V>(this ConcurrentDictionary<K, V> dictionary, K key)
-            where K : object
+            where K : notnull
             where V : new()
         {
             return dictionary.GetOrAdd(key, k => new V());
@@ -98,21 +98,21 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) where K : object
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) where K : notnull
         {
             if (!dictionary.TryGetValue(key, out V result))
                 throw new KeyNotFoundException(messageWithFormat.FormatWith(key));
             return result;
         }
 
-        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key) where K : object
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key) where K : notnull
         {
             if (!dictionary.TryGetValue(key, out V result))
                 throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
             return result;
         }
 
-        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat) where K : object
+        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat) where K : notnull
         {
             if (dictionary.ContainsKey(key))
                 throw new ArgumentException(messageWithFormat.FormatWith(key));
@@ -471,14 +471,14 @@ namespace Signum.Utilities
         }
 
 
-        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key) where K : object
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key) where K : notnull
         {
             V value = dictionary.GetOrThrow(key);
             dictionary.Remove(key);
             return value;
         }
 
-        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) where K : object
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) where K : notnull
         {
             V value = dictionary.GetOrThrow(key, messageWithFormat);
             dictionary.Remove(key);

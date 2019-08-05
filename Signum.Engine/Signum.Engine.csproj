@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>    
     <Platforms>x64;x86;AnyCPU</Platforms>
   </PropertyGroup>

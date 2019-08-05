@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 
 namespace Signum.Entities
@@ -29,7 +29,7 @@ namespace Signum.Entities
             if (OverrideNowVariable.Value == null)
                 throw new InvalidOperationException("OverridenNow is not set");
 
-            OverrideNowVariable.Value += ts;
+            OverrideNowVariable.Value = OverrideNowVariable.Value!.Value + ts;
         }
 
 
