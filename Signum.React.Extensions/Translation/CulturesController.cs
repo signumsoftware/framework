@@ -49,12 +49,11 @@ namespace Signum.React.Translation
 
             if (UserEntity.Current != null && !UserEntity.Current.Is(AuthLogic.AnonymousUser)) //Won't be used till next refresh
             {
-                var user = UserEntity.Current.ToLite().RetrieveAndRemember();
-                user.CultureInfo = culture.RetrieveAndRemember();
-
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
                 {
+                    var user = UserEntity.Current.ToLite().RetrieveAndRemember();
+                    user.CultureInfo = culture.RetrieveAndRemember();
                     UserEntity.Current = user;
                     user.Save();
                 }
