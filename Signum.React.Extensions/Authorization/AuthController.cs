@@ -118,11 +118,10 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-        public LoginResponse? LoginWithOpenID([FromBody, Required]string jwt)
+        public LoginResponse? LoginWithAzureAD([FromBody, Required]string jwt)
         {
             using (ScopeSessionFactory.OverrideSession())
-            {
-                
+            {   
                 if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
                     return null;
 
