@@ -192,7 +192,7 @@ namespace Signum.Engine.Dynamic
         }
 
         public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
-        public static Func<Dictionary<string, Dictionary<string, Tuple<string?, string?>>>> GetFormattedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>> GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {
@@ -672,7 +672,7 @@ namespace Signum.Engine.Dynamic
         public bool IsTreeEntity { get; private set; }
 
         public Dictionary<string, string>? AlreadyTranslated { get; set; }
-        public Dictionary<string, Tuple<string, string>>? Formatted { get; set; }
+        public Dictionary<string, FormatUnit>? Formatted { get; set; }
 
         public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicBaseType baseType, DynamicTypeDefinition def, HashSet<string> usings)
         {
@@ -807,12 +807,12 @@ namespace Signum.Engine.Dynamic
 { lines.ToString(",\r\n").Indent(8)}
     }})
 {complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {this.AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{this.TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
-{complexQueryFields.Where(f => this.Formatted?.TryGetC(f) != null).Select(f =>
+{complexQueryFields.Where(f => this.Formatted?.TryGetS(f) != null).Select(f =>
             {
-                (string format, string unit) = this.Formatted?.TryGetC(f);
+                var fu = this.Formatted?.TryGetS(f);
 
-                var formatText = format.HasText() ? $"c.Format = \"{format}\";" : "";
-                var unitText = unit.HasText() ? $"c.Unit = \"{unit}\";" : "";
+                var formatText = fu != null && fu.Value.Format.HasText() ? $"c.Format = \"{fu.Value.Format}\";" : "";
+                var unitText = fu != null && fu.Value.Unit.HasText() ? $"c.Unit = \"{fu.Value.Unit}\";" : "";
 
                 return $".Column(a => a.{f}, c => {{ {formatText} {unitText} }})";
             }).ToString("\r\n").Indent(4)}
@@ -893,6 +893,18 @@ namespace Signum.Engine.Dynamic
             }
 
             return sb.ToString();
+        }
+    }
+
+    public struct FormatUnit
+    {
+        public string? Format { get; set; }
+        public string? Unit { get; set; }
+
+        public FormatUnit(string? format, string? unit)
+        {
+            Format = format;
+            Unit = unit;
         }
     }
 

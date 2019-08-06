@@ -97,7 +97,7 @@ namespace Signum.Engine.Disconnected
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
-                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync);
 
                 Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
                 Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);

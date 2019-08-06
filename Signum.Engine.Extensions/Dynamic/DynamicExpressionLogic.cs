@@ -76,12 +76,12 @@ namespace Signum.Engine.Dynamic
                     try
                     {
                         if (!Administrator.ExistsTable<DynamicExpressionEntity>())
-                            return new Dictionary<string, Dictionary<string, Tuple<string?, string?>>>();
+                            return new Dictionary<string, Dictionary<string, FormatUnit>>();
 
                         using (ExecutionMode.Global())
                             return Database.Query<DynamicExpressionEntity>()
                             .Where(a => a.Format != null || a.Unit != null)
-                            .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new Tuple<string?, string?>(a.Format, a.Unit)));
+                            .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new FormatUnit(a.Format, a.Unit)));
                     }
                     finally
                     {
@@ -92,6 +92,7 @@ namespace Signum.Engine.Dynamic
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
             }
         }
+
 
         public static void WriteDynamicStarter(StringBuilder sb, int indent) {
 
