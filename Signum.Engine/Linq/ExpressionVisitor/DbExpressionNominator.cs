@@ -1232,7 +1232,7 @@ namespace Signum.Engine.Linq
 
         private Expression? HardCodedMethods(MethodCallExpression m)
         {
-            if (m.Method.Name == "ToString")
+            if (m.Method.Name == "ToString" && m.Method.DeclaringType != typeof(EnumerableExtensions))
                 return TrySqlToString(m);
 
             if (m.Method.Name == "Equals")
