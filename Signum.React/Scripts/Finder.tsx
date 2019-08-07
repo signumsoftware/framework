@@ -1330,7 +1330,7 @@ export interface QuerySettings {
   queryName: PseudoType | QueryKey;
   pagination?: Pagination;
   allowSystemTime?: boolean;
-  defaultOrderColumn?: string;
+  defaultOrderColumn?: string | QueryTokenString<any>;
   defaultOrderType?: OrderType;
   defaultFilters?: FilterOption[];
   hiddenColumns?: ColumnOption[];
