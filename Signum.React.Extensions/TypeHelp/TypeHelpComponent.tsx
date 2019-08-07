@@ -269,6 +269,8 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
           {"<"}
           {this.renderType(type.substr(startIndex + 1, endIndex - startIndex - 1), cleanType)}
           {">"}
+          {type.startsWith("Lite") && type.endsWith("?") ?
+            (this.props.mode == "TypeScript" ? <span> | <span className="sf-member-primitive">null</span></span> : "?") : ""}
         </span>
       );
     }

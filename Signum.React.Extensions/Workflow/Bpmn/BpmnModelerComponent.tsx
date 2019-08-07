@@ -198,6 +198,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         name: elementName,
         type: "Start",
         mainEntityType: mainEntityType,
+        bpmnElementId: element.id,
       });
     }
 
