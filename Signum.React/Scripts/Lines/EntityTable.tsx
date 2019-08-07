@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { classes, Dic, DomUtils } from '../Globals'
 import { TypeContext } from '../TypeContext'
+import * as Navigator from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite } from '../Signum.Entities'
 import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
@@ -51,6 +52,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
   calculateDefaultState(state: EntityTableProps) {
     super.calculateDefaultState(state);
     state.viewOnCreate = false;
+    state.view = false;
     state.createAsLink = true;
   }
 
@@ -199,6 +201,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}
                   onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
+                  onView={this.canView(mlec.value) && !readOnly ? e => this.handleViewElement(e, mlec.index!) : undefined}
                   draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, "v") : undefined}
                   columns={this.state.columns!}
                   ctx={this.props.rowSubContext ? this.props.rowSubContext(mlec) : mlec}
@@ -225,6 +228,52 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         </table>
       </div>);
   }
+
+
+  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
+
+    event.preventDefault();
+
+    const ctx = this.state.ctx;
+    const list = ctx.value!;
+    const mle = list[index];
+    const entity = mle.element;
+
+    const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
+    if (openWindow) {
+      event.preventDefault();
+      const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+      window.open(route);
+    }
+    else {
+      const pr = ctx.propertyRoute.addLambda(a => a[0]);
+
+      const promise = this.props.onView ?
+        this.props.onView(entity, pr) :
+        this.defaultView(entity, pr);
+
+      if (promise == null)
+        return;
+
+      promise.then(e => {
+        if (e == undefined)
+          return;
+
+        this.convert(e).then(m => {
+          if (is(list[index].element as Entity, e as Entity)) {
+            list[index].element = m;
+            if (e.modified)
+              this.setValue(list);
+            this.forceUpdate();
+          } else {
+            list[index] = { rowId: null, element: m };
+            this.setValue(list);
+          }
+
+        }).done();
+      }).done();
+    }
+  }
 }
 
 
@@ -233,6 +282,7 @@ export interface EntityTableRowProps {
   index: number;
   columns: EntityTableColumn<ModifiableEntity, any>[],
   onRemove?: (event: React.MouseEvent<any>) => void;
+  onView?: (event: React.MouseEvent<any>) => void;
   draggable?: DragConfig;
   fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
   onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
@@ -277,6 +327,11 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               onDragEnd={drag.onDragEnd}
               title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
               {EntityBase.moveIcon}
+            </a>}
+            {this.props.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
+              onClick={this.props.onView}
+              title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
+              {EntityBase.viewIcon}
             </a>}
           </div>
         </td>
