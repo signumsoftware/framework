@@ -5,10 +5,10 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityT
 import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
 import { SubTokensOptions } from '@framework/FindOptions'
-import { SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '@framework/Search'
+import { SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
 import { TypeInfo, MemberInfo, getTypeInfo, getTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
-import { TypeContext } from '@framework/TypeContext'
+import { TypeContext, ButtonBarElement } from '@framework/TypeContext'
 import { EntityTableColumn } from '@framework/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
@@ -1186,6 +1186,7 @@ export interface SearchControlNode extends BaseNode {
   findOptions?: FindOptionsExpr;
   searchOnLoad?: ExpressionOrValue<boolean>;
   showContextMenu?: Expression<(fop: FindOptionsParsed) => boolean | "Basic">;
+  extraButtons?: Expression<(searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[]>;
   viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
@@ -1219,6 +1220,7 @@ NodeUtils.register<SearchControlNode>({
     findOptions: node.findOptions,
     searchOnLoad: node.searchOnLoad,
     showContextMenu: node.showContextMenu,
+    extraButtons: node.extraButtons,
     getViewPromise: NodeUtils.toFunctionCode(node.viewName),
     showHeader: node.showHeader,
     showFilters: node.showFilters,
@@ -1246,6 +1248,7 @@ NodeUtils.register<SearchControlNode>({
     getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isFunctionOrStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
     showContextMenu={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showContextMenu, NodeUtils.isFunctionOrNull)}
+    extraButtons={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.extraButtons, NodeUtils.isFunctionOrNull)}
     showHeader={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showHeader, NodeUtils.isBooleanOrNull)}
     showFilters={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilters, NodeUtils.isBooleanOrNull)}
     showFilterButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
@@ -1276,6 +1279,13 @@ NodeUtils.register<SearchControlNode>({
     </FetchQueryDescription>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"fop => \"Basic\""} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.extraButtons)} type={null} defaultValue={null} exampleExpression={`sc => [
+  { 
+    order: -1.1,
+    button: modules.React.createElement("button", { className: "btn btn-light", title: "Setting", onClick: e => alert(e) },
+                                          modules.React.createElement(modules.FontAwesomeIcon, { icon: "cog", color: "green" }), " ", "Setting")
+  },
+]`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilters)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />

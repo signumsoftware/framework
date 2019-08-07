@@ -15,7 +15,7 @@ import * as TreeClient from '../../Tree/TreeClient'
 import * as AutoCompleteConfig from '@framework/Lines/AutoCompleteConfig'
 import * as Hooks from '@framework/Hooks'
 import * as SelectorModal from '@framework/SelectorModal'
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const globalModules: any = {
   numbro,
@@ -35,4 +35,5 @@ export const globalModules: any = {
   AutoCompleteConfig,
   Hooks,
   SelectorModal,
+  FontAwesomeIcon,
 };
