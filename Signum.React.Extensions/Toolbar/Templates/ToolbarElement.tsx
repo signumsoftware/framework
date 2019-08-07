@@ -13,12 +13,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
   const forceUpdate = useForceUpdate();
   function handleTypeChanges() {
     var a = p.ctx.value;
-    if (a.type == "Divider") {
-      a.iconName == null;
-      a.content == null;
-      a.label == null;
-      a.modified = true;
-    }
+    fixToolbarElementType(a);
     forceUpdate();
   }
 
@@ -75,4 +70,14 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
       }
     </div>
   );
+}
+
+export function fixToolbarElementType(a: ToolbarElementEmbedded) {
+    if (a.type == "Divider") {
+        a.iconName = null;
+        a.content = null;
+        a.label = null;
+        a.url = null;
+        a.modified = true;
+    }
 }
