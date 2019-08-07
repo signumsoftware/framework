@@ -326,7 +326,7 @@ namespace Signum.Engine.Word
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
-                        return table.UpdateSqlSync(c, swt => swt.FullClassName == oldClassName, comment: oldClassName);
+                        return table.UpdateSqlSync(c, swt => swt.FullClassName == oldClassName);
                     });
         }
 

@@ -216,7 +216,7 @@ namespace Signum.Engine.Mailing
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
-                        return table.UpdateSqlSync(c, se => se.FullClassName == c.FullClassName, comment: oldClassName);
+                        return table.UpdateSqlSync(c, se => se.FullClassName == oldClassName);
                     });
         }
 
