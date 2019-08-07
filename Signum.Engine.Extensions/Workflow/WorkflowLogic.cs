@@ -156,6 +156,14 @@ namespace Signum.Engine.Workflow
             return NextConnectionsExpression.Evaluate(e);
         }
 
+        static Expression<Func<CaseActivityEntity, WorkflowEntity>> WorkflowExpression =
+            ca => ca.WorkflowActivity.Lane.Pool.Workflow;
+        [ExpressionField]
+        public static WorkflowEntity Workflow(this CaseActivityEntity e)
+        {
+            return WorkflowExpression.Evaluate(e);
+        }
+
         public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {
             var result = GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextConnections(e);
@@ -278,11 +286,13 @@ namespace Signum.Engine.Workflow
                         HasExpired = e.HasExpired(),
                         e.ExpirationDate,
                     })
-                    .ColumnDisplayName(a => a.HasExpired, () => WorkflowMessage.HasExpired.NiceToString()));
+                    .ColumnDisplayName(a => a.HasExpired, () => WorkflowMessage.HasExpired.NiceToString()))
+                    .WithExpressionFrom((CaseActivityEntity ca) => ca.Workflow());
 
                 WorkflowGraph.Register();
                 QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.WorkflowStartEvent());
                 QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), () => WorkflowMessage.HasExpired.NiceToString());
+                sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
 
                 DynamicCode.GetCustomErrors += GetCustomErrors;
 
@@ -796,19 +806,32 @@ namespace Signum.Engine.Workflow
                     {
                         w.ExpirationDate = null;
                         w.Save();
+                        w.SuspendWorkflowScheduledTasks(false);
                     }
                 }.Register();
 
                 new Execute(WorkflowOperation.Deactivate)
                 {
-                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()) : null,
+                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()) : 
+                        w.Cases().SelectMany(c => c.CaseActivities()).Any(ca => ca.DoneDate == null) ? CaseActivityMessage.ThereAreInprogressActivities.NiceToString() : null,
                     Execute = (w, args) =>
                     {
                         w.ExpirationDate = args.GetArg<DateTime>();
                         w.Save();
+                        w.SuspendWorkflowScheduledTasks(true);
                     }
                 }.Register();
             }
+        }
+
+        public static void SuspendWorkflowScheduledTasks(this WorkflowEntity workflow, bool value)
+        {
+            workflow.WorkflowEvents()
+                .Where(a => a.Type == WorkflowEventType.ScheduledStart)
+                .Select(a => a.ScheduledTask())
+                .UnsafeUpdate()
+                .Set(a => a.Suspended, a => value)
+                .Execute();
         }
 
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>

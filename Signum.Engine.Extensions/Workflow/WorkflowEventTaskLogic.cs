@@ -241,6 +241,11 @@ namespace Signum.Engine.Workflow
 
         public static Lite<IEntity>? ExecuteTask(WorkflowEventTaskEntity wet)
         {
+            var workflow = wet.GetWorkflow();
+
+            if (workflow.HasExpired())
+                throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
+
             using (Transaction tr = new Transaction())
             {
                 if (!EvaluateCondition(wet))

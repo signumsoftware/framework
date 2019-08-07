@@ -266,6 +266,7 @@ namespace Signum.Engine.Workflow
                 {
                     var boundaryCandidates =
                     (from ca in Database.Query<CaseActivityEntity>()
+                     where !ca.Workflow().HasExpired()
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
                      where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
@@ -276,6 +277,7 @@ namespace Signum.Engine.Workflow
 
                     var intermediateCandidates =
                     (from ca in Database.Query<CaseActivityEntity>()
+                     where !ca.Workflow().HasExpired()
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      let we = ((WorkflowEventEntity)ca.WorkflowActivity)
                      where we.Type == WorkflowEventType.IntermediateTimer
@@ -608,12 +610,16 @@ namespace Signum.Engine.Workflow
                 {
                     Construct = (wet, args) =>
                     {
+                        var workflow = wet.GetWorkflow();
+
+                        if (workflow.HasExpired())
+                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
+
                         var mainEntity = args.TryGetArgC<ICaseMainEntity>();
-                        var w = wet.GetWorkflow();
                         var @case = new CaseEntity
                         {
-                            Workflow = w,
-                            Description = w.Name,
+                            Workflow = workflow,
+                            Description = workflow.Name,
                             MainEntity = mainEntity,
                         };
 
