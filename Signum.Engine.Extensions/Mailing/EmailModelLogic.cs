@@ -87,9 +87,9 @@ namespace Signum.Engine.Mailing
         }
     }
 
-    public class MultiEntityEmailTemplate : EmailModel<MultiEntityModel>
+    public class MultiEntityEmail : EmailModel<MultiEntityModel>
     {
-        public MultiEntityEmailTemplate(MultiEntityModel entity) : base(entity)
+        public MultiEntityEmail(MultiEntityModel entity) : base(entity)
         {
         }
 
@@ -102,9 +102,9 @@ namespace Signum.Engine.Mailing
         }
     }
 
-    public class QueryEmailTemplate : EmailModel<QueryModel>
+    public class QueryEmail : EmailModel<QueryModel>
     {
-        public QueryEmailTemplate(QueryModel entity) : base(entity)
+        public QueryEmail(QueryModel entity) : base(entity)
         {
         }
 
