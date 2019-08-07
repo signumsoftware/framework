@@ -224,8 +224,8 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
     var val = this.props.ctx.value;
 
     //Till https://github.com/facebook/react/issues/8529 gets fixed
-    var url = isEntity(val) ? Navigator.navigateRoute(val) :
-      isLite(val) ? Navigator.navigateRoute(val) : "#";
+    var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
+      isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
 
     return (
       <li className="sf-strip-element"
