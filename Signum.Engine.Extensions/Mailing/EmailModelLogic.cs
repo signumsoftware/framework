@@ -325,7 +325,7 @@ namespace Signum.Engine.Mailing
             }
 
             templates = templates.Where(isAllowed);
-            return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(emailModelEntity));
+            return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for EmailModel {0}".FormatWith(emailModelEntity));
         }
 
         internal static EmailTemplateEntity CreateDefaultTemplate(EmailModelEntity emailModel)
