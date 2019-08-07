@@ -94,9 +94,9 @@ namespace Signum.Engine.Word
         }        
     }
 
-    public class MultiEntityWordTemplate : WordModel<MultiEntityModel>
+    public class MultiEntityWord : WordModel<MultiEntityModel>
     {
-        public MultiEntityWordTemplate(MultiEntityModel entity) : base(entity)
+        public MultiEntityWord(MultiEntityModel entity) : base(entity)
         {
         }
 
@@ -109,9 +109,9 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class QueryWordTemplate : WordModel<QueryModel>
+    public class QueryWord : WordModel<QueryModel>
     {
-        public QueryWordTemplate(QueryModel entity) : base(entity)
+        public QueryWord(QueryModel entity) : base(entity)
         {
         }
 
@@ -163,8 +163,8 @@ namespace Signum.Engine.Word
                         se.FullClassName,
                     });
 
-                RegisterSystemWordReport<MultiEntityWordTemplate>(null);
-                RegisterSystemWordReport<QueryWordTemplate>(null);
+                RegisterSystemWordReport<MultiEntityWord>(null);
+                RegisterSystemWordReport<QueryWord>(null);
 
                 new Graph<WordTemplateEntity>.ConstructFrom<WordModelEntity>(WordTemplateOperation.CreateWordTemplateFromWordModel)
                 {
