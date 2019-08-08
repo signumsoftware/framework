@@ -91,12 +91,12 @@ namespace Signum.Engine.Toolbar
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-                t => AuthLogic.CurrentRoles().Contains(t.Owner));
+                t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
 
             sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-                t => AuthLogic.CurrentRoles().Contains(t.Owner));
+                t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
         }
 
         private static void RegisterDelete<T>(SchemaBuilder sb) where T : Entity
