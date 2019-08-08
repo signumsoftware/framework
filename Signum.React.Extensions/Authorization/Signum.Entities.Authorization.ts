@@ -361,7 +361,7 @@ export type TypeAllowed =
   "DBReadUINone" |
   "Read" |
   "DBWriteUINone" |
-  "DBMWriteUIRead" |
+  "DBWriteUIRead" |
   "Write";
 
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
