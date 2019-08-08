@@ -36,7 +36,10 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
 
     return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), () => {
       API.exportAsset(ctx.lite);
-    });
+    }, {
+        iconColor: "#FCAE25",
+        icon: "file-code"
+      });
   });
 }
 
