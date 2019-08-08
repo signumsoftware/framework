@@ -19,7 +19,9 @@ namespace Signum.React.Maps
         {
             var getStats = GetRuntimeStats();
 
-            var nodes = (from t in Schema.Current.Tables.Values
+            var s = Schema.Current;
+            var nodes = (from t in s.Tables.Values
+                         where s.IsAllowed(t.Type, true) == null
                          let type = EnumEntity.Extract(t.Type) ?? t.Type
                          select new TableInfo
                          {
@@ -61,9 +63,11 @@ namespace Signum.React.Maps
                 }
             }
 
-            var normalEdges = (from t in Schema.Current.Tables.Values
+            var normalEdges = (from t in s.Tables.Values
+                               where s.IsAllowed(t.Type, true) == null
                                from kvp in t.DependentTables()
                                where !kvp.Value.IsCollection
+                               where s.IsAllowed(kvp.Key.Type, true) == null
                                select new RelationInfo
                                {
                                    fromTable = t.Name.ToString(),
@@ -72,9 +76,11 @@ namespace Signum.React.Maps
                                    nullable = kvp.Value.IsNullable
                                }).ToList();
 
-            var mlistEdges = (from t in Schema.Current.Tables.Values
+            var mlistEdges = (from t in s.Tables.Values
+                              where s.IsAllowed(t.Type, true) == null
                               from tm in t.TablesMList()
                               from kvp in tm.GetTables()
+                              where s.IsAllowed(kvp.Key.Type, true) == null
                               select new RelationInfo
                               {
                                   fromTable = tm.Name.ToString(),
