@@ -142,7 +142,7 @@ namespace Signum.Engine.Toolbar
 
         public static ToolbarEntity GetCurrent(ToolbarLocation location)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
 
             var result = Toolbars.Value.Values
                 .Where(t => isAllowed(t) && t.Location == location)
@@ -177,12 +177,20 @@ namespace Signum.Engine.Toolbar
         {
             var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
 
-
             retry:
-                var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (i == 0 || result[i - 1].type == ToolbarElementType.Divider || i == result.Count)).ToList();
-                result.RemoveAll(extraDividers.Contains);
-                var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (i == result.Count || IsPureHeader(result[i + 1]) || result[i + 1].type == ToolbarElementType.Divider)).ToList();
-                result.RemoveAll(extraHeaders.Contains);
+            var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (
+                i == 0 ||
+                result[i - 1].type == ToolbarElementType.Divider ||
+                i == result.Count
+            )).ToList();
+            result.RemoveAll(extraDividers.Contains);
+            var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (
+                i == result.Count ||
+                IsPureHeader(result[i + 1]) ||
+                result[i + 1].type == ToolbarElementType.Divider ||
+                result[i + 1].type == ToolbarElementType.Header && result[i + 1].content is Lite<ToolbarMenuEntity>
+            )).ToList();
+            result.RemoveAll(extraHeaders.Contains);
 
             if (extraDividers.Any() || extraHeaders.Any())
                 goto retry;
@@ -197,7 +205,7 @@ namespace Signum.Engine.Toolbar
 
         private static ToolbarResponse? ToResponse(ToolbarElementEmbedded element)
         {
-            if(element.Content != null && !(element.Content is Lite<ToolbarMenuEntity>))
+            if (element.Content != null && !(element.Content is Lite<ToolbarMenuEntity>))
             {
                 if (!IsAuthorized(element.Content))
                     return null;
@@ -222,7 +230,7 @@ namespace Signum.Engine.Toolbar
                 if (result.elements.Count == 0)
                     return null;
             }
-            
+
             return result;
         }
 
@@ -230,8 +238,8 @@ namespace Signum.Engine.Toolbar
         {
             { typeof(QueryEntity), a => IsQueryAllowed((Lite<QueryEntity>)a) },
             { typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.RetrieveAndRemember()) },
-            { typeof(UserQueryEntity), a => InMemoryFilter(UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a)) },
-            { typeof(UserChartEntity), a => InMemoryFilter(UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a)) },
+            { typeof(UserQueryEntity), a => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); } },
+            { typeof(UserChartEntity), a => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); } },
             { typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
         };
 
@@ -249,7 +257,7 @@ namespace Signum.Engine.Toolbar
                 return false;
             }
         }
-        
+
         static bool InMemoryFilter<T>(T entity) where T : Entity
         {
             if (Schema.Current.IsAllowed(typeof(T), inUserInterface: true) != null)
@@ -277,7 +285,9 @@ namespace Signum.Engine.Toolbar
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? autoRefreshPeriod;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore )]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool openInPopup;
+
+        public override string ToString() => $"{type} {label} {content} {url}";
     }
 }
