@@ -439,7 +439,7 @@ namespace Signum.TSGenerator
         private static IEnumerable<PropertyDefinition> GetProperties(TypeDefinition type)
         {
             return type.Properties.Where(p => p.HasThis && p.GetMethod.IsPublic)
-                            .Where(p => p.InTypeScript() ?? !(p.ContainsAttribute("HiddenPropertyAttribute") || p.ContainsAttribute("ExpressionFieldAttribute")));
+                            .Where(p => p.InTypeScript() ?? !(p.ContainsAttribute("HiddenPropertyAttribute") || p.ContainsAttribute("ExpressionFieldAttribute") || p.ContainsAttribute("AutoExpressionFieldAttribute")));
         }
 
         public static bool ContainsAttribute(this IMemberDefinition p, string attributeName)

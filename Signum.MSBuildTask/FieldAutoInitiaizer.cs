@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System.Linq;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -26,9 +26,9 @@ namespace Signum.MSBuildTask
             this.Resolver = resolver;
             this.Log = log;
 
-            var module = resolver.Resolve(AssemblyNameReference.Parse("System.Runtime")).MainModule;
+            var module = resolver.SystemRuntime.MainModule;
 
-            var tr = module.ExportedTypes.Single(a=>a.FullName == "System.Type");
+            var tr = module.GetType("System", "Type");
 
             this.SystemType = tr.Resolve();
             this.GetTypeFromHandle = this.SystemType.GetMethods().Single(a => a.Name == "GetTypeFromHandle");

@@ -52,9 +52,8 @@ namespace Signum.MSBuildTask
                 }
 
                 var errors = new ExpressionFieldGenerator(assembly, resolver, log).FixAutoExpressionField();
-                //errors |= new FieldAutoInitializer(assembly, resolver, log).FixAutoInitializer();
-                //errors |= new ExpressionFieldFinder(assembly, resolver, log).FixAutoExpressionField();
-                //errors |= new AutoPropertyConverter(assembly, resolver).FixProperties();
+                errors |= new FieldAutoInitializer(assembly, resolver, log).FixAutoInitializer();
+                errors |= new AutoPropertyConverter(assembly, resolver).FixProperties();
 
                 if (errors)
                     return -1;

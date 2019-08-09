@@ -14,11 +14,7 @@ namespace Signum.Entities.Basics
 
         public static Func<QueryEntity, Implementations> GetEntityImplementations;
 
-        static Expression<Func<QueryEntity, string>> ToStringExpression = e => e.Key;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => this.Key);
     }
 }

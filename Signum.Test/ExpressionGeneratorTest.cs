@@ -14,6 +14,8 @@ namespace Signum.Test
         {   
             Assert.Equal(5, StaticExample.SumAuto(2, 3));
             Assert.Equal(6, StaticExample.SumMany(1, 1, 1, 1, 1, 1));
+            Assert.Equal(5, StaticExample.SumManyIgnore(1, 1, 1, 1, 2, 3));
+            Assert.Equal(30, StaticExample.SumWithLambda(10, 20));
             Assert.Equal("Hi", StaticExample.Bla);
         }
 
@@ -33,6 +35,12 @@ namespace Signum.Test
 
         [AutoExpressionField]
         public static int SumMany(int a, int b, int c, int d, int e, int f) => As.Expression(() => a + b + c + d + e + f);
+
+        [AutoExpressionField]
+        public static int SumManyIgnore(int a, int b, int c, int d, int e, int f) => As.Expression(() => f + e);
+
+        [AutoExpressionField]
+        public static int SumWithLambda(int a, int b) => As.Expression(() => a.Let(_a => _a + b));
 
         [AutoExpressionField]
         public static string Bla => As.Expression(() => "Hi");

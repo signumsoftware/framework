@@ -15,13 +15,9 @@ namespace Signum.Test.Environment
 {
     public static class MusicLogic
     {
-        static Expression<Func<IAuthorEntity, IQueryable<AlbumEntity>>> AlbumsExpression =
-        e => Database.Query<AlbumEntity>().Where(a => a.Author == e);
-        [ExpressionField]
-        public static IQueryable<AlbumEntity> Albums(this IAuthorEntity e)
-        {
-            return AlbumsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<AlbumEntity> Albums(this IAuthorEntity e) => 
+            As.Expression(() => Database.Query<AlbumEntity>().Where(a => a.Author == e));
 
         public static void Start(SchemaBuilder sb)
         {

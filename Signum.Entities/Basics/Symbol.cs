@@ -63,12 +63,8 @@ namespace Signum.Entities
         [StringLengthValidator(Min = 3, Max = 200)]
         public string Key { get; set; }
 
-        static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => this.Key);
 
         public bool BaseEquals(object obj)
         {

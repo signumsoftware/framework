@@ -78,7 +78,7 @@ namespace Signum.Utilities
     {
         public string Name { get; set; }
         /// <param name="name">The name of the field for the expression that defines the content. If not set, will be automatically found from the method body.</param>
-        public ExpressionFieldAttribute(string name = "auto")
+        public ExpressionFieldAttribute(string name)
         {
             this.Name = name;
         }

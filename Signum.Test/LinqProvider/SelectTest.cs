@@ -684,11 +684,8 @@ namespace Signum.Test.LinqProvider
 
     public static class AuthorExtensions
     {
-        static Expression<Func<IAuthorEntity, int>> AlbumCountExpression = auth => Database.Query<AlbumEntity>().Count(a => a.Author == auth);
-        [ExpressionField]
-        public static int AlbumCount(this IAuthorEntity author)
-        {
-            return AlbumCountExpression.Evaluate(author);
-        }
+        [AutoExpressionField]
+        public static int AlbumCount(this IAuthorEntity author) => 
+            As.Expression(() => Database.Query<AlbumEntity>().Count(a => a.Author == author));
     }
 }

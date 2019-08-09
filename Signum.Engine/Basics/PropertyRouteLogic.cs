@@ -12,13 +12,9 @@ namespace Signum.Engine.Basics
 {
     public static class PropertyRouteLogic
     {
-        static Expression<Func<PropertyRouteEntity, PropertyRoute, bool>> IsPropertyRouteExpression =
-            (prdn, pr) => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString() ;
-        [ExpressionField]
-        public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr)
-        {
-            return IsPropertyRouteExpression.Evaluate(prdn, pr);
-        }
+        [AutoExpressionField]
+        public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr) =>
+            As.Expression(() => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString());
 
         public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties;
 

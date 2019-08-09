@@ -99,6 +99,7 @@ export interface TypeEntity extends Entities.Entity {
   cleanName: string;
   namespace: string;
   className: string;
+  fullClassName: string;
 }
 
 

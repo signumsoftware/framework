@@ -21,30 +21,17 @@ namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-        static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
-            e => Database.Query<OperationLogEntity>().Where(a => a.Target.Is(e));
-        [ExpressionField]
-        public static IQueryable<OperationLogEntity> OperationLogs(this Entity e)
-        {
-            return OperationLogsEntityExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<OperationLogEntity> OperationLogs(this Entity e) => 
+            As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Target.Is(e)));
 
+        [AutoExpressionField]
+        public static OperationLogEntity PreviousOperationLog(this Entity e) => 
+            As.Expression(() => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
 
-        static Expression<Func<Entity, OperationLogEntity>> CurrentOperationLogExpression =
-            e => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault();
-        [ExpressionField]
-        public static OperationLogEntity PreviousOperationLog(this Entity e)
-        {
-            return CurrentOperationLogExpression.Evaluate(e);
-        }
-
-        static Expression<Func<OperationSymbol, IQueryable<OperationLogEntity>>> LogsExpression =
-            o => Database.Query<OperationLogEntity>().Where(a => a.Operation == o);
-        [ExpressionField]
-        public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o)
-        {
-            return LogsExpression.Evaluate(o);
-        }
+        [AutoExpressionField]
+        public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o) => 
+            As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Operation == o));
 
         static Polymorphic<Dictionary<OperationSymbol, IOperation>> operations = new Polymorphic<Dictionary<OperationSymbol, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 

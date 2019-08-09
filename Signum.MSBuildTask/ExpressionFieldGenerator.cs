@@ -97,11 +97,10 @@ namespace Signum.MSBuildTask
 
                 Transform(p.type.Module, p.method, newMethod, expressionField, out var closureType);
 
-                //newMethod.Body.Instructions.Clear();
-                //newMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-
                 if (closureType != null)
                     p.type.NestedTypes.Remove(closureType);
+
+                Console.WriteLine($"{p.method.Name} -> {newMethod.Name}");
 
                 p.member.CustomAttributes.Remove(p.at);
                 var attrConstructor = p.type.Module.ImportReference(this.ExpressionField.Methods.Single(a => a.IsConstructor && a.IsPublic));
@@ -118,8 +117,12 @@ namespace Signum.MSBuildTask
 
         private void Transform(ModuleDefinition mod, MethodDefinition method, MethodDefinition newMethod, FieldDefinition expressionField, out TypeDefinition closureType)
         {
+            if (method.Name == "SumManyIgnore")
+            {
+
+            }
             var writer = newMethod.Body.GetILProcessor();
-            List<ParameterReference> parametersInOrder = new List<ParameterReference>();
+            Dictionary<ParameterReference, VariableDefinition> oldParameterToNNewVariable = new Dictionary<ParameterReference, VariableDefinition>();
             newMethod.Body.InitLocals = true;
             writer.Emit(OpCodes.Nop);
             var allParameters = method.Parameters.ToList();
@@ -128,37 +131,46 @@ namespace Signum.MSBuildTask
 
             foreach (var p in allParameters)
             {
-                newMethod.Body.Variables.Add(new VariableDefinition(mod.ImportReference(ParameterExpression)));
+                var variable = new VariableDefinition(mod.ImportReference(ParameterExpression));
+                newMethod.Body.Variables.Add(variable);
                 writer.Emit(OpCodes.Ldtoken, p.ParameterType);
                 writer.Emit(OpCodes.Call, mod.ImportReference(this.Type_GetTypeFromHandle));
                 writer.Emit(OpCodes.Ldstr, p == method.Body.ThisParameter ? "this" : p.Name);
                 writer.Emit(OpCodes.Call, mod.ImportReference(this.Expression_Parameter));
-                writer.Emit(OpCodes.Stloc, parametersInOrder.Count);
-                parametersInOrder.Add(p);
+                writer.Emit(OpCodes.Stloc, variable.Index);
+                oldParameterToNNewVariable.Add(p, variable);
             }
 
+            method.Body.SimplifyMacros();
             var reader = new ILReader(method.Body);
             //var c = new <>__DisplayClass
             
-            Dictionary<MetadataToken, ParameterReference> captures = new Dictionary<MetadataToken, ParameterReference>();
+            Dictionary<MetadataToken, ParameterReference> captureFieldToParameter = new Dictionary<MetadataToken, ParameterReference>();
             closureType = null; 
             if (reader.Is(OpCodes.Newobj))
             {
                 var newObj = reader.Get(OpCodes.Newobj);
                 closureType = ((MethodDefinition)newObj.Operand).DeclaringType;
-                reader.Get(OpCodes.Stloc_0);
-                while (reader.Is(OpCodes.Ldloc_0) && reader.Body.Instructions[reader.Position + 1].OpCode == GetLdarg(captures.Count))
+                reader.Get(OpCodes.Stloc);
+                //c.a = a;
+                while (LookaheadClosureAssignment(ref reader, out var oldParameter, out var fieldReference))
                 {
-                    //c.a = a;
-                    reader.Get(OpCodes.Ldloc_0);
-                    reader.Get(GetLdarg(captures.Count));
-                    var stfld = reader.Get(OpCodes.Stfld);
-                    var fieldReference = (FieldReference)stfld.Operand;
+                    captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
+                }
+            }
 
-                    var parameter = fieldReference.Name.EndsWith("__this") ?
-                        method.Body.ThisParameter :
-                        parametersInOrder.Single(a => a.Name == fieldReference.Name);
-                    captures.Add(fieldReference.MetadataToken, parameter);
+            Dictionary<VariableDefinition, VariableDefinition> rebasedVariables = new Dictionary<VariableDefinition, VariableDefinition>();
+            foreach (var v in method.Body.Variables)
+            {
+                if (closureType != null && v.VariableType == closureType)
+                {
+
+                }
+                else
+                {
+                    var newVariable = new VariableDefinition(mod.ImportReference(v.VariableType));
+                    rebasedVariables.Add(v, newVariable);
+                    newMethod.Body.Variables.Add(newVariable);
                 }
             }
 
@@ -166,27 +178,27 @@ namespace Signum.MSBuildTask
             {
                 if (LookaheadExpressionFieldConstant(ref reader, out var token))
                 {
-                    var param = captures[token.Value];
-                    writer.Emit(OpCodes.Ldloc, parametersInOrder.IndexOf(param));
+                    var param = captureFieldToParameter[token.Value];
+                    writer.Emit(OpCodes.Ldloc, oldParameterToNNewVariable[param].Index);
                 }
                 else if (!method.IsStatic && LookaheadExpressionThisConstant(ref reader, method.DeclaringType))
                 {
-                    writer.Emit(OpCodes.Ldloc, parametersInOrder.IndexOf(method.Body.ThisParameter));
+                    writer.Emit(OpCodes.Ldloc, oldParameterToNNewVariable[method.Body.ThisParameter].Index);
                 }
                 else if (LookaheadArray(ref reader))
                 {
                     if (reader.HasMore())
                         throw new InvalidOperationException("The method should only call As.Expression with an expression tree");
 
-                    if (parametersInOrder.Count == 0)
+                    if (oldParameterToNNewVariable.Count == 0)
                     {
                         writer.Emit(OpCodes.Call, mod.ImportReference(new GenericInstanceMethod(this.Array_Empty) { GenericArguments = { this.ParameterExpression } }));
                     }
                     else
                     {
-                        writer.Emit(OpCodes.Ldc_I4, parametersInOrder.Count);
+                        writer.Emit(OpCodes.Ldc_I4, oldParameterToNNewVariable.Count);
                         writer.Emit(OpCodes.Newarr, mod.ImportReference(this.ParameterExpression));
-                        for (int i = 0; i < parametersInOrder.Count; i++)
+                        for (int i = 0; i < oldParameterToNNewVariable.Count; i++)
                         {
                             writer.Emit(OpCodes.Dup);
                             writer.Emit(OpCodes.Ldc_I4, i);
@@ -223,6 +235,14 @@ namespace Signum.MSBuildTask
                     }
                     return;
                 }
+                else if (reader.TryGet(OpCodes.Ldloc) is Instruction ldloc)
+                {
+                    writer.Emit(ldloc.OpCode, rebasedVariables[(VariableDefinition)ldloc.Operand]);
+                }
+                else if (reader.TryGet(OpCodes.Stloc) is Instruction stloc)
+                {
+                    writer.Emit(stloc.OpCode, rebasedVariables[(VariableDefinition)stloc.Operand]);
+                }
                 else
                 {
                     var ins = reader.Get();
@@ -233,21 +253,35 @@ namespace Signum.MSBuildTask
             throw new InvalidOperationException("The method should only call As.Expression with an expression tree");
         }
 
+        bool LookaheadClosureAssignment(ref ILReader reader, out ParameterReference parameterReference, out FieldReference fieldReference)
+        {
+            fieldReference = null;
+            parameterReference = null;
+            var fork = reader.Clone();
+            if (fork.TryGet(OpCodes.Ldloc, 0) != null &&
+                fork.TryGet(OpCodes.Ldarg) is Instruction ldarg &&
+                fork.TryGet(OpCodes.Stfld) is Instruction stfld)
+            {
+                parameterReference = (ParameterReference)ldarg.Operand;
+                fieldReference = (FieldReference)stfld.Operand;
+                reader.Position = fork.Position;
+                return true;
+            }
+            return false;
+        }
+
         bool LookaheadExpressionFieldConstant(ref ILReader reader, out MetadataToken? fieldToken)
         {
             fieldToken = null;
-
-            Instruction ldtoken = null;
-
-            var fork = reader.Clone();
+                                   var fork = reader.Clone();
 
             if (//Expression.Constant(typeof(<>__DisplayClass>), c)
-                fork.TryGet(OpCodes.Ldloc_0) != null &&
+                fork.TryGet(OpCodes.Ldloc, 0 ) != null &&
                 fork.TryGet(OpCodes.Ldtoken) != null &&
                 fork.TryGetCall(nameof(Type.GetTypeFromHandle)) != null &&
                 fork.TryGetCall(nameof(Expression.Constant)) != null &&
                 //Expression.Field( , fieldof(c.a));
-                (ldtoken = fork.Get(OpCodes.Ldtoken)) != null &&
+                fork.TryGet(OpCodes.Ldtoken) is Instruction ldtoken &&
                 fork.TryGetCall(nameof(System.Reflection.FieldInfo.GetFieldFromHandle)) != null &&
                 fork.TryGetCall(nameof(Expression.Field)) != null)
             {
@@ -263,7 +297,7 @@ namespace Signum.MSBuildTask
         {
             var fork = reader.Clone();
             if (//Expression.Constant(typeof(ThisType), this)
-                fork.TryGet(OpCodes.Ldarg_0) != null &&
+                fork.TryGet(OpCodes.Ldarg, 0) != null &&
                 fork.TryGet(OpCodes.Ldtoken) is Instruction ldTok && ldTok.Operand.Equals(thisType) &
                 fork.TryGetCall(nameof(Type.GetTypeFromHandle)) != null &&
                 fork.TryGetCall(nameof(Expression.Constant)) != null)
@@ -290,20 +324,6 @@ namespace Signum.MSBuildTask
             return false;
         }
 
-        private OpCode GetLdarg(int i)
-        {
-            switch (i)
-            {
-                case 0: return OpCodes.Ldarg_0;
-                case 1: return OpCodes.Ldarg_1;
-                case 2: return OpCodes.Ldarg_2;
-                case 3: return OpCodes.Ldarg_3;
-                default: return OpCodes.Ldarg_S;
-            }
-        }
-
-
-
         public struct ILReader
         {
             public int Position;
@@ -322,9 +342,22 @@ namespace Signum.MSBuildTask
                 return Body.Instructions[Position++];
             }
 
-            public bool Is(OpCode opCode)
+            public bool Is(OpCode opCode, int? operand = null)
             {
-                return Body.Instructions[Position].OpCode == opCode;
+                var ins = Body.Instructions[Position];
+
+                if (ins.OpCode != opCode)
+                    return false;
+
+                if (operand == null)
+                    return true;
+
+                if (ins.Operand is ParameterDefinition pd)
+                    return pd.Sequence == operand;
+                else if (ins.Operand is VariableDefinition vd)
+                    return vd.Index == operand;
+                else
+                    throw new Exception("Not Expected " + ins.Operand.GetType());
             }
 
             public bool IsCall(string methodName)
@@ -333,9 +366,9 @@ namespace Signum.MSBuildTask
                 return ins.OpCode == OpCodes.Call && ins.Operand is MethodReference mr && mr.Name == methodName;
             }
 
-            public Instruction TryGet(OpCode opCode)
+            public Instruction TryGet(OpCode opCode, int? operand = null)
             {
-                if (Is(opCode))
+                if (Is(opCode, operand))
                     return Get();
 
                 return null;
@@ -349,9 +382,9 @@ namespace Signum.MSBuildTask
                 return null;
             }
 
-            public Instruction Get(OpCode opCode)
+            public Instruction Get(OpCode opCode, int? operand = null)
             {
-                if (Is(opCode))
+                if (Is(opCode, operand))
                     return Get();
 
                 throw new InvalidOperationException($"{opCode} expected in Position {Position} of {Body.Method.FullName}");
