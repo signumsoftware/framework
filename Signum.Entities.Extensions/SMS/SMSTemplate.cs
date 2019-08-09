@@ -62,12 +62,8 @@ namespace Signum.Entities.SMS
             To.ParseData(this, queryDescription, 0);
         }
 
-        static readonly Expression<Func<SMSTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
         
     }
 
@@ -128,12 +124,8 @@ namespace Signum.Entities.SMS
         [UniqueIndex]
         public string FullClassName { get; set; }
 
-        static Expression<Func<SMSModelEntity, string>> ToStringExpression = e => e.FullClassName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FullClassName);
     }
 
     public interface ISMSOwnerEntity : IEntity

@@ -22,23 +22,14 @@ namespace Signum.Engine.ViewLog
     {
         public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedLog;
 
-        static Expression<Func<Entity, IQueryable<ViewLogEntity>>> ViewLogsExpression =
-            a => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a));
-        [ExpressionField]
-        public static IQueryable<ViewLogEntity> ViewLogs(this Entity a)
-        {
-            return ViewLogsExpression.Evaluate(a);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ViewLogEntity> ViewLogs(this Entity a) => 
+            As.Expression(() => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a)));
         
-        static Expression<Func<Entity, ViewLogEntity>> ViewLogMyLastExpression =
-            e => Database.Query<ViewLogEntity>()
-            .Where(a => a.User.Is(UserEntity.Current) && a.Target.Is(e))
-            .OrderBy(a => a.StartDate).FirstOrDefault();     
-        [ExpressionField]
-        public static ViewLogEntity ViewLogMyLast(this Entity e)
-        {
-            return ViewLogMyLastExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ViewLogEntity ViewLogMyLast(this Entity e) => As.Expression(() => e.ViewLogs()
+            .Where(a => a.User.Is(UserEntity.Current))
+            .OrderBy(a => a.StartDate).FirstOrDefault());
 
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;

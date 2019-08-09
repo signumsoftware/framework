@@ -27,12 +27,8 @@ namespace Signum.Entities.Dynamic
         public string ViewContent { get; set; }
 
 
-        static Expression<Func<DynamicViewEntity, string>> ToStringExpression = @this => @this.ViewName + ": " + @this.EntityType;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => ViewName + ": " + EntityType);
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
@@ -96,12 +92,8 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => "ViewSelector " + EntityType);
     }
 
     [AutoInit]
@@ -125,12 +117,8 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "DynamicViewOverride " + @this.EntityType;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => "DynamicViewOverride " + EntityType);
     }
 
     [AutoInit]

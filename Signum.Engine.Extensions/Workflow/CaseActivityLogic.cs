@@ -25,151 +25,78 @@ namespace Signum.Engine.Workflow
 {
     public static class CaseActivityLogic
     {
-        static Expression<Func<ICaseMainEntity, IQueryable<CaseActivityEntity>>> MainEntityCaseActivitiesExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e)
-        {
-            return MainEntityCaseActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e));
 
-        static Expression<Func<ICaseMainEntity, CaseActivityEntity>> LastCaseActivityExpression =
-            e => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault();
-        [ExpressionField]
-        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e)
-        {
-            return LastCaseActivityExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e) => 
+            As.Expression(() => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault());
 
-        static Expression<Func<ICaseMainEntity, IQueryable<CaseEntity>>> MainEntityCasesExpression =
-            e => e.CaseActivities().Select(a => a.Case);
-        [ExpressionField]
-        public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e)
-        {
-            return MainEntityCasesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e) => 
+            As.Expression(() => e.CaseActivities().Select(a => a.Case));
 
-        static Expression<Func<ICaseMainEntity, bool>> MainEntityCurrentUserHasNotificationExpression =
-            e => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current));
-        [ExpressionField]
-        public static bool CurrentUserHasNotification(this ICaseMainEntity e)
-        {
-            return MainEntityCurrentUserHasNotificationExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static bool CurrentUserHasNotification(this ICaseMainEntity e) => 
+            As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current)));
 
-        static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
-            w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
-        [ExpressionField]
-        public static IQueryable<CaseEntity> Cases(this WorkflowEntity e)
-        {
-            return CasesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) => 
+            As.Expression(() => Database.Query<CaseEntity>().Where(a => a.Workflow == w));
 
-        static Expression<Func<CaseActivityEntity, bool>> CurrentUserHasNotificationExpression =
-            ca => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
-                                                (cn.State == CaseNotificationState.New ||
-                                                 cn.State == CaseNotificationState.Opened ||
-                                                 cn.State == CaseNotificationState.InProgress));
-        [ExpressionField]
-        public static bool CurrentUserHasNotification(this CaseActivityEntity e)
-        {
-            return CurrentUserHasNotificationExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static bool CurrentUserHasNotification(this CaseActivityEntity ca) =>
+            As.Expression(() => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
+                                                 (cn.State == CaseNotificationState.New ||
+                                                  cn.State == CaseNotificationState.Opened ||
+                                                  cn.State == CaseNotificationState.InProgress)));
 
-        static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityEntity>>> NextActivitiesExpression =
-            ca => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca));
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity e)
-        {
-            return NextActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity ca) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca)));
 
-        static Expression<Func<CaseEntity, CaseActivityEntity>> DecompositionSurrogateActivityExpression =
-            childCase => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous!.Entity).First();
-        [ExpressionField]
-        public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase)
-        {
-            return DecompositionSurrogateActivityExpression.Evaluate(childCase);
-        }
+        [AutoExpressionField]
+        public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase) => 
+            As.Expression(() => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous!.Entity).First());
 
+        [AutoExpressionField]
+        public static IQueryable<CaseEntity> SubCases(this CaseEntity p) => 
+            As.Expression(() => Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(p)));
 
-
-        static Expression<Func<CaseEntity, IQueryable<CaseEntity>>> SubCasesExpression =
-        p => Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(p));
-        [ExpressionField]
-        public static IQueryable<CaseEntity> SubCases(this CaseEntity p)
-        {
-            return SubCasesExpression.Evaluate(p);
-        }
-
-
-        static Expression<Func<CaseActivityEntity, bool>> IsFreshNewExpression =
-        ca => (ca.State == CaseActivityState.PendingNext || ca.State == CaseActivityState.PendingDecision) && 
-                ca.Notifications().All(n => n.State == CaseNotificationState.New);
-        [ExpressionField]
-        public static bool IsFreshNew(this CaseActivityEntity entity)
-        {
-            return IsFreshNewExpression.Evaluate(entity);
-        }
-  
+        [AutoExpressionField]
+        public static bool IsFreshNew(this CaseActivityEntity ca) =>
+            As.Expression(() => (ca.State == CaseActivityState.PendingNext || ca.State == CaseActivityState.PendingDecision) && ca.Notifications().All(n => n.State == CaseNotificationState.New));
         
-        static Expression<Func<IWorkflowNodeEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e)
-        {
-            return CaseActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e));
 
-        static Expression<Func<WorkflowActivityEntity, double?>> AverageDurationActivityExpression =
-        wa => wa.CaseActivities().Average(a => a.Duration);
-        [ExpressionField]
-        public static double? AverageDuration(this WorkflowActivityEntity wa)
-        {
-            return AverageDurationActivityExpression.Evaluate(wa);
-        }
+        [AutoExpressionField]
+        public static double? AverageDuration(this WorkflowActivityEntity wa) => 
+            As.Expression(() => wa.CaseActivities().Average(a => a.Duration));
 
-        static Expression<Func<WorkflowEventEntity, double?>> AverageDurationEventExpression =
-            we => we.CaseActivities().Average(a => a.Duration);
-        [ExpressionField]
-        public static double? AverageDuration(this WorkflowEventEntity we)
-        {
-            return AverageDurationEventExpression.Evaluate(we);
-        }
+        [AutoExpressionField]
+        public static double? AverageDuration(this WorkflowEventEntity we) => 
+            As.Expression(() => we.CaseActivities().Average(a => a.Duration));
 
-        static Expression<Func<CaseEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesFromCaseExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.Case == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e)
-        {
-            return CaseActivitiesFromCaseExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case == e));
 
 
-        static Expression<Func<CaseEntity, IQueryable<CaseTagEntity>>> TagsExpression =
-        e => Database.Query<CaseTagEntity>().Where(a => a.Case.Is(e));
-        [ExpressionField]
-        public static IQueryable<CaseTagEntity> Tags(this CaseEntity e)
-        {
-            return TagsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseTagEntity> Tags(this CaseEntity e) => 
+            As.Expression(() => Database.Query<CaseTagEntity>().Where(a => a.Case.Is(e)));
 
-        static Expression<Func<CaseActivityEntity, IQueryable<CaseNotificationEntity>>> NotificationsExpression =
-            e => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e));
-        [ExpressionField]
-        public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e)
-        {
-            return NotificationsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e) => 
+            As.Expression(() => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e)));
 
 
-        static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityExecutedTimerEntity>>> ExecutedTimersExpression =
-        e => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e));
-        [ExpressionField]
-        public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e)
-        {
-            return ExecutedTimersExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e)));
 
         public static void Start(SchemaBuilder sb)
         {

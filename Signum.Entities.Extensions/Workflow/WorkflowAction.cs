@@ -21,12 +21,8 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowActionEval Eval { get; set; }
 
-        static Expression<Func<WorkflowActionEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

@@ -24,137 +24,81 @@ namespace Signum.Engine.Workflow
     {
         public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition;
 
-        static Expression<Func<WorkflowEntity, bool>> WorkflowHasExpiredExpression =
-            e => e.ExpirationDate.HasValue && e.ExpirationDate.Value < TimeZoneManager.Now;
-        [ExpressionField]
-        public static bool HasExpired(this WorkflowEntity entity)
-        {
-            return WorkflowHasExpiredExpression.Evaluate(entity);
-        }
+        [AutoExpressionField]
+        public static bool HasExpired(this WorkflowEntity w) => 
+            As.Expression(() => w.ExpirationDate.HasValue && w.ExpirationDate.Value < TimeZoneManager.Now);
 
-        static Expression<Func<WorkflowEntity, IQueryable<WorkflowPoolEntity>>> WorkflowPoolsExpression =
-            e => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowPoolEntity> WorkflowPools(this WorkflowEntity e)
-        {
-            return WorkflowPoolsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowPoolEntity> WorkflowPools(this WorkflowEntity e) => 
+            As.Expression(() => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e));
 
-        static Expression<Func<WorkflowEntity, IQueryable<WorkflowActivityEntity>>> WorkflowActivitiesExpression =
-            e => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane.Pool.Workflow == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowActivityEntity> WorkflowActivities(this WorkflowEntity e)
-        {
-            return WorkflowActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowActivityEntity> WorkflowActivities(this WorkflowEntity e) => 
+            As.Expression(() => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane.Pool.Workflow == e));
 
         public static IEnumerable<WorkflowActivityEntity> WorkflowActivitiesFromCache(this WorkflowEntity e)
         {
             return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowActivityEntity>();
         }
 
-        static Expression<Func<WorkflowEntity, IQueryable<WorkflowEventEntity>>> WorkflowEventsExpression =
-            e => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Pool.Workflow == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowEntity e)
-        {
-            return WorkflowEventsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowEntity e) => 
+            As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Pool.Workflow == e));
 
-        static Expression<Func<WorkflowEntity, WorkflowEventEntity>> WorkflowStartEventExpression =
-            e => e.WorkflowEvents().Where(we => we.Type == WorkflowEventType.Start).SingleOrDefault();
-        [ExpressionField]
-        public static WorkflowEventEntity WorkflowStartEvent(this WorkflowEntity e)
-        {
-            return WorkflowStartEventExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static WorkflowEventEntity WorkflowStartEvent(this WorkflowEntity e) => 
+            As.Expression(() => e.WorkflowEvents().Where(we => we.Type == WorkflowEventType.Start).SingleOrDefault());
 
         public static IEnumerable<WorkflowEventEntity> WorkflowEventsFromCache(this WorkflowEntity e)
         {
             return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowEventEntity>();
         }
 
-        static Expression<Func<WorkflowEntity, IQueryable<WorkflowGatewayEntity>>> WorkflowGatewaysExpression =
-            e => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane.Pool.Workflow == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowGatewayEntity> WorkflowGateways(this WorkflowEntity e)
-        {
-            return WorkflowGatewaysExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowGatewayEntity> WorkflowGateways(this WorkflowEntity e) => 
+            As.Expression(() => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane.Pool.Workflow == e));
 
         public static IEnumerable<WorkflowGatewayEntity> WorkflowGatewaysFromCache(this WorkflowEntity e)
         {
             return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowGatewayEntity>();
         }
 
-        static Expression<Func<WorkflowEntity, IQueryable<WorkflowConnectionEntity>>> WorkflowConnectionsExpression =
-          e => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow == e && a.To.Lane.Pool.Workflow == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowEntity e)
-        {
-            return WorkflowConnectionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowEntity e) => 
+            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow == e && a.To.Lane.Pool.Workflow == e));
 
         public static IEnumerable<WorkflowConnectionEntity> WorkflowConnectionsFromCache(this WorkflowEntity e)
         {
             return GetWorkflowNodeGraph(e.ToLite()).NextGraph.EdgesWithValue.SelectMany(edge => edge.Value);
         }
 
-        static Expression<Func<WorkflowEntity, IQueryable<WorkflowConnectionEntity>>> WorkflowMessageConnectionsExpression =
-         e => e.WorkflowConnections().Where(a => a.From.Lane.Pool != a.To.Lane.Pool);
-        [ExpressionField]
-        public static IQueryable<WorkflowConnectionEntity> WorkflowMessageConnections(this WorkflowEntity e)
-        {
-            return WorkflowMessageConnectionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowConnectionEntity> WorkflowMessageConnections(this WorkflowEntity e) => 
+            As.Expression(() => e.WorkflowConnections().Where(a => a.From.Lane.Pool != a.To.Lane.Pool));
 
-        static Expression<Func<WorkflowPoolEntity, IQueryable<WorkflowLaneEntity>>> PoolLanesExpression =
-            e => Database.Query<WorkflowLaneEntity>().Where(a => a.Pool == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowLaneEntity> WorkflowLanes(this WorkflowPoolEntity e)
-        {
-            return PoolLanesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowLaneEntity> WorkflowLanes(this WorkflowPoolEntity e) => 
+            As.Expression(() => Database.Query<WorkflowLaneEntity>().Where(a => a.Pool == e));
 
-        static Expression<Func<WorkflowPoolEntity, IQueryable<WorkflowConnectionEntity>>> PoolConnectionsExpression =
-            e => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool == e && a.To.Lane.Pool == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowPoolEntity e)
-        {
-            return PoolConnectionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowPoolEntity e) => 
+            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool == e && a.To.Lane.Pool == e));
 
-        static Expression<Func<WorkflowLaneEntity, IQueryable<WorkflowGatewayEntity>>> LaneGatewaysExpression =
-            e => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowGatewayEntity> WorkflowGateways(this WorkflowLaneEntity e)
-        {
-            return LaneGatewaysExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowGatewayEntity> WorkflowGateways(this WorkflowLaneEntity e) => 
+            As.Expression(() => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane == e));
 
-        static Expression<Func<WorkflowLaneEntity, IQueryable<WorkflowEventEntity>>> LaneEventsExpression =
-            e => Database.Query<WorkflowEventEntity>().Where(a => a.Lane == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowLaneEntity e)
-        {
-            return LaneEventsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowLaneEntity e) => 
+            As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane == e));
 
-        static Expression<Func<WorkflowLaneEntity, IQueryable<WorkflowActivityEntity>>> LaneActivitiesExpression =
-            e => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowActivityEntity> WorkflowActivities(this WorkflowLaneEntity e)
-        {
-            return LaneActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowActivityEntity> WorkflowActivities(this WorkflowLaneEntity e) => 
+            As.Expression(() => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane == e));
 
-        static Expression<Func<IWorkflowNodeEntity, IQueryable<WorkflowConnectionEntity>>> NextConnectionsExpression =
-            e => Database.Query<WorkflowConnectionEntity>().Where(a => a.From == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowConnectionEntity> NextConnections(this IWorkflowNodeEntity e)
-        {
-            return NextConnectionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowConnectionEntity> NextConnections(this IWorkflowNodeEntity e) => 
+            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From == e));
 
         public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {
@@ -166,13 +110,9 @@ namespace Signum.Engine.Workflow
             return result.Where(a => a.Type == type);
         }
 
-        static Expression<Func<IWorkflowNodeEntity, IQueryable<WorkflowConnectionEntity>>> PreviousConnectionsExpression =
-            e => Database.Query<WorkflowConnectionEntity>().Where(a => a.To == e);
-        [ExpressionField]
-        public static IQueryable<WorkflowConnectionEntity> PreviousConnections(this IWorkflowNodeEntity e)
-        {
-            return PreviousConnectionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WorkflowConnectionEntity> PreviousConnections(this IWorkflowNodeEntity e) => 
+            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.To == e));
 
         public static IEnumerable<WorkflowConnectionEntity> PreviousConnectionsFromCache(this IWorkflowNodeEntity e)
         {

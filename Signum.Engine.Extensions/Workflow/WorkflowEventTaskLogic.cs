@@ -26,34 +26,17 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowEventTaskLogic
     {
+        [AutoExpressionField]
+        public static IQueryable<WorkflowEventTaskConditionResultEntity> ConditionResults(this WorkflowEventTaskEntity e) => 
+            As.Expression(() => Database.Query<WorkflowEventTaskConditionResultEntity>().Where(a => a.WorkflowEventTask.Is(e)));
 
-        static Expression<Func<WorkflowEventTaskEntity, IQueryable<WorkflowEventTaskConditionResultEntity>>> ConditionResultsExpression =
-        e => Database.Query<WorkflowEventTaskConditionResultEntity>().Where(a => a.WorkflowEventTask.Is(e));
-        [ExpressionField]
-        public static IQueryable<WorkflowEventTaskConditionResultEntity> ConditionResults(this WorkflowEventTaskEntity e)
-        {
-            return ConditionResultsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ScheduledTaskEntity ScheduledTask(this WorkflowEventEntity e) =>
+            As.Expression(() => Database.Query<ScheduledTaskEntity>().SingleOrDefault(s => ((WorkflowEventTaskEntity)s.Task).Event.Is(e)));
 
-
-        static Expression<Func<WorkflowEventEntity, ScheduledTaskEntity>> ScheduledTaskExpression =
-        e => Database.Query<ScheduledTaskEntity>()
-                        .SingleOrDefault(s => ((WorkflowEventTaskEntity)s.Task).Event.Is(e));
-        [ExpressionField]
-        public static ScheduledTaskEntity ScheduledTask(this WorkflowEventEntity e)
-        {
-            return ScheduledTaskExpression.Evaluate(e);
-        }
-
-        static Expression<Func<WorkflowEventEntity, WorkflowEventTaskEntity>> WorkflowEventTaskExpression =
-        e => Database.Query<WorkflowEventTaskEntity>()
-                        .SingleOrDefault(et => et.Event.Is(e));
-        [ExpressionField]
-        public static WorkflowEventTaskEntity WorkflowEventTask(this WorkflowEventEntity e)
-        {
-            return WorkflowEventTaskExpression.Evaluate(e);
-        }
-
+        [AutoExpressionField]
+        public static WorkflowEventTaskEntity WorkflowEventTask(this WorkflowEventEntity e) =>
+            As.Expression(() => Database.Query<WorkflowEventTaskEntity>().SingleOrDefault(et => et.Event.Is(e)));
 
         public static void Start(SchemaBuilder sb)
         {

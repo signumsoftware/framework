@@ -26,12 +26,8 @@ namespace Signum.Entities.Mailing
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
-        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {

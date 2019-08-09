@@ -20,13 +20,9 @@ namespace Signum.Engine.Processes
 {
     public static class PackageLogic
     {
-        static Expression<Func<PackageEntity, IQueryable<PackageLineEntity>>> LinesExpression =
-            p => Database.Query<PackageLineEntity>().Where(pl => pl.Package.Is(p));
-        [ExpressionField]
-        public static IQueryable<PackageLineEntity> Lines(this PackageEntity p)
-        {
-            return LinesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PackageLineEntity> Lines(this PackageEntity p) => 
+            As.Expression(() => Database.Query<PackageLineEntity>().Where(pl => pl.Package.Is(p)));
 
         public static void AssertStarted(SchemaBuilder sb)
         {

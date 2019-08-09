@@ -18,38 +18,21 @@ namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
-        static Expression<Func<Pop3ConfigurationEntity, IQueryable<Pop3ReceptionEntity>>> ReceptionsExpression =
-            c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c));
-        [ExpressionField]
-        public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c)
-        {
-            return ReceptionsExpression.Evaluate(c);
-        }
+        [AutoExpressionField]
+        public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c) => 
+            As.Expression(() => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c)));
 
-        static Expression<Func<Pop3ReceptionEntity, IQueryable<EmailMessageEntity>>> EmailMessagesExpression =
-            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r));
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r)
-        {
-            return EmailMessagesExpression.Evaluate(r);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r) => 
+            As.Expression(() => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r)));
 
-        static Expression<Func<Pop3ReceptionEntity, IQueryable<ExceptionEntity>>> ExceptionsExpression =
-            e => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity);
-        [ExpressionField]
-        public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e)
-        {
-            return ExceptionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e) => 
+            As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity));
 
-
-        static Expression<Func<ExceptionEntity, Pop3ReceptionEntity>> Pop3ReceptionExpression =
-            ex => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx();
-        [ExpressionField]
-        public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity entity)
-        {
-            return Pop3ReceptionExpression.Evaluate(entity);
-        }
+        [AutoExpressionField]
+        public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity ex) => 
+            As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx());
 
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
 

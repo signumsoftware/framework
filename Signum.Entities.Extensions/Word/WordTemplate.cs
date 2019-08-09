@@ -38,12 +38,8 @@ namespace Signum.Entities.Word
 
         public WordConverterSymbol? WordConverter { get; set; }
 
-        static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public bool IsApplicable(Entity? entity)
         {

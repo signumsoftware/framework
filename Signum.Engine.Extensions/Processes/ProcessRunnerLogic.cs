@@ -107,21 +107,13 @@ namespace Signum.Engine.Processes
             process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
         }
 
-        static Expression<Func<ProcessEntity, bool>> IsMineExpression =
-            p => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName; 
-        [ExpressionField] 
-        public static bool IsMine(this ProcessEntity p)
-        {
-            return IsMineExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static bool IsMine(this ProcessEntity p) => 
+            As.Expression(() => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName);
 
-        static Expression<Func<ProcessEntity, bool>> IsSharedExpression =
-            p => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessEntity.None;
-        [ExpressionField]
-        public static bool IsShared(this ProcessEntity p)
-        {
-            return IsSharedExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static bool IsShared(this ProcessEntity p) => 
+            As.Expression(() => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessEntity.None);
 
         internal static List<T> ToListWakeup<T>(this IQueryable<T> query, string action)
         {

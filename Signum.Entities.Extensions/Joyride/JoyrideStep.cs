@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
@@ -34,12 +34,8 @@ namespace Signum.Entities.Joyride
 
         public bool IsFixed { get; set; }
 
-        static Expression<Func<JoyrideStepEntity, string>> ToStringExpression = e => e.Title.ToString();
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Title);
 
         public XElement ToXml(IToXmlContext ctx)
         {

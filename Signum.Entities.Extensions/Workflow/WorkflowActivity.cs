@@ -57,12 +57,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(MultiLine = true)]
         public string? UserHelp { get; set; }
 
-        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
 
 

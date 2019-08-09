@@ -55,12 +55,8 @@ namespace Signum.Entities.Toolbar
         }
 
 
-        static Expression<Func<ToolbarEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     public enum ToolbarLocation
@@ -208,12 +204,8 @@ namespace Signum.Entities.Toolbar
         }
 
 
-        static Expression<Func<ToolbarMenuEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

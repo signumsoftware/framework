@@ -20,14 +20,9 @@ namespace Signum.Engine.Dynamic
     public static class DynamicSqlMigrationLogic
     {
 
-        static Expression<Func<DynamicRenameEntity, bool>> IsAppliedExpression =
-        r => Database.Query<DynamicSqlMigrationEntity>().Any(m => m.CreationDate > r.CreationDate);
-
-        [ExpressionField]
-        public static bool IsApplied(this DynamicRenameEntity r)
-        {
-            return IsAppliedExpression.Evaluate(r);
-        }
+        [AutoExpressionField]
+        public static bool IsApplied(this DynamicRenameEntity r) => 
+            As.Expression(() => Database.Query<DynamicSqlMigrationEntity>().Any(m => m.CreationDate > r.CreationDate));
 
         public static StringBuilder? CurrentLog = null;
         public static string? LastLog;

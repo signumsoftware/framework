@@ -11,11 +11,7 @@ namespace Signum.Entities.Printing
         [StringLengthValidator(Max = 200)]
         public string? Name { get; set; }
 
-        static Expression<Func<PrintPackageEntity, string>> ToStringExpression = e => e.Name ?? "- No Name -";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? "- No Name -");
     }
 }

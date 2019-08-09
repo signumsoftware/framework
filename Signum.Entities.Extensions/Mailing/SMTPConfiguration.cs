@@ -45,12 +45,8 @@ namespace Signum.Entities.Mailing
                 {SmtpDeliveryMethod.PickupDirectoryFromIis,    null, null },
             };
 
-        static Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
 
@@ -90,12 +86,8 @@ namespace Signum.Entities.Mailing
 
         public CertFileType CertFileType { get; set; }
 
-        static Expression<Func<ClientCertificationFileEmbedded, string>> ToStringExpression = e => e.FullFilePath;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FullFilePath);
     }
 
     public enum CertFileType

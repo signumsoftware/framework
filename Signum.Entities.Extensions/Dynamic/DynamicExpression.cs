@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
 
@@ -27,12 +27,8 @@ namespace Signum.Entities.Dynamic
 
         public DynamicExpressionTranslation Translation { get; set; }
 
-        static Expression<Func<DynamicExpressionEntity, string>> ToStringExpression = @this => @this.ReturnType + " " + @this.Name + "(" + @this.FromType + " e)";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => ReturnType + " " + Name + "(" + FromType + " e)");
     }
 
     public enum DynamicExpressionTranslation

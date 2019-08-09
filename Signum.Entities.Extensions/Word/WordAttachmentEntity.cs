@@ -32,11 +32,7 @@ namespace Signum.Entities.Word
 
         public ModelConverterSymbol ModelConverter { get; set; }
 
-        static Expression<Func<WordAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FileName);
     }
 }

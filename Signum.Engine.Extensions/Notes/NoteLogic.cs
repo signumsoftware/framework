@@ -18,13 +18,9 @@ namespace Signum.Engine.Notes
 {
     public static class NoteLogic
     {
-        static Expression<Func<Entity, IQueryable<NoteEntity>>> NotesExpression =
-            ident => Database.Query<NoteEntity>().Where(n => n.Target.Is(ident));
-        [ExpressionField]
-        public static IQueryable<NoteEntity> Notes(this Entity ident)
-        {
-            return NotesExpression.Evaluate(ident);
-        }
+        [AutoExpressionField]
+        public static IQueryable<NoteEntity> Notes(this Entity ident) => 
+            As.Expression(() => Database.Query<NoteEntity>().Where(n => n.Target.Is(ident)));
 
         static HashSet<NoteTypeEntity> SystemNoteTypes = new HashSet<NoteTypeEntity>();
         static bool started = false;

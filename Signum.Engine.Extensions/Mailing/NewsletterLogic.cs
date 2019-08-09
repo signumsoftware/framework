@@ -20,21 +20,13 @@ namespace Signum.Engine.Mailing
 {
     public static class NewsletterLogic
     {
-        static Expression<Func<IEmailOwnerEntity, IQueryable<NewsletterDeliveryEntity>>> NewsletterDeliveriesExpression =
-            eo => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.Is(eo));
-        [ExpressionField]
-        public static IQueryable<NewsletterDeliveryEntity> NewsletterDeliveries(this IEmailOwnerEntity eo)
-        {
-            return NewsletterDeliveriesExpression.Evaluate(eo);
-        }
+        [AutoExpressionField]
+        public static IQueryable<NewsletterDeliveryEntity> NewsletterDeliveries(this IEmailOwnerEntity eo) => 
+            As.Expression(() => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.Is(eo)));
 
-        static Expression<Func<NewsletterEntity, IQueryable<NewsletterDeliveryEntity>>> DeliveriesExpression =
-            n => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n));
-        [ExpressionField]
-        public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n)
-        {
-            return DeliveriesExpression.Evaluate(n);
-        }
+        [AutoExpressionField]
+        public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n) => 
+            As.Expression(() => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n)));
         
         public static Func<NewsletterEntity, SmtpConfigurationEntity> GetStmpConfiguration;
 

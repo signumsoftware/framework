@@ -37,12 +37,8 @@ namespace Signum.Entities.Workflow
         public WorkflowEventTaskActionEval? Action { get; set; }
 
 
-        static Expression<Func<WorkflowEventTaskEntity, string>> ToStringExpression = @this => @this.Workflow + " : " + @this.Event;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Workflow + " : " + Event);
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {

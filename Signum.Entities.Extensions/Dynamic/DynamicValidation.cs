@@ -25,12 +25,8 @@ namespace Signum.Entities.Dynamic
         [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicValidationEval Eval { get; set; }
 
-        static Expression<Func<DynamicValidationEntity, string>> ToStringExpression = @this =>@this.EntityType + (@this.SubEntity == null ? null : (" " + @this.SubEntity))+ ": " + @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => EntityType + (SubEntity == null ? null : (" " + SubEntity))+ ": " + Name);
     }
 
     [AutoInit]

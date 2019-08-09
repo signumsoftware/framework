@@ -31,13 +31,9 @@ namespace Signum.Engine.Mailing
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
      
-        static Expression<Func<EmailModelEntity, IQueryable<EmailTemplateEntity>>> EmailTemplatesExpression =
-            se => Database.Query<EmailTemplateEntity>().Where(et => et.Model == se);
-        [ExpressionField]
-        public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se)
-        {
-            return EmailTemplatesExpression.Evaluate(se);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se) => 
+            As.Expression(() => Database.Query<EmailTemplateEntity>().Where(et => et.Model == se));
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
         public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName;

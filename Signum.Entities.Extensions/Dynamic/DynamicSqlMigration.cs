@@ -29,12 +29,8 @@ namespace Signum.Entities.Dynamic
         public string Script { get; set; }
 
 
-        static Expression<Func<DynamicSqlMigrationEntity, string>> ToStringExpression = @this => @this.Comment.Etc(100);
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Comment.Etc(100));
     }
 
     [AutoInit]
@@ -67,12 +63,8 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Max = 200)]
         public string NewName { get; set; }
 
-        static Expression<Func<DynamicRenameEntity, string>> ToStringExpression = @this => @this.ReplacementKey + ": " + @this.OldName + " -> " + @this.NewName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => ReplacementKey + ": " + OldName + " -> " + NewName);
     }
 
 

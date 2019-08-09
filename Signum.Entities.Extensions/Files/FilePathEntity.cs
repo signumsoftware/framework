@@ -63,13 +63,8 @@ namespace Signum.Entities.Files
 
         public int FileLength { get; internal set; }
 
-        static Expression<Func<FilePathEntity, string>> FileLengthStringExpression =
-          @this => ((long)@this.FileLength).ToComputerSize(true);
-        [ExpressionField]
-        public string FileLengthString
-        {
-            get { return FileLengthStringExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize(true));
 
         [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }

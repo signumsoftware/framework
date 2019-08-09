@@ -74,13 +74,9 @@ namespace Signum.Engine.Tree
             return ParentMethodExpander<T>.Expression.Evaluate(e);
         }
        
-        public static Expression<Func<TreeEntity, short>> LevelExpression =
-                cc => (short)cc.Route.GetLevel();
-        [ExpressionField]
-        public static short Level(this TreeEntity e)
-        {
-            return LevelExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static short Level(this TreeEntity t) => 
+            As.Expression(() => (short)t.Route.GetLevel());
 
         public static void CalculateFullName<T>(T tree)
             where T : TreeEntity

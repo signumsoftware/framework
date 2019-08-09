@@ -31,29 +31,17 @@ namespace Signum.Engine.SMS
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
-        public static Expression<Func<ISMSOwnerEntity, IQueryable<SMSMessageEntity>>> SMSMessagesExpression =
-            e => Database.Query<SMSMessageEntity>().Where(m => m.Referred.Is(e));
-        [ExpressionField]
-        public static IQueryable<SMSMessageEntity> SMSMessages(this ISMSOwnerEntity e)
-        {
-            return SMSMessagesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<SMSMessageEntity> SMSMessages(this ISMSOwnerEntity e) => 
+            As.Expression(() => Database.Query<SMSMessageEntity>().Where(m => m.Referred.Is(e)));
 
-        static Expression<Func<SMSSendPackageEntity, IQueryable<SMSMessageEntity>>> SMSMessagesSendExpression =
-            e => Database.Query<SMSMessageEntity>().Where(a => a.SendPackage.Is(e));
-        [ExpressionField]
-        public static IQueryable<SMSMessageEntity> SMSMessages(this SMSSendPackageEntity e)
-        {
-            return SMSMessagesSendExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<SMSMessageEntity> SMSMessages(this SMSSendPackageEntity e) => 
+            As.Expression(() => Database.Query<SMSMessageEntity>().Where(a => a.SendPackage.Is(e)));
 
-        static Expression<Func<SMSUpdatePackageEntity, IQueryable<SMSMessageEntity>>> SMSMessagesUpdateExpression =
-          e => Database.Query<SMSMessageEntity>().Where(a => a.UpdatePackage.Is(e));
-        [ExpressionField]
-        public static IQueryable<SMSMessageEntity> SMSMessages(this SMSUpdatePackageEntity e)
-        {
-            return SMSMessagesUpdateExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<SMSMessageEntity> SMSMessages(this SMSUpdatePackageEntity e) => 
+            As.Expression(() => Database.Query<SMSMessageEntity>().Where(a => a.UpdatePackage.Is(e)));
 
 
 

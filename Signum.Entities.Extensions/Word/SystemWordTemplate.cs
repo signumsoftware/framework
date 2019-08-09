@@ -10,12 +10,8 @@ namespace Signum.Entities.Word
         [StringLengthValidator(Max = 200), UniqueIndex]
         public string FullClassName { get; set; }
 
-        static readonly Expression<Func<WordModelEntity, string>> ToStringExpression = e => e.FullClassName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FullClassName);
     }
 
 }

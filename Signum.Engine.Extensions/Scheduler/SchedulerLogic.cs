@@ -25,38 +25,22 @@ namespace Signum.Engine.Scheduler
     {
         public static Action<ScheduledTaskLogEntity> OnFinally;
         
-        static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
-         ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
-        [ExpressionField]
-        public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity e)
-        {
-            return ExecutionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) => 
+            As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == t));
 
-        static Expression<Func<ITaskEntity, ScheduledTaskLogEntity>> LastExecutionExpression =
-            e => e.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault();
-        [ExpressionField]
-        public static ScheduledTaskLogEntity LastExecution(this ITaskEntity e)
-        {
-            return LastExecutionExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ScheduledTaskLogEntity LastExecution(this ITaskEntity t) => 
+            As.Expression(() => t.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault());
 
-        static Expression<Func<ScheduledTaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsSTExpression =
-            ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == ct);
-        [ExpressionField]
-        public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity e)
-        {
-            return ExecutionsSTExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity st) => 
+            As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == st));
 
 
-        static Expression<Func<ScheduledTaskLogEntity, IQueryable<SchedulerTaskExceptionLineEntity>>> ExceptionLinesExpression =
-        e => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e));
-        [ExpressionField]
-        public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e)
-        {
-            return ExceptionLinesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e) => 
+            As.Expression(() => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e)));
 
         public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask = 
             new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();

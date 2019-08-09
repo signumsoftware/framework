@@ -12,21 +12,13 @@ namespace Signum.Engine.Files
 {
     public static class FileLogic
     {
-        static Expression<Func<FileEntity, WebImage>> WebImageExpression =
-            fp => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() };
-        [ExpressionField]
-        public static WebImage? WebImage(this FileEntity fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
+        [AutoExpressionField]
+        public static WebImage? WebImage(this FileEntity fp) => 
+            As.Expression(() => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() });
 
-        static Expression<Func<FileEntity, WebDownload>> WebDownloadExpression =
-           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName };
-        [ExpressionField]
-        public static WebDownload WebDownload(this FileEntity fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
+        [AutoExpressionField]
+        public static WebDownload WebDownload(this FileEntity fp) => 
+            As.Expression(() => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName });
 
         public static void Start(SchemaBuilder sb)
         {

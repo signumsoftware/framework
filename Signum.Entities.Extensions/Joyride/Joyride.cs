@@ -34,12 +34,8 @@ namespace Signum.Entities.Joyride
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static Expression<Func<JoyrideEntity, string>> ToStringExpression = e => e.Name.ToString();
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public XElement ToXml(IToXmlContext ctx)
         {

@@ -19,29 +19,17 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailPackageLogic
     {
-        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> MessagesExpression =
-            p => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(p));
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p)
-        {
-            return MessagesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p) => 
+            As.Expression(() => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(p)));
 
-        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> RemainingMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending);
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p)
-        {
-            return RemainingMessagesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p) => 
+            As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending));
 
-        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> ExceptionMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailMessageState.SentException);
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p)
-        {
-            return ExceptionMessagesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p) => 
+            As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.SentException));
 
 
         public static void Start(SchemaBuilder sb)

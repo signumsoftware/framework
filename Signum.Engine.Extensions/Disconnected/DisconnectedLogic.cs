@@ -29,21 +29,13 @@ namespace Signum.Engine.Disconnected
         public static ImportManager ImportManager = new ImportManager();
         public static LocalBackupManager LocalBackupManager = new LocalBackupManager();
 
-        static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ImportsExpression =
-                m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m));
-        [ExpressionField]
-        public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m)
-        {
-            return ImportsExpression.Evaluate(m);
-        }
+        [AutoExpressionField]
+        public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m) => 
+            As.Expression(() => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m)));
 
-        static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ExportsExpression =
-               m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m));
-        [ExpressionField]
-        public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m)
-        {
-            return ExportsExpression.Evaluate(m);
-        }
+        [AutoExpressionField]
+        public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m) => 
+            As.Expression(() => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m)));
 
         public static long ServerSeed;
 

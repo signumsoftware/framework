@@ -19,12 +19,8 @@ namespace Signum.Entities.Help
 		[StringLengthValidator(Min = 3, MultiLine = true)]
         public string? Description { get; set; }
 
-        static Expression<Func<NamespaceHelpEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

@@ -28,12 +28,8 @@ namespace Signum.Entities.Workflow
         [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
         public ModelEntity GetModel()
         {

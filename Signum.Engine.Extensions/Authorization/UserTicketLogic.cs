@@ -48,13 +48,9 @@ namespace Signum.Engine.Authorization
                 user.UserTickets().UnsafeDelete();
         }
 
-        static Expression<Func<UserEntity, IQueryable<UserTicketEntity>>> UserTicketsExpression =
-            u => Database.Query<UserTicketEntity>().Where(ut => ut.User == u.ToLite());
-        [ExpressionField]
-        public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u)
-        {
-            return UserTicketsExpression.Evaluate(u);
-        }
+        [AutoExpressionField]
+        public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u) => 
+            As.Expression(() => Database.Query<UserTicketEntity>().Where(ut => ut.User == u.ToLite()));
 
         public static string NewTicket(string device)
         {

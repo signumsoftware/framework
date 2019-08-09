@@ -87,12 +87,8 @@ namespace Signum.Entities.Chart
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.DisplayName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => DisplayName);
 
         internal void ParseData(QueryDescription description)
         {

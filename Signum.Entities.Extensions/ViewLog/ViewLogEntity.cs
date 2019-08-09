@@ -23,13 +23,8 @@ namespace Signum.Entities.ViewLog
         [StringLengthValidator(Min = 0, MultiLine = true)]
         public string? Data { get; set; }
 
-        static Expression<Func<ViewLogEntity, double>> DurationExpression =
-           sl => (sl.EndDate - sl.StartDate).TotalMilliseconds;
-        [ExpressionField, Unit("ms")]
-        public double Duration
-        {
-            get { return DurationExpression.Evaluate(this); }
-        }
+        [AutoExpressionField, Unit("ms")]
+        public double Duration => As.Expression(() => (EndDate - StartDate).TotalMilliseconds);
     }
 
     public enum ViewLogMessage

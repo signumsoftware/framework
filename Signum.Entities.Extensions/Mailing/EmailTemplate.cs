@@ -79,12 +79,8 @@ namespace Signum.Entities.Mailing
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<EmailTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         internal void ParseData(QueryDescription queryDescription)
         {

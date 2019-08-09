@@ -31,11 +31,7 @@ namespace Signum.Entities.Migrations
 
         public Lite<ExceptionEntity>? Exception { get; set; }
 
-        static Expression<Func<LoadMethodLogEntity, string>> ToStringExpression = e => e.MethodName!;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => MethodName!);
     }
 }

@@ -69,12 +69,8 @@ namespace Signum.Entities.Basics
             base.PreSaving(ctx);
         }
 
-        static Expression<Func<CultureInfoEntity, string>> ToStringExpression = e => e.EnglishName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => EnglishName);
     }
 
     [AutoInit]

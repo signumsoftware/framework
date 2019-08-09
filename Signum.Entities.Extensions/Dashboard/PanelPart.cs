@@ -146,12 +146,8 @@ namespace Signum.Entities.Dashboard
 
         public UserQueryPartRenderMode RenderMode { get; set; }
 
-        static Expression<Func<UserQueryPartEntity, string>> ToStringExpression = @this => @this.UserQuery + "";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserQuery + "");
 
         public bool RequiresTitle
         {
@@ -199,12 +195,8 @@ namespace Signum.Entities.Dashboard
 
         public bool AllowChangeShowData { get; set; } = false;
 
-        static Expression<Func<UserChartPartEntity, string>> ToStringExpression = @this => @this.UserChart + "";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserChart + "");
 
         public bool RequiresTitle
         {

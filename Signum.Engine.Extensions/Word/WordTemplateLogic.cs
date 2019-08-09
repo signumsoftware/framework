@@ -49,13 +49,9 @@ namespace Signum.Engine.Word
 
         public static Dictionary<string, IWordDataTableProvider> ToDataTableProviders = new Dictionary<string, IWordDataTableProvider>();
 
-        static Expression<Func<WordModelEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
-            e => Database.Query<WordTemplateEntity>().Where(a => a.Model == e);
-        [ExpressionField]
-        public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e)
-        {
-            return WordTemplatesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
+            As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model == e));
 
         public static void Start(SchemaBuilder sb)
         {

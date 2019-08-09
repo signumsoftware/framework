@@ -10,11 +10,7 @@ namespace Signum.Entities.Mailing
         [UniqueIndex]
         public string FullClassName { get; set; }
 
-        static Expression<Func<EmailModelEntity, string>> ToStringExpression = e => e.FullClassName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FullClassName);
     }
 }

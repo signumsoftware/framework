@@ -7,11 +7,9 @@ namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EntityHelpEntity : Entity
-    {
-        
+    {   
         public TypeEntity Type { get; set; }
 
-        
         public CultureInfoEntity Culture { get; set; }
 
 		[StringLengthValidator(Min = 3, MultiLine = true)]
@@ -26,12 +24,8 @@ namespace Signum.Entities.Help
         [Ignore]
         public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
 
-        static Expression<Func<EntityHelpEntity, string>> ToStringExpression = e => e.Type.ToString();
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Type.ToString());
 
         public bool IsEmpty
         {

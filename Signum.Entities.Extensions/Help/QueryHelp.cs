@@ -34,12 +34,8 @@ namespace Signum.Entities.Help
             return base.PropertyValidation(pi);
         }
 
-        static Expression<Func<QueryHelpEntity, string>> ToStringExpression = e => e.Query.ToString();
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Query.ToString());
     }
 
     [Serializable]

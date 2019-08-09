@@ -46,12 +46,8 @@ namespace Signum.Entities.Mailing
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<NewsletterEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
 
         public QueryEntity? Query { get; set; }

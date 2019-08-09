@@ -24,12 +24,8 @@ namespace Signum.Entities.Workflow
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
         public DateTime? FinishDate { get; set; }
 
-        static Expression<Func<CaseEntity, string>> ToStringExpression = @this => @this.Description;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Description);
     }
 
     [AutoInit]
@@ -81,12 +77,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 12)]
         public string Color { get; set; }
 
-        static Expression<Func<CaseTagTypeEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

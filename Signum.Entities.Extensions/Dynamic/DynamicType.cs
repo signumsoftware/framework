@@ -63,12 +63,8 @@ namespace Signum.Entities.Dynamic
         }
 
 
-        static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => TypeName);
     }
 
     [AutoInit]

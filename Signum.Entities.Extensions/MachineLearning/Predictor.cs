@@ -63,12 +63,8 @@ namespace Signum.Entities.MachineLearning
         public PredictorRegressionMetricsEmbedded? RegressionValidation { get; set; }
 
 
-        static Expression<Func<PredictorEntity, string>> ToStringExpression = @this => @this.Name!;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name!);
     }
 
 
@@ -352,12 +348,8 @@ namespace Signum.Entities.MachineLearning
             Columns = Columns.Select(f => f.Clone()).ToMList(),
         };
 
-        static Expression<Func<PredictorSubQueryEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public PredictorSubQueryColumnEmbedded FindColumn(string part)
         {

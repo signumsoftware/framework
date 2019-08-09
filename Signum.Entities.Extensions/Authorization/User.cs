@@ -56,12 +56,8 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        public static Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserName);
 
         public static UserEntity Current
         {
@@ -69,18 +65,14 @@ namespace Signum.Entities.Authorization
             set { UserHolder.Current = value; }
         }
 
-        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = u => new EmailOwnerData
+        [AutoExpressionField]
+        public EmailOwnerData EmailOwnerData => As.Expression(() => new EmailOwnerData
         {
-            Owner = u.ToLite(),
-            CultureInfo = u.CultureInfo,
-            DisplayName = u.UserName,
-            Email = u.Email!,
-        };
-        [ExpressionField]
-        public EmailOwnerData EmailOwnerData
-        {
-            get { return EmailOwnerDataExpression.Evaluate(this); }
-        }
+            Owner = this.ToLite(),
+            CultureInfo = CultureInfo,
+            DisplayName = UserName,
+            Email = Email!,
+        });
     }
 
     public enum UserState

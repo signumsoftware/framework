@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using System.Reflection;
@@ -37,12 +37,8 @@ namespace Signum.Entities.Scheduler
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<HolidayCalendarEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

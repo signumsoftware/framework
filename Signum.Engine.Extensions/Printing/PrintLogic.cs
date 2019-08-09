@@ -27,14 +27,9 @@ namespace Signum.Engine.Printing
 
         public static Action<PrintLineEntity> Print;
          
-        static Expression<Func<PrintPackageEntity, IQueryable<PrintLineEntity>>> LinesExpression =
-            e => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e));
-        
-        [ExpressionField]
-        public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e)
-        {
-            return LinesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e) => 
+            As.Expression(() => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e)));
 
         public static FileTypeSymbol? TestFileType; 
 
