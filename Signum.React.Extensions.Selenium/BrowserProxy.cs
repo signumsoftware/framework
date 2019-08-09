@@ -131,9 +131,6 @@ namespace Signum.React.Selenium
             if (currentUser == username)
                 return;
 
-            if (currentUser.HasText())
-                Logout();
-
             Selenium.FindElement(By.Id("userName")).SafeSendKeys(username);
             Selenium.FindElement(By.Id("password")).SafeSendKeys(password);
            // Selenium.FindElement(By.Id("login")).Submit();
