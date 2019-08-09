@@ -119,7 +119,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
   initialLoad(fo: FindOptions) {
     if (!Finder.isFindable(fo.queryName, false)) {
       if (this.props.throwIfNotFindable)
-        throw Error(`Query ${fo.queryName} not allowed`);
+        throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
 
       return;
     }
