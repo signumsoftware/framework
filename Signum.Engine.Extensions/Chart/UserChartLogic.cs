@@ -174,7 +174,8 @@ namespace Signum.Engine.Chart
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(RoleEntity));
 
-            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
+            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, 
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
         }
 
         static SqlPreCommand? Schema_Synchronizing(Replacements replacements)

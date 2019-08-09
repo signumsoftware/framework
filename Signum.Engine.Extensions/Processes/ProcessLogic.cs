@@ -96,8 +96,9 @@ namespace Signum.Engine.Processes
                     .WithQuery(() => p => new
                     {
                         Entity = p,
-                        p.Line,
                         p.Process,
+                        p.Line,
+                        p.ElementInfo,
                         p.Exception,
                     });
 

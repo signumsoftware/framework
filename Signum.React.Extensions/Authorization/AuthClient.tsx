@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -152,6 +152,11 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
 
 export function isOperationInfoAllowed(oi: OperationInfo) {
   return oi.operationAllowed;
+}
+
+export function isOperationAllowed(type: PseudoType, operation: OperationSymbol) {
+  var ti = getTypeInfo(type);
+  return isOperationInfoAllowed(ti.operations![operation.key]);
 }
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {

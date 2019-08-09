@@ -94,9 +94,9 @@ namespace Signum.Engine.Word
         }        
     }
 
-    public class MultiEntityWordTemplate : WordModel<MultiEntityModel>
+    public class MultiEntityWord : WordModel<MultiEntityModel>
     {
-        public MultiEntityWordTemplate(MultiEntityModel entity) : base(entity)
+        public MultiEntityWord(MultiEntityModel entity) : base(entity)
         {
         }
 
@@ -109,9 +109,9 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class QueryWordTemplate : WordModel<QueryModel>
+    public class QueryWord : WordModel<QueryModel>
     {
-        public QueryWordTemplate(QueryModel entity) : base(entity)
+        public QueryWord(QueryModel entity) : base(entity)
         {
         }
 
@@ -163,8 +163,8 @@ namespace Signum.Engine.Word
                         se.FullClassName,
                     });
 
-                RegisterSystemWordReport<MultiEntityWordTemplate>(null);
-                RegisterSystemWordReport<QueryWordTemplate>(null);
+                RegisterWordModel<MultiEntityWord>(null);
+                RegisterWordModel<QueryWord>(null);
 
                 new Graph<WordTemplateEntity>.ConstructFrom<WordModelEntity>(WordTemplateOperation.CreateWordTemplateFromWordModel)
                 {
@@ -181,9 +181,9 @@ namespace Signum.Engine.Word
 
                 WordModelTypeToEntity = sb.GlobalLazy(() =>
                 {
-                    var dbSystemWordReports = Database.RetrieveAll<WordModelEntity>();
+                    var dbWordModels = Database.RetrieveAll<WordModelEntity>();
                     return EnumerableExtensions.JoinRelaxed(
-                        dbSystemWordReports, 
+                        dbWordModels, 
                         registeredWordModels.Keys, 
                         swr => swr.FullClassName, 
                         type => type.FullName,
@@ -198,16 +198,16 @@ namespace Signum.Engine.Word
             }
         }
 
-        internal static bool HasDefaultTemplateConstructor(WordModelEntity systemWordReport)
+        internal static bool HasDefaultTemplateConstructor(WordModelEntity wordModel)
         {
-            WordModelInfo info = registeredWordModels.GetOrThrow(systemWordReport.ToType());
+            WordModelInfo info = registeredWordModels.GetOrThrow(wordModel.ToType());
 
             return info.DefaultTemplateConstructor != null;
         }
 
-        internal static WordTemplateEntity? CreateDefaultTemplate(WordModelEntity systemWordReport)
+        internal static WordTemplateEntity? CreateDefaultTemplate(WordModelEntity wordModel)
         {
-            WordModelInfo info = registeredWordModels.GetOrThrow(systemWordReport.ToType());
+            WordModelInfo info = registeredWordModels.GetOrThrow(wordModel.ToType());
 
             if (info.DefaultTemplateConstructor == null)
                 return null;
@@ -215,9 +215,9 @@ namespace Signum.Engine.Word
             WordTemplateEntity template = info.DefaultTemplateConstructor();
 
             if (template.Name == null)
-                template.Name = systemWordReport.FullClassName;
+                template.Name = wordModel.FullClassName;
 
-            template.Model = systemWordReport;
+            template.Model = wordModel;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
             return template;
@@ -232,9 +232,9 @@ namespace Signum.Engine.Word
 
         public static byte[] CreateReport(this IWordModel model, out WordTemplateEntity template, bool avoidConversion = false, WordTemplateLogic.FileNameBox? fileNameBox = null)
         {
-            WordModelEntity system = GetWordModelEntity(model.GetType());
+            WordModelEntity wordModel = GetWordModelEntity(model.GetType());
 
-            template = GetDefaultTemplate(system, model.UntypedEntity as Entity);
+            template = GetDefaultTemplate(wordModel, model.UntypedEntity as Entity);
 
             return template.ToLite().CreateReport(null, model, avoidConversion, fileNameBox); 
         }
@@ -302,7 +302,7 @@ namespace Signum.Engine.Word
             return list;
         }
 
-        static readonly string systemTemplatesReplacementKey = "SystemWordReport";
+        static readonly string wordModelReplacementKey = "WordModel";
 
         static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
@@ -314,9 +314,9 @@ namespace Signum.Engine.Word
 
             replacements.AskForReplacements(
                 old.Keys.ToHashSet(),
-                should.Keys.ToHashSet(), systemTemplatesReplacementKey);
+                should.Keys.ToHashSet(), wordModelReplacementKey);
 
-            Dictionary<string, WordModelEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
+            Dictionary<string, WordModelEntity> current = replacements.ApplyReplacementsToOld(old, wordModelReplacementKey);
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
@@ -326,17 +326,17 @@ namespace Signum.Engine.Word
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
-                        return table.UpdateSqlSync(c, swt => swt.FullClassName == oldClassName, comment: oldClassName);
+                        return table.UpdateSqlSync(c, swt => swt.FullClassName == oldClassName);
                     });
         }
 
-        public static void RegisterSystemWordReport<T>(Func<WordTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
+        public static void RegisterWordModel<T>(Func<WordTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
          where T : IWordModel
         {
-            RegisterSystemWordReport(typeof(T), defaultTemplateConstructor, queryName);
+            RegisterWordModel(typeof(T), defaultTemplateConstructor, queryName);
         }
 
-        public static void RegisterSystemWordReport(Type wordModelType, Func<WordTemplateEntity>? defaultTemplateConstructor = null, object? queryName = null)
+        public static void RegisterWordModel(Type wordModelType, Func<WordTemplateEntity>? defaultTemplateConstructor = null, object? queryName = null)
         {
             registeredWordModels[wordModelType] = new WordModelInfo(queryName ?? GetEntityType(wordModelType))
             {
@@ -366,11 +366,11 @@ namespace Signum.Engine.Word
             return GetEntityConstructor(modelEntity.ToType()) == null;
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type systemWordTempalte)
+        public static ConstructorInfo GetEntityConstructor(Type wordModelType)
         {
-            var entityType = GetEntityType(systemWordTempalte);
+            var entityType = GetEntityType(wordModelType);
 
-            return (from ci in systemWordTempalte.GetConstructors()
+            return (from ci in wordModelType.GetConstructors()
                     let pi = ci.GetParameters().Only()
                     where pi != null && pi.ParameterType == entityType
                     select ci).SingleOrDefaultEx();

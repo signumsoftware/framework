@@ -543,6 +543,7 @@ modules.Services.ajaxPost({ url: '~/api/dynamic/getData' }, data: null)
   modules["Hooks"] = `const forceUpdate = modules.Hooks.useForceUpdate(0);
 const value = modules.Hooks.useAPI(undefined /*default value*/, [/*Keys*/], signal => Your calling API is here);
 `;
+  modules["FontAwesomeIcon"] = `modules.React.createElement(modules.FontAwesomeIcon, { icon: "...", color: "..." })`;
   modules["SelectorModal"] = `modules.SelectorModal.default.chooseElement<T>(options: T[], config?: SelectorConfig<T>)
 .then(option => {
   if (!option)

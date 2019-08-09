@@ -33,7 +33,7 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailModelLogic.RegisterEmailModel<ResetPasswordRequestMail>(() => new EmailTemplateEntity
+                EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
                 {
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                     {
@@ -70,14 +70,14 @@ namespace Signum.Engine.Authorization
         public static Func<string, UserEntity> GetUserByEmail = (email) => Database.Query<UserEntity>().Where(u => u.Email == email).SingleOrDefaultEx();
     }
 
-    public class ResetPasswordRequestMail : EmailModel<ResetPasswordRequestEntity>
+    public class ResetPasswordRequestEmail : EmailModel<ResetPasswordRequestEntity>
     {
         public string Url;
 
-        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com")
+        public ResetPasswordRequestEmail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com")
         { }
 
-        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity, string url) : base(entity)
+        public ResetPasswordRequestEmail(ResetPasswordRequestEntity entity, string url) : base(entity)
         {
             this.Url = url;
         }

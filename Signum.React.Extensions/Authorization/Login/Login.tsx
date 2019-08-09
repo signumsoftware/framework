@@ -60,7 +60,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
         <form onSubmit={(e) => this.handleSubmit(e)}>
           <div className="row">
             <div className="col-md-6 offset-md-3">
-              <h2 className="sf-entity-title">{AuthMessage.Login.niceToString()}</h2>
+              <h2 className="sf-entity-title">{AuthClient.currentUser() ? AuthMessage.SwitchUser.niceToString() : AuthMessage.Login.niceToString()}</h2>
               <p>{AuthMessage.EnterYourUserNameAndPassword.niceToString()}</p>
               <hr />
             </div>
@@ -107,7 +107,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 
           <div className="row" style={{ paddingTop: "1rem" }}>
             <div className="col-md-6 offset-md-3">
-              <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthMessage.Login.niceToString()}</button>
+              <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? AuthMessage.SwitchUser.niceToString() : AuthMessage.Login.niceToString()}</button>
               {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
               {AuthClient.Options.resetPassword &&
                 <span>

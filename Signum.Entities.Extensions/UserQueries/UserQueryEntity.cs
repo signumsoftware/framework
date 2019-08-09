@@ -35,7 +35,7 @@ namespace Signum.Entities.UserQueries
 
         public bool HideQuickLink { get; set; }
 
-        public Lite<Entity> Owner { get; set; }
+        public Lite<Entity>? Owner { get; set; }
 
         [StringLengthValidator(Min = 1, Max = 200)]
         public string DisplayName { get; set; }

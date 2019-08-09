@@ -87,9 +87,9 @@ namespace Signum.Engine.Mailing
         }
     }
 
-    public class MultiEntityEmailTemplate : EmailModel<MultiEntityModel>
+    public class MultiEntityEmail : EmailModel<MultiEntityModel>
     {
-        public MultiEntityEmailTemplate(MultiEntityModel entity) : base(entity)
+        public MultiEntityEmail(MultiEntityModel entity) : base(entity)
         {
         }
 
@@ -102,9 +102,9 @@ namespace Signum.Engine.Mailing
         }
     }
 
-    public class QueryEmailTemplate : EmailModel<QueryModel>
+    public class QueryEmail : EmailModel<QueryModel>
     {
-        public QueryEmailTemplate(QueryModel entity) : base(entity)
+        public QueryEmail(QueryModel entity) : base(entity)
         {
         }
 
@@ -216,7 +216,7 @@ namespace Signum.Engine.Mailing
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
-                        return table.UpdateSqlSync(c, se => se.FullClassName == c.FullClassName, comment: oldClassName);
+                        return table.UpdateSqlSync(c, se => se.FullClassName == oldClassName);
                     });
         }
 
@@ -325,7 +325,7 @@ namespace Signum.Engine.Mailing
             }
 
             templates = templates.Where(isAllowed);
-            return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(emailModelEntity));
+            return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for EmailModel {0}".FormatWith(emailModelEntity));
         }
 
         internal static EmailTemplateEntity CreateDefaultTemplate(EmailModelEntity emailModel)

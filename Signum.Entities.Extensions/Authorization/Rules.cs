@@ -110,7 +110,7 @@ namespace Signum.Entities.Authorization
         Read =             TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
 
         DBWriteUINone =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.None,
-        DBMWriteUIRead =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Read,
+        DBWriteUIRead =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Read,
         Write =           TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Write
     }
 
