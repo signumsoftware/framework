@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -61,6 +62,7 @@ namespace Signum.Engine.Linq
             return n.candidates;
         }
 
+        [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominate(Expression? expression)
         {
             DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true };
@@ -69,6 +71,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominateNotNullable(Expression? expression)
         {
             DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };
@@ -1229,7 +1232,7 @@ namespace Signum.Engine.Linq
 
         private Expression? HardCodedMethods(MethodCallExpression m)
         {
-            if (m.Method.Name == "ToString")
+            if (m.Method.Name == "ToString" && m.Method.DeclaringType != typeof(EnumerableExtensions))
                 return TrySqlToString(m);
 
             if (m.Method.Name == "Equals")
@@ -1420,7 +1423,9 @@ namespace Signum.Engine.Linq
                 if (!Has(exp))
                     return null;
 
-                acum = acum == null ? exp : Expression.Add(acum, exp, miSimpleConcat);
+                var coallesceExp = new SqlFunctionExpression(typeof(string), null, SqlFunction.COALESCE.ToString(), new[] { exp, new SqlConstantExpression("", typeof(string)) }); 
+
+                acum = acum == null ? (Expression)coallesceExp : Expression.Add(acum, coallesceExp, miSimpleConcat);
 
                 var nextStr = i == matches.Count - 1 ?
                     strFormat.Substring(match.EndIndex()) :

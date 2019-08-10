@@ -95,6 +95,7 @@ export interface PinnedFilter {
 export interface FilterGroupOptionParsed {
   groupOperation: FilterGroupOperation;
   frozen: boolean;
+  expanded: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
   pinned?: PinnedFilter;

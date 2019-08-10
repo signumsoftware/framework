@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import { Dic, areEqual, classes } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
-import { ValueLine, EntityLine, EntityCombo, StyleContext } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
@@ -39,6 +39,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
         token: lastToken && hasAnyOrAll(lastToken) ? getTokenParents(lastToken).filter(a => a.queryTokenType == "AnyOrAll").lastOrNull() : undefined,
         filters: [],
         frozen: false,
+        expanded: true,
       } as FilterGroupOptionParsed :
       {
         token: this.props.lastToken,
@@ -192,6 +193,7 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
         token: lastToken && hasAnyOrAll(lastToken) ? getTokenParents(lastToken).filter(a => a.queryTokenType == "AnyOrAll").lastOrNull() : this.props.prefixToken,
         filters: [],
         frozen: false,
+        expanded: true,
       } as FilterGroupOptionParsed :
       {
         token: lastToken,
@@ -205,6 +207,14 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
 
     this.forceUpdate(() => this.props.onHeightChanged());
   };
+
+  handleExpandCollapse = (e: React.MouseEvent<any>) => {
+    e.preventDefault();
+    const fg = this.props.filterGroup;
+    fg.expanded = !fg.expanded;
+
+    this.forceUpdate(() => this.props.onHeightChanged());
+  }
 
   render() {
     const fg = this.props.filterGroup;
@@ -224,15 +234,18 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
         <td colSpan={3} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
           <div className="justify-content-between d-flex" >
             <div className="form-inline">
+              <a href="#" onClick={this.handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="mr-2" />
+              </a>
               <label>Group:</label>
-              <select className="form-control form-control-sm sf-group-selector ml-2" value={fg.groupOperation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
+              <select className="form-control form-control-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
                 {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
               </select>
             </div>
 
             <div className="form-inline">
               <label>Prefix:</label>
-              <div className={classes("rw-widget-xs ml-3", fg.token == null ? "hidden" : undefined)}>
+              <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
                 <QueryTokenBuilder
                   prefixQueryToken={this.props.prefixToken}
                   queryToken={fg.token}
@@ -242,15 +255,14 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
                   readOnly={readOnly} />
               </div>
             </div>
-            {fg.pinned && <div>
-            {(this.props.renderValue ? this.props.renderValue(this) : this.renderValue())}
-              
-              
-
-            </div>}
+            {fg.pinned &&
+              <div>
+                {(this.props.renderValue ? this.props.renderValue(this) : this.renderValue())}
+              </div>
+            }
             <div>
               {this.props.showPinnedFilters &&
-                <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => { fg.pinned = fg.pinned ? undefined : {}; this.changeFilter(); }}>
+                <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => { fg.pinned = fg.pinned ? undefined : {}; this.changeFilter(); }} disabled={this.props.readOnly}>
                   <FontAwesomeIcon color="orange" icon={[fg.pinned ? "fas" : "far", "star"]} />
                 </button>
               }
@@ -259,52 +271,60 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
           <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
             <table className="table-sm" style={{ width: "100%" }}>
               <thead>
-                {fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => this.changeFilter()} />}
-                <tr>
+                {fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => this.changeFilter()} readonly={readOnly} />}
+                {fg.expanded && <tr>
                   <th style={{ minWidth: "24px" }}></th>
                   <th>{SearchMessage.Field.niceToString()}</th>
                   <th>{SearchMessage.Operation.niceToString()}</th>
                   <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
                 </tr>
-              </thead>
-              <tbody>
-                {fg.filters.map((f, i) => isFilterGroupOptionParsed(f) ?
-
-                  <FilterGroupComponent key={i} filterGroup={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
-                    prefixToken={fg.token}
-                    subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
-                    onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged}
-                    lastToken={this.props.lastToken} onHeightChanged={this.props.onHeightChanged} renderValue={this.props.renderValue}
-                    showPinnedFilters={this.props.showPinnedFilters}
-                    disableValue={this.props.disableValue || Boolean(fg.pinned)}
-                  /> :
-
-                  <FilterConditionComponent key={i} filter={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
-                    prefixToken={fg.token}
-                    subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
-                    onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged} renderValue={this.props.renderValue}
-                    showPinnedFilters={this.props.showPinnedFilters}
-                    disableValue={this.props.disableValue || Boolean(fg.pinned)}
-                  />
-                )}
-                {!this.props.readOnly &&
-                  <tr className="sf-filter-create">
-                    <td colSpan={4}>
-                      <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
-                        className="sf-line-button sf-create"
-                        onClick={e => this.handlerNewFilter(e, false)}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
-                      </a>
-
-                      <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
-                        className="sf-line-button sf-create ml-3"
-                        onClick={e => this.handlerNewFilter(e, true)}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
-                      </a>
-                    </td>
-                  </tr>
                 }
-              </tbody>
+              </thead>
+              {fg.expanded ?
+                <tbody>
+                  {fg.filters.map((f, i) => isFilterGroupOptionParsed(f) ?
+
+                    <FilterGroupComponent key={i} filterGroup={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
+                      prefixToken={fg.token}
+                      subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
+                      onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged}
+                      lastToken={this.props.lastToken} onHeightChanged={this.props.onHeightChanged} renderValue={this.props.renderValue}
+                      showPinnedFilters={this.props.showPinnedFilters}
+                      disableValue={this.props.disableValue || Boolean(fg.pinned)}
+                    /> :
+
+                    <FilterConditionComponent key={i} filter={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
+                      prefixToken={fg.token}
+                      subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
+                      onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged} renderValue={this.props.renderValue}
+                      showPinnedFilters={this.props.showPinnedFilters}
+                      disableValue={this.props.disableValue || Boolean(fg.pinned)}
+                    />
+                  )}
+                  {!this.props.readOnly &&
+                    <tr className="sf-filter-create">
+                      <td colSpan={4}>
+                        <a href="#" title={TitleManager.useTitle ? SearchMessage.AddFilter.niceToString() : undefined}
+                          className="sf-line-button sf-create"
+                          onClick={e => this.handlerNewFilter(e, false)}>
+                          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
+                        </a>
+
+                        <a href="#" title={TitleManager.useTitle ? SearchMessage.AddGroup.niceToString() : undefined}
+                          className="sf-line-button sf-create ml-3"
+                          onClick={e => this.handlerNewFilter(e, true)}>
+                          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody> :
+                <tbody>
+                  <tr>
+                    <td colSpan={4} style={{ color: "#aaa", textAlign: "center", fontSize: "smaller" }}> {SearchMessage._0FiltersCollapsed.niceToString(fg.filters.length)}</td>
+                  </tr>
+                </tbody>
+              }
             </table>
           </div>
         </td>
@@ -446,13 +466,13 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
           </td>
           {f.token && f.token.filterType && f.operation && this.props.showPinnedFilters &&
             <td>
-              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => { f.pinned = f.pinned ? undefined : {}; this.changeFilter(); }}>
+            <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => { f.pinned = f.pinned ? undefined : {}; this.changeFilter(); }} disabled={this.props.readOnly}>
                 <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} />
               </button>
             </td>
           }
         </tr>
-        {this.props.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => this.changeFilter()} />}
+        {this.props.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => this.changeFilter()} readonly={readOnly} />}
       </>
     );
   }
@@ -488,6 +508,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
 
 interface PinnedFilterEditorProps {
   pinned: PinnedFilter;
+  readonly: boolean;
   onChange: () => void;
 }
 
@@ -499,17 +520,15 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
         <td></td>
         <td>
           <div>
-            <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()}
+            <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()} readOnly={this.props.readonly}
               value={p.label || ""}
               onChange={e => { p!.label = e.currentTarget.value; this.props.onChange(); }} />
           </div>
         </td>
         <td>
           <div className="input-group input-group-xs">
-            <NumericTextBox value={p.column == undefined ? null : p.column} onChange={n => { p!.column = n == null ? undefined : n; this.props.onChange(); }}
-              validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: SearchMessage.Column.niceToString(), style: { width: "30px" } }} />
-            <NumericTextBox value={p.row == undefined ? null : p.row} onChange={n => { p!.row = n == null ? undefined : n; this.props.onChange(); }}
-              validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: SearchMessage.Row.niceToString(), style: { width: "30px" } }} />
+            {this.numericTextBox(Binding.create(p, _ => _.column), SearchMessage.Column.niceToString())}
+            {this.numericTextBox(Binding.create(p, _ => _.row), SearchMessage.Row.niceToString())}
           </div>
         </td>
         <td colSpan={2}>
@@ -522,9 +541,21 @@ export class PinnedFilterEditor extends React.Component<PinnedFilterEditorProps>
     );
   }
 
+  numericTextBox(binding: Binding<number | undefined>, title: string) {
+
+    var val = binding.getValue();
+    if (this.props.readonly)
+      return <span className="numeric form-control form-control-xs" style={{ width: "60px" }}>{val}</span>;
+
+    return (
+      <NumericTextBox value={val == undefined ? null : val} onChange={n => { binding.setValue(n == null ? undefined : n); this.props.onChange(); }}
+        validateKey={ValueLine.isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: title, style: { width: "60px" } }} />
+    );
+  }
+
   renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
     return (
-      <button type="button" className={classes("btn btn-light", binding.getValue() && "active")}
+      <button type="button" className={classes("btn btn-light", binding.getValue() && "active")} disabled={this.props.readonly}
         onClick={e => { binding.setValue(!binding.getValue()); this.props.onChange(); }}
         title={TitleManager.useTitle ? title : undefined}>
         {label}

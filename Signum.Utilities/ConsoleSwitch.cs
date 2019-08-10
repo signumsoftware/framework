@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace Signum.Utilities
 {
     public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, WithDescription<V>>>
-        where K : object
+        where K : notnull
         where V : class
     {
         readonly Dictionary<string, WithDescription<V>> dictionary = new Dictionary<string, WithDescription<V>>(StringComparer.InvariantCultureIgnoreCase);

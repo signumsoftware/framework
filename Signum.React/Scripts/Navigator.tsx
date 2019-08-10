@@ -645,16 +645,17 @@ export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var win = window.open(url);
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) {
+export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) : Promise<void> {
   if (!pack || !pack.entity)
-    return;
+    return Promise.resolve();
 
   const es = getSettings(pack.entity.Type);
   if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
     createInNewTab(pack);
+    return Promise.resolve();
   }
   else {
-    navigate(pack);
+    return navigate(pack);
   }
 }
 
@@ -778,6 +779,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
+  modalSize?: BsSize;
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
   getViewPromise?: (entity: T) => ViewPromise<T>;
@@ -796,6 +798,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
   avoidPopup!: boolean;
+  modalSize?: BsSize;
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
 

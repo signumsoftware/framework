@@ -203,6 +203,8 @@ Lose changes?")]
         PleaseSelectAnEntity,
         [Description("Please select one or several Entities")]
         PleaseSelectOneOrSeveralEntities,
+        [Description("{0} filters collapsed")]
+        _0FiltersCollapsed,
     }
 
     public enum SelectorMessage

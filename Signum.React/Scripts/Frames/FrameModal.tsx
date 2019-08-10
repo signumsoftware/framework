@@ -63,7 +63,6 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
   componentWillMount() {
     Navigator.toEntityPack(this.props.entityOrPack)
-      .then(ep => this.setPack(ep))
       .then(pack => this.loadComponent(pack))
       .done();
   }
@@ -72,7 +71,6 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     this.setState(this.calculateState(props));
 
     Navigator.toEntityPack(props.entityOrPack)
-      .then(ep => this.setPack(ep))
       .then(pack => this.loadComponent(pack))
       .done();
   }
@@ -109,17 +107,17 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     };
   }
   
-  setPack(pack: EntityPack<ModifiableEntity>): EntityPack<ModifiableEntity> {
+  setPack(pack: EntityPack<ModifiableEntity>, callback?: ()=> void): EntityPack<ModifiableEntity> {
     this.setState({
       pack: pack,
       refreshCount: this.state.refreshCount + 1,
       lastEntity: JSON.stringify(pack.entity)
-    });
+    }, callback);
 
     return pack;
   }
 
-  loadComponent(pack: EntityPack<ModifiableEntity>) {
+  loadComponent(pack: EntityPack<ModifiableEntity>, callback?: () => void) {
 
     const result = this.props.getViewPromise && this.props.getViewPromise(pack.entity);
 
@@ -129,7 +127,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       viewPromise = viewPromise.withProps(this.props.extraProps);
 
     return viewPromise.promise
-      .then(c => this.setState({ getComponent: c }));
+      .then(c => this.setState({ getComponent: c, pack: pack }, callback));
   }
 
   okClicked: boolean = false;
@@ -210,8 +208,10 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     const pack = this.state.pack;
 
+    var settings = pack && Navigator.getSettings(pack.entity.Type);
+
     return (
-      <Modal size={this.props.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
+      <Modal size={this.props.modalSize || settings && settings.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
         <ModalHeaderButtons
           onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
           onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
@@ -240,12 +240,15 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      onReload: (pack, reloadComponent) => {
+      onReload: (pack, reloadComponent, callback) => {
         var newPack = pack || this.state.pack!;
 
-        this.setPack(newPack);
-        if (reloadComponent)
-          this.setState({ getComponent: undefined }, () => this.loadComponent(newPack).done()); //For AutoFocus and potentialy another view
+        if (reloadComponent) {
+          this.setState({ getComponent: undefined }, () => this.loadComponent(newPack, callback).done()); //For AutoFocus and potentialy another view
+        }
+        else {
+          this.setPack(newPack, callback);
+        }
       },
       pack: this.state.pack,
       onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),

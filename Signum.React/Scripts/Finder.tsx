@@ -747,17 +747,31 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
       return undefined;
     }
 
-    if (overridenValue && fop.token && fop.token.type.name == "number") {
-      var numVal = parseInt(overridenValue.value);
+    if (overridenValue && fop.token && typeof overridenValue.value == "string") {
+      if (fop.token.type.name == "number") {
 
-      if (isNaN(numVal))
-        return undefined;
+        var numVal = parseInt(overridenValue.value);
 
-      return ({
-        token: fop.token.fullKey,
-        operation: fop.operation,
-        value: numVal,
-      } as FilterConditionRequest);
+        if (isNaN(numVal))
+          return undefined;
+
+        return ({
+          token: fop.token.fullKey,
+          operation: fop.operation,
+          value: numVal,
+        } as FilterConditionRequest);
+      }
+
+      if (fop.token.type.name == "Guid") {
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(overridenValue.value))
+          return undefined;
+
+        return ({
+          token: fop.token.fullKey,
+          operation: fop.operation,
+          value: overridenValue.value,
+        } as FilterConditionRequest);
+      }
     }
 
     return ({
@@ -901,6 +915,8 @@ export class TokenCompleter {
         value: fo.value,
         pinned: fo.pinned && { ...fo.pinned },
         filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
+        frozen: false,
+        expanded: false,
       } as FilterGroupOptionParsed);
     else
       return ({
@@ -912,8 +928,6 @@ export class TokenCompleter {
       } as FilterConditionOptionParsed);
   }
 }
-
-
 
 export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<void> {
 
@@ -1316,7 +1330,7 @@ export interface QuerySettings {
   queryName: PseudoType | QueryKey;
   pagination?: Pagination;
   allowSystemTime?: boolean;
-  defaultOrderColumn?: string;
+  defaultOrderColumn?: string | QueryTokenString<any>;
   defaultOrderType?: OrderType;
   defaultFilters?: FilterOption[];
   hiddenColumns?: ColumnOption[];

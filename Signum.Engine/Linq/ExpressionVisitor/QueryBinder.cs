@@ -157,7 +157,7 @@ namespace Signum.Engine.Linq
                 if (m.Method.Name == "WithHint")
                     return BindWithHints(m.GetArgument("source"), (ConstantExpression)m.GetArgument("hint"));
             }
-            else if (m.Method.DeclaringType == typeof(Database) && (m.Method.Name == "Retrieve" || m.Method.Name == "RetrieveAndForget"))
+            else if (m.Method.DeclaringType == typeof(Database) && (m.Method.Name == "RetrieveAndRemember" || m.Method.Name == "RetrieveAndForget"))
             {
                 throw new InvalidOperationException("{0} is not supported on queries. Consider using Lite<T>.Entity instead.".FormatWith(m.Method.MethodName()));
             }
@@ -1324,7 +1324,7 @@ namespace Signum.Engine.Linq
 
             var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
 
-            var argumens = mce.Arguments.Select(DbExpressionNominator.FullNominate).ToList();
+            var argumens = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
             SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias, argumens);
 
@@ -2425,7 +2425,7 @@ namespace Signum.Engine.Linq
 
         private Exception InvalidBody()
         {
-            throw new InvalidOperationException("The only allowed expressions on UnsafeInsert are: object initializers, calling method 'SetMixin', or or calling 'Administrator.SetReadonly'");
+            throw new InvalidOperationException("The only allowed expressions on UnsafeInsert are: notnull initializers, calling method 'SetMixin', or or calling 'Administrator.SetReadonly'");
         }
 
         private ColumnAssignment[] AdaptAssign(Expression colExpression, Expression exp)

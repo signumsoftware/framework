@@ -31,7 +31,7 @@ import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { TitleManager } from '../../Scripts/Lines/EntityBase';
 import { AutoFocus } from '../Components/AutoFocus';
-import { ButtonBarElement } from '../TypeContext';
+import { ButtonBarElement, StyleContext } from '../TypeContext';
 
 export interface ShowBarExtensionOption { }
 
@@ -82,6 +82,7 @@ export interface SearchControlLoadedProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
+  styleContext?: StyleContext;
 }
 
 export interface SearchControlLoadedState {
@@ -594,10 +595,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var rightButtons = ([
       ...(this.props.hideButtonBar ? [] : buttonBarElements),
 
-      !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
-      <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
-        <FontAwesomeIcon icon="external-link-alt" />
-      </button>
+      !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
+        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
+          <FontAwesomeIcon icon="external-link-alt" />
+        </button>
+      }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
@@ -743,6 +745,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           queryDescription: this.props.queryDescription,
           markRows: this.markRows,
           container: this,
+          styleContext: this.props.styleContext,
         }))
         .then(menuItems => this.setState({ currentMenuItems: menuItems }))
         .done();

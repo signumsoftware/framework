@@ -443,7 +443,7 @@ export interface EntityFrame {
   frameComponent: React.Component<any, any>;
   entityComponent: React.Component<any, any> | null | undefined;
   pack: EntityPack<ModifiableEntity> | undefined;
-  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean) => void;
+  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
   onClose: (ok?: boolean) => void;

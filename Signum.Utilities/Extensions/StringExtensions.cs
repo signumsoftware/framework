@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Signum.Utilities
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("HasTextExpression")]
-        public static bool HasText([NotNullWhenTrue]this string? str)
+        public static bool HasText([NotNullWhen(true)]this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }

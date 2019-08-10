@@ -178,7 +178,7 @@ namespace Signum.Engine.Maps
             if (ee == null)
                 return null;
 
-            return ee.OnPreUnsafeDelete(entityQuery);
+            return Disposable.Combine(ee?.OnPreUnsafeDelete(entityQuery), entityEventsGlobal.OnPreUnsafeDelete(entityQuery));
         }
 
         internal IDisposable? OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
@@ -801,7 +801,7 @@ namespace Signum.Engine.Maps
         void Complete(Entity entity, IRetriever retriver);
 
         string GetToString(PrimaryKey id);
-        string? TryGetToString(PrimaryKey id);
+        string? TryGetToString(PrimaryKey?/*CSBUG*/ id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -823,11 +823,10 @@ namespace Signum.Engine.Maps
         public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(PrimaryKey id);
-        public abstract string? TryGetToString(PrimaryKey id);
+
+        public virtual string? TryGetToString(PrimaryKey?/*CSBUG*/ id) => null;
 
         public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             where R : Entity;
     }
-
-
 }

@@ -97,7 +97,7 @@ namespace Signum.Entities.Reflection
     }
 
     public class ClassStructuralEqualityComparer<T> : EqualityComparer<T>, ICompletableComparer
-        where T: object
+        where T: notnull
     {
         public Dictionary<string, PropertyComparer<T>> Properties;
 

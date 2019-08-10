@@ -158,16 +158,26 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: this.state.pack,
-      onReload: pack => {
+      onReload: (pack, reloadComponent, callback) => {
 
         var packEntity = (pack || this.state.pack) as EntityPack<Entity>;
 
         if (packEntity.entity.id != null && entity.id == null)
           Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
-        else
-          this.loadComponent(packEntity)
-            .then(getComponent => this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1, getComponent: getComponent }))
-            .done();
+        else {
+          if (reloadComponent)
+            this.setState({ getComponent: undefined }, () => this.loadComponent(packEntity)
+              .then(getComponent => this.setState({
+                pack: packEntity,
+                refreshCount: this.state.refreshCount + 1,
+                getComponent: getComponent
+              }, callback))
+              .done());
+          else
+            this.setState({
+              pack: packEntity, refreshCount: this.state.refreshCount + 1
+            }, callback);
+        } 
       },
       onClose: () => this.onClose(),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),

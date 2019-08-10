@@ -173,7 +173,7 @@ namespace Signum.Test
                 album.Save();
 
                 {
-                    var album2 = album.ToLite().Retrieve();
+                    var album2 = album.ToLite().RetrieveAndRemember();
 
                     Assert.True(album.Songs.Count == album2.Songs.Count);
                     Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
@@ -185,7 +185,7 @@ namespace Signum.Test
                 album.Save();
 
                 {
-                    var album2 = album.ToLite().Retrieve();
+                    var album2 = album.ToLite().RetrieveAndRemember();
 
                     Assert.True(album.Songs.Count == album2.Songs.Count);
                     Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
@@ -249,7 +249,7 @@ namespace Signum.Test
                 AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
                     new Dictionary<int, string> { { 0, "Song 1" }, { 1, "Song 2" }, { 2, "Song 0" } });
 
-                AssertSequenceEquals(album.ToLite().Retrieve().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });
+                AssertSequenceEquals(album.ToLite().RetrieveAndRemember().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });
 
                 //tr.Commit();
             }

@@ -59,7 +59,7 @@ namespace Signum.Engine
             int? timeout = null,
             string? message = null)
             where T : Entity
-            where K : object
+            where K : notnull
         {
             using (HeavyProfiler.Log(nameof(BulkInsertQueryIds), () => typeof(T).TypeName()))
             using (Transaction tr = new Transaction())

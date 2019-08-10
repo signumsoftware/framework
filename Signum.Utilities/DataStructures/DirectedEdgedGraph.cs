@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace Signum.Utilities.DataStructures
 {
     public class DirectedEdgedGraph<T, E> : IEnumerable<T>
-        where T: object
+        where T: notnull
     {
         Dictionary<T, Dictionary<T, E>> adjacency;
         public IEqualityComparer<T> Comparer { get; private set; }
@@ -609,7 +609,7 @@ namespace Signum.Utilities.DataStructures
     public static class DirectedEdgedGraphExtensions
     {
         public static E GetOrCreate<T, E>(this DirectedEdgedGraph<T, E> graph, T from, T to)
-            where T : object
+            where T : notnull
             where E : new()
         {
             var dic = graph.TryRelatedTo(from);

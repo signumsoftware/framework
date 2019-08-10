@@ -259,7 +259,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
           dialogClassName={dialogClassName}
           style={{ ...this.state.style, ...style }}
           className={classes(className, inClassName)}
-          onClick={backdrop == true ? this.handleDialogClick : undefined}
+          onMouseDown={backdrop == true ? this.handleDialogClick : undefined}
         >
           <ErrorBoundary>
             {children}

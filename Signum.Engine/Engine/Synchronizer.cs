@@ -14,7 +14,7 @@ namespace Signum.Engine
           Action<K, N>? createNew,
           Action<K, O>? removeOld,
           Action<K, N, O>? merge)
-            where K : object
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -48,7 +48,7 @@ namespace Signum.Engine
           Action<K, N, O>? merge,
           bool showProgress = true,
           bool transactional = true)
-            where K : object
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -120,7 +120,7 @@ namespace Signum.Engine
             Func<K, N, O, SqlPreCommand?>? mergeBoth)
             where O : class
             where N : class
-            where K : object
+            where K : notnull
         {
             return newDictionary.OuterJoinDictionaryCC(oldDictionary, (key, newVal, oldVal) =>
             {
@@ -262,9 +262,11 @@ namespace Signum.Engine
 
             while (oldOnly.Count > 0 && newOnly.Count > 0)
             {
-                var old = distances.WithMin(kvp => kvp.Value.Values.Min());
+                var oldDist = distances.WithMin(kvp => kvp.Value.Values.Min());
 
-                Selection selection = SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
+                var alternatives = oldDist.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList();
+
+                Selection selection = SelectInteractive(oldDist.Key, alternatives, replacementsKey, Interactive);
 
                 oldOnly.Remove(selection.OldValue);
                 distances.Remove(selection.OldValue);

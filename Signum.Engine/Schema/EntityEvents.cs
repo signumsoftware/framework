@@ -56,6 +56,7 @@ namespace Signum.Engine.Maps
             return FilterQuery.GetInvocationListTyped().Select(f => f()).NotNull().ToList();
         }
 
+        public IDisposable? OnPreUnsafeDelete(IQueryable entityQuery) => this.OnPreUnsafeDelete((IQueryable<T/*Entity*/>)entityQuery);
         internal IDisposable? OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
             IDisposable? result = null;
@@ -150,6 +151,7 @@ namespace Signum.Engine.Maps
 
 
         }
+
 
         ICacheController? IEntityEvents.CacheController
         {
@@ -297,6 +299,7 @@ namespace Signum.Engine.Maps
 
         void OnRetrieved(Entity entity);
 
+        IDisposable? OnPreUnsafeDelete(IQueryable entityQuery);
         IDisposable? OnPreUnsafeUpdate(IUpdateable update);
         LambdaExpression OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
         void OnPreBulkInsert(bool inMListTable);

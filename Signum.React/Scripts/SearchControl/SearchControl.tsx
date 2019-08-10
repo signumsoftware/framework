@@ -9,7 +9,7 @@ import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoad
 import { ErrorBoundary } from '../Components';
 import { MaxHeightProperty } from 'csstype';
 import "./Search.css"
-import { ButtonBarElement } from '../TypeContext';
+import { ButtonBarElement, StyleContext } from '../TypeContext';
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
@@ -57,6 +57,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   onCreate?: () => void;
+  styleContext?: StyleContext;
 }
 
 export interface SearchControlState {
@@ -118,7 +119,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
   initialLoad(fo: FindOptions) {
     if (!Finder.isFindable(fo.queryName, false)) {
       if (this.props.throwIfNotFindable)
-        throw Error(`Query ${fo.queryName} not allowed`);
+        throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
 
       return;
     }
@@ -220,6 +221,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
           onFiltersChanged={p.onFiltersChanged}
           onHeighChanged={p.onHeighChanged}
           onResult={p.onResult}
+
+          styleContext={p.styleContext}
         />
       </ErrorBoundary>
     );

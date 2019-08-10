@@ -203,7 +203,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             return cachedStaticGetters.GetOrAdd((type: mi.DeclaringType, name: mi.Name), _ =>
             {
-                return Expression.Lambda<Func<object?>>(Expression.Convert(Expression.MakeMemberAccess(null, mi), typeof(object?))).Compile();
+                return Expression.Lambda<Func<object?>>(Expression.Convert(Expression.MakeMemberAccess(null, mi), typeof(object))).Compile();
             });
         }
 
