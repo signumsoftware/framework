@@ -83,7 +83,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicSqlMigrationEntity, t => [
     { token: t.entity(p => p.comment), type: "Text" },
-    { token: t.entity(p => p.script), type: "Text" },
+    { token: t.entity(p => p.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicRenameEntity, t => [

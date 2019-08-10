@@ -13,7 +13,7 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicApiEntity }} />);
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicApiEntity, t => [
     { token: t.entity(p => p.name), type: "Text" },
-    { token: t.entity(p => p.eval!.script), type: "JSon" },
+    { token: t.entity(p => p.eval!.script), type: "Code" },
   ]);
     
 }
