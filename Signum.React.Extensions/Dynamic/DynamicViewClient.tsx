@@ -43,6 +43,24 @@ export function start(options: { routes: JSX.Element[] }) {
     parentValue: type
   }} />);
 
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewEntity, t => [
+    { token: t.entity(p => p.viewContent), type: "JSon" },
+    { token: t.entity(p => p.locals), type: "Text" },
+    { token: t.entity(p => p.viewName), type: "Text" },
+    { token: t.entity(p => p.entityType!.cleanName), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewSelectorEntity, t => [
+    { token: t.entity(p => p.entityType!.cleanName), type: "Text" },
+    { token: t.entity(p => p.script), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewOverrideEntity, t => [
+    { token: t.entity(p => p.viewName), type: "Text" },
+    { token: t.entity(p => p.entityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.script), type: "Text" },
+  ]);
+
   Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
     onClick: ctx => {
       (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();

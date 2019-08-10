@@ -80,6 +80,17 @@ export function start(options: { routes: JSX.Element[] }) {
     { token: t.entity(p => p.mixinName), type: "Text" },
     { token: t.entity(p => p.entityType.entity!.cleanName), type: "Text" },
   ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicSqlMigrationEntity, t => [
+    { token: t.entity(p => p.comment), type: "Text" },
+    { token: t.entity(p => p.script), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicRenameEntity, t => [
+    { token: t.append(p => p.oldName), type: "Text" },
+    { token: t.append(p => p.newName), type: "Text" },
+    { token: t.append(p => p.replacementKey), type: "Text" },
+  ]);
 }
 
 export namespace API {
