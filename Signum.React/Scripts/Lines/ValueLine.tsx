@@ -548,7 +548,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const momentFormat = toMomentFormat(s.formatText);
 
-  const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601) : undefined;
+  const m = s.ctx.value ? moment(s.ctx.value) : undefined;
   const showTime = momentFormat != "L" && momentFormat != "LL";
 
   if (s.ctx.readOnly)
