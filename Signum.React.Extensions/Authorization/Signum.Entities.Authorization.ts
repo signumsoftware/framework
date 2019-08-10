@@ -21,8 +21,12 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   Type: "ActiveDirectoryConfigurationEmbedded";
   domainName: string | null;
   domainServer: string | null;
+  azure_ApplicationID: string | null;
+  azure_DirectoryID: string | null;
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
+  loginWithAzureAD: boolean;
+  allowSimpleUserNames: boolean;
   autoCreateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;
@@ -234,7 +238,7 @@ export const PropertyAllowed = new EnumType<PropertyAllowed>("PropertyAllowed");
 export type PropertyAllowed =
   "None" |
   "Read" |
-  "Modify";
+  "Write";
 
 export const PropertyAllowedRule = new Type<PropertyAllowedRule>("PropertyAllowedRule");
 export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
@@ -356,13 +360,9 @@ export type TypeAllowed =
   "None" |
   "DBReadUINone" |
   "Read" |
-  "DBModifyUINone" |
-  "DBModifyUIRead" |
-  "Modify" |
-  "DBCreateUINone" |
-  "DBCreateUIRead" |
-  "DBCreateUIModify" |
-  "Create";
+  "DBWriteUINone" |
+  "DBWriteUIRead" |
+  "Write";
 
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
@@ -375,8 +375,7 @@ export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic
 export type TypeAllowedBasic =
   "None" |
   "Read" |
-  "Modify" |
-  "Create";
+  "Write";
 
 export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
@@ -404,13 +403,17 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
   Type: "User";
   userName: string;
   passwordHash: string;
-  passwordSetDate: string;
-  passwordNeverExpires: boolean;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
-  anulationDate: string | null;
+  disabledOn: string | null;
   state: UserState;
+}
+
+export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");
+export interface UserOIDMixin extends Entities.MixinEntity {
+  Type: "UserOIDMixin";
+  oID: string | null;
 }
 
 export module UserOperation {

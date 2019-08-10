@@ -8,6 +8,9 @@ import { AuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 
 export default class Login extends React.Component<{}, { modelState?: ModelState }> {
+
+  static customLoginProviders?: () => React.ReactElement<any>;
+
   constructor(props: {}) {
     super(props);
     this.state = {};
@@ -56,16 +59,14 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
       <div className="container">
         <form onSubmit={(e) => this.handleSubmit(e)}>
           <div className="row">
-            <div className="col-md-3"></div>
-            <div className="col-md-6">
-              <h2 className="sf-entity-title">{AuthMessage.Login.niceToString()}</h2>
+            <div className="col-md-6 offset-md-3">
+              <h2 className="sf-entity-title">{AuthClient.currentUser() ? AuthMessage.SwitchUser.niceToString() : AuthMessage.Login.niceToString()}</h2>
               <p>{AuthMessage.EnterYourUserNameAndPassword.niceToString()}</p>
               <hr />
             </div>
           </div>
           <div className="row">
-            <div className="col-md-3"></div>
-            <div className="col-md-6">
+            <div className="col-md-6 offset-md-3">
               <div className={classes("form-group", this.error("userName") && "has-error")}>
                 <label className="sr-only" htmlFor="userName">{AuthMessage.Username.niceToString()}</label>
                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
@@ -79,8 +80,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
             </div>
           </div>
           <div className="row">
-            <div className="col-md-3"></div>
-            <div className="col-md-6">
+            <div className="col-md-6 offset-md-3">
               <div className={classes("form-group", this.error("password") && "has-error")}>
                 <label className="sr-only" htmlFor="password">Password</label>
                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
@@ -95,8 +95,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
           </div>
           {AuthClient.Options.userTicket &&
             <div className="row">
-              <div className="col-md-3"></div>
-              <div className="col-md-6" style={{ paddingTop: ".35rem" }}>
+            <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
                 <div className="form-check mb-2 mr-sm-2 mb-sm-0">
                   <label>
                     <input ref={r => this.rememberMe = r!} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
@@ -107,9 +106,8 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
           }
 
           <div className="row" style={{ paddingTop: "1rem" }}>
-            <div className="col-md-3"></div>
-            <div className="col-md-6">
-              <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthMessage.Login.niceToString()}</button>
+            <div className="col-md-6 offset-md-3">
+              <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? AuthMessage.SwitchUser.niceToString() : AuthMessage.Login.niceToString()}</button>
               {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
               {AuthClient.Options.resetPassword &&
                 <span>
@@ -120,6 +118,8 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
               }
             </div>
           </div>
+
+          {Login.customLoginProviders && Login.customLoginProviders()}
         </form>
       </div>
     );

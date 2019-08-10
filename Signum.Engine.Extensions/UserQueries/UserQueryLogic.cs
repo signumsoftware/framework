@@ -190,7 +190,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
         }
 
 

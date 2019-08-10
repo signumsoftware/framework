@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -40,7 +40,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   if (Options.windowsAuthentication) {
     if (!authenticators.contains(loginWindowsAuthentication))
-      throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
+      throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
@@ -99,7 +99,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.isCreableEvent.push(navigatorIsCreable);
     Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
     Navigator.isViewableEvent.push(navigatorIsViewable);
-
+    Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
@@ -139,7 +139,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   }
 
   PropertyRoute.prototype.canModify = function () {
-    return this.member != null && this.member.propertyAllowed == "Modify"
+    return this.member != null && this.member.propertyAllowed == "Write"
   }
 }
 
@@ -152,6 +152,11 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
 
 export function isOperationInfoAllowed(oi: OperationInfo) {
   return oi.operationAllowed;
+}
+
+export function isOperationAllowed(type: PseudoType, operation: OperationSymbol) {
+  var ti = getTypeInfo(type);
+  return isOperationInfoAllowed(ti.operations![operation.key]);
 }
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
@@ -167,7 +172,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
       case "Read":
         state.ctx.readOnly = true;
         break;
-      case "Modify":
+      case "Write":
         break;
     }
   }
@@ -182,7 +187,7 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   if (entityPack && entityPack.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
 
-  return ti.typeAllowed == "None" || ti.typeAllowed == "Read";
+  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed== "Read";
 }
 
 export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
@@ -194,13 +199,13 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
   if (entityPack && entityPack.typeAllowed)
     return entityPack.typeAllowed != "None";
 
-  return ti.typeAllowed != "None";
+  return ti.maxTypeAllowed != "None";
 }
 
 export function navigatorIsCreable(typeName: PseudoType) {
   const ti = getTypeInfo(typeName);
 
-  return ti == undefined || ti.typeAllowed == "Create";
+  return ti == undefined || ti.maxTypeAllowed == "Write";
 }
 
 export function currentUser(): UserEntity {
@@ -441,6 +446,10 @@ export module API {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/loginWindowsAuthentication", avoidAuthToken: true }, undefined);
   }
 
+  export function loginWithAzureAD(jwt: string): Promise<LoginResponse> {
+    return ajaxPost<LoginResponse>({ url: "~/api/auth/loginWithAzureAD", avoidAuthToken: true }, jwt);
+  }
+
   export function refreshToken(oldToken: string): Promise<LoginResponse> {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
   }
@@ -521,7 +530,8 @@ export module API {
 declare module '@framework/Reflection' {
 
   export interface TypeInfo {
-    typeAllowed: TypeAllowedBasic;
+    minTypeAllowed: TypeAllowedBasic;
+    maxTypeAllowed: TypeAllowedBasic;
     queryAllowed: QueryAllowed;
   }
 

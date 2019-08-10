@@ -33,7 +33,7 @@ namespace Signum.Engine.MachineLearning
                     using (ExecutionMode.Global())
                     using (var t = Transaction.ForceNew())
                     {
-                        var p = predictor.Retrieve();
+                        var p = predictor.RetrieveAndRemember();
                         if (p.State != PredictorState.Trained)
                             throw new InvalidOperationException($"Predictor '{p.Name}' not trained");
 

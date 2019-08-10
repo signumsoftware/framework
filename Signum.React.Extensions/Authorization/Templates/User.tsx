@@ -17,8 +17,6 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
       <EntityLine ctx={ctx.subCtx(e => e.role)} />
       <ValueLine ctx={ctx.subCtx(e => e.email)} />
       <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
-      <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires)} />
-      <ValueLine ctx={ctx.subCtx(e => e.passwordSetDate)} />
     </div>
   );
 }

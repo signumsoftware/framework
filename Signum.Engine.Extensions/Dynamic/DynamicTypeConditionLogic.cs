@@ -55,7 +55,7 @@ namespace Signum.Engine.Dynamic
                     {
                         if (!e.IsNew)
                         {
-                            var old = e.ToLite().Retrieve();
+                            var old = e.ToLite().RetrieveAndRemember();
                             if (old.Name != e.Name)
                             {
                                 DynamicSqlMigrationLogic.AddDynamicRename(typeof(TypeConditionSymbol).Name,

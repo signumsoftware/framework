@@ -227,7 +227,7 @@ namespace Signum.Engine.Processes
 
                                             foreach (var pair in afordable)
                                             {
-                                                ProcessEntity pro = pair.Process!.Retrieve();
+                                                ProcessEntity pro = pair.Process!.RetrieveAndRemember();
 
                                                 IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
 
@@ -280,7 +280,7 @@ namespace Signum.Engine.Processes
 
                                                 if (execProc.CurrentProcess.State != ProcessState.Finished)
                                                 {
-                                                    execProc.CurrentProcess = s.Retrieve();
+                                                    execProc.CurrentProcess = s.RetrieveAndRemember();
                                                     execProc.CancelationSource.Cancel();
                                                 }
                                             }
@@ -470,7 +470,7 @@ namespace Signum.Engine.Processes
         
         public void Execute()
         {
-            var user = ExecutionMode.Global().Using(_ => CurrentProcess.User.Retrieve());
+            var user = ExecutionMode.Global().Using(_ => CurrentProcess.User.RetrieveAndRemember());
 
             using (UserHolder.UserSession(user))
             {

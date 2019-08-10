@@ -42,7 +42,7 @@ namespace Signum.Entities.Chart
 
         public bool HideQuickLink { get; set; }
 
-        public Lite<Entity> Owner { get; set; }
+        public Lite<Entity>? Owner { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 200)]
         public string DisplayName { get; set; }

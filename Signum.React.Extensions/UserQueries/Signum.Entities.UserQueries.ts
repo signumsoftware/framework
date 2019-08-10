@@ -53,7 +53,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   groupResults: boolean;
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   hideQuickLink: boolean;
-  owner: Entities.Lite<Entities.Entity>;
+  owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
   appendFilters: boolean;
   filters: Entities.MList<QueryFilterEmbedded>;

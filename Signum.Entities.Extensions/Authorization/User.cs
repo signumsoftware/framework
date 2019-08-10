@@ -4,6 +4,7 @@ using System.Reflection;
 using Signum.Entities.Mailing;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
@@ -31,22 +32,8 @@ namespace Signum.Entities.Authorization
         public string UserName { get; set; }
 
         [SqlDbType(Size = 128)]
-        byte[] passwordHash;
-        public byte[] PasswordHash
-        {
-            get { return passwordHash; }
-            set
-            {
-                if (Set(ref passwordHash, value))
-                    PasswordSetDate = TimeZoneManager.Now.TrimToSeconds();
-            }
-        }
+        public byte[] PasswordHash { get; set; }
 
-        public DateTime PasswordSetDate { get; private set; }
-
-        public bool PasswordNeverExpires { get; set; }
-
-        
         public Lite<RoleEntity> Role { get; set; }
 
         [StringLengthValidator(Max = 200), EMailValidator]
@@ -54,7 +41,7 @@ namespace Signum.Entities.Authorization
 
         public CultureInfoEntity? CultureInfo { get; set; }
 
-        public DateTime? AnulationDate { get; set; }
+        public DateTime? DisabledOn { get; set; }
 
         public UserState State { get; set; } = UserState.New;
 
@@ -62,7 +49,7 @@ namespace Signum.Entities.Authorization
         {
             if (pi.Name == nameof(State))
             {
-                if (AnulationDate != null && State != UserState.Disabled)
+                if (DisabledOn != null && State != UserState.Disabled)
                     return AuthMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
@@ -136,5 +123,17 @@ namespace Signum.Entities.Authorization
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
+    }
+
+
+    [Serializable]
+    public class UserOIDMixin : MixinEntity
+    {
+        UserOIDMixin(Entity mainEntity, MixinEntity? next)
+            : base(mainEntity, next)
+        {
+        }
+
+        public Guid? OID { get; set; }
     }
 }

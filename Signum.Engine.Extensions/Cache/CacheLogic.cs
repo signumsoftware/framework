@@ -525,11 +525,11 @@ namespace Signum.Engine.Cache
                 return cachedTable.GetToString(id);
             }
 
-            public override string? TryGetToString(PrimaryKey id)
+            public override string? TryGetToString(PrimaryKey?/*CSBUG*/ id)
             {
                 AssertEnabled();
 
-                return cachedTable.TryGetToString(id);
+                return cachedTable.TryGetToString(id.Value)!;
             }
 
             public override void Complete(T entity, IRetriever retriver)

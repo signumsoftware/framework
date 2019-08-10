@@ -36,7 +36,7 @@ namespace Signum.Engine.Word
 
             EmailTemplateLogic.GenerateAttachment.Register((WordAttachmentEntity wa, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var entity = wa.OverrideModel?.Retrieve() ??  (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity;
+                var entity = wa.OverrideModel?.RetrieveAndRemember() ??  (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity;
 
                 if (wa.ModelConverter != null)
                     entity = wa.ModelConverter.Convert(entity);

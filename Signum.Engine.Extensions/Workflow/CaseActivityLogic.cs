@@ -523,7 +523,7 @@ namespace Signum.Engine.Workflow
 
         public static CaseActivityEntity RetrieveForViewing(Lite<CaseActivityEntity> lite)
         {
-            var ca = lite.Retrieve();
+            var ca = lite.RetrieveAndRemember();
 
             if (ca.DoneBy == null)
                 ca.Notifications()
@@ -623,7 +623,7 @@ namespace Signum.Engine.Workflow
                             MainEntity = mainEntity,
                         };
 
-                        var start = wet.Event.Retrieve();
+                        var start = wet.Event.RetrieveAndRemember();
                         ExecuteInitialStep(@case, start, start.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
 
                         return @case;

@@ -25,6 +25,7 @@ namespace Signum.React.Authorization
             var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
+            if(ada.GetConfig().AllowSimpleUserNames)
             {
                 UserEntity? user = AuthLogic.RetrieveUser(localName);
                 if (user != null)
@@ -36,7 +37,7 @@ namespace Signum.React.Authorization
 
             using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
             {
-                var user = ada.OnAutoCreateUser(pc, domainName!, localName);
+                var user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
                 return user;
             }
         }

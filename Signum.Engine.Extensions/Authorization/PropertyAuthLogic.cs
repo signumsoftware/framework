@@ -157,12 +157,12 @@ namespace Signum.Engine.Authorization
         public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return PropertyAllowed.Modify;
+                return PropertyAllowed.Write;
 
             route = route.SimplifyToPropertyOrRoot();
 
             if (!typeof(Entity).IsAssignableFrom(route.RootType))
-                return PropertyAllowed.Modify;
+                return PropertyAllowed.Write;
 
             return cache.GetAllowed(RoleEntity.Current, route);
         }
@@ -246,7 +246,7 @@ namespace Signum.Engine.Authorization
                 if (item > result)
                     result = item;
 
-                if (result == PropertyAllowed.Modify)
+                if (result == PropertyAllowed.Write)
                     return result;
             }
             return result;
@@ -254,7 +254,7 @@ namespace Signum.Engine.Authorization
 
         static PropertyAllowed Min(IEnumerable<PropertyAllowed> baseValues)
         {
-            PropertyAllowed result = PropertyAllowed.Modify;
+            PropertyAllowed result = PropertyAllowed.Write;
 
             foreach (var item in baseValues)
             {
@@ -272,7 +272,7 @@ namespace Signum.Engine.Authorization
             return pr =>
             {
                 if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
-                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Modify : PropertyAllowed.None;
+                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Write : PropertyAllowed.None;
 
                 var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
 
@@ -296,7 +296,7 @@ namespace Signum.Engine.Authorization
             return (pr, a) =>
             {
                 if (!TypeLogic.TypeToEntity.ContainsKey(pr.RootType))
-                    return PropertyAllowed.Modify;
+                    return PropertyAllowed.Write;
 
                 TypeAllowedAndConditions aac = TypeAuthLogic.GetAllowed(role, pr.RootType);
 
@@ -313,7 +313,7 @@ namespace Signum.Engine.Authorization
             return (role, a) =>
             {
                 if (!TypeLogic.TypeToEntity.ContainsKey(pr.RootType))
-                    return PropertyAllowed.Modify;
+                    return PropertyAllowed.Write;
 
                 TypeAllowedAndConditions aac = TypeAuthLogic.Manual.GetAllowed(role, pr.RootType);
 

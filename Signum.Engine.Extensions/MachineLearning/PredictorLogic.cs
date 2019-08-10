@@ -374,7 +374,7 @@ namespace Signum.Engine.MachineLearning
             {
                 Task.Run(() =>
                 {
-                    var user = ExecutionMode.Global().Using(_ => p.User!.Retrieve());
+                    var user = ExecutionMode.Global().Using(_ => p.User!.RetrieveAndRemember());
                     using (UserHolder.UserSession(user))
                     {
                         try

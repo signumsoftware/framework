@@ -45,16 +45,15 @@ namespace Signum.React.Translation
         [HttpPost("api/culture/setCurrentCulture"), SignumAllowAnonymous]
         public string SetCurrentCulture([Required, FromBody]Lite<CultureInfoEntity> culture)
         {
-            var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
+            var ci = ExecutionMode.Global().Using(_ => culture.RetrieveAndRemember().ToCultureInfo());
 
             if (UserEntity.Current != null && !UserEntity.Current.Is(AuthLogic.AnonymousUser)) //Won't be used till next refresh
             {
-                var user = UserEntity.Current.ToLite().Retrieve();
-                user.CultureInfo = culture.Retrieve();
-
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
                 {
+                    var user = UserEntity.Current.ToLite().RetrieveAndRemember();
+                    user.CultureInfo = culture.RetrieveAndRemember();
                     UserEntity.Current = user;
                     user.Save();
                 }

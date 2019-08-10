@@ -33,9 +33,9 @@ namespace Signum.Entities.Authorization
     class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
-        where A : object
+        where A : notnull
         where R : class
-        where K : object
+        where K : notnull
     {
         readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 

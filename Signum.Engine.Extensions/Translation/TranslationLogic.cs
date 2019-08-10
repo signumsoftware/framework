@@ -79,7 +79,7 @@ namespace Signum.Engine.Translation
                                         where opts != DescriptionOptions.None
                                         select t.Name).ToHashSet();
 
-            Dictionary<string, string> memory = new Dictionary<string, string>();
+            Dictionary<string, string?> memory = new Dictionary<string, string?>();
 
 
             foreach (var fileName in Directory.EnumerateFiles(directoryName, "{0}.*.xml".FormatWith(assemblyName)))
@@ -98,7 +98,7 @@ namespace Signum.Engine.Translation
             }
         }
 
-        private static Dictionary<string, string> AskForReplacementsWithMemory(HashSet<string> newNames, HashSet<string> oldNames, Dictionary<string, string> memory, string replacementKey)
+        private static Dictionary<string, string> AskForReplacementsWithMemory(HashSet<string> newNames, HashSet<string> oldNames, Dictionary<string, string?> memory, string replacementKey)
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
 
@@ -108,11 +108,11 @@ namespace Signum.Engine.Translation
                 {
                     oldNames.Remove(kvp.Key);
                 }
-                else if (oldNames.Contains(kvp.Key) && newNames.Contains(kvp.Value))
+                else if (oldNames.Contains(kvp.Key) && newNames.Contains(kvp.Value!))
                 {
                     oldNames.Remove(kvp.Key);
-                    newNames.Remove(kvp.Value);
-                    result.Add(kvp.Key, kvp.Value);
+                    newNames.Remove(kvp.Value!);
+                    result.Add(kvp.Key, kvp.Value!);
                 }
             }
 
@@ -124,14 +124,14 @@ namespace Signum.Engine.Translation
             if (answers != null)
             {
                 result.AddRange(answers);
-                memory.SetRange(answers);
+                memory!.SetRange(answers);
             }
 
             var toDelete = oldNames.Except(newNames);
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null!)));
+            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string?)null)));
 
             return result;
         }

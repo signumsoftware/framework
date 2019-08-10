@@ -18,7 +18,7 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
   Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
   Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));
 
-  Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
+  Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: ToolbarEntity.token(a => a.priority), defaultOrderType: "Descending" });
 
   Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
 

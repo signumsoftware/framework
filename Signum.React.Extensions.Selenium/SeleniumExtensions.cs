@@ -71,6 +71,13 @@ namespace Signum.React.Selenium
               System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         }
 
+        public static string WaitNewWindow(this RemoteWebDriver selenium, Action action)
+        {
+            var old = selenium.WindowHandles.ToHashSet();
+            action();
+            return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)));
+        }
+
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
         {
             T lastValue = default(T)!;

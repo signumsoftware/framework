@@ -47,7 +47,7 @@ namespace Signum.React.Selenium
         public T RetrieveEntity()
         {
             var lite = this.EntityInfo().ToLite();
-            return (T)(IEntity)lite.Retrieve();
+            return (T)(IEntity)lite.RetrieveAndRemember();
         }
 
         public FramePageProxy<T> WaitLoaded()

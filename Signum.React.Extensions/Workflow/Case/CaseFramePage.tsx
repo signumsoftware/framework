@@ -135,7 +135,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
-      onReload: newPack => {
+      onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
           let newActivity = newPack.entity as CaseActivityEntity;
           if (pack.activity.isNew && !newActivity.isNew) {
@@ -147,7 +147,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             pack.canExecuteActivity = newPack.canExecute;
           }
         }
-        this.setState({ refreshCount: this.state.refreshCount + 1 });
+        this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
       onClose: () => this.onClose(),
       revalidate: () => { throw new Error("Not implemented"); },
@@ -208,12 +208,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },
-      onReload: newPack => {
+      onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
           pack.activity.case.mainEntity = newPack.entity as ICaseMainEntity;
           pack.canExecuteMainEntity = newPack.canExecute;
         }
-        this.setState({ refreshCount: this.state.refreshCount + 1 });
+        this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
       onClose: () => this.onClose(),
       revalidate: () => {

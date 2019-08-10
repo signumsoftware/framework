@@ -22,8 +22,8 @@ namespace Signum.React.Word
         [HttpPost("api/word/createReport")]
         public FileStreamResult CreateReport([Required, FromBody]CreateWordReportRequest request)
         {
-            var template = request.template.Retrieve();
-            var modifiableEntity = request.entity ?? request.lite.Retrieve();
+            var template = request.template.RetrieveAndRemember();
+            var modifiableEntity = request.entity ?? request.lite.RetrieveAndRemember();
 
             var file = template.CreateReportFileContent(modifiableEntity);
 

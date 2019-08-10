@@ -225,7 +225,7 @@ namespace Signum.Engine.Mailing
                     },
                     Construct = (et, args) =>
                     {
-                        var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().Retrieve();
+                        var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().RetrieveAndRemember();
 
                         var emailMessageEntity = et.ToLite().CreateEmailMessage(entity).FirstOrDefault();
                         if (emailMessageEntity == null)

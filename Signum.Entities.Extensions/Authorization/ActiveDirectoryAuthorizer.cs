@@ -14,9 +14,19 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Max = 250)]
         public string? DomainServer { get; set; }
 
+        [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
+        public string? Azure_ApplicationID { get; set; }
+
+        [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
+        public string? Azure_DirectoryID { get; set; }
+
         public bool LoginWithWindowsAuthenticator { get; set; } = true;
         public bool LoginWithActiveDirectoryRegistry { get; set; } = true;
-        
+        public bool LoginWithAzureAD { get; set; } = true;
+
+        public bool AllowSimpleUserNames { get; set; } = true;
+
+
         public bool AutoCreateUsers { get; set; }
 
         [PreserveOrder, NoRepeatValidator]

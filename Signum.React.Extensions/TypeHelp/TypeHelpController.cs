@@ -15,6 +15,7 @@ using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.React.TypeHelp
 {
@@ -214,9 +215,9 @@ namespace Signum.React.TypeHelp
                 pr.Let(propertyRoute =>
                 {
                     var typeName = propertyRoute.Type.TypeName();
-                    var nullable = propertyRoute.PropertyInfo?.GetCustomAttribute<NullableAttribute>();
+                    var nullable = propertyRoute.PropertyInfo?.IsNullable();
 
-                    return typeName + (nullable != null && nullable.IsNullableMain == true ? "?" : "");
+                    return typeName + (nullable == true ? "?" : "");
                 });
 
 

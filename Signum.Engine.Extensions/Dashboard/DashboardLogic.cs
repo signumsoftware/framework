@@ -255,7 +255,7 @@ namespace Signum.Engine.Dashboard
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
 
             RegisterPartsTypeCondition(typeCondition);
         }
