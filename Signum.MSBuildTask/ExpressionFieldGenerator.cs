@@ -100,8 +100,6 @@ namespace Signum.MSBuildTask
                 if (closureType != null)
                     p.type.NestedTypes.Remove(closureType);
 
-                Console.WriteLine($"{p.method.Name} -> {newMethod.Name}");
-
                 p.member.CustomAttributes.Remove(p.at);
                 var attrConstructor = p.type.Module.ImportReference(this.ExpressionField.Methods.Single(a => a.IsConstructor && a.IsPublic));
                 p.member.CustomAttributes.Add(new CustomAttribute(attrConstructor)
@@ -242,6 +240,10 @@ namespace Signum.MSBuildTask
                 else if (reader.TryGet(OpCodes.Stloc) is Instruction stloc)
                 {
                     writer.Emit(stloc.OpCode, rebasedVariables[(VariableDefinition)stloc.Operand]);
+                }
+                else if (reader.TryGet(OpCodes.Ldloca) is Instruction ldloca)
+                {
+                    writer.Emit(ldloca.OpCode, rebasedVariables[(VariableDefinition)ldloca.Operand]);
                 }
                 else
                 {
