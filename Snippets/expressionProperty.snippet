@@ -40,13 +40,8 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[static Expression<Func<$type$, $returnType$>> $propertyName$Expression = 
-            @this => ;
-        [ExpressionField]
-        public $returnType$ $propertyName$
-        {
-            get{ return $propertyName$Expression.Evaluate(this); }
-        }]]>
+        <![CDATA[[AutoExpressionField]
+        public $returnType$ $propertyName$ => As.Expression(() => $end$);]]>
       </Code>
     </Snippet>
   </CodeSnippet>
