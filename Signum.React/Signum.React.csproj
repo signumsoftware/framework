@@ -33,10 +33,10 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <!--<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.3">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>-->
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -45,8 +45,8 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.0.0" />
-    <!--<PackageReference Include="Signum.TSGenerator" Version="2.0.5" />-->
+    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,27 +63,4 @@
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
-
-  <!--<Target Name="SignumAfterCompile" AfterTargets="AfterCompile" Outputs="$(TargetPath)">
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
-    <Exec command="dotnet &quot;D:\Signum\southwind\Framework\Signum.MSBuildTask\bin\Debug\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">
-      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
-    </Exec>
-  </Target>-->
-
-  <Target Name="GenerateSignumTS">
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
-    <Exec command="dotnet &quot;D:\Signum\southwind\Framework\Signum.TSGenerator\bin\Debug\netcoreapp2.1\Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
-      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
-    </Exec>
-  </Target>
-
-  <PropertyGroup>
-    <CompileTypeScriptDependsOn>
-      GenerateSignumTS;
-      $(CompileTypeScriptDependsOn);
-    </CompileTypeScriptDependsOn>
-    <ApplicationIcon />
-  </PropertyGroup>
 </Project>

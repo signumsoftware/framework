@@ -84,24 +84,23 @@ namespace Signum.Utilities
         }
     }
 
+    /// <summary>
+    /// Marks a property or method for Signum.MSBuildTask to extract the body into and static field with the expression tree. 
+    /// </summary>
     [System.AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class AutoExpressionFieldAttribute : Attribute
     {
-        public AutoExpressionFieldAttribute()
-        {
-        }
     }
-
 
     public static class As
     {
         /// <summary>
-        /// In Combination with AutoExpressionFieldAttribute, allows the extraction from an Expression field by Signum.MSBuildTask.
+        /// In Combination with AutoExpressionFieldAttribute, allows the extraction of 'body' expression into an static field (by Signum.MSBuildTask) so the method can be consumed by the LINQ provider and translated to SQL.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="exp"></param>
+        /// <typeparam name="T">return type</typeparam>
+        /// <param name="body">The implementation of the property or method</param>
         /// <returns></returns>
-        public static T Expression<T>(Expression<Func<T>> exp)
+        public static T Expression<T>(Expression<Func<T>> body)
         {
             throw new InvalidOperationException("This method is not meant to be called. Missing reference to Signum.MSBuildTask in this assembly?");
         }
