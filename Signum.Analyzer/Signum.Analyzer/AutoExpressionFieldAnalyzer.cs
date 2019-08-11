@@ -11,16 +11,16 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Signum.Analyzer
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class ExpressionFieldAnalyzer : DiagnosticAnalyzer
+    public class AutoExpressionFieldAnalyzer : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = "SF0002";
+        public const string DiagnosticId = "SF0001";
 
         internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId,
-            "Use ExpressionFieldAttribute in non-trivial method or property",
-            "'{0}' should reference an static field of type Expression<T> with the same signature ({1})", "Expressions",
+            "Call As.Expression in a method or property with AutoExpressionFieldAttribute",
+            "'{0}' should call As.Expression(() => ...)", "Expressions",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "A property or method can use ExpressionFieldAttribute pointing to an static fied of type Expression<T> to use it in LINQ queries");
+            description: "A Property or Method can use AutoExpressionFieldAttribute and As.Expression(() => ...) to extract their implementation to a hidden static field with the expression tree, that will be used by Signum LINQ provider to translate it to SQL");
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -37,7 +37,7 @@ namespace Signum.Analyzer
                 var att = (AttributeSyntax)context.Node;
 
                 var name = att.Name.ToString();
-                if (name != "ExpressionField")
+                if (name != "AutoExpressionField")
                     return;
 
                 var member = att.FirstAncestorOrSelf<MemberDeclarationSyntax>();
@@ -64,45 +64,33 @@ namespace Signum.Analyzer
                     }
                 }
 
+                ExpressionSyntax expr = GetSingleBody(context, ident, att, member);
 
+                if (expr == null)
+                    return;
 
-                var argument = att.ArgumentList?.Arguments.Select(a => a.Expression).FirstOrDefault();
-                var val = context.SemanticModel.GetConstantValue(argument);
-
-                string fieldName = val.HasValue ? (val.Value as string) : null;
-
-                if (fieldName == null)
+                var inv = expr as InvocationExpressionSyntax;
+                if (inv == null || !(context.SemanticModel.GetSymbolInfo(inv) is SymbolInfo si))
                 {
-                    Diagnostic(context, ident, argument.GetLocation(), "invalid field name");
+                    Diagnostic(context, ident, att.GetLocation(), "no As.Expression", fixable: true);
                     return;
                 }
 
-                var typeSyntax = member.FirstAncestorOrSelf<TypeDeclarationSyntax>();
-                if (typeSyntax == null)
-                    return;
-
-                var type = context.SemanticModel.GetDeclaredSymbol(typeSyntax);
-                var fieldSymbol = type.GetMembers().OfType<IFieldSymbol>().SingleOrDefault(a => a.Name == fieldName);
-
-                if (fieldSymbol == null)
+                if (si.Symbol == null ||
+                    si.Symbol.Name != "Expression" ||
+                    si.Symbol.ContainingType.Name != "As" ||
+                    si.Symbol.ContainingNamespace.ToString() != "Signum.Utilities")
                 {
-                    Diagnostic(context, ident, att.GetLocation(), string.Format("field '{0}' not found", fieldName));
+                    Diagnostic(context, ident, att.GetLocation(), "no As.Expression", fixable: true);
                     return;
                 }
 
-                var memberSymbol = context.SemanticModel.GetDeclaredSymbol(member);
+                var args = inv.ArgumentList.Arguments;
 
-                var expressionType = GetExpressionType(memberSymbol, context.SemanticModel);
-
-                if (!expressionType.Equals(fieldSymbol.Type))
+                if (args.Count == 0 || !(args[0].Expression is ParenthesizedLambdaExpressionSyntax))
                 {
-                    if (!expressionType.ToString().Replace("?", "").Equals(
-                        fieldSymbol.Type.ToString().Replace("?", ""))) // Till there is an API to express nullability
-                    {
-                        var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
-                        Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
-                        return;
-                    }
+                    Diagnostic(context, ident, att.GetLocation(), "the call to As.Expression should have a lambda as argument", fixable: false);
+                    return;
                 }
 
             }
@@ -110,23 +98,6 @@ namespace Signum.Analyzer
             {
                 throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\r\n" + e.Message + "\r\n" + e.StackTrace);
             }
-        }
-
-        private static INamedTypeSymbol GetExpressionType(ISymbol memberSymbol, SemanticModel sm)
-        {
-            var parameters = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).Parameters.Select(p => p.Type).ToList() : new List<ITypeSymbol>();
-
-            if (!memberSymbol.IsStatic)
-                parameters.Insert(0, (ITypeSymbol)memberSymbol.ContainingSymbol);
-
-            var returnType = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).ReturnType : ((IPropertySymbol)memberSymbol).Type;
-
-            parameters.Add(returnType);
-
-            var expression = sm.Compilation.GetTypeByMetadataName("System.Linq.Expressions.Expression`1");
-            var func = sm.Compilation.GetTypeByMetadataName("System.Func`" + parameters.Count);
-
-            return expression.Construct(func.Construct(parameters.ToArray()));
         }
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)
