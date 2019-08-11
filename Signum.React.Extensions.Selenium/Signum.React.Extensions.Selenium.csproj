@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <PackageReference Include="Signum.Analyzer" Version="2.0.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,5 +21,4 @@
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
   </ItemGroup>
-
 </Project>

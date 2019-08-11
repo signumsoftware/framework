@@ -41,7 +41,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Signum.Analyzer" Version="2.0.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -110,5 +110,5 @@
     <Content Include="SMS\Templates\SMSSendPackage.tsx" />
     <Content Include="SMS\Templates\SMSUpdatePackage.tsx" />
   </ItemGroup>
-  
+ 
 </Project>

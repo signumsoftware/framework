@@ -100,13 +100,9 @@ namespace Signum.Engine.Workflow
         public static IQueryable<WorkflowConnectionEntity> NextConnections(this IWorkflowNodeEntity e) => 
             As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From == e));
 
-        static Expression<Func<CaseActivityEntity, WorkflowEntity>> WorkflowExpression =
-            ca => ca.WorkflowActivity.Lane.Pool.Workflow;
-        [ExpressionField]
-        public static WorkflowEntity Workflow(this CaseActivityEntity e)
-        {
-            return WorkflowExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static WorkflowEntity Workflow(this CaseActivityEntity ca) => 
+            As.Expression(() => ca.WorkflowActivity.Lane.Pool.Workflow);
 
         public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {
