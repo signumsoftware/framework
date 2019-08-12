@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>1701;1702;8618</NoWarn>
+    <NoWarn>1701;1702;8618;NU1605</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='win64'">
@@ -41,7 +41,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>

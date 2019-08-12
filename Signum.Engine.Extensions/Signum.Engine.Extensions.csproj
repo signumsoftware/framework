@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>1701;1702;8629</NoWarn>
+    <NoWarn>1701;1702;8629;NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +21,7 @@
   
   <ItemGroup>
     <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.1.0" />
-    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.4.0" />
     <PackageReference Include="Signum.MSBuildTask" Version="1.0.5" />
   </ItemGroup>
   

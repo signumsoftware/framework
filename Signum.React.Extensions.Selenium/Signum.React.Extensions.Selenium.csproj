@@ -7,12 +7,13 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Platforms>x64;x86;AnyCPU</Platforms>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
