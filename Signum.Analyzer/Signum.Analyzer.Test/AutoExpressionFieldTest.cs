@@ -126,6 +126,14 @@ namespace Signum.Analyzer.Test
         }
 
         [TestMethod]
+        public void AutoExpressionCorrectWithError()
+        {
+            TestDiagnostic(null, @"
+        [AutoExpressionField]
+        public static int OperationLogs(Entity e) => As.Expression(() => (int)e.NotThere);", assertErrors: false);
+        }
+
+        [TestMethod]
         public void AutoExpressionCorrect()
         {
             TestDiagnostic(null, @"

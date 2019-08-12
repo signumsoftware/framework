@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <Platforms>AnyCPU;x64</Platforms>
 
   </PropertyGroup>
 
@@ -22,7 +23,7 @@
     <ProjectReference Include="..\..\Signum.Engine\Signum.Engine.csproj" />
     <ProjectReference Include="..\..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
-    <ProjectReference Include="..\Signum.Analyzer\Signum.Analyzer.csproj" />
+    <ProjectReference Include="..\Signum.Analyzer\Signum.Analyzer.csproj" /><!--Remove before restore to workarround NuGet duplicated key bug -->
   </ItemGroup>
 
 </Project>

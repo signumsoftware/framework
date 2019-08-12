@@ -26,9 +26,10 @@ namespace Signum.Analyzer
 
         public override void Initialize(AnalysisContext context)
         {
+            //context.EnableConcurrentExecution();
+            //context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
             context.RegisterSyntaxNodeAction(AnalyzeAttributeSymbol, SyntaxKind.Attribute);
         }
-
 
         static void AnalyzeAttributeSymbol(SyntaxNodeAnalysisContext context)
         {
@@ -76,10 +77,7 @@ namespace Signum.Analyzer
                     return;
                 }
 
-                if (si.Symbol == null ||
-                    si.Symbol.Name != "Expression" ||
-                    si.Symbol.ContainingType.Name != "As" ||
-                    si.Symbol.ContainingNamespace.ToString() != "Signum.Utilities")
+                if (si.Symbol != null ? !IsExpressionAs(si.Symbol) : !si.CandidateSymbols.Any(s => IsExpressionAs(s)))
                 {
                     Diagnostic(context, ident, att.GetLocation(), "no As.Expression", fixable: true);
                     return;
@@ -98,6 +96,13 @@ namespace Signum.Analyzer
             {
                 throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\r\n" + e.Message + "\r\n" + e.StackTrace);
             }
+        }
+
+        private static bool IsExpressionAs(ISymbol symbol)
+        {
+            return symbol.Name == "Expression" &&
+                    symbol.ContainingType.Name == "As" &&
+                   symbol.ContainingNamespace.ToString() == "Signum.Utilities";
         }
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)
