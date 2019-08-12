@@ -165,7 +165,13 @@ namespace Signum.Engine
                     GraphExplorer.PropagateModifications(graph.Inverse());
                     var errors = GraphExplorer.FullIntegrityCheck(graph);
                     if (errors != null)
+                    {
+#if DEBUG
+                        throw new IntegrityCheckException(errors.WithEntities(graph));
+#else
                         throw new IntegrityCheckException(errors);
+#endif
+                    }
                 }
 
                 if (mlist.IsGraphModified)
