@@ -17,7 +17,7 @@ namespace Signum.Analyzer
 
         internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId,
             "Call As.Expression in a method or property with AutoExpressionFieldAttribute",
-            "'{0}' should call As.Expression(() => ...)", "Expressions",
+            "'{0}' should call As.Expression(() => ...) ({1})", "Expressions",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "A Property or Method can use AutoExpressionFieldAttribute and As.Expression(() => ...) to extract their implementation to a hidden static field with the expression tree, that will be used by Signum LINQ provider to translate it to SQL");

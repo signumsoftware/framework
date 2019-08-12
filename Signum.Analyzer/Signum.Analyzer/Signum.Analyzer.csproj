@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <PackageId>Signum.Analyzer</PackageId>
-    <PackageVersion>2.4.1</PackageVersion>
+    <PackageVersion>2.4.3</PackageVersion>
     <Authors>Olmo del Corral</Authors>
     <PackageProjectUrl>http://www.signumframework.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/signumsoftware/framework</RepositoryUrl>
@@ -19,7 +19,7 @@
     <PackageTags>Signum.Analyzer, analyzers</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <Version>2.4.1</Version>
+    <Version>2.4.3</Version>
     <PackageIconUrl>https://raw.githubusercontent.com/signumsoftware/framework/master/SignumLogo.png</PackageIconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
