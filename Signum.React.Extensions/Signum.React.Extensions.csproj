@@ -84,6 +84,7 @@
     <None Remove="SMS\Templates\SMSSendPackage.tsx" />
     <None Remove="SMS\Templates\SMSTemplate.tsx" />
     <None Remove="SMS\Templates\SMSUpdatePackage.tsx" />
+    <None Remove="Toolbar\Templates\ToolbarMainRenderer.tsx" />
   </ItemGroup>
 
   <ItemGroup>

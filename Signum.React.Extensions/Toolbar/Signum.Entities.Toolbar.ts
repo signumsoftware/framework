@@ -40,7 +40,8 @@ export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEnt
 export const ToolbarLocation = new EnumType<ToolbarLocation>("ToolbarLocation");
 export type ToolbarLocation =
   "Top" |
-  "Side";
+  "Side" |
+  "Main";
 
 export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity {

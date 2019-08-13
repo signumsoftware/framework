@@ -64,3 +64,14 @@ body.rtl .sidebar .dropdown-item .icon {
 .sf-cursor-pointer{
     cursor:pointer;
 }
+
+.toolbar-card {
+    width: 100%;
+    text-align: center;
+    height: 180px;
+}
+
+.toolbar-card-container {
+    width: 260px;
+    padding: 1rem;
+}

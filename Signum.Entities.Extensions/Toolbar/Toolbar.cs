@@ -63,6 +63,7 @@ namespace Signum.Entities.Toolbar
     {
         Top,
         Side,
+        Main,
     }
 
     [AutoInit]
