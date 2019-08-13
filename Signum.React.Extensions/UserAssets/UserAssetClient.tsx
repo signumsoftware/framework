@@ -25,7 +25,6 @@ export function start(options: { routes: JSX.Element[] }) {
     onClick: () => Promise.resolve("~/userAssets/import")
   });
 
-
   started = true;
 }
 
@@ -35,12 +34,12 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
       return undefined;
 
     return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), () => {
-      API.exportAsset(ctx.lite);
+      API.exportAsset(ctx.lites);
     }, {
         iconColor: "#FCAE25",
         icon: "file-code"
       });
-  });
+  }, { allowsMultiple : true });
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {
@@ -213,7 +212,7 @@ export module API {
   }
 
 
-  export function exportAsset(entity: Lite<IUserAssetEntity>) {
+  export function exportAsset(entity: Lite<IUserAssetEntity>[]) {
     ajaxPostRaw({ url: "~/api/userAssets/export" }, entity)
       .then(resp => saveFile(resp))
       .done();

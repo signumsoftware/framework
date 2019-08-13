@@ -197,11 +197,14 @@ namespace Signum.React.UserAssets
         }
         
         [HttpPost("api/userAssets/export")]
-        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
+        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity>[] lites)
         {
-            var bytes = UserAssetsExporter.ToXml(lite.RetrieveAndRemember());
+            var bytes = UserAssetsExporter.ToXml(lites.RetrieveFromListOfLite().ToArray());
 
-            return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
+            string typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().Name;
+            var fileName = "{0}{1}.xml".FormatWith(typeName, lites.ToString(a => a.Id.ToString(), "_"));
+
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), fileName);
         }
 
         [HttpPost("api/userAssets/importPreview")]
