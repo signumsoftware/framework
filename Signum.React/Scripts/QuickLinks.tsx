@@ -23,6 +23,7 @@ export function start() {
 
 export interface QuickLinkContext<T extends Entity> {
   lite: Lite<T>;
+  lites: Lite<T>[];
   widgetContext?: WidgetContext<T>;
   contextualContext?: ContextualItemsContext<T>;
 }
@@ -34,18 +35,27 @@ export function clearQuickLinks() {
   Dic.clear(onQuickLinks);
 }
 
-export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {
-  onGlobalQuickLinks.push(quickLinkGenerator);
+export interface RegisteredQuickLink<T extends Entity> {
+  factory: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>;
+  options?: QuickLinkOptions;
 }
 
-export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<any>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {
+export interface QuickLinkOptions {
+  allowsMultiple?: boolean
+}
+
+export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
+export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
+  onGlobalQuickLinks.push({ factory: quickLinkGenerator,  options: options });
+}
+
+export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
   const typeName = getTypeName(type);
 
   const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
 
-  col.push(quickLinkGenerator);
+  col.push({ factory: quickLinkGenerator, options: options });
 }
 
 export var ignoreErrors = false;
@@ -56,10 +66,10 @@ export function setIgnoreErrors(value: boolean) {
 
 export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
 
-  let promises = onGlobalQuickLinks.map(f => safeCall(f, ctx));
+  let promises = onGlobalQuickLinks.filter(a => a.options && a.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.factory, ctx));
 
   if (onQuickLinks[ctx.lite.EntityType]) {
-    const specificPromises = onQuickLinks[ctx.lite.EntityType].map(f => safeCall(f, ctx));
+    const specificPromises = onQuickLinks[ctx.lite.EntityType].filter(a => a.options && a.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.factory, ctx));
 
     promises = promises.concat(specificPromises);
   }
@@ -112,11 +122,12 @@ export function getQuickLinkWidget(ctx: WidgetContext<ModifiableEntity>): React.
 
 export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
 
-  if (ctx.lites.length != 1)
+  if (ctx.lites.length == 0)
     return Promise.resolve(undefined);
 
   return getQuickLinks({
     lite: ctx.lites[0],
+    lites: ctx.lites,
     contextualContext: ctx
   }).then(links => {
 
@@ -144,6 +155,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
     else
       return getQuickLinks({
         lite: toLiteFat(entity as Entity),
+        lites: [toLiteFat(entity as Entity)],
         widgetContext: p.ctx as WidgetContext<Entity>
       });
   });
