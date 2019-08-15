@@ -14,4 +14,10 @@ namespace Signum.Entities.Authorization
 
         public bool Lapsed { get; set; }
     }
-}
+
+    [AutoInit]
+    public static class ResetPasswordRequestOperation
+    {
+        public static readonly ExecuteSymbol<ResetPasswordRequestEntity> Execute;
+    }
+    }

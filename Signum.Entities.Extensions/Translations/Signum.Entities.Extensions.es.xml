@@ -112,14 +112,18 @@
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
   <Type Name="AuthEmailMessage">
+    <Member Name="EmailNotFound" Description="Correo electrónico no encontrado" />
     <Member Name="ResetPasswordRequestSubject" Description="Solicitud de nueva contraseña" />
+    <Member Name="WeHaveSendYouAnEmailToResetYourPassword" Description="Le hemos enviado un correo electrónico para restablecer su contraseña" />
     <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes establecer una nueva contraseña mediante el siguiente enlace" />
     <Member Name="YouRecentlyRequestedANewPassword" Description="Has solicitado una nueva contraseña" />
+    <Member Name="YourResetPasswordRequestIsLapsed" Description="Su solicitud de contraseña de restablecimiento está caducada" />
     <Member Name="YourUsernameIs" Description="Tu nombre de usuario es:" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
     <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />
+    <Member Name="AnErrorOccurredRequestNotProcessed" Description="Se ha producido un error, solicitud no procesada." />
     <Member Name="AuthAdmin_AddCondition" Description="Añadir condición" />
     <Member Name="AuthAdmin_ChooseACondition" Description="Elija una condición" />
     <Member Name="AuthAdmin_RemoveCondition" Description="Eliminar condición" />
@@ -135,6 +139,7 @@
     <Member Name="EmailMustHaveAValue" Description="El correo electrónico debe tener un valor" />
     <Member Name="EmailSent" Description="Email enviado" />
     <Member Name="EnterTheNewPassword" Description="Escriba la nueva contraseña" />
+    <Member Name="EnterYourUserEmail" Description="Introduzca su correo electrónico de usuario" />
     <Member Name="EnterYourUserNameAndPassword" Description="Escriba su usuario y contraseña" />
     <Member Name="EntityGroupsAscx_EntityGroup" Description="Grupo de entidades" />
     <Member Name="EntityGroupsAscx_Overriden" Description="Sobreescrito" />
@@ -142,6 +147,8 @@
     <Member Name="ExpiredPassword" Description="Contraseña caducada" />
     <Member Name="ExpiredPasswordMessage" Description="Su contraseña ha caducado. Debe cambiarla" />
     <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="¿Olvidó su contraseña? Introduzca su email de inicio de sesión." />
+    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Danos el correo electrónico de tu usuario y te enviaremos un correo electrónico para que puedas restablecer tu contraseña." />
+    <Member Name="IForgotMyPassword" Description="Olvidé mi contraseña" />
     <Member Name="IHaveForgottenMyPassword" Description="He olvidado mi contraseña" />
     <Member Name="IncorrectPassword" Description="Contraseña incorrecta" />
     <Member Name="InvalidPassword" Description="Contraseña no válida" />
@@ -173,6 +180,7 @@
     <Member Name="PleaseEnterYourChosenNewPassword" Description="Por favor, introduzca su nueva contraseña" />
     <Member Name="Remember" Description="Recordar" />
     <Member Name="RememberMe" Description="Recordarme" />
+    <Member Name="RequestAccepted" Description="Solicitud aceptada" />
     <Member Name="ResetPassword" Description="Restablecer contraseña" />
     <Member Name="ResetPasswordCode" Description="Código para restablecer la contraseña" />
     <Member Name="ResetPasswordCodeHasBeenSent" Description="Un código de confirmación para restablecer su contraseña se ha enviado a su cuenta de correo electrónico {0}" />
@@ -192,6 +200,7 @@
     <Member Name="Username0IsNotValid" Description="El nombre de usuario {0} no es válido" />
     <Member Name="UserNameMustHaveAValue" Description="Se debe introducir el nombre de usuario" />
     <Member Name="View" Description="Ver" />
+    <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Le hemos enviado un correo electrónico con un enlace que le permitirá restablecer su contraseña." />
     <Member Name="Welcome0" Description="¡ Bienvenido {0}" />
     <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
     <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Le enviaremos un correo electrónico con un enlace para restablecer su contraseña." />
@@ -2080,6 +2089,9 @@
     <Member Name="Lapsed" Description="Caducado" />
     <Member Name="RequestDate" Description="Fecha de solicitud" />
     <Member Name="User" Description="Usuario" />
+  </Type>
+  <Type Name="ResetPasswordRequestOperation">
+    <Member Name="Execute" Description="Ejecutar" />
   </Type>
   <Type Name="RestApiKeyEntity" Description="Clave de API REST" Gender="f">
     <Member Name="ApiKey" Description="Clave de API" />

@@ -68,6 +68,9 @@ export module AuthEmailMessage {
   export const YourUsernameIs = new MessageKey("AuthEmailMessage", "YourUsernameIs");
   export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("AuthEmailMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
   export const ResetPasswordRequestSubject = new MessageKey("AuthEmailMessage", "ResetPasswordRequestSubject");
+  export const YourResetPasswordRequestIsLapsed = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestIsLapsed");
+  export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
+  export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
 }
 
 export module AuthMessage {
@@ -121,6 +124,10 @@ export module AuthMessage {
   export const PasswordDoesNotMatchCurrent = new MessageKey("AuthMessage", "PasswordDoesNotMatchCurrent");
   export const PasswordHasBeenChangedSuccessfully = new MessageKey("AuthMessage", "PasswordHasBeenChangedSuccessfully");
   export const PasswordMustHaveAValue = new MessageKey("AuthMessage", "PasswordMustHaveAValue");
+  export const AnErrorOccurredRequestNotProcessed = new MessageKey("AuthMessage", "AnErrorOccurredRequestNotProcessed");
+  export const WeHaveSentYouAnEmailToResetYourPassword = new MessageKey("AuthMessage", "WeHaveSentYouAnEmailToResetYourPassword");
+  export const EnterYourUserEmail = new MessageKey("AuthMessage", "EnterYourUserEmail");
+  export const RequestAccepted = new MessageKey("AuthMessage", "RequestAccepted");
   export const YourPasswordIsNearExpiration = new MessageKey("AuthMessage", "YourPasswordIsNearExpiration");
   export const PasswordsAreDifferent = new MessageKey("AuthMessage", "PasswordsAreDifferent");
   export const PasswordsDoNotMatch = new MessageKey("AuthMessage", "PasswordsDoNotMatch");
@@ -150,6 +157,8 @@ export module AuthMessage {
   export const Welcome0 = new MessageKey("AuthMessage", "Welcome0");
   export const LoginWithAnotherUser = new MessageKey("AuthMessage", "LoginWithAnotherUser");
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("AuthMessage", "TheUserIsNotLongerInTheDatabase");
+  export const IForgotMyPassword = new MessageKey("AuthMessage", "IForgotMyPassword");
+  export const GiveUsYourUserEmailToResetYourPassword = new MessageKey("AuthMessage", "GiveUsYourUserEmailToResetYourPassword");
 }
 
 export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");
@@ -275,6 +284,10 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   user: UserEntity;
   requestDate: string;
   lapsed: boolean;
+}
+
+export module ResetPasswordRequestOperation {
+  export const Execute : Entities.ExecuteSymbol<ResetPasswordRequestEntity> = registerSymbol("Operation", "ResetPasswordRequestOperation.Execute");
 }
 
 export const RoleEntity = new Type<RoleEntity>("Role");
