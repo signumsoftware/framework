@@ -152,7 +152,7 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
         public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
         {
-            return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryCountRequest(), token);
+            return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryValueRequest(), token);
         }
     }
 
@@ -163,7 +163,7 @@ namespace Signum.React.ApiControllers
         public string valueToken;
         public SystemTimeTS/*?*/ systemTime;
 
-        public QueryValueRequest ToQueryCountRequest()
+        public QueryValueRequest ToQueryValueRequest()
         {
             var qn = QueryLogic.ToQueryName(this.querykey);
             var qd = QueryLogic.Queries.QueryDescription(qn);

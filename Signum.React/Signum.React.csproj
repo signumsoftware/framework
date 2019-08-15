@@ -10,6 +10,7 @@
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
     <Platforms>x64;x86;win86;win64;AnyCPU;linux64</Platforms>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
 
@@ -45,7 +46,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
     <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
   </ItemGroup>
 

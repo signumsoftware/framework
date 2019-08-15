@@ -17,7 +17,7 @@ namespace Signum.Analyzer
 
         internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId,
             "Call As.Expression in a method or property with AutoExpressionFieldAttribute",
-            "'{0}' should call As.Expression(() => ...)", "Expressions",
+            "'{0}' should call As.Expression(() => ...) ({1})", "Expressions",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "A Property or Method can use AutoExpressionFieldAttribute and As.Expression(() => ...) to extract their implementation to a hidden static field with the expression tree, that will be used by Signum LINQ provider to translate it to SQL");
@@ -26,9 +26,10 @@ namespace Signum.Analyzer
 
         public override void Initialize(AnalysisContext context)
         {
+            context.EnableConcurrentExecution();
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
             context.RegisterSyntaxNodeAction(AnalyzeAttributeSymbol, SyntaxKind.Attribute);
         }
-
 
         static void AnalyzeAttributeSymbol(SyntaxNodeAnalysisContext context)
         {
@@ -76,10 +77,7 @@ namespace Signum.Analyzer
                     return;
                 }
 
-                if (si.Symbol == null ||
-                    si.Symbol.Name != "Expression" ||
-                    si.Symbol.ContainingType.Name != "As" ||
-                    si.Symbol.ContainingNamespace.ToString() != "Signum.Utilities")
+                if (si.Symbol != null ? !IsExpressionAs(si.Symbol) : !si.CandidateSymbols.Any(s => IsExpressionAs(s)))
                 {
                     Diagnostic(context, ident, att.GetLocation(), "no As.Expression", fixable: true);
                     return;
@@ -98,6 +96,13 @@ namespace Signum.Analyzer
             {
                 throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\r\n" + e.Message + "\r\n" + e.StackTrace);
             }
+        }
+
+        private static bool IsExpressionAs(ISymbol symbol)
+        {
+            return symbol.Name == "Expression" &&
+                    symbol.ContainingType.Name == "As" &&
+                   symbol.ContainingNamespace.ToString() == "Signum.Utilities";
         }
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)

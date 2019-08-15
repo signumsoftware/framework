@@ -19,7 +19,7 @@ declare global {
   interface Array<T> {
     groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
-    groupWhen(this: Array<T>, condition: (element: T) => boolean): { key: T, elements: T[] }[];
+    groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
 
     orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];

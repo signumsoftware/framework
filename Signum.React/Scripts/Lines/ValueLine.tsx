@@ -135,7 +135,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         {
           (vl.state.unitText != null || vl.state.extraButtons != null) &&
           <div className="input-group-append">
-            {vl.state.unitText && <span className="input-group-text">{vl.state.unitText}</span>}
+            {vl.state.unitText && <span className={vl.state.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{vl.state.unitText}</span>}
             {vl.state.extraButtons && vl.state.extraButtons(vl)}
           </div>
         }

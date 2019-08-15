@@ -96,7 +96,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void AutoExpressionMethodExpressionBody()
         {
-            TestDiagnostic("no Expression.As", @"        
+            TestDiagnostic("no As.Expression", @"        
         [AutoExpressionField]
         public static int OperationLogs => 1;");
         }
@@ -104,7 +104,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void AutoExpressionGetterExpressionBody()
         {
-            TestDiagnostic("no Expression.As", @"        
+            TestDiagnostic("no As.Expression", @"        
         [AutoExpressionField]
         public static int OperationLogs(this Entity e) => 1;");
         }
@@ -112,7 +112,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void AutoExpressionWrongMethod()
         {
-            TestDiagnostic("no Expression.As", @"
+            TestDiagnostic("no As.Expression", @"
         [AutoExpressionField]
         public static int OperationLogs(this Entity e) => Math.Max(1, 2);");
         }
@@ -120,9 +120,17 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void AutoExpressionNoLambda()
         {
-            TestDiagnostic("the call to Expression.As should have a lambda as argument", @"
+            TestDiagnostic("the call to As.Expression should have a lambda as argument", @"
         [AutoExpressionField]
         public static int OperationLogs(this Entity e) => As.Expression<int>(null);");
+        }
+
+        [TestMethod]
+        public void AutoExpressionCorrectWithError()
+        {
+            TestDiagnostic(null, @"
+        [AutoExpressionField]
+        public static int OperationLogs(Entity e) => As.Expression(() => (int)e.NotThere);", assertErrors: false);
         }
 
         [TestMethod]
@@ -143,7 +151,7 @@ namespace Signum.Analyzer.Test
                 VerifyCSharpDiagnostic(test, assertErrors, new DiagnosticResult
                 {
                     Id = AutoExpressionFieldAnalyzer.DiagnosticId,
-                    Message = string.Format("'OperationLogs' should call As.Expression(() => ...)", expectedError),
+                    Message = string.Format("'OperationLogs' should call As.Expression(() => ...) ({0})", expectedError),
                     Severity = DiagnosticSeverity.Warning,
                 });
         }

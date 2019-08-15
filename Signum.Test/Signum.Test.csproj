@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>1701;1702;8629;8618</NoWarn>
+    <NoWarn>1701;1702;8629;8618;NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="Signum.Analyzer" Version="2.3.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
     <PackageReference Include="xunit" Version="2.4.1" /> 
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.5" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />
 
   </ItemGroup>
 

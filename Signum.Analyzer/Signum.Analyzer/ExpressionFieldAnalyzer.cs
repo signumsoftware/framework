@@ -26,9 +26,10 @@ namespace Signum.Analyzer
 
         public override void Initialize(AnalysisContext context)
         {
+            context.EnableConcurrentExecution();
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
             context.RegisterSyntaxNodeAction(AnalyzeAttributeSymbol, SyntaxKind.Attribute);
         }
-
 
         static void AnalyzeAttributeSymbol(SyntaxNodeAnalysisContext context)
         {
@@ -64,9 +65,10 @@ namespace Signum.Analyzer
                     }
                 }
 
-
-
                 var argument = att.ArgumentList?.Arguments.Select(a => a.Expression).FirstOrDefault();
+                if (argument == null)
+                    return;
+
                 var val = context.SemanticModel.GetConstantValue(argument);
 
                 string fieldName = val.HasValue ? (val.Value as string) : null;

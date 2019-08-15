@@ -115,10 +115,6 @@ namespace Signum.MSBuildTask
 
         private void Transform(ModuleDefinition mod, MethodDefinition method, MethodDefinition newMethod, FieldDefinition expressionField, out TypeDefinition closureType)
         {
-            if (method.Name == "SumManyIgnore")
-            {
-
-            }
             var writer = newMethod.Body.GetILProcessor();
             Dictionary<ParameterReference, VariableDefinition> oldParameterToNNewVariable = new Dictionary<ParameterReference, VariableDefinition>();
             newMethod.Body.InitLocals = true;
@@ -142,17 +138,27 @@ namespace Signum.MSBuildTask
             method.Body.SimplifyMacros();
             var reader = new ILReader(method.Body);
             //var c = new <>__DisplayClass
-            
+            bool isDup = false;
             Dictionary<MetadataToken, ParameterReference> captureFieldToParameter = new Dictionary<MetadataToken, ParameterReference>();
             closureType = null; 
             if (reader.Is(OpCodes.Newobj))
             {
                 var newObj = reader.Get(OpCodes.Newobj);
                 closureType = ((MethodDefinition)newObj.Operand).DeclaringType;
-                reader.Get(OpCodes.Stloc);
-                //c.a = a;
-                while (LookaheadClosureAssignment(ref reader, out var oldParameter, out var fieldReference))
+                if(reader.TryGet(OpCodes.Stloc) != null) //General case
                 {
+                    //c.a = a;
+                    while (LookaheadClosureAssignment(isDup, ref reader, out var oldParameter, out var fieldReference))
+                    {
+                        captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
+                    }
+                }
+                else if (reader.TryGet(OpCodes.Dup) != null) //only found for 1 parameter in release
+                {
+                    isDup = true;
+                    if (!LookaheadClosureAssignment(isDup, ref reader, out var oldParameter, out var fieldReference))
+                        throw new InvalidOperationException("Not expected");
+
                     captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
                 }
             }
@@ -174,7 +180,7 @@ namespace Signum.MSBuildTask
 
             while (reader.HasMore())
             {
-                if (LookaheadExpressionFieldConstant(ref reader, out var token))
+                if (LookaheadExpressionFieldConstant(isDup, ref reader, out var token))
                 {
                     var param = captureFieldToParameter[token.Value];
                     writer.Emit(OpCodes.Ldloc, oldParameterToNNewVariable[param].Index);
@@ -255,12 +261,12 @@ namespace Signum.MSBuildTask
             throw new InvalidOperationException("The method should only call As.Expression with an expression tree");
         }
 
-        bool LookaheadClosureAssignment(ref ILReader reader, out ParameterReference parameterReference, out FieldReference fieldReference)
+        bool LookaheadClosureAssignment(bool isDup, ref ILReader reader, out ParameterReference parameterReference, out FieldReference fieldReference)
         {
             fieldReference = null;
             parameterReference = null;
             var fork = reader.Clone();
-            if (fork.TryGet(OpCodes.Ldloc, 0) != null &&
+            if ((isDup || fork.TryGet(OpCodes.Ldloc, 0) != null) &&
                 fork.TryGet(OpCodes.Ldarg) is Instruction ldarg &&
                 fork.TryGet(OpCodes.Stfld) is Instruction stfld)
             {
@@ -272,13 +278,12 @@ namespace Signum.MSBuildTask
             return false;
         }
 
-        bool LookaheadExpressionFieldConstant(ref ILReader reader, out MetadataToken? fieldToken)
+        bool LookaheadExpressionFieldConstant(bool isDup, ref ILReader reader, out MetadataToken? fieldToken)
         {
             fieldToken = null;
-                                   var fork = reader.Clone();
-
+            var fork = reader.Clone();
             if (//Expression.Constant(typeof(<>__DisplayClass>), c)
-                fork.TryGet(OpCodes.Ldloc, 0 ) != null &&
+                (isDup || fork.TryGet(OpCodes.Ldloc, 0 ) != null) &&
                 fork.TryGet(OpCodes.Ldtoken) != null &&
                 fork.TryGetCall(nameof(Type.GetTypeFromHandle)) != null &&
                 fork.TryGetCall(nameof(Expression.Constant)) != null &&
