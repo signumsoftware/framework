@@ -671,7 +671,7 @@ namespace Signum.Utilities
             StringBuilder sb = new StringBuilder();
             using (StringReader sr = new StringReader(str))
             {
-                for (string line = sr.ReadLine(); line != null; line = sr.ReadLine())
+                for (string? line = sr.ReadLine(); line != null; line = sr.ReadLine())
                 {
                     sb.Append(space);
                     sb.AppendLine(line);
@@ -778,7 +778,7 @@ namespace Signum.Utilities
             StringBuilder? sb = null;
             foreach (var item in elements)
             {
-                string str;
+                string? str;
                 if (item != null && (str = item.ToString()).HasText())
                 {
                     if (sb == null)

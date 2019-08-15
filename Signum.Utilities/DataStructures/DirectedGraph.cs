@@ -150,7 +150,7 @@ namespace Signum.Utilities.DataStructures
 
         HashSet<T> TryGetOrAdd(T node)
         {
-            if (adjacency.TryGetValue(node, out HashSet<T> result))
+            if (adjacency.TryGetValue(node, out var result))
                 return result;
 
             result = new HashSet<T>(Comparer);
@@ -335,7 +335,7 @@ namespace Signum.Utilities.DataStructures
 
         public string Graphviz()
         {
-            return Graphviz("Graph", a => a.ToString());
+            return Graphviz("Graph", a => a.ToString()!);
         }
 
         public string Graphviz(string name, Func<T, string> getName)
@@ -352,7 +352,7 @@ namespace Signum.Utilities.DataStructures
 
         public XDocument ToDGML()
         {
-            return ToDGML(a => a.ToString() ?? "[null]", a => ColorExtensions.ToHtmlColor(a.GetType().FullName.GetHashCode()));
+            return ToDGML(a => a.ToString() ?? "[null]", a => ColorExtensions.ToHtmlColor(a.GetType().FullName!.GetHashCode()));
         }
 
         public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor)

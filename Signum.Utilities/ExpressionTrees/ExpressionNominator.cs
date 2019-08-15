@@ -97,7 +97,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (source == null)
                 throw new ArgumentNullException("source");
 
-            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }),
+            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }),
                 new Expression[] { source.Expression }));
         }
 
@@ -107,7 +107,7 @@ namespace Signum.Utilities.ExpressionTrees
                 throw new ArgumentNullException("source");
 
             return source.Provider.CreateQuery<T>(Expression.Call(null,
-                ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }),
+                ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }),
                 new Expression[] { source.Expression }));
         }
 
@@ -151,7 +151,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (source == null)
                 throw new ArgumentNullException("hint");
 
-            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }), new Expression[] { source.Expression, Expression.Constant(hint, typeof(string)) }));
+            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo) MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }), new Expression[] { source.Expression, Expression.Constant(hint, typeof(string)) }));
         }
     }
 }

@@ -119,7 +119,7 @@ namespace Signum.Utilities
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityEntity
         public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
 
-        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
+        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase!).LocalPath)!, "Translations");
 
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.IsEnum && t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
@@ -127,7 +127,7 @@ namespace Signum.Utilities
 
         public static Dictionary<Type, Func<MemberInfo, string>> ExternalEnums = new Dictionary<Type, Func<MemberInfo, string>>
         {
-            { typeof(DayOfWeek), m => CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)m).GetValue(null)] }
+            { typeof(DayOfWeek), m => CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)m).GetValue(null)!] }
         };
 
 
@@ -243,7 +243,7 @@ namespace Signum.Utilities
         static string GetMemberNiceName(MemberInfo memberInfo)
         {
             //var cc = CultureInfo.CurrentUICulture;
-            var type = memberInfo.DeclaringType;
+            var type = memberInfo.DeclaringType!;
 
             if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
             {

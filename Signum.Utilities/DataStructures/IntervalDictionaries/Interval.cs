@@ -86,9 +86,9 @@ namespace Signum.Utilities.DataStructures
             return min.CompareTo(other.min);
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
-            return CompareTo((Interval<T>)obj);
+            return CompareTo((Interval<T>)obj!);
         }
 
         public override string ToString()
@@ -101,7 +101,7 @@ namespace Signum.Utilities.DataStructures
             return other.min.Equals(min) && other.max.Equals(max);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || !(obj is Interval<T>))
                 return false;
@@ -114,7 +114,7 @@ namespace Signum.Utilities.DataStructures
             return min.GetHashCode();
         }
 
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (format == null)
                 return string.Format(formatProvider, "{0} - {1}", min, max);
@@ -282,9 +282,9 @@ namespace Signum.Utilities.DataStructures
 #pragma warning restore CS8629 // Nullable value type may be null.
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
-            return CompareTo((NullableInterval<T>)obj);
+            return CompareTo((NullableInterval<T>)obj!);
         }
 
         public override string ToString()
@@ -297,7 +297,7 @@ namespace Signum.Utilities.DataStructures
             return other.min.Equals(min) && other.max.Equals(max);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || !(obj is NullableInterval<T>))
                 return false;
@@ -310,7 +310,7 @@ namespace Signum.Utilities.DataStructures
             return min.GetHashCode();
         }
 
-        public string ToString(string? format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (string.IsNullOrEmpty(format))
                 return BuildString(formatProvider, "{0} - {1}", "< {0}", "{0} ≤", "All");
@@ -336,7 +336,7 @@ namespace Signum.Utilities.DataStructures
                 "All");
         }
 
-        string BuildString(IFormatProvider formatProvider, string middle, string start, string end, string all)
+        string BuildString(IFormatProvider? formatProvider, string middle, string start, string end, string all)
         {
             if (min.HasValue && max.HasValue)
                 return string.Format(formatProvider, middle, min, max);
@@ -456,9 +456,9 @@ namespace Signum.Utilities.DataStructures
             return min.CompareTo(other.min);
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
-            return CompareTo((IntervalWithEnd<T>)obj);
+            return CompareTo((IntervalWithEnd<T>)obj!);
         }
 
         public override string ToString()
@@ -471,7 +471,7 @@ namespace Signum.Utilities.DataStructures
             return other.min.Equals(min) && other.max.Equals(max);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || !(obj is IntervalWithEnd<T>))
                 return false;
@@ -484,7 +484,7 @@ namespace Signum.Utilities.DataStructures
             return min.GetHashCode();
         }
 
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (format == null)
                 return string.Format(formatProvider, "{0} - {1}", min, max);

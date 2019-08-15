@@ -31,12 +31,12 @@ namespace Signum.Utilities
 
         public void Add(K key, V value)
         {
-            dictionary.AddOrThrow(key.ToString(), new WithDescription<V>(value), "Key {0} already in ConsoleSwitch");
+            dictionary.AddOrThrow(key.ToString()!, new WithDescription<V>(value), "Key {0} already in ConsoleSwitch");
         }
 
         public void Add(K key, V value, string description)
         {
-            dictionary.AddOrThrow(key.ToString(), new WithDescription<V>(value, description), "Key {0} already in ConsoleSwitch");
+            dictionary.AddOrThrow(key.ToString()!, new WithDescription<V>(value, description), "Key {0} already in ConsoleSwitch");
         }
         
         public V? Choose(int? numberOfOptions = null)
@@ -273,7 +273,7 @@ namespace Signum.Utilities
                 return e.NiceToString();
             if (value == null)
                 return "[No Name]";
-            return value.ToString();
+            return value.ToString()!;
         }
     }
 

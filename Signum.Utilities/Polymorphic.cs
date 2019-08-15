@@ -30,6 +30,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V>? InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>?> currentValue, KeyValuePair<Type, Dictionary<K, V>?> baseValue, List<KeyValuePair<Type, Dictionary<K, V>?>> newInterfacesValues)
+            where K : notnull
         {
             if (currentValue.Value == null && baseValue.Value == null)
                 return null;
@@ -117,7 +118,7 @@ namespace Signum.Utilities
             if (!typeof(Delegate).IsAssignableFrom(type))
                 return null;
 
-            MethodInfo mi = type.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo mi = type.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance)!;
 
             var param = mi.GetParameters().FirstOrDefault();
 

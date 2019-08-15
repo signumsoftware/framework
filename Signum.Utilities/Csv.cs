@@ -75,7 +75,7 @@ namespace Signum.Utilities
                 var members = columns.Select(c => c.MemberEntry).ToList();
                 var toString = columns.Select(c => GetToString(defCulture, c, toStringFactory)).ToList();
 
-                using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
+                using (StreamWriter sw = new StreamWriter(stream, defEncoding) { AutoFlush = autoFlush })
                 {
                     if (writeHeaders)
                         sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), separator));
@@ -135,7 +135,7 @@ namespace Signum.Utilities
             if (obj is IFormattable f)
                 return f.ToString(format, culture);
             else
-                return obj!.ToString();
+                return obj!.ToString()!;
         }
 
         static string HandleSpaces(string p)
@@ -180,7 +180,7 @@ namespace Signum.Utilities
                     var line = skipLines;
                     while(true)
                     {
-                        string csvLine = sr.ReadLine();
+                        string? csvLine = sr.ReadLine();
 
                         if (csvLine == null)
                             yield break;
@@ -337,7 +337,7 @@ namespace Signum.Utilities
 
         static object? ConvertTo(string s, Type type, CultureInfo culture, string? format)
         {
-            Type baseType = Nullable.GetUnderlyingType(type);
+            Type? baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
                 if (!s.HasText()) 
@@ -398,9 +398,8 @@ namespace Signum.Utilities
         public ParseCsvException(Exception inner) : base(inner.Message, inner)
         {
             this.Row = (int?)inner.Data["row"];
-            this.Value = (string)inner.Data["value"];
-            this.Member = (string)inner.Data["member"];
-
+            this.Value = (string)inner.Data["value"]!;
+            this.Member = (string)inner.Data["member"]!;
         }
 
         public override string Message

@@ -41,8 +41,8 @@ namespace Signum.Utilities
             return (m is PropertyInfo pi) ? pi.PropertyType :
                 (m is FieldInfo fi) ? fi.FieldType :
                 (m is MethodInfo mi) ? mi.ReturnType :
-                (m is ConstructorInfo ci) ? ci.DeclaringType :
-                (m is EventInfo ei) ? ei.EventHandlerType :
+                (m is ConstructorInfo ci) ? ci.DeclaringType! :
+                (m is EventInfo ei) ? ei.EventHandlerType! :
                  throw new UnexpectedValueException(m);
         }
 
@@ -89,7 +89,7 @@ namespace Signum.Utilities
 
         public static bool IsReadOnly(this PropertyInfo pi)
         {
-            MethodInfo mi = pi.GetSetMethod();
+            MethodInfo? mi = pi.GetSetMethod();
 
             return mi == null || !mi.IsPublic;
         }
@@ -122,7 +122,7 @@ namespace Signum.Utilities
 
             var arguments = propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray();
 
-            return baseMethod.DeclaringType.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            return baseMethod.DeclaringType!.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null, propertyInfo.PropertyType, arguments, null);
         }
 

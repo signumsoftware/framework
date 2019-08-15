@@ -124,7 +124,7 @@ namespace Signum.Utilities.Reflection
 
         protected override Expression VisitLambda<T>(Expression<T> lambda)
         {
-            var returnType = lambda.Type.GetMethod("Invoke").ReturnType;
+            var returnType = lambda.Type.GetMethod("Invoke")!.ReturnType;
 
             Expression body = Convert(this.Visit(lambda.Body), returnType);
 

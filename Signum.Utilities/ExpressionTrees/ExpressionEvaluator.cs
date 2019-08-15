@@ -106,9 +106,9 @@ namespace Signum.Utilities.ExpressionTrees
             }
             catch (TargetInvocationException ex)
             {
-                ex.InnerException.PreserveStackTrace();
+                ex.InnerException!.PreserveStackTrace();
 
-                throw ex.InnerException;
+                throw ex.InnerException!;
             }
         }
 
@@ -125,9 +125,9 @@ namespace Signum.Utilities.ExpressionTrees
                 this.arguments = mi.IsGenericMethod ? mi.GetGenericArguments() : null;
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
-                return obj is MethodKey && Equals((MethodKey)obj);
+                return obj is MethodKey mk && Equals(mk);
             }
 
             public bool Equals(MethodKey other)
@@ -156,7 +156,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             public override int GetHashCode()
             {
-                var result = mi.MetadataToken ^ mi.DeclaringType.GetHashCode();
+                var result = mi.MetadataToken ^ mi.DeclaringType!.GetHashCode();
                 if (!mi.IsGenericMethod)
                     return result;
                 
@@ -201,7 +201,7 @@ namespace Signum.Utilities.ExpressionTrees
         static readonly ConcurrentDictionary<(Type type, string name), Func<object?>> cachedStaticGetters = new ConcurrentDictionary<(Type type, string name), Func<object?>>();
         private static Func<object?> GetStaticGetter(MemberInfo mi)
         {
-            return cachedStaticGetters.GetOrAdd((type: mi.DeclaringType, name: mi.Name), _ =>
+            return cachedStaticGetters.GetOrAdd((type: mi.DeclaringType!, name: mi.Name), _ =>
             {
                 return Expression.Lambda<Func<object?>>(Expression.Convert(Expression.MakeMemberAccess(null, mi), typeof(object))).Compile();
             });
@@ -210,7 +210,7 @@ namespace Signum.Utilities.ExpressionTrees
         static readonly ConcurrentDictionary<(Type type, string name), Func<object?, object?>> cachedInstanceGetters = new ConcurrentDictionary<(Type type, string name), Func<object?, object?>>();
         private static Func<object?, object?> GetInstanceGetter(MemberInfo mi)
         {
-            return cachedInstanceGetters.GetOrAdd((type: mi.DeclaringType, name: mi.Name), _ =>
+            return cachedInstanceGetters.GetOrAdd((type: mi.DeclaringType!, name: mi.Name), _ =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 return Expression.Lambda<Func<object?, object?>>(Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, mi.DeclaringType), mi), typeof(object)), p).Compile();

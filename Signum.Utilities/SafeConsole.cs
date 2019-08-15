@@ -12,7 +12,7 @@ namespace Signum.Utilities
         public static readonly object SyncKey = new object();
         static bool needToClear = false;
 
-        public static void WriteSameLine(string? format, params object?[] parameters)
+        public static void WriteSameLine(string format, params object?[] parameters)
         {
             WriteSameLine(string.Format(format, parameters));
         }
@@ -57,7 +57,7 @@ namespace Signum.Utilities
 
 
 
-        public static void WriteLineColor(ConsoleColor color, string? format, params object?[] parameters)
+        public static void WriteLineColor(ConsoleColor color, string format, params object?[] parameters)
         {
             WriteLineColor(color, string.Format(format, parameters));
         }

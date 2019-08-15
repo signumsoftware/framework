@@ -21,7 +21,7 @@ namespace Signum.Utilities.Reflection
             if (fi.FieldType.IsValueType)
                 return null;
 
-            return fi.DeclaringType.IsNullableFromContext(position);
+            return fi.DeclaringType!.IsNullableFromContext(position);
         }
 
         public static bool? IsNullable(this PropertyInfo pi, int position = 0)
@@ -34,7 +34,7 @@ namespace Signum.Utilities.Reflection
             if (pi.PropertyType.IsValueType)
                 return null;
 
-            return pi.DeclaringType.IsNullableFromContext();
+            return pi.DeclaringType!.IsNullableFromContext();
         }
 
         public static bool? IsNullableFromContext(this Type ti, int position = 0)
@@ -262,12 +262,12 @@ namespace Signum.Utilities.Reflection
 
         public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
         {
-            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType!.GetGenericTypeDefinition().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
         public static ConstructorInfo MakeGenericConstructor(this ConstructorInfo ci, params Type[] types)
         {
-            return ci.DeclaringType.MakeGenericType(types).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType!.MakeGenericType(types).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
 
@@ -471,7 +471,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
             else
-                return (T)Convert.ChangeType(value, utype);
+                return (T)Convert.ChangeType(value, utype)!;
         }
 
         public static object? Parse(string value, Type type)
@@ -517,7 +517,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
             else
-                return (T)Convert.ChangeType(value, utype, culture);
+                return (T)Convert.ChangeType(value, utype, culture)!;
         }
 
         public static object? Parse(string value, Type type, CultureInfo culture)
@@ -780,7 +780,7 @@ namespace Signum.Utilities.Reflection
                 else if (utype == typeof(Guid) && value is string)
                     return (T)(object)Guid.Parse((string)value);
                 else
-                    return (T)Convert.ChangeType(value, utype);
+                    return (T)Convert.ChangeType(value, utype)!;
             }
         }
 
@@ -817,7 +817,7 @@ namespace Signum.Utilities.Reflection
                     if(type != typeof(string) && value is IEnumerable && typeof(IEnumerable).IsAssignableFrom(type))
                     {
                         var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
-                        IList col = (IList)Activator.CreateInstance(colType);
+                        IList col = (IList)Activator.CreateInstance(colType)!;
                         foreach (var item in (IEnumerable)value)
                         {
                             col.Add(item);
@@ -833,8 +833,8 @@ namespace Signum.Utilities.Reflection
 
         public static bool IsStatic(this PropertyInfo pi)
         {
-            return (pi.CanRead && pi.GetGetMethod().IsStatic) ||
-                  (pi.CanWrite && pi.GetSetMethod().IsStatic);
+            return (pi.CanRead && pi.GetGetMethod()!.IsStatic) ||
+                  (pi.CanWrite && pi.GetSetMethod()!.IsStatic);
         }    
     }
 }
