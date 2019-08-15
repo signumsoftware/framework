@@ -79,7 +79,7 @@ namespace Signum.Engine.ViewLog
 
         static IDisposable? Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)
         {
-            if (request == null || !LogQuery(request, type))
+            if (request == null || !LogQuery(request, type) || UserHolder.Current == null)
                 return null;
 
             var old = Connector.CurrentLogger;

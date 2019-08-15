@@ -111,13 +111,9 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
               {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
               {AuthClient.Options.resetPassword &&
                 <span>
-                  &nbsp;
-                  &nbsp;
-                                <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
-                 &nbsp;
-                <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
                 &nbsp;
-                                <Link to="~/auth/ForgotPasswordEmail">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+                &nbsp;
+                <Link to="~/auth/forgotPasswordEmail">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
                 </span>
               }
             </div>

@@ -169,28 +169,26 @@ namespace Signum.React.Authorization
         }
 
 
-        [HttpPost("api/auth/ForgotPasswordEmail")]
-        public string ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
+        [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
+        public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.eMail))
                 return AuthMessage.PasswordMustHaveAValue.NiceToString();
 
             try
             {
-                var rpr = ResetPasswordRequestLogic.ResetPasswordRequestByUserEmail(request.eMail);
+                var rpr = ResetPasswordRequestLogic.SendResetPasswordRequestEmail(request.eMail);
             }
             catch (Exception ex)
             {
-
                 ex.LogException();
                 return AuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
             }
-          
 
             return null;
         }
 
-        [HttpPost("api/auth/ResetPassword")]
+        [HttpPost("api/auth/resetPassword"), SignumAllowAnonymous]
         public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.newPassword))
@@ -200,9 +198,6 @@ namespace Signum.React.Authorization
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User) };
         }
-
-
-
 
         private BadRequestObjectResult ModelError(string field, string error)
         {

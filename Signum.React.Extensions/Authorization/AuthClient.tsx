@@ -45,8 +45,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
   options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
-  options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/resetPassword")} />);
-  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/forgotPasswordEmail")} />);
+  options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
+  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
 
 
   if (options.notifyLogout) {
@@ -461,7 +461,7 @@ export module API {
     newPassword: string;
   }
 
-  export interface forgotPasswordEmailRequest {
+  export interface ForgotPasswordEmailRequest {
     email: string;
    
   }
@@ -471,9 +471,7 @@ export module API {
     newPassword: string;
   }
 
-
-
-  export function forgotPasswordEmail(request: forgotPasswordEmailRequest): Promise<string> {
+  export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<string> {
     return ajaxPost<string>({ url: "~/api/auth/forgotPasswordEmail" }, request);
   }
 
@@ -482,7 +480,7 @@ export module API {
   }
 
   export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
-    return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
+    return ajaxPost<LoginResponse>({ url: "~/api/auth/changePassword" }, request);
   }
 
   export function fetchCurrentUser(): Promise<UserEntity> {

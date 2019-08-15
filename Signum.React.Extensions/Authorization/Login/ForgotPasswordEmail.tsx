@@ -30,7 +30,7 @@ export default class ForgotPassword extends React.Component<{}, ForgotPasswordEm
       if (this.state.modelState && Dic.getValues(this.state.modelState).some(array => array.length > 0))
         return;
 
-      const request: AuthClient.API.forgotPasswordEmailRequest = {
+      const request: AuthClient.API.ForgotPasswordEmailRequest = {
         email: this.eMail.value,
       };
 
@@ -78,40 +78,40 @@ export default class ForgotPassword extends React.Component<{}, ForgotPasswordEm
 
     if (this.state.success === true) {
       return (
-        <div>
-          <h2 className="sf-entity-title">{AuthMessage.RequestAccepted.niceToString()}</h2>
-          <p>{AuthMessage.WeHaveSentYouAnEmailToResetYourPassword.niceToString()}</p>
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6 offset-md-3">
+              <h2 className="sf-entity-title">{AuthMessage.RequestAccepted.niceToString()}</h2>
+              <p>{AuthMessage.WeHaveSentYouAnEmailToResetYourPassword.niceToString()}</p>
+            </div>
+          </div>
         </div>
       );
     }
      
 
     return (
-      <form onSubmit={(e) => this.handleSubmit(e)}>
-        <div className="row">
-          <div className="offset-sm-2 col-sm-6">
-            <h2 className="sf-entity-title">{AuthMessage.IForgotMyPassword.niceToString()}</h2>
-            <p>{AuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
-          </div>
-        </div>
-        <div>
 
-          <div className={classes("form-group row", this.error("eMail") && "has-error")}>
-            <label className="col-form-label col-sm-2">{AuthMessage.EnterYourUserEmail.niceToString()}</label>
-            <div className="col-sm-4">
-              <input type="texbox" className="form-control" id="eMail" ref={r => this.eMail = r!} onBlur={this.handleMailBlur} />
-              {this.error("eMail") && <span className="help-block">{this.error("newPassword")}</span>}
-            </div>
-            <label className="col-form-label col-sm-2" style={this.state.success === false ? { display: "inline" } : { display: "none" }}>{this.state.message}</label>
-          </div>
-       
-        </div>
+      <div className="container">
         <div className="row">
-          <div className="offset-sm-2 col-sm-6">
-            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{AuthMessage.SendEmail.niceToString()}</button>
+          <div className="col-md-6 offset-md-3">
+            <form onSubmit={(e) => this.handleSubmit(e)}>
+              <h2 className="sf-entity-title">{AuthMessage.IForgotMyPassword.niceToString()}</h2>
+              <p>{AuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
+
+              <div className={classes("form-group", this.error("eMail") && "has-error")}>
+                <div>
+                  <input type="texbox" className="form-control" id="eMail" ref={r => this.eMail = r!} onBlur={this.handleMailBlur} placeholder={AuthMessage.EnterYourUserEmail.niceToString()} />
+                  {this.error("eMail") && <span className="help-block">{this.error("newPassword")}</span>}
+                </div>
+                <label className="col-form-label col-sm-2" style={this.state.success === false ? { display: "inline" } : { display: "none" }}>{this.state.message}</label>
+              </div>
+
+              <button type="submit" className="btn btn-primary" id="changePasswordRequest">{AuthMessage.SendEmail.niceToString()}</button>
+            </form>
           </div>
         </div>
-      </form>
+      </div>
     );
   }
 

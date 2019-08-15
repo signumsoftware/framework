@@ -12,6 +12,7 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Basics;
 using Signum.Engine.Operations;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Authorization
 {
@@ -36,6 +37,7 @@ namespace Signum.Engine.Authorization
 
                 EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
                 {
+                    DisableAuthorization = true,
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                     {
                         Text = "<p>{0}</p>".FormatWith(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
@@ -78,14 +80,15 @@ namespace Signum.Engine.Authorization
                      .Where(r => r.Code == code && !r.Lapsed)
                      .SingleOrDefault();
 
-                rpr.Execute(ResetPasswordRequestOperation.Execute, password);
-
+                using (UserHolder.UserSession(rpr.User))
+                {
+                    rpr.Execute(ResetPasswordRequestOperation.Execute, password);
+                }
                 return rpr;
             }
         }
 
-        public static ResetPasswordRequestEntity ResetPasswordRequestByUserEmail(string email)
-
+        public static ResetPasswordRequestEntity SendResetPasswordRequestEmail(string email)
         {
             UserEntity user;
             using (AuthLogic.Disable())
@@ -102,7 +105,7 @@ namespace Signum.Engine.Authorization
             string url = EmailLogic.Configuration.UrlLeft+ @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
 
             using (AuthLogic.Disable())
-                new ResetPasswordRequestMail(request, url).SendMail();
+                new ResetPasswordRequestEmail(request, url).SendMail();
 
             return request;
         }
