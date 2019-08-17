@@ -127,11 +127,12 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
 
     if (this.state.findOptions) {
-      return Finder.findMany(this.state.findOptions);
+      return Finder.findMany(this.state.findOptions, { searchControlProps: { create: this.props.createOnFind } });
     }
 
     return this.chooseType(ti => Finder.isFindable(ti, false))
-      .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
+      .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined :
+        Finder.findMany({ queryName: qn } as FindOptions, { searchControlProps: { create: this.props.createOnFind } }));
   }
 
   addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
