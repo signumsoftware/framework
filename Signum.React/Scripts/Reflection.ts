@@ -172,7 +172,7 @@ export function dateToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var m = moment(val, moment.ISO_8601);
+  var m = moment(val);
   return m.format(toMomentFormat(format));
 }
 

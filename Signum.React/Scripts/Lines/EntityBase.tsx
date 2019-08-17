@@ -19,6 +19,7 @@ export interface EntityBaseProps extends LineBaseProps {
   viewOnCreate?: boolean;
   navigate?: boolean;
   create?: boolean;
+  createOnFind?: boolean;
   find?: boolean;
   remove?: boolean | ((item: any /*T*/) => boolean);
 
@@ -272,12 +273,12 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
   defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
     if (this.state.findOptions) {
-      return Finder.find(this.state.findOptions);
+      return Finder.find(this.state.findOptions, { searchControlProps: { create: this.props.createOnFind } });
     }
 
     return this.chooseType(ti => Finder.isFindable(ti, false))
       .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
-        qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
+        qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions, { searchControlProps: { create: this.props.createOnFind } }));
   }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
