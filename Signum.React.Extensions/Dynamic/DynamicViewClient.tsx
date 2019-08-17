@@ -56,7 +56,7 @@ export function start(options: { routes: JSX.Element[] }) {
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewOverrideEntity, t => [
-    { token: t.entity(p => p.viewName), type: "Text" },
+    { token: t.append(p => p.viewName), type: "Text" },
     { token: t.entity(p => p.entityType.cleanName), type: "Text" },
     { token: t.entity(p => p.script), type: "Code" },
   ]);
