@@ -601,6 +601,7 @@ NodeUtils.register<MultiValueLineNode>({
 });
 
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
+  createOnFind?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
   onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
   find?: ExpressionOrValue<boolean>;
@@ -1346,10 +1347,6 @@ NodeUtils.register<ValueSearchControlLineNode>({
       const error = NodeUtils.validateFindOptions(dn.node.findOptions, ctx);
       if (error)
         return error;
-    }
-
-    if (dn.node.findOptions && dn.node.valueToken) {
-      return NodeUtils.validateAggregate(dn.node.valueToken);
     }
 
     if (dn.node.valueToken && !dn.node.findOptions) {

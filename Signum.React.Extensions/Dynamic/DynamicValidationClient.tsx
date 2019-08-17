@@ -19,6 +19,11 @@ export function start(options: { routes: JSX.Element[] }) {
     parentToken: DynamicValidationEntity.token(a => a.entityType!.cleanName),
     parentValue: type
   }} />);
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
+    { token: t.entity(p => p.entityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.name), type: "Text" },
+    { token: t.entity(p => p.eval!.script), type: "Text" },
+  ]);
 }
 
 export namespace API {
