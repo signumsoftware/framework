@@ -743,6 +743,11 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(s))
                 return s;
 
+            var dr  = NaturalLanguageTools.DiacriticsRemover.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+
+            if (dr != null)
+                s = dr.RemoveDiacritics(s);
+
             string normalizedString = s.Normalize(NormalizationForm.FormD);
             StringBuilder stringBuilder = new StringBuilder();
 

@@ -29,6 +29,11 @@ namespace Signum.Utilities
             {"de", new GermanNumberWriter()},
         };
 
+        public static Dictionary<string, IDiacriticsRemover> DiacriticsRemover = new Dictionary<string, IDiacriticsRemover>
+        {
+            {"de", new GermanDiacriticsRemover()},
+        };
+
         public static char? GetGender(string name, CultureInfo? culture = null)
         {
             var defCulture = culture ?? CultureInfo.CurrentUICulture;
@@ -285,6 +290,11 @@ namespace Signum.Utilities
     public interface INumberWriter
     {
         string ToNumber(decimal number, NumberWriterSettings settings);
+    }
+
+    public interface IDiacriticsRemover
+    {
+        string RemoveDiacritics(string str);
     }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
