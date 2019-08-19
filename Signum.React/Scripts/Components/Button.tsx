@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import { BsSize, BsColor } from './Basic';
 import { classes } from '../Globals';
 
@@ -15,67 +15,54 @@ export interface ButtonProps extends React.AnchorHTMLAttributes<any> {
   className?: string;
 };
 
-export class Button extends React.Component<ButtonProps> {
+export function Button(props: ButtonProps) {
 
-  static defaultProps = {
-    color: 'secondary',
-    tag: 'button',
-  };
-
-  constructor(props: ButtonProps) {
-    super(props);
-
-    this.onClick = this.onClick.bind(this);
-  }
-
-  onClick = (e: React.MouseEvent<any>) => {
-    if (this.props.disabled) {
+  function onClick(e: React.MouseEvent<any>) {
+    if (props.disabled) {
       e.preventDefault();
       return;
     }
 
-    if (this.props.onClick) {
-      this.props.onClick(e);
+    if (props.onClick) {
+      props.onClick(e);
     }
   }
 
-  render() {
-    let {
-      active,
-      disabled,
-      block,
-      className,
-      color,
-      outline,
-      size,
-      tag,
-      innerRef,
-      ...attributes
-    } = this.props;
+  let {
+    active,
+    disabled,
+    block,
+    className,
+    color,
+    outline,
+    size,
+    tag,
+    innerRef,
+    ...attributes
+  } = props;
 
-    const clss = classes(
-      className,
-      'btn',
-      `btn${outline ? '-outline' : ''}-${color}`,
-      size && `btn-${size}`,
-      block && 'btn-block',
-      active && "active",
-      disabled && "disabled"
-    );
+  const clss = classes(
+    className,
+    'btn',
+    `btn${outline ? '-outline' : ''}-${color || "secondary"}`,
+    size && `btn-${size}`,
+    block && 'btn-block',
+    active && "active",
+    disabled && "disabled"
+  );
 
-    let Tag = tag!;
+  let Tag = tag || "button";
 
-    if (attributes.href && Tag === 'button') {
-      Tag = 'a';
-    }
-
-    return (
-      <Tag
-        {...attributes}
-        className={clss}
-        ref={innerRef}
-        onClick={this.onClick}
-      />
-    );
+  if (attributes.href && Tag === 'button') {
+    Tag = 'a';
   }
+
+  return (
+    <Tag
+      {...attributes}
+      className={clss}
+      ref={innerRef}
+      onClick={onClick}
+    />
+  );
 }
