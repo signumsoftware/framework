@@ -59,6 +59,8 @@ namespace Signum.Entities.Omnibox
 
         public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, string pattern, bool isPascalCase)
         {
+            pattern = pattern.RemoveDiacritics();
+
             if (values.TryGetValue(pattern, out T val) && filter(val))
             {
                 yield return new OmniboxMatch(val!, 0, pattern, new string('#', pattern.Length));
