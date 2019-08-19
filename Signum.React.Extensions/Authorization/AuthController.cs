@@ -13,6 +13,7 @@ using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using Signum.Engine.Basics;
 
 namespace Signum.React.Authorization
 {
@@ -167,6 +168,37 @@ namespace Signum.React.Authorization
             return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
         }
 
+
+        [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
+        public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.eMail))
+                return AuthMessage.PasswordMustHaveAValue.NiceToString();
+
+            try
+            {
+                var rpr = ResetPasswordRequestLogic.SendResetPasswordRequestEmail(request.eMail);
+            }
+            catch (Exception ex)
+            {
+                ex.LogException();
+                return AuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
+            }
+
+            return null;
+        }
+
+        [HttpPost("api/auth/resetPassword"), SignumAllowAnonymous]
+        public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.newPassword))
+                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+            var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
+
+            return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User) };
+        }
+
         private BadRequestObjectResult ModelError(string field, string error)
         {
             ModelState.AddModelError(field, error);
@@ -192,6 +224,19 @@ namespace Signum.React.Authorization
         {
             public string oldPassword { get; set; }
             public string newPassword { get; set; }
+        }
+
+
+        public class ResetPasswordRequest
+        {
+            public string code { get; set; }
+            public string newPassword { get; set; }
+        }
+
+
+        public class ForgotPasswordRequest
+        {
+            public string eMail { get; set; }
         }
 #pragma warning restore IDE1006 // Naming Styles
     }

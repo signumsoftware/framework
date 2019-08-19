@@ -72,13 +72,24 @@ export function start(options: { routes: JSX.Element[] }) {
     </Tab>;
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
-    { token: t.entity(p => p.typeName), type: "Text" },
+    { token: t.append(p => p.typeName), type: "Text" },
     { token: t.entity(p => p.typeDefinition), type: "JSon" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicMixinConnectionEntity, t => [
-    { token: t.entity(p => p.mixinName), type: "Text" },
+    { token: t.append(p => p.mixinName), type: "Text" },
     { token: t.entity(p => p.entityType.entity!.cleanName), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicSqlMigrationEntity, t => [
+    { token: t.append(p => p.comment), type: "Text" },
+    { token: t.entity(p => p.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicRenameEntity, t => [
+    { token: t.append(p => p.oldName), type: "Text" },
+    { token: t.append(p => p.newName), type: "Text" },
+    { token: t.append(p => p.replacementKey), type: "Text" },
   ]);
 }
 

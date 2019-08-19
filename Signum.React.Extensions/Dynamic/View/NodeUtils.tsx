@@ -158,6 +158,7 @@ ${childrenString}
       formGroupHtmlAttributes: node.formGroupHtmlAttributes,
       visible: node.visible,
       readOnly: node.readOnly,
+      createOnFind: node.createOnFind,
       create: node.create,
       onCreate: node.onCreate,
       remove: node.remove,
@@ -726,18 +727,6 @@ export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext
   return undefined;
 }
 
-
-let aggregates = ["Count", "Average", "Min", "Max", "Sum"];
-
-export function validateAggregate(token: string) {
-  var lastPart = token.tryAfterLast(".") || token;
-
-  if (!aggregates.contains(lastPart))
-    return DynamicViewValidationMessage.AggregateIsMandatoryFor01.niceToString("valueToken", aggregates.joinComma(External.CollectionMessage.Or.niceToString()));
-
-  return undefined;
-}
-
 export function addBreakLines(breakLines: boolean, message: string): React.ReactNode[] {
   if (!breakLines)
     return [message];
@@ -757,6 +746,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
       : undefined),
     visible: evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, isBooleanOrNull),
     readOnly: evaluateAndValidate(dn, parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
+    createOnFind: evaluateAndValidate(dn, parentCtx, dn.node, n => n.createOnFind, isBooleanOrNull),
     create: evaluateAndValidate(dn, parentCtx, dn.node, n => n.create, isBooleanOrNull),
     onCreate: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onCreate, isFunctionOrNull),
     remove: evaluateAndValidate(dn, parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
@@ -813,6 +803,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       {options.isEntityLine && <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).itemHtmlAttributes)} />}
       <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={m ? m.type.name : undefined} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.createOnFind)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(modules.Reflection.New('" + typeName + "', { name: ''}))"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />

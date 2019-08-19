@@ -77,39 +77,5 @@
     <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="SMS\SMSClient.tsx" />
-    <None Remove="SMS\Templates\MultipleSMS.tsx" />
-    <None Remove="SMS\Templates\SMSMessage.tsx" />
-    <None Remove="SMS\Templates\SMSSendPackage.tsx" />
-    <None Remove="SMS\Templates\SMSTemplate.tsx" />
-    <None Remove="SMS\Templates\SMSUpdatePackage.tsx" />
-    <None Remove="Toolbar\Templates\ToolbarMainRenderer.tsx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Axis.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\InitialMessage.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Legend.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\PivotTable.ts" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\ReactChart.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Rule.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Stratify.ts" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\TextEllipsis.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Ticks.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\ReactChartBase.tsx" />
-    <TypeScriptCompile Remove="Dynamic\Api\DynamicApi.tsx" />
-    <TypeScriptCompile Remove="Dynamic\DynamicApiClient.tsx" />
-    <TypeScriptCompile Remove="SMS\Templates\MultipleSMS.tsx" />
-    <TypeScriptCompile Remove="SMS\Templates\SMSSendPackage.tsx" />
-    <TypeScriptCompile Remove="SMS\Templates\SMSUpdatePackage.tsx" />
-    <TypeScriptCompile Remove="Toolbar\QueryToolbarConfig.tsx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="SMS\Templates\MultipleSMS.tsx" />
-    <Content Include="SMS\Templates\SMSSendPackage.tsx" />
-    <Content Include="SMS\Templates\SMSUpdatePackage.tsx" />
-  </ItemGroup>
  
 </Project>
