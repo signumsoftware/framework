@@ -1264,7 +1264,7 @@
     <Member Name="LastExecution" Description="Letzte Ausführung" />
   </Type>
   <Type Name="ITaskOperation">
-    <Member Name="ExecuteAsync" Description="Ausführen von asynchronen" />
+    <Member Name="ExecuteAsync" Description="Async ausführen" />
     <Member Name="ExecuteSync" Description="Sync ausführen" />
   </Type>
   <Type Name="IUserAssetEntity">
