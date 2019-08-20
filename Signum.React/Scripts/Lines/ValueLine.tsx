@@ -193,6 +193,7 @@ ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
       <label className={vl.state.ctx.error} style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...vl.baseHtmlAttributes()} {...s.formGroupHtmlAttributes}>
         <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
         {" " + s.labelText}
+        {s.helpText && <small className="form-text text-muted">{s.helpText}</small>}
       </label>
     );
   }
