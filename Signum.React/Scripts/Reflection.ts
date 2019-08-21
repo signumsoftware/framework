@@ -1202,15 +1202,15 @@ function getMember(key: string): MemberInfo | undefined {
   return member;
 }
 
-export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
+export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) : string {
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
   {
     var m = getMember((symbol as Entity & ISymbol).key);
-    return m && m.niceName || symbol.toStr;
+    return m && m.niceName || symbol.toStr!;
   }
   else {
     var m = getMember(symbol.toStr!);
-    return m && m.niceName || symbol.toStr;
+    return m && m.niceName || symbol.toStr!;
   }
 }
 
