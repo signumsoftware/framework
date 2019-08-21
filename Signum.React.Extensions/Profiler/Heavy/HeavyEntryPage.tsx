@@ -182,6 +182,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
   componentDidMount() {
     this.mountChart(this.props);
+    this.chartContainer.addEventListener("wheel", this.handleWeel, { passive: false, capture: true });
   }
 
   componentWillReceiveProps(newProps: HeavyProfilerDetailsD3Props) {
@@ -197,11 +198,16 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
     this.updateChart!();
   }
 
+  componentWillUnmount() {
+    this.chartContainer.removeEventListener("wheel", this.handleWeel);
+  }
+
   chartContainer!: HTMLDivElement;
 
-  handleWeel = (e: React.WheelEvent<any>) => {
+  handleWeel = (e: WheelEvent) => {
 
     e.preventDefault();
+    e.stopPropagation();
 
     let dist = this.state.max - this.state.min;
 
@@ -211,7 +217,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
     let elem = e.currentTarget as HTMLElement;
 
-    let ne = e.nativeEvent as MouseEvent;
+    let ne = e/*.nativeEvent*/ as MouseEvent;
 
     const rect = elem.getBoundingClientRect();
 
@@ -224,10 +230,11 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
       min: newMin,
       max: newMax
     });
+
   }
 
   render() {
-    return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div!} onWheel={this.handleWeel}></div>);
+    return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div!}></div>);
   }
 
   mountChart(props: HeavyProfilerDetailsD3Props) {

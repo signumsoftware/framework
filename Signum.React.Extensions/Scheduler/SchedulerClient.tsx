@@ -3,12 +3,10 @@ import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
-import * as Operations from '@framework/Operations'
-import { EntityOperationSettings } from '@framework/Operations'
 import { Lite } from '@framework/Signum.Entities'
 import {
   ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
-  ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity, ITaskOperation
+  ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity
 } from './Signum.Entities.Scheduler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -29,9 +27,6 @@ export function start(options: { routes: JSX.Element[] }) {
     key: "SchedulerPanel",
     onClick: () => Promise.resolve("~/scheduler/view")
   });
-
-  Operations.addSettings(new EntityOperationSettings(ITaskOperation.ExecuteAsync, { showOnReadOnly: true }));
-  Operations.addSettings(new EntityOperationSettings(ITaskOperation.ExecuteSync, { showOnReadOnly: true }));
 
   var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
   es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
