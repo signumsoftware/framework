@@ -33,7 +33,6 @@ export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
 }
 
 function ToolbarMainRendererPrivate({ response }: { response: ToolbarClient.ToolbarResponse<any> }) {
-  debugger;
   return (
     <div>
       {
