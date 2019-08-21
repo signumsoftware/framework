@@ -1189,6 +1189,9 @@ let missingSymbols: ISymbol[] = [];
 
 function getMember(key: string): MemberInfo | undefined {
 
+  if (!key.contains("."))
+    return undefined;
+
   const type = _types[key.before(".").toLowerCase()];
 
   if (!type)
@@ -1201,9 +1204,14 @@ function getMember(key: string): MemberInfo | undefined {
 
 export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
-    return getMember((symbol as Entity & ISymbol).key)!.niceName;
-  else
-    return getMember(symbol.toStr!)!.niceName;
+  {
+    var m = getMember((symbol as Entity & ISymbol).key);
+    return m && m.niceName || symbol.toStr;
+  }
+  else {
+    var m = getMember(symbol.toStr!);
+    return m && m.niceName || symbol.toStr;
+  }
 }
 
 export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string) { //Unsafe Type!

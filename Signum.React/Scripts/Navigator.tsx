@@ -345,17 +345,16 @@ function typeIsCreable(typeName: string): EntityWhen {
 
 export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>) => boolean> = [];
 
-export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>) {
+export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, ignoreTypeIsReadonly: boolean = false) {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsReadOnly = typeIsReadOnly(typeName);
+  const baseIsReadOnly = ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName);
 
   return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
 }
-
 
 function typeIsReadOnly(typeName: string): boolean {
 

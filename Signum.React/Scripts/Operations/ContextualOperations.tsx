@@ -114,7 +114,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
         contexts.forEach(coc => {
           coc.canExecute = ep.canExecute[coc.operationInfo.key];
-          coc.isReadonly = Navigator.isReadOnly(ep);
+          coc.isReadonly = Navigator.isReadOnly(ep, true);
         });
         return contexts;
       });
@@ -130,7 +130,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     }
   } else {
 
-    if (Navigator.isReadOnly(ti)) {
+    if (Navigator.isReadOnly(ti, true)) {
       contexts.forEach(a => a.isReadonly = true);
     }
 
