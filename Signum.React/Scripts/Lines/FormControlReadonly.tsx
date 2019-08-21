@@ -22,11 +22,11 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
     if (onlyText) { //Text is scrollable in inputs
       if (ctx.readonlyAsPlainText) {
         return (
-          <input {...attrs} className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, this.props.className)} tabIndex={-1} value={onlyText} ref={innerRef}/>
+          <input {...attrs} readOnly className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, this.props.className)} tabIndex={-1} value={onlyText} ref={innerRef} />
         );
       } else {
         return (
-          <input {...attrs} {...{ readOnly: true }} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)} tabIndex={-1} value={onlyText} ref={innerRef} />
+          <input {...attrs} readOnly className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)} tabIndex={-1} value={onlyText} ref={innerRef} />
         );
       }
     }
@@ -39,7 +39,7 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
         );
       } else {
         return (
-          <div {...attrs} {...{ readOnly: true }} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)} ref={innerRef}>
+          <div {...attrs} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)} ref={innerRef}>
             {this.props.children || <span>&nbsp;</span>}
           </div>
         );
