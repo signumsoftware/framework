@@ -51,7 +51,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-  onSelectionChanged?: (entity: ResultRow[]) => void;
+  onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;

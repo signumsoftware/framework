@@ -217,18 +217,18 @@ namespace Signum.Entities
         ModifiableEntity? parentEntity;
 
         public T? TryGetParentEntity<T>()
-            where T: ModifiableEntity
+            where T: class, IModifiableEntity 
         {
-            return parentEntity as T;
+            return ((IModifiableEntity?)parentEntity) as T;
         }
 
         public T GetParentEntity<T>()
-            where T : ModifiableEntity
+            where T : IModifiableEntity
         {
             if (parentEntity == null)
                 throw new InvalidOperationException("parentEntity is null");
 
-            return (T)parentEntity;
+            return (T)(IModifiableEntity)parentEntity;
         }
 
         private void SetParentEntity(ModifiableEntity? p)
