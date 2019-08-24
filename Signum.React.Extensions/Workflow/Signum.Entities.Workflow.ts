@@ -639,6 +639,7 @@ export interface WorkflowModel extends Entities.ModelEntity {
 }
 
 export module WorkflowOperation {
+  export const Create : Entities.ConstructSymbol_Simple<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Create");
   export const Clone : Entities.ConstructSymbol_From<WorkflowEntity, WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Clone");
   export const Save : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Save");
   export const Delete : Entities.DeleteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Delete");
