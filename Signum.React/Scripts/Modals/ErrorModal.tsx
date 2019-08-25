@@ -63,7 +63,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
               this.renderMessage(e)}
 
           {
-            se && se.httpError.stackTrace &&
+            se && se.httpError.stackTrace && Navigator.isViewable(ExceptionEntity) &&
             <div>
               <a href="#" onClick={this.handleShowStackTrace}>StackTrace</a>
               {this.state.showDetails && <pre>{se.httpError.stackTrace}</pre>}
