@@ -24,6 +24,7 @@ interface WorkflowActivityModelComponentProps {
 
 interface WorkflowActivityModelComponentState {
   viewNames?: string[];
+  viewProps?: DynamicViewClient.DynamicViewProps[]
 }
 
 export default class WorkflowActivityModelComponent extends React.Component<WorkflowActivityModelComponentProps, WorkflowActivityModelComponentState> {
@@ -62,6 +63,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     const isStaticView = !viewName || viewName == "" || this.isNamedView(typeName, viewName);
 
     if (isStaticView) {
+      this.state.viewProps = undefined;
       this.props.ctx.value.viewNameProps = [];
       this.props.ctx.value.modified = true;
       this.forceUpdate();
@@ -71,6 +73,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     const oldViewNameProps = this.props.ctx.value.viewNameProps.toObject(a => a.element.name, a => a.element.expression);
     DynamicViewClient.API.getDynamicViewProps(typeName, viewName!).then(dvp => {
 
+      this.state.viewProps = dvp;
       if (dvp.length > 0) {
 
         var newViewNameProps = dvp.map(p => {
@@ -134,7 +137,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
     const typeName = this.props.ctx.value.mainEntityType.cleanName;
     const viewName = this.props.ctx.value.viewName;
-    const props = this.props.ctx.value.viewNameProps.map(a => a.element).toObject(a => a.name, a => eval(a.expression));
+    const props = this.props.ctx.value.viewNameProps.map(a => a.element).toObject(a => a.name, a => !a.expression ? undefined : eval(a.expression));
 
     const isStaticView = !viewName || viewName == "" || this.isNamedView(typeName, viewName);
 
@@ -161,6 +164,24 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
         .then(dv => {
           Navigator.navigate(dv, { extraProps: props });
         }).done();
+  }
+
+  getViewNamePropsExpressionHelpText(ctx: TypeContext<ViewNamePropEmbedded>) {
+
+    const vp = this.state.viewProps;
+    const p = vp && vp.singleOrNull(a => a.name == ctx.value.name);
+
+    return !vp ? undefined :
+      !p ? <div style={{ color: "#a94442" }}><strong>Property not found</strong></div> :
+        <strong>{p.type}</strong>;
+  }
+
+  getViewNamePropsIsMandatory(ctx: TypeContext<ViewNamePropEmbedded>) {
+
+    const vp = this.state.viewProps;
+    const p = vp && vp.singleOrNull(a => a.name == ctx.value.name);
+
+    return p != null && !p.type.endsWith("?");
   }
 
   render() {
@@ -195,7 +216,20 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                 }
               </FormGroup>
               <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}>
-                <EntityTable ctx={ctx.subCtx(d => d.viewNameProps)} avoidFieldSet />
+                <EntityTable avoidFieldSet
+                  ctx={ctx.subCtx(d => d.viewNameProps)}
+                  columns={EntityTable.typedColumns<ViewNamePropEmbedded>([
+                    {
+                      property: a => a.name,
+                      template: ctx => <ValueLine ctx={ctx.subCtx(a => a.name)} />
+                    },
+                    {
+                      property: a => a.expression,
+                      template: (ctx: TypeContext<ViewNamePropEmbedded>) =>
+                        <ValueLine ctx={ctx.subCtx(a => a.expression)} helpText={this.getViewNamePropsExpressionHelpText(ctx)} mandatory={this.getViewNamePropsIsMandatory(ctx)}
+                        />
+                    }
+                  ])} />
               </FormGroup>
             </>
               : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}

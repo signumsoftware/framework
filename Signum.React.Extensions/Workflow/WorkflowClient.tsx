@@ -617,7 +617,7 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined);
 
   if (wa.viewNameProps.length) {
-    var props = wa.viewNameProps.toObject(a => a.element.name, a => eval(a.element.expression));
+    var props = wa.viewNameProps.toObject(a => a.element.name, a => !a.element.expression ? undefined : eval(a.element.expression));
     viewPromise = viewPromise.withProps(props);
   }
 

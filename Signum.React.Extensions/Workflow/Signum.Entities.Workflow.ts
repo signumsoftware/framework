@@ -292,7 +292,7 @@ export const ViewNamePropEmbedded = new Type<ViewNamePropEmbedded>("ViewNameProp
 export interface ViewNamePropEmbedded extends Entities.EmbeddedEntity {
   Type: "ViewNamePropEmbedded";
   name: string;
-  expression: string;
+  expression: string | null;
 }
 
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
