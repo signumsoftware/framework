@@ -339,10 +339,12 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
             </div>
 
 
-            <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
-
+          <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} extraButtons={() =>
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.avoidDefaultFilters)} refreshView={() => this.forceUpdate()} type="boolean" defaultValue={false}  />
+          } />
+          <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} extraButtons={() =>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => this.forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
-            <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
+          } />
 
             <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
             <PaginationComponent dn={dn} findOptions={fo} refreshView={() => this.forceUpdate()} />
@@ -459,6 +461,7 @@ class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringPro
 interface BaseOptionsComponentProps<T> {
   binding: Binding<Array<T> | undefined>;
   dn: DesignerNode<BaseNode>;
+  extraButtons?: () => React.ReactNode;
   refreshView: () => void;
   queryKey: string;
 }
@@ -552,6 +555,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
                 onClick={this.handleCreateClick}>
                 <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
               </a>
+              {this.props.extraButtons && <div className="mt-2">{this.props.extraButtons()}</div>}
             </td>
           </tr>
         </tbody>

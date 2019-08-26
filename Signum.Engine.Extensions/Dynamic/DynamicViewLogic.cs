@@ -36,6 +36,7 @@ namespace Signum.Engine.Dynamic
                         e.EntityType,
                     });
 
+                DynamicViewEntity.TryGetDynamicView = (type, name) => DynamicViews.Value.TryGetC(type)?.TryGetC(name);
 
                 new Graph<DynamicViewEntity>.Construct(DynamicViewOperation.Create)
                 {

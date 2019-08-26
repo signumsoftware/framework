@@ -211,6 +211,7 @@ namespace Signum.Engine.Workflow
                 WorkflowLogic.getConfiguration = getConfiguration;
 
                 sb.Include<WorkflowEntity>()
+                    .WithConstruct(WorkflowOperation.Create)
                     .WithQuery(() => DynamicQueryCore.Auto(
                     from e in Database.Query<WorkflowEntity>()
                     select new
