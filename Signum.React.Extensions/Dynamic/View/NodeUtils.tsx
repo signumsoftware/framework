@@ -778,7 +778,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
   if (options.filterRows)
     (result as any).filterRows = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.filterRows, isFunctionOrNull);
 
-  (result as any).ref = evaluateAndValidate(dn, parentCtx, dn.node, (n: BaseNode) => n.ref, isObjectOrNull);
+  (result as any).ref = evaluateAndValidate(dn, parentCtx, dn.node, (n: BaseNode) => n.ref, isObjectOrFunctionOrNull);
   return result;
 }
 
