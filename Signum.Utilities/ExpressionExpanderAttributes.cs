@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -103,6 +104,33 @@ namespace Signum.Utilities
         public static T Expression<T>(Expression<Func<T>> body)
         {
             throw new InvalidOperationException("This method is not meant to be called. Missing reference to Signum.MSBuildTask in this assembly?");
+        }
+
+
+        public static void ReplaceExpressionUntyped(MemberInfo methodOrProperty, LambdaExpression newExpression)
+        {
+            var attr = methodOrProperty.GetCustomAttribute<ExpressionFieldAttribute>();
+
+            if (attr == null)
+                throw new InvalidOperationException($"The member {methodOrProperty.Name} has not {nameof(ExpressionFieldAttribute)}");
+
+            var fi = methodOrProperty.DeclaringType.GetField(attr.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+            fi.SetValue(null, newExpression);
+        }
+
+        public static void ReplaceExpression<T, R>(Expression<Func<T, R>> methodOrProperty, Expression<Func<T, R>> newExpression)
+        {
+            var body = methodOrProperty.Body;
+
+            if (body is UnaryExpression u && u.NodeType == ExpressionType.Convert)
+                body = u.Operand;
+
+            var member = body is MemberExpression m ? m.Expression.Type.GetProperty(((PropertyInfo)m.Member).Name) ?? m.Member:
+                body is MethodCallExpression mc ? mc.Object?.Type.GetMethod(mc.Method.Name, mc.Method.GetParameters().Select(p=> p.ParameterType).ToArray()) ?? mc.Method :
+                throw new InvalidOperationException($"Unexpected expression of type {body.NodeType}");
+
+            ReplaceExpressionUntyped(member, newExpression);
         }
     }
 }
