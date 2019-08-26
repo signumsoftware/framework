@@ -613,6 +613,10 @@ export function isObjectOrNull(val: any) {
   return val == null || typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object or null`;
 }
 
+export function isObjectOrFunctionOrNull(val: any) {
+  return val == null || typeof val == "object" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be an object or function or null`;
+}
+
 export function isInList(val: any, values: string[]) {
   return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
