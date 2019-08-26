@@ -511,7 +511,7 @@ NodeUtils.register<ValueLineNode>({
     onChange: node.onChange
   }),
   render: (dn, ctx) => (<ValueLine
-    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
@@ -577,7 +577,7 @@ NodeUtils.register<MultiValueLineNode>({
   }),
   render: (dn, ctx) => (
     <MultiValueLine
-      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
       onRenderItem={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onRenderItem, NodeUtils.isFunctionOrNull)}
       onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onCreate, NodeUtils.isFunctionOrNull)}
@@ -728,7 +728,7 @@ NodeUtils.register<FileLineNode>({
     onChange: node.onChange
   }),
   render: (dn, parentCtx) => (<FileLine
-    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
@@ -803,7 +803,7 @@ NodeUtils.register<FileImageLineNode>({
     onChange: node.onChange
   }),
   render: (dn, parentCtx) => (<FileImageLine
-    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
@@ -878,7 +878,7 @@ NodeUtils.register<MultiFileLineNode>({
   }),
   render: (dn, ctx) => (
     <MultiFileLine
-      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
       labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
       labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
@@ -952,7 +952,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     onChange: node.onChange,
   }),
   render: (dn, ctx) => (<EnumCheckboxList
-    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
@@ -1265,7 +1265,7 @@ NodeUtils.register<SearchControlNode>({
     onResult: node.onResult,
   }),
   render: (dn, ctx) => <SearchControl
-    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     findOptions={toFindOptions(dn, ctx, dn.node.findOptions!)}
     getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isFunctionOrStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
@@ -1401,7 +1401,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
     refreshKey: node.refreshKey,
   }),
   render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
-    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     findOptions={dn.node.findOptions && toFindOptions(dn, ctx, dn.node.findOptions!)}
     valueToken={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.valueToken, NodeUtils.isStringOrNull)}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
@@ -1492,7 +1492,7 @@ NodeUtils.register<ButtonNode>({
       const eoc = EntityOperationContext.fromTypeContext(ctx as TypeContext<Entity>, dn.node.operationName);
       return (
         <OperationButton
-          ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+          ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
           eoc={eoc}
           canExecute={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.canExecute, NodeUtils.isStringOrNull)}
           onOperationClick={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onOperationClick, NodeUtils.isFunctionOrNull)}
@@ -1511,7 +1511,7 @@ NodeUtils.register<ButtonNode>({
 
     return (
       <Button
-        innerRef={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrNull)}
+        innerRef={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
         active={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
         block={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
         disabled={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
