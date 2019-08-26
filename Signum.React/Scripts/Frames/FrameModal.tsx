@@ -392,4 +392,17 @@ export class FunctionalAdapter extends React.Component {
       return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
     }
   }
+
+  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType) {
+
+    if (component instanceof type)
+      return true;
+
+    if (component instanceof FunctionalAdapter) {
+      var only = React.Children.only(component.props.children);
+      return React.isValidElement(only) && only.type == type;
+    }
+
+    return false
+  }
 }
