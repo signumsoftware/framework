@@ -234,6 +234,8 @@ namespace Signum.Entities.Workflow
         BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2,
         [Description("Intermediate timer '{0}' should have one output of type '{1}'.")]
         IntermediateTimer0ShouldHaveOneOutputOfType1,
+        [Description("Intermediate timer '{0}' should have name.")]
+        IntermediateTimer0ShouldHaveName,
         [Description("Parallel Split '{0}' should have at least one connection.")]
         ParallelSplit0ShouldHaveAtLeastOneConnection,
         [Description("Parallel Split '{0}' should have only normal connections without conditions.")]
