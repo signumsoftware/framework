@@ -774,6 +774,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
   if (options.filterRows)
     (result as any).filterRows = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.filterRows, isFunctionOrNull);
 
+  (result as any).ref = evaluateAndValidate(dn, parentCtx, dn.node, (n: BaseNode) => n.ref, isObjectOrNull);
   return result;
 }
 
@@ -795,6 +796,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
 
   return (
     <div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
