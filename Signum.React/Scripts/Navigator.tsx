@@ -824,7 +824,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     this.viewOverrides.push({ override, viewName });
   }
 
-  constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
+  constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 
     this.typeName = (type as Type<T>).typeName || type as string;
     this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
