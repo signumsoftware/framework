@@ -298,6 +298,8 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public bool Identity { get; set; }
 
+        public bool SequentialGuid;
+
         bool identityBehaviour;
         public bool IdentityBehaviour
         {
@@ -307,7 +309,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
                 identityBehaviour = value;
                 if (Type == typeof(Guid))
                 {
-                    this.Default = identityBehaviour ? NewSequentialId : null;
+                    this.Default = identityBehaviour ? NewId : null;
                 }
             }
         }
