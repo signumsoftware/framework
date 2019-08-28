@@ -489,11 +489,7 @@ namespace Signum.Engine.Authorization
                         MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union
                     }, includeCollections: false),
 
-                    removeOld: (name, role) => SqlPreCommand.Combine(Spacing.Simple,
-                            new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                                .FormatWith(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
-
-                            table.DeleteSqlSync(role, r => r.Name == role.Name)),
+                    removeOld: (name, role) => table.DeleteSqlSync(role, r => r.Name == role.Name),
                     mergeBoth: (name, xElement, role) =>
                     {
                         var oldName = role.Name;
