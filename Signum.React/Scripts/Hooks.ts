@@ -15,6 +15,13 @@ interface APIHookOptions{
   avoidReset?: boolean;
 }
 
+export function useTitle(title: string, deps?: readonly any[]) {
+  React.useEffect(() => {
+    Navigator.setTitle(title);
+    return () => Navigator.setTitle();
+  }, deps);
+}
+
 export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>, options?: APIHookOptions): T {
 
   const [data, setData] = React.useState<T>(defaultValue);
