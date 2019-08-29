@@ -19,15 +19,15 @@ using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using Signum.Entities.Help;
 using Signum.Engine.Authorization;
-
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>> Types;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>> Types;
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>> Appendices;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>> Appendices;
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>> Queries;
 
         public static Lazy<Dictionary<Type, List<object>>> TypeToQuery = new Lazy<Dictionary<Type, List<object>>>(() =>
@@ -43,6 +43,97 @@ namespace Signum.Engine.Help
 
         });
 
+        public static void Start(SchemaBuilder sb)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                sb.Include<TypeHelpEntity>()
+                    .WithUniqueIndex(e => new { e.Type, e.Culture })
+                    .WithUniqueIndexMList(e => e.Properties, mle => new { mle.Parent, mle.Element.Property })
+                    .WithUniqueIndexMList(e => e.Operations, mle => new { mle.Parent, mle.Element.Operation })
+                    .WithSave(TypeHelpOperation.Save)
+                    .WithDelete(TypeHelpOperation.Delete)
+                    .WithQuery(() => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Type,
+                        Description = e.Description.Try(d => d.Etc(100))
+                    });
+
+                sb.Include<NamespaceHelpEntity>()
+                    .WithUniqueIndex(e => new { e.Name, e.Culture })
+                    .WithSave(NamespaceHelpOperation.Save)
+                    .WithDelete(NamespaceHelpOperation.Delete)
+                    .WithQuery(() => n => new
+                    {
+                        Entity = n,
+                        n.Id,
+                        n.Name,
+                        n.Culture,
+                        Description = n.Description.Try(d => d.Etc(100))
+                    });
+
+                sb.Include<AppendixHelpEntity>()
+                    .WithUniqueIndex(e => new { e.UniqueName, e.Culture })
+                    .WithSave(AppendixHelpOperation.Save)
+                    .WithDelete(AppendixHelpOperation.Delete)
+                    .WithQuery(() => a => new
+                    {
+                        Entity = a,
+                        a.Id,
+                        a.UniqueName,
+                        a.Culture,
+                        a.Title,
+                        Description = a.Description.Try(d => d.Etc(100))
+                    });
+
+                sb.Include<QueryHelpEntity>()
+                    .WithUniqueIndex(e => new { e.Query, e.Culture })
+                    .WithUniqueIndexMList(e => e.Columns, mle => new { mle.Parent, mle.Element.ColumnName })
+                    .WithSave(QueryHelpOperation.Save)
+                    .WithDelete(QueryHelpOperation.Delete)
+                    .WithQuery(() => q => new
+                    {
+                        Entity = q,
+                        q.Id,
+                        q.Query,
+                        q.Culture,
+                        Description = q.Description.Try(d => d.Etc(100))
+                    });
+
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
+                sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
+                    Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
+
+                sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+                    Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
+
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
+                    Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type == (TypeEntity)type));
+
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += query =>
+                    Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query == (QueryEntity)query));
+
+                Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>(),
+                 invalidateWith: new InvalidateWith(typeof(TypeHelpEntity)));
+
+                Namespaces = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>(),
+                    invalidateWith: new InvalidateWith(typeof(NamespaceHelpEntity)));
+
+                Appendices = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>(),
+                    invalidateWith: new InvalidateWith(typeof(AppendixHelpEntity)));
+
+                Queries = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>(),
+                   invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
+
+                PermissionAuthLogic.RegisterPermissions(HelpPermissions.ViewHelp);
+            }
+        }
+
+        public static NamespaceHelp GetNamespaceHelp(string @namespace) => CachedNamespacesHelp().GetOrThrow(@namespace).Do(a => a.AssertAllowed());
+        public static IEnumerable<NamespaceHelp> GetNamespaceHelps() => CachedNamespacesHelp().Values.Where(a => a.IsAllowed() == null);
         public static Dictionary<string, NamespaceHelp> CachedNamespacesHelp()
         {
             return Namespaces.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
@@ -55,61 +146,32 @@ namespace Signum.Engine.Help
             }));
         }
 
-        public static NamespaceHelp GetNamespaceHelp(string @namespace)
-        {
-            return CachedNamespacesHelp().GetOrThrow(@namespace).Do(a => a.AssertAllowed());
-        }
 
-        public static IEnumerable<NamespaceHelp> GetNamespaceHelps()
-        {
-            return CachedNamespacesHelp().Values.Where(a => a.IsAllowed() == null);
-        }
-
-
-
-        public static Dictionary<string, AppendixHelp> CachedAppendicesHelp()
+        public static AppendixHelpEntity GetAppendixHelp(string name) => CachedAppendicesHelp().GetOrThrow(name);
+        public static IEnumerable<AppendixHelpEntity> GetAppendixHelps() => CachedAppendicesHelp().Values;
+        public static Dictionary<string, AppendixHelpEntity> CachedAppendicesHelp()
         {
             return Appendices.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
-                Database.Query<AppendixHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.UniqueName, a => new AppendixHelp(ci, a))));
-        }
-
-        public static AppendixHelp GetAppendixHelp(string name)
-        {
-            return CachedAppendicesHelp().GetOrThrow(name);
-        }
-
-        public static IEnumerable<AppendixHelp> GetAppendixHelps()
-        {
-            return CachedAppendicesHelp().Values.Where(a => a.IsAllowed() == null);
+                Database.Query<AppendixHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.UniqueName)));
         }
 
 
-
-        public static Dictionary<Type, EntityHelp> CachedEntityHelp()
+        public static TypeHelp GetTypeHelp(Type type) => CachedEntityHelp().GetOrThrow(type).Do(a => a.AssertAllowed());
+        public static IEnumerable<TypeHelp> GetEntityHelps() => CachedEntityHelp().Values.Where(a => a.IsAllowed() == null);
+        public static Dictionary<Type, TypeHelp> CachedEntityHelp()
         {
             return Types.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
             {
                 using (ExecutionMode.Global())
                 {
-                    var dic = Database.Query<EntityHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Type.ToType());
+                    var dic = Database.Query<TypeHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Type.ToType());
 
-                    return AllTypes().ToDictionary(t => t, t => new EntityHelp(t, ci, dic.TryGetC(t)));
+                    return AllTypes().ToDictionary(t => t, t => new TypeHelp(t, ci, dic.TryGetC(t)));
                 }
             }));
         }
 
-        public static EntityHelp GetEntityHelp(Type type)
-        {
-            return CachedEntityHelp().GetOrThrow(type).Do(a => a.AssertAllowed());
-        }
-
-        public static IEnumerable<EntityHelp> GetEntityHelps()
-        {
-            return CachedEntityHelp().Values.Where(a => a.IsAllowed() == null);
-        }
-
-
-
+        public static QueryHelp GetQueryHelp(object queryName) => CachedQueriesHelp().GetOrThrow(queryName).Do(a => a.AssertAllowed());
         public static Dictionary<object, QueryHelp> CachedQueriesHelp()
         {
             return Queries.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
@@ -120,10 +182,6 @@ namespace Signum.Engine.Help
             }));
         }
 
-        public static QueryHelp GetQueryHelp(object queryName)
-        {
-            return CachedQueriesHelp().GetOrThrow(queryName).Do(a => a.AssertAllowed());
-        }
 
         public static T GlobalContext<T>(Func<T> customFunc)
         {
@@ -167,101 +225,12 @@ namespace Signum.Engine.Help
                     select key).Distinct().ToList();
         }
 
-        public static void Start(SchemaBuilder sb)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<EntityHelpEntity>();
-                sb.Include<NamespaceHelpEntity>();
-                sb.Include<AppendixHelpEntity>();
-                sb.Include<QueryHelpEntity>();
 
-                sb.AddUniqueIndex((EntityHelpEntity e) => new { e.Type, e.Culture });
-                sb.AddUniqueIndexMList((EntityHelpEntity e) => e.Properties, mle => new { mle.Parent, mle.Element.Property });
-                sb.AddUniqueIndexMList((EntityHelpEntity e) => e.Operations, mle => new { mle.Parent, mle.Element.Operation });
-                sb.AddUniqueIndex((NamespaceHelpEntity e) => new { e.Name, e.Culture });
-                sb.AddUniqueIndex((AppendixHelpEntity e) => new { Name = e.UniqueName, e.Culture });
-                sb.AddUniqueIndex((QueryHelpEntity e) => new { e.Query, e.Culture });
-                sb.AddUniqueIndexMList((QueryHelpEntity e) => e.Columns, mle => new { mle.Parent, mle.Element.ColumnName });
-
-                Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>(),
-                    invalidateWith: new InvalidateWith(typeof(EntityHelpEntity)));
-
-                Namespaces = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>(),
-                    invalidateWith: new InvalidateWith(typeof(NamespaceHelpEntity)));
-
-                Appendices = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>(),
-                    invalidateWith: new InvalidateWith(typeof(AppendixHelpEntity)));
-
-                Queries = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>(),
-                   invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
-
-                sb.Include<EntityHelpEntity>()
-                    .WithSave(EntityHelpOperation.Save)
-                    .WithQuery(() => e => new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.Type,
-                        Description = e.Description.Try(d => d.Etc(100))
-                    });
-
-                sb.Include<NamespaceHelpEntity>()
-                    .WithSave(NamespaceHelpOperation.Save)
-                    .WithQuery(() => n => new
-                    {
-                        Entity = n,
-                        n.Id,
-                        n.Name,
-                        n.Culture,
-                        Description = n.Description.Try(d => d.Etc(100))
-                    });
-                
-                sb.Include<AppendixHelpEntity>()
-                .WithSave(AppendixHelpOperation.Save)
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.UniqueName,
-                    a.Culture,
-                    a.Title,
-                    Description = a.Description.Try(d => d.Etc(100))
-                });
-
-                sb.Include<QueryHelpEntity>()
-                    .WithSave(QueryHelpOperation.Save)
-                    .WithQuery(() => q => new
-                    {
-                        Entity = q,
-                        q.Id,
-                        q.Query,
-                        q.Culture,
-                        Description = q.Description.Try(d => d.Etc(100))
-                    });
-               
-                sb.Schema.Synchronizing += Schema_Synchronizing;
-
-                sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
-                    Administrator.UnsafeDeletePreCommandMList((EntityHelpEntity eh) => eh.Operations, Database.MListQuery((EntityHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
-
-                sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
-                    Administrator.UnsafeDeletePreCommandMList((EntityHelpEntity eh) => eh.Properties, Database.MListQuery((EntityHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
-                
-                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EntityHelpEntity>().Where(e => e.Type == (TypeEntity)type));
-
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += query =>
-                    Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query == (QueryEntity)query));
-
-                PermissionAuthLogic.RegisterPermissions(HelpPermissions.ViewHelp);
-            }
-        }
 
         static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             bool any =
-                Database.Query<EntityHelpEntity>().Any() ||
+                Database.Query<TypeHelpEntity>().Any() ||
                 Database.Query<QueryHelpEntity>().Any() ||
                 Database.Query<NamespaceHelpEntity>().Any() ||
                 Database.Query<AppendixHelpEntity>().Any();
@@ -329,7 +298,7 @@ namespace Signum.Engine.Help
                         });
 
                     foreach (var col in qh.Columns)
-                        col.Description = SynchronizeContent(col.Description, replacements, data);
+                        col.Description = SynchronizeContent(col.Description, replacements, data)!;
                 }
 
                 qh.Description = SynchronizeContent(qh.Description, replacements, data);
@@ -340,7 +309,7 @@ namespace Signum.Engine.Help
 
         static SqlPreCommand? SynchronizeTypes(Replacements replacements, SyncData data)
         {
-            var dic = Database.Query<EntityHelpEntity>().ToList();
+            var dic = Database.Query<TypeHelpEntity>().ToList();
 
             if (dic.IsEmpty())
                 return null;
@@ -349,7 +318,7 @@ namespace Signum.Engine.Help
 
             var replace = replacements.TryGetC(Replacements.KeyTables);
 
-            var table = Schema.Current.Table<EntityHelpEntity>();
+            var table = Schema.Current.Table<TypeHelpEntity>();
 
             using (replacements.WithReplacedDatabaseName())
                 return dic.Select(eh =>
@@ -446,6 +415,7 @@ namespace Signum.Engine.Help
 
         public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
 
+        [return: NotNullIfNotNull("content")]
         static string? SynchronizeContent(string? content, Replacements r, SyncData data)
         {
             if (content == null)

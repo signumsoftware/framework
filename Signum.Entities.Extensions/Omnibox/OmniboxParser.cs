@@ -51,19 +51,11 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
         public static int MaxResults = 20;
 
-        static bool IsHelp(string omniboxQuery)
-        {
-            var rawQuery = omniboxQuery.ToLower();
-            return rawQuery == "help" ||
-                rawQuery == OmniboxMessage.Omnibox_Help.NiceToString().ToLower() ||
-                rawQuery == "?";
-        }
-
         public static List<OmniboxResult> Results(string omniboxQuery, CancellationToken ct)
         {
             List<OmniboxResult> result = new List<OmniboxResult>();
 
-            if (IsHelp(omniboxQuery))
+            if (omniboxQuery == "")
             {
                 result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_OmniboxSyntaxGuide.NiceToString() });
 

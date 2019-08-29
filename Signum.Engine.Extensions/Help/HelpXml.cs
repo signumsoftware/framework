@@ -16,9 +16,6 @@ namespace Signum.Engine.Help
 {
     public static class HelpXml
     {
-     
-
-
         public static class AppendixXml
         {
             public static readonly XName _Appendix = "Appendix";
@@ -216,7 +213,7 @@ namespace Signum.Engine.Help
             static readonly XName _Query = "Query";
             static readonly XName _Language = "Language";
 
-            public static XDocument ToXDocument(EntityHelpEntity entity)
+            public static XDocument ToXDocument(TypeHelpEntity entity)
             {
                 return new XDocument(
                     new XDeclaration("1.0", "utf-8", "yes"),
@@ -250,8 +247,8 @@ namespace Signum.Engine.Help
 
                 var typeEntity = type.ToTypeEntity();
 
-                var entity = Database.Query<EntityHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Type == typeEntity) ??
-                    new EntityHelpEntity
+                var entity = Database.Query<TypeHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Type == typeEntity) ??
+                    new TypeHelpEntity
                     {
                         Culture = ci,
                         Type = typeEntity,
@@ -406,7 +403,7 @@ namespace Signum.Engine.Help
                     NamespaceXml.ToXDocument(nh).Save(path);
             }
 
-            foreach (var eh in Database.Query<EntityHelpEntity>())
+            foreach (var eh in Database.Query<TypeHelpEntity>())
             {
                 string path = Path.Combine(directoryName, eh.Culture.Name, EntitiesDirectory, "{0}.{1}.help".FormatWith(RemoveInvalid(eh.Type.CleanName), eh.Culture.Name));
 

@@ -77,5 +77,15 @@
     <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Help\HelpClient.tsx" />
+    <None Remove="Help\HelpOmniboxProvider.tsx" />
+    <None Remove="Help\Pages\EditableText.tsx" />
+    <None Remove="Help\Pages\HelpAppendixPage.tsx" />
+    <None Remove="Help\Pages\HelpEntityPage.tsx" />
+    <None Remove="Help\Pages\HelpNamespacePage.tsx" />
+    <None Remove="Help\ProcessPanelPage.tsx" />
+  </ItemGroup>
+
  
 </Project>

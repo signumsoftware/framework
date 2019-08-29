@@ -27,6 +27,7 @@ namespace Signum.Entities.Help
     public static class NamespaceHelpOperation
     {
         public static ExecuteSymbol<NamespaceHelpEntity> Save;
+        public static DeleteSymbol<NamespaceHelpEntity> Delete;
     }
 
 

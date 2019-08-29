@@ -9,7 +9,7 @@ namespace Signum.Engine.Help
 {
     public static class HelpSearch
     {
-        public static SearchResult? Search(this AppendixHelp entity, Regex regex)
+        public static SearchResult? Search(this AppendixHelpEntity entity, Regex regex)
         {
             {
                 Match m = regex.Match(entity.Title.RemoveDiacritics());
@@ -33,22 +33,22 @@ namespace Signum.Engine.Help
         }
 
 
-        public static SearchResult? Search(this NamespaceHelp entity, Regex regex)
+        public static SearchResult? Search(this NamespaceHelp nh, Regex regex)
         {
             {
-                Match m = regex.Match(entity.Title.RemoveDiacritics());
+                Match m = regex.Match(nh.Title.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Namespace, entity.Title, entity.Description.Try(d => d.Etc(etcLength)).DefaultText(entity.Title), null, m, HelpUrls.NamespaceUrl(entity.Namespace));
+                    return new SearchResult(TypeSearchResult.Namespace, nh.Title, nh.Description.Try(d => d.Etc(etcLength)).DefaultText(nh.Title), null, m, HelpUrls.NamespaceUrl(nh.Namespace));
                 }
             }
 
-            if (entity.Description.HasText())
+            if (nh.Description.HasText())
             {
-                Match m = regex.Match(entity.Description.RemoveDiacritics());
+                Match m = regex.Match(nh.Description.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Namespace, entity.Title, entity.Description.Extract(m), null, m, HelpUrls.NamespaceUrl(entity.Namespace), isDescription: true);
+                    return new SearchResult(TypeSearchResult.Namespace, nh.Title, nh.Description.Extract(m), null, m, HelpUrls.NamespaceUrl(nh.Namespace), isDescription: true);
                 }
             }
 
@@ -58,35 +58,35 @@ namespace Signum.Engine.Help
         const int etcLength = 300;
         const int lp2 = etcLength / 2;
 
-        public static IEnumerable<SearchResult> Search(this EntityHelp entity, Regex regex)
+        public static IEnumerable<SearchResult> Search(this TypeHelp th, Regex regex)
         {
-            Type type = entity.Type;
+            Type type = th.Type;
 
             //Types
             Match m;
             m = regex.Match(type.NiceName().RemoveDiacritics());
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), entity.Description.DefaultText(entity.Info).Etc(etcLength), type, m, HelpUrls.EntityUrl(type));
+                yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), th.DBEntity?.Description.DefaultText(th.Info).Etc(etcLength), type, m, HelpUrls.EntityUrl(type));
                 yield break;
             }
 
 
             //Types description
-            if (entity.Description.HasText())
+            if (th.DBEntity != null && th.DBEntity.Description.HasText())
             {
                 // TODO: Some times the rendered Description does not contain the query term and it looks strange. Description should be
                 // wiki-parsed and then make the search over this string
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), entity.Description.Extract(m), type, m, HelpUrls.EntityUrl(type), isDescription: true);
+                    yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), th.DBEntity.Description.Extract(m), type, m, HelpUrls.EntityUrl(type), isDescription: true);
                     yield break;
                 }
             }
 
             
             //Properties (key)
-            foreach (var p in  entity.Properties.Values)
+            foreach (var p in th.Properties.Values)
             {
                 {
                     m = regex.Match(p.PropertyInfo.NiceName().RemoveDiacritics());
@@ -108,7 +108,7 @@ namespace Signum.Engine.Help
             }
 
             //Queries (key)
-            foreach (var p in entity.Queries.Values)
+            foreach (var p in th.Queries.Values)
             {
                 m = regex.Match(QueryUtils.GetNiceName(p.QueryName).RemoveDiacritics());
                 if (m.Success)
@@ -126,7 +126,7 @@ namespace Signum.Engine.Help
             }
 
             //Operations (key)
-            foreach (var op in entity.Operations.Values)
+            foreach (var op in th.Operations.Values)
             {
                 m = regex.Match(op.OperationSymbol.NiceToString().RemoveDiacritics());
                 if (m.Success)
@@ -158,23 +158,25 @@ namespace Signum.Engine.Help
     public class SearchResult
     {
         public TypeSearchResult TypeSearchResult { get; set; }
-        public string ObjectName { get; set; }
+        public string Title { get; set; }
         public Type? Type { get; set; }
         public MatchType MatchType { get; set; }
         public string? Description { get; set; }
-        public string Link { get; set; }
+        public string Key { get; set; }
+        public string? Key2 { get; set; }
         public bool IsDescription { get; set; }
 
-        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string? description, Type? type, Match match, string link, bool isDescription = false)
+        public SearchResult(TypeSearchResult typeSearchResult, string title, string? description, Type? type, Match match, string key, string? key2 = null, bool isDescription = false)
         {
-            this.ObjectName = objectName;
+            this.Title = title;
             this.TypeSearchResult = typeSearchResult;
             this.Description = description;
-            this.Link = link;
+            this.Key = key;
+            this.Key2 = key2;
             this.Type = type;
             
             this.MatchType = 
-                match.Index == 0 && match.Length == objectName.Length ? MatchType.Total :
+                match.Index == 0 && match.Length == title.Length ? MatchType.Total :
                 match.Index == 0 ? MatchType.StartsWith :
                 MatchType.Contains;
 
