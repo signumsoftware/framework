@@ -227,7 +227,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        public static Func<Lite<Entity>[], bool> AnyReadonly; 
+        public static Func<Lite<Entity>[], bool>? AnyReadonly; 
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class StateCanExecuteRequest

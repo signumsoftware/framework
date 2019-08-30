@@ -123,7 +123,7 @@ namespace Signum.Utilities
 
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.IsEnum && t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
-        public static event Action<CultureInfo, MemberInfo> NotLocalizedMember;
+        public static event Action<CultureInfo, MemberInfo>? NotLocalizedMember;
 
         public static Dictionary<Type, Func<MemberInfo, string>> ExternalEnums = new Dictionary<Type, Func<MemberInfo, string>>
         {
@@ -348,7 +348,7 @@ namespace Signum.Utilities
             return true;
         }
 
-        public static Action Invalidated;
+        public static Action? Invalidated;
         public static void Invalidate()
         {
             localizations.Clear();

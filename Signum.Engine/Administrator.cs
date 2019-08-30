@@ -114,8 +114,8 @@ namespace Signum.Engine
             IColumn[] columns = IndexKeyColumns.Split(view, fields);
 
             var index = unique ?
-                new UniqueIndex(view, columns) :
-                new Index(view, columns);
+                new UniqueTableIndex(view, columns) :
+                new TableIndex(view, columns);
 
             SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
@@ -478,7 +478,7 @@ namespace Signum.Engine
             });
         }
 
-        public static IDisposable DisableUniqueIndex(UniqueIndex index)
+        public static IDisposable DisableUniqueIndex(UniqueTableIndex index)
         {
             SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
             SqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();

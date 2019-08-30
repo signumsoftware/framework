@@ -53,7 +53,7 @@ namespace Signum.Engine
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
             keys.UnionWith(newDictionary.Keys);
-            keys.ProgressForeach(key => key.ToString(), key =>
+            keys.ProgressForeach(key => key.ToString()!, key =>
             {
                 if (oldDictionary.TryGetValue(key, out var oldVal))
                 {
@@ -327,7 +327,7 @@ namespace Signum.Engine
             }
         }
 
-        public static Func<AutoReplacementContext, Selection?> AutoReplacement;
+        public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
 
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {

@@ -32,15 +32,10 @@ namespace Signum.Engine.Maps
             return Name.SqlEscape();
         }
 
+        public override bool Equals(object? obj) => obj is ServerName sn && Equals(sn);
         public bool Equals(ServerName other)
         {
             return other.Name == Name;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var db = obj as ServerName;
-            return db != null && Equals(db);
         }
 
         public override int GetHashCode()
@@ -84,16 +79,11 @@ namespace Signum.Engine.Maps
             return Server.ToString() + "." + name;
         }
 
+
+        public override bool Equals(object? obj) => obj is DatabaseName dn && Equals(dn);
         public bool Equals(DatabaseName other)
         {
-            return other.Name == Name &&
-                object.Equals(Server, other.Server);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var db = obj as DatabaseName;
-            return db != null && Equals(db);
+            return other.Name == Name && object.Equals(Server, other.Server);
         }
 
         public override int GetHashCode()
@@ -155,16 +145,11 @@ namespace Signum.Engine.Maps
             return Database.ToString() + "." + result;
         }
 
+        public override bool Equals(object? obj) => obj is SchemaName sn && Equals(sn);
         public bool Equals(SchemaName other)
         {
             return other.Name == Name &&
                 object.Equals(Database, other.Database);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var sc = obj as SchemaName;
-            return sc != null && Equals(sc);
         }
 
         public override int GetHashCode()
@@ -201,16 +186,11 @@ namespace Signum.Engine.Maps
             return Schema.ToString() + "." + Name.SqlEscape();
         }
 
+        public override bool Equals(object? obj) => obj is ObjectName on && Equals(on);
         public bool Equals(ObjectName other)
         {
             return other.Name == Name &&
                 object.Equals(Schema, other.Schema);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var sc = obj as ObjectName;
-            return sc != null && Equals(sc);
         }
 
         public override int GetHashCode()

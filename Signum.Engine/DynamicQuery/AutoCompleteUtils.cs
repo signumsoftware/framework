@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -248,8 +248,8 @@ namespace Signum.Engine.DynamicQuery
                 var parts = subString.Trim().SplitNoEmpty(' ');
 
                 var list = query
-                    .Where(r => entitySelector.Evaluate(r).ToString().ContainsAll(parts))
-                    .OrderBy(r => entitySelector.Evaluate(r).ToString().Length)
+                    .Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAll(parts))
+                    .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
                     .Take(count - results.Count)
                     .ToList();
 
@@ -278,8 +278,8 @@ namespace Signum.Engine.DynamicQuery
 
                 var parts = subString.Trim().SplitNoEmpty(' ');
 
-                var list = await query.Where(r => entitySelector.Evaluate(r).ToString().ContainsAll(parts))
-                    .OrderBy(r => entitySelector.Evaluate(r).ToString().Length)
+                var list = await query.Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAll(parts))
+                    .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
                     .Take(count - results.Count)
                     .ToListAsync();
 
@@ -310,8 +310,8 @@ namespace Signum.Engine.DynamicQuery
 
                 var parts = subString.Trim().SplitNoEmpty(' ');
 
-                results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
-                    .OrderBy(a => a.ToString().Length)
+                results.AddRange(query.Where(a => a.ToString()!.ContainsAll(parts))
+                    .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count));
 
                 return results;
@@ -338,8 +338,8 @@ namespace Signum.Engine.DynamicQuery
 
                 var parts = subString.Trim().SplitNoEmpty(' ');
 
-                var list = await query.Where(a => a.ToString().ContainsAll(parts))
-                    .OrderBy(a => a.ToString().Length)
+                var list = await query.Where(a => a.ToString()!.ContainsAll(parts))
+                    .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count)
                     .ToListAsync(token);
 
@@ -369,8 +369,8 @@ namespace Signum.Engine.DynamicQuery
 
                 var parts = subString.Trim().SplitNoEmpty(' ');
 
-                var list = collection.Where(a => a.ToString().ContainsAll(parts))
-                    .OrderBy(a => a.ToString().Length)
+                var list = collection.Where(a => a.ToString()!.ContainsAll(parts))
+                    .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count);
 
                 results.AddRange(list);

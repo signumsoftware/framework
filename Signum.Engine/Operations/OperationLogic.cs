@@ -205,8 +205,8 @@ Consider the following options:
 
         #region Events
 
-        public static event SurroundOperationHandler SurroundOperation;
-        public static event AllowOperationHandler AllowOperation;
+        public static event SurroundOperationHandler? SurroundOperation;
+        public static event AllowOperationHandler? AllowOperation;
 
         internal static IDisposable? OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity? entity, object[]? args)
         {

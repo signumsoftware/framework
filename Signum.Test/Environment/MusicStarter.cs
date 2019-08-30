@@ -53,7 +53,7 @@ namespace Signum.Test.Environment
 
             Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
 
-            sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
+            sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version!;
 
             sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
             sb.Schema.Settings.FieldAttributes((ExceptionEntity e) => e.User).Add(new ImplementedByAttribute());

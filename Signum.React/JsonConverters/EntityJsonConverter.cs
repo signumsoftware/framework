@@ -221,7 +221,7 @@ namespace Signum.React.Json
             return pr;
         }
 
-        public static Func<PropertyRoute, string> CanReadPropertyRoute;
+        public static Func<PropertyRoute, string>? CanReadPropertyRoute;
 
         public void WriteJsonProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
         {
@@ -401,7 +401,7 @@ namespace Signum.React.Json
         }
 
 
-        public static Func<PropertyRoute, string> CanWritePropertyRoute;
+        public static Func<PropertyRoute, string>? CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
         {
             string? error = CanWritePropertyRoute?.Invoke(pr);
@@ -425,7 +425,7 @@ namespace Signum.React.Json
 
             if (identityInfo.IsNew == true)
             {
-                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 if (identityInfo.Id != null)
                     ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
@@ -462,7 +462,7 @@ namespace Signum.React.Json
                 var existingMod = (ModifiableEntity)existingValue;
 
                 if (existingMod == null || existingMod.GetType() != type)
-                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 return existingMod;
             }

@@ -72,7 +72,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual List<Type> CandidateTypes()
         {
-            var assembly = Assembly.Load(Assembly.GetEntryAssembly().GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
+            var assembly = Assembly.Load(Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
 
             return assembly.GetTypes().Where(t => t.IsEntity() && !t.IsAbstract).ToList();
         }
@@ -141,7 +141,7 @@ namespace Signum.Engine.CodeGeneration
                 "Signum.Engine.DynamicQuery",
             };
 
-            result.AddRange(mod.Types.Concat(expressions.Select(e => e.FromType)).Select(t => t.Namespace).Distinct());
+            result.AddRange(mod.Types.Concat(expressions.Select(e => e.FromType)).Select(t => t.Namespace!).Distinct());
 
             return result;
         }
@@ -277,8 +277,7 @@ namespace Signum.Engine.CodeGeneration
             public Type ToType;
             public PropertyInfo Property;
             public bool IsUnique;
-            public string? Name;
-            public string? ExpressionName;
+            public string Name = null!;
 
             public ExpressionInfo(Type fromType, Type toType, PropertyInfo property, bool isUnique)
             {
@@ -308,16 +307,6 @@ namespace Signum.Engine.CodeGeneration
             result = result.GroupBy(ei => new { ei.FromType, ei.ToType }).Where(g => g.Count() == 1).SelectMany(g => g).ToList();
 
             result = result.Where(ShouldWriteExpression).ToList();
-
-            var groups = result.Select(a => a.Name).GroupCount();
-
-            foreach (var ei in result)
-            {
-                if (groups[ei.Name] == 1)
-                    ei.ExpressionName = ei.Name + "Expression";
-                else
-                    ei.ExpressionName = ei.Name + Reflector.CleanTypeName(ei.Property.PropertyType.CleanType()) + "Expresion";
-            }
 
             return result;
         }
@@ -357,31 +346,19 @@ namespace Signum.Engine.CodeGeneration
             string filter = info.Property.PropertyType.IsLite() ? "{t} => {t}.{prop}.Is({f})" : "{t} => {t}.{prop} == {f}";
 
             string str =  info.IsUnique?
-@"static Expression<Func<{from}, {to}>> {MethodExpression} =
-    {f} => Database.Query<{to}>().SingleOrDefaultEx({filter});
-[ExpressionField]
-public static {to} {Method}(this {from} e)
-{
-    return {MethodExpression}.Evaluate(e);
-}
+@"[AutoExpressionField]
+public static {to} {Method}(this {from} {f}) => As.Expression(() => Database.Query<{to}>().SingleOrDefaultEx({filter}));
 " :
-@"static Expression<Func<{from}, IQueryable<{to}>>> {MethodExpression} =
-    {f} => Database.Query<{to}>().Where({filter});
-[ExpressionField]
-public static IQueryable<{to}> {Method}(this {from} e)
-{
-    return {MethodExpression}.Evaluate(e);
-}
+@"[AutoExpressionField]
+public static IQueryable<{to}> {Method}(this {from} {f}) => As.Expression(() => Database.Query<{to}>().Where({filter}));
 ";
-
             return str.Replace("{filter}", filter)
                 .Replace("{from}", from.Name)
                 .Replace("{to}", info.ToType.Name)
                 .Replace("{t}", varTo)
                 .Replace("{f}", varFrom)
                 .Replace("{prop}", info.Property.Name)
-                .Replace("{Method}", info.Name)
-                .Replace("{MethodExpression}", info.ExpressionName);
+                .Replace("{Method}", info.Name);
         }
 
         protected virtual IEnumerable<PropertyInfo> GetQueryProperties(Type type)
@@ -408,7 +385,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             if (p1 == p2)
                 p2 += "2";
 
-            var cast = p.DeclaringType == bp.PropertyType.CleanType() ? "" : $"(Lite<{p.DeclaringType.Name}>)";
+            var cast = p.DeclaringType == bp.PropertyType.CleanType() ? "" : $"(Lite<{p.DeclaringType!.Name}>)";
 
             return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
         }
@@ -426,7 +403,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
             var t = pi.PropertyType.ElementType()!;
 
-            var backProperty = Reflector.PublicInstancePropertiesInOrder(t).SingleOrDefaultEx(bp => IsVirtualMListBackReference(bp, pi.DeclaringType));
+            var backProperty = Reflector.PublicInstancePropertiesInOrder(t).SingleOrDefaultEx(bp => IsVirtualMListBackReference(bp, pi.DeclaringType!));
 
             return backProperty;
         }
@@ -537,7 +514,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
         protected virtual bool IsSave(IOperationSymbolContainer oper)
         {
-            return oper.ToString().Contains("Save"); ;
+            return oper.ToString()!.Contains("Save"); ;
         }
 
         protected virtual string? WriteDeleteOperation(IOperationSymbolContainer oper)
@@ -606,7 +583,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
         protected virtual IEnumerable<IOperationSymbolContainer> GetOperationsSymbols(Type type)
         {
-            string name = type.FullName.RemoveSuffix("Entity") + "Operation";
+            string name = type.FullName!.RemoveSuffix("Entity") + "Operation";
 
             var operType = type.Assembly.GetType(name);
 
@@ -614,7 +591,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
                 return Enumerable.Empty<IOperationSymbolContainer>();
 
             return (from fi in operType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                    select (IOperationSymbolContainer)fi.GetValue(null)).ToList();
+                    select (IOperationSymbolContainer)fi.GetValue(null)!).ToList();
         }
     }
 }

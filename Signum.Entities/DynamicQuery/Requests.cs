@@ -267,7 +267,7 @@ namespace Signum.Entities.DynamicQuery
 
         public int? Count { get; set; }
 
-        public override string ToString() => QueryName.ToString();
+        public override string ToString() => QueryName.ToString()!;
     }
 
     [Serializable]
@@ -302,6 +302,6 @@ namespace Signum.Entities.DynamicQuery
 
         public int? Count { get; set; }
 
-        public override string ToString() => QueryName.ToString();
+        public override string ToString() => QueryName.ToString()!;
     }
 }

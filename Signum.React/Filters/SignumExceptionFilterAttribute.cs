@@ -126,7 +126,7 @@ namespace Signum.React.Filters
         public HttpError(Exception e, bool includeErrorDetails = true)
         {
             this.ExceptionMessage = e.Message;
-            this.ExceptionType = e.GetType().FullName;
+            this.ExceptionType = e.GetType().FullName!;
             if (includeErrorDetails)
             {
                 this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();

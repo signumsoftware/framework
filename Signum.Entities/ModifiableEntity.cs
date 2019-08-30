@@ -65,7 +65,7 @@ namespace Signum.Entities
                     colb.CollectionChanged -= ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)colb)
+                    foreach (var item in (IEnumerable<ModifiableEntity>)colb)
                         item.SetParentEntity(null);
             }
 
@@ -84,7 +84,7 @@ namespace Signum.Entities
                     cola.CollectionChanged += ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)cola)
+                    foreach (var item in (IEnumerable<ModifiableEntity>)cola)
                         item.SetParentEntity(this);
             }
 
@@ -115,7 +115,7 @@ namespace Signum.Entities
             public string PropertyName;
 
             public bool Equals(PropertyKey other) => other.Type == Type && other.PropertyName == PropertyName;
-            public override bool Equals(object obj) => obj is PropertyKey && Equals((PropertyKey)obj);
+            public override bool Equals(object? obj) => obj is PropertyKey pk && Equals(pk);
             public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
         }
 
@@ -128,13 +128,13 @@ namespace Signum.Entities
                  key.Type.GetInterfaces().Select(i => i.GetProperty(key.PropertyName, flags)).NotNull().FirstOrDefault());
         }
 
-        static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
+        static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString()!;
         [HiddenProperty, ExpressionField("ToStringPropertyExpression")]
         public string ToStringProperty
         {
             get
             {
-                string str = ToString();
+                string? str = ToString();
                 return str.HasText() ? str : this.GetType().NiceName();
             }
         }
@@ -165,7 +165,7 @@ namespace Signum.Entities
                     entity.SetParentEntity(this);
                 else
                 {
-                    foreach (ModifiableEntity item in (IEnumerable)field!)
+                    foreach (var item in (IEnumerable<ModifiableEntity>)field!)
                         item.SetParentEntity(this);
                 }
             }
@@ -211,7 +211,7 @@ namespace Signum.Entities
         #endregion
 
         [field: NonSerialized, Ignore]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [NonSerialized, Ignore]
         ModifiableEntity? parentEntity;
@@ -284,7 +284,7 @@ namespace Signum.Entities
 
         public override int GetHashCode()
         {
-            return GetType().FullName.GetHashCode() ^ temporalId.GetHashCode();
+            return GetType().FullName!.GetHashCode() ^ temporalId.GetHashCode();
         }
         #endregion
 

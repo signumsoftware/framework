@@ -5,12 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace Signum.React
+namespace Signum.React.JsonModelValidators
 {
     /// <summary>
     /// A visitor implementation that interprets <see cref="ValidationStateDictionary"/> to traverse
@@ -18,6 +16,8 @@ namespace Signum.React
     /// </summary>
     public class ValidationVisitor
     {
+        protected readonly ValidationStack CurrentPath;
+
         /// <summary>
         /// Creates a new <see cref="ValidationVisitor"/>.
         /// </summary>
@@ -29,9 +29,7 @@ namespace Signum.React
         public ValidationVisitor(
             ActionContext actionContext,
             IModelValidatorProvider validatorProvider,
-#pragma warning disable PUB0001 // Pubternal type in public API
             ValidatorCache validatorCache,
-#pragma warning restore PUB0001
             IModelMetadataProvider metadataProvider,
             ValidationStateDictionary validationState)
         {
@@ -63,21 +61,18 @@ namespace Signum.React
 
         protected IModelValidatorProvider ValidatorProvider { get; }
         protected IModelMetadataProvider MetadataProvider { get; }
-#pragma warning disable PUB0001 // Pubternal type in public API
+
         protected ValidatorCache Cache { get; }
-#pragma warning restore PUB0001
         protected ActionContext Context { get; }
         protected ModelStateDictionary ModelState { get; }
         protected ValidationStateDictionary ValidationState { get; }
-#pragma warning disable PUB0001 // Pubternal type in public API
-        protected ValidationStack CurrentPath { get; }
-#pragma warning restore PUB0001
 
         protected object? Container { get; set; }
         protected string? Key { get; set; }
         protected object? Model { get; set; }
         protected ModelMetadata? Metadata { get; set; }
         protected IValidationStrategy? Strategy { get; set; }
+
 
         /// <summary>
         /// Indicates whether validation of a complex type should be performed if validation fails for any of its children. The default behavior is false.
@@ -103,12 +98,15 @@ namespace Signum.React
         /// <param name="model">The model object.</param>
         /// <param name="alwaysValidateAtTopLevel">If <c>true</c>, applies validation rules even if the top-level value is <c>null</c>.</param>
         /// <returns><c>true</c> if the object is valid, otherwise <c>false</c>.</returns>
-        public virtual bool Validate(ModelMetadata? metadata, string key, object? model, bool alwaysValidateAtTopLevel)
+        public virtual bool Validate(ModelMetadata? metadata, string? key, object? model, bool alwaysValidateAtTopLevel)
         {
             if (model == null && key != null && !alwaysValidateAtTopLevel)
             {
                 var entry = ModelState[key];
-                if (entry != null && entry.ValidationState != ModelValidationState.Valid)
+
+                // Rationale: We might see the same model state key for two different objects and want to preserve any
+                // known invalidity.
+                if (entry != null && entry.ValidationState != ModelValidationState.Invalid)
                 {
                     entry.ValidationState = ModelValidationState.Valid;
                 }
@@ -181,7 +179,7 @@ namespace Signum.React
             }
         }
 
-        protected virtual bool Visit(ModelMetadata? metadata, string key, object model)
+        protected virtual bool Visit(ModelMetadata? metadata, string? key, object? model)
         {
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
@@ -205,6 +203,24 @@ namespace Signum.React
             {
                 // Use the key on the entry, because we might not have entries in model state.
                 SuppressValidation(entry.Key);
+                CurrentPath.Pop(model);
+                return true;
+            }
+            // If the metadata indicates that no validators exist AND the aggregate state for the key says that the model graph
+            // is not invalid (i.e. is one of Unvalidated, Valid, or Skipped) we can safely mark the graph as valid.
+            else if (metadata!.HasValidators == false &&
+                ModelState.GetFieldValidationState(key) != ModelValidationState.Invalid)
+            {
+                // No validators will be created for this graph of objects. Mark it as valid if it wasn't previously validated.
+                var entries = ModelState.FindKeysWithPrefix(key);
+                foreach (var item in entries)
+                {
+                    if (item.Value.ValidationState == ModelValidationState.Unvalidated)
+                    {
+                        item.Value.ValidationState = ModelValidationState.Valid;
+                    }
+                }
+
                 CurrentPath.Pop(model);
                 return true;
             }
@@ -240,7 +256,7 @@ namespace Signum.React
                 // Suppress validation for the entries matching this prefix. This will temporarily set
                 // the current node to 'skipped' but we're going to visit it right away, so subsequent
                 // code will set it to 'valid' or 'invalid'
-                SuppressValidation(Key!);
+                SuppressValidation(Key);
             }
 
             // Double-checking HasReachedMaxErrors just in case this model has no properties.
@@ -257,7 +273,7 @@ namespace Signum.React
         {
             if (ModelState.HasReachedMaxErrors)
             {
-                SuppressValidation(Key!);
+                SuppressValidation(Key);
                 return false;
             }
 
@@ -287,7 +303,7 @@ namespace Signum.React
             return isValid;
         }
 
-        protected virtual void SuppressValidation(string key)
+        protected virtual void SuppressValidation(string? key)
         {
             if (key == null)
             {
@@ -299,25 +315,30 @@ namespace Signum.React
             var entries = ModelState.FindKeysWithPrefix(key);
             foreach (var entry in entries)
             {
-                entry.Value.ValidationState = ModelValidationState.Skipped;
+                if (entry.Value.ValidationState != ModelValidationState.Invalid)
+                {
+                    entry.Value.ValidationState = ModelValidationState.Skipped;
+                }
             }
         }
 
         protected virtual ValidationStateEntry? GetValidationEntry(object? model)
         {
             if (model == null || ValidationState == null)
+            {
                 return null;
+            }
 
             ValidationState.TryGetValue(model, out var entry);
             return entry;
         }
 
-        protected struct StateManager : IDisposable
+        protected readonly struct StateManager : IDisposable
         {
             private readonly ValidationVisitor _visitor;
-            private readonly object _container;
-            private readonly string _key;
-            private readonly ModelMetadata _metadata;
+            private readonly object? _container;
+            private readonly string? _key;
+            private readonly ModelMetadata? _metadata;
             private readonly object? _model;
             private readonly object? _newModel;
             private readonly IValidationStrategy? _strategy;
@@ -345,10 +366,10 @@ namespace Signum.React
                 _visitor = visitor;
                 _newModel = newModel;
 
-                _container = _visitor.Container!;
-                _key = _visitor.Key!;
-                _metadata = _visitor.Metadata!;
-                _model = _visitor.Model!;
+                _container = _visitor.Container;
+                _key = _visitor.Key;
+                _metadata = _visitor.Metadata;
+                _model = _visitor.Model;
                 _strategy = _visitor.Strategy;
             }
 

@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />
+    <!--<PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />-->
   </ItemGroup>
 
   <ItemGroup>
@@ -23,4 +23,11 @@
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
+  
+  <Target Name="SignumAfterCompile" AfterTargets="AfterCompile" Outputs="$(TargetPath)">
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+    <Exec command="dotnet &quot;D:\Signum\southwind\Framework\Signum.MSBuildTask\bin\x64\Debug\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
+  </Target>
 </Project>

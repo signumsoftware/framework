@@ -595,7 +595,7 @@ namespace Signum.Engine
             get
             {
                 string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".FormatWith(
-                    InnerException.Message, Ordinal, ColumnName, Row);
+                    InnerException!.Message, Ordinal, ColumnName, Row);
 
                 if (Projector != null)
                 {

@@ -16,7 +16,7 @@ namespace Signum.Engine.Basics
         public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr) =>
             As.Expression(() => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString());
 
-        public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties;
+        public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties = null!;
 
         public static void Start(SchemaBuilder sb)
         {

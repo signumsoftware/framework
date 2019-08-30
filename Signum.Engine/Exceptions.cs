@@ -19,7 +19,7 @@ namespace Signum.Engine
         public Table? Table { get; private set; }
 
         public string? IndexName { get; private set; }
-        public UniqueIndex? Index { get; private set; }
+        public UniqueTableIndex? Index { get; private set; }
         public List<PropertyInfo>? Properties { get; private set; }
 
         public string? Values { get; private set; }
@@ -49,7 +49,7 @@ namespace Signum.Engine
                     {
                         var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup=>
                         {
-                            var index = tup.table.GeneratAllIndexes().OfType<UniqueIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
+                            var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
 
                             if(index == null)
                                 return null;
@@ -76,15 +76,15 @@ namespace Signum.Engine
         }
 
         static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
-        static ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?> cachedLookups =
-            new ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?>();
+        static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
+            new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
 
         public override string Message
         {
             get
             {
                 if (Table == null)
-                    return InnerException.Message;
+                    return InnerException!.Message;
 
                 return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
                     Table == null ? TableName : Table.Type.NiceName(),
@@ -160,7 +160,7 @@ namespace Signum.Engine
             get
             {
                 if (TableName == null)
-                    return InnerException.Message;
+                    return InnerException!.Message;
 
                 if (IsInsert)
                     return (TableType == null || ReferedTableType == null) ?

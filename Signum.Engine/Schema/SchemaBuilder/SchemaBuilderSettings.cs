@@ -408,7 +408,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("IsCompatibleWith"))
             {
-                var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>());
+                var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>()!);
 
                 return au != null && (au.ValidOn & targets) != 0;
             }

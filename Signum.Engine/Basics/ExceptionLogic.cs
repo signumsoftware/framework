@@ -14,7 +14,7 @@ namespace Signum.Engine.Basics
 {
 	public static class ExceptionLogic
 	{
-		public static Func<string> GetCurrentVersion;
+		public static Func<string>? GetCurrentVersion;
 
 		public static void Start(SchemaBuilder sb)
 		{
@@ -111,21 +111,21 @@ namespace Signum.Engine.Basics
 			}
 		}
 
-		public static string DefaultEnvironment { get; set; }
+		public static string? DefaultEnvironment { get; set; }
 
-		public static string CurrentEnvironment { get { return overridenEnvironment.Value ?? DefaultEnvironment; } }
+		public static string? CurrentEnvironment { get { return overridenEnvironment.Value ?? DefaultEnvironment; } }
 
-		static readonly Variable<string> overridenEnvironment = Statics.ThreadVariable<string>("exceptionEnviroment");
+		static readonly Variable<string?> overridenEnvironment = Statics.ThreadVariable<string?>("exceptionEnviroment");
 
 		public static IDisposable OverrideEnviroment(string newEnviroment)
 		{
-			string oldEnviroment = overridenEnvironment.Value;
+			string? oldEnviroment = overridenEnvironment.Value;
 			overridenEnvironment.Value = newEnviroment;
 			return new Disposable(() => overridenEnvironment.Value = oldEnviroment);
 		}
 
 
-		public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken> DeleteLogs;
+		public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken>? DeleteLogs;
 
 		public static int DeleteLogsTimeOut = 10 * 60 * 1000;
 

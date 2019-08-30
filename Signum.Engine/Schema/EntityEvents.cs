@@ -12,24 +12,24 @@ namespace Signum.Engine.Maps
     public class EntityEvents<T> : IEntityEvents
             where T : Entity
     {
-        public event PreSavingEventHandler<T> PreSaving;
-        public event SavingEventHandler<T> Saving;
-        public event SavedEventHandler<T> Saved;
+        public event PreSavingEventHandler<T>? PreSaving;
+        public event SavingEventHandler<T>? Saving;
+        public event SavedEventHandler<T>? Saved;
 
-        public event AlternativeRetriveEventHandler<T> AlternativeRetrive;
-        public event RetrievedEventHandler<T> Retrieved;
+        public event AlternativeRetriveEventHandler<T>? AlternativeRetrive;
+        public event RetrievedEventHandler<T>? Retrieved;
 
         public CacheControllerBase<T>? CacheController { get; set; }
 
-        public event FilterQueryEventHandler<T> FilterQuery;
+        public event FilterQueryEventHandler<T>? FilterQuery;
 
-        public event PreUnsafeDeleteHandler<T> PreUnsafeDelete;
-        public event PreUnsafeMListDeleteHandler<T> PreUnsafeMListDelete;
+        public event PreUnsafeDeleteHandler<T>? PreUnsafeDelete;
+        public event PreUnsafeMListDeleteHandler<T>? PreUnsafeMListDelete;
 
-        public event PreUnsafeUpdateHandler<T> PreUnsafeUpdate;
+        public event PreUnsafeUpdateHandler<T>? PreUnsafeUpdate;
 
-        public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
-        public event BulkInsetHandler<T> PreBulkInsert;
+        public event PreUnsafeInsertHandler<T>? PreUnsafeInsert;
+        public event BulkInsetHandler<T>? PreBulkInsert;
 
         public Dictionary<PropertyRoute, IAdditionalBinding>? AdditionalBindings { get; private set; }
 

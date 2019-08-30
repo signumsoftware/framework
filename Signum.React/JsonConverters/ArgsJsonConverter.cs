@@ -33,7 +33,7 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var request = (OperationController.BaseOperationRequest)Activator.CreateInstance(objectType);
+            var request = (OperationController.BaseOperationRequest)Activator.CreateInstance(objectType)!;
             serializer.Populate(reader, request);
             var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
             if (request.args != null)

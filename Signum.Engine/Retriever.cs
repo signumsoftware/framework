@@ -9,6 +9,7 @@ using Signum.Engine.Basics;
 using System.Threading;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine
 {
@@ -50,9 +51,9 @@ namespace Signum.Engine
         Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>>? liteRequests;
         List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
-        bool TryGetRequest((Type type, PrimaryKey id) key, out Entity value)
+        bool TryGetRequest((Type type, PrimaryKey id) key, [NotNullWhen(true)]out Entity? value)
         {
-            if (requests != null && requests.TryGetValue(key.type, out Dictionary<PrimaryKey, Entity> dic) && dic.TryGetValue(key.id, out value))
+            if (requests != null && requests.TryGetValue(key.type, out var dic) && dic.TryGetValue(key.id, out value))
                 return true;
 
             value = null!;
@@ -66,7 +67,7 @@ namespace Signum.Engine
 
             var tuple = (typeof(T), id.Value);
 
-            if (entityCache.TryGetValue(tuple, out Entity result))
+            if (entityCache.TryGetValue(tuple, out var result))
                 return (T)result;
 
             if (retrieved.TryGetValue(tuple, out result))

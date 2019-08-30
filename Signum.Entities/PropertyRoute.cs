@@ -74,8 +74,9 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
-            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
-                            (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            MemberInfo? mi = 
+                (MemberInfo?)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
+                (MemberInfo?)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (mi == null && Type.IsEntity())
             {
@@ -349,7 +350,7 @@ namespace Signum.Entities
             FindImplementations = findImplementations;
         }
 
-        static Func<PropertyRoute, Implementations> FindImplementations;
+        static Func<PropertyRoute, Implementations>? FindImplementations;
 
         public Implementations? TryGetImplementations()
         {
@@ -372,7 +373,7 @@ namespace Signum.Entities
             IsAllowedCallback = isAllowed;
         }
 
-        static Func<PropertyRoute, string?> IsAllowedCallback;
+        static Func<PropertyRoute, string?>? IsAllowedCallback;
 
         public string? IsAllowed()
         {
@@ -447,7 +448,7 @@ namespace Signum.Entities
             return this.RootType.GetHashCode() ^ (this.PropertyRouteType == Entities.PropertyRouteType.Root ? 0 : this.PropertyString().GetHashCode());
         }
 
-        public override bool Equals(object obj) => obj is PropertyRoute pr && Equals(pr);
+        public override bool Equals(object? obj) => obj is PropertyRoute pr && Equals(pr);
         public bool Equals(PropertyRoute other)
         {
             if (other.PropertyRouteType != this.PropertyRouteType)
@@ -512,11 +513,11 @@ namespace Signum.Entities
         PropertyRoute(SerializationInfo info, StreamingContext ctxt)
 #pragma warning restore IDE0051 // Remove unused private members
         {
-            string rootName = info.GetString("rootType");
+            string rootName = info.GetString("rootType")!;
 
-            Type root = Type.GetType(rootName);
+            Type root = Type.GetType(rootName)!;
 
-            string route = info.GetString("property");
+            string? route = info.GetString("property");
 
             if (route == null)
                 this.SetRootType(root);
@@ -666,7 +667,7 @@ namespace Signum.Entities
                         if (result != true)
                             return result;
 
-                        var list = (IList)this.PropertyInfo!.GetValue(parentEntity);
+                        var list = (IList?)this.PropertyInfo!.GetValue(parentEntity);
 
                         return list != null && list.Contains(entity);
                     }

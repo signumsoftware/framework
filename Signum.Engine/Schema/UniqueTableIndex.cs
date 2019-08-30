@@ -12,7 +12,7 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
-    public class Index
+    public class TableIndex
     {
         public ITable Table { get; private set; }
         public IColumn[] Columns { get; private set; }
@@ -31,7 +31,7 @@ namespace Signum.Engine.Maps
             return fields.SelectMany(f => f.Columns()).ToArray();
         }
 
-        public Index(ITable table, params IColumn[] columns)
+        public TableIndex(ITable table, params IColumn[] columns)
         {
             if (table == null)
                 throw new ArgumentNullException(nameof(table));
@@ -70,7 +70,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public class PrimaryClusteredIndex : Index
+    public class PrimaryClusteredIndex : TableIndex
     {
         public PrimaryClusteredIndex(ITable table) : base(table, new[] { table.PrimaryKey })
         {
@@ -85,9 +85,9 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public class UniqueIndex : Index
+    public class UniqueTableIndex : TableIndex
     {
-        public UniqueIndex(ITable table, IColumn[] columns) : base(table, columns) { }
+        public UniqueTableIndex(ITable table, IColumn[] columns) : base(table, columns) { }
 
 
         public override string IndexName
@@ -159,7 +159,7 @@ namespace Signum.Engine.Maps
                         select (IColumn)ic.Value).ToArray();
             }
 
-            return Index.GetColumnsFromFields(f);
+            return TableIndex.GetColumnsFromFields(f);
         }
 
         static Type? RemoveCasting(ref Expression body)

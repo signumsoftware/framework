@@ -135,7 +135,7 @@ namespace Signum.Entities.DynamicQuery
                 if (Value == null)
                     return Expression.Constant(false);
 
-                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value);
+                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value)!;
 
                 bool hasNull = false;
                 while (clone.Contains(null))

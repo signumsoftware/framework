@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using Signum.Entities.Reflection;
@@ -117,7 +117,7 @@ namespace Signum.Entities
                 if (!t.IsIEntity())
                     throw new InvalidOperationException("{0} should be a non-abstrat Entity".FormatWith(type.TypeName()));
 
-                return t.GetCustomAttribute<EntityKindAttribute>(true);
+                return t.GetCustomAttribute<EntityKindAttribute>(true)!;
             });
         }
 

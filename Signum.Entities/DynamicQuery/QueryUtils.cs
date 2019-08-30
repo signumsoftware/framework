@@ -16,21 +16,16 @@ namespace Signum.Entities.DynamicQuery
     {
         public static string GetKey(object queryName)
         {
-            if (queryName is Type)
-                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
-
-            return (queryName is Type ? Reflector.CleanTypeName((Type) queryName) : queryName.ToString());
+            return queryName is Type t ? Reflector.CleanTypeName(EnumEntity.Extract(t) ?? t) : 
+                queryName.ToString()!;
         }
         
         public static string GetNiceName(object queryName)
         {
-            if (queryName is Type)
-                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
-
             return
-                queryName is Type ? ((Type)queryName).NicePluralName() :
-                queryName is Enum ? ((Enum)queryName).NiceToString() :
-                queryName.ToString();
+                queryName is Type t ? (EnumEntity.Extract(t) ?? t).NicePluralName() :
+                queryName is Enum e ? e.NiceToString() :
+                queryName.ToString()!;
         }
 
         public static FilterType GetFilterType(Type type)

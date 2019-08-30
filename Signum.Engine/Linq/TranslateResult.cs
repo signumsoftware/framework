@@ -108,6 +108,7 @@ namespace Signum.Engine.Linq
 
 
     class LazyChildProjection<K, V> : IChildProjection
+        where K : notnull
     {
         public LookupToken Token { get; }
 

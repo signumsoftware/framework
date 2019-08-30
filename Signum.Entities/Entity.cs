@@ -83,7 +83,7 @@ namespace Signum.Entities
             return "{0} ({1})".FormatWith(GetType().NiceName(), id.HasValue ? id.ToString() : LiteMessage.New_G.NiceToString().ForGenderAndNumber(this.GetType().GetGender()));
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if(obj == this)
                 return true;
@@ -115,7 +115,7 @@ namespace Signum.Entities
         {
             return id == null ?
                 base.GetHashCode() :
-                StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value.GetHashCode();
+                StringHashEncoder.GetHashCode32(GetType().FullName!) ^ id.Value.GetHashCode();
         }
 
         public Entity()

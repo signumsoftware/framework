@@ -118,9 +118,9 @@ namespace Signum.Engine
             public DbTransaction? Transaction { get; private set; }
             public Exception? IsRolledback { get; private set; }
             public bool Started { get; private set; }
-            public event Action<Dictionary<string, object>?> PostRealCommit;
-            public event Action<Dictionary<string, object>?> PreRealCommit;
-            public event Action<Dictionary<string, object>?> Rolledback;
+            public event Action<Dictionary<string, object>?>? PostRealCommit;
+            public event Action<Dictionary<string, object>?>? PreRealCommit;
+            public event Action<Dictionary<string, object>?>? Rolledback;
 
             IsolationLevel? IsolationLevel;
 
@@ -219,10 +219,10 @@ namespace Signum.Engine
             string savePointName;
             public Exception? IsRolledback { get; private set; }
             public bool Started { get; private set; }
-            public event Action<Dictionary<string, object>?> PostRealCommit;
+            public event Action<Dictionary<string, object>?>? PostRealCommit;
 
-            public event Action<Dictionary<string, object>?> PreRealCommit;
-            public event Action<Dictionary<string, object>?> Rolledback;
+            public event Action<Dictionary<string, object>?>? PreRealCommit;
+            public event Action<Dictionary<string, object>?>? Rolledback;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
@@ -297,9 +297,9 @@ namespace Signum.Engine
             public DbTransaction? Transaction { get { return null; } }
             public Exception? IsRolledback { get; private set; }
             public bool Started { get; private set; }
-            public event Action<Dictionary<string, object>?> PostRealCommit;
-            public event Action<Dictionary<string, object>?> PreRealCommit;
-            public event Action<Dictionary<string, object>?> Rolledback;
+            public event Action<Dictionary<string, object>?>? PostRealCommit;
+            public event Action<Dictionary<string, object>?>? PreRealCommit;
+            public event Action<Dictionary<string, object>?>? Rolledback;
 
             public NoneTransaction(ICoreTransaction? parent)
             {

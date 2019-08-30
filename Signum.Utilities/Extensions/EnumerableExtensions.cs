@@ -1010,18 +1010,6 @@ namespace Signum.Utilities
         #endregion
 
         #region Zip
-        public static IEnumerable<(A first, B second)> Zip<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
-        {
-            using (var enumA = colA.GetEnumerator())
-            using (var enumB = colB.GetEnumerator())
-            {
-                while (enumA.MoveNext() && enumB.MoveNext())
-                {
-                    yield return (first: enumA.Current, second: enumB.Current);
-                }
-            }
-        }
-
         public static IEnumerable<R> ZipOrDefault<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> resultSelector)
         {
             bool okA = true, okB = true;

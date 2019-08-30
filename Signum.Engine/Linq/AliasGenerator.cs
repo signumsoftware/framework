@@ -86,7 +86,7 @@ namespace Signum.Engine.Linq
             return this.Name == other.Name && object.Equals(this.ObjectName, other.ObjectName);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Alias && base.Equals((Alias)obj);
         }
