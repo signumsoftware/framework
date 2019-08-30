@@ -19,8 +19,8 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
-        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
-        public static ResetLazy<HashSet<Type>> AvailableModelEntities;
+        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities = null!;
+        public static ResetLazy<HashSet<Type>> AvailableModelEntities = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -42,7 +42,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -54,7 +54,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -191,8 +191,8 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"{item}Logic.Start(sb);".Indent(indent));
         }
 
-        public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
-        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>> GetFormattedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, string>>>? GetAlreadyTranslatedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>>? GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {

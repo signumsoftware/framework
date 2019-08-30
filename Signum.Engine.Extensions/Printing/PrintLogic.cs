@@ -25,7 +25,7 @@ namespace Signum.Engine.Printing
     {
         public static int DeleteFilesAfter = 24 * 60; //Minutes
 
-        public static Action<PrintLineEntity> Print;
+        public static Action<PrintLineEntity> Print = e => throw new NotImplementedException("PrintingLogic.Print is not defined");
          
         [AutoExpressionField]
         public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e) => 
@@ -173,7 +173,7 @@ namespace Signum.Engine.Printing
         public static FileContent SavePrintLine(this FileContent file, Entity entity, FileTypeSymbol fileTypeForPrinting)
         {
             CancelPrinting(entity, fileTypeForPrinting);
-            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
+            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName)!, file.Bytes);
 
             return file;
         }
@@ -261,7 +261,7 @@ namespace Signum.Engine.Printing
             {
                 try
                 {
-                    PrintingLogic.Print(line);
+                    PrintingLogic.Print?.Invoke(line);
                     
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;

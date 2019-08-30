@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Signum.Engine;
@@ -73,7 +72,7 @@ namespace Signum.React.RestLog
         private string GetRequestBody(HttpRequest request)
         {
             // Allows using several time the stream in ASP.Net Core
-            request.EnableRewind();
+            request.EnableBuffering();
 
             string result;
             // Arguments: Stream, Encoding, detect encoding, buffer size

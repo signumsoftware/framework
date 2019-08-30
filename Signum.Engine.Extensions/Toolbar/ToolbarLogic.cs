@@ -26,8 +26,8 @@ namespace Signum.Engine.Toolbar
 
     public static class ToolbarLogic
     {
-        public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars;
-        public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus;
+        public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
+        public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -247,7 +247,7 @@ namespace Signum.Engine.Toolbar
         {
             try
             {
-                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()), true);
+                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()!), true);
             }
             catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
             {

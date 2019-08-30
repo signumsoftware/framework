@@ -47,12 +47,10 @@ namespace Signum.React.Selenium
 
         public string GetWebQueryName(object queryName)
         {
-            if (queryName is Type)
-            {
-                return TypeLogic.TryGetCleanName((Type)queryName) ?? Reflector.CleanTypeName((Type)queryName);
-            }
+            if (queryName is Type t)
+                return TypeLogic.TryGetCleanName(t) ?? Reflector.CleanTypeName(t);
 
-            return queryName.ToString();
+            return queryName.ToString()!;
         }
 
 

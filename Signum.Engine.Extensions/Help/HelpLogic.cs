@@ -25,10 +25,10 @@ namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>> Types;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>> Appendices;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>> Queries;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>> Types = null!;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces = null!;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>> Appendices = null!;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>> Queries = null!;
 
         public static Lazy<Dictionary<Type, List<object>>> TypeToQuery = new Lazy<Dictionary<Type, List<object>>>(() =>
         {
@@ -47,7 +47,7 @@ namespace Signum.Engine.Help
         {
             return Namespaces.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
             {
-                var namespaces = AllTypes().GroupBy(type => type.Namespace);
+                var namespaces = AllTypes().GroupBy(type => type.Namespace!);
 
                 var dic = Database.Query<NamespaceHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Name);
 
@@ -270,7 +270,7 @@ namespace Signum.Engine.Help
                 return null;
 
             SyncData data = new SyncData(
-                namespaces: AllTypes().Select(a => a.Namespace).ToHashSet(),
+                namespaces: AllTypes().Select(a => a.Namespace!).ToHashSet(),
                 appendices: Database.Query<AppendixHelpEntity>().Select(a => a.UniqueName).ToHashSet()
             );
 
@@ -424,7 +424,7 @@ namespace Signum.Engine.Help
         static Lazy<XmlSchemaSet> Schemas = new Lazy<XmlSchemaSet>(() =>
         {
             XmlSchemaSet schemas = new XmlSchemaSet();
-            Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
+            Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd")!;
             schemas.Add("", XmlReader.Create(str));
             return schemas;
         });

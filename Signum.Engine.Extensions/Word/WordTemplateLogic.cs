@@ -39,10 +39,10 @@ namespace Signum.Engine.Word
     {
         public static bool AvoidSynchronize = false;
 
-        public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
+        public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy = null!;
 
-        public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName;
-        public static ResetLazy<Dictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType;
+        public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName = null!;
+        public static ResetLazy<Dictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType = null!;
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -562,7 +562,7 @@ namespace Signum.Engine.Word
 
         public static void OverrideWordTemplatesConsole()
         {
-            var wordTemplates = Database.Query<WordTemplateEntity>().Where(a=>a.Model != null).GroupToDictionary(a => a.Model);
+            var wordTemplates = Database.Query<WordTemplateEntity>().Where(a=>a.Model != null).GroupToDictionary(a => a.Model!);
 
             var wordModels = Database.Query<WordModelEntity>().ToList();
 

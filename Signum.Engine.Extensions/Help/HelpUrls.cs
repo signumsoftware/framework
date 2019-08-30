@@ -8,7 +8,7 @@ namespace Signum.Engine.Help
 {
     public class HelpUrls
     {
-        public static string BaseUrl;
+        public static string BaseUrl = null!;
 
         public static string ImagesFolder = "Images";
 

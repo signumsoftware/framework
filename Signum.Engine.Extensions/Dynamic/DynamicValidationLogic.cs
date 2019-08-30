@@ -27,7 +27,7 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations; 
+        static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations = null!; 
 
         public static void Start(SchemaBuilder sb)
         {

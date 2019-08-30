@@ -95,8 +95,8 @@ namespace Signum.React.Authorization
 
                 ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
-                    if (fi.DeclaringType.Name.EndsWith("Query"))
-                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
+                    if (fi.DeclaringType!.Name.EndsWith("Query"))
+                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)!));
                 };
 
             }
@@ -128,7 +128,7 @@ namespace Signum.React.Authorization
                     if (fi.FieldType == typeof(PermissionSymbol))
                         mi.Extension.Add("permissionAllowed",
                             UserEntity.Current == null ? false :
-                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
+                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)!));
                 };
 
             }

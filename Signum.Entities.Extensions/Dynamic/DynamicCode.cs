@@ -10,7 +10,7 @@ namespace Signum.Entities.Dynamic
 {
     public static class DynamicCode
     {
-        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
+        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase!).LocalPath)!;
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenControllerNamespace = "Signum.React.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
@@ -110,7 +110,7 @@ namespace Signum.Entities.Dynamic
 
         public static void AddFullAssembly(Type type)
         {
-            Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace));
+            Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace!));
             AssemblyTypes.Add(type);
         }
     }

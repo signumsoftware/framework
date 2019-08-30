@@ -43,7 +43,7 @@ namespace Signum.React.Map
             {
                 states = (from t in stateTypes
                           from e in Enum.GetValues(t.UnNullify()).Cast<Enum>()
-                          let ignored = e.GetType().GetField(e.ToString(), BindingFlags.Static | BindingFlags.Public).HasAttribute<IgnoreAttribute>()
+                          let ignored = e.GetType().GetField(e.ToString(), BindingFlags.Static | BindingFlags.Public)!.HasAttribute<IgnoreAttribute>()
                           select new MapState
                           {
                               count = counts.GetOrThrow(e.GetType()).TryGet(e, 0),

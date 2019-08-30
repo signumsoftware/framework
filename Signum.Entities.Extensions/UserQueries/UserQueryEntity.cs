@@ -509,7 +509,7 @@ namespace Signum.Entities.UserQueries
             }
             else
             {
-                if (current.Zip(ideal).All(t => t.first.Similar(t.second)))
+                if (current.Zip(ideal).All(t => t.First.Similar(t.Second)))
                     return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEmbedded
                     {
                         Token = new QueryTokenEmbedded(c.Token),

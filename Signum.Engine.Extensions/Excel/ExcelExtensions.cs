@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
@@ -156,7 +156,7 @@ namespace Signum.Engine.Excel
                             type.UnNullify() == typeof(DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
                             type.UnNullify() == typeof(bool) ? (((bool)value) ? "TRUE": "FALSE") :
                             IsNumber(type.UnNullify()) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
-                            value.ToString();
+                            value.ToString()!;
 
                 cell.CellValue = new CellValue(excelValue);
             }

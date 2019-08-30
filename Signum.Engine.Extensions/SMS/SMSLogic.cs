@@ -45,7 +45,7 @@ namespace Signum.Engine.SMS
 
 
 
-        static Func<SMSConfigurationEmbedded> getConfiguration;
+        static Func<SMSConfigurationEmbedded> getConfiguration = null!;
         public static SMSConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
@@ -55,8 +55,8 @@ namespace Signum.Engine.SMS
 
         public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
-        public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy;
-        public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName;
+        public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
+        public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
 
         public static void AssertStarted(SchemaBuilder sb)
         {

@@ -16,9 +16,9 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicViewLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<string,  DynamicViewEntity>>> DynamicViews;
-        public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors;
-        public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides;
+        public static ResetLazy<Dictionary<Type, Dictionary<string,  DynamicViewEntity>>> DynamicViews = null!;
+        public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors = null!;
+        public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides = null!;
 
         public static void Start(SchemaBuilder sb)
         {

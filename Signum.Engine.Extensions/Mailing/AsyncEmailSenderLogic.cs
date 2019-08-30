@@ -16,10 +16,10 @@ namespace Signum.Engine.Mailing
 {
     public static class AsyncEmailSenderLogic
     {
-        static Timer timer;
+        static Timer? timer;
         internal static DateTime? nextPlannedExecution;
         static bool running = false;
-        static CancellationTokenSource CancelProcess;
+        static CancellationTokenSource? CancelProcess;
         static long queuedItems;
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
@@ -228,7 +228,7 @@ namespace Signum.Engine.Mailing
         private static void SetTimer()
         {
             nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod * 1000);
-            timer.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
+            timer!.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
         }
 
         public static void Stop()
@@ -238,8 +238,8 @@ namespace Signum.Engine.Mailing
 
             using (HeavyProfiler.Log("EmailAsyncSender", () => "Stopping process"))
             {
-                timer.Dispose();
-                CancelProcess.Cancel();
+                timer!.Dispose();
+                CancelProcess!.Cancel();
                 WakeUp("Stop", null);
                 nextPlannedExecution = null;
             }

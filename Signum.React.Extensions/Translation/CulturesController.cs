@@ -18,14 +18,15 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Signum.React.Authorization;
+using Microsoft.Extensions.Hosting;
 
 namespace Signum.React.Translation
 {
     [ValidateModelFilter]
     public class CultureController : ControllerBase
     {
-        IHostingEnvironment _env;
-        public CultureController(IHostingEnvironment env)
+        IHostApplicationLifetime _env;
+        public CultureController(IHostApplicationLifetime env)
         {
             _env = env;
         }

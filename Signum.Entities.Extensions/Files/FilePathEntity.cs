@@ -21,7 +21,7 @@ namespace Signum.Entities.Files
         public FilePathEntity(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
-            this.FileName = Path.GetFileName(path);
+            this.FileName = Path.GetFileName(path)!;
             this.BinaryFile = File.ReadAllBytes(path);
         }
 

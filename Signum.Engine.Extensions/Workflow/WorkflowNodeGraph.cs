@@ -48,7 +48,7 @@ namespace Signum.Engine.Workflow
                     gateways
                 }
             .Except(excludes.EmptyIfNull())
-            .OrderByDescending(a => a.ToString().Length)
+            .OrderByDescending(a => a.ToString()!.Length)
             .Take(count)
             .ToList();
         }

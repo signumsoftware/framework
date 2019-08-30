@@ -21,8 +21,8 @@ namespace Signum.Engine.Dashboard
 {
     public static class DashboardLogic
     {
-        public static ResetLazy<Dictionary<Lite<DashboardEntity>, DashboardEntity>> Dashboards;
-        public static ResetLazy<Dictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType;
+        public static ResetLazy<Dictionary<Lite<DashboardEntity>, DashboardEntity>> Dashboards = null!;
+        public static ResetLazy<Dictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -159,7 +159,7 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardEntity? GetHomePageDashboard()
         {
-            var result = GetDashboard(false, null);
+            var result = GetDashboard(null);
 
             if (result == null)
                 return null;
@@ -168,21 +168,15 @@ namespace Signum.Engine.Dashboard
                 return result;
         }
 
-        public static DashboardEntity GetNavbarDashboard(string key)
-        {
-            return GetDashboard(true, key);
-        }
+        public static Func<string?, DashboardEntity> GetDashboard = GetDashboardDefault;
 
-        public static Func<bool, string?, DashboardEntity> GetDashboard;
-
-        static DashboardEntity GetDashboardDefault(bool forNavbar, string? key)
+        static DashboardEntity GetDashboardDefault(string? key)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
 
             var result = Dashboards.Value.Values
                 .Where(d =>
-                    d.ForNavbar == forNavbar
-                     && (!key.HasText() || d.Key == key)
+                    (!key.HasText() || d.Key == key)
                     && d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
                 .OrderByDescending(a => a.DashboardPriority)
                 .FirstOrDefault();

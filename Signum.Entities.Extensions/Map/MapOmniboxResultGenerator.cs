@@ -87,7 +87,7 @@ namespace Signum.Entities.Map
         public override string ToString()
         {
             if (Type == null)
-                return KeywordMatch.Value.ToString();
+                return KeywordMatch.Value.ToString()!;
 
             return "{0} {1}".FormatWith(KeywordMatch.Value, Type.NicePluralName().ToOmniboxPascal());
         }

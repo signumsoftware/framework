@@ -17,10 +17,10 @@ namespace Signum.Engine.Workflow
 {
     public static class WorkflowScriptRunner
     {
-        static Timer timer;
+        static Timer? timer;
         internal static DateTime? nextPlannedExecution;
         static bool running = false;
-        static CancellationTokenSource CancelProcess;
+        static CancellationTokenSource? CancelProcess;
         static long queuedItems;
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
@@ -227,7 +227,7 @@ namespace Signum.Engine.Workflow
         private static void SetTimer()
         {
             nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000);
-            timer.Change(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000, Timeout.Infinite);
+            timer!.Change(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000, Timeout.Infinite);
         }
 
         public static void Stop()
@@ -237,8 +237,8 @@ namespace Signum.Engine.Workflow
 
             using (HeavyProfiler.Log("WorkflowScriptRunner", () => "Stopping process"))
             {
-                timer.Dispose();
-                CancelProcess.Cancel();
+                timer!.Dispose();
+                CancelProcess!.Cancel();
                 WakeUp("Stop", null);
                 nextPlannedExecution = null;
             }

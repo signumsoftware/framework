@@ -22,12 +22,12 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessRunnerLogic
     {
-        public static Action<ExecutingProcess> OnFinally;
+        public static Action<ExecutingProcess>? OnFinally;
 
         static Dictionary<Lite<ProcessEntity>, ExecutingProcess> executing = new Dictionary<Lite<ProcessEntity>, ExecutingProcess>();
 
-        static Timer timerNextExecution;
-        static Timer timerPeriodic;
+        static Timer? timerNextExecution;
+        static Timer? timerPeriodic;
         public static int PoolingPeriodMilliseconds = 30 * 1000;
 
         internal static DateTime? nextPlannedExecution;
@@ -38,7 +38,7 @@ namespace Signum.Engine.Processes
 
         static int initialDelayMiliseconds;
 
-        static CancellationTokenSource CancelNewProcesses;
+        static CancellationTokenSource? CancelNewProcesses;
 
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
@@ -332,7 +332,7 @@ namespace Signum.Engine.Processes
 
             if (next == null)
             {
-                timerNextExecution.Change(Timeout.Infinite, Timeout.Infinite);
+                timerNextExecution!.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
@@ -342,7 +342,7 @@ namespace Signum.Engine.Processes
                 else
                     ts = ts.Add(TimeSpan.FromSeconds(2));
 
-                timerNextExecution.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
+                timerNextExecution!.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
             }
 
         }
@@ -352,11 +352,11 @@ namespace Signum.Engine.Processes
             if (!running)
                 throw new InvalidOperationException("ProcessLogic is not running");
 
-            timerNextExecution.Dispose();
+            timerNextExecution!.Dispose();
             if (timerPeriodic != null)
                 timerPeriodic.Dispose();
 
-            CancelNewProcesses.Cancel();
+            CancelNewProcesses!.Cancel();
 
             WakeUp("Stop", null);
 

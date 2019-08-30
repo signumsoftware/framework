@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>Signum.Entities</RootNamespace>
     <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.1.0" />
     <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />
+    <!--<PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />-->
   </ItemGroup>
 
   <ItemGroup>
@@ -38,4 +38,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <Target Name="SignumAfterCompile" AfterTargets="AfterCompile" Outputs="$(TargetPath)">
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+    <Exec command="dotnet &quot;D:\Signum\southwind\Framework\Signum.MSBuildTask\bin\x64\Debug\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
+  </Target>
 </Project>

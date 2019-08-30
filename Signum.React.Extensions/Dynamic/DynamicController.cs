@@ -19,14 +19,15 @@ using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Dynamic;
 using Signum.Engine;
 using Signum.Entities.Basics;
+using Microsoft.Extensions.Hosting;
 
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
     public class DynamicController : ControllerBase
     {
-        IApplicationLifetime lifeTime;
-        public DynamicController(IApplicationLifetime lifeTime)
+        IHostApplicationLifetime lifeTime;
+        public DynamicController(IHostApplicationLifetime lifeTime)
         {
             this.lifeTime = lifeTime;
         }
@@ -83,7 +84,7 @@ namespace Signum.React.Dynamic
         [HttpGet("api/dynamic/startErrors")]
         public List<HttpError> GetStartErrors()
         {
-            return new Sequence<Exception>
+            return new Sequence<Exception?>
             {
                 DynamicLogic.CodeGenError,
                 StartParameters.IgnoredCodeErrors.EmptyIfNull(),

@@ -342,7 +342,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static)!;
         static int UnlockTable<T>(Lite<DisconnectedMachineEntity> machine) where T : Entity
         {
             using (ExecutionMode.Global())

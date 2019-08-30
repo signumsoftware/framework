@@ -21,12 +21,12 @@ namespace Signum.Engine.Translation
 {
     public static class TranslatedInstanceLogic
     {
-        static Func<CultureInfo> getDefaultCulture;
+        static Func<CultureInfo> getDefaultCulture = null!;
         public static CultureInfo DefaultCulture { get { return getDefaultCulture(); } }
 
         public static Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>> TranslateableRoutes 
             = new Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>>();
-        static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache;
+        static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache = null!;
 
         public static void Start(SchemaBuilder sb, Func<CultureInfo> defaultCulture)
         {
@@ -630,10 +630,7 @@ namespace Signum.Engine.Translation
             return Route.PropertyString().Replace("/", "[" + RowId + "].");
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is IndexedPropertyRoute && base.Equals((IndexedPropertyRoute)obj);
-        }
+        public override bool Equals(object? obj) => obj is IndexedPropertyRoute ipr && base.Equals(ipr);
 
         public bool Equals(IndexedPropertyRoute other)
         {

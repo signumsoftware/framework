@@ -13,7 +13,7 @@ namespace Signum.Engine.Authorization
 {
     public static class PropertyAuthLogic
     {
-        static AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed> cache;
+        static AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed> cache = null!;
 
         public static IManualAuth<PropertyRoute, PropertyAllowed> Manual { get { return cache; } }
 

@@ -70,7 +70,7 @@ namespace Signum.Entities.Chart
 
         static Dictionary<ChartColumnType, string> codes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
             a => (ChartColumnType)a.Key,
-            a => a.Value.GetCustomAttribute<CodeAttribute>().Code);
+            a => a.Value.GetCustomAttribute<CodeAttribute>()!.Code);
 
         public static string GetCode(this ChartColumnType columnType)
         {
@@ -90,7 +90,7 @@ namespace Signum.Entities.Chart
         }
 
         static Dictionary<string, ChartColumnType> fromCodes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
-            a => a.Value.GetCustomAttribute<CodeAttribute>().Code,
+            a => a.Value.GetCustomAttribute<CodeAttribute>()!.Code,
             a => (ChartColumnType)a.Key);
 
         public static string? TryParse(string code, out ChartColumnType type)

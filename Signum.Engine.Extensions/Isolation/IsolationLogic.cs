@@ -28,7 +28,7 @@ namespace Signum.Engine.Isolation
     {
         public static bool IsStarted;
 
-        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations;
+        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations = null!;
 
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
