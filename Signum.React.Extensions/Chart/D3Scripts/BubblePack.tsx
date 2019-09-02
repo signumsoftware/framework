@@ -62,9 +62,14 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
 
-  const getNodeKey = (n: d3.HierarchyCircularNode<ChartRow | Folder>) => {
-    return isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :
-      keyColumn!.getValueKey(n.data) + (colorSchemeColumn ? colorSchemeColumn.getValueKey(n.data) : "")
+  const getNodeKey = (n: d3.HierarchyCircularNode<ChartRow | Folder>): string => {
+    var last = isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :
+      keyColumn!.getValueKey(n.data) + (colorSchemeColumn ? colorSchemeColumn.getValueKey(n.data) : "");
+
+    if (n.parent && !isRoot(n.parent.data))
+      return getNodeKey(n.parent) + " / " + last;
+
+    return last;
   };
   
   var showNumber = parseFloat(parameters["NumberOpacity"]) > 0;
@@ -73,7 +78,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
   return (
     <svg direction="ltr" width={width} height={height}>
       {
-        nodes.orderBy(getNodeKey).map(d => <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x, d.y) + (initialLoad? scale(0,0) : scale(1,1))} cursor="pointer"
+        nodes.orderByDescending(a => a.r).map(d => <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
           onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }) : onDrillDown(d.data)}>
           <circle className="sf-transition" shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
             fillOpacity={parameters["FillOpacity"] || undefined}
