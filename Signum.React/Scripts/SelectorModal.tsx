@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
-import { TypeInfo } from './Reflection'
+import { TypeInfo, EnumType } from './Reflection'
 import { Modal, BsSize } from './Components';
 
 interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
@@ -84,6 +84,17 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
       message={message || SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
       size={size}
       dialogClassName={dialogClassName} />);
+  }
+
+  static chooseEnum<T extends string>(enumType: EnumType<T>): Promise<T | undefined>{
+    return SelectorModal.chooseElement(enumType.values(),
+      {
+        buttonDisplay: a => enumType.niceToString(a),
+        buttonName: a => a,
+        title: SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
+        size: "md",
+      });
   }
 
   static chooseType(options: TypeInfo[]): Promise<TypeInfo | undefined> {

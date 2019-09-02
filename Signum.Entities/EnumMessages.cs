@@ -213,7 +213,7 @@ Lose changes?")]
         ConstructorSelector,
         [Description("Please choose a value to continue:")]
         PleaseChooseAValueToContinue,
-        [Description("Please select a Constructor")]
+        [Description("Please select a constructor")]
         PleaseSelectAConstructor,
         [Description("Please select one of the following types: ")]
         PleaseSelectAType,
@@ -223,7 +223,11 @@ Lose changes?")]
         ValueMustBeSpecifiedFor0,
         ChooseAValue,
         SelectAnElement,
-        PleaseSelectAnElement
+        PleaseSelectAnElement,
+        [Description("{0} selector")]
+        _0Selector,
+        [Description("Please choose a {0} to continue:")]
+        PleaseChooseA0ToContinue,
     }
 
     public enum ConnectionMessage

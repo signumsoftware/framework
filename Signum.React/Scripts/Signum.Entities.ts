@@ -474,6 +474,8 @@ export module SelectorMessage {
   export const ChooseAValue = new MessageKey("SelectorMessage", "ChooseAValue");
   export const SelectAnElement = new MessageKey("SelectorMessage", "SelectAnElement");
   export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
+  export const _0Selector = new MessageKey("SelectorMessage", "_0Selector");
+  export const PleaseChooseA0ToContinue = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
 }
 
 export interface Symbol extends Entity {
