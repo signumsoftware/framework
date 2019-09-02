@@ -37,6 +37,8 @@ namespace Signum.Entities.Dynamic
 
             return base.PropertyValidation(pi);
         }
+
+        public static Func<Type, string, DynamicViewEntity?> TryGetDynamicView = (type, name) => throw new NotImplementedException();
     }
 
     [Serializable]
