@@ -25,6 +25,7 @@ using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
 using Signum.Engine;
 using Signum.Entities.Basics;
+using Signum.Engine.Files;
 
 namespace Signum.Engine.Word
 {
@@ -567,13 +568,14 @@ namespace Signum.Engine.Word
             var wordModels = Database.Query<WordModelEntity>().ToList();
 
             List<string> exceptions = new List<string>();
+            bool? rememberedAnswer = null;
 
             foreach (var se in wordModels)
             {
                 try
                 {
                     var defaultTemplate = WordModelLogic.CreateDefaultTemplate(se);
-                    if (defaultTemplate != null)
+                    if (defaultTemplate != null && defaultTemplate.Template != null)
                     {
                         var already = wordTemplates.TryGetC(se);
 
@@ -588,9 +590,18 @@ namespace Signum.Engine.Word
 
                             if(toModify != null)
                             {
-                                toModify.Template = defaultTemplate.Template;
-                                toModify.Save();
-                                SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Overriden {se.FullClassName}");
+                                if (toModify.Template != null &&
+                                    MemComparer.Equals(toModify.Template.RetrieveAndForget().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
+                                {
+                                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {se.FullClassName}");
+                                }
+                                else
+                                {
+                                    toModify.Template = defaultTemplate.Template;
+                                    toModify.Save();
+                                    if (SafeConsole.Ask(ref rememberedAnswer, $"Override {se.FullClassName}?"))
+                                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Overriden {se.FullClassName}");
+                                }
                             }
                         }
 
