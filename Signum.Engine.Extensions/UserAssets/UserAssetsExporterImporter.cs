@@ -292,6 +292,30 @@ namespace Signum.Engine.UserAssets
             }
         }
 
+        public static void ImportConsole(string filePath)
+        {
+            var bytes = File.ReadAllBytes(filePath);
+
+            var preview = Preview(bytes);
+            foreach (var item in preview.Lines)
+            {
+                switch (item.Action)
+                {
+                    case EntityAction.New: SafeConsole.WriteLineColor(ConsoleColor.Green, $"Create {item.Type} {item.Guid} {item.Text}"); break;
+                    case EntityAction.Identical: SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {item.Type} {item.Guid} {item.Text}"); break;
+                    case EntityAction.Different: SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Override {item.Type} {item.Guid} {item.Text}");
+                        item.OverrideEntity = true;
+                        break;
+                }
+            }
+
+            if (!preview.Lines.Any(a => a.OverrideEntity) || SafeConsole.Ask("Override all?"))
+            {
+                Import(bytes, preview);
+                SafeConsole.WriteLineColor(ConsoleColor.Green, $"Imported Succesfully");
+            }
+        }
+
         public static void Import(byte[] document, UserAssetPreviewModel preview)
         {
             using (Transaction tr = new Transaction())
