@@ -613,6 +613,10 @@ export function isObjectOrNull(val: any) {
   return val == null || typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object or null`;
 }
 
+export function isObjectOrFunctionOrNull(val: any) {
+  return val == null || typeof val == "object" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be an object or function or null`;
+}
+
 export function isInList(val: any, values: string[]) {
   return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
@@ -774,6 +778,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
   if (options.filterRows)
     (result as any).filterRows = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.filterRows, isFunctionOrNull);
 
+  (result as any).ref = evaluateAndValidate(dn, parentCtx, dn.node, (n: BaseNode) => n.ref, isObjectOrFunctionOrNull);
   return result;
 }
 
@@ -795,6 +800,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
 
   return (
     <div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />

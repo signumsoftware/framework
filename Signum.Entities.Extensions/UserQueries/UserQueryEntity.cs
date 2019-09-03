@@ -388,7 +388,7 @@ namespace Signum.Entities.UserQueries
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
             ValueString = element.Attribute("Value")?.Value;
-            Pinned = element.Element("Pinned")?.Let(p => new PinnedQueryFilterEmbedded().FromXml(p, ctx));
+            Pinned = element.Element("Pinned")?.Let(p => (this.Pinned ?? new PinnedQueryFilterEmbedded()).FromXml(p, ctx));
         }
 
         public override string ToString()

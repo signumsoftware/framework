@@ -173,19 +173,17 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { showOnReadOnly: true, hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { showOnReadOnly: true, hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
     icon: "share",
     iconColor: "blue",
-    showOnReadOnly: true,
     onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
     contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
   }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timer, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, {
     color: "dark",
-    showOnReadOnly: true,
     hideOnCanExecute: true,
     isVisible: ctx => false,
     contextual: { isVisible: ctx => true }
@@ -402,7 +400,6 @@ public interface IWorkflowTransition
 
 function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, color: BsColor) {
   Operations.addSettings(new EntityOperationSettings(operation, {
-    showOnReadOnly: true,
     hideOnCanExecute: true,
     color: color,
     onClick: eoc => executeCaseActivity(eoc, executeAndClose),
@@ -620,7 +617,7 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined);
 
   if (wa.viewNameProps.length) {
-    var props = wa.viewNameProps.toObject(a => a.element.name, a => eval(a.element.expression));
+    var props = wa.viewNameProps.toObject(a => a.element.name, a => !a.element.expression ? undefined : eval(a.element.expression));
     viewPromise = viewPromise.withProps(props);
   }
 
