@@ -166,7 +166,7 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     const ctx = this.props.ctx;
 
     if (ctx.readOnly)
-      return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(lite, this.props.liteToString)}</FormControlReadonly>;
+      return <FormControlReadonly ctx={ctx} htmlAttributes={this.props.selectHtmlAttributes}>{ctx.value && getToString(lite, this.props.liteToString)}</FormControlReadonly>;
 
     return (
       <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""}
