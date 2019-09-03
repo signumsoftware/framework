@@ -342,6 +342,11 @@ namespace Signum.React.Selenium
             return button.GetDriver().CapturePopup(() => button.Click());
         }
 
+        public static IWebElement CaptureOnDoubleClick(this IWebElement button)
+        {
+            return button.GetDriver().CapturePopup(() => button.DoubleClick());
+        }
+
         public static IWebElement CapturePopup(this RemoteWebDriver selenium, Action clickToOpen)
         {
             var body = selenium.FindElement(By.TagName("body"));
