@@ -588,23 +588,29 @@ namespace Signum.Engine.Word
                         {
                             var toModify = already.Only() ?? already.ChooseConsole();
 
-                            if(toModify != null)
+                            if (toModify != null)
                             {
-                                if (toModify.Template != null &&
-                                    MemComparer.Equals(toModify.Template.RetrieveAndForget().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
+                                if (toModify.Template == null)
+                                {
+                                    toModify.Template = defaultTemplate.Template;
+                                    toModify.Save();
+                                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Initialized {se.FullClassName}");
+                                }
+                                else if (MemComparer.Equals(toModify.Template.RetrieveAndForget().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
                                 {
                                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {se.FullClassName}");
                                 }
                                 else
                                 {
-                                    toModify.Template = defaultTemplate.Template;
-                                    toModify.Save();
                                     if (SafeConsole.Ask(ref rememberedAnswer, $"Override {se.FullClassName}?"))
+                                    {
+                                        toModify.Template = defaultTemplate.Template;
+                                        toModify.Save();
                                         SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Overriden {se.FullClassName}");
+                                    }
                                 }
                             }
                         }
-
                     }
                 }
                 catch (Exception ex)
