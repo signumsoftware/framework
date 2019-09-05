@@ -37,7 +37,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator RowElement(int rowIndex)
         {
-            return this.Element.WithLocator(By.CssSelector("tr[data-row-index={0}]".FormatWith(rowIndex)));
+            return this.Element.WithLocator(By.CssSelector("tr[data-row-index='{0}']".FormatWith(rowIndex)));
         }
 
         public WebElementLocator RowElement(Lite<IEntity> lite)
