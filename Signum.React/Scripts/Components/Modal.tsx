@@ -3,8 +3,8 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
-import * as BaseModal from 'react-overlays/lib/Modal';
-import isOverflowing from 'react-overlays/lib/utils/isOverflowing';
+import * as BaseModal from 'react-overlays/es/Modal';
+import isOverflowing from 'react-overlays/es/utils/isOverflowing';
 import { ModalFade } from './ModalFade';
 import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
@@ -189,7 +189,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
 
   updateStyle() {
 
-    const dialogNode = this._modal!.getDialogElement();
+    const dialogNode = this._modal!.dialog;
     const dialogHeight = dialogNode.scrollHeight;
 
     const document = ownerDocument(dialogNode);
