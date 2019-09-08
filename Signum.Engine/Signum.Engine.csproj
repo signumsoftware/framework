@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
   </ItemGroup>
 
   <ItemGroup>
