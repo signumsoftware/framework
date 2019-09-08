@@ -14,7 +14,6 @@ export interface IModalProps {
   onExited?: (val: any) => void;
 }
 
-
 export interface IHandleKeyboard {
   handleKeyDown?: (e: KeyboardEvent) => void;
 }
@@ -23,27 +22,41 @@ export interface GlobalModalContainerState {
   modals: React.ReactElement<IModalProps>[];
   currentUrl: string;
 }
-
-let current: GlobalModalContainer;
+let current: GlobalModalContainerHandles;
   
 let modalInstances: (React.Component & IHandleKeyboard)[] = [];
 
-export class GlobalModalContainer extends React.Component<{}, GlobalModalContainerState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = { modals: [], currentUrl: Navigator.history.location.pathname };
-    current = this;
-  }
+interface GlobalModalContainerHandles {
+  pushModal(element: React.ReactElement<any>) : void;
+  popModal(element: React.ReactElement<any>): void;
+  getCount(): number;
+}
 
-  componentDidMount() {
-    window.addEventListener("keydown", this.hanldleKeyDown);
-  }
+export function GlobalModalContainer() {
+  React.useEffect(() => {
+    window.addEventListener("keydown", hanldleKeyDown);
+    return () => window.removeEventListener("keydown", hanldleKeyDown);
+  }, []);
 
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this.hanldleKeyDown);
-  }
+  React.useEffect(() => {
+    current = {
+      pushModal: e => {
+        modals.push(e);
+        setModals(modals);
+      },
+      popModal: e => {
+        modals.remove(e);
+        setModals(modals);
+      },
+      getCount: () => modals.length
+    };
+    return () => { current = null!; };
+  }, []);
 
-  hanldleKeyDown = (e: KeyboardEvent) => {
+  var [modals, setModals] = React.useState<React.ReactElement<IModalProps>[]>([]);
+
+
+  function hanldleKeyDown(e: KeyboardEvent){
     if (modalInstances.length) {
       e.openedModals = true;
       var topMost = modalInstances[modalInstances.length - 1];
@@ -54,16 +67,12 @@ export class GlobalModalContainer extends React.Component<{}, GlobalModalContain
     }
   }
 
-  componentWillReceiveProps(nextProps: {}, nextContext: any): void {
-    var newUrl = Navigator.history.location.pathname;
 
-    if (newUrl != this.state.currentUrl)
-      this.setState({ modals: [], currentUrl: newUrl });
-  }
+  React.useEffect(() => {
+    setModals([]);
+  }, [Navigator.history.location.pathname])
 
-  render() {
-    return <div className="sf-modal-container">{this.state.modals}</div>
-  }
+  return <div className="sf-modal-container">{modals}</div>;
 }
 
 export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {
@@ -71,16 +80,14 @@ export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T 
   return new Promise<T>((resolve) => {
     let cloned: React.ReactElement<IModalProps>;
     const onExited = (val: T) => {
-      current.state.modals.remove(cloned);
-      current.forceUpdate();
+      current.popModal(cloned);
       resolve(val);
     }
 
-    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.state.modals.length } as any),
+    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.getCount() } as any),
       c => c ? modalInstances.push(c) : modalInstances.pop());
 
-    current.state.modals.push(cloned);
-    current.forceUpdate();
+    current.pushModal(cloned);
   });
 }
 

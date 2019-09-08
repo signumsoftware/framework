@@ -13,56 +13,25 @@ interface ImportComponentProps {
   onRender?: (module: ComponentModule) => React.ReactElement<any>;
 }
 
-interface ImportComponentState {
-  module?: ComponentModule;
-}
+export function ImportComponent({ onImportModule, componentProps, onRender }: ImportComponentProps) {
+  const [module, setModule] = React.useState<ComponentModule | undefined>(undefined);
 
-
-export class ImportComponent extends React.Component<ImportComponentProps, ImportComponentState> {
-
-  constructor(props: ImportComponentProps) {
-    super(props);
-    this.state = { module: undefined };
-  }
-
-  componentWillMount() {
-    this.importModule(this.props);
-  }
-
-  _isMounted = true;
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  componentWillReceiveProps(newProps: ImportComponentProps) {
-    if (newProps.onImportModule != this.props.onImportModule &&
-      newProps.onImportModule.toString() != this.props.onImportModule.toString()) {
-      this.setState({ module: undefined },
-        () => this.importModule(newProps));
-    }
-  }
-
-  requestIndex = 0;
-  importModule(props: ImportComponentProps) {
-    this.requestIndex++;
-    var currentIndex = this.requestIndex;
-    this.props.onImportModule()
-      .then(mod => this._isMounted && this.requestIndex == currentIndex && this.setState({ module: mod }))
+  React.useEffect(() => {
+    var controller = new AbortController();
+    onImportModule()
+      .then(mod => !controller.signal.aborted && setModule(mod))
       .done();
-  }
+    return () => controller.abort();
+  }, [onImportModule.toString()]);
 
-  render() {
-    if (!this.state.module)
-      return null;
+  if (!module)
+    return null;
 
-    if (this.props.onRender)
-      return this.props.onRender(this.state.module);
+  if (onRender)
+    return onRender(module);
 
-    return React.createElement(this.state.module.default, this.props.componentProps);
-  }
+  return React.createElement(module.default, componentProps);
 }
-
 
 interface ImportRouteProps {
   path?: string;
