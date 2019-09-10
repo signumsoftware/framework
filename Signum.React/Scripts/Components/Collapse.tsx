@@ -4,7 +4,7 @@ import { classes } from '../Globals';
 
 interface CollapseProps {
   isOpen?: boolean;
-  tag?: React.ComponentType<React.HTMLAttributes<any>>;
+  tag?: string | React.ComponentType<React.HTMLAttributes<any>>;
   attrs?: React.HTMLAttributes<any>;
   navbar?: boolean;
 
