@@ -506,13 +506,13 @@ export module ValidationMessage {
   export const _0IsSet = new MessageKey("ValidationMessage", "_0IsSet");
   export const _0IsNotA1_G = new MessageKey("ValidationMessage", "_0IsNotA1_G");
   export const BeA0_G = new MessageKey("ValidationMessage", "BeA0_G");
-  export const Be = new MessageKey("ValidationMessage", "Be");
+  export const Be0 = new MessageKey("ValidationMessage", "Be0");
   export const BeBetween0And1 = new MessageKey("ValidationMessage", "BeBetween0And1");
   export const BeNotNull = new MessageKey("ValidationMessage", "BeNotNull");
   export const FileName = new MessageKey("ValidationMessage", "FileName");
   export const Have0Decimals = new MessageKey("ValidationMessage", "Have0Decimals");
   export const HaveANumberOfElements01 = new MessageKey("ValidationMessage", "HaveANumberOfElements01");
-  export const HaveAPrecisionOf = new MessageKey("ValidationMessage", "HaveAPrecisionOf");
+  export const HaveAPrecisionOf0 = new MessageKey("ValidationMessage", "HaveAPrecisionOf0");
   export const HaveBetween0And1Characters = new MessageKey("ValidationMessage", "HaveBetween0And1Characters");
   export const HaveMaximum0Characters = new MessageKey("ValidationMessage", "HaveMaximum0Characters");
   export const HaveMinimum0Characters = new MessageKey("ValidationMessage", "HaveMinimum0Characters");
@@ -560,6 +560,7 @@ export module ValidationMessage {
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
   export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
+  export const BeAMultilineString = new MessageKey("ValidationMessage", "BeAMultilineString");
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
 }
 

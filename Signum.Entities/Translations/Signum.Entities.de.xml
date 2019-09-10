@@ -289,7 +289,7 @@
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
     <Member Name="As0" Description="Als {0}" />
-    <Member Name="Check" Description="check" />
+    <Member Name="BooleanValue" Description="boolescher Wert (ja oder nein)" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="Count" Description="Num" />
     <Member Name="Date" Description="Datum" />
@@ -480,20 +480,21 @@
     <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließenden Leerzeichen haben" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollte keine Leerzeichen an erster stelle haben" />
     <Member Name="_AtLeastOneValueIsNeeded" Description="Es wird mindestens ein Wert benötigt." />
-    <Member Name="Be" Description="sein " />
+    <Member Name="Be0" Description="{0} sein" />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
     <Member Name="BeAString" Description="eine Zeichenkette sein" />
+    <Member Name="BeAMultilineString" Description="eine mehrzeilige Zeichenkette sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
-    <Member Name="BeNotNull" Description="darf nicht null sein" />
+    <Member Name="BeNotNull" Description="nicht null sein" />
     <Member Name="FileName" Description="Dateiname" />
-    <Member Name="Have0Decimals" Description="haben {0} Dezimalstellen" />
-    <Member Name="HaveANumberOfElements01" Description="hat eine Nummer von Elementen {0} {1}" />
-    <Member Name="HaveAPrecisionOf" Description="haben eine Genauigkeit von " />
-    <Member Name="HaveBetween0And1Characters" Description="haben zwischen {0} und {1} Zeichen" />
+    <Member Name="Have0Decimals" Description="{0} Dezimalstellen haben" />
+    <Member Name="HaveANumberOfElements01" Description="eine Nummer von Elementen {0} {1} haben" />
+    <Member Name="HaveAPrecisionOf0" Description="eine Genauigkeit von {0} haben" />
+    <Member Name="HaveBetween0And1Characters" Description="zwischen {0} und {1} Zeichen haben" />
     <Member Name="HaveMaximum0Characters" Description="maximal {0} Zeichen haben" />
-    <Member Name="HaveMinimum0Characters" Description="haben mindestens {0} Zeichen" />
-    <Member Name="HaveNoRepeatedElements" Description="darf keine wiederholten Elementen haben" />
+    <Member Name="HaveMinimum0Characters" Description="mindestens {0} Zeichen haben" />
+    <Member Name="HaveNoRepeatedElements" Description="keine wiederholten Elementen haben" />
     <Member Name="HaveValid0Format" Description="muss ein gültiges {0}-Format haben" />
     <Member Name="InvalidDateFormat" Description="Ungültiges Datumsformat" />
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
