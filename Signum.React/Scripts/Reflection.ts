@@ -59,10 +59,10 @@ export interface OperationInfo {
   key: string,
   niceName: string;
   operationType: OperationType;
-  canBeNew: boolean;
-  canBeModified: boolean;
-  hasCanExecute: boolean;
-  hasStates: boolean;
+  canBeNew?: boolean;
+  canBeModified?: boolean;
+  hasCanExecute?: boolean;
+  hasStates?: boolean;
 }
 
 export enum OperationType {

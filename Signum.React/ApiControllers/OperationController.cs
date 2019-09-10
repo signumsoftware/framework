@@ -217,7 +217,7 @@ namespace Signum.React.ApiControllers
                 .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
                 .ToList();
 
-            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols)!;
+            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols);
             var anyReadonly = AnyReadonly.GetInvocationListTyped().Any(f => f(request.lites));
 
             return new StateCanExecuteResponse(result.SelectDictionary(a => a.Key, v => v))
