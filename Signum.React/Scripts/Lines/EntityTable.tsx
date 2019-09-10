@@ -111,7 +111,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
   }
 
   componentDidMount() {
-    this.containerDiv!.addEventListener("scroll", (e) => {
+    this.containerDiv && this.containerDiv.addEventListener("scroll", (e) => {
       var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
       this.thead!.style.transform = translate;
     });

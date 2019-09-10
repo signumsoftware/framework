@@ -72,13 +72,13 @@ namespace Signum.React.Filters
 
     public class SignumCultureSelectorFilter : IResourceFilter
     {
-        public static Func<ResourceExecutingContext, CultureInfo?> GetCurrentCultures;
+        public static Func<ResourceExecutingContext, CultureInfo?> GetCurrentCulture;
 
         const string Culture_Key = "OldCulture";
         const string UICulture_Key = "OldUICulture";
         public void OnResourceExecuting(ResourceExecutingContext context)
         {
-            var culture = GetCurrentCultures?.Invoke(context);
+            var culture = GetCurrentCulture?.Invoke(context);
             if (culture != null)
             {
                 context.HttpContext.Items[Culture_Key] = CultureInfo.CurrentCulture;
