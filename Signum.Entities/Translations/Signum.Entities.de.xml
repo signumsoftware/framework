@@ -371,9 +371,9 @@
     <Member Name="Operations" Description="Operationen" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
-    <Member Name="PleaseSelectA0_G" Description="Bitte wählen Sie eine {0}" />
+    <Member Name="PleaseSelectA0_G" Description="Bitte wählen Sie ein[m:en|f:e|n:] {0}" />
     <Member Name="PleaseSelectAnEntity" Description="Bitte wählen Sie eine Entität aus" />
-    <Member Name="PleaseSelectOneOrMore0_G" Description="Wählen Sie eine oder mehrere {0}" />
+    <Member Name="PleaseSelectOneOrMore0_G" Description="Wählen Sie ein[m:en|f:e|n:] oder mehrere {0}" />
     <Member Name="PleaseSelectOneOrSeveralEntities" Description="Bitte wählen Sie eine oder mehrere Entitäten aus" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotAllowed" Description="Abfrage {0} ist nicht zulässig." />
