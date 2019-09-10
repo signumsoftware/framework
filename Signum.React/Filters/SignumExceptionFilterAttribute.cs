@@ -24,7 +24,10 @@ namespace Signum.React.Filters
 {
     public class SignumExceptionFilterAttribute : IAsyncResourceFilter
     {
-       public static Func<Exception, bool> IncludeErrorDetails = ctx => true;
+        public static Func<Exception, bool> TranslateExceptionMessage = ex => ex is ApplicationException;
+
+
+        public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
         public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
 
@@ -57,16 +60,22 @@ namespace Signum.React.Filters
                         e.Form = Try(int.MaxValue, () => ReadAllBody(context.HttpContext));
                         e.Session = null;
                     });
-
+                    
                     if (ExpectsJsonResult(context))
                     {
-                        var error = new HttpError(context.Exception,IncludeErrorDetails(context.Exception));
 
-                        var response = context.HttpContext.Response;
-                        response.StatusCode = (int)statusCode;
-                        response.ContentType = "application/json";
-                        await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
-                        context.ExceptionHandled = true;
+                        var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture(precontext) : null;
+
+                        using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
+                        {
+                            var error = new HttpError(context.Exception, IncludeErrorDetails(context.Exception));
+
+                            var response = context.HttpContext.Response;
+                            response.StatusCode = (int)statusCode;
+                            response.ContentType = "application/json";
+                            await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                            context.ExceptionHandled = true;
+                        }
                     }
                 }
             }
