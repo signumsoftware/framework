@@ -44,6 +44,7 @@ namespace Signum.Entities.Dynamic
         public static HashSet<Type> AssemblyTypes = new HashSet<Type>
         {
             typeof(object),
+            typeof(System.IO.File),
             typeof(System.Attribute),
             typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
             typeof(System.Linq.Enumerable),
