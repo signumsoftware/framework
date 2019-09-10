@@ -189,11 +189,20 @@ let a = document.createElement("a");
 document.body.appendChild(a);
 a.style.display = "none";
 
-
 export function saveFile(response: Response) {
+  var fileName: string;
   const contentDisposition = response.headers.get("Content-Disposition")!;
-  const fileNamePart = contentDisposition.split(";").filter(a => a.trim().startsWith("filename=")).singleOrNull();
-  const fileName = fileNamePart ? fileNamePart.trim().after("filename=").trimStart("\"").trimEnd("\"") : "file.dat";
+  const parts = contentDisposition.split(";");
+
+  const fileNamePartUTF8 = parts.filter(a => a.trim().startsWith("filename*=")).singleOrNull();
+  const fileNamePartAscii = parts.filter(a => a.trim().startsWith("filename=")).singleOrNull();
+
+  if (fileNamePartUTF8)
+    fileName = decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''").trimEnd("\""));
+  else if (fileNamePartAscii)
+    fileName = fileNamePartAscii.trim().after("filename=").trimStart("\"").trimEnd("\"");
+  else
+    fileName = "file.dat";
 
   response.blob().then(blob => {
     saveFileBlob(blob, fileName);
