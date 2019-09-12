@@ -30,6 +30,7 @@ namespace Signum.Entities.Dynamic
             "System.Text",
             "System.Linq",
             "System.Reflection",
+            "System.ComponentModel",
             "System.Collections",
             "System.Collections.Generic",
             "System.Linq.Expressions",
@@ -43,12 +44,14 @@ namespace Signum.Entities.Dynamic
         public static HashSet<Type> AssemblyTypes = new HashSet<Type>
         {
             typeof(object),
+            typeof(System.IO.File),
             typeof(System.Attribute),
             typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
             typeof(System.Linq.Enumerable),
             typeof(System.Linq.Queryable),
             typeof(System.Collections.Generic.List<>),
             typeof(System.ComponentModel.Component),
+            typeof(System.ComponentModel.DescriptionAttribute),
             typeof(System.ComponentModel.IDataErrorInfo),
             typeof(System.ComponentModel.INotifyPropertyChanged),
             typeof(System.Net.HttpWebRequest),
