@@ -80,10 +80,10 @@
   <ItemGroup>
     <None Remove="Help\HelpClient.tsx" />
     <None Remove="Help\HelpOmniboxProvider.tsx" />
+    <None Remove="Help\Pages\AppendixHelpPage.tsx" />
     <None Remove="Help\Pages\EditableText.tsx" />
-    <None Remove="Help\Pages\HelpAppendixPage.tsx" />
-    <None Remove="Help\Pages\HelpEntityPage.tsx" />
-    <None Remove="Help\Pages\HelpNamespacePage.tsx" />
+    <None Remove="Help\Pages\NamespaceHelpPage.tsx" />
+    <None Remove="Help\Pages\TypeHelpPage.tsx" />
     <None Remove="Help\ProcessPanelPage.tsx" />
   </ItemGroup>
 

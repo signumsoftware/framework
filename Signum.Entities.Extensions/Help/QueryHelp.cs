@@ -15,7 +15,7 @@ namespace Signum.Entities.Help
         [Ignore]
         public string Info { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string? Description { get; set; }
 
         [PreserveOrder]
@@ -42,11 +42,11 @@ namespace Signum.Entities.Help
     [Serializable]
     public class QueryColumnHelpEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(Min = 3, Max = 100)]
+        [StringLengthValidator(Max = 100)]
         public string ColumnName { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? Description { get; set; }
 
         [Ignore]
         public string NiceName { get; set; }

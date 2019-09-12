@@ -27,3 +27,21 @@
         margin-top: -16px;
         display: block;
     }
+
+.sf-info {
+    opacity: .6;
+    margin-bottom: -10px;
+}
+
+.sf-no-text{
+    opacity: .3;
+}
+
+.shortcut {
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+}
+
+.shortcut-container:hover .shortcut {
+    opacity: 1;
+}

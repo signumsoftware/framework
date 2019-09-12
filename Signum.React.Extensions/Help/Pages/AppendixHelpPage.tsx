@@ -10,15 +10,14 @@ import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
 import { notifySuccess, confirmInNecessary } from '@framework/Operations/EntityOperations';
-import { getOperationInfo } from '../../../../Framework/Signum.React/Scripts/Operations';
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal';
-import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar';
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { getOperationInfo } from '@framework/Operations';
+import MessageModal from '@framework/Modals/MessageModal';
+import ButtonBar from '@framework/Frames/ButtonBar';
+import { classes } from '@framework/Globals';
 
 
-export default function HelpAppendixHelp(p: RouteComponentProps<{ uniqueName: string }>) {
+export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
 
-  
   var [count, setCount] = React.useState(0);
   var appendix = useAPI(undefined, [count], () => API.appendix(p.match.params.uniqueName));
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
@@ -33,32 +32,33 @@ export default function HelpAppendixHelp(p: RouteComponentProps<{ uniqueName: st
       <h1 className="display-6"><Link to={Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
-        <EditableComponent ctx={ctx.subCtx(a => a.title)} inline onChange={forceUpdate} />
+        <EditableComponent ctx={ctx.subCtx(a => a.title)} inline onChange={forceUpdate} defaultEditable={appendix.isNew} />
       </h1>
-      <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} />
+      <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+      <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={() => setCount(count + 1)} />}
+        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? Navigator.history.push(Urls.appendixUrl(a.uniqueName)) : setCount(count + 1)} />}
         <DeleteButton ctx={ctx} />
       </div>
     </div>
   );
 }
 
-function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: () => void }) {
+function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: (a: AppendixHelpEntity) => void }) {
 
   if (!Operations.isOperationAllowed(AppendixHelpOperation.Save, AppendixHelpEntity))
     return null;
 
   function onClick() {
-    Operations.API.executeEntity(ctx.value, AppendixHelpOperation.Save.key)
-      .then((() => {
-        onSuccess();
+    Operations.API.executeEntity(ctx.value, AppendixHelpOperation.Save)
+      .then(p => {
+        onSuccess(p.entity);
         notifySuccess();
-      }))
+      })
       .done();
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Save, NamespaceHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity).niceName}</button>;
 }
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
@@ -86,5 +86,5 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
     }).done();
   }
 
-  return <button className="btn btn-danger" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Delete, NamespaceHelpEntity).niceName}</button>;
+  return <button className="btn btn-danger" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity).niceName}</button>;
 }

@@ -12,7 +12,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const AppendixHelpEntity = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
   Type: "AppendixHelp";
-  guid: string;
+  uniqueName: string;
   culture: Basics.CultureInfoEntity;
   title: string;
   description: string | null;
@@ -47,7 +47,7 @@ export module HelpMessage {
   export const Buscador = new MessageKey("HelpMessage", "Buscador");
   export const Call0Over1OfThe2 = new MessageKey("HelpMessage", "Call0Over1OfThe2");
   export const Character = new MessageKey("HelpMessage", "Character");
-  export const Check = new MessageKey("HelpMessage", "Check");
+  export const BooleanValue = new MessageKey("HelpMessage", "BooleanValue");
   export const ConstructsANew0 = new MessageKey("HelpMessage", "ConstructsANew0");
   export const Date = new MessageKey("HelpMessage", "Date");
   export const DateTime = new MessageKey("HelpMessage", "DateTime");
@@ -151,7 +151,7 @@ export const QueryColumnHelpEmbedded = new Type<QueryColumnHelpEmbedded>("QueryC
 export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnHelpEmbedded";
   columnName: string;
-  description: string;
+  description: string | null;
   niceName: string;
   info: string;
 }

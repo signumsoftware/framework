@@ -37,7 +37,7 @@ namespace Signum.React.Help
 
                 Appendices = HelpLogic.GetAppendixHelps().Select(s => new AppendiceItemTS
                 {
-                    Guid = s.Guid,
+                    UniqueName = s.UniqueName,
                     Title = s.Title,
                 }).ToList(),
             };
@@ -65,10 +65,10 @@ namespace Signum.React.Help
                 entity.Execute(NamespaceHelpOperation.Save);
         }
 
-        [HttpGet("api/help/appendix/{uniqueName}")]
+        [HttpGet("api/help/appendix/{uniqueName?}")]
         public AppendixHelpEntity Appendix(string? uniqueName)
         {
-            if (uniqueName == null)
+            if (string.IsNullOrEmpty(uniqueName))
                 return new AppendixHelpEntity
                 {
                     Culture = CultureInfo.CurrentCulture.ToCultureInfoEntity() 
@@ -78,46 +78,57 @@ namespace Signum.React.Help
             return help;
         }
 
-        [HttpGet("api/help/entity/{cleanName}")]
-        public TypeHelpEntity Entity(string cleanName)
+        [HttpGet("api/help/type/{cleanName}")]
+        public TypeHelpEntity Type(string cleanName)
         {
             var help = HelpLogic.GetTypeHelp(TypeLogic.GetType(cleanName));
             help.AssertAllowed();
             return help.GetEntity();
         }
 
-        [HttpPost("api/help/saveEntity")]
-        public void SaveEntity([Required][FromBody]TypeHelpEntity entity)
+        [HttpPost("api/help/saveType")]
+        public void SaveType([Required][FromBody]TypeHelpEntity entity)
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
-
-            var oldProperties = entity.IsNew ? new List<PropertyRouteHelpEmbedded>() : entity.ToLite().RetrieveAndForget().Properties.ToList();
-
-            foreach (var query in entity.Queries)
+            using (Transaction tr = new Transaction())
             {
-                query.Columns.RemoveAll(a => !a.Description.HasText());
-
-                if (query.Columns.IsEmpty() && !query.Description.HasText())
+                foreach (var query in entity.Queries)
                 {
-                    if (!query.IsNew)
-                        query.ToLite().DeleteLite(QueryHelpOperation.Delete);
+                    query.Columns.RemoveAll(a => !a.Description.HasText());
+
+                    if (query.Columns.IsEmpty() && !query.Description.HasText())
+                    {
+                        if (!query.IsNew)
+                            query.ToLite().DeleteLite(QueryHelpOperation.Delete);
+                    }
+                    else
+                        query.Execute(QueryHelpOperation.Save);
+                }
+
+                var currentProperties = entity.Properties.Select(p => p.Property.ToPropertyRoute()).ToHashSet();
+                var hiddenProperties = entity.IsNew ? Enumerable.Empty<PropertyRouteHelpEmbedded>() : entity.ToLite().RetrieveAndForget().Properties
+                    .Where(p => !currentProperties.Contains(p.Property.ToPropertyRoute()))
+                    .ToList();
+                entity.Properties.AddRange(hiddenProperties);
+                entity.Properties.RemoveAll(a => !a.Description.HasText());
+
+                var currentOperations = entity.Operations.Select(p => p.Operation).ToHashSet();
+                var hiddenOperations = entity.IsNew ? Enumerable.Empty<OperationHelpEmbedded>() : entity.ToLite().RetrieveAndForget().Operations
+                    .Where(p => !currentOperations.Contains(p.Operation))
+                    .ToList();
+                entity.Operations.AddRange(hiddenOperations);
+                entity.Operations.RemoveAll(a => !a.Description.HasText());
+
+                if (entity.Properties.IsEmpty() && entity.Operations.IsEmpty() && !entity.Description.HasText())
+                {
+                    if (!entity.IsNew)
+                        entity.ToLite().DeleteLite(TypeHelpOperation.Delete);
                 }
                 else
-                    query.Execute(QueryHelpOperation.Save);
+                    entity.Execute(TypeHelpOperation.Save);
+                tr.Commit();
             }
 
-            var currentProperties = entity.Properties.Select(p => p.Property.ToPropertyRoute()).ToHashSet();
-
-            entity.Properties.AddRange(oldProperties.Where(p => !currentProperties.Contains(p.Property.ToPropertyRoute()))); //Hidden properties due to permissions
-            entity.Properties.RemoveAll(a => !a.Description.HasText());
-
-            if (entity.Properties.IsEmpty() && !entity.Description.HasText())
-            {
-                if (!entity.IsNew)
-                    entity.ToLite().DeleteLite(TypeHelpOperation.Delete);
-            }
-            else
-                entity.Execute(TypeHelpOperation.Save);
         }
     }
 
@@ -137,7 +148,7 @@ namespace Signum.React.Help
 
     public class AppendiceItemTS
     {
-        public Guid Guid;
+        public string UniqueName;
         public string Title;
     }
 }

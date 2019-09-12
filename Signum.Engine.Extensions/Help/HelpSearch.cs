@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Signum.Engine.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Help;
 using Signum.Utilities;
@@ -15,8 +16,7 @@ namespace Signum.Engine.Help
                 Match m = regex.Match(entity.Title.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Appendix, entity.Title, entity.Description.Try(d => d.Etc(etcLength)).DefaultText(entity.Title), null, m,
-                        HelpUrls.AppendixUrl(entity.UniqueName));
+                    return new SearchResult(TypeSearchResult.Appendix, entity.Title, entity.Description.Try(d => d.Etc(etcLength)).DefaultText(entity.Title), m, entity.UniqueName);
                 }
             }
 
@@ -25,7 +25,7 @@ namespace Signum.Engine.Help
                 Match m = regex.Match(entity.Description.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Appendix, entity.Title, entity.Description.Extract(m), null, m, HelpUrls.AppendixUrl(entity.UniqueName), isDescription:true);
+                    return new SearchResult(TypeSearchResult.Appendix, entity.Title, entity.Description.Extract(m), m, entity.UniqueName, isDescription: true);
                 }
             }
 
@@ -39,7 +39,7 @@ namespace Signum.Engine.Help
                 Match m = regex.Match(nh.Title.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Namespace, nh.Title, nh.Description.Try(d => d.Etc(etcLength)).DefaultText(nh.Title), null, m, HelpUrls.NamespaceUrl(nh.Namespace));
+                    return new SearchResult(TypeSearchResult.Namespace, nh.Title, nh.Description.Try(d => d.Etc(etcLength)).DefaultText(nh.Title), m, nh.Namespace);
                 }
             }
 
@@ -48,7 +48,7 @@ namespace Signum.Engine.Help
                 Match m = regex.Match(nh.Description.RemoveDiacritics());
                 if (m.Success)
                 {
-                    return new SearchResult(TypeSearchResult.Namespace, nh.Title, nh.Description.Extract(m), null, m, HelpUrls.NamespaceUrl(nh.Namespace), isDescription: true);
+                    return new SearchResult(TypeSearchResult.Namespace, nh.Title, nh.Description.Extract(m), m, nh.Namespace, isDescription: true);
                 }
             }
 
@@ -67,7 +67,7 @@ namespace Signum.Engine.Help
             m = regex.Match(type.NiceName().RemoveDiacritics());
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), th.DBEntity?.Description.DefaultText(th.Info).Etc(etcLength), type, m, HelpUrls.EntityUrl(type));
+                yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), th.DBEntity?.Description.DefaultText(th.Info).Etc(etcLength), m, TypeLogic.GetCleanName(type));
                 yield break;
             }
 
@@ -79,7 +79,7 @@ namespace Signum.Engine.Help
                 // wiki-parsed and then make the search over this string
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), th.DBEntity.Description.Extract(m), type, m, HelpUrls.EntityUrl(type), isDescription: true);
+                    yield return new SearchResult(TypeSearchResult.Type, type.NiceName(), th.DBEntity.Description.Extract(m), m, TypeLogic.GetCleanName(type), isDescription: true);
                     yield break;
                 }
             }
@@ -92,8 +92,8 @@ namespace Signum.Engine.Help
                     m = regex.Match(p.PropertyInfo.NiceName().RemoveDiacritics());
                     if (m.Success)
                     {
-                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.DefaultText(p.Info).Etc(etcLength), type, m,
-                            HelpUrls.PropertyUrl(p.PropertyRoute));
+                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.DefaultText(p.Info).Etc(etcLength), m,
+                            TypeLogic.GetCleanName(type), p.PropertyRoute.ToString());
                         continue;
                     }
                 }
@@ -102,8 +102,8 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(p.UserDescription.RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.Extract(m), type, m, 
-                            HelpUrls.PropertyUrl(p.PropertyRoute), isDescription: true);
+                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo.NiceName(), p.UserDescription.Extract(m), m,
+                            TypeLogic.GetCleanName(type), p.PropertyRoute.ToString(), isDescription: true);
                 }
             }
 
@@ -113,15 +113,15 @@ namespace Signum.Engine.Help
                 m = regex.Match(QueryUtils.GetNiceName(p.QueryName).RemoveDiacritics());
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.QueryName), p.UserDescription.DefaultText(p.Info).Etc(etcLength), type, m,
-                        HelpUrls.QueryUrl(p.QueryName, type));
+                    yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.QueryName), p.UserDescription.DefaultText(p.Info).Etc(etcLength), m,
+                        TypeLogic.GetCleanName(type), QueryUtils.GetKey(p.QueryName));
                 }
                 else if (p.UserDescription.HasText())
                 {
                     m = regex.Match(p.UserDescription.ToString().RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.QueryName), p.UserDescription.Extract(m), type, m,
-                            HelpUrls.QueryUrl(p.QueryName, type), isDescription: true);
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.QueryName), p.UserDescription.Extract(m), m,
+                            TypeLogic.GetCleanName(type), QueryUtils.GetKey(p.QueryName), isDescription: true);
                 }
             }
 
@@ -131,15 +131,15 @@ namespace Signum.Engine.Help
                 m = regex.Match(op.OperationSymbol.NiceToString().RemoveDiacritics());
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.Operation, op.OperationSymbol.NiceToString(), op.UserDescription.DefaultText(op.Info).Etc(etcLength), type, m,
-                        HelpUrls.OperationUrl(type, op.OperationSymbol));
+                    yield return new SearchResult(TypeSearchResult.Operation, op.OperationSymbol.NiceToString(), op.UserDescription.DefaultText(op.Info).Etc(etcLength), m,
+                        TypeLogic.GetCleanName(type), op.OperationSymbol.Key);
                 }
                 else if (op.UserDescription.HasText())
                 {
                     m = regex.Match(op.UserDescription.ToString().RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Operation, op.OperationSymbol.NiceToString(), op.UserDescription.Extract(m), type, m,
-                            HelpUrls.OperationUrl(type, op.OperationSymbol), isDescription: true);
+                        yield return new SearchResult(TypeSearchResult.Operation, op.OperationSymbol.NiceToString(), op.UserDescription.Extract(m), m,
+                            TypeLogic.GetCleanName(type), op.OperationSymbol.Key, isDescription: true);
                 }
             }
         }
@@ -159,21 +159,19 @@ namespace Signum.Engine.Help
     {
         public TypeSearchResult TypeSearchResult { get; set; }
         public string Title { get; set; }
-        public Type? Type { get; set; }
         public MatchType MatchType { get; set; }
         public string? Description { get; set; }
         public string Key { get; set; }
         public string? Key2 { get; set; }
         public bool IsDescription { get; set; }
 
-        public SearchResult(TypeSearchResult typeSearchResult, string title, string? description, Type? type, Match match, string key, string? key2 = null, bool isDescription = false)
+        public SearchResult(TypeSearchResult typeSearchResult, string title, string? description, Match match, string key, string? key2 = null, bool isDescription = false)
         {
             this.Title = title;
             this.TypeSearchResult = typeSearchResult;
             this.Description = description;
             this.Key = key;
             this.Key2 = key2;
-            this.Type = type;
             
             this.MatchType = 
                 match.Index == 0 && match.Length == title.Length ? MatchType.Total :

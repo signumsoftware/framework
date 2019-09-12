@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,6 +12,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Help;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Help
 {
@@ -73,7 +75,7 @@ namespace Signum.Engine.Help
                        new XElement(_Namespace,
                            new XAttribute(_Name, entity.Name),
                            new XAttribute(_Culture, entity.Culture.Name),
-                           new XAttribute(_Title, entity.Title),
+                           entity.Title.HasText() ? new XAttribute(_Title, entity.Title) : null,
                            entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
                        )
                     );
@@ -103,13 +105,13 @@ namespace Signum.Engine.Help
                     return ImportAction.Skipped;
 
                 var entity = Database.Query<NamespaceHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Name == name) ?? new NamespaceHelpEntity
-                    {
-                        Culture = ci,
-                        Name = name,
-                    };
+                {
+                    Culture = ci,
+                    Name = name,
+                };
 
-                entity.Title = element.Attribute(_Title).Value;
-                element.Element(_Description)?.Do(d => entity.Description = d.Value);
+                entity.Title = element.Attribute(_Title)?.Value;
+                entity.Description = element.Element(_Description)?.Value;
 
                 return Save(entity);
             }
@@ -162,7 +164,7 @@ namespace Signum.Engine.Help
                         Query = query,
                     };
 
-                element.Element(_Description)?.Do(d => entity.Description = d.Value);
+                entity.Description = element.Element(_Description)?.Value;
 
                 var cols = element.Element(_Columns);
                 if (cols != null)
@@ -346,7 +348,7 @@ namespace Signum.Engine.Help
             return result;
         }
 
-        public static string EntitiesDirectory = "Entity";
+        public static string TypesDirectory = "Types";
         public static string QueriesDirectory = "Query";
         public static string OperationsDirectory = "Operation";
         public static string NamespacesDirectory = "Namespace";
@@ -379,52 +381,97 @@ namespace Signum.Engine.Help
             return Regex.Replace(name, "[" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]", "");
         }
 
-        public static void ExportAll(string directoryName = "../../Help")
+        public static void ExportAll(string directoryName)
         {
-            bool? replace = null;
+            HashSet<CultureInfo> cultures = new HashSet<CultureInfo>();
+            cultures.AddRange(Database.Query<AppendixHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
+            cultures.AddRange(Database.Query<NamespaceHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
+            cultures.AddRange(Database.Query<TypeHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
+            cultures.AddRange(Database.Query<QueryHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
+            if (Directory.Exists(directoryName))
+                cultures.AddRange(new DirectoryInfo(directoryName).GetDirectories().Select(c => CultureInfo.GetCultureInfo(c.Name)));
 
-            foreach (var ah in Database.Query<AppendixHelpEntity>())
+            foreach (var ci in cultures)
             {
-                string path = Path.Combine(directoryName, ah.Culture.Name, AppendicesDirectory, "{0}.{1}.help".FormatWith(RemoveInvalid(ah.UniqueName), ah.Culture.Name));
-
-                FileTools.CreateParentDirectory(path);
-
-                if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".FormatWith(path)))
-                    AppendixXml.ToXDocument(ah).Save(path);
-            }
-
-            foreach (var nh in Database.Query<NamespaceHelpEntity>())
-            {
-                string path = Path.Combine(directoryName, nh.Culture.Name, NamespacesDirectory, "{0}.{1}.help".FormatWith(RemoveInvalid(nh.Name), nh.Culture.Name));
-
-                FileTools.CreateParentDirectory(path);
-
-                if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".FormatWith(path)))
-                    NamespaceXml.ToXDocument(nh).Save(path);
-            }
-
-            foreach (var eh in Database.Query<TypeHelpEntity>())
-            {
-                string path = Path.Combine(directoryName, eh.Culture.Name, EntitiesDirectory, "{0}.{1}.help".FormatWith(RemoveInvalid(eh.Type.CleanName), eh.Culture.Name));
-
-                FileTools.CreateParentDirectory(path);
-
-                if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".FormatWith(path)))
-                    EntityXml.ToXDocument(eh).Save(path);
-            }
-
-            foreach (var qh in Database.Query<QueryHelpEntity>())
-            {
-                string path = Path.Combine(directoryName, qh.Culture.Name, QueriesDirectory, "{0}.{1}.help".FormatWith(RemoveInvalid(qh.Query.Key), qh.Culture.Name));
-
-                FileTools.CreateParentDirectory(path);
-
-                if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".FormatWith(path)))
-                    QueryXml.ToXDocument(qh).Save(path);
-            }
+                ExportCulture(directoryName, ci);
+            }       
         }
 
-        public static void ImportAll(string directoryName = "../../Help")
+        public static void ExportCulture(string directoryName, CultureInfo ci)
+        {
+            bool? replace = null;
+            bool? delete = null;
+
+            SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, AppendicesDirectory),
+                Database.Query<AppendixHelpEntity>().Where(ah => ah.Culture.Name == ci.Name).ToList(),
+                ah => "{0}.{1}.help".FormatWith(RemoveInvalid(ah.UniqueName), ah.Culture.Name),
+                ah => AppendixXml.ToXDocument(ah));
+
+            SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, NamespacesDirectory),
+                Database.Query<NamespaceHelpEntity>().Where(nh => nh.Culture.Name == ci.Name).ToList(),
+                nh => "{0}.{1}.help".FormatWith(RemoveInvalid(nh.Name), nh.Culture.Name),
+                nh => NamespaceXml.ToXDocument(nh));
+
+            SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, TypesDirectory),
+                Database.Query<TypeHelpEntity>().Where(th => th.Culture.Name == ci.Name).ToList(),
+                th => "{0}.{1}.help".FormatWith(RemoveInvalid(th.Type.CleanName), th.Culture.Name),
+                th => EntityXml.ToXDocument(th));
+
+            SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, QueriesDirectory),
+                Database.Query<QueryHelpEntity>().Where(qh => qh.Culture.Name == ci.Name).ToList(),
+                qh => "{0}.{1}.help".FormatWith(RemoveInvalid(qh.Query.Key), qh.Culture.Name),
+                qh => QueryXml.ToXDocument(qh));
+        }
+
+        public static void SyncFolder<T>(ref bool? replace, ref bool? delete, string folder, List<T> should,  Func<T, string> fileName, Func<T, XDocument> toXML)
+        {
+            if (should.Any() && !Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            var deleteLocal = delete;
+            var replaceLocal = replace;
+
+            SafeConsole.WriteLineColor(ConsoleColor.Gray, "Exporting to " + folder);
+            Synchronizer.Synchronize(
+                newDictionary: should.ToDictionary(fileName),
+                oldDictionary: Directory.GetFiles(folder).ToDictionary(a => Path.GetFileName(a)),
+                createNew: (fileName, entity) => {
+                    toXML(entity).Save(Path.Combine(folder, fileName));
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, " Created " + fileName);
+                },
+                removeOld: (fileName, fullName) =>
+                {
+                    if (SafeConsole.Ask(ref deleteLocal, "Delete {0}?".FormatWith(fileName)))
+                    {
+                        File.Delete(fullName);
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, " Deleted " + fileName);
+                    }
+                }, merge: (fileName, entity, fullName) =>
+                {
+                    var xml = toXML(entity);
+
+                    var newBytes = new MemoryStream().Do(ms => xml.Save(ms)).ToArray();
+                    var oldBytes = File.ReadAllBytes(fullName);
+
+                    if (!MemComparer.Equals(newBytes, oldBytes))
+                    {
+                        if (SafeConsole.Ask(ref replaceLocal, " Override {0}?".FormatWith(fileName)))
+                        {
+                            xml.Save(Path.Combine(folder, fileName));
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, " Overriden " + fileName);
+                        }
+                    }
+                    else
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkGray, " Identical " + fileName);
+                    }
+                });
+
+            delete = deleteLocal;
+            replace = replaceLocal;
+        }
+
+        public static void ImportAll(string directoryName)
         {
             var namespaces = HelpLogic.AllTypes().Select(a => a.Namespace).Distinct().ToDictionary(a => a);
 
@@ -461,7 +508,7 @@ namespace Signum.Engine.Help
 
         public static void ImportExportHelp()
         {
-            ImportExportHelp("../../Help");
+            ImportExportHelp(@"..\..\..\Help");
         }
 
         public static void ImportExportHelp(string directoryName)

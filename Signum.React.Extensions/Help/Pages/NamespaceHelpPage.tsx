@@ -13,9 +13,8 @@ import { notifySuccess } from '@framework/Operations/EntityOperations';
 import { getOperationInfo } from '../../../../Framework/Signum.React/Scripts/Operations';
 
 
-export default function HelpNamespacePage(p: RouteComponentProps<{ namespace: string }>) {
+export default function NamespaceHelpPage(p: RouteComponentProps<{ namespace: string }>) {
 
-  
   var [count, setCount] = React.useState(0);
   var namespace = useAPI(undefined, [count], () => API.namespace(p.match.params.namespace));
   useTitle(HelpMessage.Help.niceToString() + (namespace && (" > " + namespace.title)));

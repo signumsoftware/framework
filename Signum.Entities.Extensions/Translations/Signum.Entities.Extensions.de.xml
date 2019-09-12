@@ -765,8 +765,8 @@
   <Type Name="DynamicViewValidationMessage">
     <Member Name="_0RequiresA1" Description="{0} erfordert eine {1}" />
     <Member Name="AggregateIsMandatoryFor01" Description="Aggregat ist obligatorisch für &quot;{0}&quot; ({1})." />
-    <Member Name="CollectionOfEntities" Description="Sammlung von Entitäten" />
-    <Member Name="CollectionOfEnums" Description="Sammlung von Enumerationen" />
+    <Member Name="CollectionOfEntities" Description="Liste von Entitäten" />
+    <Member Name="CollectionOfEnums" Description="Liste von Enumerationen" />
     <Member Name="Entity" Description="Entität" />
     <Member Name="EntityOrValue" Description="Entität oder Wert" />
     <Member Name="FilteringWithNew0ConsiderChangingVisibility" Description="Filtere mit neuem {0}. Erwäge Sichtbarkeit zu verändern." />
@@ -1065,7 +1065,7 @@
     <Member Name="_0IsA1" Description="{0} ist ein {1}" />
     <Member Name="_0IsA1AndShows2" Description="{0} ist ein {1} und zeigt {2}" />
     <Member Name="_0IsACalculated1" Description="{0} ist eine berechnete {1}" />
-    <Member Name="_0IsACollectionOfElements1" Description="{0} ist eine Sammlung von {1}-Elementen " />
+    <Member Name="_0IsACollectionOfElements1" Description="{0} ist eine Liste von {1}-Elementen " />
     <Member Name="_0IsThePrimaryKeyOf1OfType2" Description="{0} ist der Primärschlüssel von {1}, des Typs {2}" />
     <Member Name="Amount" Description="Betrag" />
     <Member Name="Any" Description="irgendein" />

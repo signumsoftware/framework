@@ -12,7 +12,7 @@ namespace Signum.Entities.Help
 
         public CultureInfoEntity Culture { get; set; }
 
-		[StringLengthValidator(Min = 3, MultiLine = true)]
+		[StringLengthValidator(MultiLine = true)]
         public string? Description { get; set; }
 
         [NoRepeatValidator]
@@ -59,7 +59,7 @@ namespace Signum.Entities.Help
         [Ignore]
         public string Info { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true), ForceNotNullable]
+        [StringLengthValidator(MultiLine = true), ForceNotNullable]
         public string? Description { get; set; }
 
         public override string ToString()
@@ -76,7 +76,7 @@ namespace Signum.Entities.Help
         [Ignore]
         public string Info { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true), ForceNotNullable]
+        [StringLengthValidator(MultiLine = true), ForceNotNullable]
         public string? Description { get; set; }
 
         public override string ToString()

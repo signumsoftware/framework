@@ -15,6 +15,7 @@ using Signum.Engine.Basics;
 using Newtonsoft.Json;
 using DocumentFormat.OpenXml.EMMA;
 using Signum.Entities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Help
 {
@@ -82,7 +83,6 @@ namespace Signum.Engine.Help
                     result.Ticks = DBEntity.Ticks;
                 }
 
-                GraphExplorer.CleanModifications(GraphExplorer.FromRoot(result));
 
                 return result;
             }
@@ -172,12 +172,14 @@ namespace Signum.Engine.Help
             };
 
             result.Properties.AddRange(
-                from pr in PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeEntity())
-                let ph = Properties.GetOrThrow(pr.ToPropertyRoute())
+                from pre in PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeEntity())
+                let pr = pre.ToPropertyRoute()
+                where !(pr.PropertyInfo != null && pr.PropertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(pr.PropertyInfo.DeclaringType, pr.PropertyInfo))
+                let ph = Properties.GetOrThrow(pre.ToPropertyRoute())
                 where ph.IsAllowed() == null
                 select new PropertyRouteHelpEmbedded
                 {
-                    Property = pr,
+                    Property = pre,
                     Info = ph.Info,
                     Description = ph.UserDescription,
                 });
@@ -193,16 +195,17 @@ namespace Signum.Engine.Help
                });
 
             result.Queries.AddRange(
-                from qh in this.Queries.Values
+                from qn in QueryLogic.Queries.GetTypeQueries(this.Type).Keys
+                let qh = HelpLogic.GetQueryHelp(qn)
                 where qh.IsAllowed() == null
                 select qh.GetEntity());
 
             if (DBEntity != null)
             {
                 result.SetId(DBEntity.Id);
+                result.SetIsNew(DBEntity.IsNew);
                 result.Ticks = DBEntity.Ticks;
             }
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(result));
             return result;
         }
 
@@ -290,7 +293,7 @@ namespace Signum.Engine.Help
             var cols = entity?.Columns.ToDictionary(a => a.ColumnName, a => a.Description);
             Columns = QueryLogic.Queries.GetQuery(queryName).Core.Value.StaticColumns.ToDictionary(
                             cf => cf.Name,
-                            cf => new QueryColumnHelp(cf, cf.DisplayName(), HelpGenerator.GetQueryColumnHelp(cf), cols?.TryGetC(cf.Name)));
+                            cf => new QueryColumnHelp(cf, cf.DisplayName(), HelpGenerator.GetQueryColumnHelp(cf), cols?.TryGetCN(cf.Name)));
 
             DBEntity = entity;
             UserDescription = entity?.Description;
@@ -310,7 +313,7 @@ namespace Signum.Engine.Help
                 .Select(c => new QueryColumnHelpEmbedded
                 {
                     ColumnName = c.Column.Name,
-                    Description = cd?.TryGetC(c.Column.Name)!,
+                    Description = cd?.TryGetCN(c.Column.Name)!,
                     NiceName = c.NiceName,
                     Info = c.Info,
                 }).ToMList()
@@ -319,9 +322,9 @@ namespace Signum.Engine.Help
             if (DBEntity != null)
             {
                 result.SetId(DBEntity.Id);
+                result.SetIsNew(DBEntity.IsNew);
                 result.Ticks = DBEntity.Ticks;
             }
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(result));
             return result;
         }
 

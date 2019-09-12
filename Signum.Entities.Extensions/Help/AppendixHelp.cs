@@ -7,7 +7,7 @@ namespace Signum.Entities.Help
     public class AppendixHelpEntity : Entity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
-        public Guid Guid { get; set; }
+        public string UniqueName { get; set; }
         
         public CultureInfoEntity Culture { get; set; }
 

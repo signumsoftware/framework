@@ -147,7 +147,7 @@ namespace Signum.Engine.Help
         }
 
 
-        public static AppendixHelpEntity GetAppendixHelp(string name) => CachedAppendicesHelp().GetOrThrow(name);
+        public static AppendixHelpEntity GetAppendixHelp(string uniqueName) => CachedAppendicesHelp().GetOrThrow(uniqueName);
         public static IEnumerable<AppendixHelpEntity> GetAppendixHelps() => CachedAppendicesHelp().Values;
         public static Dictionary<string, AppendixHelpEntity> CachedAppendicesHelp()
         {
@@ -413,7 +413,9 @@ namespace Signum.Engine.Help
             return document;
         }
 
-        public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
+        public static readonly Regex TokenRegex = new Regex(@"\[(?<content>([^\[\]]|\[\[|\]\])+)\]");
+
+        public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)?$");
 
         [return: NotNullIfNotNull("content")]
         static string? SynchronizeContent(string? content, Replacements r, SyncData data)
@@ -421,7 +423,7 @@ namespace Signum.Engine.Help
             if (content == null)
                 return null;
 
-            return WikiMarkup.WikiParserExtensions.TokenRegex.Replace(content, m =>
+            return TokenRegex.Replace(content, m =>
             {
                 var m2 = HelpLinkRegex.Match(m.Groups["content"].Value);
 
@@ -430,64 +432,62 @@ namespace Signum.Engine.Help
 
                 string letter = m2.Groups["letter"].Value;
                 string link = m2.Groups["link"].Value;
-                string text = m2.Groups["text"].Value;
 
                 switch (letter)
                 {
-                    case WikiFormat.EntityLink:
+                    case HelpLinkPrefix.TypeLink:
                         {
                             string? type = r.SelectInteractive(link, TypeLogic.NameToType.Keys, "Type", data.StringDistance);
                             if (type == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
-                            return Link(letter, type, text);
+                            return HelpLink(letter, type);
                         }
-                    case WikiFormat.PropertyLink:
+                    case HelpLinkPrefix.PropertyLink:
                         {
                             string? type = r.SelectInteractive(link.Before("."), TypeLogic.NameToType.Keys, "Type", data.StringDistance);
                             if (type == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
                             var routes = PropertyRoute.GenerateRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
 
                             string? pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, data.StringDistance);
                             if (pr == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
-                            return Link(letter, type + "." + pr, text);
+                            return HelpLink(letter, type + "." + pr);
                         }
-                    case WikiFormat.QueryLink:
+                    case HelpLinkPrefix.QueryLink:
                         {
                             string? query = r.SelectInteractive(link, QueryLogic.QueryNames.Keys, "Query", data.StringDistance);
                             if (query == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
-                            return Link(letter, query, text);
+                            return HelpLink(letter, query);
                         }
-                    case WikiFormat.OperationLink:
+                    case HelpLinkPrefix.OperationLink:
                         {
                             string? operation = r.SelectInteractive(link, SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", data.StringDistance);
                             if (operation == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
-                            return Link(letter, operation, text);
+                            return HelpLink(letter, operation);
                         }
-                    case WikiFormat.Hyperlink: return m.Value;
-                    case WikiFormat.NamespaceLink:
+                    case HelpLinkPrefix.NamespaceLink:
                         {
                             string? @namespace = r.SelectInteractive(link, data.Namespaces, "Namespace", data.StringDistance);
                             if (@namespace == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
-                            return Link(letter, @namespace, text);
+                            return HelpLink(letter, @namespace);
                         }
-                    case WikiFormat.AppendixLink:
+                    case HelpLinkPrefix.AppendixLink:
                         {
                             string? appendix = r.SelectInteractive(link, data.Appendices, "Appendices", data.StringDistance);
                             if (appendix == null)
-                                return Link(letter + "-error", link, text);
+                                return HelpLink(letter + "-error", link);
 
-                            return Link(letter, appendix, text);
+                            return HelpLink(letter, appendix);
                         }
                     default:
                         break;
@@ -497,25 +497,19 @@ namespace Signum.Engine.Help
             });
         }
 
-        static string Link(string letter, string link, string text)
+        static string HelpLink(string letter, string link)
         {
-            if (text.HasText())
-                return "[{0}:{1}|{2}]".FormatWith(letter, link, text);
-            else
-                return "[{0}:{1}]".FormatWith(letter, link);
+            return "[{0}:{1}]".FormatWith(letter, link);
         }
     }
 
-    public static class WikiFormat
+    public static class HelpLinkPrefix
     {
-        public const string EntityLink = "e";
+        public const string TypeLink = "t";
         public const string PropertyLink = "p";
         public const string QueryLink = "q";
         public const string OperationLink = "o";
-        public const string Hyperlink = "h";
         public const string NamespaceLink = "n";
         public const string AppendixLink = "a";
-
-        public const string Separator = ":";
     }
 }
