@@ -26,7 +26,6 @@ namespace Signum.React.Filters
     {
         public static Func<Exception, bool> TranslateExceptionMessage = ex => ex is ApplicationException;
 
-
         public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
         public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
@@ -55,7 +54,7 @@ namespace Signum.React.Filters
                         e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
                         e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress.ToString());
                         e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-                        e.User = UserHolder.Current?.ToLite();
+                        e.User = (UserHolder.Current ?? (IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite();
                         e.QueryString = Try(int.MaxValue, () => req.QueryString.ToString());
                         e.Form = Try(int.MaxValue, () => ReadAllBody(context.HttpContext));
                         e.Session = null;

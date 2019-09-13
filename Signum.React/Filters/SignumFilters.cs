@@ -43,7 +43,9 @@ namespace Signum.React.Filters
 
     public class SignumAuthenticationFilter : SignumDisposableResourceFilter
     {
-        public SignumAuthenticationFilter() : base("Signum_User") { }
+        public const string Signum_User_Key = "Signum_User";
+
+        public SignumAuthenticationFilter() : base("Signum_User_Session") { }
 
         public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
@@ -65,6 +67,8 @@ namespace Signum.React.Filters
 
             if (result == null)
                 return null;
+
+            context.HttpContext.Items[Signum_User_Key] = result.User;
 
             return result.User != null ? UserHolder.UserSession(result.User) : null;
         }
