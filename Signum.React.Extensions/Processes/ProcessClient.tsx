@@ -50,7 +50,7 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
 
 export const processOperationSettings: { [key: string]: Operations.ContextualOperationSettings<any> } = {};
 export function register<T extends Entity>(...settings: Operations.ContextualOperationSettings<T>[]) {
-  settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol.key, s));
+  settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol, s));
 }
 
 function monkeyPatchCreateContextualMenuItem() {
