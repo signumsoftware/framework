@@ -539,14 +539,16 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   return undefined;
 }
 
-export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutocompleteConfig<any> | null {
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType?: boolean): AutocompleteConfig<any> | null {
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
   var config: AutocompleteConfig<any> | null = null;
 
   if (findOptions)
-    config = new FindOptionsAutocompleteConfig(findOptions);
+    config = new FindOptionsAutocompleteConfig(findOptions, {
+      getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
+    });
 
   const types = getTypeInfos(type);
   var delay: number | undefined;
@@ -568,7 +570,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       types: type.name,
       subString: subStr,
       count: 5
-    }, signal), false, showType == null ? type.name.contains(",") : showType);
+    }, signal).then(lites => [...lites, ...(!create ? []: getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), false, showType == null ? type.name.contains(",") : showType);
   }
 
   if (!config.getItemsDelay) {
@@ -793,6 +795,18 @@ export interface ViewOverride<T extends ModifiableEntity> {
   override: (replacer: ViewReplacer<T>) => void;
 }
 
+export interface AutocompleteConstructor<T extends ModifiableEntity> {
+  type: PseudoType;
+  onClick: () => Promise<T | null>;
+}
+
+export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]): AutocompleteConstructor<ModifiableEntity>[]{
+  return getTypeInfos(tr.name).map(ti => {
+    var es = getSettings(ti);
+    return es && es.autocompleteConstructor && es.autocompleteConstructor(str, ctx, foundLites);
+  }).notNull();
+}
+
 export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
@@ -810,6 +824,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
+  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
   findOptions?: FindOptions;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
