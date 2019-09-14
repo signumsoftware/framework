@@ -1,11 +1,12 @@
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
-import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
-import { getTypeInfo, getQueryKey, QueryTokenString } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey } from '../Signum.Entities'
+import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription } from '../FindOptions'
+import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { toFilterRequests } from '../Finder';
+import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
 
 export interface AutocompleteConfig<T> {
   getItems: (subStr: string) => Promise<T[]>;
@@ -13,15 +14,19 @@ export interface AutocompleteConfig<T> {
   minLength?: number;
   renderItem(item: T, subStr?: string): React.ReactNode;
   renderList?(typeahead: Typeahead): React.ReactNode;
-  getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
-  getDataKeyFromItem(item: T): string | undefined;
+  getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | null>;
+  getDataKeyFromItem(item: T): string | null;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
   abort(): void;
 }
 
-export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T>>{
+export function isAutocompleteConstructor<T extends ModifiableEntity>(a: any): a is AutocompleteConstructor<T> {
+  return (a as AutocompleteConstructor<T>).onClick != null;
+}
+
+export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T> | AutocompleteConstructor<T>>{
   constructor(
-    public getItemsFunction: (signal: AbortSignal, subStr: string) => Promise<Lite<T>[]>,
+    public getItemsFunction: (signal: AbortSignal, subStr: string) => Promise<(Lite<T> | AutocompleteConstructor<T>)[]>,
     public requiresInitialLoad: boolean,
     public showType: boolean) {
   }
@@ -36,7 +41,13 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     return this.abortableRequest.getData(subStr);
   }
 
-  renderItem(item: Lite<T>, subStr: string) {
+  renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string) {
+
+    if (isAutocompleteConstructor<T>(item)) {
+      var ti = getTypeInfo(item.type);
+      return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{subStr}"</em>;
+    }
+
     var toStr = getToString(item);
     var text = Typeahead.highlightedText(toStr, subStr);
     if (this.showType)
@@ -45,11 +56,19 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
       return text;
   }
 
-  getEntityFromItem(item: Lite<T>): Promise<Lite<Entity> | ModifiableEntity> {
+  getEntityFromItem(item: Lite<T> | AutocompleteConstructor<T>): Promise<Lite<Entity> | ModifiableEntity | null> {
+
+    if (isAutocompleteConstructor(item))
+      return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | null>;
+
     return Promise.resolve(item);
   }
 
-  getDataKeyFromItem(item: Lite<T>): string | undefined {
+  getDataKeyFromItem(item: Lite<T> | AutocompleteConstructor<T>): string | null {
+
+    if (isAutocompleteConstructor(item))
+      return "create-" + getTypeName(item.type); 
+
     return liteKey(item);
   }
 
@@ -65,7 +84,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
     return this.abortableRequest.getData(lite.id!.toString()).then(lites => {
 
-      const result = lites.filter(a => is(a, lite)).firstOrNull();
+      const result = lites.filter(a => isLite(a) && is(a, lite)).firstOrNull() as Lite<T> | null;
 
       if (!result)
         throw new Error("Impossible to getInitialItem with the current implementation of getItems");
@@ -86,13 +105,18 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   }
 }
 
-export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow>{
+interface FindOptionsAutocompleteConfigOptions {
+  getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[],
+  count?: number,
+  requiresInitialLoad?: boolean,
+  showType?: boolean,
+}
+
+export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow | AutocompleteConstructor<Entity>>{
 
   constructor(
     public findOptions: FindOptions,
-    public count: number = 5,
-    public requiresInitialLoad: boolean = false,
-    public showType: boolean = false,
+    public options?: FindOptionsAutocompleteConfigOptions
   ) {
     Finder.expandParentColumn(this.findOptions);
   }
@@ -102,68 +126,83 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 
   parsedFilters?: FilterOptionParsed[];
-  getParsedFilters(): Promise<FilterOptionParsed[]> {
+  getParsedFilters(qd: QueryDescription): Promise<FilterOptionParsed[]> {
     if (this.parsedFilters)
       return Promise.resolve(this.parsedFilters);
 
-    return Finder.getQueryDescription(this.findOptions.queryName)
-      .then(qd => Finder.parseFilterOptions(this.findOptions.filterOptions || [], false, qd))
+    return Finder.parseFilterOptions(this.findOptions.filterOptions || [], false, qd)
       .then(filters => this.parsedFilters = filters);
   }
 
   parsedOrders?: OrderOptionParsed[];
-  getParsedOrders(): Promise<OrderOptionParsed[]> {
+  getParsedOrders(qd: QueryDescription): Promise<OrderOptionParsed[]> {
     if (this.parsedOrders)
       return Promise.resolve(this.parsedOrders);
 
-    return Finder.getQueryDescription(this.findOptions.queryName)
-      .then(qd => Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd))
+    return  Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd)
       .then(orders => this.parsedOrders = orders);
   }
 
   parsedColumns?: ColumnOptionParsed[];
-  getParsedColumns(): Promise<ColumnOptionParsed[]> {
+  getParsedColumns(qd: QueryDescription): Promise<ColumnOptionParsed[]> {
     if (this.parsedColumns)
       return Promise.resolve(this.parsedColumns);
 
-    return Finder.getQueryDescription(this.findOptions.queryName)
-      .then(qd => Finder.parseColumnOptions(this.findOptions.columnOptions || [], false, qd))
+    return Finder.parseColumnOptions(this.findOptions.columnOptions || [], false, qd)
       .then(columns => this.parsedColumns = columns);
   }
 
   abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutocompleteQueryRequest) => Finder.API.FindRowsLike(request, abortController));
 
-  getItems(subStr: string): Promise<ResultRow[]> {
-    return this.getParsedFilters().then(filters =>
-      this.getParsedOrders().then(orders =>
-        this.getParsedColumns().then(columns =>
+  async getItems(subStr: string): Promise<(ResultRow | AutocompleteConstructor<Entity>)[]> {
+
+    return Finder.getQueryDescription(this.findOptions.queryName)
+      .then(qd => Promise.all(
+        [
+          this.getParsedFilters(qd),
+          this.getParsedOrders(qd),
+          this.getParsedColumns(qd)
+        ]).then(([filters, orders, columns]) =>
           this.abortableRequest.getData({
             queryKey: getQueryKey(this.findOptions.queryName),
             columns: columns.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnRequest),
             filters: toFilterRequests(filters),
             orders: orders.map(o => ({ token: o.token!.fullKey, orderType: o.orderType }) as OrderRequest),
-            count: this.count,
+            count: this.options && this.options.count || 5,
             subString: subStr
-          }).then(rt => rt.rows)
+          }).then(rt => [
+            ...rt.rows,
+            ...this.options && this.options.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows) || []
+          ])
         )
-      )
-    );
+      );
   }
 
-  renderItem(item: ResultRow, subStr: string) {
+  renderItem(item: ResultRow | AutocompleteConstructor<Entity>, subStr: string) {
+    if (isAutocompleteConstructor<Entity>(item)) {
+      var ti = getTypeInfo(item.type);
+      return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{subStr}"</em>;
+    }
+
     var toStr = getToString(item.entity!);
     var text = Typeahead.highlightedText(toStr, subStr);
-    if (this.showType)
+    if (this.options && this.options.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
     else
       return text;
   }
 
-  getEntityFromItem(item: ResultRow): Promise<Lite<Entity> | ModifiableEntity> {
+  getEntityFromItem(item: ResultRow): Promise<Lite<Entity> | ModifiableEntity | null> {
+    if (isAutocompleteConstructor(item))
+      return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | null>;
+
     return Promise.resolve(item.entity!);
   }
 
-  getDataKeyFromItem(item: ResultRow): string | undefined {
+  getDataKeyFromItem(item: ResultRow): string | null {
+    if (isAutocompleteConstructor(item))
+      return "create-" + getTypeName(item.type); 
+
     return liteKey(item.entity!);
   }
 
@@ -171,13 +210,13 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     var lite = this.convertToLite(entity);;
 
-    if (!this.requiresInitialLoad)
+    if (!(this.options && this.options.requiresInitialLoad))
       return Promise.resolve({ entity: lite } as ResultRow);
 
     if (lite.id == undefined)
       return Promise.resolve({ entity: lite } as ResultRow);
 
-    return this.getParsedColumns().then(columns =>
+    return Finder.getQueryDescription(this.findOptions.queryName).then(qd => this.getParsedColumns(qd)).then(columns =>
 
       Finder.API.FindRowsLike({
         queryKey: getQueryKey(this.findOptions.queryName),
