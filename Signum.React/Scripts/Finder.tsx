@@ -71,6 +71,10 @@ export function getSettings(queryName: PseudoType | QueryKey): QuerySettings | u
   return querySettings[getQueryKey(queryName)];
 }
 
+export function getOrAddSettings(queryName: PseudoType | QueryKey): QuerySettings {
+  return querySettings[getQueryKey(queryName)] || (querySettings[getQueryKey(queryName)] = { queryName: queryName });
+}
+
 export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean) => boolean> = [];
 
 export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean): boolean {
