@@ -1,4 +1,4 @@
-﻿import * as Navigator from './Navigator';
+import * as Navigator from './Navigator';
 
 import * as React from 'react'
 import { Entity, Lite, is } from './Signum.Entities';
@@ -44,6 +44,8 @@ export class Retrieve extends React.Component<RetrieveProps, RetrieveState> {
 
     if (props.lite == null)
       this.setState({ entity: null });
+    else if (props.lite.entity)
+      this.setState({ entity: props.lite.entity });
     else {
       this.setState({ entity: undefined });
       Navigator.API.fetchAndForget(props.lite)
