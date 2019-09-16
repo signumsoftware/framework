@@ -90,7 +90,7 @@ modules.Services.ajaxPost({ url: '~/api/dynamic/getData' }, data: null)
 `;
   modules["TreeClient"] = "";
   modules["AutoCompleteConfig"] = `new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], requiresInitialLoad: false, showType: false)`;
-  modules["Hooks"] = `const forceUpdate = modules.Hooks.useForceUpdate(0);
+  modules["Hooks"] = `const forceUpdate = modules.Hooks.useForceUpdate();
 const value = modules.Hooks.useAPI(undefined /*default value*/, [/*Keys*/], signal => Your calling API is here);
 `;
   modules["FontAwesomeIcon"] = `modules.React.createElement(modules.FontAwesomeIcon, { icon: "...", color: "..." })`;
