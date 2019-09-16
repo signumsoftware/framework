@@ -2,7 +2,7 @@ import * as React from 'react'
 import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
-import { Entity, JavascriptMessage, entityInfo, getToString, toLite } from '@framework/Signum.Entities'
+import { Entity, JavascriptMessage, entityInfo, getToString, toLite, EntityPack } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import ValidationErrors from '@framework/Frames/ValidationErrors'
 import ButtonBar from '@framework/Frames/ButtonBar'
@@ -239,17 +239,15 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
     var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
 
-    var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity, ...extension };
-
     const wc: WidgetContext<ICaseMainEntity> = {
       ctx: ctx,
-      pack: mainPack,
+      frame: mainFrame,
     };
 
     return (
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
-        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = (bb as any as ButtonBar)} frame={mainFrame} pack={mainPack} /> : <br />}
+        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = (bb as any as ButtonBar)} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix="caseFrame"/>
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}

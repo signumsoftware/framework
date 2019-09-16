@@ -37,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.pack.userCharts || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.userCharts || []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>

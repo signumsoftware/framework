@@ -103,10 +103,10 @@ export function start(options: { routes: JSX.Element[] }) {
       }
   });
 
-  onEmbeddedWidgets.push(ctx => ctx.pack.embeddedDashboard &&
+  onEmbeddedWidgets.push(wc => wc.frame.pack.embeddedDashboard &&
     {
-      position: ctx.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
-      embeddedWidget: <DashboardWidget dashboard={ctx.pack.embeddedDashboard} pack={ctx.pack as EntityPack<Entity>} />
+      position: wc.frame.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
+      embeddedWidget: <DashboardWidget dashboard={wc.frame.pack.embeddedDashboard} pack={wc.frame.pack as EntityPack<Entity>} />
     });
 
   QuickLinks.registerGlobalQuickLink(ctx => {
@@ -114,7 +114,7 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.pack.dashboards || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.dashboards || []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(das =>
