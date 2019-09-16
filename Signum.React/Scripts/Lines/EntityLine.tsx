@@ -26,7 +26,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     super.overrideProps(state, overridenProps);
     if (state.autocomplete === undefined) {
       const type = state.type!;
-      state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
+      state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.ctx, state.create!, state.showType);
     }
 
     if (!state.currentItem) {
@@ -89,7 +89,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
     this.state.autocomplete!.getEntityFromItem(item)
-      .then(entity => entity &&
+      .then(entity => entity == null ? undefined :
         this.convert(entity)
           .then(entity => {
             this.state.autocomplete!.getItemFromEntity(entity).then(newItem => //newItem could be different to item on create new case

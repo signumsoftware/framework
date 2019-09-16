@@ -33,7 +33,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     super.overrideProps(state, overridenProps);
     if (state.autocomplete === undefined) {
       const type = state.type!;
-      state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
+      state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.ctx, state.create!, state.showType);
     }
   }
   renderInternal() {
@@ -78,9 +78,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
     this.state.autocomplete!.getEntityFromItem(item)
-      .then(entity => entity && this.convert(entity)
-        .then(e => this.addElement(e))
-      ).done();
+      .then(entity => {
+        if (entity)
+          this.convert(entity)
+            .then(e => this.addElement(e)).done();
+      }).done();
 
     return "";
   }
