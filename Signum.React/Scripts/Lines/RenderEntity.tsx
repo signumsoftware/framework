@@ -155,7 +155,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      pack: undefined,
+      pack: { entity, canExecute: {} },
       revalidate: () => this.props.ctx.frame && this.props.ctx.frame.revalidate(),
       onClose: () => { throw new Error("Not implemented Exception"); },
       onReload: pack => { throw new Error("Not implemented Exception"); },
