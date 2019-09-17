@@ -797,7 +797,7 @@ export interface ViewOverride<T extends ModifiableEntity> {
 
 export interface AutocompleteConstructor<T extends ModifiableEntity> {
   type: PseudoType;
-  onClick: () => Promise<T | null>;
+  onClick: () => Promise<T | undefined>;
 }
 
 export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]): AutocompleteConstructor<ModifiableEntity>[]{

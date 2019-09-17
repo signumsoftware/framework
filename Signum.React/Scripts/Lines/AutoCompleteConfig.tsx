@@ -14,8 +14,8 @@ export interface AutocompleteConfig<T> {
   minLength?: number;
   renderItem(item: T, subStr?: string): React.ReactNode;
   renderList?(typeahead: Typeahead): React.ReactNode;
-  getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | null>;
-  getDataKeyFromItem(item: T): string | null;
+  getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
+  getDataKeyFromItem(item: T): string | undefined;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
   abort(): void;
 }
@@ -56,15 +56,15 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
       return text;
   }
 
-  getEntityFromItem(item: Lite<T> | AutocompleteConstructor<T>): Promise<Lite<Entity> | ModifiableEntity | null> {
+  getEntityFromItem(item: Lite<T> | AutocompleteConstructor<T>): Promise<Lite<Entity> | ModifiableEntity | undefined> {
 
     if (isAutocompleteConstructor(item))
-      return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | null>;
+      return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | undefined>;
 
     return Promise.resolve(item);
   }
 
-  getDataKeyFromItem(item: Lite<T> | AutocompleteConstructor<T>): string | null {
+  getDataKeyFromItem(item: Lite<T> | AutocompleteConstructor<T>): string | undefined {
 
     if (isAutocompleteConstructor(item))
       return "create-" + getTypeName(item.type); 
@@ -192,14 +192,14 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       return text;
   }
 
-  getEntityFromItem(item: ResultRow): Promise<Lite<Entity> | ModifiableEntity | null> {
+  getEntityFromItem(item: ResultRow): Promise<Lite<Entity> | ModifiableEntity | undefined> {
     if (isAutocompleteConstructor(item))
-      return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | null>;
+      return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | undefined>;
 
     return Promise.resolve(item.entity!);
   }
 
-  getDataKeyFromItem(item: ResultRow): string | null {
+  getDataKeyFromItem(item: ResultRow): string | undefined {
     if (isAutocompleteConstructor(item))
       return "create-" + getTypeName(item.type); 
 
