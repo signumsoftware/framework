@@ -9,7 +9,8 @@ import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '
 import { Modal, Typeahead, UncontrolledTabs, Tab } from '@framework/Components';
 import { TypeContext, EntityTable, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
-import { DynamicViewInspector, ModulesHelp, PropsHelp } from './Designer';
+import { DynamicViewInspector, PropsHelp } from './Designer';
+import { ModulesHelp } from "./ModulesHelp";
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror';
 
 export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }) {
@@ -38,7 +39,7 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
               <ModulesHelp cleanName={typeName} />{", "}<PropsHelp node={rootNode} />{") =>"}
             </div>
           </pre>
-          <JavascriptCodeMirror code={ctx.value.locals || ""} onChange={newCode => { ctx.value.locals = newCode; handleChange(); }} />
+          <JavascriptCodeMirror code={ctx.value.locals || ""} onChange={newCode => { ctx.value.locals = newCode; ctx.value.modified = true; handleChange(); } } />
         </div>
       </Tab>
     </UncontrolledTabs>

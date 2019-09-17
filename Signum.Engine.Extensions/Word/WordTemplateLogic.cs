@@ -290,58 +290,68 @@ namespace Signum.Engine.Word
         public static string? DumpFileFolder = null;
         public static byte[] CreateReport(this WordTemplateEntity template, ModifiableEntity? modifiableEntity = null, IWordModel? model = null, bool avoidConversion = false, FileNameBox? fileNameBox = null)
         {
-            WordTemplatePermission.GenerateReport.AssertAuthorized();
+            try
+            {
+                WordTemplatePermission.GenerateReport.AssertAuthorized();
 
-            Entity? entity = null;
-            if (template.Model != null)
-            {
-                if (model == null)
-                    model = WordModelLogic.CreateDefaultWordModel(template.Model, modifiableEntity);
-                else if(template.Model.ToType() != model.GetType())
-                    throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.FullClassName, model.GetType().FullName));
-            }
-            else
-            {
-                entity = modifiableEntity as Entity ?? throw new InvalidOperationException("Model should be an Entity"); 
-            }
-            
-            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-            using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
-            {
-                QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
-
-                var array = template.ProcessOpenXmlPackage(document =>
+                Entity? entity = null;
+                if (template.Model != null)
                 {
-                    Dump(document, "0.Original.txt");
+                    if (model == null)
+                        model = WordModelLogic.CreateDefaultWordModel(template.Model, modifiableEntity);
+                    else if (template.Model.ToType() != model.GetType())
+                        throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.FullClassName, model.GetType().FullName));
+                }
+                else
+                {
+                    entity = modifiableEntity as Entity ?? throw new InvalidOperationException("Model should be an Entity");
+                }
 
-                    var parser = new WordTemplateParser(document, qd, template.Model?.ToType(), template);
-                    parser.ParseDocument(); Dump(document, "1.Match.txt");
-                    parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
-                    parser.AssertClean();
+                using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+                using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
+                {
+                    QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
 
-                    if (parser.Errors.Any())
-                        throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
+                    var array = template.ProcessOpenXmlPackage(document =>
+                    {
+                        Dump(document, "0.Original.txt");
 
-                    var parsedFileName = fileNameBox != null ? TextTemplateParser.Parse(template.FileName, qd, template.Model?.ToType()) : null;
+                        var parser = new WordTemplateParser(document, qd, template.Model?.ToType(), template);
+                        parser.ParseDocument(); Dump(document, "1.Match.txt");
+                        parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                        parser.AssertClean();
 
-                    var renderer = new WordTemplateRenderer(document, qd, template.Culture.ToCultureInfo(), template, model, entity, parsedFileName);
-                    renderer.MakeQuery();
-                    renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
-                    renderer.AssertClean();
+                        if (parser.Errors.Any())
+                            throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
 
-                    FixDocument(document); Dump(document, "4.Fixed.txt");
+                        var parsedFileName = fileNameBox != null ? TextTemplateParser.Parse(template.FileName, qd, template.Model?.ToType()) : null;
 
-                    if (fileNameBox != null)
-                        fileNameBox.FileName = renderer.RenderFileName();
+                        var renderer = new WordTemplateRenderer(document, qd, template.Culture.ToCultureInfo(), template, model, entity, parsedFileName);
+                        renderer.MakeQuery();
+                        renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
+                        renderer.AssertClean();
 
-                    if (template.WordTransformer != null)
-                        Transformers.GetOrThrow(template.WordTransformer)(new WordContext(template, entity, model), document);
-                });
+                        FixDocument(document); Dump(document, "4.Fixed.txt");
 
-                if (!avoidConversion && template.WordConverter != null)
-                    array = Converters.GetOrThrow(template.WordConverter)(new WordContext(template, entity, model), array);
+                        if (fileNameBox != null)
+                            fileNameBox.FileName = renderer.RenderFileName();
 
-                return array;
+                        if (template.WordTransformer != null)
+                            Transformers.GetOrThrow(template.WordTransformer)(new WordContext(template, entity, model), document);
+                    });
+
+                    if (!avoidConversion && template.WordConverter != null)
+                        array = Converters.GetOrThrow(template.WordConverter)(new WordContext(template, entity, model), array);
+
+                    return array;
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["WordTemplate"] = template.ToLite();
+                e.Data["ModifiableEntity"] = modifiableEntity;
+                e.Data["Model"] = model;
+                throw;
             }
         }
 

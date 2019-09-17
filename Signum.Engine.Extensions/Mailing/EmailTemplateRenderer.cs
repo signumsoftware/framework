@@ -44,46 +44,58 @@ namespace Signum.Engine.Mailing
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
-                    CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ?? 
-                        EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
-
-                    EmailMessageEntity email = new EmailMessageEntity
+                    EmailMessageEntity email;
+                    try
                     {
-                        Target = entity?.ToLite() ?? (this.model!.UntypedEntity as Entity)?.ToLite(),
-                        Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
-                        From = from,
-                        IsBodyHtml = template.IsBodyHtml,
-                        EditableMessage = template.EditableMessage,
-                        Template = template.ToLite(),
-                        Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, 
-                        new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
-                        { 
-                            ModelType = template.Model?.ToType(),
-                            Model = model,
-                            Entity = entity, 
-                        })).ToMList()
-                    };
-                    
-                    EmailTemplateMessageEmbedded message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+                        CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ??
+                            EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
-                    if (message == null)
-                        throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
-
-                    using (CultureInfoUtils.ChangeBothCultures(ci))
-                    {
-                        email.Subject = SubjectNode(message).Print(
-                            new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                        email = new EmailMessageEntity
+                        {
+                            Target = entity?.ToLite() ?? (this.model!.UntypedEntity as Entity)?.ToLite(),
+                            Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
+                            From = from,
+                            IsBodyHtml = template.IsBodyHtml,
+                            EditableMessage = template.EditableMessage,
+                            Template = template.ToLite(),
+                            Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g,
+                            new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
                             {
-                                IsHtml = false,
-                                Model = model
-                            });
-
-                        email.Body = TextNode(message).Print(
-                            new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
-                            {
-                                IsHtml = template.IsBodyHtml,
+                                ModelType = template.Model?.ToType(),
                                 Model = model,
-                            });
+                                Entity = entity,
+                            })).ToMList()
+                        };
+
+                        EmailTemplateMessageEmbedded message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+
+                        if (message == null)
+                            throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
+
+                        using (CultureInfoUtils.ChangeBothCultures(ci))
+                        {
+                            email.Subject = SubjectNode(message).Print(
+                                new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                                {
+                                    IsHtml = false,
+                                    Model = model
+                                });
+
+                            email.Body = TextNode(message).Print(
+                                new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                                {
+                                    IsHtml = template.IsBodyHtml,
+                                    Model = model,
+                                });
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.Data["Template"] = this.template.ToLite();
+                        ex.Data["Model"] = this.model;
+                        ex.Data["Entity"] = this.entity;
+                        throw;
                     }
 
 
@@ -91,7 +103,7 @@ namespace Signum.Engine.Mailing
                 }
             }
         }
-
+            
         TextTemplateParser.BlockNode TextNode(EmailTemplateMessageEmbedded message)
         {
             if (message.TextParsedNode == null)
