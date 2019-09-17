@@ -66,12 +66,12 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
           <tbody>
             {
               mlistItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-                (<ErrorBoundary>
-                  <MultiValueLineElement key={i}
+                <ErrorBoundary key={i}>
+                  <MultiValueLineElement
                     ctx={mlec}
                     onRemove={e => { e.preventDefault(); this.handleDeleteValue(i); }}
                     onRenderItem={this.props.onRenderItem} />
-                </ErrorBoundary>))
+                </ErrorBoundary>)
             }
             <tr >
               <td colSpan={4}>
