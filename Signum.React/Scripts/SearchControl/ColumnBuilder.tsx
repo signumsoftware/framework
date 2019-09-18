@@ -4,7 +4,8 @@ import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./ColumnBuilder.css"
-import { TitleManager } from '../../Scripts/Lines/EntityBase';
+import { StyleContext } from '../Lines';
+import { useForceUpdate } from '../Hooks';
 
 export interface ColumnsBuilderProps {
   queryDescription: QueryDescription;
@@ -15,74 +16,73 @@ export interface ColumnsBuilderProps {
   readonly?: boolean;
 }
 
-export default class ColumnsBuilder extends React.Component<ColumnsBuilderProps> {
+export default function ColumnsBuilder(p: ColumnsBuilderProps) {
 
-  handlerNewColumn = () => {
+  const forceUpdate = useForceUpdate();
 
-    this.props.columnOptions.push({
+  function handlerNewColumn() {
+
+    p.columnOptions.push({
       token: undefined,
       displayName: undefined,
     });
 
-    if (this.props.onColumnsChanged)
-      this.props.onColumnsChanged(this.props.columnOptions);
+    if (p.onColumnsChanged)
+      p.onColumnsChanged(p.columnOptions);
 
-    this.forceUpdate();
+    forceUpdate();
   };
 
-  handlerDeleteColumn = (column: ColumnOptionParsed) => {
-    this.props.columnOptions.remove(column);
-    if (this.props.onColumnsChanged)
-      this.props.onColumnsChanged(this.props.columnOptions);
+  function handlerDeleteColumn(column: ColumnOptionParsed) {
+    p.columnOptions.remove(column);
+    if (p.onColumnsChanged)
+      p.onColumnsChanged(p.columnOptions);
 
-    this.forceUpdate();
+    forceUpdate();
   };
 
-  handleColumnChanged = (column: ColumnOptionParsed) => {
-    if (this.props.onColumnsChanged)
-      this.props.onColumnsChanged(this.props.columnOptions);
+  function handleColumnChanged(column: ColumnOptionParsed) {
+    if (p.onColumnsChanged)
+      p.onColumnsChanged(p.columnOptions);
 
-    this.forceUpdate();
+    forceUpdate();
   };
 
-  render() {
 
-
-    return (
-      <fieldset className="form-xs">
-        {this.props.title && <legend>{this.props.title}</legend>}
-        <div className="sf-columns-list table-responsive" style={{ overflowX: "visible" }}>
-          <table className="table table-condensed">
-            <thead>
+  return (
+    <fieldset className="form-xs">
+      {p.title && <legend>{p.title}</legend>}
+      <div className="sf-columns-list table-responsive" style={{ overflowX: "visible" }}>
+        <table className="table table-condensed">
+          <thead>
+            <tr>
+              <th style={{ minWidth: "24px" }}></th>
+              <th>{SearchMessage.Field.niceToString()}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {p.columnOptions.map((c, i) => <ColumnComponent column={c} key={i} readonly={Boolean(p.readonly)}
+              onDeleteColumn={handlerDeleteColumn}
+              subTokenOptions={p.subTokensOptions}
+              queryDescription={p.queryDescription}
+              onColumnChanged={handleColumnChanged}
+            />)}
+            {!p.readonly &&
               <tr>
-                <th style={{ minWidth: "24px" }}></th>
-                <th>{SearchMessage.Field.niceToString()}</th>
+                <td colSpan={4}>
+                  <a title={StyleContext.default.titleLabels ? SearchMessage.AddColumn.niceToString() : undefined}
+                    className="sf-line-button sf-create"
+                    onClick={handlerNewColumn}>
+                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
+                  </a>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {this.props.columnOptions.map((c, i) => <ColumnComponent column={c} key={i} readonly={Boolean(this.props.readonly)}
-                onDeleteColumn={this.handlerDeleteColumn}
-                subTokenOptions={this.props.subTokensOptions}
-                queryDescription={this.props.queryDescription}
-                onColumnChanged={this.handleColumnChanged}
-              />)}
-              {!this.props.readonly &&
-                <tr>
-                  <td colSpan={4}>
-                    <a title={TitleManager.useTitle ? SearchMessage.AddColumn.niceToString() : undefined}
-                      className="sf-line-button sf-create"
-                      onClick={this.handlerNewColumn}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
-                    </a>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </fieldset>
-    );
-  }
+            }
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  );
 }
 
 
@@ -97,50 +97,48 @@ export interface ColumnComponentProps {
   readonly: boolean;
 }
 
-export class ColumnComponent extends React.Component<ColumnComponentProps>{
+export function ColumnComponent(p: ColumnComponentProps) {
 
-  handleDeleteColumn = () => {
-    this.props.onDeleteColumn(this.props.column);
+  const forceUpdate = useForceUpdate();
+  function handleDeleteColumn() {
+    p.onDeleteColumn(p.column);
   }
 
-  handleTokenChanged = (newToken: QueryToken | null | undefined) => {
-
-    const c = this.props.column;
+  function handleTokenChanged(newToken: QueryToken | null | undefined) {
+    const c = p.column;
     c.displayName = undefined;
     c.token = newToken || undefined;
 
-    if (this.props.onTokenChanged)
-      this.props.onTokenChanged(newToken || undefined);
+    if (p.onTokenChanged)
+      p.onTokenChanged(newToken || undefined);
 
-    this.props.onColumnChanged(this.props.column);
+    p.onColumnChanged(p.column);
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-
-  render() {
-    const c = this.props.column;
-    const readonly = this.props.readonly;
-    return (
-      <tr>
-        <td>
-          {!readonly &&
-            <a title={TitleManager.useTitle ? JavascriptMessage.removeColumn.niceToString() : undefined}
-              className="sf-line-button sf-remove"
-              onClick={this.handleDeleteColumn}>
-              <FontAwesomeIcon icon="times" />
-            </a>}
-        </td>
-        <td>
-          <QueryTokenBuilder
-            queryToken={c.token}
-            onTokenChange={this.handleTokenChanged}
-            queryKey={this.props.queryDescription.queryKey}
-            subTokenOptions={this.props.subTokenOptions}
-            readOnly={readonly} />
-        </td>
-      </tr>
-    );
-  }
+  const c = p.column;
+  const readonly = p.readonly;
+  return (
+    <tr>
+      <td>
+        {!readonly &&
+          <a title={StyleContext.default.titleLabels ? JavascriptMessage.removeColumn.niceToString() : undefined}
+            className="sf-line-button sf-remove"
+            onClick={handleDeleteColumn}>
+            <FontAwesomeIcon icon="times" />
+          </a>
+        }
+      </td>
+      <td>
+        <QueryTokenBuilder
+          queryToken={c.token}
+          onTokenChange={handleTokenChanged}
+          queryKey={p.queryDescription.queryKey}
+          subTokenOptions={p.subTokenOptions}
+          readOnly={readonly} />
+      </td>
+    </tr>
+  );
 }
 

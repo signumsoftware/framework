@@ -11,7 +11,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { TitleManager, EntityBase } from '../../Scripts/Lines/EntityBase';
+import { EntityBaseController } from '../Lines/EntityBase'
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
   ctx: StyleContext;
@@ -36,9 +36,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   onValueChanged?: (value: any) => void;
 }
 
-
 export default class ValueSearchControlLine extends React.Component<ValueSearchControlLineProps> {
-
 
   valueSearchControl?: ValueSearchControl | null;
 
@@ -89,28 +87,29 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     var token = this.valueSearchControl && this.valueSearchControl.state.token;
 
-    let isQuery = this.props.valueToken == undefined || token && token.queryTokenType == "Aggregate";
+    const isQuery = this.props.valueToken == undefined || token && token.queryTokenType == "Aggregate";
 
-    let isBadge = coalesce(this.props.isBadge, this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
-    let isFormControl = coalesce(this.props.isFormControl, this.props.valueToken != undefined);
+    const isBadge = coalesce(this.props.isBadge, this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
+    const isFormControl = coalesce(this.props.isFormControl, this.props.valueToken != undefined);
 
-    let unit = isFormControl && token && token.unit && <span className="input-group-text">{token.unit}</span>;
+    const unit = isFormControl && token && token.unit && <span className="input-group-text">{token.unit}</span>;
 
+    const ctx = this.props.ctx;
 
-    let value = this.valueSearchControl && this.valueSearchControl.state.value;
-    let find = value != undefined && coalesce(this.props.findButton, isQuery) &&
+    const value = this.valueSearchControl && this.valueSearchControl.state.value;
+    const find = value != undefined && coalesce(this.props.findButton, isQuery) &&
       <a href="#" className={classes("sf-line-button", isFormControl ? "btn input-group-text" : undefined)}
-        onClick={this.valueSearchControl!.handleClick}
-      title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
-      {EntityBase.findIcon}
+      onClick={this.valueSearchControl!.handleClick}
+      title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+      {EntityBaseController.findIcon}
       </a>;
 
 
-    let view = value != undefined && coalesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
+    const view = value != undefined && coalesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
       <a href="#" className={classes("sf-line-button", isFormControl ? "btn input-group-text" : undefined)}
         onClick={this.handleViewEntityClick}
-      title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
-        {EntityBase.viewIcon}
+        title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+        {EntityBaseController.viewIcon}
       </a>
 
     let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);

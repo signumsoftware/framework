@@ -5,10 +5,10 @@ import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { TitleManager, EntityBase } from './EntityBase';
+import { EntityBaseController } from './EntityBase';
 
 export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -19,82 +19,74 @@ export interface EntityStripProps extends EntityListBaseProps {
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
-export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
-
-  calculateDefaultState(state: EntityStripProps) {
-    super.calculateDefaultState(state);
-  }
-
-  componentWillUnmount() {
-    this.state.autocomplete && this.state.autocomplete.abort();
-  }
-
-  overrideProps(state: EntityStripProps, overridenProps: EntityStripProps) {
-    super.overrideProps(state, overridenProps);
-    if (state.autocomplete === undefined) {
-      const type = state.type!;
-      state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
+export class EntityStripController extends EntityListBaseController<EntityStripProps> {
+  overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
+    super.overrideProps(p, overridenProps);
+    if (p.autocomplete === undefined) {
+      p.autocomplete = Navigator.getAutoComplete(p.type!, p.findOptions, p.showType);
     }
   }
-  renderInternal() {
+}
 
-    const s = this.state;
-    const readOnly = this.state.ctx.readOnly;
-    return (
-      <FormGroup ctx={s.ctx!}
-        labelText={s.labelText}
-        labelHtmlAttributes={s.labelHtmlAttributes}
-        helpText={s.helpText}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
-        <div className="SF-entity-strip SF-control-container">
-          <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
-            {
-              this.getMListItemContext(s.ctx).map(mlec =>
-                (<EntityStripElement key={this.keyGenerator.getKey(mlec.value)}
-                  ctx={mlec}
-                  iconStart={s.iconStart}
-                  autoComplete={s.autocomplete}
-                  onRenderItem={s.onRenderItem}
-                  drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, this.props.vertical ? "v" : "h") : undefined}
-                  onItemHtmlAttributes={s.onItemHtmlAttributes}
-                  onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
-                  onView={this.canView(mlec.value) ? e => this.handleViewElement(e, mlec.index!) : undefined}
-                />))
-            }
-            <li className={classes(s.ctx.inputGroupClass, "sf-strip-input")}>
-              {this.renderAutoComplete()}
-              <span>
-                {this.renderCreateButton(false)}
-                {this.renderFindButton(false)}
-                {this.props.extraButtons && this.props.extraButtons(this)}
-              </span>
-            </li>
-          </ul>
-        </div>
-      </FormGroup>
-    );
+export function EntityStrip(props: EntityStripProps) {
+  const c = new EntityStripController(props);
+  const p = c.props;
 
-  }
 
-  handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
-    this.state.autocomplete!.getEntityFromItem(item)
-      .then(entity => entity && this.convert(entity)
-        .then(e => this.addElement(e))
+  const readOnly = p.ctx.readOnly;
+  return (
+    <FormGroup ctx={p.ctx!}
+      labelText={p.labelText}
+      labelHtmlAttributes={p.labelHtmlAttributes}
+      helpText={p.helpText}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      <div className="SF-entity-strip SF-control-container">
+        <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
+          {
+            c.getMListItemContext(p.ctx).map(mlec =>
+              (<EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
+                ctx={mlec}
+                iconStart={p.iconStart}
+                autoComplete={p.autocomplete}
+                onRenderItem={p.onRenderItem}
+                drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
+                onItemHtmlAttributes={p.onItemHtmlAttributes}
+                onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
+                onView={c.canView(mlec.value) ? e => handleViewElement(e, mlec.index!) : undefined}
+              />))
+          }
+          <li className={classes(p.ctx.inputGroupClass, "sf-strip-input")}>
+            {renderAutoComplete()}
+            <span>
+              {c.renderCreateButton(false)}
+              {c.renderFindButton(false)}
+              {p.extraButtons && p.extraButtons(c)}
+            </span>
+          </li>
+        </ul>
+      </div>
+    </FormGroup>
+  );
+
+  function handleOnSelect(item: any, event: React.SyntheticEvent<any>) {
+    p.autocomplete!.getEntityFromItem(item)
+      .then(entity => entity && c.convert(entity)
+        .then(e => c.addElement(e))
       ).done();
 
     return "";
   }
 
-  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
+  function handleViewElement(event: React.MouseEvent<any>, index: number) {
 
     event.preventDefault();
 
-    const ctx = this.state.ctx;
+    const ctx = p.ctx;
     const list = ctx.value!;
     const mle = list[index];
     const entity = mle.element;
 
-    const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
+    const openWindow = (event.button == 1 || event.ctrlKey) && !p.type!.isEmbedded;
     if (openWindow) {
       event.preventDefault();
       const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
@@ -103,9 +95,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     else {
       const pr = ctx.propertyRoute.addLambda(a => a[0]);
 
-      const promise = this.props.onView ?
-        this.props.onView(entity, pr) :
-        this.defaultView(entity, pr);
+      const promise = p.onView ?
+        p.onView(entity, pr) :
+        c.defaultView(entity, pr);
 
       if (promise == null)
         return;
@@ -114,28 +106,26 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         if (e == undefined)
           return;
 
-        this.convert(e).then(m => {
+        c.convert(e).then(m => {
           if (is(list[index].element as Entity, e as Entity)) {
             list[index].element = m;
             if (e.modified)
-              this.setValue(list);
-            this.forceUpdate();
+              c.setValue(list);
+            c.forceUpdate();
           } else {
             list[index] = { rowId: null, element: m };
-            this.setValue(list);
+            c.setValue(list);
           }
-
         }).done();
       }).done();
     }
   }
 
+  function renderAutoComplete() {
 
-  renderAutoComplete() {
+    var ac = p.autocomplete;
 
-    var ac = this.state.autocomplete;
-
-    if (!ac || this.state.ctx!.readOnly)
+    if (!ac || p.ctx!.readOnly)
       return undefined;
 
     return (
@@ -145,7 +135,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         getItemsDelay={ac.getItemsDelay}
         renderItem={(e, str) => ac!.renderItem(e, str)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
-        onSelect={this.handleOnSelect} />
+        onSelect={handleOnSelect} />
     );
   }
 }
@@ -162,38 +152,23 @@ export interface EntityStripElementProps {
   drag?: DragConfig;
 }
 
-export interface EntityStripElementState {
-  currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: unknown };
-}
+export function EntityStripElement(p: EntityStripElementProps) {
+  var [currentItem, setCurrentItem] = React.useState<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
 
-export class EntityStripElement extends React.Component<EntityStripElementProps, EntityStripElementState>
-{
-  constructor(props: EntityStripElementProps) {
-    super(props);
-    this.state = {};
-  }
+  React.useEffect(() => {
 
-  componentWillMount() {
-    this.refreshItem(this.props);
-  }
-
-  componentWillReceiveProps(newProps: EntityStripElementProps, nextContext: any) {
-    this.refreshItem(newProps);
-  }
-
-  refreshItem(props: EntityStripElementProps) {
-    if (this.props.autoComplete) {
-      var newEntity = props.ctx.value;
-      if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
+    if (p.autoComplete) {
+      var newEntity = p.ctx.value;
+      if (!currentItem || currentItem.entity !== newEntity) {
         var ci = { entity: newEntity!, item: undefined }
-        this.setState({ currentItem: ci });
+        setCurrentItem(ci);
         var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
-          const autocomplete = this.props.autoComplete;
+          const autocomplete = p.autoComplete;
           autocomplete && autocomplete.getItemFromEntity(newEntity)
             .then(item => {
-              if (autocomplete == this.props.autoComplete) {
+              if (autocomplete == p.autoComplete) {
                 ci.item = item;
-                this.forceUpdate();
+                setCurrentItem(ci);
               } else {
                 fillItem(newEntity);
               }
@@ -201,78 +176,78 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
             .done();
         };
         fillItem(newEntity);
-        this.props.autoComplete.getItemFromEntity(newEntity)
+        p.autoComplete.getItemFromEntity(newEntity)
           .then(item => {
             ci.item = item;
-            this.forceUpdate();
+            setCurrentItem(ci);
           })
           .done();
       }
     }
-  }
 
-  render() {
+  }, [p.ctx.value]);
 
-    const toStr =
-      this.props.onRenderItem ? this.props.onRenderItem(this.props.ctx.value) :
-        this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) :
-          getToString(this.props.ctx.value);
 
-    var drag = this.props.drag;
-    const htmlAttributes = this.props.onItemHtmlAttributes && this.props.onItemHtmlAttributes(this.props.ctx.value);
 
-    var val = this.props.ctx.value;
+  const toStr =
+    p.onRenderItem ? p.onRenderItem(p.ctx.value) :
+      currentItem && currentItem.item ? p.autoComplete!.renderItem(currentItem.item) :
+        getToString(p.ctx.value);
 
-    //Till https://github.com/facebook/react/issues/8529 gets fixed
-    var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
-      isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
+  var drag = p.drag;
+  const htmlAttributes = p.onItemHtmlAttributes && p.onItemHtmlAttributes(p.ctx.value);
 
-    return (
-      <li className="sf-strip-element"
-        {...EntityListBase.entityHtmlAttributes(this.props.ctx.value)}>
-        <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
-          onDragEnter={drag && drag.onDragOver}
-          onDragOver={drag && drag.onDragOver}
-          onDrop={drag && drag.onDrop}
+  var val = p.ctx.value;
 
-        >
-          {this.props.iconStart && <span style={{ marginRight: "5px" }}>{this.removeIcon()}&nbsp;{this.dragIcon()}</span>}
-          {
-            this.props.onView ?
-              <a href={url} className="sf-entitStrip-link" onClick={this.props.onView} {...htmlAttributes}>
-                {toStr}
-              </a>
-              :
-              <span className="sf-entitStrip-link" {...htmlAttributes}>
-                {toStr}
-              </span>
-          }
-          {!this.props.iconStart && <span>{this.removeIcon()}&nbsp;{this.dragIcon()}</span>}
-        </div>
-      </li>
-    );
-  }
+  //Till https://github.com/facebook/react/issues/8529 gets fixed
+  var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
+    isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
 
-  removeIcon() {
-    return this.props.onRemove &&
+  return (
+    <li className="sf-strip-element"
+      {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}>
+      <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
+        onDragEnter={drag && drag.onDragOver}
+        onDragOver={drag && drag.onDragOver}
+        onDrop={drag && drag.onDrop}
+
+      >
+        {p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {
+          p.onView ?
+            <a href={url} className="sf-entitStrip-link" onClick={p.onView} {...htmlAttributes}>
+              {toStr}
+            </a>
+            :
+            <span className="sf-entitStrip-link" {...htmlAttributes}>
+              {toStr}
+            </span>
+        }
+        {!p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
+      </div>
+    </li>
+  );
+
+
+  function removeIcon() {
+    return p.onRemove &&
       <span>
         <a className="sf-line-button sf-remove"
-          onClick={this.props.onRemove}
+          onClick={p.onRemove}
           href="#"
-        title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-        {EntityBase.removeIcon}
+          title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+          {EntityBaseController.removeIcon}
         </a>
       </span>
   }
 
-  dragIcon() {
-    var drag = this.props.drag;
+  function dragIcon() {
     return drag && <span className={classes("sf-line-button", "sf-move")}
       draggable={true}
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
-      title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
-      {EntityBase.moveIcon}
+      title={p.ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+      {EntityBaseController.moveIcon}
     </span>;
   }
 }

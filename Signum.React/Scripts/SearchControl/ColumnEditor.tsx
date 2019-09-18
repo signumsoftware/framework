@@ -4,9 +4,9 @@ import { classes } from '../Globals';
 import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
-import { TitleManager } from '../../Scripts/Lines/EntityBase';
+import { StyleContext } from '../Lines';
 
-interface ColumnEditorProps extends React.Props<ColumnEditor> {
+interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
   subTokensOptions: SubTokensOptions;
   queryDescription: QueryDescription;
@@ -14,44 +14,40 @@ interface ColumnEditorProps extends React.Props<ColumnEditor> {
   close: () => void;
 }
 
-export default class ColumnEditor extends React.Component<ColumnEditorProps>{
+export default function ColumnEditor(p: ColumnEditorProps) {
 
-  handleTokenChanged = (newToken: QueryToken | undefined) => {
-    this.props.columnOption.token = newToken;
-    this.props.columnOption.displayName = newToken && newToken.niceName;
-    this.props.onChange(newToken);
-
+  function handleTokenChanged(newToken: QueryToken | undefined) {
+    p.columnOption.token = newToken;
+    p.columnOption.displayName = newToken && newToken.niceName;
+    p.onChange(newToken);
   }
 
-  handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.props.columnOption.displayName = event.currentTarget.value || undefined;
-    this.props.onChange(undefined);
+  function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+    p.columnOption.displayName = event.currentTarget.value || undefined;
+    p.onChange(undefined);
   }
 
-  render() {
-    const co = this.props.columnOption;
+  const co = p.columnOption;
 
-    const isCollection = co.token && co.token.type.isCollection;
+  const isCollection = co.token && co.token.type.isCollection;
 
-    return (
-      <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
-        title={TitleManager.useTitle && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
-        <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
-        <div className="rw-widget-xs">
-          <QueryTokenBuilder
-            queryToken={co.token!}
-            onTokenChange={this.handleTokenChanged}
-            queryKey={this.props.queryDescription.queryKey}
-            subTokenOptions={this.props.subTokensOptions}
-            readOnly={false} />
-        </div>
-        <input className="form-control form-control-xs"
-          value={co.displayName || ""}
-          onChange={this.handleOnChange} />
+  return (
+    <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
+      title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
+      <button type="button" className="close" aria-label="Close" onClick={p.close} ><span aria-hidden="true">×</span></button>
+      <div className="rw-widget-xs">
+        <QueryTokenBuilder
+          queryToken={co.token!}
+          onTokenChange={handleTokenChanged}
+          queryKey={p.queryDescription.queryKey}
+          subTokenOptions={p.subTokensOptions}
+          readOnly={false} />
       </div>
-    );
-  }
-
+      <input className="form-control form-control-xs"
+        value={co.displayName || ""}
+        onChange={handleOnChange} />
+    </div>
+  );
 }
 
 

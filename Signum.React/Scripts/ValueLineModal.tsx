@@ -7,85 +7,79 @@ import { ValueLineType, ValueLine } from './Lines/ValueLine'
 import { ValueLineProps } from "./Lines";
 import { MemberInfo } from './Reflection';
 import { Modal, BsSize } from './Components';
+import { useForceUpdate } from './Hooks';
 
-interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps {
-
+interface ValueLineModalProps extends IModalProps {
   options: ValueLineModalOptions;
 }
 
-export default class ValueLineModal extends React.Component<ValueLineModalProps, { show: boolean; value?: any }>  {
-  constructor(props: ValueLineModalProps) {
-    super(props);
+export default function ValueLineModal(p: ValueLineModalProps) {
 
-    this.state = {
-      show: true,
-      value: this.props.options.initialValue
-    };
+  const [show, setShow] = React.useState(true);
+  const forceUpdate = useForceUpdate();
+  const value = React.useRef<any>(undefined);
+  const selectedValue = React.useRef<any>(undefined);
+  function handleOkClick() {
+    selectedValue.current = value.current;
+    setShow(show);
   }
 
-  selectedValue: any = undefined;
-  handleOkClick = () => {
-    this.selectedValue = this.state.value;
-    this.setState({ show: false });
+  function handleCancelClicked() {
+    selectedValue.current = undefined;
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.selectedValue = undefined;
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(selectedValue.current);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.selectedValue);
-  }
+  const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(value, s => s.current), "valueLineModal");
 
-  render() {
-    const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value), "valueLineModal");
+  const { title, message, initialValue, ...props } = p.options;
+  var vlp: ValueLineProps = {
+    ctx: ctx,
+    formatText: props.formatText !== undefined ? props.formatText : props.member && props.member.format,
+    unitText: props.unitText !== undefined ? props.unitText : props.member && props.member.unit,
+    labelText: props.labelText !== undefined ? props.labelText : props.member && props.member.niceName,
+    type: props.type || props.member && props.member.type,
+    valueLineType: props.valueLineType || props.member && (props.member.isMultiline ? "TextArea" : undefined),
+    valueHtmlAttributes: props.valueHtmlAttributes,
+    initiallyFocused: props.initiallyFocused,
+  };
 
-    const { title, message, initialValue, ...props } = this.props.options;
-    var vlp: ValueLineProps = {
-      ctx: ctx,
-      formatText: props.formatText !== undefined ? props.formatText : props.member && props.member.format,
-      unitText: props.unitText !== undefined ? props.unitText : props.member && props.member.unit,
-      labelText: props.labelText !== undefined ? props.labelText : props.member && props.member.niceName,
-      type: props.type || props.member && props.member.type,
-      valueLineType: props.valueLineType || props.member && (props.member.isMultiline ? "TextArea" : undefined),
-      valueHtmlAttributes: props.valueHtmlAttributes,
-      initiallyFocused: props.initiallyFocused,
-    };
+  const disabled = p.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
+  const valueOnChanged = p.options.allowEmptyValue == false ? () => forceUpdate() : undefined;
 
-    const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
-    const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
+  return (
+    <Modal size={p.options.modalSize || "lg"} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
+      <div className="modal-header">
+        <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        <p>
+          {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
+        </p>
+        <ValueLine ctx={ctx}
+          formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+      </div>
+      <div className="modal-footer">
+        <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>
+          {JavascriptMessage.ok.niceToString()}
+        </button>
+        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+          {JavascriptMessage.cancel.niceToString()}
+        </button>
+      </div>
+    </Modal>
+  );
 
-    return (
-      <Modal size={this.props.options.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked}>
-        <div className="modal-header">
-          <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
-          <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div className="modal-body">
-          <p>
-            {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
-          </p>
-          <ValueLine ctx={ctx}
-            formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
-        </div>
-        <div className="modal-footer">
-          <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
-            {JavascriptMessage.ok.niceToString()}
-          </button>
-          <button className="btn btn-light sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
-            {JavascriptMessage.cancel.niceToString()}
-          </button>
-        </div>
-      </Modal>
-    );
-  }
+}
 
-  static show(options: ValueLineModalOptions): Promise<any> {
-    return openModal<any>(<ValueLineModal options={options} />);
-  }
+ValueLineModal.show = (options: ValueLineModalOptions): Promise<any> => {
+  return openModal<any>(<ValueLineModal options={options} />);
 }
 
 export interface ValueLineModalOptions {

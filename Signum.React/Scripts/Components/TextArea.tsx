@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  innerRef?: (ta: HTMLTextAreaElement | null) => void;
+  innerRef?: React.Ref<HTMLTextAreaElement>;
   autoResize?: boolean;
 }
 
@@ -27,7 +27,12 @@ export default class TextArea extends React.Component<TextAreaProps> {
         }
       } {...props} ref={a => {
         a && this.handleResize(a);
-        innerRef && innerRef(a);
+        if (innerRef) {
+          if (typeof innerRef == "function")
+            innerRef(a);
+          else
+            (innerRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = a;
+        }
       }} />
     );
   }

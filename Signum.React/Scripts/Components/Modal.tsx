@@ -369,7 +369,6 @@ export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps>
       <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
         <span aria-hidden="true">×</span>
       </button>;
-    
 
     return (
       <div className="modal-header" {...p.htmlAttributes}>

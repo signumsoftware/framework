@@ -6,6 +6,7 @@ import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../S
 import { ViewPromise } from "../Navigator";
 import { ErrorBoundary } from '../Components';
 import { FunctionalAdapter } from '../Frames/FrameModal';
+import { useFetchAndRemember, useAPI, useForceUpdate } from '../Hooks'
 
 export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -15,171 +16,79 @@ export interface RenderEntityProps {
   extraProps?: any;
 }
 
-export interface RenderEntityState {
-  getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  lastLoadedType?: string;
-  lastLoadedViewName?: string;
+export function RenderEntity(p: RenderEntityProps) {
+
+  var e = p.ctx.value
+
+  var entityFromLite = useFetchAndRemember(isLite(e) ? e : null, p.onEntityLoaded);
+  var entity = isLite(e) ? e.entity : e;
+  var entityComponent = React.useRef<React.Component | null>(null);
+  var forceUpdate = useForceUpdate();
+
+  var getComponent = useAPI(null, signal => {
+    if (p.getComponent)
+      return Promise.resolve(p.getComponent);
+
+    if (entity == null)
+      return Promise.resolve(null);
+
+    var vp = p.getViewPromise && p.getViewPromise(entity);
+    var viewPromise = vp == undefined || typeof vp == "string" ? Navigator.getViewPromise(entity, vp) : vp;
+    return viewPromise.promise;
+
+  }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))]);
+
+
+  if (entity == undefined)
+    return null;
+
+  if (getComponent == null)
+    return null;
+
+  const ti = getTypeInfo(entity.Type);
+
+  const ctx = p.ctx;
+
+  const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
+
+  const frame: EntityFrame = {
+    frameComponent: { forceUpdate },
+    entityComponent: entityComponent.current,
+    pack: undefined,
+    revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),
+    onClose: () => { throw new Error("Not implemented Exception"); },
+    onReload: pack => { throw new Error("Not implemented Exception"); },
+    setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
+    refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
+    allowChangeEntity: false,
+  };
+
+  function setComponent(c: React.Component<any, any> | null) {
+    if (c && entityComponent.current != c) {
+      entityComponent.current = c;
+      forceUpdate();
+    }
+  }
+
+  var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
+
+  const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
+
+  var element = getComponent(newCtx);
+
+  if (p.extraProps)
+    element = React.cloneElement(element, p.extraProps);
+
+  return (
+    <div data-property-path={ctx.propertyPath}>
+      <ErrorBoundary>
+        {FunctionalAdapter.withRef(element, c => setComponent(c))}
+      </ErrorBoundary>
+    </div>
+  );
 }
 
 const Anonymous = "__Anonymous__";
-
-export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
-
-  constructor(props: RenderEntityProps) {
-    super(props);
-
-    this.state = { getComponent: undefined, lastLoadedType: undefined };
-  }
-
-  isDead = false;
-  componentWillUnmount() {
-    this.isDead = true;
-  }
-
-
-  componentWillMount() {
-    this.loadEntity(this.props)
-      .then(() => this.isDead ? undefined : this.loadComponent(this.props))
-      .then(() => this.isDead ? undefined : this.forceUpdate())
-      .done();
-  }
-
-  componentWillReceiveProps(nextProps: RenderEntityProps) {
-    this.loadEntity(nextProps)
-      .then(() => this.isDead ? undefined : this.loadComponent(nextProps))
-      .then(() => this.isDead ? undefined : this.forceUpdate())
-      .done();
-  }
-
-  loadEntity(nextProps: RenderEntityProps): Promise<void> {
-
-    if (!nextProps.ctx.value)
-      return Promise.resolve(undefined);
-
-    const ent = this.toEntity(nextProps.ctx.value);
-    if (ent)
-      return Promise.resolve(undefined);
-
-    const lite = nextProps.ctx.value as Lite<Entity>;
-    return Navigator.API.fetchAndRemember(lite).then(a => { this.props.onEntityLoaded && this.props.onEntityLoaded(); });
-  }
-
-
-  toEntity(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null): ModifiableEntity | undefined {
-
-    if (!entityOrLite)
-      return undefined;
-
-    if (isLite(entityOrLite))
-      return entityOrLite.entity;
-
-    if (isModifiableEntity(entityOrLite))
-      return entityOrLite;
-
-    throw new Error("Unexpected value " + entityOrLite);
-  }
-
-
-
-  loadComponent(nextProps: RenderEntityProps): Promise<void> {
-
-    const e = this.toEntity(nextProps.ctx.value);
-
-    if (nextProps.getComponent)
-      return Promise.resolve(undefined);
-
-    if (e == undefined) {
-      if (this.state.getComponent != undefined || this.state.lastLoadedType != undefined || this.state.lastLoadedViewName != undefined)
-        this.setState({ getComponent: undefined, lastLoadedType: undefined, lastLoadedViewName: undefined });
-      return Promise.resolve(undefined);
-    }
-
-    var result = nextProps.getViewPromise && nextProps.getViewPromise(e);
-
-    if (this.state.lastLoadedType == e.Type && this.state.lastLoadedViewName == RenderEntity.toViewName(result))
-      return Promise.resolve(undefined);
-
-    var viewPromise = result == undefined || typeof result == "string" ? Navigator.getViewPromise(e, result) : result;
-
-    return viewPromise.promise.then(c => {
-      this.setState({
-        getComponent: c,
-        lastLoadedType: e.Type,
-        lastLoadedViewName: RenderEntity.toViewName(result)
-      });
-    });
-  }
-
-  static toViewName(result: undefined | string | Navigator.ViewPromise<ModifiableEntity>): string | undefined {
-    return (result instanceof ViewPromise ? Anonymous : result);
-  }
-
-  entityComponent?: React.Component<any, any> | null;
-
-  setComponent(c: React.Component<any, any> | null) {
-    if (c && this.entityComponent != c) {
-      this.entityComponent = c;
-      this.forceUpdate();
-    }
-  }
-
-  render() {
-    const entity = this.toEntity(this.props.ctx.value);
-
-    if (entity == undefined)
-      return null;
-
-    let getComponent = this.props.getComponent;
-
-    if (getComponent == undefined) {
-      if (this.state.lastLoadedType != entity.Type)
-        return null;
-
-      var result = this.props.getViewPromise && this.props.getViewPromise(entity);
-      if (this.state.lastLoadedViewName != RenderEntity.toViewName(result))
-        return null
-
-      getComponent = this.state.getComponent;
-
-      if (getComponent == undefined)
-        return null;
-    }
-
-    const ti = getTypeInfo(entity.Type);
-
-    const ctx = this.props.ctx;
-
-    const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
-
-
-    const frame: EntityFrame = {
-      frameComponent: this,
-      entityComponent: this.entityComponent,
-      pack: undefined,
-      revalidate: () => this.props.ctx.frame && this.props.ctx.frame.revalidate(),
-      onClose: () => { throw new Error("Not implemented Exception"); },
-      onReload: pack => { throw new Error("Not implemented Exception"); },
-      setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
-      refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
-      allowChangeEntity: false,
-    };
-
-    var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
-
-    const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
-
-    var element = getComponent(newCtx);
-
-    if (this.props.extraProps)
-      element = React.cloneElement(element, this.props.extraProps);
-
-    return (
-      <div data-property-path={ctx.propertyPath}>
-        <ErrorBoundary>
-          {FunctionalAdapter.withRef(element, c => this.setComponent(c))}
-        </ErrorBoundary>
-      </div>
-    );
-  }
+function toViewName(result: undefined | string | Navigator.ViewPromise<ModifiableEntity>): string | undefined {
+  return (result instanceof ViewPromise ? Anonymous : result);
 }
-

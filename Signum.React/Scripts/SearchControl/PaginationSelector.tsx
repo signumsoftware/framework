@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as numbro from 'numbro'
 import * as Finder from '../Finder'
 import { classes } from '../Globals'
@@ -12,27 +12,25 @@ interface PaginationSelectorProps {
   onPagination: (pag: Pagination) => void;
 }
 
-export default class PaginationSelector extends React.Component<PaginationSelectorProps> {
-  render() {
-    if (!this.props.pagination)
-      return null;
+export default function PaginationSelector(p: PaginationSelectorProps) {
+  if (!p.pagination)
+    return null;
 
-    return (
-      <div className="sf-search-footer">
-        <div className="sf-pagination-left">{this.renderLeft()}</div>
-        {this.renderCenter()}
-        <div className="sf-pagination-right">{this.renderRight()}</div>
-      </div>
-    );
-  }
+  return (
+    <div className="sf-search-footer">
+      <div className="sf-pagination-left">{renderLeft()}</div>
+      {renderCenter()}
+      <div className="sf-pagination-right">{renderRight()}</div>
+    </div>
+  );
 
-  renderLeft(): React.ReactNode {
+  function renderLeft(): React.ReactNode {
 
-    const resultTable = this.props.resultTable;
+    const resultTable = p.resultTable;
     if (!resultTable)
       return "\u00a0";
 
-    const pagination = this.props.pagination;
+    const pagination = p.pagination;
 
     function format(num: number): string {
       return numbro(num).format("0,0");
@@ -65,53 +63,52 @@ export default class PaginationSelector extends React.Component<PaginationSelect
       default:
         throw new Error("Unexpected pagination mode");
     }
-
   }
 
-  handleMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  function handleMode(e: React.ChangeEvent<HTMLSelectElement>){
 
     const mode = e.currentTarget.value as any as PaginationMode
 
-    const p: Pagination = {
+    const pag: Pagination = {
       mode: mode,
       elementsPerPage: mode != "All" ? Finder.defaultPagination.elementsPerPage : undefined,
       currentPage: mode == "Paginate" ? 1 : undefined
     };
 
-    this.props.onPagination(p);
+    p.onPagination(pag);
   }
 
-  handleElementsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const mode = this.props.pagination.mode;
-    const p: Pagination = {
+  function handleElementsPerPage(e: React.ChangeEvent<HTMLSelectElement>) {
+    const mode = p.pagination.mode;
+    const pag: Pagination = {
       mode: mode,
       elementsPerPage: parseInt(e.currentTarget.value),
       currentPage: mode == "Paginate" ? 1 : undefined,
     };
-    this.props.onPagination(p);
+    p.onPagination(pag);
   }
 
-  handlePageClick = (page: number) => {
+  function handlePageClick(page: number) {
 
-    const p: Pagination = {
-      ...this.props.pagination,
+    const pag: Pagination = {
+      ...p.pagination,
       currentPage: page
     };
-    this.props.onPagination(p);
+    p.onPagination(pag);
   }
 
-  renderCenter() {
+  function renderCenter() {
     return (
       <div className="sf-pagination-center">
         <div className="form-inline">
-          <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control form-control-xs sf-pagination-mode">
+          <select value={p.pagination.mode} onChange={handleMode} ref="mode" className="form-control form-control-xs sf-pagination-mode">
             {["Paginate" as PaginationMode,
             "Firsts" as PaginationMode,
             "All" as PaginationMode].map(mode =>
               <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
           </select>
-          {this.props.pagination.mode != "All" &&
-            <select value={this.props.pagination.elementsPerPage!.toString()} onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control form-control-xs sf-elements-per-page">
+          {p.pagination.mode != "All" &&
+            <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} ref="elementsPerPage" className="form-control form-control-xs sf-elements-per-page">
               {[5, 10, 20, 50, 100, 200].map(elem =>
                 <option key={elem} value={elem.toString()}>{elem}</option>)}
             </select>
@@ -121,8 +118,8 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     );
   }
 
-  renderRight(): React.ReactNode {
-    const resultTable = this.props.resultTable;
+  function renderRight(): React.ReactNode {
+    const resultTable = p.resultTable;
     if (!resultTable || resultTable.pagination.mode != "Paginate")
       return "\u00a0";
 
@@ -133,11 +130,10 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         currentPage={resultTable.pagination.currentPage!}
         totalPages={totalPages}
         maxButtons={7}
-        onSelect={num => this.handlePageClick(num)} />
+        onSelect={num => handlePageClick(num)} />
     );
   }
 }
-
 
 interface PaginationComponentProps {
   currentPage: number;
@@ -146,35 +142,33 @@ interface PaginationComponentProps {
   onSelect: (num: number) => void;
 }
 
-export class PaginationComponent extends React.Component<PaginationComponentProps> {
+export function PaginationComponent(p: PaginationComponentProps) {
 
-  handlePageClicked = (e: React.MouseEvent<any>, num: number) => {
+  function handlePageClicked(e: React.MouseEvent<any>, num: number) {
     e.preventDefault();
-    this.props.onSelect(num);
+    p.onSelect(num);
   }
 
-  render() {
-    const { currentPage, totalPages, maxButtons, onSelect } = this.props;
+  const { currentPage, totalPages, maxButtons, onSelect } = p;
 
-    var prevCount = Math.floor((maxButtons - 1) / 2);
-    var nextCount = maxButtons - 1 - prevCount;
+  var prevCount = Math.floor((maxButtons - 1) / 2);
+  var nextCount = maxButtons - 1 - prevCount;
 
-    const { first, last } = this.getFirstLast();
+  const { first, last } = getFirstLast();
 
-    return (
-      <ul className="pagination">
-        {this.addPageLink("First", 1, "«", "First", currentPage == 1 ? "disabled" : undefined)}
-        {first != 1 && <li className="page-item disabled"><span className="page-link">…</span></li>}
-        {Array.range(first, last + 1).map(page => this.addPageLink(page.toString(), page, page.toString(), page.toString(), page == currentPage ? "active" : undefined))}
-        {last != totalPages && <li className="page-item disabled"><span className="page-link">…</span></li>}
-        {this.addPageLink("Last", totalPages, "»", "Last", currentPage == totalPages ? "disabled" : undefined)}
-      </ul>
-    );
-  }
+  return (
+    <ul className="pagination">
+      {addPageLink("First", 1, "«", "First", currentPage == 1 ? "disabled" : undefined)}
+      {first != 1 && <li className="page-item disabled"><span className="page-link">…</span></li>}
+      {Array.range(first, last + 1).map(page => addPageLink(page.toString(), page, page.toString(), page.toString(), page == currentPage ? "active" : undefined))}
+      {last != totalPages && <li className="page-item disabled"><span className="page-link">…</span></li>}
+      {addPageLink("Last", totalPages, "»", "Last", currentPage == totalPages ? "disabled" : undefined)}
+    </ul>
+  );
 
 
-  getFirstLast(): { first: number; last: number; } {
-    const { currentPage, totalPages, maxButtons, onSelect } = this.props;
+  function getFirstLast(): { first: number; last: number; } {
+    const { currentPage, totalPages, maxButtons, onSelect } = p;
 
     if (totalPages <= maxButtons)
       return { first: 1, last: totalPages };
@@ -194,13 +188,13 @@ export class PaginationComponent extends React.Component<PaginationComponentProp
     };
   }
 
-  addPageLink(key: string, page: number, text: string, ariaLabel: string, mode?: "active" | "disabled") {
+  function addPageLink(key: string, page: number, text: string, ariaLabel: string, mode?: "active" | "disabled") {
     return (
       <li className={classes("page-item", mode)} key={key} >
         {
           mode != undefined ?
             <span className="page-link">{text}</span> :
-            <a href="#" className="page-link" onClick={e => this.handlePageClicked(e, page)}>
+            <a href="#" className="page-link" onClick={e => handlePageClicked(e, page)}>
               {text}
             </a>
         }

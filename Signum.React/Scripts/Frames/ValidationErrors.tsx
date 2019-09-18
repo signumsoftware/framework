@@ -3,10 +3,9 @@ import { Dic } from '../Globals'
 import { ModifiableEntity } from '../Signum.Entities'
 import { GraphExplorer } from '../Reflection'
 
-export default class ValidationErrors extends React.Component<{ entity: ModifiableEntity, prefix: string }>
+export default function ValidationErrors(p : { entity: ModifiableEntity, prefix: string })
 {
-  render() {
-    const modelState = GraphExplorer.collectModelState(this.props.entity, this.props.prefix);
+    const modelState = GraphExplorer.collectModelState(p.entity, p.prefix);
 
     if (!modelState || Dic.getKeys(modelState).length == 0)
       return null;
@@ -16,15 +15,14 @@ export default class ValidationErrors extends React.Component<{ entity: Modifiab
         {Dic.map(modelState, (key, value) => <li
           key={key}
           style={{ cursor: "pointer" }}
-          onClick={() => this.handleOnClick(key)}
-          title={key.after(this.props.prefix + ".")}>
+          onClick={() => handleOnClick(key)}
+          title={key.after(p.prefix + ".")}>
           {value.join("\n")}
         </li>)}
       </ul>
     );
-  }
 
-  handleOnClick = (key: string) => {
+  function handleOnClick(key: string){
 
     var result = document.querySelector(`[data-error-path='${key}']`);
     if (result != null) {

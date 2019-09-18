@@ -12,7 +12,6 @@ import {
   CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString, isOperationAllowed
 } from '../Operations'
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button, Dropdown } from "../Components";
-import { TitleManager } from "../../Scripts/Lines/EntityBase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonProps } from "../Components/Button";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -131,10 +130,10 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.props.createNew as ((() => Promise<EntityPack<ModifiableEntity> | undefined>) | undefined);
+        var createNew = eoc.frame.frameComponent.createNew;
 
         if (createNew)
-          createNew()
+          (createNew() || Promise.resolve(undefined))
             .then(newPack => newPack && eoc.frame.onReload(newPack, true))
             .done();
         else
@@ -154,126 +153,122 @@ interface OperationButtonProps extends ButtonProps {
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
 }
 
+export function OperationButton({ eoc, group, onOperationClick, canExecute, color, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
+  if (!isOperationAllowed(eoc.operationInfo.key, (eoc.entity as Entity).Type))
+    return null;
 
-export class OperationButton extends React.Component<OperationButtonProps> {
+  if (canExecute === undefined)
+    canExecute = eoc.canExecute;
 
-  render() {
-    let { eoc, group, onOperationClick, canExecute, color, ...props } = this.props;
+  const disabled = !!canExecute;
 
-    if (!isOperationAllowed(eoc.operationInfo.key, (eoc.entity as Entity).Type))
-      return null;
+  let elem: HTMLElement | null;
 
-    if (canExecute === undefined)
-      canExecute = eoc.canExecute;
-    
-    const disabled = !!canExecute;
+  const tooltip = canExecute &&
+    (
+      <UncontrolledTooltip placement={group ? "right" : "bottom"} target={() => elem!} key="tooltip">
+        {canExecute}
+      </UncontrolledTooltip>
+    );
 
-    let elem: HTMLElement | null;
+  var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
-    const tooltip = canExecute &&
-      (
-        <UncontrolledTooltip placement={group ? "right" : "bottom"} target={() => elem!} key="tooltip">
-          {canExecute}
-        </UncontrolledTooltip>
-      );
-
-    var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
-
-    if (group) {
-      return [
+  if (group) {
+    return (
+      <>
         <DropdownItem
           {...props}
           key="di"
           innerRef={r => elem = r}
           disabled={disabled}
           title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-          onClick={disabled ? undefined : this.handleOnClick}
+          onClick={disabled ? undefined : handleOnClick}
           data-operation={eoc.operationInfo.key}>
-          {this.renderChildren()}
+          {renderChildren()}
         </DropdownItem>,
         tooltip,
-        tooltip == null && alternatives && alternatives.map(a => this.renderAlternative(a))
-      ];
-    }
-
-
-    var button = <Button color={eoc.color}
-      {...props}
-      key="button"
-      title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-      innerRef={r => elem = r}
-      className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
-      onClick={disabled ? undefined : this.handleOnClick}
-      data-operation={eoc.operationInfo.key}>
-      {this.renderChildren()}
-    </Button>;
-
-    if (tooltip)
-      return [
-        button,
-        tooltip
-      ];
-
-    if (alternatives == undefined || alternatives.length == 0)
-      return button;
-
-    var buttonAlternatives = alternatives.filter(a => !a.inDropdown);
-
-    if (buttonAlternatives.length) {
-      button =
-        (
-          <div className="btn-group"
-            key="buttonGroup">
-            {button}
-            {buttonAlternatives.map((aos, i) =>
-              <Button key={i} color={eoc.color}
-                className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
-                onClick={() => aos.onClick(this.props.eoc)}
-                title={aos.text() + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
-                <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
-              </Button>
-            )}
-          </div>
-        );
-    }
-
-    var dropdownAlternatives = alternatives.filter(a => a.inDropdown);
-    if (dropdownAlternatives.length == 0)
-      return button;
-
-    return (
-      <UncontrolledDropdown group>
-        {button}
-        <DropdownToggle caret split color={eoc.color}/>
-        <DropdownMenu right>
-          {dropdownAlternatives.map(a => this.renderAlternative(a))}
-        </DropdownMenu>
-      </UncontrolledDropdown>
+        tooltip == null && alternatives && alternatives.map(a => renderAlternative(a))
+    </>
     );
   }
 
-  renderAlternative(aos: AlternativeOperationSetting<Entity>) {
-    
+
+  var button = <Button color={eoc.color}
+    {...props}
+    key="button"
+    title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
+    innerRef={r => elem = r}
+    className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
+    onClick={disabled ? undefined : handleOnClick}
+    data-operation={eoc.operationInfo.key}>
+    {renderChildren()}
+  </Button>;
+
+  if (tooltip)
+    return (
+      <>
+        button,
+        tooltip
+      </>
+    );
+
+  if (alternatives == undefined || alternatives.length == 0)
+    return button;
+
+  var buttonAlternatives = alternatives.filter(a => !a.inDropdown);
+
+  if (buttonAlternatives.length) {
+    button =
+      (
+        <div className="btn-group"
+          key="buttonGroup">
+          {button}
+          {buttonAlternatives.map((aos, i) =>
+            <Button key={i} color={eoc.color}
+              className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
+              onClick={() => aos.onClick(eoc)}
+              title={aos.text() + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
+              <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
+            </Button>
+          )}
+        </div>
+      );
+  }
+
+  var dropdownAlternatives = alternatives.filter(a => a.inDropdown);
+  if (dropdownAlternatives.length == 0)
+    return button;
+
+  return (
+    <UncontrolledDropdown group>
+      {button}
+      <DropdownToggle caret split color={eoc.color} />
+      <DropdownMenu right>
+        {dropdownAlternatives.map(a => renderAlternative(a))}
+      </DropdownMenu>
+    </UncontrolledDropdown>
+  );
+
+
+  function renderAlternative(aos: AlternativeOperationSetting<Entity>) {
+
     return (
       <DropdownItem
         color={aos.color}
         className={aos.classes}
         key={aos.name}
         title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}
-        onClick={() => aos.onClick(this.props.eoc)}
+        onClick={() => aos.onClick(eoc)}
         data-alternative={aos.name}>
         {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}
       </DropdownItem>
     );
   }
 
-  renderChildren() {
-    if (this.props.children)
-      return this.props.children;
-
-    const eoc = this.props.eoc;
-    const group = this.props.group;
+  function renderChildren() {
+    if (props.children)
+      return props.children;
 
     let text: string = eoc.settings && eoc.settings.text ? eoc.settings.text() :
       group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
@@ -283,13 +278,12 @@ export class OperationButton extends React.Component<OperationButtonProps> {
     return withIcon(text, s && s.icon, s && s.iconColor, s && s.iconAlign);
   }
 
-  handleOnClick = (event: React.MouseEvent<any>) => {
-    const eoc = this.props.eoc;
+  function handleOnClick(event: React.MouseEvent<any>) {
     eoc.event = event;
     event.persist();
 
-    if (this.props.onOperationClick)
-      this.props.onOperationClick(eoc);
+    if (onOperationClick)
+      onOperationClick(eoc);
     else
       eoc.click();
   }
@@ -326,7 +320,7 @@ export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>,
 }
 
 export function notifySuccess() {
-  Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+  Notify.singleton && Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
 export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {

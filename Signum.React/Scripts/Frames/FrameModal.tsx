@@ -3,7 +3,7 @@ import * as React from 'react'
 import { openModal, IModalProps, IHandleKeyboard } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
-import ButtonBar from './ButtonBar'
+import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
@@ -19,9 +19,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { instanceOf } from 'prop-types';
+import { useStateWithPromise, useForceUpdate } from '../Hooks'
 
-
-interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
+interface FrameModalProps extends IModalProps {
   title?: string;
   entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
   propertyRoute?: PropertyRoute;
@@ -37,103 +37,69 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
   createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
 }
 
-interface FrameModalState {
-  pack?: EntityPack<ModifiableEntity>;
-  lastEntity?: string;
-  getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  propertyRoute?: PropertyRoute;
-  show: boolean;
-  refreshCount: number;
-}
-
 let modalCount = 0;
 
-export default class FrameModal extends React.Component<FrameModalProps, FrameModalState> implements IHandleKeyboard  {
-  prefix = "modal" + (modalCount++);
+interface PackAndComponent {
+  pack: EntityPack<ModifiableEntity>;
+  lastEntity: string;
+  refreshCount: number;
+  getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+}
 
-  static defaultProps: FrameModalProps = {
-    isOperationVisible: undefined,
-    entityOrPack: null as any
-  }
+export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) => {
 
-  constructor(props: FrameModalProps) {
-    super(props);
-    this.state = this.calculateState(props);
-  }
+  const [packComponent, setPackComponent] = useStateWithPromise<PackAndComponent | undefined>(undefined);
+  const [show, setShow] = React.useState<boolean | undefined>();
+  const prefix = React.useMemo(() => "modal" + (modalCount++), []);
 
-  componentWillMount() {
-    Navigator.toEntityPack(this.props.entityOrPack)
-      .then(pack => this.loadComponent(pack))
+  const okClicked = React.useRef(false);
+  const buttonBar = React.useRef<ButtonBarHandle>(null);
+  const entityComponent = React.useRef<React.Component>(null);
+  const validationErrors = React.useRef<React.Component>(null);
+
+  const forceUpdate = useForceUpdate();
+   
+  React.useImperativeHandle(ref, () => ({
+    handleKeyDown(e: KeyboardEvent) {
+      buttonBar.current && buttonBar.current.handleKeyDown(e);
+    }
+  }));
+
+  const typeName = getTypeName(p.entityOrPack);
+  const typeInfo = getTypeInfo(typeName);
+
+
+  React.useEffect(() => {
+    Navigator.toEntityPack(p.entityOrPack)
+      .then(pack => loadComponent(pack))
       .done();
-  }
+  }, [p.entityOrPack]);
 
-  componentWillReceiveProps(props: FrameModalProps) {
-    this.setState(this.calculateState(props));
+  function loadComponent(pack: EntityPack<ModifiableEntity>, callback?: () => void) {
 
-    Navigator.toEntityPack(props.entityOrPack)
-      .then(pack => this.loadComponent(pack))
-      .done();
-  }
-
-  handleKeyDown(e: KeyboardEvent) {
-    this.buttonBar && this.buttonBar.hanldleKeyDown(e);
-  }
-
-  getTypeName() {
-    return (this.props.entityOrPack as Lite<Entity>).EntityType ||
-      (this.props.entityOrPack as ModifiableEntity).Type ||
-      (this.props.entityOrPack as EntityPack<ModifiableEntity>).entity.Type;
-  }
-
-  getTypeInfo() {
-    const typeName = this.getTypeName();
-
-    return getTypeInfo(typeName);
-  }
-
-  calculateState(props: FrameModalProps): FrameModalState {
-
-    const typeInfo = this.getTypeInfo();
-
-    const pr = typeInfo ? PropertyRoute.root(typeInfo) : this.props.propertyRoute;
-
-    if (!pr)
-      throw new Error("propertyRoute is mandatory for embeddedEntities");
-
-    return {
-      propertyRoute: pr,
-      show: true,
-      refreshCount: 0,
-    };
-  }
-  
-  setPack(pack: EntityPack<ModifiableEntity>, callback?: ()=> void): EntityPack<ModifiableEntity> {
-    this.setState({
-      pack: pack,
-      refreshCount: this.state.refreshCount + 1,
-      lastEntity: JSON.stringify(pack.entity)
-    }, callback);
-
-    return pack;
-  }
-
-  loadComponent(pack: EntityPack<ModifiableEntity>, callback?: () => void) {
-
-    const result = this.props.getViewPromise && this.props.getViewPromise(pack.entity);
+    const result = p.getViewPromise && p.getViewPromise(pack.entity);
 
     var viewPromise = result instanceof ViewPromise ? result : Navigator.getViewPromise(pack.entity, result);
 
-    if (this.props.extraProps)
-      viewPromise = viewPromise.withProps(this.props.extraProps);
+    if (p.extraProps)
+      viewPromise = viewPromise.withProps(p.extraProps);
 
-    return viewPromise.promise
-      .then(c => this.setState({ getComponent: c, pack: pack }, callback));
+    return viewPromise;
   }
 
-  okClicked: boolean = false;
-  handleOkClicked = () => {
-    if (this.hasChanges() &&
-      (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
+  function setPack(pack: EntityPack<ModifiableEntity>, getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>, callback?: () => void) {
+    setPackComponent({
+      pack,
+      lastEntity: JSON.stringify(pack.entity),
+      getComponent,
+      refreshCount: packComponent ? packComponent.refreshCount + 1 : 0
+    }).then(callback).done();
+  }
+
+  function handleOkClicked() {
+    const pack = packComponent!.pack;
+    if (hasChanges() &&
+      (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack.entity.Type))) {
       MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
@@ -144,29 +110,44 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     }
     else {
 
-      if (!this.props.validate) {
+      if (!p.validate) {
 
-        this.okClicked = true;
-        this.setState({ show: false });
+        okClicked.current = true;
+        setShow(false)
 
         return;
       }
 
-      Navigator.API.validateEntity(this.state.pack!.entity)
+      Navigator.API.validateEntity(pack.entity)
         .then(() => {
-          this.okClicked = true;
-          this.setState({ show: false });
+          okClicked.current = true;
+          setShow(false);
         }, ifError(ValidationError, e => {
-          GraphExplorer.setModelState(this.state.pack!.entity, e.modelState, "entity");
-          this.forceUpdate();
+          GraphExplorer.setModelState(pack.entity, e.modelState, "entity");
+          forceUpdate();
         })).done();
     }
   }
 
+  function hasChanges() {
 
-  handleCancelClicked = () => {
+    var hc = entityComponent.current as IHasChanges | null | undefined;
+    if (hc && hc.componentHasChanges)
+      return hc.componentHasChanges();
 
-    if (this.hasChanges() && !this.props.avoidPromptLoseChange) {
+    if (packComponent == null)
+      return false;
+
+    const entity = packComponent.pack.entity;
+
+    var ge = GraphExplorer.propagateAll(entity);
+
+    return entity.modified && JSON.stringify(entity) != packComponent.lastEntity;
+  }
+
+  function handleCancelClicked(){
+
+    if (hasChanges() && !p.avoidPromptLoseChange) {
       MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: NormalWindowMessage.LoseChanges.niceToString(),
@@ -175,114 +156,92 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         icon: "warning"
       }).then(result => {
         if (result == "yes") {
-          this.setState({ show: false });
+          setShow(false);
         }
       }).done();
     }
     else {
-      this.setState({ show: false });
+      setShow(false);
     }
   }
 
-  hasChanges() {
-
-    var hc = this.entityComponent as IHasChanges | null | undefined;
-    if (hc && hc.componentHasChanges)
-      return hc.componentHasChanges();
-
-    if (this.state.pack == null)
-      return false;
-
-    const entity = this.state.pack.entity;
-
-    var ge = GraphExplorer.propagateAll(entity);
-
-    return entity.modified && JSON.stringify(entity) != this.state.lastEntity;
+  function handleOnExited() {
+    p.onExited!(okClicked.current ? packComponent!.pack.entity : undefined);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.okClicked ? this.state.pack!.entity : undefined);
-  }
+  var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
 
-  render() {
+  return (
+    <Modal size={p.modalSize || settings && settings.modalSize || "lg"} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-popup-control" >
+      <ModalHeaderButtons
+        onClose={p.isNavigate ? handleCancelClicked : undefined}
+        onOk={!p.isNavigate ? handleOkClicked : undefined}
+        onCancel={!p.isNavigate ? handleCancelClicked : undefined}
+        okDisabled={!packComponent}>
+        <FrameModalTitle pack={packComponent && packComponent.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
+      </ModalHeaderButtons>
+      {packComponent && renderBody(packComponent)}
+    </Modal>
+  );
 
-    const pack = this.state.pack;
 
-    var settings = pack && Navigator.getSettings(pack.entity.Type);
 
-    return (
-      <Modal size={this.props.modalSize || settings && settings.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
-        <ModalHeaderButtons
-          onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
-          onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
-          onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
-          okDisabled={!pack}>
-          {this.renderTitle()}
-        </ModalHeaderButtons>
-        {pack && this.renderBody()}
-      </Modal>
-    );
-  }
 
-  entityComponent?: React.Component<any, any> | null;
 
-  setComponent(c: React.Component<any, any> | null) {
-    if (c && this.entityComponent != c) {
-      this.entityComponent = c;
-      this.forceUpdate();
-    }
-  }
-
-  buttonBar?: ButtonBar | null;
-
-  renderBody() {
+  function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
-      frameComponent: this,
-      entityComponent: this.entityComponent,
+      frameComponent: { forceUpdate },
+      entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
-        var newPack = pack || this.state.pack!;
+        var newPack = pack || packComponent!.pack;
 
         if (reloadComponent) {
-          this.setState({ getComponent: undefined }, () => this.loadComponent(newPack, callback).done()); //For AutoFocus and potentialy another view
+          setPackComponent(undefined)
+            .then(() => loadComponent(newPack).promise)
+            .then(getComponent => setPack(newPack, getComponent, callback))
+            .done();
+
         }
         else {
-          this.setPack(newPack, callback);
+          setPack(newPack, packComponent!.getComponent, callback);
         }
       },
-      pack: this.state.pack,
-      onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),
-      revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
+      pack: pc.pack,
+      onClose: (ok?: boolean) => p.onExited!(ok ? pc.pack.entity : undefined),
+      revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
-        GraphExplorer.setModelState(this.state.pack!.entity, modelState, initialPrefix!);
-        this.forceUpdate();
+        GraphExplorer.setModelState(pc.pack.entity, modelState, initialPrefix!);
+        forceUpdate();
       },
-      refreshCount: this.state.refreshCount,
-      allowChangeEntity: this.props.isNavigate || false,
+      refreshCount: pc.refreshCount,
+      allowChangeEntity: p.isNavigate || false,
     };
 
-    const pack = this.state.pack!;
-
     const styleOptions: StyleOptions = {
-      readOnly: this.props.readOnly != undefined ? this.props.readOnly : Navigator.isReadOnly(pack),
+      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack),
       frame: frame,
     };
 
-    const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, ""), this.prefix!);
+    const pr = typeInfo ? PropertyRoute.root(typeInfo) : p.propertyRoute;
+    if (!pr)
+      throw new Error("propertyRoute is mandatory for embeddedEntities");
 
-    const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pack };
+    const ctx = new TypeContext(undefined, styleOptions, pr, new ReadonlyBinding(pc.pack.entity, ""), prefix!);
+
+    const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pc.pack };
 
     const embeddedWidgets = renderEmbeddedWidgets(wc);
 
     return (
       <div className="modal-body">
-        {renderWidgets({ ctx: ctx, pack: pack })}
-        {this.entityComponent && <ButtonBar ref={bb => this.buttonBar = bb} frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
-        <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
+        {renderWidgets({ ctx: ctx, pack: pc.pack })}
+        {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
+        {FunctionalAdapter.withRef(< ValidationErrors entity={pc.pack.entity} prefix={prefix} />, validationErrors)}
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
-            {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
+            {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
         </div>
         {embeddedWidgets.bottom}
@@ -290,54 +249,22 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     );
   }
 
-  validationErrors?: ValidationErrors | null;
-
-  renderTitle() {
-
-    if (!this.state.pack)
-      return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
-
-    const entity = this.state.pack.entity;
-    const pr = this.props.propertyRoute;
-
-    return (
-      <span>
-        <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
-        {this.renderExpandLink()}
-        <br />
-        <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
-      </span>
-    );
+  function setComponent(c: React.Component | null) {
+    if (c && entityComponent.current != c) {
+      (entityComponent as React.MutableRefObject<React.Component>).current = c;
+      forceUpdate();
+    }
   }
+});
 
-  renderExpandLink() {
-    const entity = this.state.pack!.entity;
+function getTypeName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
+  return (entityOrPack as Lite<Entity>).EntityType ||
+    (entityOrPack as ModifiableEntity).Type ||
+    (entityOrPack as EntityPack<ModifiableEntity>).entity.Type;
+}
 
-    if (entity == undefined || entity.isNew)
-      return undefined;
-
-    const ti = getTypeInfo(entity.Type);
-
-    if (ti == undefined || !Navigator.isNavigable(ti, false)) //Embedded
-      return undefined;
-
-    return (
-      <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={this.handlePopupFullScreen}>
-        <FontAwesomeIcon icon="external-link-alt" />
-      </a>
-    );
-  }
-
-
-  handlePopupFullScreen = (e: React.MouseEvent<any>) => {
-    e.preventDefault();
-
-    var entity = this.state.pack!.entity;
-    var vp = this.props.getViewPromise && this.props.getViewPromise(entity);
-    Navigator.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
-  }
-
-  static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity | undefined> {
+export namespace FrameModalManager {
+  export function openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack < ModifiableEntity >, options: Navigator.ViewOptions): Promise < Entity | undefined > {
 
     return openModal<Entity>(<FrameModal
       entityOrPack={entityOrPack}
@@ -349,19 +276,12 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       requiresSaveOperation={options.requiresSaveOperation}
       avoidPromptLoseChange={options.avoidPromptLoseChange}
       extraProps={options.extraProps}
-      validate={options.validate == undefined ? FrameModal.isModelEntity(entityOrPack) : options.validate}
+      validate={options.validate == undefined ? isTypeModel(getTypeName(entityOrPack)) : options.validate}
       title={options.title}
       isNavigate={false} />);
   }
 
-  static isModelEntity(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
-    const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type :
-      isLite(entityOrPack) ? entityOrPack.EntityType : entityOrPack.Type;
-
-    return isTypeModel(typeName);
-  }
-
-  static openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {
+  export function openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack < ModifiableEntity >, options: Navigator.NavigateOptions): Promise < void> {
 
     return openModal<void>(<FrameModal
       entityOrPack={entityOrPack}
@@ -376,15 +296,62 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
       isNavigate={true}
     />);
   }
+} 
+
+
+
+export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>); }) {
+
+  if (!pack)
+    return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
+
+  const entity = pack.entity;
+
+  return (
+    <span>
+      <span className="sf-entity-title">{title || getToString(entity)}</span>&nbsp;
+        {renderExpandLink(pack.entity)}
+      <br />
+      <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+    </span>
+  );
+
+  function renderExpandLink(entity: ModifiableEntity) {
+
+    if (entity == undefined || entity.isNew)
+      return undefined;
+
+    const ti = getTypeInfo(entity.Type);
+
+    if (ti == undefined || !Navigator.isNavigable(ti, false)) //Embedded
+      return undefined;
+
+    return (
+      <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={handlePopupFullScreen}>
+        <FontAwesomeIcon icon="external-link-alt" />
+      </a>
+    );
+  }
+
+
+  function handlePopupFullScreen(e: React.MouseEvent<any>) {
+    e.preventDefault();
+
+    var entity = pack!.entity;
+    var vp = getViewPromise && getViewPromise(entity);
+    Navigator.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
+  }
 }
+
+
 
 export class FunctionalAdapter extends React.Component {
 
   render() {
     return this.props.children;
   }
-  
-  static withRef(element: React.ReactElement<any>, ref: (c: React.Component | null) => void) {
+
+  static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
     if (typeof type == "string" || type.prototype.render) {
       return React.cloneElement(element, { ref: ref });

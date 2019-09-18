@@ -11,13 +11,13 @@ import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
-import ButtonBar from './Frames/ButtonBar';
+import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew } from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { bool } from "prop-types";
+
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
     return false;
@@ -25,7 +25,7 @@ export namespace Options {
 }
 
 export function start() {
-  ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
+  ButtonBarManager.onButtonBarRender.push(getEntityOperationButtons);
   ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
   ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
 

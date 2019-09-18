@@ -1,11 +1,12 @@
 import * as React from "react";
-import { TypeContext, LineBaseProps, LineBase, FormGroup } from "../Lines";
+import { TypeContext, FormGroup } from "../Lines";
 import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
 import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DynamicComponent from "./DynamicComponent";
+import DynamicComponent, { getAppropiateComponent } from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
-import { TitleManager, EntityBase } from "./EntityBase";
+import { EntityBaseController } from "./EntityBase";
+import { LineBaseProps, LineBaseController } from "./LineBase";
 
 interface MultiValueLineProps extends LineBaseProps {
   ctx: TypeContext<MList<any>>;
@@ -14,24 +15,25 @@ interface MultiValueLineProps extends LineBaseProps {
   addValueText?: string;
 }
 
-export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLineProps> {
-  calculateDefaultState(state: MultiValueLineProps) {
-    if (state.ctx.value == undefined)
-      state.ctx.value = [];
+export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
 
-    super.calculateDefaultState(state);
+  getDefaultProps(p: MultiValueLineProps) {
+    if (p.ctx.value == undefined)
+      p.ctx.value = [];
+
+    super.getDefaultProps(p);
   }
 
   handleDeleteValue = (index: number) => {
-    const list = this.state.ctx.value;
+    const list = this.props.ctx.value;
     list.removeAt(index);
     this.setValue(list);
   }
 
   handleAddValue = (e: React.MouseEvent<any>) => {
     e.preventDefault();
-    const list = this.state.ctx.value;
-    const newValuePromise = this.state.onCreate == null ? this.defaultCreate() : this.state.onCreate();
+    const list = this.props.ctx.value;
+    const newValuePromise = this.props.onCreate == null ? this.defaultCreate() : this.props.onCreate();
 
     newValuePromise.then(v => {
       if (v === undefined)
@@ -51,43 +53,44 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
   defaultCreate() {
     return Promise.resolve(null);
   }
+}
 
-  renderInternal() {
+export function MultiValueLine(props: MultiValueLineProps) {
+  const c = new MultiValueLineController(props);
+  const p = c.props;
+  const list = p.ctx.value;
 
-    const s = this.state;
-    const list = this.state.ctx.value!;
+  return (
+    <FormGroup ctx={p.ctx} labelText={p.labelText}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+      helpText={p.helpText}
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      <table className="sf-multi-value">
+        <tbody>
+          {
+            mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
+              (<ErrorBoundary>
+                <MultiValueLineElement key={i}
+                  ctx={mlec}
+                  onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
+                  onRenderItem={p.onRenderItem} />
+              </ErrorBoundary>))
+          }
+          <tr >
+            <td colSpan={4}>
+              {!p.ctx.readOnly &&
+                <a href="#" title={p.ctx.titleLabels ? p.addValueText || SearchMessage.AddValue.niceToString() : undefined}
+                  className="sf-line-button sf-create"
+                  onClick={c.handleAddValue}>
+                  {EntityBaseController.createIcon}&nbsp;{p.addValueText || SearchMessage.AddValue.niceToString()}
+                </a>}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FormGroup>
+  );
 
-    return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
-        helpText={this.state.helpText}
-        labelHtmlAttributes={s.labelHtmlAttributes}>
-        <table className="sf-multi-value">
-          <tbody>
-            {
-              mlistItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-                (<ErrorBoundary>
-                  <MultiValueLineElement key={i}
-                    ctx={mlec}
-                    onRemove={e => { e.preventDefault(); this.handleDeleteValue(i); }}
-                    onRenderItem={this.props.onRenderItem} />
-                </ErrorBoundary>))
-            }
-            <tr >
-              <td colSpan={4}>
-                {!s.ctx.readOnly &&
-                  <a href="#" title={TitleManager.useTitle ? this.props.addValueText || SearchMessage.AddValue.niceToString() : undefined}
-                    className="sf-line-button sf-create"
-                    onClick={this.handleAddValue}>
-                    {EntityBase.createIcon}&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
-                  </a>}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </FormGroup>
-    );
-  }
 }
 
 export interface MultiValueLineElementProps {
@@ -96,26 +99,24 @@ export interface MultiValueLineElementProps {
   onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
 }
 
-export class MultiValueLineElement extends React.Component<MultiValueLineElementProps> {
-  render() {
-    const ctx = this.props.ctx;
+export function MultiValueLineElement(props: MultiValueLineElementProps) {
+  const ctx = props.ctx;
 
-    return (
-      <tr>
-        <td>
-          {!ctx.readOnly &&
-            <a href="#" title={TitleManager.useTitle ? SearchMessage.DeleteFilter.niceToString() : undefined}
-              className="sf-line-button sf-remove"
-              onClick={this.props.onRemove}>
-              <FontAwesomeIcon icon="times" />
-            </a>}
-        </td>
-        <td>
-          {this.props.onRenderItem ? this.props.onRenderItem(ctx) : DynamicComponent.getAppropiateComponent(ctx)}
-        </td>
-      </tr>
-    );
-  }
+  return (
+    <tr>
+      <td>
+        {!ctx.readOnly &&
+          <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+            className="sf-line-button sf-remove"
+            onClick={props.onRemove}>
+            <FontAwesomeIcon icon="times" />
+          </a>}
+      </td>
+      <td>
+        {props.onRenderItem ? props.onRenderItem(ctx) : getAppropiateComponent(ctx)}
+      </td>
+    </tr>
+  );
 }
 
 

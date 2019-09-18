@@ -6,9 +6,10 @@ import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../Find
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import * as DropdownList from 'react-widgets/lib/DropdownList'
-import { TitleManager } from '../../Scripts/Lines/EntityBase';
+import { StyleContext } from '../Lines';
+import { useAPI } from '../Hooks';
 
-interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
+interface QueryTokenBuilderProps {
   prefixQueryToken?: QueryToken | undefined;
   queryToken: QueryToken | undefined | null;
   onTokenChange: (newToken: QueryToken | undefined) => void;
@@ -18,63 +19,57 @@ interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
   className?: string;
 }
 
-export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, { expanded: boolean }>{
-  lastTokenChanged: string | undefined;
-  static copiedToken: { fullKey: string, queryKey: string } | undefined;
+let copiedToken: { fullKey: string, queryKey: string } | undefined;
 
-  constructor(props: QueryTokenBuilderProps) {
-    super(props);
-    this.state = { expanded: false };
+export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
+  var [expanded, setExpanded] = React.useState(false);
+  var lastTokenChanged = React.useRef<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    setExpanded(false);
+  }, [p.queryKey, p.prefixQueryToken])
+
+  function handleExpandButton(e: React.MouseEvent<any>) {
+    setExpanded(true);
   }
 
-  componentWillReceiveProps(newProps: QueryTokenBuilderProps) {
-    if (newProps.queryToken != this.props.queryToken || newProps.prefixQueryToken != this.props.prefixQueryToken)
-      this.setState({ expanded: false });
-  }
+  let tokenList: (QueryToken | undefined)[] = [...getTokenParents(p.queryToken)];
 
-  handleExpandButton = (e: React.MouseEvent<any>) => {
-    this.setState({ expanded: true });
-  }
+  var initialIndex = !expanded && p.prefixQueryToken && p.queryToken && isPrefix(p.prefixQueryToken, p.queryToken) ?
+    tokenList.findIndex(a => a!.fullKey == p.prefixQueryToken!.fullKey) + 1 : 0;
 
-  render() {
-    let tokenList: (QueryToken | undefined)[] = [...getTokenParents(this.props.queryToken)];
+  if (!p.readOnly)
+    tokenList.push(undefined);
 
-    var initialIndex = !this.state.expanded && this.props.prefixQueryToken && this.props.queryToken && isPrefix(this.props.prefixQueryToken, this.props.queryToken) ?
-      tokenList.findIndex(a => a!.fullKey == this.props.prefixQueryToken!.fullKey) + 1 : 0;
+  return (
+    <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown}>
+      {initialIndex != 0 && <button onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
+      {tokenList.map((a, i) => i < initialIndex ? null : <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey}
+        queryKey={p.queryKey}
+        readOnly={p.readOnly}
+        onTokenSelected={qt => {
+          lastTokenChanged.current = qt && qt.fullKey;
+          p.onTokenChange && p.onTokenChange(qt);
+        }}
+        defaultOpen={lastTokenChanged.current && i > 0 && lastTokenChanged.current == tokenList[i - 1]!.fullKey ? true : false}
+        subTokenOptions={p.subTokenOptions}
+        parentToken={i == 0 ? undefined : tokenList[i - 1]}
+        selectedToken={a} />)}
+    </div>
+  );
 
-    if (!this.props.readOnly)
-      tokenList.push(undefined);
-
-    return (
-      <div className={classes("sf-query-token-builder", this.props.className)} onKeyDown={this.handleKeyDown}>
-        {initialIndex != 0 && <button onClick={this.handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
-        {tokenList.map((a, i) => i < initialIndex ? null : <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey}
-          queryKey={this.props.queryKey}
-          readOnly={this.props.readOnly}
-          onTokenSelected={qt => {
-            this.lastTokenChanged = qt && qt.fullKey;
-            this.props.onTokenChange && this.props.onTokenChange(qt);
-          }}
-          defaultOpen={this.lastTokenChanged && i > 0 && this.lastTokenChanged == tokenList[i - 1]!.fullKey ? true : false}
-          subTokenOptions={this.props.subTokenOptions}
-          parentToken={i == 0 ? undefined : tokenList[i - 1]}
-          selectedToken={a} />)}
-      </div>
-    );
-  }
-
-  handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
 
     if (e.ctrlKey) {
       if (e.key == "c") {
-        QueryTokenBuilder.copiedToken = this.props.queryToken ? {
-          fullKey: this.props.queryToken.fullKey,
-          queryKey: this.props.queryKey
+        copiedToken = p.queryToken ? {
+          fullKey: p.queryToken.fullKey,
+          queryKey: p.queryKey
         } : undefined;
       }
-      else if (e.key == "v" && QueryTokenBuilder.copiedToken && QueryTokenBuilder.copiedToken.queryKey == this.props.queryKey) {
-        Finder.parseSingleToken(this.props.queryKey, QueryTokenBuilder.copiedToken.fullKey, this.props.subTokenOptions)
-          .then(a => this.props.onTokenChange(a))
+      else if (e.key == "v" && copiedToken && copiedToken.queryKey == p.queryKey) {
+        Finder.parseSingleToken(p.queryKey, copiedToken.fullKey, p.subTokenOptions)
+          .then(a => p.onTokenChange(a))
           .done();
       }
 
@@ -84,7 +79,7 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
 }
 
 
-interface QueryTokenPartProps extends React.Props<QueryTokenPart> {
+interface QueryTokenPartProps{
   parentToken: QueryToken | undefined;
   selectedToken: QueryToken | undefined;
   onTokenSelected: (newToken: QueryToken | undefined) => void;
@@ -94,118 +89,86 @@ interface QueryTokenPartProps extends React.Props<QueryTokenPart> {
   defaultOpen: boolean;
 }
 
-export class QueryTokenPart extends React.Component<QueryTokenPartProps, { subTokens?: (QueryToken | null)[] }>
-{
-  constructor(props: QueryTokenPartProps) {
-    super(props);
+const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
-    this.state = { subTokens: undefined };
+export function QueryTokenPart(p: QueryTokenPartProps) {
+
+
+  const subTokens = useAPI(undefined, () => {
+    if (p.readOnly)
+      return Promise.resolve(undefined);
+
+    return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
+      .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
+  }, [p.readOnly, p.parentToken && p.parentToken.fullKey, p.subTokenOptions, p.queryKey])
+
+  if (subTokens != undefined && subTokens.length == 0)
+    return null;
+
+  return (
+    <ParentTokenContext.Provider value={p.parentToken}>
+      <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
+        <DropdownList
+          disabled={p.readOnly}
+          filter="contains"
+          data={subTokens || []}
+          value={p.selectedToken}
+          onChange={handleOnChange}
+          valueField="fullKey"
+          textField="toStr"
+          valueComponent={QueryTokenItem}
+          itemComponent={QueryTokenOptionalItem}
+          defaultOpen={p.defaultOpen}
+          busy={!p.readOnly && subTokens == undefined}
+        />
+      </div>
+      </ParentTokenContext.Provider>
+      );
+
+ 
+  function handleOnChange (value: any) {
+    p.onTokenSelected(value || p.parentToken);
   }
 
-  componentWillMount() {
-    if (!this.props.readOnly)
-      this.requestSubTokens(this.props);
-  }
-
-  componentWillReceiveProps(newProps: QueryTokenPartProps) {
-    if ((newProps.readOnly == false && this.props.readOnly == true) ||
-      !newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) ||
-        this.props.subTokenOptions != newProps.subTokenOptions ||
-        this.props.queryKey != newProps.queryKey)) {
-      this.setState({ subTokens: undefined });
-      this.requestSubTokens(newProps);
-    }
-  }
-
-  requestSubTokens(props: QueryTokenPartProps) {
-    Finder.API.getSubTokens(props.queryKey, props.parentToken, props.subTokenOptions).then(tokens =>
-      this.setState({ subTokens: tokens.length == 0 ? tokens : [null, ...tokens] })
-    ).done();
-  }
-
-  getChildContext() {
-    return { parentToken: this.props.parentToken };
-  }
-
-  static childContextTypes = { "parentToken": PropTypes.object };
-
-  handleOnChange = (value: any) => {
-    this.props.onTokenSelected(value || this.props.parentToken);
-  }
-
-  handleKeyUp = (e: React.KeyboardEvent<any>) => {
+  function handleKeyUp (e: React.KeyboardEvent<any>) {
     if (e.key == "Enter") {
       e.preventDefault();
       e.stopPropagation();
     }
   }
-
-  render() {
-
-    if (this.state.subTokens != undefined && this.state.subTokens.length == 0)
-      return null;
-
-    return (
-      <div className="sf-query-token-part" onKeyUp={this.handleKeyUp} onKeyDown={this.handleKeyUp}>
-        <DropdownList
-          disabled={this.props.readOnly}
-          filter="contains"
-          data={this.state.subTokens || []}
-          value={this.props.selectedToken}
-          onChange={this.handleOnChange}
-          valueField="fullKey"
-          textField="toStr"
-          valueComponent={QueryTokenItem}
-          itemComponent={QueryTokenOptionalItem}
-          defaultOpen={this.props.defaultOpen}
-          busy={!this.props.readOnly && this.state.subTokens == undefined}
-        />
-      </div>
-    );
-  }
 }
 
-export class QueryTokenItem extends React.Component<{ item: QueryToken | null }> {
-  render() {
+export function QueryTokenItem(p: { item: QueryToken | null }) {
 
-    const item = this.props.item;
+  const item = p.item;
 
-    if (item == null)
-      return null;
+  if (item == null)
+    return null;
 
-    return (
-      <span
-        style={{ color: item.typeColor }}
-        title={TitleManager.useTitle ? item.niceTypeName : undefined}>
-        {item.toStr}
-      </span>
-    );
-  }
+  return (
+    <span
+      style={{ color: item.typeColor }}
+      title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
+      {item.toStr}
+    </span>
+  );
 }
 
 
-export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }> {
+export function QueryTokenOptionalItem(p: { item: QueryToken | null }) {
 
-  static contextTypes = { "parentToken": PropTypes.object };
+  const item = p.item;
 
+  if (item == null)
+    return <span> - </span>;
 
-  render() {
+  var parentToken = React.useContext(ParentTokenContext);
 
-
-    const item = this.props.item;
-
-    if (item == null)
-      return <span> - </span>;
-
-    const parentToken = (this.context as any).parentToken;
-
-    return (
-      <span data-token={item.key}
-        style={{ color: item.typeColor }}
-        title={TitleManager.useTitle ? item.niceTypeName : undefined}>
-        {((item.parent && !parentToken) ? " > " : "") + item.toStr}
-      </span>
-    );
-
-  }
+  return (
+    <span data-token={item.key}
+      style={{ color: item.typeColor }}
+      title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
+      {((item.parent && !parentToken) ? " > " : "") + item.toStr}
+    </span>
+  );
 }

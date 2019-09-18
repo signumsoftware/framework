@@ -6,7 +6,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
+import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
@@ -17,203 +17,197 @@ export interface EntityLineProps extends EntityBaseProps {
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
-export interface EntityLineState extends EntityLineProps {
-  currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: unknown };
+interface ItemPair {
+  entity: ModifiableEntity | Lite<Entity>;
+  item?: unknown;
 }
 
-export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
-  overrideProps(state: EntityLineState, overridenProps: EntityLineProps) {
-    super.overrideProps(state, overridenProps);
-    if (state.autocomplete === undefined) {
-      const type = state.type!;
-      state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
-    }
 
-    if (!state.currentItem) {
-      if (this.state && this.state.currentItem && this.state.currentItem.entity == state.ctx.value)
-        state.currentItem = this.state.currentItem;
-    }
-  }
+export class EntityLineController extends EntityBaseController<EntityLineProps> {
 
-  componentWillUnmount() {
-    this.state.autocomplete && this.state.autocomplete.abort();
-  }
+  currentItem: ItemPair | undefined;
+  setCurrentItem: (v: ItemPair | undefined) => void;
+  focusNext: React.MutableRefObject<boolean>;
+  typeahead: React.RefObject<Typeahead>;
 
-  componentWillMount() {
-    this.refreshItem(this.props);
-  }
+  constructor(p: EntityLineProps) {
+    super(p);
 
-  componentWillReceiveProps(newProps: EntityLineProps, nextContext: any) {
+    var s = this.props;
+    var [currentItem, setCurrentItem] = React.useState<ItemPair | undefined>();
+    this.currentItem = currentItem;
+    this.setCurrentItem = setCurrentItem;
+    this.focusNext = React.useRef(false);
+    this.typeahead = React.useRef<Typeahead>(null);
+    React.useEffect(() => {
+      if (s.autocomplete) {
+        var entity = s.ctx.value;
 
-    super.componentWillReceiveProps(newProps, nextContext);
-
-    this.refreshItem(newProps);
-  }
-
-  refreshItem(props: EntityLineProps) {
-    if (this.state.autocomplete) {
-      var newEntity = props.ctx.value;
-
-      if (newEntity == null) {
-        if (this.state.currentItem)
-          this.setState({ currentItem: undefined });
-      } else {
-        if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
-          var ci = { entity: newEntity!, item: undefined as unknown }
-          this.setState({ currentItem: ci });
-          var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
-            const autocomplete = this.state.autocomplete;
-            autocomplete && autocomplete.getItemFromEntity(newEntity)
-              .then(item => {
-                if (autocomplete == this.state.autocomplete) {
-                  ci.item = item;
-                  this.forceUpdate();
-                } else {
-                  fillItem(newEntity);
-                }
-              })
-              .done();
-          };
-          fillItem(newEntity);
-
+        if (entity == null) {
+          if (currentItem)
+            setCurrentItem(undefined);
+        } else {
+          if (!currentItem || currentItem.entity !== entity) {
+            var ci = { entity: entity!, item: undefined as unknown }
+            setCurrentItem(ci);
+            var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
+              const autocomplete = s.autocomplete;
+              autocomplete && autocomplete.getItemFromEntity(newEntity)
+                .then(item => {
+                  if (autocomplete == s.autocomplete) {
+                    ci.item = item;
+                    this.forceUpdate();
+                  } else {
+                    fillItem(newEntity);
+                  }
+                })
+                .done();
+            };
+            fillItem(entity);
+            return () => { s.autocomplete && s.autocomplete.abort(); };
+          }
         }
       }
+
+      return undefined;
+    }, [s.ctx.value]);
+
+  }
+
+  overrideProps(p: EntityLineProps, overridenProps: EntityLineProps) {
+    super.overrideProps(p, overridenProps);
+    if (p.autocomplete === undefined) {
+      const type = p.type!;
+      p.autocomplete = Navigator.getAutoComplete(type, p.findOptions, p.showType);
     }
   }
 
+  setValue(val: any) {
+    if (val != null)
+      this.focusNext.current = true;
 
-  typeahead?: Typeahead | null;
-  writeInTypeahead(query: string) {
-    this.typeahead!.writeInInput(query);
+    super.setValue(val);
+
+    if (val == null)
+      this.writeInTypeahead("");
   }
 
-  handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
-    this.state.autocomplete!.getEntityFromItem(item)
+  writeInTypeahead(query: string) {
+    this.typeahead.current!.writeInInput(query);
+  }
+}
+
+
+export function EntityLine(props: EntityLineProps) {
+  const c = new EntityLineController(props);
+  const p = c.props;
+
+  function handleOnSelect(item: any, event: React.SyntheticEvent<any>) {
+    p.autocomplete!.getEntityFromItem(item)
       .then(entity => entity &&
-        this.convert(entity)
+        c.convert(entity)
           .then(entity => {
-            this.state.autocomplete!.getItemFromEntity(entity).then(newItem => //newItem could be different to item on create new case
-              this.setState({ currentItem: { entity: entity, item: newItem } }));
-            
-            this.setValue(entity);
+            p.autocomplete!.getItemFromEntity(entity)
+              .then(newItem => c.setCurrentItem({ entity: entity, item: newItem })); //newItem could be different to item on create new case
+
+            c.setValue(entity);
           }))
       .done();
 
     return "";
   }
 
-  setValue(val: any) {
-    if (val != null)
-      this.focusNext = true;
+  if (c.isHidden)
+    return null;
 
-    super.setValue(val);
-    this.refreshItem(this.props);
+  const hasValue = !!p.ctx.value;
 
-    if (val == null)
-      this.writeInTypeahead("");
-  }
+  const buttons = (
+    <span className="input-group-append">
+      {!hasValue && c.renderCreateButton(true)}
+      {!hasValue && c.renderFindButton(true)}
+      {hasValue && c.renderViewButton(true, p.ctx.value!)}
+      {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
+      {c.props.extraButtons && c.props.extraButtons(c)}
+    </span>
+  );
 
-  renderInternal() {
+  var linkOrAutocomplete = hasValue ? renderLink() : renderAutoComplete();
 
-    const s = this.state;
+  return (
+    <FormGroup ctx={p.ctx} labelText={p.labelText} helpText={p.helpText}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      <div className="SF-entity-line">
+        {
+          !EntityBaseController.hasChildrens(buttons) ?
+            <div style={{ position: "relative" }}>{linkOrAutocomplete}</div> :
+            <div className={p.ctx.inputGroupClass}>
+              {linkOrAutocomplete}
+              {buttons}
+            </div>
+        }
+      </div>
+    </FormGroup>
+  );
 
-    const hasValue = !!s.ctx.value;
+  function renderAutoComplete() {
 
-    const buttons = (
-      <span className="input-group-append">
-        {!hasValue && this.renderCreateButton(true)}
-        {!hasValue && this.renderFindButton(true)}
-        {hasValue && this.renderViewButton(true, s.ctx.value!)}
-        {hasValue && this.renderRemoveButton(true, s.ctx.value!)}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </span>
-    );
+    const ctx = p.ctx;
 
-    var linkOrAutocomplete = hasValue ? this.renderLink() : this.renderAutoComplete();
-
-    return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value!), ...s.formGroupHtmlAttributes }}
-        labelHtmlAttributes={s.labelHtmlAttributes}>
-        <div className="SF-entity-line">
-          {
-            !EntityBase.hasChildrens(buttons) ?
-              <div style={{ position: "relative" }}>{linkOrAutocomplete}</div> :
-              <div className={s.ctx.inputGroupClass}>
-                {linkOrAutocomplete}
-                {buttons}
-              </div>
-          }
-        </div>
-      </FormGroup>
-    );
-  }
-
-  renderAutoComplete() {
-
-    const ctx = this.state.ctx;
-
-    var ac = this.state.autocomplete;
+    var ac = p.autocomplete;
 
     if (ac == null || ctx.readOnly)
       return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
 
     return (
-      <Typeahead ref={ta => this.typeahead = ta}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", this.mandatoryClass) }}
+      <Typeahead ref={c.typeahead}
+        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass) }}
         getItems={query => ac!.getItems(query)}
         getItemsDelay={ac.getItemsDelay}
         minLength={ac.minLength}
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
-        onSelect={this.handleOnSelect} />
+        onSelect={handleOnSelect} />
     );
   }
 
-  focusNext?: boolean;
+  function renderLink() {
 
-  setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
-    if (this.focusNext && linkOrSpan != null) {
-      linkOrSpan.focus();
-    }
-    this.focusNext = undefined;
-  }
-
-  renderLink() {
-
-    const s = this.state;
-
-    var value = s.ctx.value!;
+    var value = p.ctx.value!;
 
     const str =
-      s.renderItem ? s.renderItem :
-        s.currentItem && s.currentItem.item && s.autocomplete ? s.autocomplete.renderItem(s.currentItem.item) :
+      p.renderItem ? p.renderItem :
+        c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item) :
           getToString(value);
 
-    if (s.ctx.readOnly)
-      return <FormControlReadonly ctx={s.ctx}>{str}</FormControlReadonly>
+    if (p.ctx.readOnly)
+      return <FormControlReadonly ctx={p.ctx}>{str}</FormControlReadonly>
 
-    if (s.navigate && s.view) {
+    if (p.navigate && p.view) {
       return (
-        <a ref={e => this.setLinkOrSpan(e)}
-          href="#" onClick={this.handleViewClick}
-          className={classes(s.ctx.formControlClass, "sf-entity-line-entity")}
-          title={TitleManager.useTitle ? JavascriptMessage.navigate.niceToString() : undefined} {...s.itemHtmlAttributes}>
+        <a ref={e => setLinkOrSpan(e)}
+          href="#" onClick={c.handleViewClick}
+          className={classes(p.ctx.formControlClass, "sf-entity-line-entity")}
+          title={p.ctx.titleLabels ? JavascriptMessage.navigate.niceToString() : undefined} {...p.itemHtmlAttributes}>
           {str}
         </a>
       );
     } else {
       return (
-        <span tabIndex={0} ref={e => this.setLinkOrSpan(e)} className={classes(s.ctx.formControlClass, "sf-entity-line-entity")} {...s.itemHtmlAttributes}>
+        <span tabIndex={0} ref={e => setLinkOrSpan(e)} className={classes(p.ctx.formControlClass, "sf-entity-line-entity")} {...p.itemHtmlAttributes}>
           {str}
         </span>
       );
     }
   }
+
+
+  function setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
+    if (c.focusNext.current && linkOrSpan != null) {
+      linkOrSpan.focus();
+    }
+    c.focusNext.current = false;
+  }
 }
-
-
-
-
-

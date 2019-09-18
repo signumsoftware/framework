@@ -252,7 +252,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
 }
 
 export function notifySuccess() {
-  Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+  Notify.singleton && Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
 export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {

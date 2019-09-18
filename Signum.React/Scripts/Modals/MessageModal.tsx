@@ -15,7 +15,7 @@ export type MessageModalButtons = "ok" | "ok_cancel" | "yes_no" | "yes_no_cancel
 
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
-interface MessageModalProps extends React.Props<MessageModal>, IModalProps {
+interface MessageModalProps extends IModalProps {
   title: React.ReactChild;
   message: React.ReactChild;
   style?: MessageModalStyle;
@@ -25,36 +25,32 @@ interface MessageModalProps extends React.Props<MessageModal>, IModalProps {
   size?: BsSize;
 }
 
-export default class MessageModal extends React.Component<MessageModalProps, { show: boolean }> {
+export default function MessageModal(p: MessageModalProps) {
 
-  constructor(props: MessageModalProps) {
-    super(props);
+  const [show, setShow] = React.useState(true);
 
-    this.state = { show: true };
+  const selectedValue = React.useRef<MessageModalResult | undefined>(undefined);
+
+  function handleButtonClicked(val: MessageModalResult) {
+    selectedValue.current = val;
+    setShow(false);
   }
 
-  selectedValue?: MessageModalResult;
-
-  handleButtonClicked = (val: MessageModalResult) => {
-    this.selectedValue = val;
-    this.setState({ show: false });
+  function handleCancelClicked() {
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(selectedValue.current);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.selectedValue);
-  }
-
-  renderButtons = (buttons: MessageModalButtons) => {
+  function renderButtons(buttons: MessageModalButtons) {
     switch (buttons) {
       case "ok":
         return (
           <button
             className="btn btn-primary sf-close-button sf-ok-button"
-            onClick={() => this.handleButtonClicked("ok")}
+            onClick={() => handleButtonClicked("ok")}
             name="accept">
             {JavascriptMessage.ok.niceToString()}
           </button>);
@@ -63,13 +59,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
           <div className="btn-toolbar">
             <button
               className="btn btn-primary sf-close-button sf-ok-button"
-              onClick={() => this.handleButtonClicked("ok")}
+              onClick={() => handleButtonClicked("ok")}
               name="accept">
               {JavascriptMessage.ok.niceToString()}
             </button>
             <button
               className="btn btn-secondary sf-close-button sf-button"
-              onClick={() => this.handleButtonClicked("cancel")}
+              onClick={() => handleButtonClicked("cancel")}
               name="cancel">
               {JavascriptMessage.cancel.niceToString()}
             </button>
@@ -79,13 +75,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
           <div className="btn-toolbar">
             <button
               className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => this.handleButtonClicked("yes")}
+              onClick={() => handleButtonClicked("yes")}
               name="yes">
               {BooleanEnum.niceToString("True")}
             </button>
             <button
               className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => this.handleButtonClicked("no")}
+              onClick={() => handleButtonClicked("no")}
               name="no">
               {BooleanEnum.niceToString("False")}
             </button>
@@ -95,19 +91,19 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
           <div className="btn-toolbar">
             <button
               className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => this.handleButtonClicked("yes")}
+              onClick={() => handleButtonClicked("yes")}
               name="yes">
               {BooleanEnum.niceToString("True")}
             </button>
             <button
               className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => this.handleButtonClicked("no")}
+              onClick={() => handleButtonClicked("no")}
               name="no">
               {BooleanEnum.niceToString("False")}
             </button>
             <button
               className="btn btn-secondary sf-close-button sf-cancel-button"
-              onClick={() => this.handleButtonClicked("cancel")}
+              onClick={() => handleButtonClicked("cancel")}
               name="cancel">
               {JavascriptMessage.cancel.niceToString()}
             </button>
@@ -115,14 +111,14 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
     }
   }
 
-  getIcon = () => {
+  function getIcon() {
     var icon: IconProp | undefined;
 
-    if (this.props.customIcon)
-      icon = this.props.customIcon;
+    if (p.customIcon)
+      icon = p.customIcon;
 
-    if (this.props.icon) {
-      switch (this.props.icon) {
+    if (p.icon) {
+      switch (p.icon) {
         case "info":
           icon = "info-circle";
           break;
@@ -144,56 +140,53 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
     return icon;
   }
 
-  renderTitle = () => {
-    var icon = this.getIcon();
+  function renderTitle() {
+    var icon = getIcon();
 
     var iconSpan = icon && <FontAwesomeIcon icon={icon} />;
 
     return (
       <span>
-        {iconSpan && iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{this.props.title}
+        {iconSpan && iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
       </span>
     );
   }
 
-  render() {
-    return (
-      <Modal show={this.state.show} onExited={this.handleOnExited}
-        dialogClassName={classes("message-modal",
-          this.props.size && "modal-" + this.props.size /*temporary hack*/)}
-        size={this.props.size}
-        onHide={this.handleCancelClicked} autoFocus={true}>
-        <div className={classes("modal-header", dialogHeaderClass(this.props.style))}>
-          {this.renderTitle()}
-        </div>
-        <div className="modal-body">
-          {renderText(this.props.message, this.props.style)}
-        </div>
-        <div className="modal-footer">
-          {this.renderButtons(this.props.buttons)}
-        </div>
-      </Modal>
-    );
-  }
+  return (
+    <Modal show={show} onExited={handleOnExited}
+      dialogClassName={classes("message-modal", p.size && "modal-" + p.size)}
+      size={p.size}
+      onHide={handleCancelClicked} autoFocus={true}>
+      <div className={classes("modal-header", dialogHeaderClass(p.style))}>
+        {renderTitle()}
+      </div>
+      <div className="modal-body">
+        {renderText(p.message, p.style)}
+      </div>
+      <div className="modal-footer">
+        {renderButtons(p.buttons)}
+      </div>
+    </Modal>
+  );
+}
 
-  static show(options: MessageModalProps): Promise<MessageModalResult | undefined> {
-    return openModal<MessageModalResult>(
-      <MessageModal
-        title={options.title}
-        message={options.message}
-        buttons={options.buttons}
-        icon={options.icon}
-        size={options.size}
-        customIcon={options.customIcon}
-        style={options.style}
-      />
-    );
-  }
+MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | undefined> => {
+  return openModal<MessageModalResult>(
+    <MessageModal
+      title={options.title}
+      message={options.message}
+      buttons={options.buttons}
+      icon={options.icon}
+      size={options.size}
+      customIcon={options.customIcon}
+      style={options.style}
+    />
+  );
+}
 
-  static showError(message: string, title?: string): Promise<undefined> {
-    return this.show({ buttons: "ok", icon: "error", style: "error", title: title || JavascriptMessage.error.niceToString(), message: message })
-      .then(() => undefined);
-  }
+MessageModal.showError = (message: string, title?: string): Promise<undefined> => {
+  return MessageModal.show({ buttons: "ok", icon: "error", style: "error", title: title || JavascriptMessage.error.niceToString(), message: message })
+    .then(() => undefined);
 }
 
 function dialogHeaderClass(style: MessageModalStyle | undefined) {

@@ -29,7 +29,6 @@ import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
-import { TitleManager } from '../../Scripts/Lines/EntityBase';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 
@@ -401,19 +400,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-            this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFilters={true}
+              this.state.showFilters ? <FilterBuilder
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFilters={true}
 
-            /> :
-              sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                <AutoFocus disabled={!this.props.enableAutoFocus}>
+              /> :
+                sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                  <AutoFocus disabled={!this.props.enableAutoFocus}>
                     <PinnedFilterBuilder
                       filterOptions={fo.filterOptions}
                       onFiltersChanged={this.handlePinnedFilterChanged} />
@@ -537,6 +536,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
 
 
+    const titleLabels = StyleContext.default.titleLabels;
+
     var leftButtons = ([
 
       p.showFilterButton && {
@@ -545,7 +546,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
           style={!s.showFilters && p.findOptions.filterOptions.length > 0 ? { border: "1px solid #b3b3b3" } : undefined}
           onClick={this.handleToggleFilters}
-          title={TitleManager.useTitle ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
+          title={titleLabels ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
           <FontAwesomeIcon icon="filter" />
         </button>
       },
@@ -555,7 +556,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         button: < button
           className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
           onClick={this.handleToggleGroupBy}
-          title={TitleManager.useTitle ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
+          title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
           Ʃ
             </button>
       },
@@ -565,7 +566,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         button: < button
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
           onClick={this.handleSystemTimeClick}
-          title={TitleManager.useTitle ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
+          title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
           <FontAwesomeIcon icon="history" />
         </button>
       },
@@ -581,11 +582,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: < button className="sf-query-button btn btn-light sf-create ml-2" title={TitleManager.useTitle ? this.createTitle() : undefined} onClick={this.handleCreate} >
+        button: <button className="sf-query-button btn btn-light sf-create ml-2" title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate} >
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
-      
+
       ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
       ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -702,7 +703,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       throw new Error("Results are grouped")
 
     if (this.state.selectedRows == null)
-      return []; 
+      return [];
 
     return this.state.selectedRows.map(a => a.entity!);
   }
@@ -713,7 +714,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       throw new Error("Results are not grouped")
 
     if (this.state.selectedRows == null || this.state.resultFindOptions == null)
-      return Promise.resolve([]); 
+      return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
@@ -857,13 +858,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  
+
 
   renderContextualMenu() {
 
     const cm = this.state.contextualMenu!;
     const p = this.props;
-    
+
     var fo = this.state.resultFindOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo && fo.columnOptions[columnIndex].token;

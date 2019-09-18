@@ -24,7 +24,7 @@ export interface GlobalModalContainerState {
 }
 let current: GlobalModalContainerHandles;
   
-let modalInstances: (React.Component & IHandleKeyboard)[] = [];
+const modalInstances: (React.Component & IHandleKeyboard)[] = [];
 
 interface GlobalModalContainerHandles {
   pushModal(element: React.ReactElement<any>) : void;

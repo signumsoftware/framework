@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity } from '../Signum.Entities'
-import { EntityBase, EntityBaseProps } from './EntityBase'
+import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
@@ -11,63 +11,55 @@ export interface EntityDetailProps extends EntityBaseProps {
   onEntityLoaded?: () => void;
 }
 
-export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {
 
-  calculateDefaultState(state: EntityDetailProps) {
-    super.calculateDefaultState(state);
-    state.viewOnCreate = false;
-    state.view = false;
-  }
-
-  renderInternal() {
-
-    const s = this.state;
-
-    if (this.props.avoidFieldSet == true)
-      return (
-        <div className={classes("sf-entity-line-details", s.ctx.errorClass, this.mandatoryClass)}
-          {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes, ...s.ctx.errorAttributes() }}>
-          {this.renderButtons()}
-          {this.renderElements()}
-        </div>
-      );
-
-    return (
-      <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass, this.mandatoryClass)}
-        {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes, ...s.ctx.errorAttributes() }}>
-        <legend>
-          <div>
-            <span>{s.labelText}</span>
-            {this.renderButtons()}
-          </div>
-        </legend>
-        {this.renderElements()}
-      </fieldset>
-    );
-  }
-
-  renderButtons() {
-    const s = this.state;
-    const hasValue = !!s.ctx.value;
-
-    const buttons = (
-      <span className="ml-1 float-right">
-        {!hasValue && this.renderCreateButton(false)}
-        {!hasValue && this.renderFindButton(false)}
-        {hasValue && this.renderViewButton(false, s.ctx.value!)}
-        {hasValue && this.renderRemoveButton(false, s.ctx.value!)}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </span>
-    );
-
-    return EntityBase.hasChildrens(buttons) ? buttons : undefined;
-  }
-
-  renderElements() {
-    const s = this.state;
-    return (
-      <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} onEntityLoaded={this.props.onEntityLoaded} />
-    );
+export class EntityDetailController extends EntityBaseController<EntityDetailProps> {
+  getDefaultProps(p: EntityDetailProps) {
+    super.getDefaultProps(p);
+    p.viewOnCreate = false;
+    p.view = false;
   }
 }
+
+export function EntityDetail(props: EntityDetailProps) {
+
+  const c = new EntityDetailController(props);
+  const p = c.props;
+
+  if (p.avoidFieldSet == true)
+    return (
+      <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
+        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+        {renderButtons()}
+        <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
+      </div>
+    );
+
+  return (
+    <fieldset className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
+      {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+      <legend>
+        <div>
+          <span>{p.labelText}</span>
+          {renderButtons()}
+        </div>
+      </legend>
+      <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
+    </fieldset>
+  );
+
+  function renderButtons() {
+    const hasValue = !!p.ctx.value;
+    const buttons = (
+      <span className="ml-1 float-right">
+        {!hasValue && c.renderCreateButton(false)}
+        {!hasValue && c.renderFindButton(false)}
+        {hasValue && c.renderViewButton(false, p.ctx.value!)}
+        {hasValue && c.renderRemoveButton(false, p.ctx.value!)}
+        {p.extraButtons && p.extraButtons(c)}
+      </span>
+    );
+    return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;
+  }
+}
+
 

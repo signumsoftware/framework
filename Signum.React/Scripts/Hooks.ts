@@ -3,7 +3,6 @@ import { FindOptions, ResultTable } from './Search';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
 import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
-import { EntityBase } from './Lines/EntityBase';
 import { Type, QueryTokenString } from './Reflection';
 
 export function useForceUpdate(): () => void {
@@ -11,11 +10,36 @@ export function useForceUpdate(): () => void {
   return () => setCount(count + 1);
 }
 
+export function useForceUpdatePromise(): () => Promise<void> {
+  var [count, setCount] = useStateWithPromise(0);
+  return () => setCount(count + 1) as Promise<any>;
+}
+
 interface APIHookOptions{
   avoidReset?: boolean;
 }
 
-export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, makeCall: (signal: AbortSignal) => Promise<T>, options?: APIHookOptions): T {
+export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.SetStateAction<T>) => Promise<T>]{
+  const [state, setState] = React.useState({ value: defaultValue, resolve: (val: T) => { } });
+
+  React.useEffect(() => state.resolve(state.value), [state]);
+
+  return [
+    state.value,
+    updaterOrValue => new Promise(resolve => {
+      setState(prevState => {
+        let nextVal = typeof updaterOrValue == "function" ? (updaterOrValue  as ((val : T) => T))(prevState.value) : updaterOrValue;
+        return {
+          value: nextVal,
+          resolve: resolve
+        };
+      })
+    })
+  ]
+
+}
+
+export function useAPI<T>(defaultValue: T, makeCall: (signal: AbortSignal, oldData: T) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): T {
 
   const [data, setData] = React.useState<T>(defaultValue);
 
@@ -25,14 +49,14 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
     if (options == null || !options.avoidReset)
       setData(defaultValue);
 
-    makeCall(abortController.signal)
+    makeCall(abortController.signal, data)
       .then(result => !abortController.signal.aborted && setData(result))
       .done();
 
     return () => {
       abortController.abort();
     }
-  }, key);
+  }, deps);
 
   return data;
 }
@@ -61,11 +85,12 @@ export function useThrottle<T>(value: T, limit: number) : T {
 };
 
 export function useQuery(fo: FindOptions | null): ResultTable | undefined | null {
-  return useAPI(undefined, [fo && Finder.findOptionsPath(fo)], signal =>
+  return useAPI(undefined, signal =>
     fo == null ? Promise.resolve<ResultTable | null>(null) :
       Finder.getQueryDescription(fo.queryName)
         .then(qd => Finder.parseFindOptions(fo!, qd))
-        .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)));
+        .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)),
+    [fo && Finder.findOptionsPath(fo)]);
 }
 
 export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): Finder.AddToLite<R> | null | undefined {
@@ -89,9 +114,10 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
 
 
 export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
-  return useAPI(undefined, [lite && liteKey(lite)], signal =>
+  return useAPI(undefined, signal =>
     lite == null ? Promise.resolve<T | null | undefined>(lite) :
-      Navigator.API.fetchAndForget(lite));
+      Navigator.API.fetchAndForget(lite),
+    [lite && liteKey(lite)]);
 }
 
 
@@ -119,5 +145,5 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLo
 }
 
 export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
-  return useAPI(undefined, [], signal => Navigator.API.fetchAll(type));
+  return useAPI(undefined, signal => Navigator.API.fetchAll(type), []);
 }

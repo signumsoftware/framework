@@ -16,7 +16,7 @@ import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
-import ButtonBar from "./Frames/ButtonBar";
+import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 
@@ -152,7 +152,7 @@ export const clearSettingsActions: Array<() => void> = [
   clearEntitySettings,
   Finder.clearQuerySettings,
   Finder.ButtonBarQuery.clearButtonBarElements,
-  ButtonBar.clearButtonBarRenderer,
+  ButtonBarManager.clearButtonBarRenderer,
   Operations.clearOperationSettings,
   clearWidgets,
   clearContextualItems
@@ -609,7 +609,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
   return NavigatorManager.getFrameModal()
-    .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
+    .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions || {}));
 }
 
 export interface NavigateOptions {
@@ -635,7 +635,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
   return NavigatorManager.getFrameModal()
-    .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
+    .then(NP => NP.FrameModalManager.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -948,7 +948,6 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
     const view = baseRender.call(this);
     if (view == null)
       return null;
-
 
     const replacer = new ViewReplacer<T>(view, ctx);
     viewOverrides.forEach(vo => vo.override(replacer));

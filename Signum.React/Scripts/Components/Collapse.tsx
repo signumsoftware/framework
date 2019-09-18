@@ -1,3 +1,5 @@
+//Based on https://github.com/react-bootstrap/react-bootstrap/blob/master/src/Collapse.js
+
 import * as React from 'react';
 import Transition, { EnterHandler, ExitHandler } from 'react-transition-group/Transition';
 import { classes } from '../Globals';
@@ -74,6 +76,7 @@ export function Collapse({
 
   return (
     <Transition
+      
       timeout={timeout!}
       in={isOpen}
       onEnter={onEnter}

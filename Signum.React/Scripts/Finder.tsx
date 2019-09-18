@@ -30,11 +30,10 @@ import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
-import ButtonBar from "./Frames/ButtonBar";
 import { json, namespace } from "d3";
 import { ButtonBarElement } from "./TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EntityBase } from "./Lines";
+import { EntityBaseController } from "./Lines";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -1512,7 +1511,7 @@ export const entityFormatRules: EntityFormatRule[] = [
         getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}
         inPlaceNavigation={sc && sc.props.navigate == "InPlace"} className="sf-line-button sf-view">
         <span title={EntityControlMessage.View.niceToString()}>
-          {EntityBase.viewIcon}
+          {EntityBaseController.viewIcon}
         </span>
       </EntityLink>
   },

@@ -10,8 +10,8 @@ import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is } from 
 import { onWidgets, WidgetContext } from './Frames/Widgets'
 import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
 import { DropdownItem, DropdownToggle, DropdownMenu, UncontrolledDropdown } from './Components';
-import { TitleManager } from './Lines/EntityBase';
 import { useAPI } from './Hooks';
+import { StyleContext } from './Lines'
 
 export function start() {
 
@@ -149,7 +149,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
   const entity = p.ctx.pack.entity;
 
-  const links = useAPI(undefined, [p], signal => {
+  const links = useAPI(undefined, signal => {
     if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind)
       return Promise.resolve([]);
     else
@@ -158,7 +158,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
         lites: [toLiteFat(entity as Entity)],
         widgetContext: p.ctx as WidgetContext<Entity>
       });
-  });
+  }, [p]);
 
   if (links != undefined && links.length == 0)
     return null;
@@ -168,7 +168,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
       <DropdownToggle tag="span" data-toggle="dropdown">
         <a
           className={classes("badge badge-pill", links && links.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
-          title={TitleManager.useTitle ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
+          title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
           role="button"
           href="#"
           data-toggle="dropdown"
