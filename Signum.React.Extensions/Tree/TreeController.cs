@@ -93,7 +93,7 @@ namespace Signum.React.Tree
 
             var expandedChildren = request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
                             frozenQuery
-                           .Where(t => request.expandedNodes.Contains(t.Parent().ToLite()))
+                           .Where(t => request.expandedNodes.Contains(t.Parent()!.ToLite()))
                            .SelectMany(t => t.Ascendants())
                            .Select(t => new TreeInfo
                            {
@@ -107,7 +107,6 @@ namespace Signum.React.Tree
 
             return list.Concat(expandedChildren).ToList();
         }
-
 
         static List<TreeNode> ToTreeNodes(List<TreeInfo> infos)
         {
