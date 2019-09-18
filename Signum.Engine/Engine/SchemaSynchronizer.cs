@@ -1053,7 +1053,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
     {
         public ObjectName Name;
 
-        public ObjectName PrimaryKeyName;
+        public ObjectName? PrimaryKeyName;
 
         public Dictionary<string, DiffColumn> Columns;
 

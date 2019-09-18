@@ -166,7 +166,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
                 }
 
-                T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+                T? retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
                 if (retrieved == null)
                     throw new EntityNotFoundException(typeof(T), id);

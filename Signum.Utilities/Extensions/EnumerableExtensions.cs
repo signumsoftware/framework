@@ -158,6 +158,7 @@ namespace Signum.Utilities
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
+        [return: MaybeNull]
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             if (collection == null)
@@ -184,11 +185,13 @@ namespace Signum.Utilities
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
+        [return: MaybeNull]
         public static T SingleOrDefaultEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
             return query.Where(predicate).SingleOrDefaultEx();
         }
 
+        [return: MaybeNull]
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
@@ -208,6 +211,7 @@ namespace Signum.Utilities
             throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
         }
 
+        [return: MaybeNull]
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
@@ -280,17 +284,20 @@ namespace Signum.Utilities
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
+        [return: MaybeNull]
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             return collection.Where(predicate).FirstEx();
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
+        [return: MaybeNull]
         public static T SingleOrManyEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
             return query.Where(predicate).FirstEx();
         }
 
+        [return: MaybeNull]
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
@@ -310,6 +317,7 @@ namespace Signum.Utilities
             }
         }
 
+        [return: MaybeNull]
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
         {
             if (collection == null)
@@ -330,6 +338,7 @@ namespace Signum.Utilities
         }
 
         //Throws exception if 0, returns if one, returns default if many
+        [return: MaybeNull]
         public static T SingleOrMany<T>(this IEnumerable<T> collection)
         {
             if (collection == null)

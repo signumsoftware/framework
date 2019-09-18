@@ -150,7 +150,7 @@ namespace Signum.Engine
                                     .Select(p => p.Key)
                                     .SingleOrDefaultEx();
 
-                    ReferedTableType = EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
+                    ReferedTableType = ReferedTableType == null ? null : EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
                 }
             }
         }
