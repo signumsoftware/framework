@@ -84,7 +84,7 @@ namespace Signum.Engine.Authorization
                 UserEntity user = Database.Retrieve<UserEntity>(pair.userId);
                 CleanExpiredTickets(user);
 
-                UserTicketEntity userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
+                UserTicketEntity? userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
                 if (userTicket == null)
                 {
                     throw new UnauthorizedAccessException("User attempted to log-in with an invalid ticket");

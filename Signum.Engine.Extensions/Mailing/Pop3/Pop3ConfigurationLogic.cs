@@ -31,7 +31,7 @@ namespace Signum.Engine.Mailing.Pop3
             As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity));
 
         [AutoExpressionField]
-        public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity ex) => 
+        public static Pop3ReceptionEntity? Pop3Reception(this ExceptionEntity ex) => 
             As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx());
 
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;

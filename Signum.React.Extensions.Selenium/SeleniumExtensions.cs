@@ -75,7 +75,7 @@ namespace Signum.React.Selenium
         {
             var old = selenium.WindowHandles.ToHashSet();
             action();
-            return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)));
+            return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)))!;
         }
 
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)

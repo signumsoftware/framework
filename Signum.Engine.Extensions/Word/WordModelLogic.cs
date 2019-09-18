@@ -277,7 +277,7 @@ namespace Signum.Engine.Word
                     () => $"More than one active WordTemplate for {registeredWordModels} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
         }
 
-        private static WordTemplateEntity GetTemplate(IEnumerable<WordTemplateEntity> candidates, WordModelEntity model, CultureInfo culture)
+        private static WordTemplateEntity? GetTemplate(IEnumerable<WordTemplateEntity> candidates, WordModelEntity model, CultureInfo culture)
         {
             return candidates
                 .Where(a => a.Culture.Name == culture.Name)
@@ -366,7 +366,7 @@ namespace Signum.Engine.Word
             return GetEntityConstructor(modelEntity.ToType()) == null;
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type wordModelType)
+        public static ConstructorInfo? GetEntityConstructor(Type wordModelType)
         {
             var entityType = GetEntityType(wordModelType);
 
@@ -378,7 +378,7 @@ namespace Signum.Engine.Word
 
         public static IWordModel CreateDefaultWordModel(WordModelEntity wordModel, ModifiableEntity? entity)
         {
-            return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType()).Invoke(new[] { entity });
+            return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType())!.Invoke(new[] { entity });
         }
     }
 }
