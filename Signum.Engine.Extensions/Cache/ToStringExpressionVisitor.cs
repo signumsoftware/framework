@@ -82,6 +82,9 @@ namespace Signum.Engine.Cache
             if (field is FieldEnum)
                 return Expression.Convert(constructor.GetTupleProperty((IColumn)field), field.FieldType);
 
+            if (field is FieldPrimaryKey)
+                return constructor.GetTupleProperty((IColumn)field);
+
             if (field is IFieldReference)
             {
                 bool isLite = ((IFieldReference)field).IsLite;
