@@ -805,7 +805,7 @@ namespace Signum.Engine.Workflow
             return wb.PreviewChanges(document, model);
         }
 
-        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel replacements, List<WorkflowIssue> issuesContainer)
+        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel? replacements, List<WorkflowIssue> issuesContainer)
         {
             if (issuesContainer.Any())
                 throw new InvalidOperationException("issuesContainer should be empty");

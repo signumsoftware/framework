@@ -116,7 +116,7 @@ namespace Signum.Entities.MachineLearning
             return Columns.SingleEx(a => a.Token.Token.ContainsKey(part));
         }
 
-        public PredictorColumnEmbedded TryFindColumn(string part)
+        public PredictorColumnEmbedded? TryFindColumn(string part)
         {
             return Columns.SingleOrDefaultEx(a => a.Token.Token.ContainsKey(part));
         }

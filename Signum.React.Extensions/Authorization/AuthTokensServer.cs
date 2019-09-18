@@ -82,28 +82,28 @@ namespace Signum.React.Authorization
 
         static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
         {
-            newUser = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
+            var user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 
-            if (newUser == null)
+            if (user == null)
                 throw new AuthenticationException(AuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
-            if (newUser.State == UserState.Disabled)
-                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(newUser));
+            if (user.State == UserState.Disabled)
+                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(user));
 
-            if (newUser.UserName != oldToken.User.UserName)
+            if (user.UserName != oldToken.User.UserName)
                 throw new AuthenticationException(AuthMessage.InvalidUsername.NiceToString());
 
-            if (!newUser.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
+            if (!user.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
                 throw new AuthenticationException(AuthMessage.InvalidPassword.NiceToString());
 
             AuthToken newToken = new AuthToken
             {
-                User = newUser,
+                User = user,
                 CreationDate = TimeZoneManager.Now,
             };
 
             var result = SerializeToken(newToken);
-
+            newUser = user;
             return result;
         }
 

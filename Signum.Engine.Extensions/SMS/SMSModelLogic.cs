@@ -333,10 +333,10 @@ namespace Signum.Engine.SMS
 
         public static ISMSModel CreateModel(SMSModelEntity model, ModifiableEntity? entity)
         {
-            return (ISMSModel)SMSModelLogic.GetEntityConstructor(model.ToType()).Invoke(new[] { entity });
+            return (ISMSModel)SMSModelLogic.GetEntityConstructor(model.ToType())!.Invoke(new[] { entity });
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type smsModel)
+        public static ConstructorInfo? GetEntityConstructor(Type smsModel)
         {
             var entityType = GetEntityType(smsModel);
 
