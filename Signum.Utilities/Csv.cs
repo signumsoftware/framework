@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Collections.Concurrent;
 using System.Collections;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
@@ -21,7 +22,7 @@ namespace Signum.Utilities
         public static CultureInfo? DefaultCulture = null;
 
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
+            Func<CsvMemberInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
                 ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
@@ -30,7 +31,7 @@ namespace Signum.Utilities
         }
 
         public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
+            Func<CsvMemberInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -40,7 +41,7 @@ namespace Signum.Utilities
         }
 
         public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
+            Func<CsvMemberInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory = null)
         {
             var defEncoding = encoding ?? DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -71,29 +72,48 @@ namespace Signum.Utilities
             }
             else
             {
-                var columns = ColumnInfoCache<T>.Columns;
-                var members = columns.Select(c => c.MemberEntry).ToList();
-                var toString = columns.Select(c => GetToString(defCulture, c, toStringFactory)).ToList();
+                var members = CsvMemberCache<T>.Members;
+                var toString = members.Select(c => GetToString(defCulture, c, toStringFactory)).ToList();
 
                 using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
                 {
                     if (writeHeaders)
-                        sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), separator));
+                        sw.WriteLine(members.ToString(m => HandleSpaces(m.MemberInfo.Name), separator));
 
                     foreach (var item in collection)
                     {
                         for (int i = 0; i < members.Count; i++)
                         {
-                            var obj = members[i].Getter!(item);
+                            var member = members[i];
+                            var toStr = toString[i];
+                            if (!member.IsCollection)
+                            {
+                                if (i != 0)
+                                    sw.Write(separator);
 
-                            var str = EncodeCsv(toString[i](obj), defCulture);
+                                var obj = member.MemberEntry.Getter!(item);
 
-                            sw.Write(str);
-                            if (i < members.Count - 1)
-                                sw.Write(separator);
+                                var str = EncodeCsv(toStr(obj), defCulture);
+
+                                sw.Write(str);
+                            }
                             else
-                                sw.WriteLine();
+                            {
+                                var list = (IList?)member.MemberEntry.Getter!(item);
+
+                                for (int j = 0; j < list!.Count; j++)
+                                {
+                                    if (!(i == 0 && j == 0))
+                                        sw.Write(separator);
+
+                                    var str = EncodeCsv(toStr(list[j]), defCulture);
+
+                                    sw.Write(str);
+                                }
+                            }
                         }
+
+                        sw.WriteLine();
                     }
                 }
             }
@@ -114,7 +134,7 @@ namespace Signum.Utilities
             return p;
         }
 
-        private static Func<object?, string?> GetToString<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory)
+        private static Func<object?, string?> GetToString<T>(CultureInfo culture, CsvMemberInfo<T> column, Func<CsvMemberInfo<T>, CultureInfo, Func<object?, string?>>? toStringFactory)
         {
             if (toStringFactory != null)
             {
@@ -164,9 +184,8 @@ namespace Signum.Utilities
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
             var defOptions = options ?? new CsvReadOptions<T>();
 
-            var columns = ColumnInfoCache<T>.Columns;
-            var members = columns.Select(c => c.MemberEntry).ToList();
-            var parsers = columns.Select(c => GetParser(defCulture, c, defOptions.ParserFactory)).ToList();
+            var members = CsvMemberCache<T>.Members;
+            var parsers = members.Select(m => GetParser(defCulture, m, defOptions.ParserFactory)).ToList();
 
             Regex regex = GetRegex(defCulture, defOptions.RegexTimeout);
 
@@ -256,14 +275,14 @@ namespace Signum.Utilities
 
             Match m = regex.Match(csvLine);
 
-            var columns = ColumnInfoCache<T>.Columns;
+            var members = CsvMemberCache<T>.Members;
 
             return ReadObject<T>(m,
-                columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(defCulture, c, defOptions.ParserFactory)).ToList());
+                members,
+                members.Select(c => GetParser(defCulture, c, defOptions.ParserFactory)).ToList());
         }
 
-        private static Func<string, object?> GetParser<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object?>>? parserFactory)
+        private static Func<string, object?> GetParser<T>(CultureInfo culture, CsvMemberInfo<T> column, Func<CsvMemberInfo<T>, CultureInfo, Func<string, object?>?>? parserFactory)
         {
             if (parserFactory != null)
             {
@@ -273,10 +292,12 @@ namespace Signum.Utilities
                     return result;
             }
 
-            return str => ConvertTo(str, column.MemberInfo.ReturningType(), culture, column.Format);
+            var type = column.IsCollection ? column.MemberInfo.ReturningType().ElementType()! : column.MemberInfo.ReturningType();
+
+            return str => ConvertTo(str, type, culture, column.Format);
         }
 
-        static T ReadObject<T>(Match m, List<MemberEntry<T>> members, List<Func<string, object?>> parsers) where T : new()
+        static T ReadObject<T>(Match m, List<CsvMemberInfo<T>> members, List<Func<string, object?>> parsers) where T : new()
         {
             var vals = m.Groups["val"].Captures;
 
@@ -284,16 +305,37 @@ namespace Signum.Utilities
                 throw new FormatException("Only {0} columns found (instead of {1}) in line: {2}".FormatWith(vals.Count, members.Count, m.Value));
 
             T t = new T();
+
             for (int i = 0; i < members.Count; i++)
             {
-                string? str = null; 
+                var member = members[i];
+                var parser = parsers[i];
+                string? str = null;
                 try
                 {
-                    str = DecodeCsv(vals[i].Value);
+                    if (!member.IsCollection)
+                    {
+                        str = DecodeCsv(vals[i].Value);
 
-                    object? val = parsers[i](str);
+                        object? val = parser(str);
 
-                    members[i].Setter!(t, val);
+                        member.MemberEntry.Setter!(t, val);
+                    }
+                    else
+                    {
+                        var list = (IList)Activator.CreateInstance(member.MemberInfo.ReturningType());
+
+                        for (int j = i; j < vals.Count; j++)
+                        {
+                            str = DecodeCsv(vals[j].Value);
+
+                            object? val = parser(str);
+
+                            list.Add(val);
+                        }
+
+                        member.MemberEntry.Setter!(t, list);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -317,10 +359,28 @@ namespace Signum.Utilities
                 new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
         }
 
-        static class ColumnInfoCache<T>
+        static class CsvMemberCache<T>
         {
-            public static List<CsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter)
-                .Select((me, i) => new CsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
+            static CsvMemberCache()
+            {
+                var memberEntries = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter);
+                Members = memberEntries.Select((me, i) =>
+                {
+                    var type = me.MemberInfo.ReturningType();
+                    var isCollection = typeof(IList).IsAssignableFrom(type);
+                    if (isCollection)
+                    {
+                        if (type.IsArray)
+                            throw new InvalidOperationException($"{me.MemberInfo.Name} is an array, use a List<T> instead");
+
+                        if (i != memberEntries.Count - 1)
+                            throw new InvalidOperationException($"{me.MemberInfo.Name} is of {type} but is not the last member");
+                    }
+                    return new CsvMemberInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format, isCollection);
+                }).ToList();
+            }
+
+            public static List<CsvMemberInfo<T>> Members;
         }
 
         static string DecodeCsv(string s)
@@ -361,29 +421,31 @@ namespace Signum.Utilities
 
     public class CsvReadOptions<T> where T: class
     {
-        public Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>>? ParserFactory;
+        public Func<CsvMemberInfo<T>, CultureInfo, Func<string, object?>?>? ParserFactory;
         public bool AsumeSingleLine = false;
         public Func<Exception, Match?, bool>? SkipError;
         public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     }
 
 
-    public class CsvColumnInfo<T>
+    public class CsvMemberInfo<T>
     {
         public readonly int Index;
         public readonly MemberEntry<T> MemberEntry;
         public readonly string? Format;
+        public readonly bool IsCollection;
 
         public MemberInfo MemberInfo
         {
             get { return this.MemberEntry.MemberInfo; }
         }
 
-        internal CsvColumnInfo(int index, MemberEntry<T> memberEntry, string? format)
+        internal CsvMemberInfo(int index, MemberEntry<T> memberEntry, string? format, bool isCollection)
         {
             this.Index = index;
             this.MemberEntry = memberEntry;
             this.Format = format;
+            this.IsCollection = isCollection;
         }
     }
 
