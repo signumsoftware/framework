@@ -57,7 +57,7 @@ interface CountUserQueryIconProps {
 export function CountUserQueryIcon(p: CountUserQueryIconProps) {
 
   var userQuery = useFetchAndForget(p.userQuery)
-  var findOptions = useAPI(undefined, [userQuery], signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined));
+  var findOptions = useAPI(undefined, signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
 
   if (findOptions == null)
     return <span className="icon" style={{ color: p.color }}>…</span>;

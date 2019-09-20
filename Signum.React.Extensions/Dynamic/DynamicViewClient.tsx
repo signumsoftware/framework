@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
+import * as ReactBootstrap from "react-bootstrap";
 import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
 import * as Search from '@framework/Search'
@@ -358,7 +359,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var EntityTable = Lines.EntityTable;
   var FormGroup = Lines.FormGroup;
   var FormControlReadonly = Lines.FormControlReadonly;
-  var FileLine = FileLineModule.default;
+  var FileLine = FileLineModule.FileLine;
 
   // Search
   var SearchControl = Search.SearchControl;
@@ -367,21 +368,16 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var ValueSearchControlLine = Search.ValueSearchControlLine;
 
   // Components
-  var Button = Components.Button;
-  var Dropdown = Components.Dropdown;
-  var DropdownItem = Components.DropdownItem;
-  var DropdownMenu = Components.DropdownMenu;
-  var DropdownToggle = Components.DropdownToggle;
-  var Fade = Components.ModalFade;
-  var Modal = Components.Modal;
-  var NavItem = Components.NavItem;
-  var PopperContent = Components.PopperContent;
-  var Tooltip = Components.Tooltip;
-  var UncontrolledDropdown = Components.UncontrolledDropdown;
-  var UncontrolledTooltip = Components.UncontrolledTooltip;
-  var Tab = Components.Tab;
-  var Tabs = Components.Tabs;
-  var UncontrolledTabs = Components.UncontrolledTabs;
+  var Button = ReactBootstrap.Button;
+  var Dropdown = ReactBootstrap.Dropdown;
+  var DropdownItem = ReactBootstrap.DropdownButton;
+  var Modal = ReactBootstrap.Modal;
+  var NavItem = ReactBootstrap.NavItem;
+  var Tooltip = ReactBootstrap.Tooltip;
+  var Overlay = ReactBootstrap.Overlay;
+  var OverlayTrigger = ReactBootstrap.OverlayTrigger;
+  var Tab = ReactBootstrap.Tab;
+  var Tabs = ReactBootstrap.Tabs;
   var LinkContainer = Components.LinkContainer;
 
 

@@ -6,7 +6,7 @@ import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "@framework/Services";
-import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '@framework/Components';
+import { DropdownButton, Dropdown } from 'react-bootstrap';
 
 export interface WordSearchMenuProps {
   searchControl: SearchControlLoaded;
@@ -40,18 +40,15 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
   const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
   return (
-    <UncontrolledDropdown id="wordTemplateDropDown" className="sf-word-dropdown">
-      <DropdownToggle>{label}</DropdownToggle>
-      <DropdownMenu>
-        {
-          wordReports.map((wt, i) =>
-            <DropdownItem key={i}
-              onClick={() => handleOnClick(wt)}>
-              {wt.toStr}
-            </DropdownItem>)
-        }
-      </DropdownMenu>
-    </UncontrolledDropdown>
+    <DropdownButton id="wordTemplateDropDown" className="sf-word-dropdown" title={label}>
+      {
+        wordReports.map((wt, i) =>
+          <Dropdown.Item key={i}
+            onClick={() => handleOnClick(wt)}>
+            {wt.toStr}
+          </Dropdown.Item>)
+      }
+    </DropdownButton>
   );
 }
 

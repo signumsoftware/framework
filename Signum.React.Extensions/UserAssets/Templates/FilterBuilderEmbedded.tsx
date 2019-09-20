@@ -11,7 +11,7 @@ import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQuerie
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
-import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent } from '@framework/SearchControl/FilterBuilder';
+import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -192,13 +192,13 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
     this.forceUpdate();
   }
 
-  handleRenderValue = (fc: FilterConditionComponent | FilterGroupComponent) => {
+  handleRenderValue = (fc: RenderValueContext) => {
 
-    if (fc instanceof FilterGroupComponent) {
+    if (isFilterGroupOptionParsed(fc.filter)) {
 
-      const f = fc.props.filterGroup;
+      const f = fc.filter;
 
-      const readOnly = fc.props.readOnly || f.frozen;
+      const readOnly = fc.readonly || f.frozen;
 
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
@@ -206,9 +206,9 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
     } else {
 
-      const f = fc.props.filter;
+      const f = fc.filter
 
-      const readOnly = fc.props.readOnly || f.frozen;
+      const readOnly = fc.readonly || f.frozen;
 
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
@@ -219,9 +219,9 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
     }
   }
 
-  handleCreateAppropiateControl = (ctx: TypeContext<any>, fc: FilterConditionComponent, onChange: () => void): React.ReactElement<any> => {
+  handleCreateAppropiateControl = (ctx: TypeContext<any>, fc: RenderValueContext, onChange: () => void): React.ReactElement<any> => {
 
-    const token = fc.props.filter.token!;
+    const token = fc.filter.token!;
 
     switch (token.filterType) {
       case "Lite":

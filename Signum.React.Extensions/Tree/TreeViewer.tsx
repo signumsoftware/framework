@@ -18,7 +18,7 @@ import { ContextualItemsContext, renderContextualItems } from "@framework/Search
 import { Entity } from "@framework/Signum.Entities";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
 import { tryGetMixin } from "@framework/Signum.Entities";
-import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
 import { QueryTokenString } from '@framework/Reflection';
@@ -243,16 +243,16 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     let type = this.props.typeName;
 
     var menuItems = [
-      Navigator.isNavigable(type, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
-      Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <DropdownItem onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
-      Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <DropdownItem onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
+      Navigator.isNavigable(type, undefined, true) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
+      Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
+      Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];
 
     if (this.state.currentMenuItems == undefined) {
-      menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
+      menuItems.push(<Dropdown.Item header>{JavascriptMessage.loading.niceToString()}</Dropdown.Item>);
     } else {
       if (menuItems.length && this.state.currentMenuItems.length)
-        menuItems.push(<DropdownItem divider />);
+        menuItems.push(<Dropdown.Item divider />);
 
       menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
     }
@@ -394,20 +394,17 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><FontAwesomeIcon icon="filter" /></a>
         <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
         {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star" />&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
-        <Dropdown id="selectedButton"
+        <DropdownButton id="selectedButton"
           className="sf-query-button sf-tm-selected"
           toggle={this.handleSelectedToggle}
           isOpen={s.isSelectOpen}
-          disabled={selected == undefined}>
-          <DropdownToggle color="light" caret disabled={selected == undefined}>
-            {`${JavascriptMessage.Selected.niceToString()} (${selected ? selected.lite.toStr : TreeViewerMessage.None.niceToString()})`}
-          </DropdownToggle>
-          <DropdownMenu>
-            {menuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-              menuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
-                menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-          </DropdownMenu>
-        </Dropdown>
+          disabled={selected == undefined}
+          variant="light"
+          title={`${JavascriptMessage.Selected.niceToString()} (${selected ? selected.lite.toStr : TreeViewerMessage.None.niceToString()})`}>
+          {menuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
+            menuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
+              menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+        </DropdownButton>
         <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
       </div>
     );

@@ -1,11 +1,11 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic } from '@framework/Globals';
 import { openModal, IModalProps } from '@framework/Modals';
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
-import { Modal } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { Modal } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 
 interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {
 }

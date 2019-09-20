@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
+import { Tab, Tabs } from 'react-bootstrap'
 import { ValueLine, EntityLine, EntityDetail, EntityCombo, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '@framework/Lines'
 import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
-import FileLine from '../../Files/FileLine'
+import { FileLine } from '../../Files/FileLine';
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -205,7 +205,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
           </div>
         </div>
         {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
-        <UncontrolledTabs>
+        <Tabs id="predictorTabs">
           <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
             <div>
               <fieldset>
@@ -271,7 +271,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
               } />
             </Tab>
           }
-        </UncontrolledTabs>
+        </Tabs>
       </div>
     );
   }

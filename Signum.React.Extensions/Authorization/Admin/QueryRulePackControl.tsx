@@ -6,7 +6,7 @@ import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'
 import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, AuthMessage, QueryAllowed } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap'
 import "./AuthAdmin.css"
 
 export default class QueryRulesPackControl extends React.Component<{ ctx: TypeContext<QueryRulePack> }> implements IRenderButtons {

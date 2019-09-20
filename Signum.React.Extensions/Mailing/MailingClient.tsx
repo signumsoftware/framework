@@ -22,7 +22,7 @@ import { QueryRequest } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import MailingMenu from "./MailingMenu";
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
-import { DropdownItem } from '@framework/Components';
+import { Dropdown } from 'react-bootstrap';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
 
@@ -163,10 +163,10 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
       return {
         header: EmailTemplateEntity.nicePluralName(),
         menuItems: wts.map(wt =>
-          <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+          <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
             <FontAwesomeIcon icon={["far", "envelope"]} className="icon" />
             {wt.toStr}
-          </DropdownItem>
+          </Dropdown.Item>
         )
       } as MenuItemBlock;
     });

@@ -7,8 +7,8 @@ import * as TreeClient from './TreeClient'
 import { TreeNode } from './TreeClient'
 import { TreeViewer } from './TreeViewer'
 import { FilterOption } from "@framework/FindOptions";
-import { Modal } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { Modal } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 
 interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
   typeName: string;

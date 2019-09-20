@@ -12,7 +12,7 @@ import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { newMListElement, ModifiableEntity } from '@framework/Signum.Entities';
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 import { useFetchAndForget } from '../../../../Framework/Signum.React/Scripts/Hooks';
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { isFunctionOrStringOrNull } from '../../Dynamic/View/NodeUtils';
@@ -63,7 +63,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     const isStaticView = !viewName || viewName == "" || this.isNamedView(typeName, viewName);
 
     if (isStaticView) {
-      this.state.viewProps = undefined;
+      this.setState({ viewProps: undefined });
       this.props.ctx.value.viewNameProps = [];
       this.props.ctx.value.modified = true;
       this.forceUpdate();
@@ -73,7 +73,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     const oldViewNameProps = this.props.ctx.value.viewNameProps.toObject(a => a.element.name, a => a.element.expression);
     DynamicViewClient.API.getDynamicViewProps(typeName, viewName!).then(dvp => {
 
-      this.state.viewProps = dvp;
+      this.setState({ viewProps: dvp });
       if (dvp.length > 0) {
 
         var newViewNameProps = dvp.map(p => {

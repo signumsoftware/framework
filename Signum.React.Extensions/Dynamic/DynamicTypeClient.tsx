@@ -17,7 +17,7 @@ import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, 
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
-import { Tab } from '@framework/Components/Tabs';
+import { Tab } from 'react-bootstrap';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));

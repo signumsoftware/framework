@@ -7,11 +7,11 @@ import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
-import { default as FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
-import FileUploader from './FileUploader'
+import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
+import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EntityListBase, EntityListBaseProps } from '@framework/Lines';
 import "./Files.css"
+import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 
 export { FileTypeSymbol };
 
@@ -27,16 +27,13 @@ interface MultiFileLineProps extends EntityListBaseProps {
   maxSizeInBytes?: number;
 }
 
-export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileLineProps> {
+export class MultiFileLineController extends EntityListBaseController<MultiFileLineProps> {
 
-  static defaultProps = {
-    download: "SaveAs",
-    dragAndDrop: true
-  }
 
-  calculateDefaultState(state: MultiFileLineProps) {
 
-    super.calculateDefaultState(state);
+  getDefaultProps(state: MultiFileLineProps) {
+
+    super.getDefaultProps(state);
 
     const m = state.ctx.propertyRoute.member;
     if (m && m.defaultFileTypeInfo) {
@@ -54,13 +51,13 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
   }
 
   handleDeleteValue = (index: number) => {
-    const list = this.state.ctx.value;
+    const list = this.props.ctx.value;
     list.removeAt(index);
     this.setValue(list);
   }
 
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
-    const list = this.state.ctx.value;
+    const list = this.props.ctx.value;
 
     this.convert(file)
       .then(f => this.addElement(f))
@@ -68,63 +65,69 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
   }
 
   defaultCreate() {
-    return Constructor.construct(this.state.type!.name);
-  }
-
-  renderInternal() {
-
-    const s = this.state;
-    const list = this.state.ctx.value!;
-
-    return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
-        helpText={this.state.helpText}
-        labelHtmlAttributes={s.labelHtmlAttributes}>
-        <table className="sf-multi-value">
-          <tbody>
-            {
-              this.getMListItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
-                <tr key={mlec.index!}>
-                  <td>
-                    {!s.ctx.readOnly &&
-                      <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-                      className="sf-line-button sf-remove"
-                      onClick={e => { e.preventDefault(); this.handleDeleteValue(mlec.index!); }}>
-                        <FontAwesomeIcon icon="times" />
-                      </a>}
-                  </td>
-                  <td style={{ width: "100%" }}>
-                    {this.state.download == "None" ?
-                      <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
-                      <FileDownloader
-                        configuration={this.props.configuration}
-                        download={this.props.download}
-                        entityOrLite={mlec.value}
-                        htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
-                  </td>
-                </tr>)
-            }
-            <tr >
-              <td colSpan={4}>
-                {s.ctx.readOnly ? undefined :
-                  <FileUploader
-                    accept={s.accept}
-                    multiple={true}
-                    maxSizeInBytes={s.maxSizeInBytes}
-                    dragAndDrop={this.state.dragAndDrop}
-                    dragAndDropMessage={this.state.dragAndDropMessage}
-                    fileType={this.state.fileType}
-                    onFileLoaded={this.handleFileLoaded}
-                    typeName={s.ctx.propertyRoute.typeReference().name}
-                    buttonCss={s.ctx.buttonClass}
-                    divHtmlAttributes={{ className: "sf-file-line-new" }} />}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </FormGroup>
-    );
+    return Constructor.construct(this.props.type!.name);
   }
 }
 
+export function MultiFileLine(props: MultiFileLineProps) {
+  const c = new MultiFileLineController(props)
+  const p = c.props;
+
+  if (c.isHidden)
+    return null;
+
+  return (
+    <FormGroup ctx={p.ctx} labelText={p.labelText}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+      helpText={p.helpText}
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      <table className="sf-multi-value">
+        <tbody>
+          {
+            c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
+              <tr key={mlec.index!}>
+                <td>
+                  {!p.ctx.readOnly &&
+                    <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+                      className="sf-line-button sf-remove"
+                      onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
+                      <FontAwesomeIcon icon="times" />
+                    </a>}
+                </td>
+                <td style={{ width: "100%" }}>
+                  {p.download == "None" ?
+                    <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
+                    <FileDownloader
+                      configuration={p.configuration}
+                      download={p.download}
+                      entityOrLite={mlec.value}
+                      htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
+                </td>
+              </tr>)
+          }
+          <tr >
+            <td colSpan={4}>
+              {p.ctx.readOnly ? undefined :
+                <FileUploader
+                  accept={p.accept}
+                  multiple={true}
+                  maxSizeInBytes={p.maxSizeInBytes}
+                  dragAndDrop={p.dragAndDrop}
+                  dragAndDropMessage={p.dragAndDropMessage}
+                  fileType={p.fileType}
+                  onFileLoaded={c.handleFileLoaded}
+                  typeName={p.ctx.propertyRoute.typeReference().name}
+                  buttonCss={p.ctx.buttonClass}
+                  divHtmlAttributes={{ className: "sf-file-line-new" }} />}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FormGroup>
+  );
+}
+
+MultiFileLine.defaultProps = {
+  download: "SaveAs",
+  dragAndDrop: true
+}

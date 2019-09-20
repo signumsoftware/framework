@@ -28,7 +28,7 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import ValueLineModal from '@framework/ValueLineModal'
 
 import "./DynamicType.css"
-import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
+import { Tabs, Tab } from 'react-bootstrap';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
 import { Typeahead } from '@framework/Components';
 
@@ -216,7 +216,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
           </div>
         }
 
-        <UncontrolledTabs defaultEventKey="properties" id="DynamicTypeTabs" onToggled={this.handleTabSelect}>
+        <Tabs defaultEventKey="properties" id="DynamicTypeTabs" onToggled={this.handleTabSelect}>
           <Tab eventKey="properties" title="Properties">
             <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
             <br />
@@ -343,7 +343,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
               {this.renderOthers()}
             </Tab>
           }
-        </UncontrolledTabs>
+        </Tabs>
       </div>
     );
   }

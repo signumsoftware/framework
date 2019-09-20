@@ -9,8 +9,7 @@ import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl, SearchControlLoaded } from "@framework/Search";
 import * as Navigator from "@framework/Navigator";
-import { Tab, Tabs } from '@framework/Components/Tabs';
-import { UncontrolledTooltip } from "@framework/Components";
+import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
 import * as AuthClient from '../../Authorization/AuthClient'
 
@@ -182,25 +181,23 @@ class CaseActivityStatsButtonComponent extends React.Component<CaseActivityButto
 
   render() {
     const sc = this.props.sc;
-    let Div: HTMLDivElement | null;
 
     const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
 
     return (
-      <>
-        <div ref={comp => Div = comp}>
+      <OverlayTrigger overlay={<Tooltip placement="top" key="tooltip" id="caseStatsTooltip">
+        {WorkflowActivityMessage.OpenCaseActivityStats.niceToString()}
+      </Tooltip>}>
+        <div>
           <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
             onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
             <FontAwesomeIcon icon="list" />
           </a>
-        </div>,
-        <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
-          {WorkflowActivityMessage.OpenCaseActivityStats.niceToString()}
-        </UncontrolledTooltip>
-      </>
+        </div>
+      </OverlayTrigger>
     );
   }
-
+      
   handleOnClick(rr: ResultRow) {
     if (rr.entity)
       Navigator.API.fetchAndForget(rr.entity).then(caseActivity => {
@@ -218,21 +215,20 @@ class WorkflowActivityLocateButtonComponent extends React.Component<WorkflowActi
 
   render() {
     const sc = this.props.sc;
-    let Div: HTMLDivElement | null;
 
     const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
     return (
-      <>
-        <div ref={comp => Div = comp}>
+      <OverlayTrigger overlay={<Tooltip placement="top" id="activityLocatorPopupt">
+        {WorkflowActivityMessage.LocateWorkflowActivityInDiagram.niceToString()}
+      </Tooltip>}>
+        <div>
           <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
             onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
             <FontAwesomeIcon icon="map-marker" />
           </a>
         </div>,
-        <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
-          {WorkflowActivityMessage.LocateWorkflowActivityInDiagram.niceToString()}
-        </UncontrolledTooltip>
-      </>
+        
+      </OverlayTrigger>
     );
   }
 

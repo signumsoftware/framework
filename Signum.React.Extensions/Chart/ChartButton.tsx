@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequestModel } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap'
 import * as Finder from '@framework//Finder';
 
 export interface ChartButtonProps {

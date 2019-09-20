@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { TreeMessage } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 
 export interface TreeButtonProps {
   searchControl: SearchControlLoaded;

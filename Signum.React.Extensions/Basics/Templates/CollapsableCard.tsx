@@ -1,7 +1,7 @@
 import * as React from 'react'
+import Collapse from 'react-bootstrap/Collapse'
 import { classes } from '@framework/Globals'
 import { BsColor } from '@framework/Components/Basic';
-import { Collapse } from '@framework/Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface CollapsableCardProps {
@@ -90,7 +90,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
           }
           {this.props.header}
         </div>
-        <Collapse isOpen={isOpen}>
+        <Collapse in={isOpen}>
           <div className={classes("card-body", cardStyleClasses(this.props.bodyStyle))}>
             {this.props.children}
           </div>

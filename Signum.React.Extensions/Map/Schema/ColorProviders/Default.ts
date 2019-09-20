@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { colorScaleLog } from '../../Utils'
 import { MapMessage } from '../../Signum.Entities.Map'

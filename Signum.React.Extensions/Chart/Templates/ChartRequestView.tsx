@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ifError } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
@@ -10,7 +11,7 @@ import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
-import ValidationErrors from '@framework/Frames/ValidationErrors'
+import { ValidationErrors } from '@framework/Frames/ValidationErrors'
 import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartBuilder from './ChartBuilder'
@@ -18,7 +19,6 @@ import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "@framework/SearchControl/Search.css"
 import "../Chart.css"
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import { ChartScript } from '../ChartClient';
 
 
@@ -176,7 +176,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
           </div>
           <br />
           <div className="sf-scroll-table-container" >
-            <UncontrolledTabs id="chartResultTabs">
+            <Tabs id="chartResultTabs">
               <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
                 <ChartRenderer chartRequest={cr} loading={s.loading} lastChartRequest={s.lastChartRequest} data={s.chartResult && s.chartResult.chartTable} />
               </Tab>
@@ -187,7 +187,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     onOrderChanged={() => this.handleOnDrawClick()} />
                 </Tab>
               }
-            </UncontrolledTabs>
+            </Tabs>
           </div>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
-import { Modal } from '@framework/Components/Modal'
 import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
@@ -9,8 +8,7 @@ import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem, Collapse } from '@framework/Components';
-import { NavLink } from '@framework/Components/NavItem';
+import { Collapse, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
@@ -24,7 +22,7 @@ export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(undefined, [], signal => ToolbarClient.API.getCurrentToolbar("Main"));
+  var response = useAPI(undefined, signal => ToolbarClient.API.getCurrentToolbar("Main"), []);
 
   if (response == null)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
@@ -57,7 +55,7 @@ function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
   return (
     <div>
       <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label || getToString(r.content!)}</h4>
-      <Collapse isOpen={isOpen}>
+      <Collapse in={isOpen}>
         <ToolbarMainRendererPrivate response={r} />
       </Collapse>
     </div>

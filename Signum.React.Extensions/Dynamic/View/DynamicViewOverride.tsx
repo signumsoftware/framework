@@ -14,7 +14,7 @@ import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponen
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
@@ -103,13 +103,13 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
   handleRenderContextualMenu = (pr: PropertyRoute) => {
     const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
     return (
-      <DropdownItem>
-        <DropdownItem header>{pr.propertyPath()}</DropdownItem>
-        <DropdownItem divider />
-        <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash" />&nbsp; Remove</DropdownItem>
-        <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up" />&nbsp; Insert Before</DropdownItem>
-        <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down" />&nbsp; Insert After</DropdownItem>
-      </DropdownItem>
+      <Dropdown.Item>
+        <Dropdown.Item header>{pr.propertyPath()}</Dropdown.Item>
+        <Dropdown.Item divider />
+        <Dropdown.Item onClick={() => this.handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash" />&nbsp; Remove</Dropdown.Item>
+        <Dropdown.Item onClick={() => this.handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up" />&nbsp; Insert Before</Dropdown.Item>
+        <Dropdown.Item onClick={() => this.handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down" />&nbsp; Insert After</Dropdown.Item>
+      </Dropdown.Item>
     );
   }
 
@@ -290,13 +290,10 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
   renderViewNameButtons() {
     return (
-      <UncontrolledDropdown>
-        <DropdownToggle color="success" caret>View Names</DropdownToggle>
-        <DropdownMenu>
-          {this.state.viewNames!.map((vn, i) =>
-            <DropdownItem key={i} onClick={() => this.handleViewNameClick(vn)}>{vn}</DropdownItem>)}
-        </DropdownMenu>
-      </UncontrolledDropdown>
+      <DropdownButton variant="success" title="View Names" id="view_dropdown">
+        {this.state.viewNames!.map((vn, i) =>
+          <Dropdown.Item key={i} onClick={() => this.handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
+      </DropdownButton>
     );
   }
 
@@ -315,13 +312,10 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
   renderExpressionsButtons() {
     return (
-      <UncontrolledDropdown>
-        <DropdownToggle color="warning" caret>Expressions</DropdownToggle>
-        <DropdownMenu>
-          {this.allExpressions().map((m, i) =>
-            <DropdownItem key={i} onClick={() => this.handleExpressionClick(m)}>{m.name}</DropdownItem>)}
-        </DropdownMenu>
-      </UncontrolledDropdown>
+      <DropdownButton variant="warning" title="Expressions" id="expression_dropdown">
+        {this.allExpressions().map((m, i) =>
+          <Dropdown.Item key={i} onClick={() => this.handleExpressionClick(m)}>{m.name}</Dropdown.Item>)}
+      </DropdownButton>
     );
   }
 

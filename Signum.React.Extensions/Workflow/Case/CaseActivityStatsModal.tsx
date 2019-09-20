@@ -1,5 +1,5 @@
 import * as moment from 'moment'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
@@ -12,8 +12,7 @@ import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
 import { OperationLogEntity } from "@framework/Signum.Entities.Basics";
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
-import { Modal } from '@framework/Components';
+import { Tab, Tabs, Modal } from 'react-bootstrap';
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
   case: CaseEntity;
@@ -51,7 +50,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
           {
             <div>
               {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
-                <UncontrolledTabs id="statsTabs">
+                <Tabs id="statsTabs">
                   {
                     caseActivityStats.map(a =>
                       <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!}
@@ -59,7 +58,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
                         <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
                       </Tab>)
                   }
-                </UncontrolledTabs>
+                </Tabs>
               }
             </div>
           }

@@ -1,6 +1,7 @@
-﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+import { Modal } from "react-bootstrap";
 import * as React from "react";
-import * as numbro from "numbro";
+import numbro from "numbro";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
@@ -14,9 +15,9 @@ import { Dic } from "@framework/Globals";
 import { Binding } from "@framework/Reflection";
 import { is } from "@framework/Signum.Entities";
 import { isLite } from "@framework/Signum.Entities";
-import { Modal } from "@framework/Components";
-import { ModalHeaderButtons } from "@framework/Components/Modal";
-import { NumericTextBox } from "@framework/Lines/ValueLine";
+import {  } from "@framework/Components";
+import { ModalHeaderButtons } from "@framework/Components/ModalHeaderButtons";
+import { NumericTextBox, isNumber } from "@framework/Lines/ValueLine";
 import { AbortableRequest } from "@framework/Services";
 
 interface PredictModalProps extends IModalProps {
@@ -103,7 +104,7 @@ export class AlternativesCheckBox extends React.Component<{ binding: Binding<num
   render() {
     var val = this.props.binding.getValue();
     return (
-      <label><input type="checkbox" checked={val != null} onChange={() => this.setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => this.setValue(n)} validateKey={ValueLine.isNumber} /> alternative predictions </label>
+      <label><input type="checkbox" checked={val != null} onChange={() => this.setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => this.setValue(n)} validateKey={isNumber} /> alternative predictions </label>
     );
   }
 

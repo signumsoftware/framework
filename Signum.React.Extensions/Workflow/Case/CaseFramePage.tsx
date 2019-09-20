@@ -4,8 +4,8 @@ import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyB
 import * as Navigator from '@framework/Navigator'
 import { Entity, JavascriptMessage, entityInfo, getToString, toLite } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
-import ValidationErrors from '@framework/Frames/ValidationErrors'
-import ButtonBar from '@framework/Frames/ButtonBar'
+import { ValidationErrors, ValidationErrorHandle } from '@framework/Frames/ValidationErrors'
+import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, WorkflowMainEntityStrategy, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
@@ -65,7 +65,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
   hanldleKeyDown = (e: KeyboardEvent) => {
     if (!e.openedModals && this.buttonBar)
-      this.buttonBar.hanldleKeyDown(e);
+      this.buttonBar.handleKeyDown(e);
   }
 
   load(props: CaseFramePageProps) {
@@ -117,7 +117,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
   }
 
-  buttonBar?: ButtonBar | null;
+  buttonBar?: ButtonBarHandle | null;
 
   render() {
 
@@ -193,8 +193,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 
-  validationErrorsTop?: ValidationErrors | null;
-  validationErrorsBottom?: ValidationErrors | null;
+  validationErrorsTop?: ValidationErrorHandle | null;
+  validationErrorsBottom?: ValidationErrorHandle | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -249,7 +249,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     return (
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
-        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = (bb as any as ButtonBar)} frame={mainFrame} pack={mainPack} /> : <br />}
+        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={a => this.buttonBar = a} frame={mainFrame} pack={mainPack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix="caseFrame"/>
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}

@@ -14,7 +14,7 @@ import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, Pack
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { DropdownItem, UncontrolledTooltip } from '@framework/Components';
+import { OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import "./Processes.css"
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
@@ -101,9 +101,8 @@ function monkeyPatchCreateContextualMenuItem() {
 
     let innerRef: HTMLElement | null;
 
-    return [
-      <DropdownItem
-        innerRef={r => innerRef = r}
+    var item = (
+      <Dropdown.Item
         className={disabled ? "disabled" : undefined}
         onClick={disabled ? undefined : onClick}
         data-operation={coc.operationInfo.key}>
@@ -112,10 +111,13 @@ function monkeyPatchCreateContextualMenuItem() {
         {(icon != null || color != null) && " "}
         {text}
         <span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog" /></span>
+      </Dropdown.Item>
+    );
 
-      </DropdownItem>,
-      coc.canExecute ? <UncontrolledTooltip target={() => innerRef!} placement="right">{coc.canExecute}</UncontrolledTooltip> : undefined
-    ].filter(a => a != null);
+    if (!coc.canExecute)
+      return item;
+
+    return (<OverlayTrigger overlay={<Tooltip id="processTooltip" placement="right">{coc.canExecute}</Tooltip>}>{item}</OverlayTrigger>);
   };
 }
 

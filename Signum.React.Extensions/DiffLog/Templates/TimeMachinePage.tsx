@@ -14,7 +14,7 @@ import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
-import { UncontrolledTabs, Tab } from '@framework/Components'
+import { Tabs, Tab } from 'react-bootstrap'
 import { is } from '@framework/Signum.Entities'
 import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
@@ -95,7 +95,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
 
         <br />
         <h5>Selected Versions</h5>
-        <UncontrolledTabs hideOnly>
+        <Tabs id="timeMachineTabs">
           {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).orderBy(a => a).flatMap((d, i, dates) => [
             <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
               <RenderEntityVersion lite={lite} asOf={d} />
@@ -104,7 +104,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
               <DiffEntityVersion lite={lite} validFrom={d} validTo={dates[i + 1]} />
             </Tab>
           ])}
-        </UncontrolledTabs>
+        </Tabs>
       </div>
     );
   }

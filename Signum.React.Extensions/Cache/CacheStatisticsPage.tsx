@@ -1,8 +1,8 @@
 
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
+import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats } from './CacheClient'
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
 
 interface CacheStatisticsPageProps extends RouteComponentProps<{}> {
 
@@ -57,7 +57,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
           {this.state.isEnabled == false && <button onClick={this.handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
           {<button onClick={this.handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
         </div >
-        <UncontrolledTabs id="tabs">
+        <Tabs id="tabs">
           {this.state.tables &&
             <Tab title="Tables" eventKey="table">
               {this.renderTables()}
@@ -67,7 +67,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
               {this.renderLazies()}
             </Tab>
           }
-        </UncontrolledTabs>
+        </Tabs>
 
 
       </div>

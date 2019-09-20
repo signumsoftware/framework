@@ -2,15 +2,15 @@ import * as React from 'react'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
-import DynamicComponent from '@framework/Lines/DynamicComponent'
+import { customTypeComponent } from '@framework/Lines/DynamicComponent'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Entities.Files'
-import FileLine from './FileLine'
+import { FileLine } from './FileLine'
 import CellFormatter = Finder.CellFormatter;
 import { ModifiableEntity, Lite, Entity, isLite, registerToString } from "@framework/Signum.Entities";
-import FileImageLine from './FileImageLine';
+import { FileImageLine } from './FileImageLine';
 import { MultiFileLine } from './MultiFileLine';
-import FileDownloader from './FileDownloader';
-import { Retrieve } from '@framework/Retrieve';
+import { FileDownloader } from './FileDownloader';
+import { Retrieve } from '@framework/Lines/Retrieve';
 import { FileImage } from './FileImage';
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -43,7 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
-  DynamicComponent.customTypeComponent[type.typeName] = ctx => {
+  customTypeComponent[type.typeName] = ctx => {
     const tr = ctx.propertyRoute.typeReference();
     if (tr.isCollection)
       return <MultiFileLine ctx={ctx} />;
@@ -66,8 +66,8 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     name: type.typeName + "_Image",
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
-      isLite(cell) ? Retrieve.create(cell as Lite<IFile & Entity>, e => <FileImage file={e} />) :
-        < FileImage file={cell as IFile & ModifiableEntity} />)
+      isLite(cell) ? <Retrieve lite={cell as Lite<IFile & Entity>}>{e => <FileImage file={e} />}</Retrieve> :
+        <FileImage file={cell as IFile & ModifiableEntity} />)
   });
 }
 

@@ -21,13 +21,13 @@ import { registeredCustomContexts, API } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
-import FileLine from "../../Files/FileLine";
-import {MultiFileLine} from "../../Files/MultiFileLine";
+import { FileLine } from "../../Files/FileLine";
+import { MultiFileLine } from "../../Files/MultiFileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "@framework/Reflection";
-import { Button, BsColor, BsSize } from '@framework/Components';
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
-import FileImageLine from '../../Files/FileImageLine';
+import { BsColor, BsSize } from '@framework/Components';
+import { Tab, Tabs, Button } from 'react-bootstrap';
+import { FileImageLine } from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { ColorTypeahead } from '../../Basics/Templates/ColorTypeahead';
 import { IconTypeahead } from '../../Basics/Templates/IconTypeahead';
@@ -36,6 +36,7 @@ import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
+import { ValueLineController } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -162,7 +163,7 @@ NodeUtils.register<TabsNode>({
     hideOnly: node.hideOnly,
   }, node),
   render: (dn, parentCtx) => {
-    return NodeUtils.withChildrensSubCtx(dn, parentCtx, <UncontrolledTabs
+    return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tabs
       id={parentCtx.getUniqueId(NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
       defaultEventKey={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.defaultEventKey, NodeUtils.isStringOrNull)}
       hideOnly={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.hideOnly, NodeUtils.isBooleanOrNull)}
@@ -370,7 +371,7 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
   var exampleExpression: string | undefined = undefined;
 
   if (typeName && fixedViewName) {
-    const viewProps = useAPI(undefined, [typeName, fixedViewName], signal => API.getDynamicViewProps(typeName, fixedViewName));
+    const viewProps = useAPI(undefined, signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
     if (viewProps && viewProps.length > 0)
       exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
   }
@@ -511,7 +512,7 @@ NodeUtils.register<ValueLineNode>({
     onChange: node.onChange
   }),
   render: (dn, ctx) => (<ValueLine
-    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
+    //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
@@ -529,7 +530,7 @@ NodeUtils.register<ValueLineNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -577,7 +578,7 @@ NodeUtils.register<MultiValueLineNode>({
   }),
   render: (dn, ctx) => (
     <MultiValueLine
-      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
+      //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
       onRenderItem={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onRenderItem, NodeUtils.isFunctionOrNull)}
       onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onCreate, NodeUtils.isFunctionOrNull)}
@@ -592,7 +593,7 @@ NodeUtils.register<MultiValueLineNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
@@ -728,7 +729,7 @@ NodeUtils.register<FileLineNode>({
     onChange: node.onChange
   }),
   render: (dn, parentCtx) => (<FileLine
-    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
+    //ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
@@ -748,7 +749,7 @@ NodeUtils.register<FileLineNode>({
     const m = dn.route && dn.route.member;
     return (
       <div>
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+        {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -803,7 +804,7 @@ NodeUtils.register<FileImageLineNode>({
     onChange: node.onChange
   }),
   render: (dn, parentCtx) => (<FileImageLine
-    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
+    //ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
@@ -823,7 +824,7 @@ NodeUtils.register<FileImageLineNode>({
     const m = dn.route && dn.route.member;
     return (
       <div>
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+        {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -878,7 +879,7 @@ NodeUtils.register<MultiFileLineNode>({
   }),
   render: (dn, ctx) => (
     <MultiFileLine
-      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
+      //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
       labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
       labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
@@ -896,7 +897,7 @@ NodeUtils.register<MultiFileLineNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -952,7 +953,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     onChange: node.onChange,
   }),
   render: (dn, ctx) => (<EnumCheckboxList
-    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
+    //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
@@ -964,7 +965,7 @@ NodeUtils.register<EnumCheckboxListNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
@@ -1492,18 +1493,13 @@ NodeUtils.register<ButtonNode>({
       const eoc = EntityOperationContext.fromTypeContext(ctx as TypeContext<Entity>, dn.node.operationName);
       return (
         <OperationButton
-          ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
           eoc={eoc}
           canExecute={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.canExecute, NodeUtils.isStringOrNull)}
           onOperationClick={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onOperationClick, NodeUtils.isFunctionOrNull)}
-          active={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
-          block={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
           disabled={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
-          outline={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.outline, NodeUtils.isBooleanOrNull)}
-          onClick={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onClick, NodeUtils.isFunctionOrNull)}
           className={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.className, NodeUtils.isStringOrNull)}
-          color={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
-          size={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize}
+          variant={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
+          size={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize as any}
           children={children}
         />
       );
@@ -1511,15 +1507,13 @@ NodeUtils.register<ButtonNode>({
 
     return (
       <Button
-        innerRef={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
         active={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
         block={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
         disabled={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
-        outline={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.outline, NodeUtils.isBooleanOrNull)}
         onClick={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onClick, NodeUtils.isFunctionOrNull)}
         className={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.className, NodeUtils.isStringOrNull)}
-        color={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
-        size={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize}
+        variant={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.color, NodeUtils.isStringOrNull) as BsColor}
+        size={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.size, NodeUtils.isStringOrNull) as BsSize as any}
         children={children}
       />
     );
@@ -1531,7 +1525,7 @@ NodeUtils.register<ButtonNode>({
     var operations = ti && ti.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key) || [];
 
     return (<div>
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
+      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.name)} type="string" defaultValue={null} allowsExpression={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.operationName)} type="string" defaultValue={null} allowsExpression={false} options={operations} refreshView={() => {
         if (dn.node.operationName == null) {
@@ -1550,7 +1544,6 @@ NodeUtils.register<ButtonNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.active)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.block)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.outline)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n(e) => locals.forceUpdate()"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.className)} type="string" defaultValue={null} />
     </div>)
@@ -1645,7 +1638,7 @@ export namespace NodeConstructor {
       return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
     }
 
-    if (ValueLine.getValueLineType(tr) != undefined)
+    if (ValueLineController.getValueLineType(tr) != undefined)
       return { kind: "ValueLine", field } as ValueLineNode;
 
     return undefined;

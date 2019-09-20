@@ -17,7 +17,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
-import { Tab, Tabs } from '@framework/Components/Tabs';
+import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"

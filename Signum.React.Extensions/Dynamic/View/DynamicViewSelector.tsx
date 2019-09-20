@@ -10,7 +10,7 @@ import * as Navigator from '@framework/Navigator'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 interface DynamicViewSelectorComponentProps {
   ctx: TypeContext<DynamicViewSelectorEntity>;
@@ -208,13 +208,10 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
 
   renderViewNameButtons() {
     return (
-      <UncontrolledDropdown>
-        <DropdownToggle color="success" caret>View Names</DropdownToggle>
-        <DropdownMenu>
+      <DropdownButton variant="success" title="View Names" id="views_dropdown">
           {this.allViewNames().map((vn, i) =>
-            <DropdownItem key={i} onClick={e => this.handleViewNameClick(vn)}>{vn}</DropdownItem>)}
-        </DropdownMenu>
-      </UncontrolledDropdown>
+            <Dropdown.Item key={i} onClick={() => this.handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
+      </DropdownButton>
     );
   }
 

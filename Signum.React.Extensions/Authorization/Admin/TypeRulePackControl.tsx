@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { classes } from '@framework/Globals'
@@ -23,7 +24,6 @@ import { QueryEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Bas
 
 
 import "./AuthAdmin.css"
-import { Button } from '@framework/Components';
 import { is } from '@framework/Signum.Entities';
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {

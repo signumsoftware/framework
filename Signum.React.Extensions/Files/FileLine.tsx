@@ -5,9 +5,9 @@ import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
-import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
-import { default as FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
-import FileUploader from './FileUploader'
+import { EntityBaseProps, EntityBaseController } from '@framework/Lines/EntityBase'
+import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
+import { FileUploader }  from './FileUploader'
 
 import "./Files.css"
 
@@ -26,16 +26,11 @@ export interface FileLineProps extends EntityBaseProps {
 }
 
 
-export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
+export class FileLineController extends EntityBaseController<FileLineProps>{
 
-  static defaultProps = {
-    download: "SaveAs",
-    dragAndDrop: true
-  }
+  getDefaultProps(state: FileLineProps) {
 
-  calculateDefaultState(state: FileLineProps) {
-
-    super.calculateDefaultState(state);
+    super.getDefaultProps(state);
 
     const m = state.ctx.propertyRoute.member;
     if (m && m.defaultFileTypeInfo) {
@@ -52,57 +47,59 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
     }
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+  handleFileLoaded(file: IFile & ModifiableEntity) {
 
     this.convert(file)
       .then(f => this.setValue(f))
       .done();
   }
+}
+
+export function FileLine(props: FileLineProps) {
+  const c = new FileLineController(props);
+  const p = c.props;
+
+  if (c.isHidden)
+    return null;
+
+  const hasValue = !!p.ctx.value;
+
+  return (
+    <FormGroup ctx={p.ctx} labelText={p.labelText}
+      labelHtmlAttributes={p.labelHtmlAttributes}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
+      helpText={p.helpText}>
+      {hasValue ? renderFile() : p.ctx.readOnly ? undefined :
+        <FileUploader
+          accept={p.accept}
+          maxSizeInBytes={p.maxSizeInBytes}
+          dragAndDrop={p.dragAndDrop}
+          dragAndDropMessage={p.dragAndDropMessage}
+          fileType={p.fileType}
+          onFileLoaded={c.handleFileLoaded}
+          typeName={p.ctx.propertyRoute.typeReference().name}
+          buttonCss={p.ctx.buttonClass}
+          divHtmlAttributes={{ className: "sf-file-line-new" }} />
+      }
+    </FormGroup>
+  );
 
 
-  renderInternal() {
+  function renderFile() {
 
-    const s = this.state;
-
-    const hasValue = !!s.ctx.value;
-
-    return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText}
-        labelHtmlAttributes={s.labelHtmlAttributes}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
-        helpText={this.state.helpText}>
-        {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
-          <FileUploader
-            accept={s.accept}
-            maxSizeInBytes={s.maxSizeInBytes}
-            dragAndDrop={this.state.dragAndDrop}
-            dragAndDropMessage={this.state.dragAndDropMessage}
-            fileType={this.state.fileType}
-            onFileLoaded={this.handleFileLoaded}
-            typeName={s.ctx.propertyRoute.typeReference().name}
-            buttonCss={s.ctx.buttonClass}
-            divHtmlAttributes={{ className: "sf-file-line-new" }} />
-        }
-      </FormGroup>
-    );
-  }
-
-
-  renderFile() {
-
-    var ctx = this.state.ctx;
+    var ctx = p.ctx;
 
     const val = ctx.value!;
 
-    const content = this.state.download == "None" ?
+    const content = p.download == "None" ?
       <span className={classes(ctx.formControlClass, "file-control")} > {val.toStr}</span > :
       <FileDownloader
-        configuration={this.props.configuration}
-        download={this.props.download}
+        configuration={p.configuration}
+        download={p.download}
         entityOrLite={val}
         htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
-    const removeButton = this.renderRemoveButton(true, val);
+    const removeButton = c.renderRemoveButton(true, val);
 
     if (removeButton == null)
       return content;
@@ -116,6 +113,9 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
       </div>
     );
   }
-
 }
 
+FileLine.defaultProps = {
+  download: "SaveAs",
+  dragAndDrop: true
+}

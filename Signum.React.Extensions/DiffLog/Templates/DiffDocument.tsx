@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DiffPair } from '../DiffLogClient';
-import { NumericTextBox, ValueLine } from '@framework/Lines/ValueLine';
+import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine';
 
 export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<DiffPair<string>>>> }>
 {
@@ -19,7 +19,7 @@ export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<D
         <div>
           <label><input type="checkbox" checked={margin != null} onChange={() => this.handleSetMargin(margin == null ? 4 : null)} />
             Show only <NumericTextBox value={margin == null ? 4 : margin} onChange={num => this.handleSetMargin(num == null ? 0 : Math.max(num, 0))}
-              validateKey={ValueLine.isNumber} /> lines arround each change</label>
+              validateKey={isNumber} /> lines arround each change</label>
         </div>
         <div>
           {this.renderLines()}

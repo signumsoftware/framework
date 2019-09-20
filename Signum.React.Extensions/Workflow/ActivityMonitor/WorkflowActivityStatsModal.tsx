@@ -1,5 +1,5 @@
 import * as moment from 'moment'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
@@ -11,8 +11,8 @@ import { WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityMonitorM
 import { SearchControl, ColumnOption } from "@framework/Search";
 import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
-import { Modal } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { Modal } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { toFilterOptions, isAggregate } from '@framework/Finder';
 
 interface WorkflowActivityStatsModalProps extends React.Props<WorkflowActivityStatsModal>, IModalProps {

@@ -7,7 +7,7 @@ import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
-import { UncontrolledTabs, Tab } from '@framework/Components/Tabs';
+import { Tabs, Tab } from 'react-bootstrap';
 
 interface WorkflowPanelPageProps extends RouteComponentProps<{}> {
 
@@ -28,14 +28,14 @@ export default class WorkflowPanelPage extends React.Component<WorkflowPanelPage
       <div>
         <h2 className="display-6">Workflow Panel</h2>
 
-        <UncontrolledTabs>
+        <Tabs id="workflowTabs">
           <Tab title="Script Runner" eventKey="scriptRunner">
             <WorkflowScriptRunnerTab />
           </Tab>
           <Tab title="Timers" eventKey="timers">
             <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(Navigator.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
           </Tab>
-        </UncontrolledTabs>
+        </Tabs>
       </div>
     );
   }
@@ -126,7 +126,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
             ],
             pagination: { elementsPerPage: 10, mode: "Firsts" }
           }} />
-        <UncontrolledTabs>
+        <Tabs id="workflowScriptTab">
           <Tab title="Last operation logs" eventKey="logs">
             <SearchControl findOptions={{
               queryName: OperationLogEntity,
@@ -170,7 +170,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
                 pagination: { elementsPerPage: 10, mode: "Firsts" }
               }} />
           </Tab>
-        </UncontrolledTabs>
+        </Tabs>
       </div>
     );
   }

@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
-import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
 
 export interface ExcelMenuProps {
@@ -66,26 +66,20 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
 
     const excelReports = this.state.excelReport;
     return (
-      <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
-        isOpen={this.state.isOpen} toggle={this.handleSelectedToggle}>
-        <DropdownToggle color="light" caret>
-          {label as any}
-        </DropdownToggle>
-        <DropdownMenu>
-          {this.props.plainExcel && <DropdownItem onClick={this.handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
-          {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider />}
-          {
-            excelReports && excelReports.map((uq, i) =>
-              <DropdownItem key={i}
-                onClick={() => this.handleClick(uq)}>
-                {uq.toStr}
-              </DropdownItem>)
-          }
-          {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider />}
-          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</DropdownItem>}
-          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</DropdownItem>}
-        </DropdownMenu>
-      </Dropdown>
+      <DropdownButton id="userQueriesDropDown" className="sf-userquery-dropdown" isOpen={this.state.isOpen} toggle={this.handleSelectedToggle} variant="light" title={label}>
+        {this.props.plainExcel && <Dropdown.Item onClick={this.handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
+        {this.props.plainExcel && excelReports && excelReports.length > 0 && <Dropdown.Item divider />}
+        {
+          excelReports && excelReports.map((uq, i) =>
+            <Dropdown.Item key={i}
+              onClick={() => this.handleClick(uq)}>
+              {uq.toStr}
+            </Dropdown.Item>)
+        }
+        {(this.props.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Item divider />}
+        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={this.handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
+        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={this.handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
+      </DropdownButton>
     );
   }
 }

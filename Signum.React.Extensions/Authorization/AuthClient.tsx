@@ -4,7 +4,7 @@ import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
-import { tasks, LineBase, LineBaseProps } from '@framework/Lines/LineBase'
+import { tasks, LineBaseProps, LineBaseController } from '@framework/Lines/LineBase'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -161,7 +161,7 @@ export function isOperationAllowed(type: PseudoType, operation: OperationSymbol)
   return isOperationInfoAllowed(ti.operations![operation.key]);
 }
 
-export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
+export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
 

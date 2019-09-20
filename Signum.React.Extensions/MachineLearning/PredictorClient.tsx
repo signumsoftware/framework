@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as Constructor from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'

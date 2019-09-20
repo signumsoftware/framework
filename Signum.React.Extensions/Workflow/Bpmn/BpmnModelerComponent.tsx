@@ -14,7 +14,7 @@ import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 import { newMListElement } from '@framework/Signum.Entities';
 import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
 import { Dic } from '@framework/Globals';

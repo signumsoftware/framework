@@ -6,8 +6,7 @@ import { } from "@framework/ConfigureReactWidgets";
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 import * as Navigator from '@framework/Navigator'
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
-import { Button } from '@framework/Components';
+import { Tab, Tabs, Button } from 'react-bootstrap';
 
 export interface RestLogState {
     diff?: RestLogDiff,
@@ -79,11 +78,11 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
                 <fieldset>
                     <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
-                    <UncontrolledTabs defaultEventKey="prev">
+                    <Tabs defaultEventKey="prev" id="restLogs">
                         <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.subCtx(f => f.responseBody).value!)}</Tab>
                         {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{this.state.diff.diff && <DiffDocument diff={this.state.diff.diff} />}</Tab>}
                         {this.state.diff && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
-                    </UncontrolledTabs>
+                    </Tabs>
                 </fieldset>
             </div>
         );

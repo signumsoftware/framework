@@ -70,7 +70,7 @@ export default class ReactChart extends React.Component<ReactChartProps, { width
       if (newProps.data.rows.length < ReactChart.maxRowsForAnimation)
         this.setInitialTimer();
       else
-        this.state.initialLoad = false; //To use the same rendering loop
+        this.setState({ initialLoad: false }); //To use the same rendering loop
     }
   }
 

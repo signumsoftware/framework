@@ -1,7 +1,7 @@
 import * as React from 'react'
+import { Nav } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import JoyrideComponent from "./JoyrideComponent";
-import { NavItem } from '@framework/Components';
 
 export interface JoyrideNavItemProps {
   getJoyrideComponent: () => JoyrideComponent;
@@ -26,11 +26,11 @@ export default class JoyrideNavItem extends React.Component<JoyrideNavItemProps,
 
   render() {
     return (
-      <NavItem id="help-nav-item" onClick={this.onClick}>
+      <Nav.Item id="help-nav-item" onClick={this.onClick}>
         <a className="nav-link">
           <FontAwesomeIcon icon={"question-circle"} />
         </a>
-      </NavItem>
+      </Nav.Item>
     );
   }
 }

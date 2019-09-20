@@ -1,8 +1,9 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem, NavLink, LinkContainer } from '@framework/Components';
+import { LinkContainer } from '@framework/Components';
+import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
 
 
 export default class LoginDropdown extends React.Component<{}, { user: UserEntity }> {
@@ -12,26 +13,20 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
 
     if (!user)
       return (
-        <NavItem>
-          <LinkContainer to="~/auth/login" className="sf-login"><NavLink>{AuthMessage.Login.niceToString()}</NavLink>
-          </LinkContainer>
-        </NavItem>
+        <LinkContainer to="~/auth/login" className="sf-login">
+          <Nav.Link>{AuthMessage.Login.niceToString()}</Nav.Link>
+        </LinkContainer>
       );
 
     return (
-      <UncontrolledDropdown className="sf-user" id="sfUserDropDown" nav inNavbar>
-        <DropdownToggle nav caret>
-          {user.userName!}
-        </DropdownToggle>
-        <DropdownMenu right style={{ minWidth: "200px" }}>
-          <LinkContainer to="~/auth/changePassword">
-            <DropdownItem><FontAwesomeIcon icon="key" fixedWidth /> {AuthMessage.ChangePassword.niceToString()}</DropdownItem>
-          </LinkContainer>
-          <DropdownItem divider />
-          <LinkContainer to="~/auth/login"><DropdownItem><FontAwesomeIcon icon="user-plus" /> {AuthMessage.SwitchUser.niceToString()}</DropdownItem></LinkContainer>
-          <DropdownItem id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth /> {AuthMessage.Logout.niceToString()}</DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown>
+      <NavDropdown className="sf-user" id="sfUserDropDown" title={user.userName!}>
+        <LinkContainer to="~/auth/changePassword">
+          <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth /> {AuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
+        </LinkContainer>
+        <NavDropdown.Item divider />
+        <LinkContainer to="~/auth/login"><NavDropdown.Item><FontAwesomeIcon icon="user-plus" /> {AuthMessage.SwitchUser.niceToString()}</NavDropdown.Item></LinkContainer>
+        <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth /> {AuthMessage.Logout.niceToString()}</NavDropdown.Item>
+      </NavDropdown>
     );
   }
 }

@@ -5,7 +5,7 @@ import { API, TimeTrackerEntry } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
 import "./Times.css"
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
+import { Tab, Tabs } from 'react-bootstrap';
 
 interface TimesPageProps extends RouteComponentProps<{}> {
 
@@ -49,14 +49,14 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
           <button onClick={this.handleClear} className="btn btn-warning">Clear</button>
         </div>
         <br />
-        <UncontrolledTabs>
+        <Tabs id="timeMachineTabs">
           <Tab eventKey="bars" title="Bars">
             {this.renderBars()}
           </Tab>
           <Tab eventKey="table" title="Table">
             {this.renderTable()}
           </Tab>
-        </UncontrolledTabs>
+        </Tabs>
       </div>
     );
   }

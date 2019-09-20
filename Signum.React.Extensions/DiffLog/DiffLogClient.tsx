@@ -93,7 +93,7 @@ export interface DiffPair<T> {
   value: T;
 }
 
-export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {
+export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
   inSearch?: boolean;
 }

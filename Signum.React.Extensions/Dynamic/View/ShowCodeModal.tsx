@@ -4,7 +4,7 @@ import { Dic } from '@framework/Globals';
 import { openModal, IModalProps } from '@framework/Modals';
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
-import { Modal } from '@framework/Components';
+import { Modal } from 'react-bootstrap';
 
 interface ShowCodeModalProps extends React.Props<ShowCodeModal>, IModalProps {
   typeName: string;

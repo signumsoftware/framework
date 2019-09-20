@@ -3,11 +3,11 @@ import { ValueLine, EntityLine, EntityDetail, EntityRepeater } from '@framework/
 import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity, EmailAttachmentEmbedded, EmailReceptionMixin, EmailFileType } from '../Signum.Entities.Mailing'
 import { EmailTemplateMessage } from '../Signum.Entities.Mailing'
-import FileLine from '../../Files/FileLine'
+import { FileLine } from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "@framework/Signum.Entities";
-import { UncontrolledTabs, Tab } from '@framework/Components';
+import { Tabs, Tab } from 'react-bootstrap';
 import { LabelWithHelp } from '../../MachineLearning/Templates/NeuralNetworkSettings';
 import { useForceUpdate } from '@framework/Hooks'
 
@@ -55,7 +55,7 @@ export default function EmailMessage(p : { ctx: TypeContext<EmailMessageEntity> 
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
 
   return (
-    <UncontrolledTabs id="emailTabs">
+    <Tabs id="emailTabs">
       <Tab title={EmailMessageEntity.niceName()} eventKey="mainTab">
         <fieldset>
           <legend>Properties</legend>
@@ -98,7 +98,7 @@ export default function EmailMessage(p : { ctx: TypeContext<EmailMessageEntity> 
         <EmailMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />
       </Tab>
       {renderEmailReceptionMixin()}
-    </UncontrolledTabs>
+    </Tabs>
   );
 }
 

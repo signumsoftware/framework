@@ -11,7 +11,7 @@ import * as Operations from '@framework/Operations'
 import * as Constructor from '@framework/Constructor'
 import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
 import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
-import ButtonBar from '@framework/Frames/ButtonBar';
+import { ButtonBarManager } from '@framework/Frames/ButtonBar';
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
@@ -19,7 +19,7 @@ import { QueryRequest } from "@framework/FindOptions";
 import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
-import { DropdownItem } from '@framework/Components';
+import { Dropdown } from 'react-bootstrap';
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
@@ -95,7 +95,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     });
 
   if (options.entityButton) {
-    ButtonBar.onButtonBarRender.push(getEntityWordButtons);
+    ButtonBarManager.onButtonBarRender.push(getEntityWordButtons);
   }
 }
 
@@ -132,10 +132,10 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
       return {
         header: WordTemplateEntity.nicePluralName(),
         menuItems: wts.map(wt =>
-          <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+          <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
             <FontAwesomeIcon icon={["far", "file-word"]} className="icon" />
             {wt.toStr}
-          </DropdownItem>
+          </Dropdown.Item>
         )
       } as MenuItemBlock;
     });

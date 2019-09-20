@@ -6,7 +6,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, NeuralNetworkLearner } from '../Signum.Entities.MachineLearning'
 import { API } from '../PredictorClient';
 import { is } from '@framework/Signum.Entities';
-import { Popover } from '@framework/Components';
+import { Popover, OverlayTrigger } from 'react-bootstrap';
 
 export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
   handlePredictionTypeChanged = () => {
@@ -167,40 +167,24 @@ function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactN
   return React.cloneElement(element, { labelText: label } as LineBaseProps);
 }
 
-
 interface LabelWithHelpProps {
   ctx: TypeContext<LineBaseProps>;
   text: React.ReactNode;
 }
 
-interface LabelWithHelpState {
-  isOpen?: boolean
-}
+export function LabelWithHelp(p: LabelWithHelpProps) {
 
-export class LabelWithHelp extends React.Component<LabelWithHelpProps, LabelWithHelpState> {
-
-  constructor(props: LabelWithHelpProps) {
-    super(props);
-    this.state = {};
-  }
-
-  toggle = () => {
-    this.setState({ isOpen: !this.state.isOpen });
-  }
-
-  span?: HTMLSpanElement | null;
-  render() {
-    const ctx = this.props.ctx;
-    return [
-      <span ref={r => this.span = r} onClick={this.toggle} key="s">
-        {ctx.niceName()} <FontAwesomeIcon icon="question-circle" />
-      </span>,
-      <Popover placement="auto" target={() => this.span!} toggle={this.toggle} isOpen={this.state.isOpen} key="p">
-        <h3 className="popover-header">{ctx.niceName()}</h3>
-        <div className="popover-body">{this.props.text}</div>
-      </Popover>
-    ];
-  }
+    return (
+      <OverlayTrigger overlay={
+        <Popover id={p.ctx.prefix + "_popper"} placement="auto" key="p">
+          <h3 className="popover-header">{p.ctx.niceName()}</h3>
+          <div className="popover-body">{p.text}</div>
+        </Popover>}>
+        <span key="s">
+          {p.ctx.niceName()} <FontAwesomeIcon icon="question-circle" />
+        </span>
+      </OverlayTrigger>
+    );
 }
 
 function hideFor(ctx: TypeContext<NeuralNetworkSettingsEntity>, ...learners: NeuralNetworkLearner[]): React.HTMLAttributes<any> | undefined {

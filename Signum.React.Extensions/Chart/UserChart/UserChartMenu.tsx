@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { Lite, toLite, newMListElement } from '@framework/Signum.Entities'
@@ -9,7 +10,6 @@ import SearchControl from '@framework/SearchControl/SearchControl'
 import { UserChartEntity, ChartRequestModel, ChartMessage, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
 import { getQueryKey } from '@framework/Reflection';
 import * as UserAssetClient from '../../UserAssets/UserAssetClient'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
@@ -108,7 +108,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),
       parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
     }));
-    
+
     if (uc && uc.id) {
       await this.reloadList();
 
@@ -123,23 +123,19 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
 
     const label = <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {labelText}</span>;
     return (
-      <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
-        toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
-        <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
-        <DropdownMenu>
-          {
-            userCharts && userCharts.map((uc, i) =>
-              <DropdownItem key={i}
-                className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
-                onClick={() => this.handleSelect(uc)}>
-                {uc.toStr}
-              </DropdownItem>)
-          }
-          {userCharts && userCharts.length > 0 && <DropdownItem divider />}
-          {crView.props.userChart && <DropdownItem onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</DropdownItem>}
-          <DropdownItem onClick={() => this.onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
+      <DropdownButton id="userQueriesDropDown" className="sf-userquery-dropdown" toggle={this.handleSelectedToggle} isOpen={this.state.isOpen} variant="light" title={label as any}>
+        {
+          userCharts && userCharts.map((uc, i) =>
+            <Dropdown.Item key={i}
+              className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
+              onClick={() => this.handleSelect(uc)}>
+              {uc.toStr}
+            </Dropdown.Item>)
+        }
+        {userCharts && userCharts.length > 0 && <Dropdown.Divider />}
+        {crView.props.userChart && <Dropdown.Item onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
+        <Dropdown.Item onClick={() => this.onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
+      </DropdownButton>
     );
   }
 

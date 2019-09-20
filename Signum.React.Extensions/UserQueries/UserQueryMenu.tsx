@@ -9,7 +9,7 @@ import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbed
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
-import { DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 
@@ -157,24 +157,21 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
     const userQueries = this.state.userQueries;
     return (
-      <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"
-        toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
-        <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
-        <DropdownMenu>
-          {
-            userQueries && userQueries.map((uq, i) =>
-              <DropdownItem key={i}
-                className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
-                onClick={() => this.handleOnClick(uq)}>
-                {uq.toStr}
-              </DropdownItem>)
-          }
-          {userQueries && userQueries.length > 0 && <DropdownItem divider />}
-          <DropdownItem onClick={this.handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</DropdownItem>
-          {this.state.currentUserQuery && <DropdownItem onClick={this.handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
-          {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <DropdownItem onClick={() => { this.createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>}
-        </DropdownMenu>
-      </Dropdown>
+      <DropdownButton id="userQueriesDropDown" className="sf-userquery-dropdown"
+        toggle={this.handleSelectedToggle} isOpen={this.state.isOpen} variant="light" title={label}>
+        {
+          userQueries && userQueries.map((uq, i) =>
+            <Dropdown.Item key={i}
+              className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
+              onClick={() => this.handleOnClick(uq)}>
+              {uq.toStr}
+            </Dropdown.Item>)
+        }
+        {userQueries && userQueries.length > 0 && <Dropdown.Item divider />}
+        <Dropdown.Item onClick={this.handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
+        {this.state.currentUserQuery && <Dropdown.Item onClick={this.handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
+        {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { this.createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
+      </DropdownButton>
     );
   }
 

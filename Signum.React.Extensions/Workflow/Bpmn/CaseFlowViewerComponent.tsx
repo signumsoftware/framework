@@ -14,7 +14,8 @@ import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
+import { DropdownButton, Dropdown, Button } from 'react-bootstrap';
+
 
 export interface CaseFlowViewerComponentProps {
   diagramXML?: string;
@@ -163,16 +164,11 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
       <div>
         <div className="btn-toolbar">
           <Button color="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
-          <UncontrolledDropdown id="colorMenu">
-            <DropdownToggle color="light" caret>
-              {WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}
-            </DropdownToggle>
-            <DropdownMenu>
-              {this.menuItem("CaseMaxDuration")}
-              {this.menuItem("AverageDuration")}
-              {this.menuItem("EstimatedDuration")}
-            </DropdownMenu>
-          </UncontrolledDropdown>
+          <DropdownButton id="colorMenu" color="light" title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}>
+            {this.menuItem("CaseMaxDuration")}
+            {this.menuItem("AverageDuration")}
+            {this.menuItem("EstimatedDuration")}
+          </DropdownButton>
           <Button color="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
         </div>
         <div ref={de => this.divArea = de!} />
@@ -188,9 +184,9 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
   menuItem(color: CaseFlowColor) {
     return (
-      <DropdownItem onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
+      <Dropdown.Item onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
         {CaseFlowColor.niceToString(color)}
-      </DropdownItem>
+      </Dropdown.Item>
     );
   }
 }

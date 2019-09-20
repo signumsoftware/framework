@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
@@ -8,7 +8,7 @@ import NodeSelectorModal from './NodeSelectorModal'
 import { DesignerNode } from './NodeUtils'
 import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor } from './Nodes'
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { DropdownItem } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import "./DynamicViewTree.css"
 
 export interface DynamicViewTreeProps {
@@ -79,16 +79,16 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
 
     return (
       <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-        {no.isContainer && <DropdownItem onClick={this.handleAddChildren}><FontAwesomeIcon icon="arrow-right" />&nbsp; {DynamicViewMessage.AddChild.niceToString()}</DropdownItem>}
-        {!isRoot && <DropdownItem onClick={this.handleAddSibling}><FontAwesomeIcon icon="arrow-down" />&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</DropdownItem>}
+        {no.isContainer && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="arrow-right" />&nbsp; {DynamicViewMessage.AddChild.niceToString()}</Dropdown.Item>}
+        {!isRoot && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="arrow-down" />&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</Dropdown.Item>}
 
-        {no.isContainer && <DropdownItem divider={true} />}
+        {no.isContainer && <Dropdown.Item divider={true} />}
 
-        {no.isContainer && cn.children.length == 0 && dn.route && <DropdownItem onClick={this.handleGenerateChildren}><FontAwesomeIcon icon="bolt" />&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</DropdownItem>}
-        {no.isContainer && cn.children.length > 0 && <DropdownItem onClick={this.handleClearChildren} color="danger"><FontAwesomeIcon icon="trash" />&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</DropdownItem>}
+        {no.isContainer && cn.children.length == 0 && dn.route && <Dropdown.Item onClick={this.handleGenerateChildren}><FontAwesomeIcon icon="bolt" />&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</Dropdown.Item>}
+        {no.isContainer && cn.children.length > 0 && <Dropdown.Item onClick={this.handleClearChildren} color="danger"><FontAwesomeIcon icon="trash" />&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</Dropdown.Item>}
 
-        {!isRoot && <DropdownItem divider={true} />}
-        {!isRoot && <DropdownItem onClick={this.handleRemove} color="danger"><FontAwesomeIcon icon="times" />&nbsp; {DynamicViewMessage.Remove.niceToString()}</DropdownItem>}
+        {!isRoot && <Dropdown.Item divider={true} />}
+        {!isRoot && <Dropdown.Item onClick={this.handleRemove} color="danger"><FontAwesomeIcon icon="times" />&nbsp; {DynamicViewMessage.Remove.niceToString()}</Dropdown.Item>}
       </ContextMenu>
     );
   }

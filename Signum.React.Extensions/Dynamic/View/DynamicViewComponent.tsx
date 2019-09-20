@@ -16,7 +16,7 @@ import { DynamicViewTabs } from './DynamicViewTabs'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
-import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu, UncontrolledTabs, Tab } from '@framework/Components';
+import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 
@@ -264,20 +264,18 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
       <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
         {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
         <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
-        <Dropdown id="bg-nested-dropdown" tag={false} toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm">
-          <DropdownToggle>{" … "}</DropdownToggle>
-          <DropdownMenu>
-            {operations[DynamicViewOperation.Create.key] && <DropdownItem onClick={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
-            {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem onClick={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
-            {this.state.viewNames && this.state.viewNames.length > 0 && <DropdownItem divider={true} />}
-            {this.state.viewNames && this.state.viewNames.map(vn => <DropdownItem key={vn}
-              className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
-              onClick={() => this.handleChangeView(vn)}>
-              {vn}
-            </DropdownItem>)}
-          </DropdownMenu>
-        </Dropdown>
-      </div >);
+        <DropdownButton id="bg-nested-dropdown" tag={false} toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm" title=" … ">
+          {operations[DynamicViewOperation.Create.key] && <Dropdown.Item onClick={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</Dropdown.Item>}
+          {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <Dropdown.Item onClick={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</Dropdown.Item>}
+          {this.state.viewNames && this.state.viewNames.length > 0 && <Dropdown.Item divider={true} />}
+          {this.state.viewNames && this.state.viewNames.map(vn => <Dropdown.Item key={vn}
+            className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
+            onClick={() => this.handleChangeView(vn)}>
+            {vn}
+          </Dropdown.Item>)}
+        </DropdownButton>
+      </div >
+    );
   }
 }
 

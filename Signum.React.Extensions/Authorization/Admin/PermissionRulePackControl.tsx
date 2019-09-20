@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations/EntityOperations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
@@ -7,7 +8,6 @@ import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, Permission
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
-import { Button } from '@framework/Components';
 
 export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }> implements IRenderButtons {
   handleSaveClick = (bc: ButtonsContext) => {

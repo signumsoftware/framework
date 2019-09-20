@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'

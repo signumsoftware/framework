@@ -11,8 +11,9 @@ import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import { Modal, Typeahead, UncontrolledTabs, Tab, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { Typeahead } from '@framework/Components';
+import { Modal, Tabs, Tab, DropdownButton, Dropdown } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { globalModules } from '../../Dynamic/View/GlobalModules';
 
 export interface ExpressionOrValueProps {
@@ -576,13 +577,10 @@ export interface SelectorConfig<T> {
 `;
 
   return (
-    <UncontrolledDropdown size="xs">
-      <DropdownToggle color="info" caret>{DynamicViewMessage.ModulesHelp.niceToString()}</DropdownToggle>
-      <DropdownMenu>
+    <DropdownButton id="designer_dropdown" size="xs" variante="info" title={DynamicViewMessage.ModulesHelp.niceToString()}>
         {Dic.getKeys(globalModules).map((moduleName, i) =>
-          <DropdownItem style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handleModulesClick(moduleName)}>{moduleName}</DropdownItem>)}
-      </DropdownMenu>
-    </UncontrolledDropdown>
+          <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handleModulesClick(moduleName)}>{moduleName}</Dropdown.Item>)}
+    </DropdownButton>
   );
 
   function handleModulesClick(key: string) {
@@ -607,13 +605,10 @@ export interface SelectorConfig<T> {
 export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
 
   return (
-    <UncontrolledDropdown size="xs">
-      <DropdownToggle color="success" caret>{DynamicViewMessage.PropsHelp.niceToString()}</DropdownToggle>
-      <DropdownMenu>
+    <DropdownButton id="props_help_dropdown" variant="success" size="xs" title={DynamicViewMessage.PropsHelp.niceToString()}>
         {Dic.map(p.node.context.propTypes, (name, typeName, i) =>
-          <DropdownItem style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handlePropsClick(name)}>{name}: {typeName}</DropdownItem>)}
-      </DropdownMenu>
-    </UncontrolledDropdown>
+          <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handlePropsClick(name)}>{name}: {typeName}</Dropdown.Item>)}
+    </DropdownButton>
   );
 
   function handlePropsClick(val: string) {

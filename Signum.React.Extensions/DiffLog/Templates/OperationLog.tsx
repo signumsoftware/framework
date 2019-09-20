@@ -8,7 +8,8 @@ import { DiffLogMixin, DiffLogMessage } from '../Signum.Entities.DiffLog'
 import { API, DiffLogResult, DiffPair } from '../DiffLogClient'
 import { TypeContext } from '@framework/TypeContext'
 import { DiffDocument } from './DiffDocument'
-import { UncontrolledTabs, Tab, LinkContainer } from '@framework/Components';
+import { Tabs, Tab } from 'react-bootstrap';
+import { LinkContainer } from '@framework/Components';
 import "./DiffLog.css"
 
 export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
@@ -68,7 +69,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
     const result = this.state.result;
     const target = this.props.ctx.value.target;
     return (
-      <UncontrolledTabs id="diffTabs" defaultEventKey="diff">
+      <Tabs id="diffTabs" defaultEventKey="diff">
         {result && result.prev && this.renderPrev(result.prev)}
         {result && result.diffPrev && this.renderPrevDiff(result.diffPrev)}
         {this.renderInitialState()}
@@ -76,7 +77,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         {this.renderFinalState()}
         {result && result.diffNext && this.renderNextDiff(result.diffNext)}
         {result && (result.next ? this.renderNext(result.next) : target && this.renderCurrentEntity(target))}
-      </UncontrolledTabs>
+      </Tabs>
     );
   }
 
