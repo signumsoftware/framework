@@ -1,13 +1,14 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { getTypeInfos } from '../Reflection'
+import { getTypeInfos, TypeReference } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
-import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute } from '../Lines'
 import { Type } from '../Reflection';
 import { EntityRepeater } from './EntityRepeater';
 import { MultiValueLine } from './MultiValueLine';
+import { faUnderline } from '@fortawesome/free-solid-svg-icons';
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity>, viewName?: string }> {
   render() {
@@ -47,78 +48,88 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
   }
 
   static getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
-    const mi = ctx.propertyRoute.member;
+    return DynamicComponent.getAppropiateComponentFactory(ctx.propertyRoute)(ctx);
+  }
 
+  static getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
+    const mi = pr.member;
     if (mi && (mi.name == "Id" || mi.notVisible == true))
-      return undefined;
+      return ctx => undefined;
 
-    const ccProp = DynamicComponent.customPropertyComponent[ctx.propertyRoute.toString()];
+    const ccProp = DynamicComponent.customPropertyComponent[pr.toString()];
     if (ccProp) {
-      return ccProp(ctx) || undefined;
+      return ctx => ccProp(ctx) || undefined;
     }
 
-    const tr = ctx.propertyRoute.typeReference();
+    const tr = pr.typeReference();
     const ccType = DynamicComponent.customTypeComponent[tr.name];
     if (ccType) {
-      var result = ccType(ctx);
-      if (result != "continue")
-        return result || undefined;
+      var basic = DynamicComponent.getAppropiateComponentFactoryBasic(tr);
+
+      return ctx => {
+        var result = ccType(ctx);
+        return result == "continue" ? basic(ctx) : result || undefined;
+      };
     }
 
+    return DynamicComponent.getAppropiateComponentFactoryBasic(tr);
+  }
+
+  static getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
     let tis = getTypeInfos(tr);
     if (tis.length == 1 && tis[0] == undefined)
       tis = [];
 
     if (tr.isCollection) {
       if (tr.name == "[ALL]")
-        return <EntityStrip ctx={ctx} />;
+        return ctx => <EntityStrip ctx={ctx} />;
 
       if (tis.length) {
         if (tis.length == 1 && tis.first().kind == "Enum")
-          return <EnumCheckboxList ctx={ctx} />;
+          return ctx => <EnumCheckboxList ctx={ctx} />;
 
         if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart"))
-          return <EntityTable ctx={ctx} />;
+          return ctx => <EntityTable ctx={ctx} />;
 
         if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-          return <EntityRepeater ctx={ctx} />;
+          return ctx => <EntityRepeater ctx={ctx} />;
 
         if (tis.every(t => t.isLowPopulation == true))
-          return <EntityCheckboxList ctx={ctx} />;
+          return ctx => <EntityCheckboxList ctx={ctx} />;
 
-        return <EntityStrip ctx={ctx} />;
+        return ctx => <EntityStrip ctx={ctx} />;
       }
 
       if (tr.isEmbedded)
-        return <EntityTable ctx={ctx} />;
+        return ctx => <EntityTable ctx={ctx} />;
 
-      return <MultiValueLine ctx={ctx} />;
+      return ctx => <MultiValueLine ctx={ctx} />;
 
     } else {
 
       if (tr.name == "[ALL]")
-        return <EntityLine ctx={ctx} />;
+        return ctx => <EntityLine ctx={ctx} />;
 
       if (tis.length) {
         if (tis.length == 1 && tis.first().kind == "Enum")
-          return <ValueLine ctx={ctx} />;
+          return ctx => <ValueLine ctx={ctx} />;
 
         if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-          return <EntityDetail ctx={ctx} />;
+          return ctx => <EntityDetail ctx={ctx} />;
 
         if (tis.every(t => t.isLowPopulation == true))
-          return <EntityCombo ctx={ctx} />;
+          return ctx => <EntityCombo ctx={ctx} />;
 
-        return <EntityLine ctx={ctx} />;
+        return ctx => <EntityLine ctx={ctx} />;
       }
 
       if (tr.isEmbedded)
-        return <EntityDetail ctx={ctx} />;
+        return ctx =><EntityDetail ctx={ctx} />;
 
       if (ValueLine.getValueLineType(tr) != undefined)
-        return <ValueLine ctx={ctx} />;
+        return ctx =><ValueLine ctx={ctx} />;
 
-      return undefined;
+      return ctx => undefined;
     }
   }
 }

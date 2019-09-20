@@ -2,12 +2,13 @@ import * as React from 'react'
 import { classes, Dic, DomUtils } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import * as Navigator from '../Navigator'
-import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
+import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is, isEntity } from '../Signum.Entities'
 import { EntityBase, TitleManager } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent from './DynamicComponent'
 import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
@@ -26,12 +27,13 @@ export interface EntityTableProps extends EntityListBaseProps {
   createOnBlurLastRow?: boolean;
 }
 
-export interface EntityTableColumn<T, RS> {
+export interface EntityTableColumn<T, RS = undefined> {
   property?: ((a: T) => any) | string;
   header?: React.ReactNode | null;
   headerHtmlAttributes?: React.ThHTMLAttributes<any>;
   cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
   template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined | false;
+  mergeCells?: (boolean | ((a: T) => any) | string)
 }
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
@@ -41,11 +43,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
     scrollable: false
   };
 
-  static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
-    return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, any>[];
-  }
-
-  static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
+  static typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, any> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
     return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, RS>[];
   }
 
@@ -68,6 +66,33 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
         }) as EntityTableColumn<ModifiableEntity, any>);
     }
+
+    var pr = state.ctx.propertyRoute.addMember("Indexer", "");
+    state.columns.forEach(c => {
+      if (c.template === undefined) {
+        if (c.property == null)
+          throw new Error("Column has no property and no template");
+
+        var factory = DynamicComponent.getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property) : pr.addLambda(c.property!));
+
+        c.template = (ctx, row, state) => {
+          var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
+          return factory(subCtx);
+        };
+      }
+
+      if (c.mergeCells == true) {
+        if (c.property == null)
+          throw new Error("Column has no property but mergeCells is true");
+
+        c.mergeCells = c.property;
+      }
+
+      if (typeof c.mergeCells == "string") {
+        const prop = c.mergeCells;
+        c.mergeCells = a => (a as any)[prop];
+      }
+    });
   }
 
 
@@ -175,6 +200,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     var isEmpty = this.props.avoidEmptyTable && ctx.value.length == 0;
 
+    const s = this.state;
+    var firstColumnVisible = !(s.readOnly || s.remove == false && s.move == false && s.view == false);
     return (
       <div ref={d => this.containerDiv = d}
         className={this.props.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
@@ -184,7 +211,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             !isEmpty &&
             <thead ref={th => this.thead = th}>
               <tr className={this.props.theadClasses || "bg-light"}>
-                <th></th>
+                {firstColumnVisible && <th></th>}
                 {
                   this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                     {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
@@ -196,15 +223,17 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           <tbody>
             {
               this.getMListItemContext(ctx)
-                .map(mlec => <EntityTableRow key={this.keyGenerator.getKey(mlec.value)}
-                  index={mlec.index!}
+                .map((mlec, i, array) => <EntityTableRow key={this.keyGenerator.getKey(mlec.value)}
+                  ctx={this.props.rowSubContext ? this.props.rowSubContext(mlec) : mlec}
+                  array={array}
+                  index={i}
+                  firstColumnVisible={firstColumnVisible}
                   onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                   fetchRowState={this.props.fetchRowState}
                   onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
                   onView={this.canView(mlec.value) && !readOnly ? e => this.handleViewElement(e, mlec.index!) : undefined}
                   draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, "v") : undefined}
                   columns={this.state.columns!}
-                  ctx={this.props.rowSubContext ? this.props.rowSubContext(mlec) : mlec}
                   onBlur={this.props.createOnBlurLastRow && this.state.create && !readOnly? this.handleBlur : undefined}
                 />
                 )
@@ -279,7 +308,9 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
 export interface EntityTableRowProps {
   ctx: TypeContext<ModifiableEntity>;
+  array: TypeContext<ModifiableEntity>[];
   index: number;
+  firstColumnVisible: boolean;
   columns: EntityTableColumn<ModifiableEntity, any>[],
   onRemove?: (event: React.MouseEvent<any>) => void;
   onView?: (event: React.MouseEvent<any>) => void;
@@ -313,7 +344,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
         onDrop={drag && drag.onDrop}
         className={drag && drag.dropClass}
         onBlur={this.props.onBlur && (e => this.props.onBlur!(this, e))}>
-        <td>
+        {this.props.firstColumnVisible && < td >
           <div className="item-group">
             {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={this.props.onRemove}
@@ -334,8 +365,39 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
               {EntityBase.viewIcon}
             </a>}
           </div>
-        </td>
-        {this.props.columns.map((c, i) => <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, this, this.state.rowState)}>{this.getTemplate(c)}</td>)}
+        </td>}
+        {this.props.columns.map((c, i) => {
+
+          var td = <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, this, this.state.rowState)}>{this.getTemplate(c)}</td>;
+
+          var mc = c.mergeCells as ((a: any) => any) | undefined
+
+          if (!mc)
+            return td;
+
+          var equals = (a: any, b: any) => {
+            var ka = mc!(a);
+            var kb = mc!(b);
+            return ka == kb || is(ka, kb, false, false);
+          }
+
+          var current = this.props.ctx.value;
+          if (this.props.index > 0 && equals(this.props.array[this.props.index - 1].value, current))
+            return null;
+
+          var rowSpan = 1;
+          for (var i = this.props.index + 1; i < this.props.array.length; i++) {
+            if (equals(this.props.array[i].value, current))
+              rowSpan++;
+            else
+              break;
+          }
+
+          if (rowSpan == 1)
+            return td;
+
+          return React.cloneElement(td, { rowSpan });
+        })}
       </tr>
     );
   }
@@ -346,16 +408,6 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
     if (col.template === null)
       return null;
 
-    if (col.template !== undefined)
-      return col.template(this.props.ctx, this, this.state.rowState);
-
-    if (col.property == null)
-      throw new Error("Column has no property and no template");
-
-    if (typeof col.property == "string")
-      return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property)); /*string overload*/
-    else
-      return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property)); /*lambda overload*/
-
+    return col.template!(this.props.ctx, this, this.state.rowState);
   }
 }

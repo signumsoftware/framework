@@ -170,7 +170,7 @@ export function parseLite(lite: string): Lite<Entity> {
   };
 }
 
-export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false) {
+export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
 
   if (a == undefined && b == undefined)
     return true;
@@ -181,8 +181,12 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
   const aType = (a as T).Type || (a as Lite<T>).EntityType;
   const bType = (b as T).Type || (b as Lite<T>).EntityType;
 
-  if (!aType || !bType)
-    throw new Error("No Type found");
+  if (!aType || !bType) {
+    if (assertTypesFound)
+      throw new Error("No Type found");
+    else
+      return false;
+  }
 
   if (aType != bType)
     return false;

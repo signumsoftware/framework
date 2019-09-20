@@ -100,6 +100,8 @@ export class MultiValueLineElement extends React.Component<MultiValueLineElement
   render() {
     const ctx = this.props.ctx;
 
+    var renderItem = this.props.onRenderItem || DynamicComponent.getAppropiateComponentFactory(ctx.propertyRoute)
+
     return (
       <tr>
         <td>
@@ -111,7 +113,7 @@ export class MultiValueLineElement extends React.Component<MultiValueLineElement
             </a>}
         </td>
         <td>
-          {this.props.onRenderItem ? this.props.onRenderItem(ctx) : DynamicComponent.getAppropiateComponent(ctx)}
+          {renderItem(ctx)}
         </td>
       </tr>
     );
