@@ -60,6 +60,9 @@ export function MultiValueLine(props: MultiValueLineProps) {
   const p = c.props;
   const list = p.ctx.value;
 
+  if (c.isHidden)
+    return null;
+
   return (
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}

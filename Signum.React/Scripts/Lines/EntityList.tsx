@@ -124,6 +124,9 @@ export function EntityList(props: EntityListProps) {
 
   const selectedIndex = c.getSelectedIndex();
 
+  if (c.isHidden)
+    return null;
+
   return (
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}

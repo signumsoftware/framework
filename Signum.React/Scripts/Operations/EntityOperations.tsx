@@ -11,12 +11,12 @@ import {
   operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
   CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString, isOperationAllowed
 } from '../Operations'
-import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button, Dropdown } from "../Components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ButtonProps } from "../Components/Button";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
 import { func } from "prop-types";
+import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
+import { BsColor } from "../Components";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -78,17 +78,13 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         order: group.order != undefined ? group.order : 100,
         shortcut: e => gr.elements.some(eoc => eoc.onKeyDown(e)),
         button: (
-          <UncontrolledDropdown key={i}>
-            <DropdownToggle data-key={group.key} color={group.color || "light"} className={group.cssClass} caret>
-              {group.text()}
-            </DropdownToggle>
-            <DropdownMenu>
-              {gr.elements
+          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.color || "light"}>
+            {
+              gr.elements
                 .orderBy(a => a.settings && a.settings.order)
                 .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group} />)
-              }
-            </DropdownMenu>
-          </UncontrolledDropdown >
+            }
+          </DropdownButton>
         )
       } as ButtonBarElement];
     }
@@ -149,11 +145,14 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
 interface OperationButtonProps extends ButtonProps {
   eoc: EntityOperationContext<any /*Entity*/>;
   group?: EntityOperationGroup;
+  variant?: BsColor;
   canExecute?: string | null;
+  className?: string;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
+  children?: React.ReactNode
 }
 
-export function OperationButton({ eoc, group, onOperationClick, canExecute, color, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ eoc, group, onOperationClick, canExecute, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (!isOperationAllowed(eoc.operationInfo.key, (eoc.entity as Entity).Type))
     return null;
@@ -163,55 +162,53 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, colo
 
   const disabled = !!canExecute;
 
-  let elem: HTMLElement | null;
-
-  const tooltip = canExecute &&
-    (
-      <UncontrolledTooltip placement={group ? "right" : "bottom"} target={() => elem!} key="tooltip">
-        {canExecute}
-      </UncontrolledTooltip>
-    );
-
   var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
   if (group) {
+
+    const item =
+      <Dropdown.Item
+        {...props}
+        disabled={disabled}
+        title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
+        onClick={disabled ? undefined : handleOnClick}
+        data-operation={eoc.operationInfo.key}>
+        {renderChildren()}
+      </Dropdown.Item>;
+
+    if (canExecute)
+      return (
+        <OverlayTrigger overlay={<Tooltip id={eoc.operationInfo.key + "_tooltip"} placement={"right"}>{canExecute}</Tooltip>}>
+          {item}
+        </OverlayTrigger>
+      );
+
     return (
       <>
-        <DropdownItem
-          {...props}
-          key="di"
-          innerRef={r => elem = r}
-          disabled={disabled}
-          title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-          onClick={disabled ? undefined : handleOnClick}
-          data-operation={eoc.operationInfo.key}>
-          {renderChildren()}
-        </DropdownItem>,
-        tooltip,
-        tooltip == null && alternatives && alternatives.map(a => renderAlternative(a))
-    </>
+        {item},
+        alternatives && alternatives.map(a => renderAlternative(a))
+      </>
     );
   }
 
 
-  var button = <Button color={eoc.color}
+  var button = <Button variant={eoc.color}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-    innerRef={r => elem = r}
     className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
     onClick={disabled ? undefined : handleOnClick}
     data-operation={eoc.operationInfo.key}>
     {renderChildren()}
   </Button>;
 
-  if (tooltip)
+  if (canExecute) {
     return (
-      <>
-        button,
-        tooltip
-      </>
+      <OverlayTrigger overlay={<Tooltip id={eoc.operationInfo.key + "_tooltip"} placement={"bottom"}>{canExecute}</Tooltip>}>
+        {button}
+      </OverlayTrigger>
     );
+  }
 
   if (alternatives == undefined || alternatives.length == 0)
     return button;
@@ -241,20 +238,20 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, colo
     return button;
 
   return (
-    <UncontrolledDropdown group>
+    <Dropdown as={ButtonGroup}>
       {button}
-      <DropdownToggle caret split color={eoc.color} />
-      <DropdownMenu right>
+      <Dropdown.Toggle split color={eoc.color} id={eoc.operationInfo.key + "_split"} />
+      <Dropdown.Menu alignRight>
         {dropdownAlternatives.map(a => renderAlternative(a))}
-      </DropdownMenu>
-    </UncontrolledDropdown>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 
 
   function renderAlternative(aos: AlternativeOperationSetting<Entity>) {
 
     return (
-      <DropdownItem
+      <Dropdown.Item
         color={aos.color}
         className={aos.classes}
         key={aos.name}
@@ -262,7 +259,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, colo
         onClick={() => aos.onClick(eoc)}
         data-alternative={aos.name}>
         {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}
-      </DropdownItem>
+      </Dropdown.Item>
     );
   }
 

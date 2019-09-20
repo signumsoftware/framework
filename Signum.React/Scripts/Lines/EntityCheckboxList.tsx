@@ -36,6 +36,9 @@ export function EntityCheckboxList(props: EntityCheckboxListProps) {
   const c = new EntityCheckboxListController(props);
   const p = c.props;
 
+  if (c.isHidden)
+    return null;
+
   if (p.avoidFieldSet == true)
     return (
       <div className={classes("SF-checkbox-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>

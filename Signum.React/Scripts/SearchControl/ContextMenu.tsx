@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes, combineFunction, DomUtils } from '../Globals'
 import * as PropTypes from "prop-types";
-import { DropdownItemProps } from '../Components';
+import { DropdownItemProps } from 'react-bootstrap/DropdownItem';
 
 export interface ContextMenuPosition {
   left: number;

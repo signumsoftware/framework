@@ -5,7 +5,7 @@ import { PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
 export { Binding, ReadonlyBinding, PropertyRoute };
 
 import { tasks, ChangeEvent, LineBaseController, LineBaseProps } from './Lines/LineBase'
-export { tasks, ChangeEvent }
+export { tasks, ChangeEvent, LineBaseProps }
 
 import { FormGroup, FormGroupProps } from './Lines/FormGroup'
 export { FormGroup, FormGroupProps }
@@ -22,6 +22,8 @@ export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 
 import { EntityBaseController } from './Lines/EntityBase'
 export { EntityBaseController }
+
+export { Retrieve } from './Lines/Retrieve'
 
 export { EntityLine } from './Lines/EntityLine'
 

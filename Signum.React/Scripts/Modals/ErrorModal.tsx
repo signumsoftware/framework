@@ -5,10 +5,10 @@ import { Dic } from '../Globals';
 import { ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, NormalWindowMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
-import { Modal } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { newLite } from '../Reflection';
+import { Modal } from 'react-bootstrap';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps {
@@ -19,13 +19,13 @@ export default function ErrorModal(p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
   const [showDetails, setShowDetails] = React.useState(false);
-  
-  function handleShowStackTrace (e: React.MouseEvent<any>) {
+
+  function handleShowStackTrace(e: React.MouseEvent<any>) {
     e.preventDefault();
     setShowDetails(!showDetails);
   }
 
-  function handleOnExited () {
+  function handleOnExited() {
     p.onExited!(undefined);
   }
 
@@ -34,10 +34,10 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 
 
-    const e = p.error;
+  const e = p.error;
 
-    const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
-    const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
+  const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
+  const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
   return (
     <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg">
@@ -124,7 +124,6 @@ ErrorModal.showError = (error: any): Promise<void> => {
   return openModal<void>(<ErrorModal error={error} />);
 }
 
-
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
 
   if (typeof message == "string")
@@ -132,6 +131,3 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
 
   return message;
 }
-
-
-

@@ -4,10 +4,10 @@ import { openModal, IModalProps } from '../Modals';
 import { FindOptions, FindMode, ResultRow, ModalFindOptions } from '../FindOptions'
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps } from './SearchControl'
-import { Modal } from '../Components';
-import { ModalHeaderButtons } from '../Components/Modal';
 import { AutoFocus } from '../Components/AutoFocus';
 import { SearchMessage } from '../Signum.Entities';
+import { ModalHeaderButtons } from '../Components/ModalHeaderButtons';
+import { Modal } from 'react-bootstrap';
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
   findOptions: FindOptions;

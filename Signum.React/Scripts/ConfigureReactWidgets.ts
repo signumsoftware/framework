@@ -66,7 +66,7 @@ export function configure() {
       return getMoment(culture, value, undefined).format(_format);
     }
   };
-  ReactWidgets.setDateLocalizer(localizer);
+  (ReactWidgets as any).setDateLocalizer(localizer);
 
 }
 

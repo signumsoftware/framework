@@ -8,7 +8,7 @@ import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } 
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
-import ValidationErrors from './ValidationErrors'
+import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
@@ -177,7 +177,7 @@ export default function FramePage(p: FramePageProps) {
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
-      {FunctionalAdapter.withRef(< ValidationErrors entity={state.pack.entity} prefix="framePage" />, validationErrors)}
+      <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
         {embeddedWidgets.top}
       <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
         <ErrorBoundary>

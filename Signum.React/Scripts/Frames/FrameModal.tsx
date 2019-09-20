@@ -9,17 +9,18 @@ import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel } from '../Reflection'
-import ValidationErrors from './ValidationErrors'
+import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
 import { EntityOperationContext } from '../Operations'
 import { ViewPromise } from "../Navigator";
-import { BsSize, Modal, ErrorBoundary } from '../Components';
-import { ModalHeaderButtons } from '../Components/Modal';
+import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { instanceOf } from 'prop-types';
 import { useStateWithPromise, useForceUpdate } from '../Hooks'
+import { Modal } from 'react-bootstrap'
+import { ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 
 interface FrameModalProps extends IModalProps {
   title?: string;
@@ -55,7 +56,7 @@ export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<I
   const okClicked = React.useRef(false);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component>(null);
-  const validationErrors = React.useRef<React.Component>(null);
+  const validationErrors = React.useRef<ValidationErrorHandle>(null);
 
   const forceUpdate = useForceUpdate();
    
@@ -172,7 +173,7 @@ export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<I
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
 
   return (
-    <Modal size={p.modalSize || settings && settings.modalSize || "lg"} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-popup-control" >
+    <Modal size={p.modalSize || settings && settings.modalSize || "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-popup-control" >
       <ModalHeaderButtons
         onClose={p.isNavigate ? handleCancelClicked : undefined}
         onOk={!p.isNavigate ? handleOkClicked : undefined}
@@ -237,7 +238,7 @@ export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<I
       <div className="modal-body">
         {renderWidgets({ ctx: ctx, pack: pc.pack })}
         {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
-        {FunctionalAdapter.withRef(< ValidationErrors entity={pc.pack.entity} prefix={prefix} />, validationErrors)}
+        <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
         {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>

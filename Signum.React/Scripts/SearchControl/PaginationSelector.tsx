@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as Finder from '../Finder'
 import { classes } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath } from '../FindOptions'

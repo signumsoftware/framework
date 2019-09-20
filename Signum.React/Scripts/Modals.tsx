@@ -2,7 +2,6 @@ import * as Navigator from './Navigator';
 
 import * as React from 'react'
 import { FunctionalAdapter } from './Frames/FrameModal';
-import { Modal } from 'react-overlays';
 
 declare global {
   interface KeyboardEvent {

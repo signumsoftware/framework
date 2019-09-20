@@ -2,7 +2,8 @@ import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
 import { TypeInfo } from './Reflection'
-import { Modal, BsSize } from './Components';
+import { BsSize } from './Components';
+import { Modal } from 'react-bootstrap';
 
 interface SelectorModalProps extends IModalProps {
   options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
@@ -31,7 +32,7 @@ export default function SelectorModal(p: SelectorModalProps) {
   }
 
   return (
-    <Modal size={p.size || "sm"} show={show} onExited={handleOnExited}
+    <Modal size={p.size || "sm" as any} show={show} onExited={handleOnExited}
       className="sf-selector-modal" dialogClassName={p.dialogClassName} onHide={handleCancelClicked}>
       <div className="modal-header">
         {p.title &&

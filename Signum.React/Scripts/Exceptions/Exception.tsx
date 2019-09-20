@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, EntityLine, TypeContext } from '../Lines'
-import { Tab, UncontrolledTabs } from '../Components/Tabs';
+import { Tab, Tabs } from 'react-bootstrap';
 
 export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
   const ctx = p.ctx;
@@ -31,13 +31,13 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
       <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></h3>
       <pre><code>{ctx.value.exceptionMessage}</code></pre>
-      <UncontrolledTabs>
+      <Tabs id="exceptionTabs">
         {codeTab(0, a => a.stackTrace)}
         {codeTab(1, a => a.data)}
         {codeTab(2, a => a.queryString)}
         {codeTab(3, a => a.form)}
         {codeTab(4, a => a.session)}
-      </UncontrolledTabs>
+      </Tabs>
     </div>
   );
 

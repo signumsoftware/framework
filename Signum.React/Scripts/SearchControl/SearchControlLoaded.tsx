@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as moment from 'moment'
-import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
@@ -31,6 +30,8 @@ import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
+import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import DropdownToggle from 'react-bootstrap/DropdownToggle'
 
 export interface ShowBarExtensionOption { }
 
@@ -771,17 +772,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return {
       order: -1,
       button:
-        <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
-          isOpen={this.state.isSelectOpen}
-          toggle={this.handleSelectedToggle}
+        <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected ml-2" title={title}
+          show={this.state.isSelectOpen}
+          onToggle={this.handleSelectedToggle}
           disabled={this.state.selectedRows!.length == 0}>
-          <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
-          <DropdownMenu>
-            {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-              this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
-                this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-          </DropdownMenu>
-        </Dropdown>
+          {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
+            this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
+              this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+        </DropdownButton>
     };
   }
 
@@ -813,7 +811,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
 
     if (!this.state.showFilters)
-      this.state.showFilters = true;
+      this.setState({ showFilters: true });
 
     this.handleFiltersChanged();
 
@@ -873,25 +871,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const menuItems: React.ReactElement<any>[] = [];
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex))
-      menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
+      menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</Dropdown.Item>);
 
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
       if (menuItems.length)
-        menuItems.push(<DropdownItem divider />);
+        menuItems.push(<Dropdown.Item divider />);
 
-      menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
-      menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
-      menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
+      menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</Dropdown.Item>);
+      menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</Dropdown.Item>);
+      menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</Dropdown.Item>);
     }
 
     if (cm.rowIndex != undefined) {
 
       if (this.state.currentMenuItems == undefined) {
-        menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
+        menuItems.push(<Dropdown.Item header>{JavascriptMessage.loading.niceToString()}</Dropdown.Item>);
       } else {
         if (menuItems.length && this.state.currentMenuItems.length)
-          menuItems.push(<DropdownItem divider />);
+          menuItems.push(<Dropdown.Item divider />);
 
         menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
       }
@@ -1242,14 +1240,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
-      const message = mark && mark.message;
 
-      const id = message && "result_row_" + i;
-
-      return (
+      var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row)}
-          id={id}
           {...ra}
           className={classes(mark && mark.className, ra && ra.className)}>
           {this.props.allowSelection &&
@@ -1271,10 +1265,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               </td>)
           }
 
-          {message && id && <UncontrolledTooltip placement="bottom" target={id}>
-            {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
-          </UncontrolledTooltip>}
         </tr>
+      );
+
+      const message = mark && mark.message;
+      if (!message)
+        return tr;
+
+      return (
+        <OverlayTrigger
+          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+          {tr}
+        </OverlayTrigger>
       );
     });
   }

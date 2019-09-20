@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { Tab } from '../Components/Tabs'
 import { FindOptions, FilterOption, isFilterGroupOption, FilterGroupOption, FilterConditionOption } from '../FindOptions'
 import { ModifiableEntity } from '../Signum.Entities'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute } from '../Reflection'
 import { ColumnOption, OrderOption, Pagination } from '../Search';
+import { Tab } from 'react-bootstrap'
 
 export class ReactVisitor {
     visitChild(child: React.ReactChild): React.ReactNode {

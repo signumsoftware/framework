@@ -2,10 +2,11 @@ import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
-import { Modal, BsSize } from '../Components';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
+import { BsSize } from '../Components';
+import { Modal } from 'react-bootstrap';
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
@@ -155,7 +156,6 @@ export default function MessageModal(p: MessageModalProps) {
   return (
     <Modal show={show} onExited={handleOnExited}
       dialogClassName={classes("message-modal", p.size && "modal-" + p.size)}
-      size={p.size}
       onHide={handleCancelClicked} autoFocus={true}>
       <div className={classes("modal-header", dialogHeaderClass(p.style))}>
         {renderTitle()}

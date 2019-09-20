@@ -6,8 +6,9 @@ import { TypeContext } from './TypeContext'
 import { ValueLineType, ValueLine } from './Lines/ValueLine'
 import { ValueLineProps } from "./Lines";
 import { MemberInfo } from './Reflection';
-import { Modal, BsSize } from './Components';
+import { BsSize } from './Components';
 import { useForceUpdate } from './Hooks';
+import { Modal } from 'react-bootstrap';
 
 interface ValueLineModalProps extends IModalProps {
   options: ValueLineModalOptions;
@@ -51,7 +52,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   const valueOnChanged = p.options.allowEmptyValue == false ? () => forceUpdate() : undefined;
 
   return (
-    <Modal size={p.options.modalSize || "lg"} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
+    <Modal size={p.options.modalSize || "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
       <div className="modal-header">
         <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
         <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>

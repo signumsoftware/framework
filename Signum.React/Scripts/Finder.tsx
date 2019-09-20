@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as moment from "moment"
-import * as numbro from "numbro"
+import numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'

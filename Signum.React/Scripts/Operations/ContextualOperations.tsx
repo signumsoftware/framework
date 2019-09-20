@@ -10,10 +10,9 @@ import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/Contextu
 import {
   operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults
 } from '../Operations'
-import { DropdownItem } from "../Components/DropdownItem";
-import { UncontrolledTooltip } from "../Components/Tooltip";
 import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -44,7 +43,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
     .filter(coc => coc != undefined)
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order)
-    .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
+    .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
 
   if (!menuItems.length)
     return undefined;
@@ -143,7 +142,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       .filter(coc => !coc.isReadonly || showOnReadonly(coc))
       .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
         coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-      .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
+      .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
 
     if (menuItems.length == 0)
       return undefined;
@@ -232,22 +231,28 @@ export namespace MenuItemConstructor { //To allow monkey patching
       coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
     }
 
-    let innerRef: HTMLElement | null;
-
-    return [
-      <DropdownItem
-        innerRef={b => innerRef = b}
+    const item = (
+      <Dropdown.Item
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}>
         {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon  != null || color != null) && " "}
+        {(icon != null || color != null) && " "}
         {text}
-      </DropdownItem>,
-      coc.canExecute ? <UncontrolledTooltip placement="right" target={() => innerRef!}>{coc.canExecute}</UncontrolledTooltip> : undefined
-    ].filter(a => a != null);
+      </Dropdown.Item>
+    );
+
+    if (!coc.canExecute)
+      return item;
+
+    return (
+      <OverlayTrigger placement="right"
+        overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"}>{coc.canExecute}</Tooltip>} >
+        {item}
+      </OverlayTrigger >
+    );
   }
 }
 

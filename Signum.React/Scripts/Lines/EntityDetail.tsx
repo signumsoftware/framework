@@ -25,6 +25,9 @@ export function EntityDetail(props: EntityDetailProps) {
   const c = new EntityDetailController(props);
   const p = c.props;
 
+  if (c.isHidden)
+    return null;
+
   if (p.avoidFieldSet == true)
     return (
       <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}

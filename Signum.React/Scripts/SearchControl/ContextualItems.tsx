@@ -2,8 +2,8 @@ import * as React from 'react'
 import { QueryDescription, } from '../FindOptions'
 import { Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
-import { DropdownItem } from '../Components';
 import { StyleContext } from '../TypeContext';
+import { Dropdown } from 'react-bootstrap';
 
 export interface MenuItemBlock {
   header: string;
@@ -46,10 +46,10 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
         return;
 
       if (result.length)
-        result.push(<DropdownItem divider />);
+        result.push(<Dropdown.Item divider />);
 
       if (block.header)
-        result.push(<DropdownItem header>{block.header}</DropdownItem>);
+        result.push(<Dropdown.Item header>{block.header}</Dropdown.Item>);
 
       if (block.header)
         result.splice(result.length, 0, ...block.menuItems);

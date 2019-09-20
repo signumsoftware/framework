@@ -1,7 +1,8 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes } from '../Globals'
-import { Popper, Manager, Target } from 'react-popper';
+import { Dropdown } from 'react-bootstrap';
+import DropdownMenu from 'react-bootstrap/DropdownMenu';
 
 export interface TypeaheadProps {
   value?: string;
@@ -243,20 +244,19 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
   render() {
     return (
-      <Manager tag={false}>
-        <Target innerRef={inp => this.input = inp as HTMLInputElement}>
-          {({ targetProps }) => <input type="text" autoComplete="asdfsdf" {...this.props.inputAttrs} {...targetProps as any}
-            value={this.props.value}
-            onFocus={this.handleFocus}
-            onBlur={this.handleBlur}
-            onKeyUp={this.handleKeyUp}
-            onKeyDown={this.handleKeyDown}
-            onChange={this.handleOnChange}
-          />
-          }
-        </Target>
-        {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
-      </Manager>
+      <Dropdown show={this.state.shown} drop="down">
+        <input type="text" autoComplete="asdfsdf" {...this.props.inputAttrs}
+          value={this.props.value}
+          onFocus={this.handleFocus}
+          onBlur={this.handleBlur}
+          onKeyUp={this.handleKeyUp}
+          onKeyDown={this.handleKeyDown}
+          onChange={this.handleOnChange}
+        />
+        <DropdownMenu alignRight={this.rtl}>
+          {this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}
+        </DropdownMenu>
+      </Dropdown>
     );
   }
 
@@ -318,3 +318,4 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     );
   }
 }
+

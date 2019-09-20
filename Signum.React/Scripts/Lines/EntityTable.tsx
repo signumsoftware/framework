@@ -175,10 +175,13 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
 
 export function EntityTable(props: EntityTableProps) {
   const c = new EntityTableController(props);
-
   const p = c.props;
+
   if (p.type!.isLite)
     throw new Error("Lite not supported");
+
+  if (c.isHidden)
+    return null;
 
   let ctx = (p.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
 

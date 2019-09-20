@@ -41,7 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="node_modules\**" />
     <None Remove="ts_out\**" />
   </ItemGroup>
   
@@ -63,5 +62,14 @@
   <ItemGroup>
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Remove="node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Scripts\Components\ModalHeaderButtons.tsx" />
+    <None Remove="Scripts\Lines\Retrieve.tsx" />
   </ItemGroup>
 </Project>

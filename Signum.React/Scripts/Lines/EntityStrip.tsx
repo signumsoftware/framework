@@ -32,6 +32,8 @@ export function EntityStrip(props: EntityStripProps) {
   const c = new EntityStripController(props);
   const p = c.props;
 
+  if (c.isHidden)
+    return null;
 
   const readOnly = p.ctx.readOnly;
   return (
