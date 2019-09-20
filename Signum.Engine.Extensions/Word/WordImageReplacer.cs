@@ -52,16 +52,16 @@ namespace Signum.Engine.Word
 
             if (adaptSize && !AvoidAdaptSize)
             {
-                Array.ForEach(bitmaps, bitmap =>
+                bitmaps = bitmaps.Select(bitmap =>
                 {
                     var part = doc.MainDocumentPart.GetPartById(blips.First().Embed);
 
                     using (var stream = part.GetStream())
                     {
                         Bitmap oldBmp = (Bitmap)Bitmap.FromStream(stream);
-                        bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
+                        return ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
                     }
-                });
+                }).ToArray();
             }
 
             doc.MainDocumentPart.DeletePart(blips.First().Embed);
