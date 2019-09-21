@@ -18,6 +18,7 @@ interface NotifyOptions {
 interface NotifyHandle {
   notify(options: NotifyOptions) : void;
   notifyTimeout(options: NotifyOptions, timeout?: number): void
+  notifyPendingRequest(pending: number): void;
 }
 
 
@@ -59,7 +60,8 @@ export default function Notify() {
 
     Notify.singleton = {
       notify: notify,
-      notifyTimeout: notifyTimeout
+      notifyTimeout: notifyTimeout,
+      notifyPendingRequest: notifyPendingRequest
     };
 
     return () => Notify.singleton = undefined;
