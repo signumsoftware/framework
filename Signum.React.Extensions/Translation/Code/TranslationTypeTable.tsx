@@ -60,6 +60,9 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
 
 export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean }>{
 
+  static normalizeString(str: string): string {
+    return str;
+  }
 
   constructor(props: any) {
     super(props);
@@ -80,7 +83,7 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
   }
 
   handleOnChange = (e: React.FormEvent<any>) => {
-    this.props.member.description = (e.currentTarget as HTMLSelectElement).value;
+    this.props.member.description = TranslationMember.normalizeString((e.currentTarget as HTMLSelectElement).value);
     this.forceUpdate();
   }
 
