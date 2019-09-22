@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
 import { Dic } from '@framework/Globals'
@@ -165,7 +165,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         <th className="monospaceCell">
           {
             type.hasPluralDescription && (edit ?
-              <TextArea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); }} /> :
+              <TextArea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); this.forceUpdate(); }} /> :
               td.pluralDescription)
           }
         </th>
@@ -176,7 +176,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
   handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     const { loc } = this.props;
     const td = loc.typeDescription!;
-    td.description = e.currentTarget.value;
+    td.description = TranslationMember.normalizeString(e.currentTarget.value);
 
     API.pluralize(loc.culture, td.description).then(plural => {
       td.pluralDescription = plural;
