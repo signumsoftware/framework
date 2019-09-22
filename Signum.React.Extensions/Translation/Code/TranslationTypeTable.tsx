@@ -83,7 +83,7 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
   }
 
   handleOnChange = (e: React.FormEvent<any>) => {
-    this.props.member.description = TranslationMember.normalizeString((e.currentTarget as HTMLSelectElement).value);
+    this.props.member.description = (e.currentTarget as HTMLSelectElement).value;
     this.forceUpdate();
   }
 
@@ -104,7 +104,7 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
     const translatedMembers = Dic.getValues(this.props.type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
     if (!translatedMembers.length || this.state.avoidCombo)
       return (<TextArea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange}
-        innerRef={(ta) => ta && this.state.avoidCombo && ta.focus()} />);
+         innerRef={(ta) => ta && this.state.avoidCombo && ta.focus()} />);
 
     return (
       <span>
@@ -165,7 +165,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         <th className="monospaceCell">
           {
             type.hasPluralDescription && (edit ?
-              <TextArea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); this.forceUpdate(); }} /> :
+              <TextArea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); }} /> :
               td.pluralDescription)
           }
         </th>
@@ -176,7 +176,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
   handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     const { loc } = this.props;
     const td = loc.typeDescription!;
-    td.description = TranslationMember.normalizeString(e.currentTarget.value);
+    td.description = e.currentTarget.value;
 
     API.pluralize(loc.culture, td.description).then(plural => {
       td.pluralDescription = plural;
