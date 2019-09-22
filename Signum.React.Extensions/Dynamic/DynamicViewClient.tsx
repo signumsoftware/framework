@@ -402,7 +402,7 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
       entityType: t!,
       viewName: "My View",
       locals: `{
-  const forceUpdate = modules.Hooks.useForceUpdate(0);
+  const forceUpdate = modules.Hooks.useForceUpdate();
   return { forceUpdate };
 }`,
       viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
