@@ -4,15 +4,15 @@ import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey } from '../Signum.Entities'
-import { Typeahead } from '../Components'
 import { toFilterRequests } from '../Finder';
+import { TypeaheadHandle, TypeaheadOptions } from '../Components/Typeahead'
 
 export interface AutocompleteConfig<T> {
   getItems: (subStr: string) => Promise<T[]>;
   getItemsDelay?: number;
   minLength?: number;
   renderItem(item: T, subStr?: string): React.ReactNode;
-  renderList?(typeahead: Typeahead): React.ReactNode;
+  renderList?(typeahead: TypeaheadHandle): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
@@ -38,7 +38,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
   renderItem(item: Lite<T>, subStr: string) {
     var toStr = getToString(item);
-    var text = Typeahead.highlightedText(toStr, subStr);
+    var text = TypeaheadOptions.highlightedText(toStr, subStr);
     if (this.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
     else
@@ -152,7 +152,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   renderItem(item: ResultRow, subStr: string) {
     var toStr = getToString(item.entity!);
-    var text = Typeahead.highlightedText(toStr, subStr);
+    var text = TypeaheadOptions.highlightedText(toStr, subStr);
     if (this.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
     else

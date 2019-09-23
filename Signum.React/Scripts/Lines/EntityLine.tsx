@@ -8,6 +8,7 @@ import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, get
 import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
+import { TypeaheadHandle } from '../Components/Typeahead'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -28,7 +29,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
   currentItem: ItemPair | undefined;
   setCurrentItem: (v: ItemPair | undefined) => void;
   focusNext: React.MutableRefObject<boolean>;
-  typeahead: React.RefObject<Typeahead>;
+  typeahead: React.RefObject<TypeaheadHandle>;
 
   constructor(p: EntityLineProps) {
     super(p);
@@ -38,7 +39,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     this.currentItem = currentItem;
     this.setCurrentItem = setCurrentItem;
     this.focusNext = React.useRef(false);
-    this.typeahead = React.useRef<Typeahead>(null);
+    this.typeahead = React.useRef<TypeaheadHandle>(null);
     React.useEffect(() => {
       if (s.autocomplete) {
         var entity = s.ctx.value;

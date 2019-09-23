@@ -71,7 +71,8 @@ export function GlobalModalContainer() {
     setModals([]);
   }, [Navigator.history.location.pathname])
 
-  return <div className="sf-modal-container">{modals}</div>;
+
+  return React.createElement("div", { className: "sf-modal-container" }, ...modals);
 }
 
 export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {

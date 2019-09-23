@@ -123,4 +123,4 @@ export function getAppropiateComponent(ctx: TypeContext<any>): React.ReactElemen
   }
 }
 
-(DynamicComponent.prototype.render as any).withViewOverrides = true;
+DynamicComponent.withViewOverrides = true;

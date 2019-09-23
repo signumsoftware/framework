@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
+import { SelectCallback } from 'react-bootstrap/helpers'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
@@ -114,11 +115,11 @@ export function EntityTabRepeater(props: EntityTabRepeaterProps) {
     return React.Children.count(buttons) ? buttons : undefined;
   }
 
-  function handleSelectTab(activeKey: string | number) {
+  function handleSelectTab(eventKey: any) {
     if (p.onSelectTab)
-      p.onSelectTab(activeKey as number);
+      p.onSelectTab(eventKey as number);
     else
-      c.setSelectedIndex(activeKey as number);
+      c.setSelectedIndex(eventKey as number);
   }
 
   function renderTabs() {
@@ -126,7 +127,7 @@ export function EntityTabRepeater(props: EntityTabRepeaterProps) {
     const readOnly = ctx.readOnly;
 
     return (
-      <Tabs activeEventKey={c.selectedIndex || 0} toggle={handleSelectTab} id={ctx.prefix + "_tab"}>
+      <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"}>
         {
           c.getMListItemContext(ctx).map(mlec => {
             const drag = c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;

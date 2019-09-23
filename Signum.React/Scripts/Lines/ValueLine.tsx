@@ -76,7 +76,8 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return str;
   }
 
-  calculateDefaultState(state: ValueLineProps) {
+  getDefaultProps(state: ValueLineProps) {
+    super.getDefaultProps(state);
     state.valueLineType = ValueLineController.getValueLineType(state.type!);
 
     if (state.valueLineType == undefined)

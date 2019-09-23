@@ -46,10 +46,10 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
         return;
 
       if (result.length)
-        result.push(<Dropdown.Item divider />);
+        result.push(<Dropdown.Divider />);
 
       if (block.header)
-        result.push(<Dropdown.Item header>{block.header}</Dropdown.Item>);
+        result.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
 
       if (block.header)
         result.splice(result.length, 0, ...block.menuItems);

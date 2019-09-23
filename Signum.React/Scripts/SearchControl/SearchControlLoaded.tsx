@@ -725,8 +725,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   // SELECT BUTTON
 
-  handleSelectedToggle = () => {
-    this.setState({ isSelectOpen: !this.state.isSelectOpen }, () => {
+  handleSelectedToggle = (isOpen: boolean) => {
+    this.setState({ isSelectOpen: isOpen }, () => {
       if (this.state.isSelectOpen && this.state.currentMenuItems == undefined)
         this.loadMenuItems();
     });
@@ -772,14 +772,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return {
       order: -1,
       button:
-        <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected ml-2" title={title}
+        <Dropdown
           show={this.state.isSelectOpen}
-          onToggle={this.handleSelectedToggle}
-          disabled={this.state.selectedRows!.length == 0}>
-          {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
-            this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
-              this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-        </DropdownButton>
+          onToggle={this.handleSelectedToggle}>
+          <Dropdown.Toggle id="selectedButton"
+            className="sf-query-button sf-tm-selected ml-2"
+          
+            disabled={this.state.selectedRows!.length == 0}>
+            {title}
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
+              this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
+                this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          </Dropdown.Menu>
+        </Dropdown>
     };
   }
 
@@ -876,7 +883,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
       if (menuItems.length)
-        menuItems.push(<Dropdown.Item divider />);
+        menuItems.push(<Dropdown.Divider />);
 
       menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</Dropdown.Item>);
       menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</Dropdown.Item>);
@@ -886,10 +893,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (cm.rowIndex != undefined) {
 
       if (this.state.currentMenuItems == undefined) {
-        menuItems.push(<Dropdown.Item header>{JavascriptMessage.loading.niceToString()}</Dropdown.Item>);
+        menuItems.push(<Dropdown.Header>{JavascriptMessage.loading.niceToString()}</Dropdown.Header>);
       } else {
         if (menuItems.length && this.state.currentMenuItems.length)
-          menuItems.push(<Dropdown.Item divider />);
+          menuItems.push(<Dropdown.Divider />);
 
         menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
       }

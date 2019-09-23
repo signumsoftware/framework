@@ -2,6 +2,7 @@ import * as React from "react";
 import { Route, RouteProps, match } from "react-router-dom";
 import * as H from "history";
 import * as PropTypes from "prop-types";
+import { RouteChildrenProps } from "react-router";
 
 export interface ComponentModule {
   default: React.ComponentClass<any> | React.FunctionComponent<any>;
@@ -48,7 +49,7 @@ interface ImportRouteProps {
 export function ImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
   return (
     <Route {...rest}>
-      <ImportComponent onImportModule={onImportModule} />
+      {(props: RouteChildrenProps<any>) => <ImportComponent onImportModule={onImportModule} componentProps={props} />}
     </Route>
   );
  }

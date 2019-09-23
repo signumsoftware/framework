@@ -7,7 +7,7 @@ import SearchControl, { SearchControlProps } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
 import { SearchMessage } from '../Signum.Entities';
 import { ModalHeaderButtons } from '../Components/ModalHeaderButtons';
-import { Modal } from 'react-bootstrap';
+import { Modal, Dropdown } from 'react-bootstrap';
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
   findOptions: FindOptions;
