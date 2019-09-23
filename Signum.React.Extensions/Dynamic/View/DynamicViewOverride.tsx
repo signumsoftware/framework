@@ -104,8 +104,8 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
     return (
       <Dropdown.Item>
-        <Dropdown.Item header>{pr.propertyPath()}</Dropdown.Item>
-        <Dropdown.Item divider />
+        <Dropdown.Header>{pr.propertyPath()}</Dropdown.Header>
+        <Dropdown.Divider />
         <Dropdown.Item onClick={() => this.handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash" />&nbsp; Remove</Dropdown.Item>
         <Dropdown.Item onClick={() => this.handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up" />&nbsp; Insert Before</Dropdown.Item>
         <Dropdown.Item onClick={() => this.handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down" />&nbsp; Insert After</Dropdown.Item>

@@ -79,8 +79,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
             {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                     </div>
         }
-        <Tabs activeEventKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
-
+        <Tabs activeKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
           <Tab eventKey="search" title="Search">
             <SearchPanel />
           </Tab>

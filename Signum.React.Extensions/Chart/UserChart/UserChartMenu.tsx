@@ -123,19 +123,22 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
 
     const label = <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {labelText}</span>;
     return (
-      <DropdownButton id="userQueriesDropDown" className="sf-userquery-dropdown" toggle={this.handleSelectedToggle} isOpen={this.state.isOpen} variant="light" title={label as any}>
-        {
-          userCharts && userCharts.map((uc, i) =>
-            <Dropdown.Item key={i}
-              className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
-              onClick={() => this.handleSelect(uc)}>
-              {uc.toStr}
-            </Dropdown.Item>)
-        }
-        {userCharts && userCharts.length > 0 && <Dropdown.Divider />}
-        {crView.props.userChart && <Dropdown.Item onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
-        <Dropdown.Item onClick={() => this.onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
-      </DropdownButton>
+      <Dropdown onToggle={this.handleSelectedToggle} show={this.state.isOpen}>
+        <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">{label as any}</Dropdown.Toggle>
+        <Dropdown.Menu>
+          {
+            userCharts && userCharts.map((uc, i) =>
+              <Dropdown.Item key={i}
+                className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
+                onClick={() => this.handleSelect(uc)}>
+                {uc.toStr}
+              </Dropdown.Item>)
+          }
+          {userCharts && userCharts.length > 0 && <Dropdown.Divider />}
+          {crView.props.userChart && <Dropdown.Item onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
+          <Dropdown.Item onClick={() => this.onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
     );
   }
 

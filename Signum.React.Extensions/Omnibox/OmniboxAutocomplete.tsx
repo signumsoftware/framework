@@ -1,10 +1,11 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { AbortableRequest } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import '@framework/Frames/MenuIcons.css'
+import { TypeaheadHandle } from '../../../Framework/Signum.React/Scripts/Components/Typeahead';
 
 export interface OmniboxAutocompleteProps {
   inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
@@ -37,7 +38,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
   abortRequest = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
 
-  typeahead!: Typeahead;
+  typeahead!: TypeaheadHandle;
 
   render() {
 

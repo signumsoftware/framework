@@ -85,7 +85,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
         </div>
 
         {AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
-          <Tabs id="caseTabs" hideOnly={true} activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
+          <Tabs id="caseTabs" unmountOnExit={false} activeKey={this.state.activeEventKey} onSelect={this.handleToggle}>
             <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
               {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
                 <div>
@@ -162,7 +162,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
     );
   }
 
-  handleToggle = (eventKey: string | number) => {
+  handleToggle = (eventKey: unknown) => {
     if (this.state.activeEventKey !== eventKey)
       this.setState({ activeEventKey: eventKey as CaseTab });
   }

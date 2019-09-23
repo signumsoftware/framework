@@ -7,6 +7,7 @@ import { Typeahead } from '@framework/Components'
 import { TypeContext } from '@framework/TypeContext'
 import { namedColors } from '../Color'
 import { useForceUpdate } from '@framework/Hooks'
+import { TypeaheadOptions } from '@framework/Components/Typeahead'
 
 
 export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefined>; onChange?: () => void }){
@@ -68,7 +69,7 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
     return (
       <span>
         <FontAwesomeIcon icon="square" className="icon" color={item as string} />
-        {Typeahead.highlightedText(item as string, query)}
+        {TypeaheadOptions.highlightedText(item as string, query)}
       </span>
     );
   }

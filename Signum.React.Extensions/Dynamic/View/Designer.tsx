@@ -577,7 +577,7 @@ export interface SelectorConfig<T> {
 `;
 
   return (
-    <DropdownButton id="designer_dropdown" size="xs" variante="info" title={DynamicViewMessage.ModulesHelp.niceToString()}>
+    <DropdownButton id="designer_dropdown" size={"xs" as any} variant="info" title={DynamicViewMessage.ModulesHelp.niceToString()}>
         {Dic.getKeys(globalModules).map((moduleName, i) =>
           <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handleModulesClick(moduleName)}>{moduleName}</Dropdown.Item>)}
     </DropdownButton>
@@ -605,7 +605,7 @@ export interface SelectorConfig<T> {
 export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
 
   return (
-    <DropdownButton id="props_help_dropdown" variant="success" size="xs" title={DynamicViewMessage.PropsHelp.niceToString()}>
+    <DropdownButton id="props_help_dropdown" variant="success" size={"xs" as any} title={DynamicViewMessage.PropsHelp.niceToString()}>
         {Dic.map(p.node.context.propTypes, (name, typeName, i) =>
           <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handlePropsClick(name)}>{name}: {typeName}</Dropdown.Item>)}
     </DropdownButton>

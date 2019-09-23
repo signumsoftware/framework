@@ -82,12 +82,12 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         {no.isContainer && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="arrow-right" />&nbsp; {DynamicViewMessage.AddChild.niceToString()}</Dropdown.Item>}
         {!isRoot && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="arrow-down" />&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</Dropdown.Item>}
 
-        {no.isContainer && <Dropdown.Item divider={true} />}
+        {no.isContainer && <Dropdown.Divider />}
 
         {no.isContainer && cn.children.length == 0 && dn.route && <Dropdown.Item onClick={this.handleGenerateChildren}><FontAwesomeIcon icon="bolt" />&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</Dropdown.Item>}
         {no.isContainer && cn.children.length > 0 && <Dropdown.Item onClick={this.handleClearChildren} color="danger"><FontAwesomeIcon icon="trash" />&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</Dropdown.Item>}
 
-        {!isRoot && <Dropdown.Item divider={true} />}
+        {!isRoot && <Dropdown.Divider />}
         {!isRoot && <Dropdown.Item onClick={this.handleRemove} color="danger"><FontAwesomeIcon icon="times" />&nbsp; {DynamicViewMessage.Remove.niceToString()}</Dropdown.Item>}
       </ContextMenu>
     );

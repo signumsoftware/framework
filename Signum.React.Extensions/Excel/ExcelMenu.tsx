@@ -66,20 +66,25 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
 
     const excelReports = this.state.excelReport;
     return (
-      <DropdownButton id="userQueriesDropDown" className="sf-userquery-dropdown" isOpen={this.state.isOpen} toggle={this.handleSelectedToggle} variant="light" title={label}>
-        {this.props.plainExcel && <Dropdown.Item onClick={this.handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
-        {this.props.plainExcel && excelReports && excelReports.length > 0 && <Dropdown.Item divider />}
-        {
-          excelReports && excelReports.map((uq, i) =>
-            <Dropdown.Item key={i}
-              onClick={() => this.handleClick(uq)}>
-              {uq.toStr}
-            </Dropdown.Item>)
-        }
-        {(this.props.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Item divider />}
-        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={this.handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
-        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={this.handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
-      </DropdownButton>
+      <Dropdown show={this.state.isOpen} onToggle={this.handleSelectedToggle}>
+        <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
+        {label}
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          {this.props.plainExcel && <Dropdown.Item onClick={this.handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
+          {this.props.plainExcel && excelReports && excelReports.length > 0 && <Dropdown.Divider />}
+          {
+            excelReports && excelReports.map((uq, i) =>
+              <Dropdown.Item key={i}
+                onClick={() => this.handleClick(uq)}>
+                {uq.toStr}
+              </Dropdown.Item>)
+          }
+          {(this.props.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}
+          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={this.handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
+          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={this.handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
+        </Dropdown.Menu>
+      </Dropdown>
     );
   }
 }

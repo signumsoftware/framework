@@ -27,7 +27,7 @@ export default function WorkflowDropdown(props: {}) {
   return (
     <NavDropdown className="sf-workflow" id="workflowDropdown" title={WorkflowEntity.nicePluralName()}>
         <LinkContainer exact to={Options.getInboxUrl()}><Dropdown.Item>{CaseActivityQuery.Inbox.niceName()}</Dropdown.Item></LinkContainer>
-        {starts.length > 0 && <Dropdown.Item divider />}
+        {starts.length > 0 && <Dropdown.Divider />}
         {starts.length > 0 && <Dropdown.Item disabled>{JavascriptMessage.create.niceToString()}</Dropdown.Item>}
         {starts.length > 0 && getStarts(starts).flatMap((kvp, i) => [
           (kvp.elements.length > 1 && <Dropdown.Item key={i} disabled>{kvp.elements[0].typeInfo.niceName}</Dropdown.Item>),

@@ -145,8 +145,8 @@ export interface TabsNode extends ContainerNode {
   field?: string;
   styleOptions?: StyleOptionsExpression;
   id: ExpressionOrValue<string>;
-  defaultEventKey?: ExpressionOrValue<string>;
-  hideOnly?: ExpressionOrValue<boolean>;
+  defaultActiveKey?: ExpressionOrValue<string>;
+  unmountOnExit?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<TabsNode>({
@@ -159,22 +159,22 @@ NodeUtils.register<TabsNode>({
   renderTreeNode: NodeUtils.treeNodeKind,
   renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("Tabs", {
     id: { __code__: cc.ctxName + ".compose(" + toCodeEx(node.id) + ")" } as Expression<string>,
-    defaultActiveKey: node.defaultEventKey,
-    hideOnly: node.hideOnly,
+    defaultActiveKey: node.defaultActiveKey,
+    unmountOnExit: node.unmountOnExit,
   }, node),
   render: (dn, parentCtx) => {
     return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tabs
       id={parentCtx.getUniqueId(NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
-      defaultEventKey={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.defaultEventKey, NodeUtils.isStringOrNull)}
-      hideOnly={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.hideOnly, NodeUtils.isBooleanOrNull)}
+      defaultActiveKey={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.defaultActiveKey, NodeUtils.isStringOrNull)}
+      unmountOnExit={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.unmountOnExit, NodeUtils.isBooleanOrNull)}
     />);
   },
   renderDesigner: (dn) => (<div>
     <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
     <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.id)} type="string" defaultValue={null} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.defaultEventKey)} type="string" defaultValue={null} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.hideOnly)} type="boolean" defaultValue={false} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.defaultActiveKey)} type="string" defaultValue={null} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unmountOnExit)} type="boolean" defaultValue={false} />
   </div>),
 });
 

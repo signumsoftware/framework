@@ -105,11 +105,14 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
           var title = res.label || res.content!.toStr;
           var icon = this.icon(res);
           return (
-            <DropdownButton id={"button" + index}
-              toggle={() => this.handleOnToggle(res)}
-              isOpen={this.state.expanded.contains(res)} title={!icon ? title : (<span>{icon}{title}</span>)}>
-              {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 1, res)).map((sr, i) => withKey(sr, i))}
-            </DropdownButton>
+            <Dropdown
+              onToggle={() => this.handleOnToggle(res)}
+              show={this.state.expanded.contains(res)} >
+              <Dropdown.Toggle id={"button" + index}>{!icon ? title : (<span>{icon}{title}</span>)}</Dropdown.Toggle>
+              <Dropdown.Menu>
+                {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 1, res)).map((sr, i) => withKey(sr, i))}
+              </Dropdown.Menu>
+            </Dropdown>
           );
         }
         
@@ -175,28 +178,28 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
       case "Divider":
         return [
-          <Dropdown.Item divider className={menuItemN} />
+          <Dropdown.Divider className={menuItemN} />
         ];
 
       case "Header":
       case "Item":
 
-        var isHeader = res.type == "Header";
+        var HeaderOrItem = res.type == "Header" ? Dropdown.Item : Dropdown.Header;
 
         if (res.elements && res.elements.length) {
           return [
-            <Dropdown.Item header={isHeader} onClick={(e: React.MouseEvent<any>) => this.handleClick(e, res, topRes)}
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => this.handleClick(e, res, topRes)}
               className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
               {this.icon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={this.state.expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align"  />
-            </Dropdown.Item>
+            </HeaderOrItem>
           ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : [])
         }
 
         if (res.url) {
           return [
-            <Dropdown.Item header={isHeader} onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className = { menuItemN } >
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className = { menuItemN } >
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
-            </Dropdown.Item>
+            </HeaderOrItem>
           ];
         }
 
@@ -204,22 +207,22 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
           var config = ToolbarClient.configs[res.content!.EntityType];
           if (!config) {
             return [
-              <Dropdown.Item header={isHeader} style={{ color: "red" }} className={menuItemN}>
+              <HeaderOrItem style={{ color: "red" }} className={menuItemN}>
                 {res.content!.EntityType + "ToolbarConfig not registered"}
-              </Dropdown.Item>
+              </HeaderOrItem>
             ];
           }
 
           return [
-            <Dropdown.Item header={isHeader} onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={menuItemN}>
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={menuItemN}>
               {config.getIcon(res)}{config.getLabel(res)}
-            </Dropdown.Item>
+            </HeaderOrItem>
           ];
         }
 
         if (res.type == "Header")
           return [
-            <Dropdown.Item header className={menuItemN}>{this.icon(res)}{res.label}</Dropdown.Item>
+            <HeaderOrItem className={menuItemN}>{this.icon(res)}{res.label}</HeaderOrItem>
           ];
         
         return [<Dropdown.Item style={{ color: "red" }} className={menuItemN}>{"No Content or Url found"}</Dropdown.Item>];

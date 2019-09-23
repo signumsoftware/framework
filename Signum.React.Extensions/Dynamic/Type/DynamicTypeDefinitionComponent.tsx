@@ -216,7 +216,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
           </div>
         }
 
-        <Tabs defaultEventKey="properties" id="DynamicTypeTabs" onToggled={this.handleTabSelect}>
+        <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
           <Tab eventKey="properties" title="Properties">
             <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
             <br />
