@@ -507,7 +507,7 @@
     <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="Die Länge von {0} muss gleich {1} sein" />
     <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="Die Länge von {0} muss größer als oder gleich {1} sein" />
     <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="Die Länge von {0} muss kleiner als oder gleich {1} sein" />
-    <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl von {0} wird mit {1} multipliziert" />
+    <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl der {0} wird mit {1} multipliziert" />
     <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Die Anzahl der Elemente von {0} muss {1} {2} sein" />
     <Member Name="TheRowsAreBeingGroupedBy0" Description="Die Zeilen werden nach {0} gruppiert" />
     <Member Name="Type0NotAllowed" Description="Der Typ {0} ist nicht zulässig" />
