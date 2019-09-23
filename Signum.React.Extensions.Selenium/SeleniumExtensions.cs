@@ -350,16 +350,18 @@ namespace Signum.React.Selenium
         public static IWebElement CapturePopup(this RemoteWebDriver selenium, Action clickToOpen)
         {
             var body = selenium.FindElement(By.TagName("body"));
-            var last = body.FindElement(By.XPath("./*[last()]"));
+            var oldDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
             clickToOpen();
             var result = selenium.Wait(() =>
             {
-                var newLast = body.FindElement(By.XPath("./*[last()]"));
-                
-                if (object.Equals(last, newLast))
+                var newDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+
+                var newTop = newDialogs.SingleOrDefaultEx(a => !oldDialogs.Contains(a));
+
+                if (newTop == null)
                     return null;
 
-                return newLast.TryFindElement(By.CssSelector(".modal.fade.show"));
+                return newTop;
             })!;
 
             return result;
