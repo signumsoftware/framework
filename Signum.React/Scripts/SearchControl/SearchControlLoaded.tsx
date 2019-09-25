@@ -31,7 +31,6 @@ import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import DropdownToggle from 'react-bootstrap/DropdownToggle'
 
 export interface ShowBarExtensionOption { }
 

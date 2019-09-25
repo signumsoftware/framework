@@ -3,16 +3,16 @@
 
 
 "@babel/runtime@^7.1.2", "@babel/runtime@^7.4.2", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.5":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.6.0.tgz#4fc1d642a9fd0299754e8b5de62c631cf5568205"
-  integrity sha512-89eSBLJsxNxOERC0Op4vd+0Bqm6wRMqMbFtV3i0/fbaWw/mJ8Q3eBvgX0G4SyrOOLCtbu98HspF8o09MRT+KzQ==
+  version "7.6.2"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.6.2.tgz#c3d6e41b304ef10dcf13777a33e7694ec4a9a6dd"
+  integrity sha512-EXxN64agfUqqIGeEjI5dL5z0Sw0ZwWo1mLTi4mQowCZ42O59b7DRpZAnTC6OqdF28wMBMFKNb/4uFGrVaigSpg==
   dependencies:
     regenerator-runtime "^0.13.2"
 
 "@fortawesome/fontawesome-common-types@^0.2.22":
-  version "0.2.23"
-  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.2.23.tgz#6d71f44645c44314d82c8f1f68fe94465ca21634"
-  integrity sha512-e12eya9ezEA8AcrkIm96l/KcnRw9JwxbUR07R6PMOvpihwatdDqFPatVNPNcUm3/INw1OKDDmK3I2DFLJ/V2ow==
+  version "0.2.25"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.2.25.tgz#6df015905081f2762e5cfddeb7a20d2e9b16c786"
+  integrity sha512-3RuZPDuuPELd7RXtUqTCfed14fcny9UiPOkdr2i+cYxBoTOfQgxcDoq77fHiiHcgWuo1LoBUpvGxFF1H/y7s3Q==
 
 "@fortawesome/fontawesome-svg-core@1.2.22":
   version "1.2.22"
@@ -68,9 +68,9 @@
   integrity sha512-INJYZQJP7g+IoDUh/475NlGiTeMfwTXUEr3tmRneckHIxNolGOW9CTq83S8cxq0CgJwwcMzMJFchxvlwe7Rk8Q==
 
 "@restart/hooks@^0.3.11":
-  version "0.3.13"
-  resolved "https://registry.yarnpkg.com/@restart/hooks/-/hooks-0.3.13.tgz#656a62d6be3f3d72b9437101c557c864c0b34e36"
-  integrity sha512-qQ+QYoU9rfxltGSjJH0Ah65N41vhSe4bnaAGV+8J/mEOXnZh0ejN5P2sGoMYIGiOPCVj0Y1k2kL1Rp/wL0YHGA==
+  version "0.3.14"
+  resolved "https://registry.yarnpkg.com/@restart/hooks/-/hooks-0.3.14.tgz#1e0f045aadf0b06229b58eeba91351d90fb9452a"
+  integrity sha512-k57+iyGr6o1XHeWWsGe5aMHKYcw7fukL6mCE+ZrPjtt1gXei5wCUxj71yQYfFbNjg0z5xxX8Els/UmyJiEn4nw==
 
 "@types/d3-array@*":
   version "2.0.0"
@@ -324,7 +324,15 @@
     "@types/react" "*"
     "@types/react-router" "*"
 
-"@types/react-router@*", "@types/react-router@5.0.4":
+"@types/react-router@*":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@types/react-router/-/react-router-5.0.5.tgz#f28f5e0b65e2a9870e0f08f57e4f50361f8ad1a6"
+  integrity sha512-FX/K5Vnm9q9O3zTC0v3XF08q24ccPz24E/nVDxWSzcBW/Wuxq7lCD6cc5qr1PNOz8OdaDA4Jedjs2evf4jw/aQ==
+  dependencies:
+    "@types/history" "*"
+    "@types/react" "*"
+
+"@types/react-router@5.0.4":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@types/react-router/-/react-router-5.0.4.tgz#27398c8898bcf5e3c7d1b04abb178f6c203722cb"
   integrity sha512-A9Hdz78Qq9jzZuE0ncninYJLT8lloFwaMZC/hdTi+CIc6yOqKLUSaqidhCNcDgeEKBep9RHjpuHGvEPT+D3/5Q==
