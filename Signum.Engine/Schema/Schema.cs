@@ -36,7 +36,7 @@ namespace Signum.Engine.Maps
             set { this.version = value; }
         }
 
-        public event Action OnMetadataInvalidated;
+        public event Action? OnMetadataInvalidated;
         public void InvalidateMetadata()
         {
             this.OnMetadataInvalidated?.Invoke();
@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
 
         #region Events
 
-        public event Func<Type, bool, string?> IsAllowedCallback;
+        public event Func<Type, bool, string?>? IsAllowedCallback;
 
         public string? IsAllowed(Type type, bool inUserInterface)
         {

@@ -580,7 +580,7 @@ namespace Signum.Utilities.Reflection
 
             result = null;
 
-            if (string.IsNullOrEmpty(value))
+            if (!value.HasText())
             {
                 if (Nullable.GetUnderlyingType(type) == null && type.IsValueType)
                 {

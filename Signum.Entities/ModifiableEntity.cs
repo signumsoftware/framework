@@ -211,7 +211,7 @@ namespace Signum.Entities
         #endregion
 
         [field: NonSerialized, Ignore]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [NonSerialized, Ignore]
         ModifiableEntity? parentEntity;

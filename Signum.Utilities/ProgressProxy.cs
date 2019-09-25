@@ -12,7 +12,7 @@ namespace Signum.Utilities
         private int max;
         private int position;
 
-        public event EventHandler<ProgressArgs> Changed;
+        public event EventHandler<ProgressArgs>? Changed;
 
         public ProgressProxy()
         {

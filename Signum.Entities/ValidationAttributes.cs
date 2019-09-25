@@ -836,7 +836,7 @@ namespace Signum.Entities
         protected override string? OverrideError(object? value)
         {
             string? str = (string?)value;
-            if (string.IsNullOrEmpty(str))
+            if (!str.HasText())
                 return null;
             
             if ((this.textCase == StringCase.Uppercase) && (str != str.ToUpper()))

@@ -19,7 +19,7 @@ namespace Signum.React.Facades
 {
     public static class SignumServer
     {
-        public static JsonSerializerSettings JsonSerializerSettings;
+        public static JsonSerializerSettings JsonSerializerSettings = null!;
 
         public static MvcJsonOptions AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
         {
@@ -88,17 +88,18 @@ namespace Signum.React.Facades
                 canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
             );
 
-            foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
-            {
-                try
+            if (EntityPackTS.AddExtension != null)
+                foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
                 {
-                    action(result);
-                }
-                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
-                {
+                    try
+                    {
+                        action(result);
+                    }
+                    catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                    {
 
+                    }
                 }
-            }
 
             return result;
         }
@@ -112,7 +113,7 @@ namespace Signum.React.Facades
         [JsonExtensionData]
         public Dictionary<string, object?> extension { get; set; } = new Dictionary<string, object?>();
 
-        public static Action<EntityPackTS> AddExtension;
+        public static Action<EntityPackTS>? AddExtension;
 
         public EntityPackTS(Entity entity, Dictionary<string, string> canExecute)
         {

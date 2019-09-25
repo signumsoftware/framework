@@ -118,7 +118,7 @@ namespace Signum.Entities
 
     class FromEnumMethodExpander : IMethodExpander
     {
-        internal static MethodInfo miQuery;
+        internal static MethodInfo miQuery = null!; /*Initialized in Logic*/
         static readonly MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.SingleOrDefault<int>(null, i => true)).GetGenericMethodDefinition();
 
         public Expression Expand(Expression instance, Expression[] arguments, System.Reflection.MethodInfo mi)

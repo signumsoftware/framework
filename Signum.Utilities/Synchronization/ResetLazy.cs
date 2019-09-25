@@ -169,6 +169,6 @@ namespace Signum.Utilities
             };
         }
 
-        public event EventHandler OnReset; 
+        public event EventHandler? OnReset; 
     }
 }

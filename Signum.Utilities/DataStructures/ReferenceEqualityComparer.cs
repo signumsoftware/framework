@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Collections;
@@ -8,7 +8,7 @@ namespace Signum.Utilities.DataStructures
     [Serializable]
     public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer where T : class
     {
-        static ReferenceEqualityComparer<T> _default;
+        static ReferenceEqualityComparer<T>? _default;
 
         ReferenceEqualityComparer() { }
 

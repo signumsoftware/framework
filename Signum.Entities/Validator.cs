@@ -25,7 +25,7 @@ namespace Signum.Entities
             return new Disposable(() => inModelBinderVariable.Value = old);
         }
 
-        public static Func<ModifiableEntity, PropertyInfo, string?> GlobalValidation { get; set; }
+        public static Func<ModifiableEntity, PropertyInfo, string?>? GlobalValidation { get; set; }
 
         static readonly Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));

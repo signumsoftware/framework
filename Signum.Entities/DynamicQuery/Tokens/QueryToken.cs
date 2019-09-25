@@ -217,7 +217,7 @@ namespace Signum.Entities.DynamicQuery
             return EntityExtensions(parent);
         }
 
-        public static Func<QueryToken, IEnumerable<QueryToken>> EntityExtensions;
+        public static Func<QueryToken, IEnumerable<QueryToken>>? EntityExtensions;
 
 
         public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)

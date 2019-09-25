@@ -11,8 +11,8 @@ namespace Signum.Engine.Extensions.Basics
     public static class SemiSymbolLogic<T>
         where T : SemiSymbol
     {
-        static ResetLazy<Dictionary<string, T>> lazy;
-        static Func<IEnumerable<T>> getSemiSymbols;
+        static ResetLazy<Dictionary<string, T>> lazy = null!;
+        static Func<IEnumerable<T>> getSemiSymbols = null!;
 
         [ThreadStatic]
         static bool avoidCache;

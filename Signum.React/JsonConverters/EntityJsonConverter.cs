@@ -222,7 +222,7 @@ namespace Signum.React.Json
             return pr;
         }
 
-        public static Func<PropertyRoute, string> CanReadPropertyRoute;
+        public static Func<PropertyRoute, string>? CanReadPropertyRoute;
 
         public void WriteJsonProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
         {
@@ -402,7 +402,7 @@ namespace Signum.React.Json
         }
 
 
-        public static Func<PropertyRoute, string> CanWritePropertyRoute;
+        public static Func<PropertyRoute, string>? CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
         {
             string? error = CanWritePropertyRoute?.Invoke(pr);

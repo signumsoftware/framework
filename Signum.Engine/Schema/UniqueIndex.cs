@@ -99,7 +99,7 @@ namespace Signum.Engine.Maps
         {
             get
             {
-                if (string.IsNullOrEmpty(Where))
+                if (!Where.HasText())
                     return null;
 
                 if (Connector.Current.AllowsIndexWithWhere(Where))

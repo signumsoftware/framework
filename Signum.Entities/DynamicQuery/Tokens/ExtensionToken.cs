@@ -70,7 +70,7 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
             return base.SubTokensBase(type, options, implementations);
         }
 
-        public static Func<Type, string, Expression, Expression> BuildExtension;
+        public static Func<Type, string, Expression, Expression>? BuildExtension;
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {

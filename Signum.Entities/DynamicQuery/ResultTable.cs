@@ -468,6 +468,6 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

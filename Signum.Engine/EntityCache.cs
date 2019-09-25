@@ -195,7 +195,7 @@ namespace Signum.Engine
 
         static class Constructor<T> where T : Entity
         {
-            static Func<T> call;
+            static Func<T>? call;
             public static Func<T> Call
             {
                 get

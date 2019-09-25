@@ -63,7 +63,7 @@ namespace Signum.React.Filters
                     if (ExpectsJsonResult(context))
                     {
 
-                        var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture(precontext) : null;
+                        var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
 
                         using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                         {

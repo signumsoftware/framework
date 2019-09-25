@@ -281,7 +281,7 @@ namespace Signum.Engine.Operations
             throw new InvalidOperationException("OperationGraphs should not be instantiated");
         }
 
-        static Expression<Func<T, S>> getState;
+        static Expression<Func<T, S>> getState = null!;
         public static Expression<Func<T, S>> GetState
         {
             get { return getState; }
@@ -292,11 +292,11 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static Func<T, S> GetStateFunc{get; private set;}
+        public static Func<T, S> GetStateFunc { get; private set; } = null!;
 
 
-        public static Action<T, S> EnterState { get; set; }
-        public static Action<T, S> ExitState { get; set; }
+        public static Action<T, S>? EnterState { get; set; }
+        public static Action<T, S>? ExitState { get; set; }
 
 
 

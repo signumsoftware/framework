@@ -168,7 +168,7 @@ namespace Signum.Utilities.DataStructures
         /// <summary>
         /// Event that is fired when an item falls outside of the cache
         /// </summary>
-        public event Action<K,V> Purged;
+        public event Action<K,V>? Purged;
 
         public override string ToString()
         {

@@ -35,7 +35,7 @@ namespace Signum.React.Facades
         public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
          new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
-        public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
+        public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = null!;
 
         public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
             () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t) ||
@@ -64,7 +64,7 @@ namespace Signum.React.Facades
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        public static event Action<TypeInfoTS, Type> AddTypeExtension;
+        public static event Action<TypeInfoTS, Type>? AddTypeExtension;
         static TypeInfoTS OnAddTypeExtension(TypeInfoTS ti, Type t)
         {
             foreach (var a in AddTypeExtension.GetInvocationListTyped())
@@ -73,7 +73,7 @@ namespace Signum.React.Facades
             return ti;
         }
 
-        public static event Action<MemberInfoTS, PropertyRoute> AddPropertyRouteExtension;
+        public static event Action<MemberInfoTS, PropertyRoute>? AddPropertyRouteExtension;
         static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
             if (AddPropertyRouteExtension == null)
@@ -86,7 +86,7 @@ namespace Signum.React.Facades
         }
 
 
-        public static event Action<MemberInfoTS, FieldInfo> AddFieldInfoExtension;
+        public static event Action<MemberInfoTS, FieldInfo>? AddFieldInfoExtension;
         static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
         {
             if (AddFieldInfoExtension == null)
@@ -98,7 +98,7 @@ namespace Signum.React.Facades
             return mi;
         }
 
-        public static event Action<OperationInfoTS, OperationInfo, Type> AddOperationExtension;
+        public static event Action<OperationInfoTS, OperationInfo, Type>? AddOperationExtension;
         static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
         {
             if (AddOperationExtension == null)

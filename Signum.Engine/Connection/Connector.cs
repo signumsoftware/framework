@@ -33,7 +33,7 @@ namespace Signum.Engine
             get { return currentConnector.Value ?? Default; }
         }
 
-        static Connector @default;
+        static Connector @default = null!;
         public static Connector Default
         {
             get { return @default; }

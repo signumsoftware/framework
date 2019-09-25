@@ -349,7 +349,7 @@ namespace Signum.Entities
             FindImplementations = findImplementations;
         }
 
-        static Func<PropertyRoute, Implementations> FindImplementations;
+        static Func<PropertyRoute, Implementations>? FindImplementations;
 
         public Implementations? TryGetImplementations()
         {
@@ -372,7 +372,7 @@ namespace Signum.Entities
             IsAllowedCallback = isAllowed;
         }
 
-        static Func<PropertyRoute, string?> IsAllowedCallback;
+        static Func<PropertyRoute, string?>? IsAllowedCallback;
 
         public string? IsAllowed()
         {

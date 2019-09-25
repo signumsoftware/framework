@@ -16,7 +16,7 @@ namespace Signum.Engine
     {
         public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains(@"\");
 
-        public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables;
+        public static Action<Dictionary<string, DiffTable>>? SimplifyDiffTables;
 
         public static SqlPreCommand? SynchronizeTablesScript(Replacements replacements)
         {

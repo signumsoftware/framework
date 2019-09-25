@@ -139,7 +139,7 @@ namespace Signum.Utilities
     {
         readonly Stream InnerStream;
 
-        public event EventHandler ProgressChanged;
+        public event EventHandler? ProgressChanged;
 
         public ProgressStream(Stream innerStream)
         {

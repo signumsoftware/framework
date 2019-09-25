@@ -12,7 +12,7 @@ namespace Signum.Engine
 
     public static class SymbolLogic
     {
-        public static event Action OnLoadAll;
+        public static event Action? OnLoadAll;
 
         public static void LoadAll()
         {
@@ -23,8 +23,8 @@ namespace Signum.Engine
     public static class SymbolLogic<T>
         where T: Symbol
     {
-        static ResetLazy<Dictionary<string, T>> lazy;
-        static Func<IEnumerable<T>> getSymbols;
+        static ResetLazy<Dictionary<string, T>> lazy = null!;
+        static Func<IEnumerable<T>> getSymbols = null!;
 
         [ThreadStatic]
         static bool avoidCache;

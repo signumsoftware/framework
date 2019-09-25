@@ -327,7 +327,7 @@ namespace Signum.Engine
             }
         }
 
-        public static Func<AutoReplacementContext, Selection?> AutoReplacement;
+        public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
 
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
