@@ -67,6 +67,35 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       Navigator.API.fetchAndForget(ctx.lite)
@@ -146,9 +175,19 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump), contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
+    icon: "share",
+    iconColor: "blue",
+    onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
+    contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
+  }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timer, { isVisible: ctx => false }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, {
+    color: "dark",
+    hideOnCanExecute: true,
+    isVisible: ctx => false,
+    contextual: { isVisible: ctx => true }
+  }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptExecute, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptFailureJump, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptScheduleRetry, { isVisible: ctx => false }));
@@ -578,7 +617,7 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined);
 
   if (wa.viewNameProps.length) {
-    var props = wa.viewNameProps.toObject(a => a.element.name, a => eval(a.element.expression));
+    var props = wa.viewNameProps.toObject(a => a.element.name, a => !a.element.expression ? undefined : eval(a.element.expression));
     viewPromise = viewPromise.withProps(props);
   }
 

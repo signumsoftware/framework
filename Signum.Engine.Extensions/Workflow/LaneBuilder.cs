@@ -48,7 +48,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(events, oldEvents,
                    (id, e) =>
                    {
-                       var already = (WorkflowEventEntity)locator.FindEntity(id);
+                       var already = (WorkflowEventEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).events.Remove(id);
@@ -80,7 +80,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(activities, oldActivities,
                    (id, a) =>
                    {
-                       var already = (WorkflowActivityEntity)locator.FindEntity(id);
+                       var already = (WorkflowActivityEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).activities.Remove(id);
@@ -111,7 +111,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(gateways, oldGateways,
                    (id, g) =>
                    {
-                       var already = (WorkflowGatewayEntity)locator.FindEntity(id);
+                       var already = (WorkflowGatewayEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).gateways.Remove(id);
@@ -362,7 +362,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (locator!.HasReplacement(node.ToLite()))
                     {
-                        var replacement = locator.GetReplacement(node.ToLite());
+                        var replacement = locator.GetReplacement(node.ToLite())!;
 
                         node.CaseActivities()
                             .Where(a => a.State == CaseActivityState.Done)

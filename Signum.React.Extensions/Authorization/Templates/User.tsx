@@ -13,7 +13,8 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
     <div>
       <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
       <ValueLine ctx={ctx.subCtx(e => e.userName)} />
-      <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} />
+      {!ctx.readOnly &&
+        <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} />}
       <EntityLine ctx={ctx.subCtx(e => e.role)} />
       <ValueLine ctx={ctx.subCtx(e => e.email)} />
       <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />

@@ -28,8 +28,6 @@ namespace Signum.Engine.Dashboard
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                GetDashboard = GetDashboardDefault;
-
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
                 UserAssetsImporter.RegisterName<DashboardEntity>("Dashboard");

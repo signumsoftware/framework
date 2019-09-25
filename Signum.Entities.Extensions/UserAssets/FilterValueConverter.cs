@@ -441,7 +441,7 @@ namespace Signum.Entities.UserAssets
 
         public Result<object?>? TryParseValue(string? value, Type type)
         {
-            if (string.IsNullOrEmpty(value))
+            if (!value.HasText())
                 return null;
 
             string? error = Lite.TryParseLite(value, out Lite<Entity>? lite);

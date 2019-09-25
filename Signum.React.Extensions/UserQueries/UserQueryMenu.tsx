@@ -60,7 +60,10 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
       .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd))
       .then(nfo => {
 
-        ofo.filterOptions = nfo.filterOptions;
+        ofo.filterOptions = [
+          ...ofo.filterOptions.filter(a => a.frozen),
+          ...nfo.filterOptions
+        ];
         ofo.columnOptions = nfo.columnOptions;
         ofo.orderOptions = nfo.orderOptions;
         ofo.groupResults = nfo.groupResults;

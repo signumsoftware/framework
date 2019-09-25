@@ -384,10 +384,10 @@ namespace Signum.Engine.Mailing
 
         public static IEmailModel CreateModel(EmailModelEntity model, ModifiableEntity? entity)
         {
-            return (IEmailModel)EmailModelLogic.GetEntityConstructor(model.ToType()).Invoke(new[] { entity });
+            return (IEmailModel)EmailModelLogic.GetEntityConstructor(model.ToType())!.Invoke(new[] { entity });
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type emailModel)
+        public static ConstructorInfo? GetEntityConstructor(Type emailModel)
         {
             var entityType = GetEntityType(emailModel);
 

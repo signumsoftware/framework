@@ -73,7 +73,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
         title={toStr || undefined}
         target="_blank"
         {...this.props.htmlAttributes}>
-        {toStr}
+        {this.props.children || toStr}
       </a>
     );
 

@@ -20,22 +20,7 @@ export interface AppendixHelpEntity extends Entities.Entity {
 
 export module AppendixHelpOperation {
   export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Save");
-}
-
-export const EntityHelpEntity = new Type<EntityHelpEntity>("EntityHelp");
-export interface EntityHelpEntity extends Entities.Entity {
-  Type: "EntityHelp";
-  type: Signum.TypeEntity;
-  culture: Basics.CultureInfoEntity;
-  description: string | null;
-  properties: Entities.MList<PropertyRouteHelpEmbedded>;
-  operations: Entities.MList<OperationHelpEmbedded>;
-  queries: Entities.MList<QueryHelpEntity>;
-  isEmpty: boolean;
-}
-
-export module EntityHelpOperation {
-  export const Save : Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol("Operation", "EntityHelpOperation.Save");
+  export const Delete : Entities.DeleteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Delete");
 }
 
 export module HelpKindMessage {
@@ -62,7 +47,7 @@ export module HelpMessage {
   export const Buscador = new MessageKey("HelpMessage", "Buscador");
   export const Call0Over1OfThe2 = new MessageKey("HelpMessage", "Call0Over1OfThe2");
   export const Character = new MessageKey("HelpMessage", "Character");
-  export const Check = new MessageKey("HelpMessage", "Check");
+  export const BooleanValue = new MessageKey("HelpMessage", "BooleanValue");
   export const ConstructsANew0 = new MessageKey("HelpMessage", "ConstructsANew0");
   export const Date = new MessageKey("HelpMessage", "Date");
   export const DateTime = new MessageKey("HelpMessage", "DateTime");
@@ -143,12 +128,14 @@ export interface NamespaceHelpEntity extends Entities.Entity {
 
 export module NamespaceHelpOperation {
   export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Save");
+  export const Delete : Entities.DeleteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Delete");
 }
 
 export const OperationHelpEmbedded = new Type<OperationHelpEmbedded>("OperationHelpEmbedded");
 export interface OperationHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "OperationHelpEmbedded";
   operation: Entities.OperationSymbol;
+  info: string;
   description: string | null;
 }
 
@@ -156,6 +143,7 @@ export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("Pr
 export interface PropertyRouteHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "PropertyRouteHelpEmbedded";
   property: Signum.PropertyRouteEntity;
+  info: string;
   description: string | null;
 }
 
@@ -164,6 +152,8 @@ export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnHelpEmbedded";
   columnName: string;
   description: string | null;
+  niceName: string;
+  info: string;
 }
 
 export const QueryHelpEntity = new Type<QueryHelpEntity>("QueryHelp");
@@ -171,6 +161,7 @@ export interface QueryHelpEntity extends Entities.Entity {
   Type: "QueryHelp";
   query: Signum.QueryEntity;
   culture: Basics.CultureInfoEntity;
+  info: string;
   description: string | null;
   columns: Entities.MList<QueryColumnHelpEmbedded>;
   isEmpty: boolean;
@@ -178,6 +169,25 @@ export interface QueryHelpEntity extends Entities.Entity {
 
 export module QueryHelpOperation {
   export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Save");
+  export const Delete : Entities.DeleteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Delete");
+}
+
+export const TypeHelpEntity = new Type<TypeHelpEntity>("TypeHelp");
+export interface TypeHelpEntity extends Entities.Entity {
+  Type: "TypeHelp";
+  type: Signum.TypeEntity;
+  culture: Basics.CultureInfoEntity;
+  description: string | null;
+  properties: Entities.MList<PropertyRouteHelpEmbedded>;
+  operations: Entities.MList<OperationHelpEmbedded>;
+  queries: Entities.MList<QueryHelpEntity>;
+  isEmpty: boolean;
+  info: string;
+}
+
+export module TypeHelpOperation {
+  export const Save : Entities.ExecuteSymbol<TypeHelpEntity> = registerSymbol("Operation", "TypeHelpOperation.Save");
+  export const Delete : Entities.DeleteSymbol<TypeHelpEntity> = registerSymbol("Operation", "TypeHelpOperation.Delete");
 }
 
 

@@ -826,7 +826,7 @@ namespace Signum.Engine.Dynamic
         {
             StringBuilder sb = new StringBuilder();
             var operationConstruct = this.Def.OperationCreate?.Construct.Trim();
-            if (!string.IsNullOrWhiteSpace(operationConstruct))
+            if (operationConstruct.HasText())
             {
                 sb.AppendLine();
 

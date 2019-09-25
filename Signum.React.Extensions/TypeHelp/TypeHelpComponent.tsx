@@ -31,7 +31,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
   constructor(props: TypeHelpComponentProps) {
     super(props);
-    this.state = { history: [], historyIndex: -1 };
+    this.state = { history: [], historyIndex: -1, help: false };
   }
 
   static getExpression(initial: string, pr: PropertyRoute | string, mode: TypeHelpClient.TypeHelpMode, options?: { stronglyTypedMixinTS?: boolean }): string {

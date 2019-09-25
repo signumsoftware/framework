@@ -228,26 +228,28 @@ namespace Signum.Engine.SMS
 
         private static void SendOneMessage(SMSMessageEntity message)
         {
-            try
+            using (OperationLogic.AllowSave<SMSMessageEntity>())
             {
-                message.MessageID = GetProvider().SMSSendAndGetTicket(message);
-                message.SendDate = TimeZoneManager.Now.TrimToSeconds();
-                message.State = SMSMessageState.Sent;
-                using (OperationLogic.AllowSave<SMSMessageEntity>())
+                try
+                {
+                    message.MessageID = GetProvider().SMSSendAndGetTicket(message);
+                    message.SendDate = TimeZoneManager.Now.TrimToSeconds();
+                    message.State = SMSMessageState.Sent;
                     message.Save();
 
-            }
-            catch (Exception e)
-            {
-                var ex = e.LogException();
-                using (Transaction tr = Transaction.ForceNew())
-                {
-                    message.Exception = ex.ToLite();
-                    message.State = SMSMessageState.SendFailed;
-                    message.Save();
-                    tr.Commit();
                 }
-                throw;
+                catch (Exception e)
+                {
+                    var ex = e.LogException();
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        message.Exception = ex.ToLite();
+                        message.State = SMSMessageState.SendFailed;
+                        message.Save();
+                        tr.Commit();
+                    }
+                    throw;
+                }
             }
         }
 

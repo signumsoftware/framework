@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using Signum.Engine.Basics;
+using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -154,6 +155,10 @@ namespace Signum.React.Authorization
             if (string.IsNullOrEmpty(request.newPassword))
                 return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
+            var error = UserEntity.OnValidatePassword(request.newPassword);
+            if (error.HasText())
+                return ModelError("newPassword", error);
+
             var user = UserEntity.Current;
 
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
@@ -161,7 +166,10 @@ namespace Signum.React.Authorization
 
             user.PasswordHash = Security.EncodePassword(request.newPassword);
             using (AuthLogic.Disable())
-                user.Execute(UserOperation.Save);
+            using (OperationLogic.AllowSave<UserEntity>())
+            {
+                user.Save();
+            }
 
             return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
         }

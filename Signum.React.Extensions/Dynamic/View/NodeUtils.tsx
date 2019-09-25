@@ -158,6 +158,7 @@ ${childrenString}
       formGroupHtmlAttributes: node.formGroupHtmlAttributes,
       visible: node.visible,
       readOnly: node.readOnly,
+      createOnFind: node.createOnFind,
       create: node.create,
       onCreate: node.onCreate,
       remove: node.remove,
@@ -612,6 +613,10 @@ export function isObjectOrNull(val: any) {
   return val == null || typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object or null`;
 }
 
+export function isObjectOrFunctionOrNull(val: any) {
+  return val == null || typeof val == "object" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be an object or function or null`;
+}
+
 export function isInList(val: any, values: string[]) {
   return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
@@ -726,18 +731,6 @@ export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext
   return undefined;
 }
 
-
-let aggregates = ["Count", "Average", "Min", "Max", "Sum"];
-
-export function validateAggregate(token: string) {
-  var lastPart = token.tryAfterLast(".") || token;
-
-  if (!aggregates.contains(lastPart))
-    return DynamicViewValidationMessage.AggregateIsMandatoryFor01.niceToString("valueToken", aggregates.joinComma(External.CollectionMessage.Or.niceToString()));
-
-  return undefined;
-}
-
 export function addBreakLines(breakLines: boolean, message: string): React.ReactNode[] {
   if (!breakLines)
     return [message];
@@ -757,6 +750,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
       : undefined),
     visible: evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, isBooleanOrNull),
     readOnly: evaluateAndValidate(dn, parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
+    createOnFind: evaluateAndValidate(dn, parentCtx, dn.node, n => n.createOnFind, isBooleanOrNull),
     create: evaluateAndValidate(dn, parentCtx, dn.node, n => n.create, isBooleanOrNull),
     onCreate: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onCreate, isFunctionOrNull),
     remove: evaluateAndValidate(dn, parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
@@ -784,6 +778,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
   if (options.filterRows)
     (result as any).filterRows = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.filterRows, isFunctionOrNull);
 
+  (result as any).ref = evaluateAndValidate(dn, parentCtx, dn.node, (n: BaseNode) => n.ref, isObjectOrFunctionOrNull);
   return result;
 }
 
@@ -805,6 +800,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
 
   return (
     <div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -813,6 +809,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       {options.isEntityLine && <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).itemHtmlAttributes)} />}
       <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={m ? m.type.name : undefined} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.createOnFind)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(modules.Reflection.New('" + typeName + "', { name: ''}))"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />

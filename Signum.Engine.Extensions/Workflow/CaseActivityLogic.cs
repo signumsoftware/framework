@@ -542,7 +542,7 @@ namespace Signum.Engine.Workflow
                         if (workflow.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
 
-                        var mainEntity = args.TryGetArgC<ICaseMainEntity>();
+                        var mainEntity = args.GetArg<ICaseMainEntity>();
                         var @case = new CaseEntity
                         {
                             Workflow = workflow,

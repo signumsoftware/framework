@@ -129,7 +129,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static Func<string, UserEntity> GetUserByEmail = (email) => Database.Query<UserEntity>().Where(u => u.Email == email).SingleOrDefaultEx();
+        public static Func<string, UserEntity?> GetUserByEmail = (email) => Database.Query<UserEntity>().Where(u => u.Email == email).SingleOrDefaultEx();
     }
 
     public class ResetPasswordRequestEmail : EmailModel<ResetPasswordRequestEntity>

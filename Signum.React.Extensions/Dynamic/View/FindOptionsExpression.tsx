@@ -1,6 +1,7 @@
 import { ModifiableEntity } from '@framework/Signum.Entities'
 import { ColumnOptionsMode, FilterOperation, OrderType, PaginationMode, FindOptions, FilterOption, OrderOption, ColumnOption, Pagination, QueryToken } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
+import * as Finder from '@framework/Finder'
 import { ExpressionOrValue } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
 //import { BaseNode } from './Nodes';
@@ -12,6 +13,7 @@ export interface FindOptionsExpr {
   parentValue?: ExpressionOrValue<any>;
 
   filterOptions?: FilterOptionExpr[];
+  avoidDefaultFilters?: boolean;
   orderOptions?: OrderOptionExpr[];
   columnOptionsMode?: ExpressionOrValue<ColumnOptionsMode>;
   columnOptions?: ColumnOptionExpr[];
@@ -49,15 +51,17 @@ export function toFindOptions(dn: any/*NodeUtils.DesignerNode<BaseNode>*/, ctx: 
     parentToken: foe.parentToken,
     parentValue: NodeUtils.evaluate(dn, ctx, foe, f => f.parentValue),
 
-    filterOptions: foe.filterOptions ?
-      foe.filterOptions
+    filterOptions: [
+      ...(foe.filterOptions ? foe.filterOptions
         .filter(fo => NodeUtils.evaluateAndValidate(dn, ctx, fo, f => f.applicable, NodeUtils.isBooleanOrNull) != false)
         .map(fo => ({
           token: fo.token,
           frozen: NodeUtils.evaluateAndValidate(dn, ctx, fo, f => f.frozen, NodeUtils.isBooleanOrNull),
           operation: NodeUtils.evaluateAndValidate(dn, ctx, fo, f => f.operation, v => NodeUtils.isEnumOrNull(v, FilterOperation)),
           value: NodeUtils.evaluate(dn, ctx, fo, f => f.value)
-        } as FilterOption)) : undefined,
+        } as FilterOption)) : []),
+      ...(foe.avoidDefaultFilters ?  [] : Finder.getDefaultFilter(undefined, Finder.getSettings(foe.queryName!)) || [])
+    ],
 
     orderOptions: foe.orderOptions ?
       foe.orderOptions

@@ -44,10 +44,12 @@ namespace Signum.React.Dynamic
             Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
             compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false));
 
-            Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionaryEx(a => a.FileName, "CodeGenController C# code file");
-            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true));
-
-            codeFiles.AddRange(apiFiles);
+            if (DynamicApiLogic.IsStarted)
+            {
+                Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionaryEx(a => a.FileName, "CodeGenController C# code file");
+                compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true));
+                codeFiles.AddRange(apiFiles);
+            }
 
             return (from cr in compileResult
                     from ce in cr.Errors

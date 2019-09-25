@@ -48,7 +48,6 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
   options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
   options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
 
-
   if (options.notifyLogout) {
     notifyLogout = options.notifyLogout;
 

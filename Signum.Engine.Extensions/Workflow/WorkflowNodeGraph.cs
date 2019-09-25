@@ -176,6 +176,9 @@ namespace Signum.Engine.Workflow
                             issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
                         }
                     }
+
+                    if (e.Type == WorkflowEventType.IntermediateTimer && !e.Name.HasText())
+                        issues.AddError(e, WorkflowValidationMessage.IntermediateTimer0ShouldHaveName.NiceToString(e));
                 }
             });
 

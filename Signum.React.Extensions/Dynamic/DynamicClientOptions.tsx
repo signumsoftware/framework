@@ -49,7 +49,6 @@ export namespace Options {
 
 function HighlightText({ text, search, type }: { text: string, search: string, type: FormatColumnType }) {
 
-  var searchParts = search.split(/\s+/).orderBy(a => a.length).map(p => new RegExp(RegExp.escape(p), "gi"));
   if (type == "JSon")
     text = JSON.stringify(JSON.parse(text), undefined, 2);
 
@@ -57,6 +56,7 @@ function HighlightText({ text, search, type }: { text: string, search: string, t
 
   var lines = text.split(/\r?\n/g);
 
+  var searchParts = search.split(/\s+/).filter(s => s.length > 0).orderBy(a => a.length).map(p => new RegExp(RegExp.escape(p), "gi"));
   function mark(line: string, index: number): React.ReactNode {
 
     if (index == -1)
@@ -77,17 +77,28 @@ function HighlightText({ text, search, type }: { text: string, search: string, t
 
   function makeLine(line: React.ReactNode) {
     if (type == "Text")
-      return <>{line}{"\n"}</>;
+      return <>{line}<br/></>;
     else
       return <><code>{line}</code>{"\n"}</>;
   }
 
 
-  if (showAll) {
-    return React.createElement("pre", undefined, ...lines.map(line => makeLine(mark(line, searchParts.length - 1))));
+  if (type == "Text") {
+    return (React.createElement("div", undefined, ...lines.map(line => makeLine(mark(line, searchParts.length - 1)))));
+  }
+  else if (showAll) {
+    return (
+      <div>
+        {React.createElement("pre", undefined, ...lines.map(line => makeLine(mark(line, searchParts.length - 1))))}
+        <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setShowAll(false) }}>Show less</a>
+      </div>
+    );
   }
   else {
     var changes = lines.map((str, i) => searchParts.some(p => str.search(p) != -1) ? i : null).notNull();
+
+    if (changes.length == 0)
+      changes = [0];
 
     var result = expandNumbers(changes, 4);
 
@@ -97,7 +108,7 @@ function HighlightText({ text, search, type }: { text: string, search: string, t
           React.createElement("pre", undefined, ...result.map(n => typeof n == "number" ? makeLine(mark(lines[n], searchParts.length - 1)) :
             makeLine(` ----- ${n.numLines} Lines Removed ----- `)
           ))}
-        <a href="#" onClick={e => { e.preventDefault(); setShowAll(true) }}> Show All </a>
+        <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setShowAll(true) }}>Show all</a>
       </div>
     );
   }

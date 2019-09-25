@@ -38,6 +38,7 @@ import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
 
 export interface BaseNode {
+  ref?: Expression<any>;
   kind: string;
   visible?: ExpressionOrValue<boolean>;
 }
@@ -494,6 +495,7 @@ NodeUtils.register<ValueLineNode>({
   validate: (dn) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("ValueLine", {
+    ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     labelText: node.labelText,
     labelHtmlAttributes: node.labelHtmlAttributes,
@@ -509,6 +511,7 @@ NodeUtils.register<ValueLineNode>({
     onChange: node.onChange
   }),
   render: (dn, ctx) => (<ValueLine
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
@@ -526,6 +529,7 @@ NodeUtils.register<ValueLineNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -560,6 +564,7 @@ NodeUtils.register<MultiValueLineNode>({
   validate: (dn) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("MultiValueLine", {
+    ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     onRenderItem: node.onRenderItem,
     onCreate: node.onCreate,
@@ -572,6 +577,7 @@ NodeUtils.register<MultiValueLineNode>({
   }),
   render: (dn, ctx) => (
     <MultiValueLine
+      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
       onRenderItem={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onRenderItem, NodeUtils.isFunctionOrNull)}
       onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onCreate, NodeUtils.isFunctionOrNull)}
@@ -586,6 +592,7 @@ NodeUtils.register<MultiValueLineNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
@@ -601,6 +608,7 @@ NodeUtils.register<MultiValueLineNode>({
 });
 
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
+  createOnFind?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
   onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
   find?: ExpressionOrValue<boolean>;
@@ -703,6 +711,7 @@ NodeUtils.register<FileLineNode>({
   validate: (dn, ctx) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("FileLine", {
+    ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     labelText: node.labelText,
     labelHtmlAttributes: node.labelHtmlAttributes,
@@ -719,6 +728,7 @@ NodeUtils.register<FileLineNode>({
     onChange: node.onChange
   }),
   render: (dn, parentCtx) => (<FileLine
+    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
@@ -738,6 +748,7 @@ NodeUtils.register<FileLineNode>({
     const m = dn.route && dn.route.member;
     return (
       <div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -776,6 +787,7 @@ NodeUtils.register<FileImageLineNode>({
   validate: (dn, ctx) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("FileImageLine", {
+    ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     labelText: node.labelText,
     labelHtmlAttributes: node.labelHtmlAttributes,
@@ -791,6 +803,7 @@ NodeUtils.register<FileImageLineNode>({
     onChange: node.onChange
   }),
   render: (dn, parentCtx) => (<FileImageLine
+    ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
@@ -810,6 +823,7 @@ NodeUtils.register<FileImageLineNode>({
     const m = dn.route && dn.route.member;
     return (
       <div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -848,6 +862,7 @@ NodeUtils.register<MultiFileLineNode>({
   validate: (dn) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("MultiFileLine", {
+    ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     labelText: node.labelText,
     labelHtmlAttributes: node.labelHtmlAttributes,
@@ -863,6 +878,7 @@ NodeUtils.register<MultiFileLineNode>({
   }),
   render: (dn, ctx) => (
     <MultiFileLine
+      ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
       labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
       labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
@@ -880,6 +896,7 @@ NodeUtils.register<MultiFileLineNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
@@ -925,6 +942,7 @@ NodeUtils.register<EnumCheckboxListNode>({
   validate: (dn) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EnumCheckboxList", {
+    ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     labelText: node.labelText,
     avoidFieldSet: node.avoidFieldSet,
@@ -934,6 +952,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     onChange: node.onChange,
   }),
   render: (dn, ctx) => (<EnumCheckboxList
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
@@ -945,6 +964,7 @@ NodeUtils.register<EnumCheckboxListNode>({
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
     return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
@@ -1126,7 +1146,8 @@ NodeUtils.register<EntityTableNode>({
     columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map(col => ({ __code__: NodeUtils.renderCode(col as EntityTableColumnNode, cc) }))) + ")" })
   }),
   render: (dn, ctx) => (<EntityTable
-    columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
+    columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => (c.visible == undefined || NodeUtils.evaluateAndValidate(dn, ctx, c, n => n.visible, NodeUtils.isBooleanOrNull)) &&
+      NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
     {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
     scrollable={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.scrollable, NodeUtils.isBooleanOrNull)}
@@ -1217,6 +1238,7 @@ NodeUtils.register<SearchControlNode>({
   validate: (dn, ctx) => NodeUtils.mandatory(dn, n => n.findOptions) || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions, ctx),
   renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryName || " - "}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("SearchControl", {
+    ref: node.ref,
     findOptions: node.findOptions,
     searchOnLoad: node.searchOnLoad,
     showContextMenu: node.showContextMenu,
@@ -1244,6 +1266,7 @@ NodeUtils.register<SearchControlNode>({
     onResult: node.onResult,
   }),
   render: (dn, ctx) => <SearchControl
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     findOptions={toFindOptions(dn, ctx, dn.node.findOptions!)}
     getViewPromise={NodeUtils.toFunction(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.viewName, NodeUtils.isFunctionOrStringOrNull))}
     searchOnLoad={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
@@ -1273,6 +1296,7 @@ NodeUtils.register<SearchControlNode>({
     onResult={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onResult, NodeUtils.isFunctionOrNull)}
   />,
   renderDesigner: dn => <div>
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
     <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
     <FetchQueryDescription queryName={dn.node.findOptions && dn.node.findOptions.queryName} >
       {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd && qd.columns["Entity"].type.name} />}
@@ -1348,10 +1372,6 @@ NodeUtils.register<ValueSearchControlLineNode>({
         return error;
     }
 
-    if (dn.node.findOptions && dn.node.valueToken) {
-      return NodeUtils.validateAggregate(dn.node.valueToken);
-    }
-
     if (dn.node.valueToken && !dn.node.findOptions) {
       if (ctx) {
         var name = ctx.propertyRoute.typeReference().name;
@@ -1367,6 +1387,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
       dn.node.findOptions ? dn.node.findOptions.queryName : " - "
   }</strong></span>,
   renderCode: (node, cc) => cc.elementCode("ValueSearchControlLine", {
+    ref: node.ref,
     ctx: cc.subCtxCode(),
     findOptions: node.findOptions,
     valueToken: node.valueToken,
@@ -1381,6 +1402,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
     refreshKey: node.refreshKey,
   }),
   render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
+    ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     findOptions={dn.node.findOptions && toFindOptions(dn, ctx, dn.node.findOptions!)}
     valueToken={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.valueToken, NodeUtils.isStringOrNull)}
     labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
@@ -1395,6 +1417,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
   />,
   renderDesigner: dn => {
     return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <QueryTokenLine dn={dn} binding={Binding.create(dn.node, a => a.valueToken)} queryKey={dn.node.findOptions && dn.node.findOptions.queryName ||
         (isTypeEntity(dn.route!.typeReference().name) ? dn.route!.typeReference().name : dn.route!.findRootType().name)}
         subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement} />
@@ -1440,6 +1463,7 @@ NodeUtils.register<ButtonNode>({
   order: 0,
   renderTreeNode: dn => <span><small>Button:</small> <strong>{dn.node.name}</strong></span>,
   renderCode: (node, cc) => cc.elementCode(node.operationName ? "OperationButton" : "Button", {
+    ref: node.ref,
     eoc: node.operationName ? { __code__: `EntityOperationContext.fromTypeContext(${cc.subCtxCode().__code__}, ${node.operationName}))` } : undefined,
     onOperationClick: node.onOperationClick,
     canExecute: node.canExecute,
@@ -1469,6 +1493,7 @@ NodeUtils.register<ButtonNode>({
       const eoc = EntityOperationContext.fromTypeContext(ctx as TypeContext<Entity>, dn.node.operationName);
       return (
         <OperationButton
+          ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
           eoc={eoc}
           canExecute={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.canExecute, NodeUtils.isStringOrNull)}
           onOperationClick={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onOperationClick, NodeUtils.isFunctionOrNull)}
@@ -1487,6 +1512,7 @@ NodeUtils.register<ButtonNode>({
 
     return (
       <Button
+        innerRef={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
         active={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
         block={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
         disabled={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
@@ -1506,6 +1532,7 @@ NodeUtils.register<ButtonNode>({
     var operations = ti && ti.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key) || [];
 
     return (<div>
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.name)} type="string" defaultValue={null} allowsExpression={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.operationName)} type="string" defaultValue={null} allowsExpression={false} options={operations} refreshView={() => {
         if (dn.node.operationName == null) {

@@ -37,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.pack.userQueries || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>

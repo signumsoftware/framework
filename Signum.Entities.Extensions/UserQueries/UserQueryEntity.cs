@@ -122,9 +122,10 @@ namespace Signum.Entities.UserQueries
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                AppendFilters == true ? null : new XAttribute("AppendFilters", true),
+                !HideQuickLink ? null : new XAttribute("HideQuickLink", HideQuickLink),
+                !AppendFilters ? null : new XAttribute("AppendFilters", AppendFilters),
+                !GroupResults ? null : new XAttribute("GroupResults", GroupResults),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
                 PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
                 new XAttribute("ColumnsMode", ColumnsMode),
@@ -138,9 +139,10 @@ namespace Signum.Entities.UserQueries
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
-            HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
-            AppendFilters = element.Attribute("AppendFilters")?.Let(a => a.Value == true.ToString()) ?? false;
+            HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
+            AppendFilters = element.Attribute("AppendFilters")?.Let(a => bool.Parse(a.Value)) ?? false;
+            GroupResults = element.Attribute("GroupResults")?.Let(a => bool.Parse(a.Value)) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
@@ -386,7 +388,7 @@ namespace Signum.Entities.UserQueries
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
             ValueString = element.Attribute("Value")?.Value;
-            Pinned = element.Element("Pinned")?.Let(p => new PinnedQueryFilterEmbedded().FromXml(p, ctx));
+            Pinned = element.Element("Pinned")?.Let(p => (this.Pinned ?? new PinnedQueryFilterEmbedded()).FromXml(p, ctx));
         }
 
         public override string ToString()

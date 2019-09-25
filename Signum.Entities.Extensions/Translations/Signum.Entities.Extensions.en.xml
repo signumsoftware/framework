@@ -28,6 +28,7 @@
   <Type Name="CaseActivityEntity" />
   <Type Name="CaseActivityExecutedTimerEntity" />
   <Type Name="CaseActivityMessage" />
+  <Type Name="CaseActivityMixin" />
   <Type Name="CaseActivityOperation" />
   <Type Name="CaseActivityProcessAlgorithm" />
   <Type Name="CaseActivityQuery" />
@@ -124,6 +125,7 @@
   <Type Name="DynamicViewOperation" />
   <Type Name="DynamicViewOverrideEntity" />
   <Type Name="DynamicViewOverrideOperation" />
+  <Type Name="DynamicViewPropEmbedded" />
   <Type Name="DynamicViewSelectorEntity" />
   <Type Name="DynamicViewSelectorOperation" />
   <Type Name="DynamicViewValidationMessage" />
@@ -140,6 +142,7 @@
   <Type Name="EmailMessageOperation" />
   <Type Name="EmailMessageProcess" />
   <Type Name="EmailMessageState" />
+  <Type Name="EmailModelEntity" />
   <Type Name="EmailOwnerData" />
   <Type Name="EmailPackageEntity" />
   <Type Name="EmailReceptionInfoEmbedded" />
@@ -191,6 +194,7 @@
   <Type Name="IProcessDataEntity" />
   <Type Name="IProcessLineDataEntity" />
   <Type Name="IScheduleRuleEntity" />
+  <Type Name="ISMSOwnerEntity" />
   <Type Name="IsolationEntity" />
   <Type Name="IsolationMessage" />
   <Type Name="IsolationMixin" />
@@ -330,6 +334,7 @@
   <Type Name="RestLogEntity" />
   <Type Name="RestLogReplayState" />
   <Type Name="RoleEntity" />
+  <Type Name="RoleMappingEmbedded" />
   <Type Name="RoleOperation" />
   <Type Name="RoleQuery" />
   <Type Name="RuleEntity`2" />
@@ -361,6 +366,9 @@
   <Type Name="SMSMessageOperation" />
   <Type Name="SMSMessageProcess" />
   <Type Name="SMSMessageState" />
+  <Type Name="SMSMessageTask" />
+  <Type Name="SMSModelEntity" />
+  <Type Name="SMSOwnerData" />
   <Type Name="SMSPackageEntity" />
   <Type Name="SMSSendPackageEntity" />
   <Type Name="SMSTemplateEntity" />
@@ -374,9 +382,7 @@
   <Type Name="SqlMigrationEntity" />
   <Type Name="SubEntitiesEval" />
   <Type Name="SubWorkflowEmbedded" />
-  <Type Name="SystemEmailEntity" />
   <Type Name="SystemEventLogEntity" />
-  <Type Name="SystemWordTemplateEntity" />
   <Type Name="TemplateApplicableEval" />
   <Type Name="TemplateTokenMessage" />
   <Type Name="TimeMachineMessage" />
@@ -416,6 +422,7 @@
   <Type Name="UserChartOperation" />
   <Type Name="UserChartPartEntity" />
   <Type Name="UserEntity" />
+  <Type Name="UserOIDMixin" />
   <Type Name="UserOperation" />
   <Type Name="UserQueryEntity" />
   <Type Name="UserQueryMessage" />
@@ -429,10 +436,12 @@
   <Type Name="ValueUserQueryListPartEntity" />
   <Type Name="ViewLogEntity" />
   <Type Name="ViewLogMessage" />
+  <Type Name="ViewNamePropEmbedded" />
   <Type Name="WebDownload" />
   <Type Name="WebImage" />
   <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
+  <Type Name="WordModelEntity" />
   <Type Name="WordTemplateEntity" />
   <Type Name="WordTemplateMessage" />
   <Type Name="WordTemplateOperation" />
@@ -479,7 +488,7 @@
   <Type Name="WorkflowMessage" />
   <Type Name="WorkflowModel" />
   <Type Name="WorkflowOperation" />
-  <Type Name="WorkflowPanelPermission" />
+  <Type Name="WorkflowPermission" />
   <Type Name="WorkflowPoolEntity" />
   <Type Name="WorkflowPoolModel" />
   <Type Name="WorkflowPoolOperation" />

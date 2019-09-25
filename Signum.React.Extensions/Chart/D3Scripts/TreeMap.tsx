@@ -71,10 +71,24 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   const scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);
 
+  const getNodeKey = (n: d3.HierarchyRectangularNode<ChartRow | Folder | Root>): string => {
+
+    if (isRoot(n.data))
+      return "root";
+
+    var last = isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :
+      keyColumn!.getValueKey(n.data) + (colorSchemeColumn ? colorSchemeColumn.getValueKey(n.data) : "");
+
+    if (n.parent && !isRoot(n.parent.data))
+      return getNodeKey(n.parent) + " / " + last;
+
+    return last;
+  };
+
   return (
     <svg direction="ltr" width={width} height={height} >
       {nodes.map((d, i) =>
-        <g key={i} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
+        <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
           {isFolder(d.data) &&
             <rect className="folder sf-transition" shapeRendering="initial"
               width={nodeWidth(d)}

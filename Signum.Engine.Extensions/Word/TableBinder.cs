@@ -59,7 +59,7 @@ namespace Signum.Engine.Word
             var graphicFrames = part.RootElement.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
             foreach (var item in graphicFrames)
             {
-                var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
+                var nonVisualProps = item.Descendants().SingleEx(a => a.LocalName == "cNvPr");
                 var title = GetTitle(nonVisualProps);
 
                 Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
@@ -84,7 +84,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        static string? GetTitle(OpenXmlElement nonVisualProps)
+        static string? GetTitle(OpenXmlElement? nonVisualProps)
         {
             if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
                 return draw.Title?.Value;
@@ -92,7 +92,7 @@ namespace Signum.Engine.Word
             if (nonVisualProps is Presentation.NonVisualDrawingProperties pres)
                 return pres.Title?.Value;
             
-            throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps.GetType().FullName);
+            throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps?.GetType().FullName);
         }
 
         static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)
