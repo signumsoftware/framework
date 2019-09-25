@@ -66,12 +66,12 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
           <tbody>
             {
               mlistItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-                (<ErrorBoundary>
-                  <MultiValueLineElement key={i}
+                <ErrorBoundary key={i}>
+                  <MultiValueLineElement
                     ctx={mlec}
                     onRemove={e => { e.preventDefault(); this.handleDeleteValue(i); }}
                     onRenderItem={this.props.onRenderItem} />
-                </ErrorBoundary>))
+                </ErrorBoundary>)
             }
             <tr >
               <td colSpan={4}>
@@ -100,6 +100,8 @@ export class MultiValueLineElement extends React.Component<MultiValueLineElement
   render() {
     const ctx = this.props.ctx;
 
+    var renderItem = this.props.onRenderItem || DynamicComponent.getAppropiateComponentFactory(ctx.propertyRoute)
+
     return (
       <tr>
         <td>
@@ -111,7 +113,7 @@ export class MultiValueLineElement extends React.Component<MultiValueLineElement
             </a>}
         </td>
         <td>
-          {this.props.onRenderItem ? this.props.onRenderItem(ctx) : DynamicComponent.getAppropiateComponent(ctx)}
+          {renderItem(ctx)}
         </td>
       </tr>
     );

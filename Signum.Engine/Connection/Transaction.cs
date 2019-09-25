@@ -24,9 +24,9 @@ namespace Signum.Engine
 
         interface ICoreTransaction
         {
-            event Action<Dictionary<string, object>?> PostRealCommit;
+            event Action<Dictionary<string, object>?>? PostRealCommit;
             void CallPostRealCommit();
-            event Action<Dictionary<string, object>?> PreRealCommit;
+            event Action<Dictionary<string, object>?>? PreRealCommit;
             DbConnection? Connection { get; }
             DbTransaction? Transaction { get; }
 
@@ -60,13 +60,13 @@ namespace Signum.Engine
                 this.parent = parent;
             }
 
-            public event Action<Dictionary<string, object>?> PostRealCommit
+            public event Action<Dictionary<string, object>?>? PostRealCommit
             {
                 add { parent.PostRealCommit += value; }
                 remove { parent.PostRealCommit -= value; }
             }
 
-            public event Action<Dictionary<string, object>?> PreRealCommit
+            public event Action<Dictionary<string, object>?>? PreRealCommit
             {
                 add { parent.PreRealCommit += value; }
                 remove { parent.PreRealCommit -= value; }

@@ -71,6 +71,10 @@ export function getSettings(queryName: PseudoType | QueryKey): QuerySettings | u
   return querySettings[getQueryKey(queryName)];
 }
 
+export function getOrAddSettings(queryName: PseudoType | QueryKey): QuerySettings {
+  return querySettings[getQueryKey(queryName)] || (querySettings[getQueryKey(queryName)] = { queryName: queryName });
+}
+
 export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean) => boolean> = [];
 
 export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean): boolean {
@@ -500,14 +504,14 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefi
   } as OrderOption;
 }
 
-export function getDefaultFilter(qd: QueryDescription, qs: QuerySettings | undefined): FilterOption[] | undefined {
+export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySettings | undefined): FilterOption[] | undefined {
   if (qs && qs.simpleFilterBuilder)
     return undefined;
 
   if (qs && qs.defaultFilters)
     return qs.defaultFilters;
 
-  if (qd.columns["Entity"]) {
+  if (qd == null || qd.columns["Entity"]) {
     return [
       {
         groupOperation: "Or",

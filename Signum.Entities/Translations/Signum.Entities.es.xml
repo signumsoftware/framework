@@ -289,7 +289,7 @@
     <Member Name="And" Description=" y " />
     <Member Name="AnyEntity" Description="cualquier entidad" />
     <Member Name="As0" Description="As {0}" />
-    <Member Name="Check" Description="verificación" />
+    <Member Name="BooleanValue" Description="valor booleano (sí o no)" />
     <Member Name="Column0NotFound" Description="La columna {0} no se ha encontrado" />
     <Member Name="Count" Description="[Num]" />
     <Member Name="Date" Description="Fecha" />

@@ -59,10 +59,10 @@ export interface OperationInfo {
   key: string,
   niceName: string;
   operationType: OperationType;
-  canBeNew: boolean;
-  canBeModified: boolean;
-  hasCanExecute: boolean;
-  hasStates: boolean;
+  canBeNew?: boolean;
+  canBeModified?: boolean;
+  hasCanExecute?: boolean;
+  hasStates?: boolean;
 }
 
 export enum OperationType {
@@ -172,7 +172,7 @@ export function dateToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var m = moment(val, moment.ISO_8601);
+  var m = moment(val);
   return m.format(toMomentFormat(format));
 }
 
@@ -1189,6 +1189,9 @@ let missingSymbols: ISymbol[] = [];
 
 function getMember(key: string): MemberInfo | undefined {
 
+  if (!key.contains("."))
+    return undefined;
+
   const type = _types[key.before(".").toLowerCase()];
 
   if (!type)
@@ -1199,11 +1202,16 @@ function getMember(key: string): MemberInfo | undefined {
   return member;
 }
 
-export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
+export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) : string {
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
-    return getMember((symbol as Entity & ISymbol).key)!.niceName;
-  else
-    return getMember(symbol.toStr!)!.niceName;
+  {
+    var m = getMember((symbol as Entity & ISymbol).key);
+    return m && m.niceName || symbol.toStr!;
+  }
+  else {
+    var m = getMember(symbol.toStr!);
+    return m && m.niceName || symbol.toStr!;
+  }
 }
 
 export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string) { //Unsafe Type!
@@ -1370,6 +1378,8 @@ export class PropertyRoute {
 
   addMember(memberType: MemberType, memberName: string): PropertyRoute {
 
+    var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
+
     if (memberType == "Member") {
 
       if (this.propertyRouteType == "Field" ||
@@ -1384,16 +1394,16 @@ export class PropertyRoute {
           return PropertyRoute.liteEntity(this);
         }
 
-        const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
+        const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
           const m = ti.members[memberName];
           if (!m)
-            throw new Error(`member '${memberName}' not found`);
+            throw new Error(`member '${memberName}' not found` + getErrorContext());
 
           return PropertyRoute.member(PropertyRoute.root(ti), m);
         } else if (this.propertyRouteType == "LiteEntity") {
-          throw Error("Unexpected lite case");
+          throw Error("Unexpected lite case" + getErrorContext());
         }
       }
 
@@ -1403,30 +1413,30 @@ export class PropertyRoute {
 
       const m = this.findRootType().members[fullMemberName];
       if (!m)
-        throw new Error(`member '${fullMemberName}' not found`)
+        throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
 
       return PropertyRoute.member(this, m);
     }
 
     if (memberType == "Mixin") {
       if (this.propertyRouteType != "Root")
-        throw new Error("invalid mixin at this stage");
+        throw new Error("invalid mixin at this stage" + getErrorContext());
 
       return PropertyRoute.mixin(this, memberName);
     }
 
     if (memberType == "Indexer") {
       if (this.propertyRouteType != "Field")
-        throw new Error("invalid indexer at this stage");
+        throw new Error("invalid indexer at this stage" + getErrorContext());
 
       const tr = this.typeReference();
       if (!tr.isCollection)
-        throw new Error(`${this.propertyPath()} is not a collection`);
+        throw new Error("${this.propertyPath()} is not a collection" + getErrorContext());
 
       return PropertyRoute.mlistItem(this);
     }
 
-    throw new Error("not implemented");
+    throw new Error("not implemented" + getErrorContext());
   }
 
   static generateAll(type: PseudoType): PropertyRoute[] {

@@ -200,7 +200,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
     const wc: WidgetContext<Entity> = {
       ctx: ctx,
-      pack: this.state.pack,
+      frame: frame,
     };
 
     const embeddedWidgets = renderEmbeddedWidgets(wc);

@@ -43,7 +43,9 @@ namespace Signum.React.Filters
 
     public class SignumAuthenticationFilter : SignumDisposableResourceFilter
     {
-        public SignumAuthenticationFilter() : base("Signum_User") { }
+        public const string Signum_User_Key = "Signum_User";
+
+        public SignumAuthenticationFilter() : base("Signum_User_Session") { }
 
         public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
@@ -66,19 +68,21 @@ namespace Signum.React.Filters
             if (result == null)
                 return null;
 
+            context.HttpContext.Items[Signum_User_Key] = result.User;
+
             return result.User != null ? UserHolder.UserSession(result.User) : null;
         }
     }
 
     public class SignumCultureSelectorFilter : IResourceFilter
     {
-        public static Func<ResourceExecutingContext, CultureInfo?>? GetCurrentCultures;
+        public static Func<ResourceExecutingContext, CultureInfo?>? GetCurrentCulture;
 
         const string Culture_Key = "OldCulture";
         const string UICulture_Key = "OldUICulture";
         public void OnResourceExecuting(ResourceExecutingContext context)
         {
-            var culture = GetCurrentCultures?.Invoke(context);
+            var culture = GetCurrentCulture?.Invoke(context);
             if (culture != null)
             {
                 context.HttpContext.Items[Culture_Key] = CultureInfo.CurrentCulture;

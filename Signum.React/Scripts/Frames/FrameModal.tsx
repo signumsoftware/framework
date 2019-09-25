@@ -219,7 +219,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
           okDisabled={!pack}>
           {this.renderTitle()}
         </ModalHeaderButtons>
-        {pack && this.renderBody()}
+        {pack && this.renderBody(pack)}
       </Modal>
     );
   }
@@ -235,33 +235,32 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
   buttonBar?: ButtonBar | null;
 
-  renderBody() {
+  renderBody(pack: EntityPack<ModifiableEntity>) {
 
     const frame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      onReload: (pack, reloadComponent, callback) => {
-        var newPack = pack || this.state.pack!;
+      onReload: (newPack, reloadComponent, callback) => {
+        var newPackOrPack = newPack || pack;
 
         if (reloadComponent) {
-          this.setState({ getComponent: undefined }, () => this.loadComponent(newPack, callback).done()); //For AutoFocus and potentialy another view
+          this.setState({ getComponent: undefined }, () => this.loadComponent(newPackOrPack, callback).done()); //For AutoFocus and potentialy another view
         }
         else {
-          this.setPack(newPack, callback);
+          this.setPack(newPackOrPack, callback);
         }
       },
-      pack: this.state.pack,
-      onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),
+      pack: pack,
+      onClose: (ok?: boolean) => this.props.onExited!(ok ? pack.entity : undefined),
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
-        GraphExplorer.setModelState(this.state.pack!.entity, modelState, initialPrefix!);
+        GraphExplorer.setModelState(pack.entity, modelState, initialPrefix!);
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
       allowChangeEntity: this.props.isNavigate || false,
     };
 
-    const pack = this.state.pack!;
 
     const styleOptions: StyleOptions = {
       readOnly: this.props.readOnly != undefined ? this.props.readOnly : Navigator.isReadOnly(pack),
@@ -270,13 +269,13 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, ""), this.prefix!);
 
-    const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pack };
+    const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, frame: frame };
 
     const embeddedWidgets = renderEmbeddedWidgets(wc);
 
     return (
       <div className="modal-body">
-        {renderWidgets({ ctx: ctx, pack: pack })}
+        {renderWidgets(wc)}
         {this.entityComponent && <ButtonBar ref={bb => this.buttonBar = bb} frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
         <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} prefix={this.prefix} />
         {embeddedWidgets.top}
@@ -391,5 +390,18 @@ export class FunctionalAdapter extends React.Component {
     } else {
       return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
     }
+  }
+
+  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType) {
+
+    if (component instanceof type)
+      return true;
+
+    if (component instanceof FunctionalAdapter) {
+      var only = React.Children.only(component.props.children);
+      return React.isValidElement(only) && only.type == type;
+    }
+
+    return false
   }
 }

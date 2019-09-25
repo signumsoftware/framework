@@ -88,17 +88,18 @@ namespace Signum.React.Facades
                 canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
             );
 
-            foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
-            {
-                try
+            if (EntityPackTS.AddExtension != null)
+                foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
                 {
-                    action(result);
-                }
-                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
-                {
+                    try
+                    {
+                        action(result);
+                    }
+                    catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                    {
 
+                    }
                 }
-            }
 
             return result;
         }

@@ -45,7 +45,7 @@ namespace Signum.Engine.Maps
 
         public static ServerName? Parse(string? name)
         {
-            if (string.IsNullOrEmpty(name))
+            if (!name.HasText())
                 return null;
 
             return new ServerName(name.UnScapeSql());
@@ -93,7 +93,7 @@ namespace Signum.Engine.Maps
 
         public static DatabaseName? Parse(string? name)
         {
-            if (string.IsNullOrEmpty(name))
+            if (!name.HasText())
                 return null;
 
             var tuple = ObjectName.SplitLast(name);
@@ -159,7 +159,7 @@ namespace Signum.Engine.Maps
 
         public static SchemaName Parse(string? name)
         {
-            if (string.IsNullOrEmpty(name))
+            if (!name.HasText())
                 return SchemaName.Default;
 
             var tuple = ObjectName.SplitLast(name);
@@ -200,7 +200,7 @@ namespace Signum.Engine.Maps
 
         public static ObjectName Parse(string? name)
         {
-            if (string.IsNullOrEmpty(name))
+            if (!name.HasText())
                 throw new ArgumentNullException(nameof(name));
 
             var tuple = SplitLast(name);

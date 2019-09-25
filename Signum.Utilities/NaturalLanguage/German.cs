@@ -302,4 +302,17 @@ namespace Signum.Utilities.NaturalLanguage
 
     }
 
+    public class GermanDiacriticsRemover : IDiacriticsRemover
+    {
+        public string RemoveDiacritics(string str)
+        {
+            return str
+                .Replace("ü", "ue")
+                .Replace("ä", "ae")
+                .Replace("ö", "oe")
+                .Replace("Ü", "Ue")
+                .Replace("Ä", "Ae")
+                .Replace("Ö", "Oe");
+        }
+    }
 }

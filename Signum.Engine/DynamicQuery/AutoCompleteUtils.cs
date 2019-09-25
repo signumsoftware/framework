@@ -299,7 +299,7 @@ namespace Signum.Engine.DynamicQuery
 
                 if (TryParsePrimaryKey(subString, typeof(T), out PrimaryKey id))
                 {
-                    Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
+                    Lite<T>? entity = query.SingleOrDefaultEx(e => e.Id == id);
 
                     if (entity != null)
                         results.Add(entity);
@@ -358,7 +358,7 @@ namespace Signum.Engine.DynamicQuery
 
                 if (TryParsePrimaryKey(subString, typeof(T), out PrimaryKey id))
                 {
-                    Lite<T> entity = collection.SingleOrDefaultEx(e => e.Id == id);
+                    Lite<T>? entity = collection.SingleOrDefaultEx(e => e.Id == id);
 
                     if (entity != null)
                         results.Add(entity);

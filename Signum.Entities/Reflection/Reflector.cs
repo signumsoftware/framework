@@ -408,19 +408,19 @@ namespace Signum.Entities.Reflection
             var pp = Validator.TryGetPropertyValidator(simpleRoute);
             if (pp != null)
             {
-                DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                DateTimePrecisionValidatorAttribute? datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
                 if (datetimePrecision != null)
                     return datetimePrecision.FormatString;
 
-                TimeSpanPrecisionValidatorAttribute timeSpanPrecision = pp.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
+                TimeSpanPrecisionValidatorAttribute? timeSpanPrecision = pp.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
                 if (timeSpanPrecision != null)
                     return timeSpanPrecision.FormatString;
 
-                DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
+                DecimalsValidatorAttribute? decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                 if (decimals != null)
                     return "N" + decimals.DecimalPlaces;
 
-                StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefaultEx();
+                StringCaseValidatorAttribute? stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefaultEx();
                 if (stringCase != null)
                     return stringCase.TextCase == StringCase.Lowercase ? "L" : "U";
             }

@@ -14,8 +14,6 @@ namespace Signum.Engine.Basics
 {
 	public static class ExceptionLogic
 	{
-		public static Func<string>? GetCurrentVersion;
-
 		public static void Start(SchemaBuilder sb)
 		{
 			if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -117,7 +115,7 @@ namespace Signum.Engine.Basics
 
 		static readonly Variable<string?> overridenEnvironment = Statics.ThreadVariable<string?>("exceptionEnviroment");
 
-		public static IDisposable OverrideEnviroment(string newEnviroment)
+		public static IDisposable OverrideEnviroment(string? newEnviroment)
 		{
 			string? oldEnviroment = overridenEnvironment.Value;
 			overridenEnvironment.Value = newEnviroment;

@@ -140,7 +140,7 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
       systemTime[field] = m.isValid() ? m.format() : undefined;
     };
 
-    var m = moment(systemTime[field], moment.ISO_8601)
+    var m = moment(systemTime[field])
     var momentFormat = "YYYY-MM-DDTHH:mm:ss";
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>

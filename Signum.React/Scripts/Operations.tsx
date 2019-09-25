@@ -49,7 +49,7 @@ export function clearOperationSettings() {
 }
 
 export function addSettings(...settings: OperationSettings[]) {
-  settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key!, s));
+  settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol, s));
 }
 
 
@@ -107,10 +107,10 @@ export function operationInfos(ti: TypeInfo) {
 export abstract class OperationSettings {
 
   text?: () => string;
-  operationSymbol: OperationSymbol;
+  operationSymbol: string;
 
-  constructor(operationSymbol: OperationSymbol) {
-    this.operationSymbol = operationSymbol;
+  constructor(operationSymbol: OperationSymbol | string) {
+    this.operationSymbol = typeof operationSymbol == "string" ? operationSymbol : operationSymbol.key;
   }
 }
 
@@ -124,7 +124,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
   onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
-  constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
+  constructor(operationSymbol: ConstructSymbol_Simple<T> | string, options: ConstructorOperationOptions<T>) {
     super(operationSymbol);
 
     Dic.assign(this, options);
@@ -170,7 +170,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   iconColor?: string;
   order?: number;
 
-  constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
+  constructor(operationSymbol: ConstructSymbol_FromMany<any, T> | string, options: ContextualOperationOptions<T>) {
     super(operationSymbol);
 
     Dic.assign(this, options);
@@ -345,7 +345,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
   keyboardShortcut?: KeyboardShortcut | null;
 
-  constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
+  constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string, options: EntityOperationOptions<T>) {
     super(operationSymbol)
 
     Dic.assign(this, options);

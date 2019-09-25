@@ -367,9 +367,9 @@ WHERE {oldPrimaryKey} NOT IN
 (
     SELECT MIN({oldPrimaryKey})
     FROM {oldTableName}
-    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
+    {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
+){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
         }
 
         public static SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)

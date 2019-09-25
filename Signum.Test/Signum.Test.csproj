@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
 
   </ItemGroup>
 

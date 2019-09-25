@@ -436,7 +436,8 @@ namespace Signum.Engine
 
             if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc)
                 return new DateTime(dt.Ticks, DateTimeKind.Utc);
-            return dt;
+
+            return new DateTime(dt.Ticks, DateTimeKind.Local);
         }
 
         public DateTime? GetNullableDateTime(int ordinal)

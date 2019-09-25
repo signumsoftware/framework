@@ -218,7 +218,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ResultTable
     {
-        internal ResultColumn entityColumn;
+        internal ResultColumn? entityColumn;
         public ColumnDescription? EntityColumn
         {
             get { return entityColumn == null ? null : ((ColumnToken)entityColumn.Column.Token).Column; }
@@ -435,7 +435,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Lite<Entity> Entity
         {
-            get { return (Lite<Entity>)Table.entityColumn.Values[Index]!; }
+            get { return (Lite<Entity>)Table.entityColumn!.Values[Index]; }
         }
 
         public Lite<Entity>? TryEntity

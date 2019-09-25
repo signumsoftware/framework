@@ -108,13 +108,13 @@ namespace Signum.Utilities
         public static T? GetByCode<T>(string code)
             where T: struct, Enum
         {
-            return (T?)(object)EnumFieldCache.Get(typeof(T))
+            return (T?)(object?)EnumFieldCache.Get(typeof(T))
                 .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>()!.Code == code)
                 .Select(kvp => kvp.Key)
                 .SingleOrDefaultEx();
         }
 
-        public static string GetCode<T>(string key)
+        public static string? GetCode<T>(string key)
         {
             return (EnumFieldCache.Get(typeof(T))
                 .Where(kvp => kvp.Key.NiceToString() == key)

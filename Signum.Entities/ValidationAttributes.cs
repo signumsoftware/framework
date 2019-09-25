@@ -80,19 +80,18 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.BeNotNull.NiceToString(); }
-        }
+        public override string HelpMessage => ValidationMessage.BeNotNull.NiceToString();
 
-        
+
     }
 
     public static class NotNullValidatorExtensions
     {
         public static string? IsSetOnlyWhen(this (PropertyInfo pi, object? nullableValue) tuple, bool shouldBeSet)
         {
-            var isNull = tuple.nullableValue == null || tuple.nullableValue is string s && string.IsNullOrEmpty(s);
+            var isNull = tuple.nullableValue == null || 
+                tuple.nullableValue is string s && string.IsNullOrEmpty(s) || 
+                tuple.nullableValue is ICollection col && col.Count == 0;
 
             if (isNull && shouldBeSet)
                 return ValidationMessage._0IsNotSet.NiceToString(tuple.pi.NiceName());
@@ -172,7 +171,9 @@ namespace Signum.Entities
                 string result =
                     min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().FormatWith(min, max) :
                     min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().FormatWith(min) :
-                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : ValidationMessage.BeAString.NiceToString();
+                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : 
+                    MultiLine ? ValidationMessage.BeAMultilineString.NiceToString() : 
+                    ValidationMessage.BeAString.NiceToString();
                 
                 return result;
             }
@@ -215,13 +216,7 @@ namespace Signum.Entities
             return ValidationMessage._0DoesNotHaveAValid1Format.NiceToString().FormatWith("{0}", FormatName);
         }
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName);
-            }
-        }
+        public override string HelpMessage => ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName);
     }
 
     public class EMailValidatorAttribute : RegexValidatorAttribute
@@ -369,15 +364,9 @@ namespace Signum.Entities
         {
         }
 
-        public string FormatName
-        {
-            get { return ValidationMessage.FileName.NiceToString(); }
-        }
+        public string FormatName => ValidationMessage.FileName.NiceToString();
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName); }
-        }
+        public override string HelpMessage => ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName);
 
         protected override string? OverrideError(object? value)
         {
@@ -425,10 +414,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.Have0Decimals.NiceToString().FormatWith(DecimalPlaces); }
-        }
+        public override string HelpMessage => ValidationMessage.Have0Decimals.NiceToString().FormatWith(DecimalPlaces);
     }
 
 
@@ -493,13 +479,10 @@ namespace Signum.Entities
             if (ok)
                 return null;
 
-            return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().ToLower(), number.ToString());
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.Be.NiceToString() + ComparisonType.NiceToString() + " " + number.ToString(); }
-        }
+        public override string HelpMessage => ValidationMessage.Be0.NiceToString(ComparisonType.NiceToString().ToLower() + " " + number.ToString());
     }
 
     //Not using C intervals to please user!
@@ -564,10 +547,7 @@ namespace Signum.Entities
             return ValidationMessage._0HasToBeBetween1And2.NiceToString("{0}", min, max);
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.BeBetween0And1.NiceToString(min, max); }
-        }
+        public override string HelpMessage => ValidationMessage.BeBetween0And1.NiceToString(min, max);
     }
 
 
@@ -599,10 +579,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.Be.NiceToString() + ValidationMessage.PowerOf.NiceToString() + " " + 2; }
-        }
+        public override string HelpMessage => ValidationMessage.Be0.NiceToString(ValidationMessage.PowerOf.NiceToString() + " " + 2);
     }
 
     public class NoRepeatValidatorAttribute : ValidatorAttribute
@@ -618,10 +595,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.HaveNoRepeatedElements.NiceToString(); }
-        }
+        public override string HelpMessage => ValidationMessage.HaveNoRepeatedElements.NiceToString();
 
         public static string? ByKey<T, K>(IEnumerable<T> collection, Func<T, K> keySelector)
         {
@@ -662,10 +636,7 @@ namespace Signum.Entities
             return ValidationMessage.TheNumberOfElementsOf0HasToBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().FirstLower(), number.ToString());
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), number.ToString()); }
-        }
+        public override string HelpMessage => ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), number.ToString());
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
@@ -742,13 +713,7 @@ namespace Signum.Entities
             }
         }
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return ValidationMessage.HaveAPrecisionOf.NiceToString() + " " + Precision.NiceToString().ToLower();
-            }
-        }
+        public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
     }
 
     public class DateInPastValidator : ValidatorAttribute
@@ -764,13 +729,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return ValidationMessage.BeInThePast.NiceToString();
-            }
-        }
+        public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
     }
 
     public class YearGreaterThanValidator : ValidatorAttribute
@@ -793,13 +752,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return ValidationMessage.BeInThePast.NiceToString();
-            }
-        }
+        public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
     }
 
 
@@ -842,13 +795,7 @@ namespace Signum.Entities
             }
         }
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return ValidationMessage.HaveAPrecisionOf.NiceToString() + " " + Precision.NiceToString().ToLower();
-            }
-        }
+        public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
     }
 
     public class TimeOfDayValidatorAttribute : ValidatorAttribute
@@ -868,14 +815,8 @@ namespace Signum.Entities
 
             return null;
         }
-       
-        public override string HelpMessage
-        {
-            get
-            {
-                return ValidationMessage.IsATimeOfTheDay.NiceToString();
-            }
-        }
+
+        public override string HelpMessage => ValidationMessage.IsATimeOfTheDay.NiceToString();
     }
 
     public class StringCaseValidatorAttribute : ValidatorAttribute
@@ -895,7 +836,7 @@ namespace Signum.Entities
         protected override string? OverrideError(object? value)
         {
             string? str = (string?)value;
-            if (string.IsNullOrEmpty(str))
+            if (!str.HasText())
                 return null;
             
             if ((this.textCase == StringCase.Uppercase) && (str != str.ToUpper()))
@@ -907,10 +848,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.Be.NiceToString() + textCase.NiceToString(); }
-        }
+        public override string HelpMessage => ValidationMessage.Be0.NiceToString(textCase.NiceToString());
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
@@ -945,10 +883,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public override string HelpMessage
-        {
-            get { return ValidationMessage.BeA0_G.NiceToString().ForGenderAndNumber(Type.GetGender()).FormatWith(Type.NiceName()); }
-        }
+        public override string HelpMessage => ValidationMessage.BeA0_G.NiceToString().ForGenderAndNumber(Type.GetGender()).FormatWith(Type.NiceName());
     }
 
     public class IpValidatorAttribute : RegexValidatorAttribute
@@ -1107,8 +1042,8 @@ namespace Signum.Entities
         _0IsNotA1_G,
         [Description("be a {0}")]
         BeA0_G,
-        [Description("be ")]
-        Be,
+        [Description("be {0}")]
+        Be0,
         [Description("be between {0} and {1}")]
         BeBetween0And1,
         [Description("be not null")]
@@ -1119,8 +1054,8 @@ namespace Signum.Entities
         Have0Decimals,
         [Description("have a number of elements {0} {1}")]
         HaveANumberOfElements01,
-        [Description("have a precision of ")]
-        HaveAPrecisionOf,
+        [Description("have a precision of {0}")]
+        HaveAPrecisionOf0,
         [Description("have between {0} and {1} characters")]
         HaveBetween0And1Characters,
         [Description("have maximum {0} characters")]
@@ -1209,6 +1144,7 @@ namespace Signum.Entities
         _AtLeastOneValueIsNeeded,
         PowerOf,
         BeAString,
+        BeAMultilineString,
         IsATimeOfTheDay,
     }
 }

@@ -41,7 +41,7 @@ namespace Signum.Engine
                  select new DiffColumn
                  {
                      Name = c.name,
-                     SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type().name),
+                     SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type()!.name),
                      UserTypeName = null,
                      Identity = c.is_identity,
                      Nullable = c.is_nullable,

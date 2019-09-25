@@ -53,7 +53,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
       if (eos && eos.hideOnCanExecute && eoc.canExecute)
         return false;
 
-      if (Navigator.isReadOnly(ctx.pack) && !(eos && eos.showOnReadOnly))
+      if (Navigator.isReadOnly(ctx.pack, true) && !(eos && eos.showOnReadOnly))
         return false;
 
       return true;
