@@ -323,7 +323,7 @@ namespace Signum.Utilities
                     }
                     else
                     {
-                        var list = (IList)Activator.CreateInstance(member.MemberInfo.ReturningType());
+                        var list = (IList)Activator.CreateInstance(member.MemberInfo.ReturningType())!;
 
                         for (int j = i; j < vals.Count; j++)
                         {

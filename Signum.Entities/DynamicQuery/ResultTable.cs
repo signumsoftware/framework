@@ -435,7 +435,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Lite<Entity> Entity
         {
-            get { return (Lite<Entity>)Table.entityColumn!.Values[Index]; }
+            get { return (Lite<Entity>)Table.entityColumn!.Values[Index]!; }
         }
 
         public Lite<Entity>? TryEntity

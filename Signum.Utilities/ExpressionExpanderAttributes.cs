@@ -114,7 +114,7 @@ namespace Signum.Utilities
             if (attr == null)
                 throw new InvalidOperationException($"The member {methodOrProperty.Name} has not {nameof(ExpressionFieldAttribute)}");
 
-            var fi = methodOrProperty.DeclaringType.GetField(attr.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            var fi = methodOrProperty.DeclaringType!.GetField(attr.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
 
             fi.SetValue(null, newExpression);
         }
