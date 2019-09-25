@@ -47,7 +47,7 @@ namespace Signum.React.RestLog
                     Url = request.Path.ToString(),
                     QueryString = queryParams,
                     User = UserHolder.Current?.ToLite(),
-                    Controller = context.Controller.GetType().FullName,
+                    Controller = context.Controller.GetType().FullName!,
                     ControllerName = context.Controller.GetType().Name,
                     Action = ((ControllerActionDescriptor)context.ActionDescriptor).ActionName,
  					MachineName = System.Environment.MachineName,
