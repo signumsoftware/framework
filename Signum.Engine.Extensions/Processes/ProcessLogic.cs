@@ -23,7 +23,7 @@ namespace Signum.Engine.Processes
     {
         public static bool JustMyProcesses = true;
 
-        public static Func<ProcessEntity, IDisposable?> ApplySession;
+        public static Func<ProcessEntity, IDisposable?>? ApplySession;
 
         [AutoExpressionField]
         public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p) => 

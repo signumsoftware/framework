@@ -36,9 +36,9 @@ namespace Signum.Engine.Dynamic
             return null;
         }
 
-        public static Func<List<CodeFile>> GetCodeFiles;
-        public static Action<StringBuilder, int> OnWriteDynamicStarter;
-        public static Exception CodeGenError;
+        public static Func<List<CodeFile>>? GetCodeFiles;
+        public static Action<StringBuilder, int>? OnWriteDynamicStarter;
+        public static Exception? CodeGenError;
 
         public static FileInfo GetLastCodeGenAssemblyFileInfo()
         {
@@ -356,7 +356,7 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine("{");
                 sb.AppendLine("    public static void Start(SchemaBuilder sb)");
                 sb.AppendLine("    {");
-                DynamicLogic.OnWriteDynamicStarter(sb, 8);
+                DynamicLogic.OnWriteDynamicStarter?.Invoke(sb, 8);
                 sb.AppendLine("    }");
                 sb.AppendLine("}");
 

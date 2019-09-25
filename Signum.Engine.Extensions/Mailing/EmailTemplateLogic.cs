@@ -35,8 +35,8 @@ namespace Signum.Engine.Mailing
         public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se) => 
             As.Expression(() => Database.Query<EmailTemplateEntity>().Where(et => et.Model == se));
         
-        public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
-        public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName;
+        public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy = null!;
+        public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName = null!;
 
 
         public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =

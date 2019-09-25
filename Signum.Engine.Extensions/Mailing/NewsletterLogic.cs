@@ -28,7 +28,7 @@ namespace Signum.Engine.Mailing
         public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n) => 
             As.Expression(() => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n)));
         
-        public static Func<NewsletterEntity, SmtpConfigurationEntity> GetStmpConfiguration;
+        public static Func<NewsletterEntity, SmtpConfigurationEntity> GetStmpConfiguration = null!;
 
         public static void Start(SchemaBuilder sb, Func<NewsletterEntity, SmtpConfigurationEntity> getSmtpConfiguration)
         {

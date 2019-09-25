@@ -68,7 +68,7 @@ namespace Signum.React.Help
         [HttpGet("api/help/appendix/{uniqueName?}")]
         public AppendixHelpEntity Appendix(string? uniqueName)
         {
-            if (string.IsNullOrEmpty(uniqueName))
+            if (!uniqueName.HasText())
                 return new AppendixHelpEntity
                 {
                     Culture = CultureInfo.CurrentCulture.ToCultureInfoEntity() 

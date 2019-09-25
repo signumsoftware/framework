@@ -37,18 +37,13 @@ namespace Signum.React.Selenium
 
         public static string GetMessageText(RemoteWebDriver selenium, MessageModalProxy modal)
         {
-            Message = modal.Element.FindElement(By.ClassName("text-warning")).Text;
-            return Message;
+            return modal.Element.FindElement(By.ClassName("text-warning")).Text;
         }
 
         public static string GetMessageTitle(RemoteWebDriver selenium, MessageModalProxy modal)
         {
-            Title = modal.Element.FindElement(By.ClassName("modal-title")).Text;
-            return Title;
+            return modal.Element.FindElement(By.ClassName("modal-title")).Text;
         }
-
-        public static string Message { get; set; }
-        public static string Title { get; set; }
     }
 
     public static class MessageModalProxyExtensions

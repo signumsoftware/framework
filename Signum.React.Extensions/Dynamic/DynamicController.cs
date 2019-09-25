@@ -85,7 +85,7 @@ namespace Signum.React.Dynamic
         [HttpGet("api/dynamic/startErrors")]
         public List<HttpError> GetStartErrors()
         {
-            return new Sequence<Exception>
+            return new Sequence<Exception?>
             {
                 DynamicLogic.CodeGenError,
                 StartParameters.IgnoredCodeErrors.EmptyIfNull(),

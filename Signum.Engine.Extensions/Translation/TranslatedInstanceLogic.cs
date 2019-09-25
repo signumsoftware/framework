@@ -21,12 +21,12 @@ namespace Signum.Engine.Translation
 {
     public static class TranslatedInstanceLogic
     {
-        static Func<CultureInfo> getDefaultCulture;
+        static Func<CultureInfo> getDefaultCulture = null!;
         public static CultureInfo DefaultCulture { get { return getDefaultCulture(); } }
 
         public static Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>> TranslateableRoutes 
             = new Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>>();
-        static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache;
+        static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache = null!;
 
         public static void Start(SchemaBuilder sb, Func<CultureInfo> defaultCulture)
         {

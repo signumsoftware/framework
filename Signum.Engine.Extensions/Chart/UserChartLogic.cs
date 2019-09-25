@@ -22,9 +22,9 @@ namespace Signum.Engine.Chart
 {
     public static class UserChartLogic
     {
-        public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts;
-        public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks;
-        public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery;
+        public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts = null!;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks = null!;
+        public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery = null!;
 
         public static void Start(SchemaBuilder sb)
         {

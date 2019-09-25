@@ -80,10 +80,10 @@ namespace Signum.Engine.SMS
             }
         }
 
-        static ResetLazy<Dictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates;
+        static ResetLazy<Dictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates = null!;
         static Dictionary<Type, SMSModelInfo> registeredModels = new Dictionary<Type, SMSModelInfo>();
-        static ResetLazy<Dictionary<Type, SMSModelEntity>> typeToEntity;
-        static ResetLazy<Dictionary<SMSModelEntity, Type>> entityToType;
+        static ResetLazy<Dictionary<Type, SMSModelEntity>> typeToEntity = null!;
+        static ResetLazy<Dictionary<SMSModelEntity, Type>> entityToType = null!;
 
         public static void Start(SchemaBuilder sb)
         {

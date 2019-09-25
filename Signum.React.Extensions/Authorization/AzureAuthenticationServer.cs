@@ -27,7 +27,7 @@ namespace Signum.React.Authorization
             {
                 try
                 {
-                    var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer;
+                    var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
 
                     if (!ada.GetConfig().LoginWithAzureAD)
                         return false;
@@ -75,7 +75,7 @@ namespace Signum.React.Authorization
         //https://stackoverflow.com/questions/39866513/how-to-validate-azure-ad-security-token
         public static ClaimsPrincipal ValidateToken(string jwt, out JwtSecurityToken jwtSecurityToken)
         {
-            var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer;
+            var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
 
             string stsDiscoveryEndpoint = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
 

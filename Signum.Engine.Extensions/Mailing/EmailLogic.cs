@@ -21,20 +21,20 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailLogic
     {
-        static Func<EmailConfigurationEmbedded> getConfiguration;
+        static Func<EmailConfigurationEmbedded> getConfiguration = null!;
         public static EmailConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
         }
 
-        public static EmailSenderManager SenderManager;
+        public static EmailSenderManager SenderManager = null!;
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null!, null!, null, null)));
         }
 
-        public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
+        public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient = null!;
         
         public static void Start(
             SchemaBuilder sb,  
@@ -303,7 +303,7 @@ namespace Signum.Engine.Mailing
 
         }
 
-        public static Func<EmailMessageEntity, MailMessage> CustomCreateMailMessage;
+        public static Func<EmailMessageEntity, MailMessage>? CustomCreateMailMessage;
 
 
         public virtual void Send(EmailMessageEntity email)

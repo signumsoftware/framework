@@ -20,7 +20,7 @@ namespace Signum.Engine.Mailing
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
-        public static Func<EmailMasterTemplateEntity> CreateDefaultMasterTemplate;
+        public static Func<EmailMasterTemplateEntity>? CreateDefaultMasterTemplate;
 
         public static void Start(SchemaBuilder sb)
         {

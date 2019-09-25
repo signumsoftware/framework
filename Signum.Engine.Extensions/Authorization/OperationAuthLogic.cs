@@ -16,7 +16,7 @@ namespace Signum.Engine.Authorization
 {
     public static class OperationAuthLogic
     {
-        static AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed> cache;
+        static AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed> cache = null!;
 
         public static IManualAuth<(OperationSymbol operation, Type type), OperationAllowed> Manual { get { return cache; } }
 

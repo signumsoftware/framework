@@ -19,8 +19,8 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
-        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
-        public static ResetLazy<HashSet<Type>> AvailableModelEntities;
+        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities = null!;
+        public static ResetLazy<HashSet<Type>> AvailableModelEntities = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -191,8 +191,8 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"{item}Logic.Start(sb);".Indent(indent));
         }
 
-        public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
-        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>> GetFormattedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, string>>>? GetAlreadyTranslatedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>>? GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {
@@ -826,7 +826,7 @@ namespace Signum.Engine.Dynamic
         {
             StringBuilder sb = new StringBuilder();
             var operationConstruct = this.Def.OperationCreate?.Construct.Trim();
-            if (!string.IsNullOrWhiteSpace(operationConstruct))
+            if (operationConstruct.HasText())
             {
                 sb.AppendLine();
 

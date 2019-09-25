@@ -25,7 +25,7 @@ namespace Signum.Engine.Printing
     {
         public static int DeleteFilesAfter = 24 * 60; //Minutes
 
-        public static Action<PrintLineEntity> Print;
+        public static Action<PrintLineEntity> Print = null!;
          
         [AutoExpressionField]
         public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e) => 

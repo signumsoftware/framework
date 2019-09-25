@@ -15,7 +15,7 @@ namespace Signum.Engine.Authorization
 {
     public static partial class TypeAuthLogic
     {
-        static TypeAuthCache cache;
+        static TypeAuthCache cache = null!;
 
         public static IManualAuth<Type, TypeAllowedAndConditions> Manual { get { return cache; } }
 

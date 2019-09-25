@@ -16,7 +16,7 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicClientLogic
     {
-        public static ResetLazy<List<DynamicClientEntity>> Clients;
+        public static ResetLazy<List<DynamicClientEntity>> Clients = null!;
 
         public static bool IsStarted = false;
         public static void Start(SchemaBuilder sb)
