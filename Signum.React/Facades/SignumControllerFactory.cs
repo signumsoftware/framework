@@ -38,7 +38,7 @@ namespace Signum.React
             (AllowedAreas.TryGetC(ti.Assembly)?.Any(ns => ti.Namespace!.StartsWith(ns)) ?? false) ||
             AllowedControllers.Contains(ti.AsType()));
 
-            var toRemove = feature.Controllers.Where(ti => !allowed.Contains(ti));
+            var toRemove = feature.Controllers.Where(ti => !allowed.Contains(ti)).ToList();
 
             feature.Controllers.RemoveAll(ti => toRemove.Contains(ti));
         }
