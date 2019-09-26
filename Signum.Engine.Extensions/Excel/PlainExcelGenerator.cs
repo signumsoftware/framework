@@ -18,8 +18,8 @@ namespace Signum.Engine.Excel
 {
     public static class PlainExcelGenerator
     {
-        public static byte[] Template { get; set; }
-        public static CellBuilder CellBuilder { get; set; }
+        public static byte[] Template { get; set; } = null!;
+        public static CellBuilder CellBuilder { get; set; } = null!;
 
         static PlainExcelGenerator()
         {

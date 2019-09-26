@@ -25,10 +25,10 @@ namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>> Types;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>> Appendices;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>> Queries;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>> Types = null!;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces = null!;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>> Appendices = null!;
+        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>> Queries = null!;
 
         public static Lazy<Dictionary<Type, List<object>>> TypeToQuery = new Lazy<Dictionary<Type, List<object>>>(() =>
         {

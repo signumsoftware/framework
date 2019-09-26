@@ -22,12 +22,12 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessRunnerLogic
     {
-        public static Action<ExecutingProcess> OnFinally;
+        public static Action<ExecutingProcess>? OnFinally;
 
         static Dictionary<Lite<ProcessEntity>, ExecutingProcess> executing = new Dictionary<Lite<ProcessEntity>, ExecutingProcess>();
 
-        static Timer timerNextExecution;
-        static Timer timerPeriodic;
+        static Timer timerNextExecution = null!;
+        static Timer timerPeriodic = null!;
         public static int PoolingPeriodMilliseconds = 30 * 1000;
 
         internal static DateTime? nextPlannedExecution;
@@ -38,7 +38,7 @@ namespace Signum.Engine.Processes
 
         static int initialDelayMiliseconds;
 
-        static CancellationTokenSource CancelNewProcesses;
+        static CancellationTokenSource CancelNewProcesses = null!;
 
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 

@@ -88,7 +88,7 @@ namespace Signum.Engine.Help
 
                 var result = document.Root.Attribute(_Name)?.Value;
 
-                if (string.IsNullOrEmpty(result))
+                if (!result.HasText())
                     throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _Name));
 
                 return result;
@@ -328,7 +328,7 @@ namespace Signum.Engine.Help
 
                 var result = document.Root.Attribute(_FullName)?.Value;
 
-                if (string.IsNullOrEmpty(result))
+                if (!result.HasText())
                     throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _FullName));
 
                 return result;

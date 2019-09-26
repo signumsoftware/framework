@@ -140,7 +140,7 @@ namespace Signum.Engine.MachineLearning
             this.CancellationToken = cancellationToken;
         }
 
-        public event Action<string, decimal?> OnReportProgres;
+        public event Action<string, decimal?>? OnReportProgres;
 
         public void ReportProgress(string message, decimal? progress = null)
         {

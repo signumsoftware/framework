@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -15,7 +15,7 @@ namespace Signum.Engine.Authorization
 
     public static class QueryAuthLogic
     {
-        static AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed> cache;
+        static AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed> cache = null!;
 
         public static IManualAuth<object, QueryAllowed> Manual { get { return cache; } }
 

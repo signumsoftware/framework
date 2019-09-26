@@ -123,7 +123,7 @@ namespace Signum.Engine.Cache
             c.NotifyInvalidated();
         }
 
-        public static TextWriter LogWriter;
+        public static TextWriter? LogWriter;
         public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, Type type, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
         {
             if (!WithSqlDependency)
@@ -492,7 +492,7 @@ namespace Signum.Engine.Cache
                     throw new InvalidOperationException("Cache for {0} is not enabled".FormatWith(typeof(T).TypeName()));
             }
 
-            public event EventHandler<CacheEventArgs> Invalidated;
+            public event EventHandler<CacheEventArgs>? Invalidated;
 
             public void OnChange(object sender, SqlNotificationEventArgs args)
             {
@@ -558,7 +558,7 @@ namespace Signum.Engine.Cache
 
                 return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
             }
-#pragma warning enable CS8631
+#pragma warning restore CS8631
 
             public Type Type
             {

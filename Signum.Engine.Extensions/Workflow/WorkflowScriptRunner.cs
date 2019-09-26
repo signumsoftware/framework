@@ -17,10 +17,10 @@ namespace Signum.Engine.Workflow
 {
     public static class WorkflowScriptRunner
     {
-        static Timer timer;
+        static Timer timer = null!;
         internal static DateTime? nextPlannedExecution;
         static bool running = false;
-        static CancellationTokenSource CancelProcess;
+        static CancellationTokenSource CancelProcess = null!;
         static long queuedItems;
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);

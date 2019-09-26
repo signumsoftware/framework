@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
 import { Dic } from '@framework/Globals'
@@ -60,6 +60,9 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
 
 export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean }>{
 
+  static normalizeString(str: string): string {
+    return str;
+  }
 
   constructor(props: any) {
     super(props);
@@ -101,7 +104,7 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
     const translatedMembers = Dic.getValues(this.props.type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
     if (!translatedMembers.length || this.state.avoidCombo)
       return (<TextArea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange}
-        innerRef={(ta) => ta && this.state.avoidCombo && ta.focus()} />);
+         innerRef={(ta) => ta && this.state.avoidCombo && ta.focus()} />);
 
     return (
       <span>

@@ -22,7 +22,7 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogic
     {
-        public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition;
+        public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition = null!;
 
         [AutoExpressionField]
         public static bool HasExpired(this WorkflowEntity w) => 
@@ -124,7 +124,7 @@ namespace Signum.Engine.Workflow
         }
 
 
-        public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy;
+        public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy = null!;
 
         public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
@@ -156,7 +156,7 @@ namespace Signum.Engine.Workflow
             }
         }
 
-        static Func<WorkflowConfigurationEmbedded> getConfiguration;
+        static Func<WorkflowConfigurationEmbedded> getConfiguration = null!;
         public static WorkflowConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
@@ -424,7 +424,7 @@ namespace Signum.Engine.Workflow
         }
 
 
-        public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions;
+        public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions = null!;
         public static WorkflowTimerConditionEntity RetrieveFromCache(this Lite<WorkflowTimerConditionEntity> wc) => TimerConditions.Value.GetOrThrow(wc);
         private static void StartWorkflowTimerConditions(SchemaBuilder sb)
         {
@@ -481,7 +481,7 @@ namespace Signum.Engine.Workflow
                  new InvalidateWith(typeof(WorkflowTimerConditionEntity)));
         }
 
-        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
+        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions = null!;
         public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa) => Actions.Value.GetOrThrow(wa);
         private static void StartWorkflowActions(SchemaBuilder sb)
         {
@@ -538,7 +538,7 @@ namespace Signum.Engine.Workflow
                 new InvalidateWith(typeof(WorkflowActionEntity)));
         }
 
-        public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
+        public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions = null!;
         public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc) => Conditions.Value.GetOrThrow(wc);
         private static void StartWorkflowConditions(SchemaBuilder sb)
         {
@@ -595,7 +595,7 @@ namespace Signum.Engine.Workflow
                 new InvalidateWith(typeof(WorkflowConditionEntity)));
         }
 
-        public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
+        public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts = null!;
         public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)=> Scripts.Value.GetOrThrow(ws);
         private static void StartWorkflowScript(SchemaBuilder sb)
         {

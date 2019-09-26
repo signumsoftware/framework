@@ -23,7 +23,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Action<ScheduledTaskLogEntity> OnFinally;
+        public static Action<ScheduledTaskLogEntity>? OnFinally;
         
         [AutoExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) => 
@@ -57,7 +57,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
+        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
 
         static PriorityQueue<ScheduledTaskPair> priorityQueue = new PriorityQueue<ScheduledTaskPair>((a, b) => a.NextDate.CompareTo(b.NextDate));
 
