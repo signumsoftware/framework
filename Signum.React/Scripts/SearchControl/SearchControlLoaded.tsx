@@ -373,7 +373,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.containerDiv.scrollTop = 0;
         this.containerDiv.style.overflowY = "hidden";
         setTimeout(() => {
-          this.containerDiv!.style.overflowY = null;
+          this.containerDiv!.style.overflowY = "";
         }, 10);
 
       }
@@ -401,19 +401,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-            this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFilters={true}
+              this.state.showFilters ? <FilterBuilder
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFilters={true}
 
-            /> :
-              sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                <AutoFocus disabled={!this.props.enableAutoFocus}>
+              /> :
+                sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                  <AutoFocus disabled={!this.props.enableAutoFocus}>
                     <PinnedFilterBuilder
                       filterOptions={fo.filterOptions}
                       onFiltersChanged={this.handlePinnedFilterChanged} />
@@ -585,7 +585,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
-      
+
       ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
       ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -702,7 +702,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       throw new Error("Results are grouped")
 
     if (this.state.selectedRows == null)
-      return []; 
+      return [];
 
     return this.state.selectedRows.map(a => a.entity!);
   }
@@ -713,7 +713,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       throw new Error("Results are not grouped")
 
     if (this.state.selectedRows == null || this.state.resultFindOptions == null)
-      return Promise.resolve([]); 
+      return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
@@ -857,13 +857,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  
+
 
   renderContextualMenu() {
 
     const cm = this.state.contextualMenu!;
     const p = this.props;
-    
+
     var fo = this.state.resultFindOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo && fo.columnOptions[columnIndex].token;
