@@ -259,7 +259,7 @@ namespace Signum.Engine.Operations
                 return base.OnCanDelete(entity);
             }
 
-            protected override void OnDelete(T entity, object[]? args)
+            protected override void OnDelete(T entity, object?[]? args)
             {
                 AssertGetState();
                 S oldState = Graph<T, S>.GetStateFunc(entity);
