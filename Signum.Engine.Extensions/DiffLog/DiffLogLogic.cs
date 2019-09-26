@@ -41,7 +41,7 @@ namespace Signum.Engine.DiffLog
             ShouldLog.SetDefinition(typeof(T), func);
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object[]? args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)
         {
             if (entity != null && ShouldLog.Invoke(entity, operation))
             {

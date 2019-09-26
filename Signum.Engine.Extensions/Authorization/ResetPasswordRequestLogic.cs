@@ -57,7 +57,7 @@ namespace Signum.Engine.Authorization
                     CanExecute = (e) => e.Lapsed == false ? null : AuthEmailMessage.YourResetPasswordRequestIsLapsed.NiceToString(),
                     Execute = (e, args) =>
                     {
-                        string password = args.GetArg<string>();
+                        string password = args!.GetArg<string>();
                         e.Lapsed = true;
                         var user = e.User;
 
