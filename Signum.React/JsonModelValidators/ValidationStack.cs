@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Signum.React.JsonModelValidators
 {
-    public class ValidationStack
+    internal class ValidationStack
     {
         public int Count => HashSet?.Count ?? List.Count;
 
@@ -15,11 +15,11 @@ namespace Signum.React.JsonModelValidators
         // O(n) search at larger n we set the cutoff to 20. If someone finds the point where they intersect feel free to change this number.
         internal const int CutOff = 20;
 
-        internal List<object?> List { get; } = new List<object?>();
+        internal List<object> List { get; } = new List<object>();
 
-        internal HashSet<object?>? HashSet { get; set; }
+        internal HashSet<object>? HashSet { get; set; }
 
-        public bool Push(object? model)
+        public bool Push(object model)
         {
             if (HashSet != null)
             {
@@ -35,13 +35,13 @@ namespace Signum.React.JsonModelValidators
 
             if (HashSet == null && List.Count > CutOff)
             {
-                HashSet = new HashSet<object?>(List, ReferenceEqualityComparer<object>.Default!);
+                HashSet = new HashSet<object>(List, ReferenceEqualityComparer<object>.Default!);
             }
 
             return true;
         }
 
-        public void Pop(object? model)
+        public void Pop(object model)
         {
             if (HashSet != null)
             {
@@ -57,7 +57,7 @@ namespace Signum.React.JsonModelValidators
             }
         }
 
-        private bool ListContains(object? model)
+        private bool ListContains(object model)
         {
             for (var i = 0; i < List.Count; i++)
             {

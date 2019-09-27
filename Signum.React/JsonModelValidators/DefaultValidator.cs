@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Signum.React.JsonModelValidators
@@ -14,7 +15,7 @@ namespace Signum.React.JsonModelValidators
     /// A visitor implementation that interprets <see cref="ValidationStateDictionary"/> to traverse
     /// a model object graph and perform validation.
     /// </summary>
-    public class ValidationVisitor
+    internal class ValidationVisitor
     {
         protected readonly ValidationStack CurrentPath;
 
@@ -203,7 +204,7 @@ namespace Signum.React.JsonModelValidators
             {
                 // Use the key on the entry, because we might not have entries in model state.
                 SuppressValidation(entry.Key);
-                CurrentPath.Pop(model);
+                CurrentPath.Pop(model!);
                 return true;
             }
             // If the metadata indicates that no validators exist AND the aggregate state for the key says that the model graph
@@ -221,11 +222,11 @@ namespace Signum.React.JsonModelValidators
                     }
                 }
 
-                CurrentPath.Pop(model);
+                CurrentPath.Pop(model!);
                 return true;
             }
 
-            using (StateManager.Recurse(this, key ?? string.Empty, metadata, model, strategy))
+            using (StateManager.Recurse(this, key ?? string.Empty, metadata, model!, strategy))
             {
                 if (Metadata!.IsEnumerableType)
                 {
@@ -340,14 +341,14 @@ namespace Signum.React.JsonModelValidators
             private readonly string? _key;
             private readonly ModelMetadata? _metadata;
             private readonly object? _model;
-            private readonly object? _newModel;
+            private readonly object _newModel;
             private readonly IValidationStrategy? _strategy;
 
             public static StateManager Recurse(
                 ValidationVisitor visitor,
                 string key,
                 ModelMetadata? metadata,
-                object? model,
+                object model,
                 IValidationStrategy? strategy)
             {
                 var recursifier = new StateManager(visitor, model);
@@ -361,7 +362,7 @@ namespace Signum.React.JsonModelValidators
                 return recursifier;
             }
 
-            public StateManager(ValidationVisitor visitor, object? newModel)
+            public StateManager(ValidationVisitor visitor, object newModel)
             {
                 _visitor = visitor;
                 _newModel = newModel;
