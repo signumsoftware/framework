@@ -247,7 +247,7 @@ namespace Signum.Engine.Toolbar
         {
             try
             {
-                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()), true);
+                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()!), true);
             }
             catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
             {

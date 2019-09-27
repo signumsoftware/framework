@@ -89,7 +89,7 @@ namespace Signum.Engine.MachineLearning
 
                 foreach (var sq in ctx.SubQueries.Values)
                 {
-                    using (HeavyProfiler.Log("SubQuery", () => sq.ToString()))
+                    using (HeavyProfiler.Log("SubQuery", () => sq.ToString()!))
                     {
                         var distinctKeys = sq.GroupedValues.SelectMany(a => a.Value.Keys).Distinct(ObjectArrayComparer.Instance).ToList();
 

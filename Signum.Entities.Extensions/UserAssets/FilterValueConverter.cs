@@ -76,7 +76,7 @@ namespace Signum.Entities.UserAssets
         {
             if (isList && stringValue != null && stringValue.Contains('|'))
             {
-                IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type));
+                IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type))!;
                 foreach (var item in stringValue.Split('|'))
                 {
                     var result = TryParseInternal(item.Trim(), type);

@@ -22,7 +22,7 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogic
     {
-        public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition = null!;
+        public static Action<ICaseMainEntity, WorkflowTransitionContext>? OnTransition;
 
         [AutoExpressionField]
         public static bool HasExpired(this WorkflowEntity w) => 

@@ -18,7 +18,7 @@ namespace Signum.Engine.Disconnected
     {
         public ExportManager()
         {
-            this.miUnsafeLock = this.GetType().GetMethod("UnsafeLock", BindingFlags.NonPublic | BindingFlags.Instance);
+            this.miUnsafeLock = this.GetType().GetMethod("UnsafeLock", BindingFlags.NonPublic | BindingFlags.Instance)!;
         }
 
         class DownloadTable

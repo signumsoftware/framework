@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <TypeScriptToolsVersion>3.5</TypeScriptToolsVersion>
     <LangVersion>preview</LangVersion>
     <OutputType>Library</OutputType>
@@ -36,8 +36,9 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.3">
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.5.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.5.0" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.6.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -46,6 +47,7 @@
 
   <ItemGroup>
     <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -76,16 +78,4 @@
     <None Remove="ts_out\**" />
     <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Help\HelpClient.tsx" />
-    <None Remove="Help\HelpOmniboxProvider.tsx" />
-    <None Remove="Help\Pages\AppendixHelpPage.tsx" />
-    <None Remove="Help\Pages\EditableText.tsx" />
-    <None Remove="Help\Pages\NamespaceHelpPage.tsx" />
-    <None Remove="Help\Pages\TypeHelpPage.tsx" />
-    <None Remove="Help\ProcessPanelPage.tsx" />
-  </ItemGroup>
-
- 
 </Project>

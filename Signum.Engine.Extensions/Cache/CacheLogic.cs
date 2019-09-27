@@ -234,6 +234,7 @@ namespace Signum.Engine.Cache
             }
 
             public MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field)
+                where K : notnull
             {
                 throw new InvalidOperationException("Subqueries can not be used on simple queries");
             }

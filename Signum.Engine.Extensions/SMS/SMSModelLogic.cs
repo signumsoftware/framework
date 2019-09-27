@@ -195,7 +195,7 @@ namespace Signum.Engine.SMS
             var list = (from type in registeredModels.Keys
                         select new SMSModelEntity
                         {
-                            FullClassName = type.FullName
+                            FullClassName = type.FullName!
                         }).ToList();
             return list;
         }

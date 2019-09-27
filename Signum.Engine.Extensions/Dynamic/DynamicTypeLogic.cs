@@ -42,7 +42,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -54,7 +54,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));

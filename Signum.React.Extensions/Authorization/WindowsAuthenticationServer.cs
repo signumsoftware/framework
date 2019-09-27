@@ -21,7 +21,7 @@ namespace Signum.React.Authorization
                 return null;
 
             var config = ada.GetConfig();
-            var userName = wp.Identity.Name;
+            var userName = wp.Identity.Name!;
             var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
@@ -54,7 +54,7 @@ namespace Signum.React.Authorization
                     if (AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada && !ada.GetConfig().LoginWithWindowsAuthenticator)
                         return false;
 
-                    UserEntity? user = AuthLogic.RetrieveUser(wp.Identity.Name);
+                    UserEntity? user = AuthLogic.RetrieveUser(wp.Identity.Name!);
 
                     if (user == null)
                     {

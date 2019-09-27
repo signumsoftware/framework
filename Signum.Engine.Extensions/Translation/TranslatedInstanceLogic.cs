@@ -630,10 +630,7 @@ namespace Signum.Engine.Translation
             return Route.PropertyString().Replace("/", "[" + RowId + "].");
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is IndexedPropertyRoute && base.Equals((IndexedPropertyRoute)obj);
-        }
+        public override bool Equals(object? obj) => obj is IndexedPropertyRoute ipr && base.Equals(ipr);
 
         public bool Equals(IndexedPropertyRoute other)
         {

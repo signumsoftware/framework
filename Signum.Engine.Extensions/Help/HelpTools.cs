@@ -9,6 +9,7 @@ namespace Signum.Engine.Help
     static class HelpTools
     {
         internal static Dictionary<K, V>? CollapseDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
+            where K : notnull
         {
             var dic = collection.ToDictionary();
             if (dic.Count == 0)

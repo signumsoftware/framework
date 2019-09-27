@@ -214,14 +214,10 @@ namespace Signum.Entities.Mailing
             };
         }
 
+        public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
         public bool Equals(EmailRecipientEmbedded other)
         {
             return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is EmailAddressEmbedded && Equals((EmailAddressEmbedded)obj);
         }
 
         public override int GetHashCode()
@@ -298,15 +294,12 @@ namespace Signum.Entities.Mailing
             };
         }
 
+        public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
         public bool Equals(EmailAddressEmbedded other)
         {
             return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is EmailAddressEmbedded && Equals((EmailAddressEmbedded)obj);
-        }
 
         public override int GetHashCode()
         {
@@ -340,15 +333,12 @@ namespace Signum.Entities.Mailing
         public string? DisplayName { get; set; }
         public CultureInfoEntity? CultureInfo { get; set; }
 
+        public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
         public bool Equals(EmailOwnerData other)
         {
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is EmailOwnerData && Equals((EmailOwnerData)obj);
-        }
 
         public override int GetHashCode()
         {

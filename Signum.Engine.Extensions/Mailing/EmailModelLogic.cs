@@ -254,7 +254,7 @@ namespace Signum.Engine.Mailing
             var list = (from type in registeredModels.Keys
                         select new EmailModelEntity
                         {
-                             FullClassName = type.FullName
+                             FullClassName = type.FullName!
                         }).ToList();
             return list;
         }

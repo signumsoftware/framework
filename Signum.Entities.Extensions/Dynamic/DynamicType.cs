@@ -335,7 +335,7 @@ namespace Signum.Entities.Dynamic
             JObject obj = JObject.Load(reader);
             var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type").Value.Value<string>());
 
-            object target = Activator.CreateInstance(type);
+            object target = Activator.CreateInstance(type)!;
             serializer.Populate(obj.CreateReader(), target);
             return target;
         }

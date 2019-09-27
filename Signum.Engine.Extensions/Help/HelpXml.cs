@@ -473,9 +473,9 @@ namespace Signum.Engine.Help
 
         public static void ImportAll(string directoryName)
         {
-            var namespaces = HelpLogic.AllTypes().Select(a => a.Namespace).Distinct().ToDictionary(a => a);
+            var namespaces = HelpLogic.AllTypes().Select(a => a.Namespace!).Distinct().ToDictionary(a => a);
 
-            var types = HelpLogic.AllTypes().ToDictionary(a=>a.FullName);
+            var types = HelpLogic.AllTypes().ToDictionary(a => a.FullName!);
 
             foreach (var path in Directory.GetFiles(directoryName, "*.help", SearchOption.AllDirectories))
             {

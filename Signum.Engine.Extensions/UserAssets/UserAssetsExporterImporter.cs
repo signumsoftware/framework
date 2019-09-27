@@ -119,7 +119,7 @@ namespace Signum.Engine.UserAssets
 
                     previews.Add(guid, new UserAssetPreviewLineEmbedded
                     {
-                        Text = entity.ToString(),
+                        Text = entity.ToString()!,
                         Type = entity.GetType().ToTypeEntity(),
                         Guid = guid,
                         Action = entity.IsNew ? EntityAction.New :
@@ -140,7 +140,7 @@ namespace Signum.Engine.UserAssets
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
 
                 part.FromXml(element, this);
 
@@ -256,7 +256,7 @@ namespace Signum.Engine.UserAssets
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
 
                 part.FromXml(element, this);
 

@@ -45,7 +45,7 @@ namespace Signum.Engine.Translation
                 return new { Type = kvp.Key, count };
             })
             .Where(a => a.count > 0)
-            .GroupBy(a => a.Type!.Namespace)
+            .GroupBy(a => a.Type!.Namespace!)
             .Select(gr => new NamespaceSyncStats
             {
                 @namespace = gr.Key,

@@ -54,7 +54,7 @@ namespace Signum.Engine.Chart
                 
                
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
-                 new InvalidateWith(typeof(UserChartEntity)));
+                    new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KVP.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));

@@ -138,7 +138,7 @@ namespace Signum.Engine.Help
         {
             return Namespaces.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
             {
-                var namespaces = AllTypes().GroupBy(type => type.Namespace);
+                var namespaces = AllTypes().GroupBy(type => type.Namespace!);
 
                 var dic = Database.Query<NamespaceHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Name);
 
@@ -239,7 +239,7 @@ namespace Signum.Engine.Help
                 return null;
 
             SyncData data = new SyncData(
-                namespaces: AllTypes().Select(a => a.Namespace).ToHashSet(),
+                namespaces: AllTypes().Select(a => a.Namespace!).ToHashSet(),
                 appendices: Database.Query<AppendixHelpEntity>().Select(a => a.UniqueName).ToHashSet()
             );
 
@@ -393,7 +393,7 @@ namespace Signum.Engine.Help
         static Lazy<XmlSchemaSet> Schemas = new Lazy<XmlSchemaSet>(() =>
         {
             XmlSchemaSet schemas = new XmlSchemaSet();
-            Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
+            Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd")!;
             schemas.Add("", XmlReader.Create(str));
             return schemas;
         });

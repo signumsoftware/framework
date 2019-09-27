@@ -295,10 +295,7 @@ namespace Signum.Engine.Word
         internal static List<WordModelEntity> GenerateTemplates()
         {
             var list = (from type in registeredWordModels.Keys
-                        select new WordModelEntity
-                        {
-                            FullClassName = type.FullName
-                        }).ToList();
+                        select new WordModelEntity { FullClassName = type.FullName! }).ToList();
             return list;
         }
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
@@ -11,7 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.6" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
   </ItemGroup>
 
   <ItemGroup>

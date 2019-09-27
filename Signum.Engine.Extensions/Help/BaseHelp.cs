@@ -174,7 +174,7 @@ namespace Signum.Engine.Help
             result.Properties.AddRange(
                 from pre in PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeEntity())
                 let pr = pre.ToPropertyRoute()
-                where !(pr.PropertyInfo != null && pr.PropertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(pr.PropertyInfo.DeclaringType, pr.PropertyInfo))
+                where !(pr.PropertyInfo != null && pr.PropertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(pr.PropertyInfo.DeclaringType!, pr.PropertyInfo))
                 let ph = Properties.GetOrThrow(pre.ToPropertyRoute())
                 where ph.IsAllowed() == null
                 select new PropertyRouteHelpEmbedded

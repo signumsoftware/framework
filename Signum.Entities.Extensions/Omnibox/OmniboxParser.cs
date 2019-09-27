@@ -77,7 +77,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
             {
                 List<OmniboxToken> tokens = new List<OmniboxToken>();
 
-                foreach (Match m in tokenizer.Matches(omniboxQuery))
+                foreach (Match m in tokenizer.Matches(omniboxQuery).Cast<Match>())
                 {
                     if (ct.IsCancellationRequested)
                         return result;

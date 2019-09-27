@@ -573,7 +573,7 @@ namespace Signum.Engine.Word
 
         public static void OverrideWordTemplatesConsole()
         {
-            var wordTemplates = Database.Query<WordTemplateEntity>().Where(a=>a.Model != null).GroupToDictionary(a => a.Model);
+            var wordTemplates = Database.Query<WordTemplateEntity>().Where(a=>a.Model != null).GroupToDictionary(a => a.Model!);
 
             var wordModels = Database.Query<WordModelEntity>().ToList();
 

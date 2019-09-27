@@ -95,6 +95,7 @@ namespace Signum.Entities.UserAssets
             return TokenString;
         }
 
+        public override bool Equals(object? obj) => obj is QueryTokenEmbedded qte && this.Equals(qte);
         public bool Equals(QueryTokenEmbedded other)
         {
             return this.GetTokenString() == other.GetTokenString();
@@ -103,11 +104,6 @@ namespace Signum.Entities.UserAssets
         public string GetTokenString()
         {
             return this.token != null ? this.token.FullKey() : this.TokenString;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is QueryTokenEmbedded && this.Equals((QueryTokenEmbedded)obj);
         }
 
         public override int GetHashCode()
