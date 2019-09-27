@@ -1,7 +1,9 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
+using System;
+using System.Collections.Generic;
 
 namespace Signum.React.Selenium
 {
@@ -54,6 +56,29 @@ namespace Signum.React.Selenium
                 ResultTable.WaitNoVisible(lites);
             else
                 ResultTable.WaitSuccess(lites);
+        }
+
+
+        public FrameModalProxy<T> ConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbolContainer, bool shouldDisapear = true, Action<List<Lite<IEntity>>, ResultTableProxy>? customCheck = null)
+            where F : Entity
+            where T : Entity
+        {
+            var lites = ResultTable.SelectedEntities();
+
+            var modal = Operation(symbolContainer).WaitVisible().CaptureOnClick();
+
+            return new FrameModalProxy<T>(modal)
+            {
+                Disposing = a =>
+                {
+                    if (customCheck != null)
+                        customCheck(lites, ResultTable);
+                    else if (shouldDisapear)
+                        ResultTable.WaitNoVisible(lites);
+                    else
+                        ResultTable.WaitSuccess(lites);
+                }
+            };
         }
 
         public FrameModalProxy<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)

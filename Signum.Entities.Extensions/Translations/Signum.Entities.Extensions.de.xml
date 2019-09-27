@@ -2069,7 +2069,7 @@
   </Type>
   <Type Name="TimeMachineMessage">
     <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
-    <Member Name="TimeMachine" Description="Zzeitmaschine" />
+    <Member Name="TimeMachine" Description="Zeitmaschine" />
   </Type>
   <Type Name="TimeMachinePermission">
     <Member Name="ShowTimeMachine" Description="Zeitmaschine anzeigen" />

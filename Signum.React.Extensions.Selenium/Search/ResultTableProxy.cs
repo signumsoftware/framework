@@ -201,6 +201,11 @@ namespace Signum.React.Selenium
             return new FrameModalProxy<T>(element);
         }
 
+        public void WaitRows(int rows)
+        {
+            this.Selenium.Wait(() => this.RowsCount() == rows);
+        }
+
         public FrameModalProxy<T> EntityClick<T>(int rowIndex) where T : Entity
         {
             var element = EntityLink(rowIndex).Find().CaptureOnClick();
