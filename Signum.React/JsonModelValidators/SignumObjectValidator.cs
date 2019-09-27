@@ -11,7 +11,8 @@ using System.Linq;
 
 namespace Signum.React.JsonModelValidators
 {
-    public class SignumObjectModelValidator : IObjectModelValidator
+    //don't make it public! use services.AddSignumValidation(); instead
+    internal class SignumObjectModelValidator : IObjectModelValidator
     {
         private readonly IModelMetadataProvider _modelMetadataProvider;
         private readonly ValidatorCache _validatorCache;
@@ -114,7 +115,7 @@ namespace Signum.React.JsonModelValidators
         }
     }
 
-    public class SignumValidationVisitor : ValidationVisitor
+    internal class SignumValidationVisitor : ValidationVisitor
     {
         public SignumValidationVisitor(
             ActionContext actionContext,

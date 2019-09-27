@@ -15,7 +15,7 @@ namespace Signum.React.JsonModelValidators
     /// A visitor implementation that interprets <see cref="ValidationStateDictionary"/> to traverse
     /// a model object graph and perform validation.
     /// </summary>
-    public class ValidationVisitor
+    internal class ValidationVisitor
     {
         protected readonly ValidationStack CurrentPath;
 

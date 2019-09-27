@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Signum.React.JsonModelValidators
 {
-    public class ValidationStack
+    internal class ValidationStack
     {
         public int Count => HashSet?.Count ?? List.Count;
 

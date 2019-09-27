@@ -4,7 +4,7 @@ using Signum.Entities;
 
 namespace Signum.React.JsonModelValidators
 {
-    public class SignumModelMetadataProvider : DefaultModelMetadataProvider
+    internal class SignumModelMetadataProvider : DefaultModelMetadataProvider
     {
         public SignumModelMetadataProvider(ICompositeMetadataDetailsProvider detailsProvider) : 
             base(detailsProvider)
@@ -21,7 +21,7 @@ namespace Signum.React.JsonModelValidators
         }
     }
 
-    public class SignumModelMetadata : DefaultModelMetadata
+    internal class SignumModelMetadata : DefaultModelMetadata
     {
         public SignumModelMetadata(IModelMetadataProvider provider, ICompositeMetadataDetailsProvider detailsProvider, DefaultMetadataDetails details) :
             base(provider, detailsProvider, details)
