@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
@@ -9,6 +14,7 @@ using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.React.Filters;
 using Signum.React.Json;
+using Signum.React.JsonModelValidators;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -54,6 +60,21 @@ namespace Signum.React.Facades
             options.Filters.Add(new VersionFilterAttribute());
 
             return options;
+        }
+
+        public static void AddSignumValidation(this IServiceCollection services)
+        {
+            services.AddSingleton<IModelMetadataProvider>(s =>
+            {
+                var modelMetadataProvider = s.GetRequiredService<ICompositeMetadataDetailsProvider>();
+                return new SignumModelMetadataProvider(modelMetadataProvider);
+            });
+            services.AddSingleton<IObjectModelValidator>(s =>
+            {
+                var options = s.GetRequiredService<IOptions<MvcOptions>>().Value;
+                var modelMetadataProvider = s.GetRequiredService<IModelMetadataProvider>();
+                return new SignumObjectModelValidator(modelMetadataProvider, options.ModelValidatorProviders);
+            });
         }
 
         public static void Start(IApplicationBuilder app, IWebHostEnvironment hostingEnvironment, Assembly mainAsembly)
