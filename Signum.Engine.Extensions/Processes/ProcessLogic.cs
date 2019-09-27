@@ -23,7 +23,7 @@ namespace Signum.Engine.Processes
     {
         public static bool JustMyProcesses = true;
 
-        public static Func<ProcessEntity, IDisposable?> ApplySession;
+        public static Func<ProcessEntity, IDisposable?>? ApplySession;
 
         [AutoExpressionField]
         public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p) => 
@@ -410,6 +410,7 @@ namespace Signum.Engine.Processes
             Action<K, N> createNew,
             Action<K, O> removeOld,
             Action<K, N, O> merge)
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -473,7 +474,7 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEach(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);
@@ -513,7 +514,7 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);

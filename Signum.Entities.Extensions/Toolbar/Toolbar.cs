@@ -126,7 +126,7 @@ namespace Signum.Entities.Toolbar
 
             var content = x.Attribute("Content")?.Value;
 
-            Content = string.IsNullOrEmpty(content) ? null :
+            Content = !content.HasText() ? null :
                 Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLiteFat() :
                 (Lite<Entity>?)ctx.TryGetQuery(content)?.ToLite() ??
                 (Lite<Entity>?)ctx.TryPermission(content)?.ToLite() ??

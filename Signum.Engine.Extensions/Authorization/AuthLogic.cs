@@ -20,9 +20,9 @@ namespace Signum.Engine.Authorization
 {
     public static class AuthLogic
     {
-        public static event Action<UserEntity> UserLogingIn;
-        public static event Func<string?> LoginMessage;
-        public static ICustomAuthorizer Authorizer;
+        public static event Action<UserEntity>? UserLogingIn;
+        public static event Func<string?>? LoginMessage;
+        public static ICustomAuthorizer? Authorizer;
 
         public static string? SystemUserName { get; private set; }
         static ResetLazy<UserEntity?> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
@@ -43,9 +43,9 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-        static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles;
-        static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse;
-        static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName;
+        static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
+        static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
+        static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
 
         class RoleData
         {
@@ -53,7 +53,7 @@ namespace Signum.Engine.Authorization
             public MergeStrategy MergeStrategy;
         }
 
-        static ResetLazy<Dictionary<Lite<RoleEntity>, RoleData>> mergeStrategies;
+        static ResetLazy<Dictionary<Lite<RoleEntity>, RoleData>> mergeStrategies = null!;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -83,7 +83,7 @@ namespace Signum.Engine.Authorization
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
                 rolesInverse = sb.GlobalLazy(()=>roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
-                rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()), new InvalidateWith(typeof(RoleEntity)));
+                rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
                     var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
@@ -266,7 +266,7 @@ namespace Signum.Engine.Authorization
             get { return !tempDisabled.Value && gloaballyEnabled; }
         }
 
-        public static event Action OnRulesChanged;
+        public static event Action? OnRulesChanged;
 
         public static void NotifyRulesChanged()
         {
@@ -367,8 +367,8 @@ namespace Signum.Engine.Authorization
             return roles.Value.IndirectlyRelatedTo(role).Count;
         }
 
-        public static event Func<bool, XElement> ExportToXml;
-        public static event Func<XElement, Dictionary<string, Lite<RoleEntity>>, Replacements, SqlPreCommand?> ImportFromXml;
+        public static event Func<bool, XElement>? ExportToXml;
+        public static event Func<XElement, Dictionary<string, Lite<RoleEntity>>, Replacements, SqlPreCommand?>? ImportFromXml;
 
         public static XDocument ExportRules(bool exportAll = false)
         {
@@ -382,14 +382,14 @@ namespace Signum.Engine.Authorization
                             new XAttribute("Name", r.ToString()),
                             GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null,
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
-                     ExportToXml.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())));
+                     ExportToXml?.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand? ImportRulesScript(XDocument doc, bool interactive)
         {
             Replacements replacements = new Replacements { Interactive = interactive };
 
-            Dictionary<string, Lite<RoleEntity>> rolesDic = roles.Value.ToDictionary(a => a.ToString());
+            Dictionary<string, Lite<RoleEntity>> rolesDic = roles.Value.ToDictionary(a => a.ToString()!);
             Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
             replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
@@ -489,11 +489,7 @@ namespace Signum.Engine.Authorization
                         MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union
                     }, includeCollections: false),
 
-                    removeOld: (name, role) => SqlPreCommand.Combine(Spacing.Simple,
-                            new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                                .FormatWith(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
-
-                            table.DeleteSqlSync(role, r => r.Name == role.Name)),
+                    removeOld: (name, role) => table.DeleteSqlSync(role, r => r.Name == role.Name),
                     mergeBoth: (name, xElement, role) =>
                     {
                         var oldName = role.Name;
@@ -529,7 +525,7 @@ namespace Signum.Engine.Authorization
                  mergeBoth: (name, xElement, role) =>
                  {
                      var should = xElement.Attribute("Contains").Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries);
-                     var current = role.Roles.Select(a=>a.ToString());
+                     var current = role.Roles.Select(a => a.ToString()!);
 
                      if(should.OrderBy().SequenceEqual(current.OrderBy()))
                          return null;
@@ -565,7 +561,7 @@ namespace Signum.Engine.Authorization
         public static void AutomaticImportAuthRules(string fileName)
         {
             Schema.Current.Initialize();
-            var script = AuthLogic.ImportRulesScript(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)), interactive: false);
+            var script = AuthLogic.ImportRulesScript(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, fileName)), interactive: false);
             if (script == null)
             {
                 SafeConsole.WriteColor(ConsoleColor.Green, "AuthRules already synchronized");

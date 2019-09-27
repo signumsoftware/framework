@@ -8,13 +8,14 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
     public class QueryHelpEntity : Entity
     {
-        
         public QueryEntity Query { get; set; }
 
-        
         public CultureInfoEntity Culture { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true)]
+        [Ignore]
+        public string Info { get; set; }
+
+        [StringLengthValidator(MultiLine = true)]
         public string? Description { get; set; }
 
         [PreserveOrder]
@@ -41,11 +42,17 @@ namespace Signum.Entities.Help
     [Serializable]
     public class QueryColumnHelpEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(Min = 3, Max = 100)]
+        [StringLengthValidator(Max = 100)]
         public string ColumnName { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string? Description { get; set; }
+
+        [Ignore]
+        public string NiceName { get; set; }
+
+        [Ignore]
+        public string Info { get; set; }
 
         public override string ToString()
         {
@@ -57,5 +64,6 @@ namespace Signum.Entities.Help
     public static class QueryHelpOperation
     {
         public static ExecuteSymbol<QueryHelpEntity> Save;
+        public static DeleteSymbol<QueryHelpEntity> Delete;
     }
 }

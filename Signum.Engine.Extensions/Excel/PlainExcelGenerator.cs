@@ -18,12 +18,12 @@ namespace Signum.Engine.Excel
 {
     public static class PlainExcelGenerator
     {
-        public static byte[] Template { get; set; }
-        public static CellBuilder CellBuilder { get; set; }
+        public static byte[] Template { get; set; } = null!;
+        public static CellBuilder CellBuilder { get; set; } = null!;
 
         static PlainExcelGenerator()
         {
-            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx"));
+            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx")!);
         }
 
         public static void SetTemplate(Stream templateStream)

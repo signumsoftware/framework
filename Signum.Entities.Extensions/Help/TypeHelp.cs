@@ -6,13 +6,13 @@ using Signum.Utilities;
 namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EntityHelpEntity : Entity
+    public class TypeHelpEntity : Entity
     {   
         public TypeEntity Type { get; set; }
 
         public CultureInfoEntity Culture { get; set; }
 
-		[StringLengthValidator(Min = 3, MultiLine = true)]
+		[StringLengthValidator(MultiLine = true)]
         public string? Description { get; set; }
 
         [NoRepeatValidator]
@@ -32,6 +32,9 @@ namespace Signum.Entities.Help
             get { return string.IsNullOrEmpty(this.Description) && Properties.IsEmpty() && Operations.IsEmpty(); }
         }
 
+        [Ignore]
+        public string Info { get; set; }
+
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(IsEmpty) && IsEmpty)
@@ -42,9 +45,10 @@ namespace Signum.Entities.Help
     }
 
     [AutoInit]
-    public static class EntityHelpOperation
+    public static class TypeHelpOperation
     {
-        public static ExecuteSymbol<EntityHelpEntity> Save;
+        public static ExecuteSymbol<TypeHelpEntity> Save;
+        public static DeleteSymbol<TypeHelpEntity> Delete;
     }
 
     [Serializable]
@@ -52,7 +56,10 @@ namespace Signum.Entities.Help
     {
         public PropertyRouteEntity Property { get; set; }
 
-		[StringLengthValidator(Min = 3, MultiLine = true)]
+        [Ignore]
+        public string Info { get; set; }
+
+        [StringLengthValidator(MultiLine = true), ForceNotNullable]
         public string? Description { get; set; }
 
         public override string ToString()
@@ -66,7 +73,10 @@ namespace Signum.Entities.Help
     {
         public OperationSymbol Operation { get; set; }
 
-        [StringLengthValidator(Min = 3, MultiLine = true)]
+        [Ignore]
+        public string Info { get; set; }
+
+        [StringLengthValidator(MultiLine = true), ForceNotNullable]
         public string? Description { get; set; }
 
         public override string ToString()

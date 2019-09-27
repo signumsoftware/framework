@@ -45,7 +45,7 @@ namespace Signum.Engine.SMS
 
 
 
-        static Func<SMSConfigurationEmbedded> getConfiguration;
+        static Func<SMSConfigurationEmbedded> getConfiguration = null!;
         public static SMSConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
@@ -55,8 +55,8 @@ namespace Signum.Engine.SMS
 
         public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
-        public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy;
-        public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName;
+        public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
+        public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -228,26 +228,28 @@ namespace Signum.Engine.SMS
 
         private static void SendOneMessage(SMSMessageEntity message)
         {
-            try
+            using (OperationLogic.AllowSave<SMSMessageEntity>())
             {
-                message.MessageID = GetProvider().SMSSendAndGetTicket(message);
-                message.SendDate = TimeZoneManager.Now.TrimToSeconds();
-                message.State = SMSMessageState.Sent;
-                using (OperationLogic.AllowSave<SMSMessageEntity>())
+                try
+                {
+                    message.MessageID = GetProvider().SMSSendAndGetTicket(message);
+                    message.SendDate = TimeZoneManager.Now.TrimToSeconds();
+                    message.State = SMSMessageState.Sent;
                     message.Save();
 
-            }
-            catch (Exception e)
-            {
-                var ex = e.LogException();
-                using (Transaction tr = Transaction.ForceNew())
-                {
-                    message.Exception = ex.ToLite();
-                    message.State = SMSMessageState.SendFailed;
-                    message.Save();
-                    tr.Commit();
                 }
-                throw;
+                catch (Exception e)
+                {
+                    var ex = e.LogException();
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        message.Exception = ex.ToLite();
+                        message.State = SMSMessageState.SendFailed;
+                        message.Save();
+                        tr.Commit();
+                    }
+                    throw;
+                }
             }
         }
 

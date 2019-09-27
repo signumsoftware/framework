@@ -31,13 +31,13 @@ namespace Signum.Engine.Mailing.Pop3
             As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity));
 
         [AutoExpressionField]
-        public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity ex) => 
+        public static Pop3ReceptionEntity? Pop3Reception(this ExceptionEntity ex) => 
             As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx());
 
-        public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
+        public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client = null!;
 
 
-        public static Action<Pop3ReceptionEntity> ReceptionComunication;
+        public static Action<Pop3ReceptionEntity>? ReceptionComunication;
 
         public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
@@ -129,7 +129,7 @@ namespace Signum.Engine.Mailing.Pop3
             }
         }
 
-        public static event Func<Pop3ConfigurationEntity, IDisposable> SurroundReceiveEmail;
+        public static event Func<Pop3ConfigurationEntity, IDisposable>? SurroundReceiveEmail;
 
         public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config)
         {
@@ -410,7 +410,7 @@ namespace Signum.Engine.Mailing.Pop3
             return true;
         }
 
-        public static Action<EmailMessageEntity> AssociateNewEmail;
-        public static Action<EmailMessageEntity, EmailMessageEntity> AssociateDuplicateEmail;
+        public static Action<EmailMessageEntity>? AssociateNewEmail;
+        public static Action<EmailMessageEntity, EmailMessageEntity>? AssociateDuplicateEmail;
     }
 }

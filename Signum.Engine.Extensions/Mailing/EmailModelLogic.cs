@@ -137,10 +137,10 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static ResetLazy<Dictionary<Lite<EmailModelEntity>, List<EmailTemplateEntity>>> EmailModelToTemplates;
+        static ResetLazy<Dictionary<Lite<EmailModelEntity>, List<EmailTemplateEntity>>> EmailModelToTemplates = null!;
         static Dictionary<Type, EmailModelInfo> registeredModels = new Dictionary<Type, EmailModelInfo>();
-        static ResetLazy<Dictionary<Type, EmailModelEntity>> typeToEntity;
-        static ResetLazy<Dictionary<EmailModelEntity, Type>> entityToType;
+        static ResetLazy<Dictionary<Type, EmailModelEntity>> typeToEntity = null!;
+        static ResetLazy<Dictionary<EmailModelEntity, Type>> entityToType = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -254,7 +254,7 @@ namespace Signum.Engine.Mailing
             var list = (from type in registeredModels.Keys
                         select new EmailModelEntity
                         {
-                             FullClassName = type.FullName
+                             FullClassName = type.FullName!
                         }).ToList();
             return list;
         }
@@ -384,10 +384,10 @@ namespace Signum.Engine.Mailing
 
         public static IEmailModel CreateModel(EmailModelEntity model, ModifiableEntity? entity)
         {
-            return (IEmailModel)EmailModelLogic.GetEntityConstructor(model.ToType()).Invoke(new[] { entity });
+            return (IEmailModel)EmailModelLogic.GetEntityConstructor(model.ToType())!.Invoke(new[] { entity });
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type emailModel)
+        public static ConstructorInfo? GetEntityConstructor(Type emailModel)
         {
             var entityType = GetEntityType(emailModel);
 

@@ -388,7 +388,7 @@ namespace Signum.Entities.UserQueries
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
             ValueString = element.Attribute("Value")?.Value;
-            Pinned = element.Element("Pinned")?.Let(p => new PinnedQueryFilterEmbedded().FromXml(p, ctx));
+            Pinned = element.Element("Pinned")?.Let(p => (this.Pinned ?? new PinnedQueryFilterEmbedded()).FromXml(p, ctx));
         }
 
         public override string ToString()
@@ -511,7 +511,7 @@ namespace Signum.Entities.UserQueries
             }
             else
             {
-                if (current.Zip(ideal).All(t => t.first.Similar(t.second)))
+                if (current.Zip(ideal).All(t => t.First.Similar(t.Second)))
                     return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEmbedded
                     {
                         Token = new QueryTokenEmbedded(c.Token),

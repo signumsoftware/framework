@@ -120,7 +120,7 @@ namespace Signum.Entities.Dynamic
 
                             Type type = assembly.GetTypes().Where(a => typeof(T).IsAssignableFrom(a)).SingleEx();
 
-                            T algorithm = (T)assembly.CreateInstance(type.FullName);
+                            T algorithm = (T)assembly.CreateInstance(type.FullName!)!;
 
                             return new CompilationResult { Algorithm = algorithm };
                         }

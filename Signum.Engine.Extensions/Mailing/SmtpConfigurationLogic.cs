@@ -15,7 +15,7 @@ namespace Signum.Engine.Mailing
 {
     public static class SmtpConfigurationLogic
     {
-        public static ResetLazy<Dictionary<Lite<SmtpConfigurationEntity>, SmtpConfigurationEntity>> SmtpConfigCache;
+        public static ResetLazy<Dictionary<Lite<SmtpConfigurationEntity>, SmtpConfigurationEntity>> SmtpConfigCache = null!;
 
         public static void Start(SchemaBuilder sb)
         {

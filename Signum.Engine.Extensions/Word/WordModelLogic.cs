@@ -144,10 +144,10 @@ namespace Signum.Engine.Word
             }
         }
 
-        static ResetLazy<Dictionary<Lite<WordModelEntity>, List<Lite<WordTemplateEntity>>>> WordModelToTemplates;
+        static ResetLazy<Dictionary<Lite<WordModelEntity>, List<Lite<WordTemplateEntity>>>> WordModelToTemplates = null!;
         static Dictionary<Type, WordModelInfo> registeredWordModels = new Dictionary<Type, WordModelInfo>();
-        public static ResetLazy<Dictionary<Type, WordModelEntity>> WordModelTypeToEntity;
-        public static ResetLazy<Dictionary<WordModelEntity, Type>> WordModelEntityToType;
+        public static ResetLazy<Dictionary<Type, WordModelEntity>> WordModelTypeToEntity = null!;
+        public static ResetLazy<Dictionary<WordModelEntity, Type>> WordModelEntityToType = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -277,7 +277,7 @@ namespace Signum.Engine.Word
                     () => $"More than one active WordTemplate for {registeredWordModels} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
         }
 
-        private static WordTemplateEntity GetTemplate(IEnumerable<WordTemplateEntity> candidates, WordModelEntity model, CultureInfo culture)
+        private static WordTemplateEntity? GetTemplate(IEnumerable<WordTemplateEntity> candidates, WordModelEntity model, CultureInfo culture)
         {
             return candidates
                 .Where(a => a.Culture.Name == culture.Name)
@@ -295,10 +295,7 @@ namespace Signum.Engine.Word
         internal static List<WordModelEntity> GenerateTemplates()
         {
             var list = (from type in registeredWordModels.Keys
-                        select new WordModelEntity
-                        {
-                            FullClassName = type.FullName
-                        }).ToList();
+                        select new WordModelEntity { FullClassName = type.FullName! }).ToList();
             return list;
         }
 
@@ -366,7 +363,7 @@ namespace Signum.Engine.Word
             return GetEntityConstructor(modelEntity.ToType()) == null;
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type wordModelType)
+        public static ConstructorInfo? GetEntityConstructor(Type wordModelType)
         {
             var entityType = GetEntityType(wordModelType);
 
@@ -378,7 +375,7 @@ namespace Signum.Engine.Word
 
         public static IWordModel CreateDefaultWordModel(WordModelEntity wordModel, ModifiableEntity? entity)
         {
-            return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType()).Invoke(new[] { entity });
+            return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType())!.Invoke(new[] { entity });
         }
     }
 }

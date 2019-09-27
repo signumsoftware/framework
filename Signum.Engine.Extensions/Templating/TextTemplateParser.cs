@@ -136,7 +136,7 @@ namespace Signum.Engine.Templating
                     }
 
                     int index = 0;
-                    foreach (Match match in matches)
+                    foreach (Match match in matches.Cast<Match>())
                     {
                         if (index < match.Index)
                         {

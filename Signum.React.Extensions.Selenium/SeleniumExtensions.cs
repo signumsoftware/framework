@@ -75,7 +75,7 @@ namespace Signum.React.Selenium
         {
             var old = selenium.WindowHandles.ToHashSet();
             action();
-            return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)));
+            return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)))!;
         }
 
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
@@ -342,19 +342,26 @@ namespace Signum.React.Selenium
             return button.GetDriver().CapturePopup(() => button.Click());
         }
 
+        public static IWebElement CaptureOnDoubleClick(this IWebElement button)
+        {
+            return button.GetDriver().CapturePopup(() => button.DoubleClick());
+        }
+
         public static IWebElement CapturePopup(this RemoteWebDriver selenium, Action clickToOpen)
         {
             var body = selenium.FindElement(By.TagName("body"));
-            var last = body.FindElement(By.XPath("./*[last()]"));
+            var oldDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
             clickToOpen();
             var result = selenium.Wait(() =>
             {
-                var newLast = body.FindElement(By.XPath("./*[last()]"));
-                
-                if (object.Equals(last, newLast))
+                var newDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+
+                var newTop = newDialogs.SingleOrDefaultEx(a => !oldDialogs.Contains(a));
+
+                if (newTop == null)
                     return null;
 
-                return newLast.TryFindElement(By.CssSelector(".modal.fade.show"));
+                return newTop;
             })!;
 
             return result;

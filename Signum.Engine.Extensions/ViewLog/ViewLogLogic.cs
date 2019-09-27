@@ -20,7 +20,7 @@ namespace Signum.Engine.ViewLog
 {
     public static class ViewLogLogic
     {
-        public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedLog;
+        public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable>? QueryExecutedLog;
 
         [AutoExpressionField]
         public static IQueryable<ViewLogEntity> ViewLogs(this Entity a) => 
@@ -162,7 +162,7 @@ namespace Signum.Engine.ViewLog
             Second.Write(buffer, index, count);
         }
 
-        public override void Write(string value)
+        public override void Write(string? value)
         {
             First.Write(value);
             Second.Write(value);

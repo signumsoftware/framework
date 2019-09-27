@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -78,7 +78,7 @@ namespace Signum.Entities.Chart
         public override string ToString()
         {
             if (QueryName == null)
-                return KeywordMatch.Value.ToString();
+                return KeywordMatch.Value.ToString()!;
 
             return "{0} {1}".FormatWith(KeywordMatch.Value, QueryUtils.GetNiceName(QueryName).ToOmniboxPascal());
         }

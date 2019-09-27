@@ -8,6 +8,7 @@ import ValueLineModal from '@framework/ValueLineModal'
 import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
+import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
@@ -25,7 +26,12 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     queryName: AlertEntity,
     parentToken: AlertEntity.token(e => e.target),
     parentValue: ctx.lite
-  }, { isVisible: couldHaveAlerts(ctx.lite.EntityType), icon: "bell", iconColor: "orange", isShy: true }));
+  }, {
+      isVisible: AuthClient.navigatorIsViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType),
+      icon: "bell",
+      iconColor: "orange",
+      isShy: true
+    }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],

@@ -26,8 +26,8 @@ namespace Signum.Engine.Basics
 
         public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
 
-        public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity;
-        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo;
+        public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity = null!;
+        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo = null!;
 
         public static void Start(SchemaBuilder sb)
         {

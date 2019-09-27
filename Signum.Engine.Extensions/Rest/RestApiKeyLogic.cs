@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
@@ -16,7 +16,7 @@ namespace Signum.Engine.Rest
         public readonly static string ApiKeyQueryParameter = "apiKey";
         public readonly static string ApiKeyHeaderParameter = "X-ApiKey";
 
-        public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache;
+        public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache = null!;
         public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
 
         public static void Start(SchemaBuilder sb)

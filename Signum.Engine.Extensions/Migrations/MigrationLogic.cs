@@ -81,7 +81,7 @@ namespace Signum.Engine.Migrations
             var log = !Schema.Current.Tables.ContainsKey(typeof(LoadMethodLogEntity)) ? null : new LoadMethodLogEntity
             {
                 Start = TimeZoneManager.Now,
-                ClassName = action.Method.DeclaringType.FullName,
+                ClassName = action.Method.DeclaringType!.FullName,
                 MethodName = action.Method.Name,
                 Description = description,
             }.Save();

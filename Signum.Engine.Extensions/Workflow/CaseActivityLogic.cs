@@ -542,7 +542,7 @@ namespace Signum.Engine.Workflow
                         if (workflow.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
 
-                        var mainEntity = args.TryGetArgC<ICaseMainEntity>();
+                        var mainEntity = args.GetArg<ICaseMainEntity>();
                         var @case = new CaseEntity
                         {
                             Workflow = workflow,
@@ -570,7 +570,7 @@ namespace Signum.Engine.Workflow
                         var now = TimeZoneManager.Now;
                         var c = ca.Case;
                         c.StartDate = now;
-                        c.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
+                        c.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                         c.Save();
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
@@ -838,7 +838,7 @@ namespace Signum.Engine.Workflow
                 ca.DoneBy = UserEntity.Current.ToLite();
                 ca.DoneDate = TimeZoneManager.Now;
                 ca.DoneType = doneType;
-                ca.Case.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
+                ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                 ca.Save();
 
                 ca.Notifications()
@@ -875,7 +875,7 @@ namespace Signum.Engine.Workflow
 
             private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? ca)
             {
-                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
+                @case.Description = @case.MainEntity.ToString()!.Trim().Etc(100);
 
                 if (ctx.IsFinished)
                 {
@@ -950,7 +950,7 @@ namespace Signum.Engine.Workflow
             {
                 SaveEntity(@case.MainEntity);
 
-                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
+                @case.Description = @case.MainEntity.ToString()!.Trim().Etc(100);
                 @case.Save();
 
                 var ctx = new WorkflowExecuteStepContext(@case, null);

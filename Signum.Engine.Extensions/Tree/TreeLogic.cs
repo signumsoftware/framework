@@ -63,12 +63,12 @@ namespace Signum.Engine.Tree
         public class ParentMethodExpander<T> : GenericMethodExpander
             where T : TreeEntity
         {
-            public static Expression<Func<T, T>> Expression = 
+            public static Expression<Func<T, T?>> Expression = 
                 cc => Database.Query<T>().SingleOrDefaultEx(cp => (bool)(cp.Route == cc.Route.GetAncestor(1)));
             public ParentMethodExpander() : base(Expression) { }
         }
         [MethodExpander(typeof(ParentMethodExpander<>))]
-        public static T Parent<T>(this T e)
+        public static T? Parent<T>(this T e)
              where T : TreeEntity
         {
             return ParentMethodExpander<T>.Expression.Evaluate(e);
@@ -275,7 +275,7 @@ namespace Signum.Engine.Tree
                     {
                         t.Route = CalculateRoute(t);
                         if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && t.ParentOrSibling != null)
-                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent().Mixin<DisabledMixin>().IsDisabled;
+                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent()!.Mixin<DisabledMixin>().IsDisabled;
                     }
 
                     TreeLogic.FixName(t);

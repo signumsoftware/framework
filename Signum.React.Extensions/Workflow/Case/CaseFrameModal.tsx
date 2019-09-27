@@ -237,12 +237,14 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
   renderMainEntity() {
 
+    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
+
     var pack = this.state.pack!;
     var mainEntity = pack.activity.case.mainEntity;
     const mainFrame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },
+      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity, ...extension },
       onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
           pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
@@ -272,19 +274,15 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
 
-    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
-
-    var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity, ...extension };
-
     const wc: WidgetContext<ICaseMainEntity> = {
       ctx: ctx,
-      pack: mainPack,
+      frame: mainFrame,
     };
 
     return (
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
-        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainPack} /> : <br />}
+        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}

@@ -80,10 +80,10 @@ namespace Signum.Engine.SMS
             }
         }
 
-        static ResetLazy<Dictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates;
+        static ResetLazy<Dictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates = null!;
         static Dictionary<Type, SMSModelInfo> registeredModels = new Dictionary<Type, SMSModelInfo>();
-        static ResetLazy<Dictionary<Type, SMSModelEntity>> typeToEntity;
-        static ResetLazy<Dictionary<SMSModelEntity, Type>> entityToType;
+        static ResetLazy<Dictionary<Type, SMSModelEntity>> typeToEntity = null!;
+        static ResetLazy<Dictionary<SMSModelEntity, Type>> entityToType = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -195,7 +195,7 @@ namespace Signum.Engine.SMS
             var list = (from type in registeredModels.Keys
                         select new SMSModelEntity
                         {
-                            FullClassName = type.FullName
+                            FullClassName = type.FullName!
                         }).ToList();
             return list;
         }
@@ -333,10 +333,10 @@ namespace Signum.Engine.SMS
 
         public static ISMSModel CreateModel(SMSModelEntity model, ModifiableEntity? entity)
         {
-            return (ISMSModel)SMSModelLogic.GetEntityConstructor(model.ToType()).Invoke(new[] { entity });
+            return (ISMSModel)SMSModelLogic.GetEntityConstructor(model.ToType())!.Invoke(new[] { entity });
         }
 
-        public static ConstructorInfo GetEntityConstructor(Type smsModel)
+        public static ConstructorInfo? GetEntityConstructor(Type smsModel)
         {
             var entityType = GetEntityType(smsModel);
 

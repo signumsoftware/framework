@@ -32,7 +32,7 @@ namespace Signum.React.Maps
                              entityData = EntityKindCache.GetEntityData(t.Type),
                              entityKind = EntityKindCache.GetEntityKind(t.Type),
                              entityBaseType = GetEntityBaseType(t.Type),
-                             @namespace = type.Namespace,
+                             @namespace = type.Namespace!,
                              rows = getStats.TryGetC(t.Name)?.rows,
                              total_size_kb = getStats.TryGetC(t.Name)?.total_size_kb,
                              rows_history = t.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.rows),

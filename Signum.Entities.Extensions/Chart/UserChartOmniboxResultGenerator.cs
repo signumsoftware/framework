@@ -27,7 +27,7 @@ namespace Signum.Entities.Chart
 
             foreach (var uq in userCharts)
             {
-                var match = OmniboxUtils.Contains(uq, uq.ToString(), ident)!;
+                var match = OmniboxUtils.Contains(uq, uq.ToString()!, ident)!;
 
                 yield return new UserChartOmniboxResult
                 {

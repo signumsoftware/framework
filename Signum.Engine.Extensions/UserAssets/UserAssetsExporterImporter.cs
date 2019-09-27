@@ -119,7 +119,7 @@ namespace Signum.Engine.UserAssets
 
                     previews.Add(guid, new UserAssetPreviewLineEmbedded
                     {
-                        Text = entity.ToString(),
+                        Text = entity.ToString()!,
                         Type = entity.GetType().ToTypeEntity(),
                         Guid = guid,
                         Action = entity.IsNew ? EntityAction.New :
@@ -140,7 +140,7 @@ namespace Signum.Engine.UserAssets
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
 
                 part.FromXml(element, this);
 
@@ -256,7 +256,7 @@ namespace Signum.Engine.UserAssets
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
 
                 part.FromXml(element, this);
 
@@ -289,6 +289,30 @@ namespace Signum.Engine.UserAssets
             public CultureInfoEntity GetCultureInfoEntity(string cultureName)
             {
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
+            }
+        }
+
+        public static void ImportConsole(string filePath)
+        {
+            var bytes = File.ReadAllBytes(filePath);
+
+            var preview = Preview(bytes);
+            foreach (var item in preview.Lines)
+            {
+                switch (item.Action)
+                {
+                    case EntityAction.New: SafeConsole.WriteLineColor(ConsoleColor.Green, $"Create {item.Type} {item.Guid} {item.Text}"); break;
+                    case EntityAction.Identical: SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {item.Type} {item.Guid} {item.Text}"); break;
+                    case EntityAction.Different: SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Override {item.Type} {item.Guid} {item.Text}");
+                        item.OverrideEntity = true;
+                        break;
+                }
+            }
+
+            if (!preview.Lines.Any(a => a.OverrideEntity) || SafeConsole.Ask("Override all?"))
+            {
+                Import(bytes, preview);
+                SafeConsole.WriteLineColor(ConsoleColor.Green, $"Imported Succesfully");
             }
         }
 

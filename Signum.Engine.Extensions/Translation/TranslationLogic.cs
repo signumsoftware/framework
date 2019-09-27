@@ -55,7 +55,7 @@ namespace Signum.Engine.Translation
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, MemberInfo mi)
         {
-            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType).Members.GetOrAdd(mi, 0);
+            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType!).Members.GetOrAdd(mi, 0);
         }
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, Type type)
@@ -72,7 +72,7 @@ namespace Signum.Engine.Translation
 
         public static void SynchronizeTypes(Assembly assembly, string directoryName)
         {
-            string assemblyName = assembly.GetName().Name;
+            string assemblyName = assembly.GetName().Name!;
 
             HashSet<string> newNames = (from t in assembly.GetTypes()
                                         let opts = LocalizedAssembly.GetDescriptionOptions(t)
@@ -88,7 +88,7 @@ namespace Signum.Engine.Translation
 
                 HashSet<string> oldNames = doc.Element("Translations").Elements("Type").Select(t => t.Attribute("Name").Value).ToHashSet();
 
-                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)); //cloning
+                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)!); //cloning
 
                 var culture = fileName.After(assemblyName + ".").Before(".xml");
 

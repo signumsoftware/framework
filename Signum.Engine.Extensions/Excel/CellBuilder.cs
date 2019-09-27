@@ -94,7 +94,7 @@ namespace Signum.Engine.Excel
                         (template.ToString().StartsWith("Decimal")) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
                         (template == DefaultStyle.Boolean) ? ToYesNo((bool)value) :
                         (template == DefaultStyle.Enum) ? ((Enum)value).NiceToString() :
-                        value.ToString();
+                        value.ToString()!;
 
             Cell cell = IsInlineString(template)? 
                 new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 

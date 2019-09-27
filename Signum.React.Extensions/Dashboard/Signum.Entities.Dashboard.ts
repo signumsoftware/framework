@@ -29,7 +29,6 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   combineSimilarRows: boolean;
   parts: Entities.MList<PanelPartEmbedded>;
   guid: string;
-  forNavbar: boolean;
   key: string | null;
 }
 

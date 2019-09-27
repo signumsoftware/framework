@@ -23,7 +23,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Action<ScheduledTaskLogEntity> OnFinally;
+        public static Action<ScheduledTaskLogEntity>? OnFinally;
         
         [AutoExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) => 
@@ -57,7 +57,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
+        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
 
         static PriorityQueue<ScheduledTaskPair> priorityQueue = new PriorityQueue<ScheduledTaskPair>((a, b) => a.NextDate.CompareTo(b.NextDate));
 
@@ -212,7 +212,7 @@ namespace Signum.Engine.Scheduler
             Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
+        static void ScheduledTasksLazy_OnReset(object? sender, EventArgs e)
         {
             if (running)
                 using (ExecutionContext.SuppressFlow())
@@ -277,10 +277,10 @@ namespace Signum.Engine.Scheduler
                 lock (priorityQueue)
                 {
                     DateTime now = TimeZoneManager.Now;
-                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a=>a.ScheduledTask != null).GroupBy(a => a.ScheduledTask).Select(gr => KVP.Create(
-                        gr.Key,
-                        gr.Max(a => a.StartTime)
-                    )).ToDictionary();
+                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask != null).GroupBy(a => a.ScheduledTask!).Select(gr => KVP.Create(
+                          gr.Key,
+                          gr.Max(a => a.StartTime)
+                      )).ToDictionary();
 
                     priorityQueue.Clear();
                     priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => {
@@ -329,7 +329,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static void TimerCallback(object obj) // obj ignored
+        static void TimerCallback(object? obj) // obj ignored
         {
             try
             {
@@ -489,7 +489,7 @@ namespace Signum.Engine.Scheduler
                 Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
                 {
                     ScheduledTask = p.ScheduledTask.ToLite(),
-                    Rule = p.ScheduledTask.Rule.ToString(),
+                    Rule = p.ScheduledTask.Rule.ToString()!,
                     NextDate = p.NextDate,
                 }).ToList(),
 
@@ -574,7 +574,7 @@ namespace Signum.Engine.Scheduler
                     catch (Exception e)
                     {
                         SafeConsole.WriteLineColor(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
 
                         var ex = e.LogException();
                         using (ExecutionMode.Global())

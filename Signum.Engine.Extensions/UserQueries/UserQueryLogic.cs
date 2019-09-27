@@ -21,9 +21,9 @@ namespace Signum.Engine.UserQueries
 {
     public static class UserQueryLogic
     {
-        public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries;
-        public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks;
-        public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery;
+        public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries = null!;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks = null!;
+        public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery = null!;
 
         public static void Start(SchemaBuilder sb)
         {

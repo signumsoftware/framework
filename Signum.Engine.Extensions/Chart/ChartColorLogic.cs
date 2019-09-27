@@ -15,7 +15,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors;
+        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors = null!;
 
         public static readonly int Limit = 360;
 

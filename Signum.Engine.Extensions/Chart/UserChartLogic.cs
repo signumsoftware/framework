@@ -22,9 +22,9 @@ namespace Signum.Engine.Chart
 {
     public static class UserChartLogic
     {
-        public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts;
-        public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks;
-        public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery;
+        public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts = null!;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks = null!;
+        public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -54,7 +54,7 @@ namespace Signum.Engine.Chart
                 
                
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
-                 new InvalidateWith(typeof(UserChartEntity)));
+                    new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KVP.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));

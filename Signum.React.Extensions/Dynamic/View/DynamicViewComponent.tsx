@@ -100,7 +100,6 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
     var topMostEntity = ctx.frame && ctx.frame.pack && ctx.frame.pack.entity;
     
-
     var vos = this.state.viewOverrides.filter(a => a.viewName == this.state.dynamicView.viewName);
 
     if (!Navigator.isViewable(DynamicViewEntity)) {
