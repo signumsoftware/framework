@@ -179,8 +179,7 @@ namespace Signum.React.JsonModelValidators
             int i = 0;
             foreach (object? element in (IEnumerable)mlist)
             {
-
-                if (this.CurrentPath.Push(element))
+                if (element != null && this.CurrentPath.Push(element))
                 {
                     using (StateManager.Recurse(this, this.Key + "[" + (i++) + "].element", null, element, null))
                     {
@@ -220,7 +219,7 @@ namespace Signum.React.JsonModelValidators
                         }
 
                         var val = kvp.Value.GetValue!(mod);
-                        if (this.CurrentPath.Push(val))
+                        if (val != null && this.CurrentPath.Push(val))
                         {
                             using (StateManager.Recurse(this, this.Key + "." + kvp.Key, null, val, null))
                             {
