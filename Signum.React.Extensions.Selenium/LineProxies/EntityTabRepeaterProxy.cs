@@ -1,3 +1,4 @@
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 
@@ -20,6 +21,13 @@ namespace Signum.React.Selenium
             Tab(index).Find().Click();
 
             return this.Details<T>();
+        }
+
+        public int SelectedTabIndex()
+        {
+            var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item .nav-link.active"));
+
+            return int.Parse(active.GetParent().GetAttribute("data-eventkey"));
         }
 
         public LineContainer<T> Details<T>() where T : ModifiableEntity

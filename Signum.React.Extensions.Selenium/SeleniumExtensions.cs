@@ -250,8 +250,7 @@ namespace Signum.React.Selenium
 
             element.Click();
 
-            if (element.Selected != isChecked)
-                throw new InvalidOperationException();
+            element.GetDriver().Wait(() => element.Selected == isChecked, () => "Set Checkbox to " + isChecked);
         }
 
         //[DebuggerStepThrough]
