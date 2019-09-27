@@ -71,7 +71,7 @@ namespace Signum.Entities
                 return Element == null ? 0 : Element.GetHashCode();
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 return obj is RowIdElement && base.Equals((RowIdElement)obj);
             }
@@ -99,7 +99,7 @@ namespace Signum.Entities
                     {
                         case "rowid": this.RowId = (PrimaryKey?)item.Value; break;
                         case "oldindex": this.OldIndex = (int?)item.Value; break;
-                        case "value": this.Element = (T)item.Value; break;
+                        case "value": this.Element = (T)item.Value!; break;
                         default: throw new InvalidOperationException("Unexpected SerializationEntry");
                     }
                 }
@@ -453,6 +453,7 @@ namespace Signum.Entities
             return removed.Count;
         }
 
+        //void IList.RemoveAt(int index) => RemoveAt(index!.Value);
         public void RemoveAt(int index)
         {
             AssertNotSealed();
@@ -582,25 +583,25 @@ namespace Signum.Entities
 
         #region IList Members
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
-            this.Add((T)value);
+            this.Add((T)value!);
             return this.Count;
         }
 
-        bool IList.Contains(object value)
+        bool IList.Contains(object? value)
         {
-            return this.Contains((T)value);
+            return this.Contains((T)value!);
         }
 
-        int IList.IndexOf(object value)
+        int IList.IndexOf(object? value)
         {
-            return this.IndexOf((T)value);
+            return this.IndexOf((T)value!);
         }
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
-            this.Insert(index, (T)value);
+            this.Insert(index, (T)value!);
         }
 
         bool IList.IsFixedSize
@@ -608,9 +609,9 @@ namespace Signum.Entities
             get { return false;  }
         }
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
-            this.Remove((T)value);
+            this.Remove((T)value!);
         }
 
         object? IList.this[int index]
@@ -778,6 +779,11 @@ namespace Signum.Entities
         {
             this.AssignMList((MList<T>)newList);
             this.PostRetrieving();
+        }
+
+        public void Insert(int? index, object? value)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Signum.Entities;
+using Signum.React.Json;
 using Signum.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Signum.React.Json
+namespace Signum.React.JsonModelValidators
 {
     public class SignumObjectModelValidator : IObjectModelValidator
     {
@@ -114,7 +114,7 @@ namespace Signum.React.Json
         }
     }
 
-    public class SignumValidationVisitor : Signum.React.ValidationVisitor
+    public class SignumValidationVisitor : ValidationVisitor
     {
         public SignumValidationVisitor(
             ActionContext actionContext,
@@ -177,7 +177,7 @@ namespace Signum.React.Json
             Type elementType = mlist.GetType().ElementType()!;
 
             int i = 0;
-            foreach (object element in (IEnumerable)mlist)
+            foreach (object? element in (IEnumerable)mlist)
             {
 
                 if (this.CurrentPath.Push(element))

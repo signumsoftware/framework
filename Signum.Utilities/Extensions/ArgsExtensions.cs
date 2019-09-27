@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Utilities
 {
@@ -14,10 +15,10 @@ namespace Signum.Utilities
             return args.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
         }
 
+        [return: MaybeNull]
         public static T TryGetArgC<T>(this IEnumerable<object>? args) where T : class
         {
-            return args.SmartConvertTo<T>().SingleOrDefaultEx(
-                () => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
+            return args.SmartConvertTo<T>().SingleOrDefaultEx(() => "There are more than one {0} in the argument list".FormatWith(typeof(T)))!;
         }
 
         public static T? TryGetArgS<T>(this IEnumerable<object>? args) where T : struct

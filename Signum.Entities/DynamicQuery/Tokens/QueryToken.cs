@@ -52,7 +52,7 @@ namespace Signum.Entities.DynamicQuery
                                 var pp = Validator.TryGetPropertyValidator(route);
                                 if (pp != null)
                                 {
-                                    DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                                    DateTimePrecisionValidatorAttribute? datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
 
                                     if (datetimePrecision != null && datetimePrecision.Precision == DateTimePrecision.Days)
                                         return true;
@@ -79,7 +79,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
-            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out Expression result))
+            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out var result))
                 return result;
 
             return BuildExpressionInternal(context);
@@ -217,7 +217,7 @@ namespace Signum.Entities.DynamicQuery
             return EntityExtensions(parent);
         }
 
-        public static Func<QueryToken, IEnumerable<QueryToken>> EntityExtensions;
+        public static Func<QueryToken, IEnumerable<QueryToken>>? EntityExtensions;
 
 
         public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)
@@ -316,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
         }

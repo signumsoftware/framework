@@ -189,7 +189,7 @@ namespace Signum.Engine.Basics
                         {
                             TableName = tab.Name.ToString(),
                             CleanName = Reflector.CleanTypeName(type),
-                            Namespace = type.Namespace,
+                            Namespace = type.Namespace!,
                             ClassName = type.Name,
                         }).ToList();
             return list;

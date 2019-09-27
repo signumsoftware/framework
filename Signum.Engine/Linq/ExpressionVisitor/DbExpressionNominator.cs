@@ -1160,7 +1160,7 @@ namespace Signum.Engine.Linq
 
         public Expression? HardCodedMembers(MemberExpression m)
         {
-            switch (m.Member.DeclaringType.TypeName() + "." + m.Member.Name)
+            switch (m.Member.DeclaringType!.TypeName() + "." + m.Member.Name)
             {
                 case "string.Length": return TrySqlFunction(null, SqlFunction.LEN, m.Type, m.Expression);
                 case "Math.PI": return TrySqlFunction(null, SqlFunction.PI, m.Type);
@@ -1217,7 +1217,7 @@ namespace Signum.Engine.Linq
             if (result != null)
                 return result;
 
-            SqlMethodAttribute sma = m.Method.GetCustomAttribute<SqlMethodAttribute>();
+            SqlMethodAttribute? sma = m.Method.GetCustomAttribute<SqlMethodAttribute>();
             if (sma != null)
                 using (ForceFullNominate())
                     return TrySqlFunction(m.Object, sma.Name ?? m.Method.Name, m.Type, m.Arguments.ToArray());
@@ -1255,7 +1255,7 @@ namespace Signum.Engine.Linq
                 return VisitBinary(Expression.Equal(obj, arg));
             }
 
-            switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
+            switch (m.Method.DeclaringType!.TypeName() + "." + m.Method.Name)
             {
                 case "string.IndexOf":
                     {

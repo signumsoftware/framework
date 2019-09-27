@@ -74,13 +74,13 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void StringContainsUnion()
         {
-            var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineUnion().ToString().Contains("Hola")).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineUnion().ToString()!.Contains("Hola")).ToList();
         }
 
         [Fact]
         public void StringContainsSwitch()
         {
-            var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineCase().ToString().Contains("Hola")).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineCase().ToString()!.Contains("Hola")).ToList();
         }
 
         [Fact]

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Signum.React.Filters
 {
@@ -43,7 +45,9 @@ namespace Signum.React.Filters
 
     public class SignumAuthenticationFilter : SignumDisposableResourceFilter
     {
-        public SignumAuthenticationFilter() : base("Signum_User") { }
+        public const string Signum_User_Key = "Signum_User";
+
+        public SignumAuthenticationFilter() : base("Signum_User_Session") { }
 
         public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
@@ -66,19 +70,21 @@ namespace Signum.React.Filters
             if (result == null)
                 return null;
 
+            context.HttpContext.Items[Signum_User_Key] = result.User;
+
             return result.User != null ? UserHolder.UserSession(result.User) : null;
         }
     }
 
     public class SignumCultureSelectorFilter : IResourceFilter
     {
-        public static Func<ResourceExecutingContext, CultureInfo?> GetCurrentCultures;
+        public static Func<ResourceExecutingContext, CultureInfo?>? GetCurrentCulture;
 
         const string Culture_Key = "OldCulture";
         const string UICulture_Key = "OldUICulture";
         public void OnResourceExecuting(ResourceExecutingContext context)
         {
-            var culture = GetCurrentCultures?.Invoke(context);
+            var culture = GetCurrentCulture?.Invoke(context);
             if (culture != null)
             {
                 context.HttpContext.Items[Culture_Key] = CultureInfo.CurrentCulture;
@@ -156,7 +162,7 @@ namespace Signum.React.Filters
         }
     }
 
-    public abstract class SignumDisposableResourceFilter : IResourceFilter
+    public abstract class SignumDisposableResourceFilter : IAsyncResourceFilter
     {
         public string ResourceKey;
 
@@ -167,18 +173,10 @@ namespace Signum.React.Filters
 
         public abstract IDisposable? GetResource(ResourceExecutingContext context);
 
-        public void OnResourceExecuting(ResourceExecutingContext context)
+        public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
         {
-            context.HttpContext.Items[ResourceKey] = GetResource(context);
-        }
-
-        public void OnResourceExecuted(ResourceExecutedContext context)
-        {
-            if (context.HttpContext.Items.TryGetValue(ResourceKey, out object result))
-            {
-                if (result != null)
-                    ((IDisposable)result).Dispose();
-            }
+            using (GetResource(context))
+                await next();
         }
     }
 }

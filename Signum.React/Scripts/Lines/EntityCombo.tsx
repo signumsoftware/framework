@@ -175,7 +175,7 @@ export const EntityComboSelect = React.forwardRef((p: EntityComboSelectProps, re
   const ctx = p.ctx;
 
   if (ctx.readOnly)
-    return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
+    return <FormControlReadonly ctx={ctx} htmlAttributes={this.props.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
 
   return (
     <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}

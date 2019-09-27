@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Signum.Utilities
@@ -8,10 +8,10 @@ namespace Signum.Utilities
         //The best development experience is to throw an exception when starting but in some scenarios is better to try to start at all costs:
 
         // * Green / Blue deployments where the Application and the DB could be mistmatched for a while     
-        public static List<Exception> IgnoredDatabaseMismatches; //Initialize to enable
+        public static List<Exception>? IgnoredDatabaseMismatches; //Initialize to enable
 
         // * Dynamic code where everithing could happen (like duplicated entities, entities without operations, etc..)
-        public static List<Exception> IgnoredCodeErrors;//Initialize to enable
+        public static List<Exception>? IgnoredCodeErrors;//Initialize to enable
 
 
         public static List<R> SelectCatch<T, R>(this IEnumerable<T> elements, Func<T, R> selectorOrCrash)

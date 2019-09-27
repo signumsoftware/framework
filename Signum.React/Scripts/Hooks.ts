@@ -37,6 +37,11 @@ export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.Se
     })
   ]
 
+export function useTitle(title: string, deps?: readonly any[]) {
+  React.useEffect(() => {
+    Navigator.setTitle(title);
+    return () => Navigator.setTitle();
+  }, deps);
 }
 
 export function useAPI<T>(defaultValue: T, makeCall: (signal: AbortSignal, oldData: T) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): T {

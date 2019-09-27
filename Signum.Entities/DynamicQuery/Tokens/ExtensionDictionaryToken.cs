@@ -32,12 +32,12 @@ namespace Signum.Entities.DynamicQuery
         
         public override string ToString()
         {
-            return "[" + (((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
+            return "[" + (keyValue is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
         }
 
         public override string NiceName()
         {
-            return ((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString();
+            return keyValue is Enum e ? e.NiceToString() : keyValue.ToString()!;
         }
 
         public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); } }

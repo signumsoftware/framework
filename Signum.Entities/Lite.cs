@@ -182,7 +182,7 @@ namespace Signum.Entities
                 return this.toStr;
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj == null)
                     return false;
@@ -204,7 +204,7 @@ namespace Signum.Entities
             public override int GetHashCode()
             {
                 return this.id == null ? entityOrNull!.GetHashCode() ^ MagicMask :
-                    this.EntityType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+                    this.EntityType.FullName!.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
             }
 
             public string Key()
@@ -222,7 +222,7 @@ namespace Signum.Entities
                 return ToString()!.CompareTo(other.ToString());
             }
 
-            public int CompareTo(object obj)
+            public int CompareTo(object? obj)
             {
                 if (obj is Lite<Entity> lite)
                     return CompareTo(lite);
@@ -248,10 +248,10 @@ namespace Signum.Entities
                 {
                     switch (item.Name)
                     {
-                        case "modified": this.Modified = (ModifiedState)Enum.Parse(typeof(ModifiedState), (string)item.Value); modifiedSet = true; break;
-                        case "entityOrNull": this.entityOrNull = (T)item.Value; break;
-                        case "id": this.id = (PrimaryKey)item.Value; break;
-                        case "toStr": this.toStr = (string)item.Value; break;
+                        case "modified": this.Modified = (ModifiedState)Enum.Parse(typeof(ModifiedState), (string)item.Value!); modifiedSet = true; break;
+                        case "entityOrNull": this.entityOrNull = (T)item.Value!; break;
+                        case "id": this.id = (PrimaryKey)item.Value!; break;
+                        case "toStr": this.toStr = (string)item.Value!; break;
                         default: throw new InvalidOperationException("Unexpected SerializationEntry");
                     }
                 }
@@ -565,9 +565,13 @@ namespace Signum.Entities
         static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructorId = new ConcurrentDictionary<Type, ConstructorInfo>();
         public static ConstructorInfo LiteConstructorId(Type type)
         {
-            return ciLiteConstructorId.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string) }));
+            var hc = type.GetHashCode();
+            var equals = type.Equals(type);
+
+            return ciLiteConstructorId.GetOrAdd(type, Bla.CreateLiteConstructor);
         }
 
+        
         public static NewExpression NewExpression(Type type, Expression id, Expression toString)
         {
             return Expression.New(Lite.LiteConstructorId(type), id.UnNullify(), toString);
@@ -612,5 +616,14 @@ namespace Signum.Entities
         Type0NotFound,
         [Description("Text")]
         ToStr
+    }
+
+    static class Bla
+    {
+        internal static ConstructorInfo CreateLiteConstructor(Type t)
+        {
+            return typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string) })!;
+        }
+
     }
 }

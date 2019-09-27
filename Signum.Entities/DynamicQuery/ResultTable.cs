@@ -43,9 +43,9 @@ namespace Signum.Entities.DynamicQuery
             {
                 switch (entry.Name)
                 {
-                    case "column": column = (Column)entry.Value; break;
-                    case "valuesList": values = (IList)entry.Value; break;
-                    case "valuesString": values = Split((string)entry.Value, GetValueDeserializer()); break;
+                    case "column": column = (Column)entry.Value!; break;
+                    case "valuesList": values = (IList)entry.Value!; break;
+                    case "valuesString": values = Split((string)entry.Value!, GetValueDeserializer()); break;
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace Signum.Entities.DynamicQuery
                 };
 
             if (column.Type.UnNullify().IsEnum)
-                return obj => Convert.ChangeType(obj, typeof(int)).ToString();
+                return obj => Convert.ChangeType(obj, typeof(int))!.ToString()!;
 
             switch (Type.GetTypeCode(column.Type.UnNullify()))
             {
@@ -218,7 +218,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ResultTable
     {
-        internal ResultColumn entityColumn;
+        internal ResultColumn? entityColumn;
         public ColumnDescription? EntityColumn
         {
             get { return entityColumn == null ? null : ((ColumnToken)entityColumn.Column.Token).Column; }
@@ -435,12 +435,12 @@ namespace Signum.Entities.DynamicQuery
 
         public Lite<Entity> Entity
         {
-            get { return (Lite<Entity>)Table.entityColumn.Values[Index]; }
+            get { return (Lite<Entity>)Table.entityColumn!.Values[Index]!; }
         }
 
         public Lite<Entity>? TryEntity
         {
-            get { return Table.entityColumn == null ? null : (Lite<Entity>)Table.entityColumn.Values[Index]; }
+            get { return Table.entityColumn == null ? null : (Lite<Entity>?)Table.entityColumn.Values[Index]; }
         }
 
         public T GetValue<T>(string columnName)
@@ -468,6 +468,6 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

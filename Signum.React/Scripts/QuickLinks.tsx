@@ -117,7 +117,7 @@ function asArray<T>(valueOrArray: Seq<T>): T[] {
 
 export function getQuickLinkWidget(ctx: WidgetContext<ModifiableEntity>): React.ReactElement<any> {
 
-  return <QuickLinkWidget ctx={ctx} />;
+  return <QuickLinkWidget wc={ctx} />;
 }
 
 export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
@@ -142,12 +142,12 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
 }
 
 export interface QuickLinkWidgetProps {
-  ctx: WidgetContext<ModifiableEntity>
+  wc: WidgetContext<ModifiableEntity>
 }
 
 export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
-  const entity = p.ctx.pack.entity;
+  const entity = p.wc.ctx.value;
 
   const links = useAPI(undefined, signal => {
     if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind)
@@ -156,7 +156,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
       return getQuickLinks({
         lite: toLiteFat(entity as Entity),
         lites: [toLiteFat(entity as Entity)],
-        widgetContext: p.ctx as WidgetContext<Entity>
+        widgetContext: p.wc as WidgetContext<Entity>
       });
   }, [p]);
 

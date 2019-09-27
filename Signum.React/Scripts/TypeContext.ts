@@ -445,7 +445,7 @@ export interface EntityFrame {
     createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
   };
   entityComponent: React.Component | null | undefined;
-  pack: EntityPack<ModifiableEntity> | undefined;
+  pack: EntityPack<ModifiableEntity>;
   onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;

@@ -498,7 +498,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string? GetPrimaryKeyAttribute(DiffTable table)
         {
-            DiffColumn primaryKey = GetPrimaryKeyColumn(table);
+            DiffColumn? primaryKey = GetPrimaryKeyColumn(table);
 
             if (primaryKey == null)
                 return null;
@@ -529,7 +529,7 @@ namespace Signum.Engine.CodeGeneration
             return null;
         }
 
-        protected virtual DiffColumn GetPrimaryKeyColumn(DiffTable table)
+        protected virtual DiffColumn? GetPrimaryKeyColumn(DiffTable table)
         {
             return table.Columns.Values.SingleOrDefaultEx(a => a.PrimaryKey);
         }

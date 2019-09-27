@@ -36,7 +36,7 @@ namespace Signum.Engine.Maps
             set { this.version = value; }
         }
 
-        public event Action OnMetadataInvalidated;
+        public event Action? OnMetadataInvalidated;
         public void InvalidateMetadata()
         {
             this.OnMetadataInvalidated?.Invoke();
@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
 
         #region Events
 
-        public event Func<Type, bool, string?> IsAllowedCallback;
+        public event Func<Type, bool, string?>? IsAllowedCallback;
 
         public string? IsAllowed(Type type, bool inUserInterface)
         {
@@ -410,7 +410,7 @@ namespace Signum.Engine.Maps
                     {
                         try
                         {
-                            SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType.TypeName());
+                            SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
                             Console.Write(".");
                             SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
                             Console.Write("...");
@@ -428,7 +428,7 @@ namespace Signum.Engine.Maps
                         {
                             SafeConsole.WriteLineColor(ConsoleColor.Red, "Error");
 
-                            return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType.Name, e.Method.Name, ex.Message.Indent(2, '-')));
+                            return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                         }
                     })
                     .Combine(Spacing.Triple);
@@ -526,7 +526,7 @@ namespace Signum.Engine.Maps
 
             using (ExecutionMode.Global())
                 foreach (var item in Initializing.GetInvocationListTyped())
-                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType.ToString()))
+                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType!.ToString()))
                         item();
 
             Initializing = null;

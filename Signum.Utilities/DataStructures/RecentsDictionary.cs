@@ -6,6 +6,7 @@ using System.Collections;
 namespace Signum.Utilities.DataStructures
 {
     public class RecentDictionary<K, V>: IEnumerable<KeyValuePair<K,V>>
+        where K : notnull
     {
         int capacity;
         LinkedList<V> orderList = new LinkedList<V>();
@@ -50,7 +51,7 @@ namespace Signum.Utilities.DataStructures
             if (keyToLink.Keys.Count >= capacity)
             {
                 // Purge an item from the cache
-                LinkedListNode<V> tail = orderList.Last;
+                LinkedListNode<V> tail = orderList.Last!;
 
                 if (tail != null)
                 {
@@ -72,7 +73,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool Contains(K key)
         {
-            if (keyToLink.TryGetValue(key, out LinkedListNode<V> node))
+            if (keyToLink.TryGetValue(key, out var node))
             {
                 MoveToHead(node);
                 return true;
@@ -100,7 +101,7 @@ namespace Signum.Utilities.DataStructures
         {
             get
             {
-                if (keyToLink.TryGetValue(key, out LinkedListNode<V> value))
+                if (keyToLink.TryGetValue(key, out var value))
                 {
                     MoveToHead(value);
                     return value.Value;
@@ -110,7 +111,7 @@ namespace Signum.Utilities.DataStructures
             set
             {
 
-                if (keyToLink.TryGetValue(key, out LinkedListNode<V> link))
+                if (keyToLink.TryGetValue(key, out var link))
                 {
                     link.Value = value;
 
@@ -130,7 +131,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool TryGetValue(K key, out V value)
         {
-            if (keyToLink.TryGetValue(key, out LinkedListNode<V> node))
+            if (keyToLink.TryGetValue(key, out var node))
             {
                 MoveToHead(node);
                 value = node.Value;
@@ -168,7 +169,7 @@ namespace Signum.Utilities.DataStructures
         /// <summary>
         /// Event that is fired when an item falls outside of the cache
         /// </summary>
-        public event Action<K,V> Purged;
+        public event Action<K,V>? Purged;
 
         public override string ToString()
         {

@@ -25,7 +25,7 @@ namespace Signum.Entities
             return new Disposable(() => inModelBinderVariable.Value = old);
         }
 
-        public static Func<ModifiableEntity, PropertyInfo, string?> GlobalValidation { get; set; }
+        public static Func<ModifiableEntity, PropertyInfo, string?>? GlobalValidation { get; set; }
 
         static readonly Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
@@ -44,7 +44,7 @@ namespace Signum.Entities
                 return;
 
             if(typeof(T) != typeof(ModifiableEntity))
-                GenerateType(typeof(T).BaseType);
+                GenerateType(typeof(T).BaseType!);
 
             var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                        where !pi.HasAttribute<HiddenPropertyAttribute>() && !pi.HasAttribute<ExpressionFieldAttribute>() 

@@ -54,7 +54,7 @@ export function RenderEntity(p: RenderEntityProps) {
   const frame: EntityFrame = {
     frameComponent: { forceUpdate },
     entityComponent: entityComponent.current,
-    pack: undefined,
+    pack: { entity, canExecute: {} },
     revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),
     onClose: () => { throw new Error("Not implemented Exception"); },
     onReload: pack => { throw new Error("Not implemented Exception"); },

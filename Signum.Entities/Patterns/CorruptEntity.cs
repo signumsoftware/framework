@@ -52,14 +52,14 @@ namespace Signum.Entities
             return new Disposable(() => allowed.Value = true);
         }
 
-        public static event Action<Entity, Dictionary<Guid, IntegrityCheck>> SaveCorrupted;
+        public static event Action<Entity, Dictionary<Guid, IntegrityCheck>>? SaveCorrupted;
 
         public static void OnSaveCorrupted(Entity corruptEntity, Dictionary<Guid, IntegrityCheck> integrity)
         {
             SaveCorrupted?.Invoke(corruptEntity, integrity);
         }
 
-        public static event Action<Entity> CorruptionRemoved;
+        public static event Action<Entity>? CorruptionRemoved;
 
         public static void OnCorruptionRemoved(Entity corruptEntity)
         {

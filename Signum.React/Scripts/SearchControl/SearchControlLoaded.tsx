@@ -372,7 +372,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.containerDiv.scrollTop = 0;
         this.containerDiv.style.overflowY = "hidden";
         setTimeout(() => {
-          this.containerDiv!.style.overflowY = null!;
+          this.containerDiv!.style.overflowY = "";
         }, 10);
 
       }

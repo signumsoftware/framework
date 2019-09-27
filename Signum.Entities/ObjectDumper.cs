@@ -59,7 +59,7 @@ namespace Signum.Entities
                 this.showByteArrays = showByteArrays;
             }
 
-            public void DumpObject(object o)
+            public void DumpObject(object? o)
             {
                 if (o == null)
                 {
@@ -138,8 +138,8 @@ namespace Signum.Entities
                     {
                         Sb.AppendLine().AppendLine("{".Indent(level));
                         level += 1;
-                        var prop = o.GetType().GetProperty(nameof(Lite<Entity>.Entity));
-                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
+                        var prop = o.GetType().GetProperty(nameof(Lite<Entity>.Entity))!;
+                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null)!);
                         level -= 1;
                         Sb.Append("}".Indent(level));
                     }
@@ -172,14 +172,14 @@ namespace Signum.Entities
                 }
                 else if (o is IEnumerable)
                 {
-                    if (o is IDictionary)
+                    if (o is IDictionary dic)
                     {
-                        foreach (DictionaryEntry item in (o as IDictionary)!)
+                        foreach (DictionaryEntry? item in dic)
                         {
                             Sb.Append("{".Indent(level));
-                            DumpObject(item.Key);
+                            DumpObject(item!.Value.Key);
                             Sb.Append(", ");
-                            DumpObject(item.Value);
+                            DumpObject(item!.Value.Value);
                             Sb.AppendLine("},");
                         }
                     }
@@ -249,7 +249,7 @@ namespace Signum.Entities
                 string toString;
                 try
                 {
-                    toString = o.ToString();
+                    toString = o.ToString()!;
                 }
                 catch (Exception e)
                 {
@@ -286,7 +286,7 @@ namespace Signum.Entities
                 return false;
             }
 
-            private void DumpPropertyOrField(Type type, string name, object obj)
+            private void DumpPropertyOrField(Type type, string name, object? obj)
             {
                 Sb.AppendFormat("{0} = ".Indent(level), name);
                 DumpObject(obj);

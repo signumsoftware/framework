@@ -184,11 +184,11 @@ namespace Signum.Engine.Linq
                 var converted = EntityCasting(entity, Lite.Extract(m.Type)!)!;
                 return MakeLite(converted, toStr);
             }
-            else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
+            else if (m.Method.DeclaringType!.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
                 EntityExpression fi = (EntityExpression)Visit(m.Object);
 
-                return Expression.Convert((ColumnExpression)fi.ExternalId.Value, m.Method.DeclaringType.GetGenericArguments()[0]);
+                return Expression.Convert((ColumnExpression)fi.ExternalId.Value, m.Method.DeclaringType!.GetGenericArguments()[0]);
             }
             else if (m.Object != null && typeof(IEnumerable).IsAssignableFrom(m.Method.DeclaringType) && typeof(string) != m.Method.DeclaringType && m.Method.Name == "Contains")
             {
@@ -279,7 +279,7 @@ namespace Signum.Engine.Linq
                     ee = Completed(ee);
 
 
-                    var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType, (PropertyInfo)m);
+                    var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType!, (PropertyInfo)m);
 
                     var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
 
@@ -593,7 +593,7 @@ namespace Signum.Engine.Linq
          OverloadingSimplifier.miWhereQ :
          OverloadingSimplifier.miWhereE;
 
-                    source = Expression.Call(miWhere.MakeGenericMethod(source.Type.ElementType()), source, selectorOrPredicate);
+                    source = Expression.Call(miWhere.MakeGenericMethod(source.Type.ElementType()!), source, selectorOrPredicate);
                     selectorOrPredicate = null;
                 }
 
@@ -789,7 +789,7 @@ namespace Signum.Engine.Linq
 
                     aggregate = (Expression)Expression.Coalesce(
                         new AggregateExpression(GetBasicType(nominated), nominated, aggregateFunction, distinct),
-                        new SqlConstantExpression(Activator.CreateInstance(nominated.Type.UnNullify())));
+                        new SqlConstantExpression(Activator.CreateInstance(nominated.Type.UnNullify())!));
                 }
                 else
                 {
@@ -1322,7 +1322,7 @@ namespace Signum.Engine.Linq
 
             Expression exp = table.GetProjectorExpression(tableAlias, this);
 
-            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
+            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
 
             var argumens = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
@@ -1600,7 +1600,7 @@ namespace Signum.Engine.Linq
                         {
                             if (nex.Members == null)
                             {
-                                int index = nex.Constructor.GetParameters().IndexOf(p => p.Name.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
+                                int index = nex.Constructor.GetParameters().IndexOf(p => p.Name!.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
 
                                 if (index == -1)
                                     throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
@@ -1609,7 +1609,7 @@ namespace Signum.Engine.Linq
                             }
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
-                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.first, pi)).second;
+                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.First, pi)).Second;
                         }
                         break;
                     }
@@ -2839,7 +2839,7 @@ namespace Signum.Engine.Linq
                 );
 
             var projectType = withRowId ?
-                typeof(IEnumerable<>).MakeGenericType(typeof(MList<>.RowIdElement).MakeGenericType(mle.Type.ElementType())) :
+                typeof(IEnumerable<>).MakeGenericType(typeof(MList<>.RowIdElement).MakeGenericType(mle.Type.ElementType()!)) :
                 mle.Type;
 
             var proj = new ProjectionExpression(

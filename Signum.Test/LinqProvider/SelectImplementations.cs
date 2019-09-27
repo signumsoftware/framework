@@ -59,7 +59,7 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIBDoubleWhereUnion()
         {
             var query = Database.Query<AlbumEntity>()
-                .Where(a => a.Author.CombineUnion().ToLite().ToString().Length > 0)
+                .Where(a => a.Author.CombineUnion().ToLite().ToString()!.Length > 0)
                 .Select(a => a.Author.CombineUnion().ToLite());
 
             Assert.Equal(3, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
@@ -70,7 +70,7 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIBDoubleWhereSwitch()
         {
             var query = Database.Query<AlbumEntity>()
-                .Where(a => a.Author.CombineCase().ToLite().ToString().Length > 0)
+                .Where(a => a.Author.CombineCase().ToLite().ToString()!.Length > 0)
                 .Select(a => a.Author.CombineCase().ToLite());
 
             Assert.Equal(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
@@ -184,7 +184,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumEntity>()
                 .Select(a => a.Author.CombineUnion().ToLite())
-                .Where(a => a.ToString().StartsWith("Michael")).ToList();
+                .Where(a => a.ToString()!.StartsWith("Michael")).ToList();
         }
 
         [Fact]
@@ -192,7 +192,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumEntity>()
                 .Select(a => a.Author.CombineCase().ToLite())
-                .Where(a => a.ToString().StartsWith("Michael")).ToList();
+                .Where(a => a.ToString()!.StartsWith("Michael")).ToList();
         }
 
         [Fact]

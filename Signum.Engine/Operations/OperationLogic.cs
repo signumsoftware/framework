@@ -205,8 +205,8 @@ Consider the following options:
 
         #region Events
 
-        public static event SurroundOperationHandler SurroundOperation;
-        public static event AllowOperationHandler AllowOperation;
+        public static event SurroundOperationHandler? SurroundOperation;
+        public static event AllowOperationHandler? AllowOperation;
 
         internal static IDisposable? OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity? entity, object[]? args)
         {
@@ -622,9 +622,9 @@ Consider the following options:
             return FindOperation(type, operationSymbol).OperationType;
         }
 
-        public static Dictionary<OperationSymbol, string>? GetContextualCanExecute(IEnumerable<Lite<IEntity>> lites, List<OperationSymbol> operationSymbols)
+        public static Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IEntity>> lites, List<OperationSymbol> operationSymbols)
         {
-            Dictionary<OperationSymbol, string>? result = null;
+            Dictionary<OperationSymbol, string> result = new Dictionary<OperationSymbol, string>();
             using (ExecutionMode.Global())
             {
                 foreach (var grLites in lites.GroupBy(a => a.EntityType))
@@ -634,8 +634,8 @@ Consider the following options:
                     foreach (var grOperations in operations.GroupBy(a => a.GetType().GetGenericArguments().Let(arr => Tuple.Create(arr[0], arr[1]))))
                     {
                         var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grOperations.Key.Item1, grOperations.Key.Item2)(grLites, grOperations);
-                        if (result == null)
-                            result = dic;
+                        if (result.IsEmpty())
+                            result.AddRange(dic);
                         else
                         {
                             foreach (var kvp in dic)

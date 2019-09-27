@@ -306,7 +306,7 @@ namespace Signum.Engine
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand CreateIndex(Index index, Replacements? checkUnique)
+        public static SqlPreCommand CreateIndex(TableIndex index, Replacements? checkUnique)
         {
             if (index is PrimaryClusteredIndex)
             {
@@ -315,7 +315,7 @@ namespace Signum.Engine
                 return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName} PRIMARY KEY CLUSTERED({columns})");
             }
 
-            if (index is UniqueIndex uIndex)
+            if (index is UniqueTableIndex uIndex)
             {
                 if (uIndex.ViewName != null)
                 {
@@ -346,7 +346,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int DuplicateCount(UniqueIndex uniqueIndex, Replacements rep)
+        public static int DuplicateCount(UniqueTableIndex uniqueIndex, Replacements rep)
         {
             var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
 
@@ -367,12 +367,12 @@ WHERE {oldPrimaryKey} NOT IN
 (
     SELECT MIN({oldPrimaryKey})
     FROM {oldTableName}
-    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
+    {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
+){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
         }
 
-        public static SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
+        public static SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)
         {
             try
             {
@@ -408,7 +408,7 @@ WHERE {oldPrimaryKey} NOT IN
             }
         }
 
-        private static SqlPreCommand RemoveDuplicates(UniqueIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
+        private static SqlPreCommand RemoveDuplicates(UniqueTableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
         {
             return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
@@ -420,9 +420,9 @@ WHERE {primaryKey.Name} NOT IN
 ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)}".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
         }
 
-        public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)
+        public static SqlPreCommand CreateIndexBasic(Maps.TableIndex index, bool forHistoryTable)
         {
-            var indexType = index is UniqueIndex ? "UNIQUE INDEX" : "INDEX";
+            var indexType = index is UniqueTableIndex ? "UNIQUE INDEX" : "INDEX";
             var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
             var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null;
             var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";

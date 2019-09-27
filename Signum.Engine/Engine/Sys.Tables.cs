@@ -196,7 +196,7 @@ namespace Signum.Engine.SchemaInfoTables
         public GeneratedAlwaysType generated_always_type;
 
         [AutoExpressionField]
-        public SysTypes Type() => 
+        public SysTypes? Type() => 
             As.Expression(() => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == this.system_type_id));
     }
 

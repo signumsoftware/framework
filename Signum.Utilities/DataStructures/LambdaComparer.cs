@@ -47,14 +47,14 @@ namespace Signum.Utilities.DataStructures
             return equalityComparer.GetHashCode(func((T)obj));
         }
 
-        public int Compare(object x, object y)
+        public int Compare(object? x, object? y)
         {
-            return comparer.Compare(func((T)x), func((T)y));
+            return comparer.Compare(func((T)x!), func((T)y!));
         }
 
-        bool IEqualityComparer.Equals(object x, object y)
+        bool IEqualityComparer.Equals(object? x, object? y)
         {
-            return equalityComparer.Equals(func((T)x), func((T)y));
+            return equalityComparer.Equals(func((T)x!), func((T)y!));
         }
     }
 
@@ -91,9 +91,9 @@ namespace Signum.Utilities.DataStructures
                 return comparer1.Compare(x, y).DefaultToNull() ?? comparer2.Compare(x, y);
             }
 
-            public int Compare(object x, object y)
+            public int Compare(object? x, object? y)
             {
-                return this.Compare((T)x, (T)y);
+                return this.Compare((T)x!, (T)y!);
             }
         }
 
@@ -118,7 +118,7 @@ namespace Signum.Utilities.DataStructures
                 return comparer1.Equals(x, y) && comparer2.Equals(x,y);
             }
 
-            public new bool Equals(object x, object y) => this.Equals((T)x, (T)y);
+            public new bool Equals(object? x, object? y) => this.Equals((T)x!, (T)y!);
 
             public int GetHashCode(T obj)
             {

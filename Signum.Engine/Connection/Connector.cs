@@ -33,12 +33,7 @@ namespace Signum.Engine
             get { return currentConnector.Value ?? Default; }
         }
 
-        static Connector @default;
-        public static Connector Default
-        {
-            get { return @default; }
-            set { @default = value; }
-        }
+        public static Connector Default { get; set; } = null!;
 
         static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout");
         public static int? ScopeTimeout { get { return scopeTimeout.Value; } }

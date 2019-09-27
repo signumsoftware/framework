@@ -42,7 +42,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal static ConstructorInfo intervalConstructor = typeof(Interval<DateTime>).GetConstructor(new[] { typeof(DateTime), typeof(DateTime) });
+        internal static ConstructorInfo intervalConstructor = typeof(Interval<DateTime>).GetConstructor(new[] { typeof(DateTime), typeof(DateTime) })!;
 
         internal NewExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {

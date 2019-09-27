@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.React.Facades;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
@@ -221,7 +222,7 @@ namespace Signum.React.Json
             return pr;
         }
 
-        public static Func<PropertyRoute, string> CanReadPropertyRoute;
+        public static Func<PropertyRoute, string>? CanReadPropertyRoute;
 
         public void WriteJsonProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
         {
@@ -389,7 +390,7 @@ namespace Signum.React.Json
         private bool IsEquals(object newValue, object? oldValue)
         {
             if (newValue is byte[] && oldValue is byte[])
-                return MemCompare.Compare((byte[])newValue, (byte[])oldValue);
+                return MemComparer.Equals((byte[])newValue, (byte[])oldValue);
 
             if (newValue is DateTime && oldValue is DateTime)
                 return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
@@ -401,7 +402,7 @@ namespace Signum.React.Json
         }
 
 
-        public static Func<PropertyRoute, string> CanWritePropertyRoute;
+        public static Func<PropertyRoute, string>? CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
         {
             string? error = CanWritePropertyRoute?.Invoke(pr);
@@ -425,7 +426,7 @@ namespace Signum.React.Json
 
             if (identityInfo.IsNew == true)
             {
-                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 if (identityInfo.Id != null)
                     ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
@@ -462,7 +463,7 @@ namespace Signum.React.Json
                 var existingMod = (ModifiableEntity)existingValue;
 
                 if (existingMod == null || existingMod.GetType() != type)
-                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 return existingMod;
             }
@@ -531,18 +532,5 @@ namespace Signum.React.Json
     }
 
 
-    static class MemCompare
-    {
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-#pragma warning disable IDE1006 // Naming Styles
-        static extern int memcmp(byte[] b1, byte[] b2, long count);
-#pragma warning restore IDE1006 // Naming Styles
-
-        public static bool Compare(byte[] b1, byte[] b2)
-        {
-            // Validate buffers are the same length.
-            // This also ensures that the count does not exceed the length of either buffer.
-            return b1.Length == b2.Length && memcmp(b1, b2, b1.Length) == 0;
-        }
-    }
+   
 }

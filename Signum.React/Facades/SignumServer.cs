@@ -19,9 +19,9 @@ namespace Signum.React.Facades
 {
     public static class SignumServer
     {
-        public static JsonSerializerSettings JsonSerializerSettings;
+        public static JsonSerializerSettings JsonSerializerSettings = null!;
 
-        public static MvcJsonOptions AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
+        public static MvcNewtonsoftJsonOptions AddSignumJsonConverters(this MvcNewtonsoftJsonOptions jsonOptions)
         {
             //Signum converters
             jsonOptions.SerializerSettings.Do(s =>
@@ -56,14 +56,14 @@ namespace Signum.React.Facades
             return options;
         }
 
-        public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
+        public static void Start(IApplicationBuilder app, IWebHostEnvironment hostingEnvironment, Assembly mainAsembly)
         {
             Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
 
             //app.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
 
             SignumControllerFactory.RegisterArea(typeof(EntitiesController));
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
 
 
             //// Web API configuration and services
@@ -88,17 +88,18 @@ namespace Signum.React.Facades
                 canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
             );
 
-            foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
-            {
-                try
+            if (EntityPackTS.AddExtension != null)
+                foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
                 {
-                    action(result);
-                }
-                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
-                {
+                    try
+                    {
+                        action(result);
+                    }
+                    catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                    {
 
+                    }
                 }
-            }
 
             return result;
         }
@@ -112,7 +113,7 @@ namespace Signum.React.Facades
         [JsonExtensionData]
         public Dictionary<string, object?> extension { get; set; } = new Dictionary<string, object?>();
 
-        public static Action<EntityPackTS> AddExtension;
+        public static Action<EntityPackTS>? AddExtension;
 
         public EntityPackTS(Entity entity, Dictionary<string, string> canExecute)
         {

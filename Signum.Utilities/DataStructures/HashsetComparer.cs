@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
@@ -19,14 +19,14 @@ namespace Signum.Utilities.DataStructures
             return obj.Aggregate(0, (acum, o) => acum ^ comparer.GetHashCode(o));
         }
 
-        bool IEqualityComparer.Equals(object x, object y)
+        bool IEqualityComparer.Equals(object? x, object? y)
         {
-            return Equals((HashSet<T>)x, (HashSet<T>)y);
+            return Equals((HashSet<T>)x!, (HashSet<T>)y!);
         }
 
-        int IEqualityComparer.GetHashCode(object obj)
+        int IEqualityComparer.GetHashCode(object? obj)
         {
-            return GetHashCode((HashSet<T>)obj);
+            return GetHashCode((HashSet<T>)obj!);
         }
     }
 }

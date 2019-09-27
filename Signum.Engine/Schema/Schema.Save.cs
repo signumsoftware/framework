@@ -327,7 +327,7 @@ namespace Signum.Engine.Maps
             get
             {
 
-                if (Fields.TryGetValue("toStr", out EntityField entity))
+                if (Fields.TryGetValue("toStr", out var entity))
                     return (IColumn)entity.Field;
 
                 return null;

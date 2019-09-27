@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
+        public UniqueTableIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
         {
             var table = Schema.Table<T>();
 
@@ -89,7 +89,7 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        public Index AddIndex<T>(Expression<Func<T, object?>> fields, 
+        public TableIndex AddIndex<T>(Expression<Func<T, object?>> fields, 
             Expression<Func<T, bool>>? where = null, 
             Expression<Func<T, object>>? includeFields = null) where T : Entity
         {
@@ -97,7 +97,7 @@ namespace Signum.Engine.Maps
 
             IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
-            var index = new Index(table, columns);
+            var index = new TableIndex(table, columns);
 
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
@@ -116,7 +116,7 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+        public UniqueTableIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
             Expression<Func<MListElement<T, V>, object>> fields,
             Expression<Func<MListElement<T, V>, bool>>? where = null,
             Expression<Func<MListElement<T, V>, object>>? includeFields = null)
@@ -146,7 +146,7 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        public Index AddIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+        public TableIndex AddIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
             Expression<Func<MListElement<T, V>, object>> fields,
             Expression<Func<MListElement<T, V>, bool>>? where = null,
             Expression<Func<MListElement<T, V>, object>>? includeFields = null)
@@ -174,40 +174,40 @@ namespace Signum.Engine.Maps
         }
 
 
-        public UniqueIndex AddUniqueIndex(ITable table, Field[] fields)
+        public UniqueTableIndex AddUniqueIndex(ITable table, Field[] fields)
         {
-            var index = new UniqueIndex(table, Index.GetColumnsFromFields(fields));
+            var index = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(fields));
             AddIndex(index);
             return index;
         }
 
-        public UniqueIndex AddUniqueIndex(ITable table, IColumn[] columns)
+        public UniqueTableIndex AddUniqueIndex(ITable table, IColumn[] columns)
         {
-            var index = new UniqueIndex(table, columns);
+            var index = new UniqueTableIndex(table, columns);
             AddIndex(index);
             return index;
         }
 
-        public Index AddIndex(ITable table, Field[] fields)
+        public TableIndex AddIndex(ITable table, Field[] fields)
         {
-            var index = new Index(table, Index.GetColumnsFromFields(fields));
+            var index = new TableIndex(table, TableIndex.GetColumnsFromFields(fields));
             AddIndex(index);
             return index;
         }
 
-        public Index AddIndex(ITable table, IColumn[] columns)
+        public TableIndex AddIndex(ITable table, IColumn[] columns)
         {
-            var index = new Index(table, columns);
+            var index = new TableIndex(table, columns);
             AddIndex(index);
             return index;
         }
 
-        public void AddIndex(Index index)
+        public void AddIndex(TableIndex index)
         {
             ITable table = index.Table;
 
             if (table.MultiColumnIndexes == null)
-                table.MultiColumnIndexes = new List<Index>();
+                table.MultiColumnIndexes = new List<TableIndex>();
 
             table.MultiColumnIndexes.Add(index);
         }
@@ -227,7 +227,7 @@ namespace Signum.Engine.Maps
 
         internal protected virtual Table Include(Type type, PropertyRoute? route)
         {
-            if (schema.Tables.TryGetValue(type, out Table result))
+            if (schema.Tables.TryGetValue(type, out var result))
                 return result;
 
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
@@ -321,9 +321,9 @@ namespace Signum.Engine.Maps
 
 
         public HashSet<(Type type, string method)> LoadedModules = new HashSet<(Type type, string method)>();
-        public bool NotDefined(MethodBase methodBase)
+        public bool NotDefined(MethodBase? methodBase)
         {
-            this.Tracer.Switch(methodBase.DeclaringType.Name);
+            this.Tracer.Switch(methodBase!.DeclaringType!.Name);
 
             var methods = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
              .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
@@ -345,7 +345,7 @@ namespace Signum.Engine.Maps
 
         public void AssertDefined(MethodBase methodBase)
         {
-            var tulpe = (methodBase.DeclaringType, methodBase.Name);
+            var tulpe = (methodBase.DeclaringType!, methodBase.Name);
 
             if (!LoadedModules.Contains(tulpe))
                 throw new ApplicationException("Call {0} first".FormatWith(tulpe));
@@ -371,7 +371,7 @@ namespace Signum.Engine.Maps
                         result.Add(fiId.Name, new EntityField(type, fiId, field));
                     }
 
-                    TicksColumnAttribute t = type.GetCustomAttribute<TicksColumnAttribute>();
+                    TicksColumnAttribute? t = type.GetCustomAttribute<TicksColumnAttribute>();
                     if (t == null || t.HasTicks)
                     {
                         PropertyRoute route = root.Add(fiTicks);
@@ -773,7 +773,7 @@ namespace Signum.Engine.Maps
         {
             type = CleanType(type);
 
-            CleanTypeNameAttribute ctn = type.GetCustomAttribute<CleanTypeNameAttribute>();
+            var ctn = type.GetCustomAttribute<CleanTypeNameAttribute>();
             if (ctn != null)
                 return ctn.Name;
 
@@ -902,11 +902,11 @@ namespace Signum.Engine.Maps
             {
                 if (Transaction.InTestTransaction)
                 {
-                    invalidate(this, null);
-                    Transaction.Rolledback += dic => invalidate(this, null);
+                    invalidate(this, EventArgs.Empty);
+                    Transaction.Rolledback += dic => invalidate(this, EventArgs.Empty);
                 }
 
-                Transaction.PostRealCommit += dic => invalidate(this, null);
+                Transaction.PostRealCommit += dic => invalidate(this, EventArgs.Empty);
             };
 
             Schema schema = sb.Schema;

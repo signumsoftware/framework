@@ -102,7 +102,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public event Func<ExecuteType, object, BaseQueryRequest?, IDisposable?> QueryExecuted;
+        public event Func<ExecuteType, object, BaseQueryRequest?, IDisposable?>? QueryExecuted;
 
         public enum ExecuteType
         {
@@ -166,7 +166,7 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.GetDQueryable, request.QueryName, null, dqb => dqb.Core.Value.GetDQueryable(request));
         }
 
-        public event Func<object, bool, bool> AllowQuery;
+        public event Func<object, bool, bool>? AllowQuery;
 
         public bool QueryAllowed(object queryName, bool fullScreen)
         {

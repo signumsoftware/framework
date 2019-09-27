@@ -72,8 +72,8 @@ export function MultiValueLine(props: MultiValueLineProps) {
         <tbody>
           {
             mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-              (<ErrorBoundary>
-                <MultiValueLineElement key={i}
+              (<ErrorBoundary key={i}>
+                <MultiValueLineElement 
                   ctx={mlec}
                   onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
                   onRenderItem={p.onRenderItem} />
@@ -105,21 +105,24 @@ export interface MultiValueLineElementProps {
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
   const ctx = props.ctx;
 
-  return (
-    <tr>
-      <td>
-        {!ctx.readOnly &&
-          <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
-            className="sf-line-button sf-remove"
-            onClick={props.onRemove}>
-            <FontAwesomeIcon icon="times" />
-          </a>}
-      </td>
-      <td>
-        {props.onRenderItem ? props.onRenderItem(ctx) : getAppropiateComponent(ctx)}
-      </td>
-    </tr>
-  );
+    var renderItem = this.props.onRenderItem || DynamicComponent.getAppropiateComponentFactory(ctx.propertyRoute)
+
+    return (
+      <tr>
+        <td>
+          {!ctx.readOnly &&
+            <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+              className="sf-line-button sf-remove"
+              onClick={props.onRemove}>
+              <FontAwesomeIcon icon="times" />
+            </a>}
+        </td>
+        <td>
+          {renderItem(ctx)}
+        </td>
+      </tr>
+    );
+  }
 }
 
 

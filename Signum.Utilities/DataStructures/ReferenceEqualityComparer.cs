@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Collections;
@@ -6,9 +6,10 @@ using System.Collections;
 namespace Signum.Utilities.DataStructures
 {
     [Serializable]
-    public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer where T : class
+    public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer 
+        where T : class
     {
-        static ReferenceEqualityComparer<T> _default;
+        static ReferenceEqualityComparer<T>? _default;
 
         ReferenceEqualityComparer() { }
 
@@ -27,14 +28,14 @@ namespace Signum.Utilities.DataStructures
             return object.ReferenceEquals(x, y);
         }
 
-        bool IEqualityComparer.Equals(object x, object y)
+        bool IEqualityComparer.Equals(object? x, object? y)
         {
             return object.ReferenceEquals(x, y);
         }
 
-        int IEqualityComparer.GetHashCode(object obj)
+        int IEqualityComparer.GetHashCode(object? obj)
         {
-            return RuntimeHelpers.GetHashCode(obj);
+            return RuntimeHelpers.GetHashCode(obj!);
         }
     }
 }

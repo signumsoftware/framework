@@ -67,7 +67,7 @@ namespace Signum.Engine.Linq
 
                     ConstantExpression key = Expression.Constant(0);
                     Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
-                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
+                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type })!;
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
 
                     var childProj = new ProjectionExpression(proj.Select,
@@ -132,7 +132,7 @@ namespace Signum.Engine.Linq
 
                     Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM).Nullify()));
                     Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
-                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
+                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type })!;
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
 
                     var childProj = new ProjectionExpression(selectMany,

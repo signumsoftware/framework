@@ -51,7 +51,10 @@ namespace Signum.MSBuildTask
                     return 0;
                 }
 
-                var errors = new ExpressionFieldGenerator(assembly, resolver, log).FixAutoExpressionField();
+                log.WriteLine("Signum.MSBuildTask doing nothing");
+
+                bool errors = false;
+                errors |= new ExpressionFieldGenerator(assembly, resolver, log).FixAutoExpressionField();
                 errors |= new FieldAutoInitializer(assembly, resolver, log).FixAutoInitializer();
                 errors |= new AutoPropertyConverter(assembly, resolver).FixProperties();
 

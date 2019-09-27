@@ -69,7 +69,7 @@ namespace Signum.Entities
     {
         public static Entity FromEnumUntyped(Enum value)
         {
-            Entity ident = (Entity)Activator.CreateInstance(Generate(value.GetType()));
+            Entity ident = (Entity)Activator.CreateInstance(Generate(value.GetType()))!;
             ident.Id = new PrimaryKey(EnumExtensions.GetUnderlyingValue(value));
 
             return ident;
@@ -79,7 +79,7 @@ namespace Signum.Entities
         {
             Type enumType = Extract(ident.GetType())!;
 
-            return (Enum)Enum.ToObject(enumType, ident.id);
+            return (Enum)Enum.ToObject(enumType, ident.id!.Value.Object);
         }
 
         public static bool IsEnumEntity(this Type type)
@@ -118,15 +118,15 @@ namespace Signum.Entities
 
     class FromEnumMethodExpander : IMethodExpander
     {
-        internal static MethodInfo miQuery;
+        internal static MethodInfo miQuery = null!; /*Initialized in Logic*/
         static readonly MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.SingleOrDefault<int>(null, i => true)).GetGenericMethodDefinition();
 
         public Expression Expand(Expression instance, Expression[] arguments, System.Reflection.MethodInfo mi)
         {
-            var type = mi.DeclaringType;
-            var query = Expression.Call(null, miQuery.MakeGenericMethod(mi.DeclaringType));
+            var type = mi.DeclaringType!;
+            var query = Expression.Call(null, miQuery.MakeGenericMethod(mi.DeclaringType!));
 
-            var underlyingType = Enum.GetUnderlyingType(mi.DeclaringType.GetGenericArguments().Single());
+            var underlyingType = Enum.GetUnderlyingType(mi.DeclaringType!.GetGenericArguments().Single());
 
             var param = Expression.Parameter(mi.DeclaringType);
             var filter = Expression.Lambda(Expression.Equal(

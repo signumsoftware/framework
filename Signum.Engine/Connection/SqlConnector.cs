@@ -401,7 +401,7 @@ namespace Signum.Engine
             {
                 bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
 
-                foreach (DataColumn c in dt.Columns)
+                foreach (var c in dt.Columns.Cast<DataColumn>())
                     bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
 
                 bulkCopy.DestinationTableName = destinationTable.ToString();

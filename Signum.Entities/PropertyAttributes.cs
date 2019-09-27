@@ -1,3 +1,4 @@
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -31,7 +32,7 @@ namespace Signum.Entities
 
         public static string? GetTranslation(string? unitName)
         {
-            if (string.IsNullOrEmpty(unitName))
+            if (!unitName.HasText())
                 return null;
 
             if (UnitTranslations.TryGetValue(unitName, out var func))

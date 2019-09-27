@@ -82,6 +82,12 @@ declare global {
     extract(this: Array<T>, filter: (element: T) => boolean): T[];
     findIndex(this: Array<T>, filter: (element: T, index: number, obj: Array<T>) => boolean): number;
     findLastIndex(this: Array<T>, filter: (element: T) => boolean): number;
+    toTree(this: Array<T>, getKey: (element: T) => string, getParentKey: (element: T) => string | null | undefined): TreeNode<T>[];
+  }
+
+  interface TreeNode<T> {
+    value: T;
+    children: TreeNode<T>[];
   }
 
   interface ArrayConstructor {
@@ -579,6 +585,33 @@ if (!Array.prototype.findLastIndex) {
 
     return -1;
   };
+}
+
+if (!Array.prototype.toTree) {
+  Array.prototype.toTree = function toTree(this: any[], getKey: (element: any) => string, getParentKey: (element: any) => string | null | undefined) {
+
+    var top: TreeNode<any> = { value: null, children: [] };
+
+    var dic: { [key: string]: TreeNode<any> } = {};
+
+    function createNode(item: any) {
+
+      var key = getKey(item);
+      if (dic[key])
+        return dic[key];
+
+      var itemNode: TreeNode<any> = { value: item, children: [] };
+
+      var parentKey = getParentKey(item);
+      var parent = parentKey ? dic[parentKey] : top;
+      parent.children.push(itemNode);
+      return dic[key] = itemNode;
+    }
+
+    this.forEach(n => createNode(n));
+
+    return top.children;
+  }
 }
 
 Array.range = function (min: number, maxNotIncluded: number) {

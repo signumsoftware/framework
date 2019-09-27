@@ -16,7 +16,7 @@ namespace Signum.Engine
     {
         public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains(@"\");
 
-        public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables;
+        public static Action<Dictionary<string, DiffTable>>? SimplifyDiffTables;
 
         public static SqlPreCommand? SynchronizeTablesScript(Replacements replacements)
         {
@@ -40,7 +40,7 @@ namespace Signum.Engine
 
             databaseTablesHistory = replacements.ApplyReplacementsToOld(databaseTablesHistory, Replacements.KeyTables);
 
-            Dictionary<ITable, Dictionary<string, Index>> modelIndices = modelTables.Values
+            Dictionary<ITable, Dictionary<string, TableIndex>> modelIndices = modelTables.Values
                 .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
 
             //To --> From
@@ -136,7 +136,7 @@ namespace Signum.Engine
                     removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !ix.IsPrimary).Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                     mergeBoth: (tn, tab, dif) =>
                     {
-                        Dictionary<string, Index> modelIxs = modelIndices[tab];
+                        Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
                         
                         var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
 
@@ -157,12 +157,12 @@ namespace Signum.Engine
                     removeOld: (tn, dif) => dif.Indices.Values.Where(ix => ix.Type != DiffIndexType.Clustered).Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                     mergeBoth: (tn, tab, dif) =>
                     {
-                        Dictionary<string, Index> modelIxs = modelIndices[tab];
+                        Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
                         var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
 
                         var changes = Synchronizer.SynchronizeScript(Spacing.Simple, 
-                            modelIxs.Where(kvp => kvp.Value.GetType() == typeof(Index)).ToDictionary(), 
+                            modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(), 
                             dif.Indices.Where(kvp => kvp.Value.Type != DiffIndexType.Clustered).ToDictionary(),
                             createNew: null,
                             removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? SqlBuilder.DropIndex(dif.Name, dix) : null,
@@ -390,12 +390,12 @@ namespace Signum.Engine
 
                         Func<IColumn, bool> isNew = c => !dif.Columns.ContainsKey(columnReplacements?.TryGetC(c.Name) ?? c.Name);
 
-                        Dictionary<string, Index> modelIxs = modelIndices[tab];
+                        Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                             modelIxs.Where(kvp => !(kvp.Value is PrimaryClusteredIndex)).ToDictionary(),
                             dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
+                            createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
@@ -405,7 +405,7 @@ namespace Signum.Engine
 
                 SqlPreCommand? addIndicesHistory =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
-                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => a.GetType() == typeof(Index)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple),
+                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => a.GetType() == typeof(TableIndex)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple),
                     removeOld: null,
                     mergeBoth: (tn, tab, dif) =>
                     {
@@ -413,12 +413,12 @@ namespace Signum.Engine
 
                         Func<IColumn, bool> isNew = c => !dif.Columns.ContainsKey(columnReplacements?.TryGetC(c.Name) ?? c.Name);
 
-                        Dictionary<string, Index> modelIxs = modelIndices[tab];
+                        Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
-                            modelIxs.Where(kvp => kvp.Value.GetType() == typeof(Index)).ToDictionary(),
+                            modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
                             dif.Indices.Where(kvp => kvp.Value.Type != DiffIndexType.Clustered).ToDictionary(),
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
+                            createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.IndexName) : null);
@@ -651,7 +651,7 @@ WHERE {where}"))!;
         }
 
 
-        private static Dictionary<string, DiffIndex> ApplyIndexAutoReplacements(DiffTable diff, ITable tab, Dictionary<string, Index> dictionary)
+        private static Dictionary<string, DiffIndex> ApplyIndexAutoReplacements(DiffTable diff, ITable tab, Dictionary<string, Maps.TableIndex> dictionary)
         {
             List<string> oldOnly = diff.Indices.Keys.Where(n => !dictionary.ContainsKey(n)).ToList();
             List<string> newOnly = dictionary.Keys.Where(n => !diff.Indices.ContainsKey(n)).ToList();
@@ -673,10 +673,10 @@ WHERE {where}"))!;
                     if (oldIx.IsPrimary || newIx is PrimaryClusteredIndex)
                         return false;
 
-                    if (oldIx.IsUnique != (newIx is UniqueIndex))
+                    if (oldIx.IsUnique != (newIx is UniqueTableIndex))
                         return false;
 
-                    if (oldIx.ViewName != null || (newIx is UniqueIndex) && ((UniqueIndex)newIx).ViewName != null)
+                    if (oldIx.ViewName != null || (newIx is UniqueTableIndex) && ((UniqueTableIndex)newIx).ViewName != null)
                         return false;
 
                     var news = newIx.Columns.Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
@@ -990,7 +990,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
         private static Entity Clone(Entity current)
         {
-            var instance = (Entity)Activator.CreateInstance(current.GetType());
+            var instance = (Entity)Activator.CreateInstance(current.GetType())!;
             instance.toStr = current.toStr;
             instance.id = (int)current.id!.Value + 1000000;
             return instance;
@@ -1053,7 +1053,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
     {
         public ObjectName Name;
 
-        public ObjectName PrimaryKeyName;
+        public ObjectName? PrimaryKeyName;
 
         public Dictionary<string, DiffColumn> Columns;
 
@@ -1123,9 +1123,9 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
         }
 
-        internal bool IndexEquals(DiffTable dif, Index mix)
+        internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix)
         {
-            if (this.ViewName != (mix as UniqueIndex)?.ViewName)
+            if (this.ViewName != (mix as UniqueTableIndex)?.ViewName)
                 return false;
 
             if (this.ColumnsChanged(dif, mix))
@@ -1140,9 +1140,9 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             return true;
         }
 
-        private static DiffIndexType? GetIndexType(Index mix)
+        private static DiffIndexType? GetIndexType(TableIndex mix)
         {
-            if (mix is UniqueIndex && ((UniqueIndex)mix).ViewName != null)
+            if (mix is UniqueTableIndex && ((UniqueTableIndex)mix).ViewName != null)
                 return null;
 
             if (mix is PrimaryClusteredIndex)
@@ -1151,7 +1151,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             return DiffIndexType.NonClustered;
         }
 
-        bool ColumnsChanged(DiffTable dif, Index mix)
+        bool ColumnsChanged(DiffTable dif, TableIndex mix)
         {
             bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => !a.IsIncluded).ToList());
             bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.IsIncluded).ToList());
