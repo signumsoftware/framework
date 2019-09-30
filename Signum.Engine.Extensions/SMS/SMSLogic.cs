@@ -142,7 +142,7 @@ namespace Signum.Engine.SMS
                       .ToHashSet();
         }
 
-        static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate)
+        public static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate)
         {
             using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {
@@ -280,59 +280,81 @@ namespace Signum.Engine.SMS
             return messages;
         }
         
-        public static SMSMessageEntity CreateSMSMessage(Lite<SMSTemplateEntity> template, Entity entity, ISMSModel? model, CultureInfo? forceCulture)
+        public static SMSMessageEntity CreateSMSMessage(Lite<SMSTemplateEntity> template, Entity? entity, ISMSModel? model, CultureInfo? forceCulture)
         {
             var t = SMSLogic.SMSTemplatesLazy.Value.GetOrThrow(template);
 
             var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
 
-            var qd = QueryLogic.Queries.QueryDescription(t.Query.ToQueryName());
-
-            List<QueryToken> tokens = new List<QueryToken>();
-            t.ParseData(qd);
-
-            tokens.Add(t.To.Token);
-            var parsedNodes = t.Messages.ToDictionary(
-                tm => tm.CultureInfo.ToCultureInfo(),
-                tm => TextTemplateParser.Parse(tm.Message, qd, t.Model?.ToType())
-            );
-
-            parsedNodes.Values.ToList().ForEach(n => n.FillQueryTokens(tokens));
-
-            var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
-
-            var filters = model != null ? model.GetFilters(qd) :
-                new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
-
-
-            var table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+            if (entity != null)
             {
-                QueryName = qd.QueryName,
-                Columns = columns,
-                Pagination = model?.GetPagination() ?? new Pagination.All(),
-                Filters = filters,
-                Orders = model?.GetOrders(qd) ?? new List<Order>(),
-            });
+                var qd = QueryLogic.Queries.QueryDescription(t.Query.ToQueryName());
 
-            var columnTokens = table.Columns.ToDictionary(a => a.Column.Token);
+                List<QueryToken> tokens = new List<QueryToken>();
+                t.ParseData(qd);
 
-            var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To.Token)]!;
+                tokens.Add(t.To.Token);
+                var parsedNodes = t.Messages.ToDictionary(
+                    tm => tm.CultureInfo.ToCultureInfo(),
+                    tm => TextTemplateParser.Parse(tm.Message, qd, t.Model?.ToType())
+                );
 
-            var ci = forceCulture ?? ownerData.CultureInfo?.ToCultureInfo() ?? defaultCulture;
+                parsedNodes.Values.ToList().ForEach(n => n.FillQueryTokens(tokens));
 
-            var node = parsedNodes.TryGetC(ci) ?? parsedNodes.GetOrThrow(defaultCulture);
+                var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
-            return new SMSMessageEntity
+                var filters = model != null ? model.GetFilters(qd) :
+                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
+
+
+                var table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+                {
+                    QueryName = qd.QueryName,
+                    Columns = columns,
+                    Pagination = model?.GetPagination() ?? new Pagination.All(),
+                    Filters = filters,
+                    Orders = model?.GetOrders(qd) ?? new List<Order>(),
+                });
+
+                var columnTokens = table.Columns.ToDictionary(a => a.Column.Token);
+
+                var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To.Token)]!;
+
+                var ci = forceCulture ?? ownerData.CultureInfo?.ToCultureInfo() ?? defaultCulture;
+
+                var node = parsedNodes.TryGetC(ci) ?? parsedNodes.GetOrThrow(defaultCulture);
+                return new SMSMessageEntity
+                {
+                    Template = t.ToLite(),
+                    Message = node.Print(new TextTemplateParameters(entity, ci, columnTokens, table.Rows) { Model = model }),
+                    From = t.From,
+                    EditableMessage = t.EditableMessage,
+                    State = SMSMessageState.Created,
+                    Referred = ownerData.Owner,
+                    DestinationNumber = ownerData.TelephoneNumber,
+                    Certified = t.Certified
+                };
+            }
+            else
             {
-                Template = t.ToLite(),
-                Message = node.Print(new TextTemplateParameters(entity, ci, columnTokens, table.Rows) { Model = model }),
-                From = t.From,
-                EditableMessage = t.EditableMessage,
-                State = SMSMessageState.Created,
-                Referred = ownerData.Owner,
-                DestinationNumber = ownerData.TelephoneNumber,
-                Certified = t.Certified
-            };
+
+                var ci = (forceCulture ?? defaultCulture).ToCultureInfoEntity();
+
+                return new SMSMessageEntity
+                {
+                    Template = t.ToLite(),
+                    Message = t.Messages.Where(m=>  m.CultureInfo.Is(ci)).SingleEx().Message,
+                    From = t.From,
+                    EditableMessage = t.EditableMessage,
+                    State = SMSMessageState.Created,
+                    Certified = t.Certified
+                };
+
+
+            }
+
+
+         
         }
 
         private static void Schema_SchemaCompleted(SchemaBuilder sb)
@@ -365,7 +387,7 @@ namespace Signum.Engine.SMS
                 Construct = (t, args) =>
                 {
                     return SMSLogic.CreateSMSMessage(t.ToLite(),
-                        args.GetArg<Lite<Entity>>().RetrieveAndRemember(),
+                        args.TryGetArgC<Lite<Entity>>()?.RetrieveAndRemember(),
                         args.TryGetArgC<ISMSModel>(),
                         args.TryGetArgC<CultureInfo>());
                 }
