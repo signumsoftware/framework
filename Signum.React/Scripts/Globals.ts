@@ -1006,6 +1006,24 @@ export module Dic {
     }
     return result;
   }
+
+  export function deepFreeze<T extends object>(object: T): T {
+
+    // Abrufen der definierten Eigenschaftsnamen des Objekts
+    var propNames = Object.getOwnPropertyNames(object);
+
+    // Eigenschaften vor dem eigenen Einfrieren einfrieren
+    var result = {};
+
+    for (let name of propNames) {
+      let value = (object as any)[name];
+
+      (result as any)[name] = value && typeof value === "object" ?
+        deepFreeze(value) : value;
+    }
+
+    return Object.freeze(object);
+  }
 }
 
 export function coalesce<T>(value: T | undefined | null, defaultValue: T): T {

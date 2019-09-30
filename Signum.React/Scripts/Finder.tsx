@@ -1017,21 +1017,18 @@ export function clearQueryDescriptionCache() {
   queryDescriptionCache = {};
 }
 
-let queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+let queryDescriptionCache: { [queryKey: string]: Promise<QueryDescription> } = {};
 export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
   const queryKey = getQueryKey(queryName);
 
-  if (queryDescriptionCache[queryKey])
-    return Promise.resolve(queryDescriptionCache[queryKey]);
+  if (!queryDescriptionCache[queryKey]) {
+    queryDescriptionCache[queryKey] = API.fetchQueryDescription(queryKey).then(qd => {
+      return Dic.deepFreeze(qd);
+    });
+  }
 
-  return API.fetchQueryDescription(queryKey).then(qd => {
-    Object.freeze(qd.columns);
-    queryDescriptionCache[queryKey] = Object.freeze(qd);
-    return qd;
-  });
+  return queryDescriptionCache[queryKey];
 }
-
-
 
 export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null> {
 
