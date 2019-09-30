@@ -1623,7 +1623,7 @@ export namespace NodeConstructor {
       if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
         return { kind: "FileImageLine", field } as FileImageLineNode;
 
-      if (ti.name == FileEntity.typeName && ti.name == FilePathEntity.typeName)
+      if (ti.name == FileEntity.typeName || ti.name == FilePathEntity.typeName)
         return { kind: "FileLine", field } as FileLineNode;
 
       if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
