@@ -1223,7 +1223,7 @@ export interface SearchControlNode extends BaseNode {
   allowSelection?: ExpressionOrValue<boolean>;
   allowChangeColumns?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
-  onCreate?: Expression<() => void>;
+  onCreate?: Expression<() => Promise<void | boolean>>;
   navigate?: ExpressionOrValue<boolean>;
   refreshKey?: Expression<number | string | undefined>;
   maxResultsHeight?: Expression<number | string>;
