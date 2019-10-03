@@ -112,7 +112,7 @@ namespace Signum.Engine.SMS
 
                 SMSTemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return SMSTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
+                    return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KVP.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 
@@ -144,9 +144,12 @@ namespace Signum.Engine.SMS
 
         public static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate)
         {
+            if (smsTemplate.Query == null)
+                return;
+
             using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                object queryName = QueryLogic.ToQueryName(smsTemplate.Query.Key);
+                object queryName = QueryLogic.ToQueryName(smsTemplate.Query!.Key);
                 QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
                 using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
@@ -157,9 +160,12 @@ namespace Signum.Engine.SMS
 
         static void EmailTemplate_PreSaving(SMSTemplateEntity smsTemplate, PreSavingContext ctx)
         {
+            if (smsTemplate.Query == null)
+                return;
+
             using (smsTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                var queryName = QueryLogic.ToQueryName(smsTemplate.Query.Key);
+                var queryName = QueryLogic.ToQueryName(smsTemplate.Query!.Key);
                 QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
@@ -286,7 +292,7 @@ namespace Signum.Engine.SMS
 
             var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
 
-            if (entity != null)
+            if (t.Query != null)
             {
                 var qd = QueryLogic.Queries.QueryDescription(t.Query.ToQueryName());
 
@@ -304,7 +310,7 @@ namespace Signum.Engine.SMS
                 var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
                 var filters = model != null ? model.GetFilters(qd) :
-                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
+                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) };
 
 
                 var table = QueryLogic.Queries.ExecuteQuery(new QueryRequest

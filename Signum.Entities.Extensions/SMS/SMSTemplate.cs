@@ -23,7 +23,7 @@ namespace Signum.Entities.SMS
 
         public bool DisableAuthorization { get; set; }
 
-        public QueryEntity Query { get; set; }
+        public QueryEntity? Query { get; set; }
 
         public SMSModelEntity? Model { get; set; }
 
