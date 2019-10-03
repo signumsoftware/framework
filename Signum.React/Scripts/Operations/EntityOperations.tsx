@@ -186,7 +186,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
           {...props}
           key="di"
           innerRef={r => elem = r}
-          disabled={disabled}
+          className={classes(disabled ? "disabled sf-pointer-events" : undefined, props && props.className)}
           title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
           onClick={disabled ? undefined : this.handleOnClick}
           data-operation={eoc.operationInfo.key}>
