@@ -112,7 +112,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
   certified: boolean;
   editableMessage: boolean;
   disableAuthorization: boolean;
-  query: Signum.QueryEntity;
+  query: Signum.QueryEntity | null;
   model: SMSModelEntity | null;
   messages: Entities.MList<SMSTemplateMessageEmbedded>;
   from: string | null;

@@ -696,7 +696,7 @@ namespace Signum.Engine.Workflow
                     CanBeModified = true,
                     Execute = (e, args) =>
                     {
-                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
+                        WorkflowLogic.ApplyDocument(e, args!.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
                         DynamicCode.OnInvalidated?.Invoke();
                     }
                 }.Register();
