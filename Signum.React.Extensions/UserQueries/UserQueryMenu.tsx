@@ -57,7 +57,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     const sc = this.props.searchControl
     const ofo = sc.props.findOptions;
     Finder.getQueryDescription(sc.props.findOptions.queryKey)
-      .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd))
+      .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd, sc.props.defaultIncudeDefaultFilters))
       .then(nfo => {
 
         ofo.filterOptions = [
@@ -83,7 +83,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     Navigator.API.fetchAndForget(uq).then(userQuery => {
       const sc = this.props.searchControl
       const oldFindOptions = sc.props.findOptions;
-      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
+      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(newFindOptions => {
           sc.setState({ showFilters: true });
           this.setState({
@@ -114,7 +114,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
 
     const sc = this.props.searchControl;
 
-    const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription);
+    const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);
 
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
@@ -129,6 +129,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
       owner: Navigator.currentUser && toLite(Navigator.currentUser),
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
+      includeDefaultFilters: fo.includeDefaultFilters,
       columns: (fo.columnOptions || []).map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
         displayName: c.displayName
