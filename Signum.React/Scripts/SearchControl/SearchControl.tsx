@@ -29,6 +29,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
+  defaultIncludeDefaultFilters?: boolean;
   showHeader?: boolean | "PinnedFilters";
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -80,6 +81,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
   static defaultProps = {
     allowSelection: true,
     avoidFullScreenButton: false,
+    defaultIncludeDefaultFilters: false,
     maxResultsHeight: "400px"
   };
 
@@ -98,7 +100,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
       return;
 
     if (this.state.findOptions && this.state.queryDescription) {
-      var fo = Finder.toFindOptions(this.state.findOptions, this.state.queryDescription);
+      var fo = Finder.toFindOptions(this.state.findOptions, this.state.queryDescription, this.props.defaultIncludeDefaultFilters!);
       if (path == Finder.findOptionsPath(fo))
         return;
     }
@@ -131,7 +133,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
       if (Finder.validateNewEntities(fo))
         this.setState({ findOptions: undefined });
       else
-        Finder.parseFindOptions(fo, qd).then(fop => {
+        Finder.parseFindOptions(fo, qd, this.props.defaultIncludeDefaultFilters!).then(fop => {
           this.setState({ findOptions: fop, });
         }).done();
     }).done();
@@ -184,6 +186,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
           maxResultsHeight={p.maxResultsHeight}
           tag={p.tag}
 
+          defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters!}
           searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
           showHeader={p.showHeader != null ? p.showHeader : true}
           showFilters={p.showFilters != null ? p.showFilters : false}
