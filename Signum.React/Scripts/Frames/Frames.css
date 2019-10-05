@@ -93,6 +93,10 @@ button.dropdown-item:not(:disabled):not(.disabled) {
     cursor: pointer;
 }
 
+.sf-pointer-events{
+    pointer-events: initial !important;
+}
+
 a.expand-window {
     cursor: pointer;
     color: lightgray;
