@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, 
+import {
+  ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
+  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine,
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
@@ -22,7 +23,7 @@ import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
 import FileLine from "../../Files/FileLine";
-import {MultiFileLine} from "../../Files/MultiFileLine";
+import { MultiFileLine } from "../../Files/MultiFileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "@framework/Reflection";
 import { Button, BsColor, BsSize } from '@framework/Components';
@@ -687,9 +688,9 @@ NodeUtils.register<EntityDetailNode>({
       {NodeUtils.designEntityBase(dn, {})}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onEntityLoaded)} type={null} defaultValue={null} exampleExpression={"() => { /* do something here... */ }"} />
-    </div> 
-  });
-  
+    </div>
+});
+
 export interface FileLineNode extends EntityBaseNode {
   kind: "FileLine",
   download?: ExpressionOrValue<DownloadBehaviour>;
@@ -1223,7 +1224,7 @@ export interface SearchControlNode extends BaseNode {
   allowSelection?: ExpressionOrValue<boolean>;
   allowChangeColumns?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
-  onCreate?: Expression<() => void>;
+  onCreate?: Expression<() => Promise<void | boolean>>;
   navigate?: ExpressionOrValue<boolean>;
   refreshKey?: Expression<number | string | undefined>;
   maxResultsHeight?: Expression<number | string>;
