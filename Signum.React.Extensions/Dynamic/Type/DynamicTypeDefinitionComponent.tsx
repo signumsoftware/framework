@@ -607,8 +607,8 @@ public EmailOwnerData EmailOwnerData
     var oc = def.operationCreate;
 
     this.popupCodeSnippet(`fi.WithWorkflow(
-constructor: () => ${oc ? `OperationLogic.Construct(${entityName}Operation.Create)` : getConstructor(entityName, def)}
-save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
+  constructor: () => { ${oc ? `return OperationLogic.Construct(${entityName}Operation.Create);` : getConstructor(entityName, def)} },
+  save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 );`);
   }
 
