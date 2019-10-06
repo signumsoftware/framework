@@ -176,7 +176,7 @@ ${childrenString}
 
 
     if (options.showAutoComplete)
-      result.autoComplete = (node as EntityLineNode).autoComplete == undefined ? undefined :
+      result.autocomplete = (node as EntityLineNode).autoComplete == undefined ? undefined :
         bindExpr(ac => ac == false ? null : undefined, (node as EntityLineNode).autoComplete);
 
     if (options.showMove)
@@ -770,7 +770,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
   };
 
   if (options.showAutoComplete)
-    (result as any).autoComplete = evaluateAndValidate(dn, parentCtx, dn.node, n => (n as EntityLineNode).autoComplete, isBooleanOrNull) == false ? null : undefined;
+    (result as any).autocomplete = evaluateAndValidate(dn, parentCtx, dn.node, n => (n as EntityLineNode).autoComplete, isObjectOrNull);
 
   if (options.showMove)
     (result as any).move = evaluateAndValidate(dn, parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull);
@@ -821,7 +821,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onView)} type={null} defaultValue={null} exampleExpression={"e => modules.Navigator.view(e)"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewOnCreate)} type="boolean" defaultValue={null} />
       {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
-      {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} exampleExpression={"new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], requiresInitialLoad: false, showType: false)"} />}
+      {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} exampleExpression={"new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], /*requiresInitialLoad:*/ false, /*showType:*/ false)"} />}
       <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
       {options.filterRows && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityListBaseNode).filterRows)} type={null} defaultValue={null} exampleExpression={"ctxs => ctxs.filter(ctx => ctx.value.code != null)"} />}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
