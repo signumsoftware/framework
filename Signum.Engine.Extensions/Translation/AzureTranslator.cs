@@ -26,7 +26,7 @@ namespace Signum.Engine.Translation
         static readonly XNamespace ArrayNs = XNamespace.Get("http://schemas.microsoft.com/2003/10/Serialization/Arrays");
         
 
-        public async Task<List<string>> TranslateBatchAsync(List<string> list, string from, string to)
+        public async Task<List<string?>> TranslateBatchAsync(List<string> list, string from, string to)
         {
             string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey, Proxy);
             
@@ -56,14 +56,14 @@ namespace Signum.Engine.Translation
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
                 XDocument doc = XDocument.Parse(responseBody);
-                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => r.Element(Ns + "TranslatedText").Value).ToList();
+                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => (string?)r.Element(Ns + "TranslatedText").Value).ToList();
                 return result;
             }
         }
 
-        public List<string> TranslateBatch(List<string> list, string from, string to)
+        public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
-            var result = Task.Run<List<string>>(async () =>
+            var result = Task.Run<List<string?>>(async () =>
             {
                 return await this.TranslateBatchAsync(list, from, to);
             }).Result;
