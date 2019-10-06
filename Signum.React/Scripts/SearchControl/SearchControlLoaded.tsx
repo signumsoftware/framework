@@ -48,6 +48,7 @@ export interface SearchControlLoadedProps {
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   tag?: string | {};
 
+  defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
   allowSelection: boolean;
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
@@ -676,7 +677,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     ev.preventDefault();
 
-    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription);
+    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
 
     const path = Finder.findOptionsPath(findOptions);
 

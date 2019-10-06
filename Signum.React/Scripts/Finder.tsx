@@ -16,7 +16,7 @@ import {
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -203,6 +203,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 
   const query = {
     groupResults: fo.groupResults || undefined,
+    idf: fo.includeDefaultFilters,
     columnMode: (!fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode) ? undefined : fo.columnOptionsMode,
     paginationMode: fo.pagination && fo.pagination.mode,
     elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
@@ -252,6 +253,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
   const result: FindOptions = {
     queryName: queryName,
     groupResults: parseBoolean(query.groupResults),
+    includeDefaultFilters: parseBoolean(query.idf),
     filterOptions: Decoder.decodeFilters(query),
     orderOptions: Decoder.decodeOrders(query),
     columnOptions: Decoder.decodeColumns(query),
@@ -426,7 +428,7 @@ export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | unde
     .then(filters => getPropsFromFilters(type, filters));
 }
 
-export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): FindOptions {
+export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): FindOptions {
 
   const pair = smartColumns(fo.columnOptions, Dic.getValues(qd.columns));
 
@@ -459,12 +461,18 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
 
   if (findOptions.filterOptions) {
     var defaultFilters = getDefaultFilter(qd, qs);
-
-    if (defaultFilters && defaultFilters.length == findOptions.filterOptions.length) {
-      if (isEqual(defaultFilters, findOptions.filterOptions))
-        findOptions.filterOptions = [];
+    if (defaultFilters && defaultFilters.length <= findOptions.filterOptions.length) {
+      if (isEqual(defaultFilters, findOptions.filterOptions.slice(0, defaultFilters.length))) {
+        findOptions.filterOptions = findOptions.filterOptions.slice(defaultFilters.length);
+        findOptions.includeDefaultFilters = true;
+      }
     }
   }
+  if (!findOptions.includeDefaultFilters)
+    findOptions.includeDefaultFilters = false;
+
+  if (findOptions.includeDefaultFilters == defaultIncludeDefaultFilters)
+    delete findOptions.includeDefaultFilters;
 
   return findOptions;
 }
@@ -482,9 +490,9 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
-      (a as FilterConditionOption).operation == (b as FilterConditionOption).operation &&
-      JSON.stringify(a.value) == JSON.stringify(b.value) &&
-      JSON.stringify(a.pinned) == JSON.stringify(b.pinned) &&
+      ((a as FilterConditionOption).operation || "EqualTo") == ((b as FilterConditionOption).operation || "EqualsTo") &&
+      (a.value == b.value || is(a.value, b.value)) &&
+      Dic.equals(a.pinned, b.pinned, true) &&
       isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
   });
 }
@@ -565,7 +573,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
   return filterOptionsParsed.map(fop => toFilterOption(fop)).filter(fo => fo != null) as FilterOption[];
 }
 
-export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
+export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
 
   const fo: FindOptions = { ...findOptions };
 
@@ -584,11 +592,10 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
       fo.orderOptions = [defaultOrder];
   }
 
-  if (!fo.filterOptions || fo.filterOptions.length == 0) {
+  if (fo.includeDefaultFilters == null ? defaultIncludeDefaultFilters : fo.includeDefaultFilters) {
     var defaultFilters = getDefaultFilter(qd, qs);
-
     if (defaultFilters)
-      fo.filterOptions = defaultFilters;
+      fo.filterOptions = [...defaultFilters, ...fo.filterOptions || []];
   }
 
   var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
@@ -1044,7 +1051,7 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
   };
 
   return getQueryDescription(fo.queryName)
-    .then(qd => parseFindOptions(fo!, qd))
+    .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
     .then(rt => rt.rows[0].columns[0]);
 }

@@ -71,7 +71,7 @@ export function useQuery(fo: FindOptions | null): ResultTable | undefined | null
   return useAPI(undefined, [fo && Finder.findOptionsPath(fo)], signal =>
     fo == null ? Promise.resolve<ResultTable | null>(null) :
       Finder.getQueryDescription(fo.queryName)
-        .then(qd => Finder.parseFindOptions(fo!, qd))
+        .then(qd => Finder.parseFindOptions(fo!, qd, false))
         .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)));
 }
 
