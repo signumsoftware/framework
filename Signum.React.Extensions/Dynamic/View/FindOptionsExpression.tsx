@@ -13,7 +13,7 @@ export interface FindOptionsExpr {
   parentValue?: ExpressionOrValue<any>;
 
   filterOptions?: FilterOptionExpr[];
-  avoidDefaultFilters?: boolean;
+  includeDefaultFilters?: boolean;
   orderOptions?: OrderOptionExpr[];
   columnOptionsMode?: ExpressionOrValue<ColumnOptionsMode>;
   columnOptions?: ColumnOptionExpr[];
@@ -60,8 +60,9 @@ export function toFindOptions(dn: any/*NodeUtils.DesignerNode<BaseNode>*/, ctx: 
           operation: NodeUtils.evaluateAndValidate(dn, ctx, fo, f => f.operation, v => NodeUtils.isEnumOrNull(v, FilterOperation)),
           value: NodeUtils.evaluate(dn, ctx, fo, f => f.value)
         } as FilterOption)) : []),
-      ...(foe.avoidDefaultFilters ?  [] : Finder.getDefaultFilter(undefined, Finder.getSettings(foe.queryName!)) || [])
     ],
+
+    includeDefaultFilters: foe.includeDefaultFilters,
 
     orderOptions: foe.orderOptions ?
       foe.orderOptions
