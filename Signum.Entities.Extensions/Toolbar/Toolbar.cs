@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Xml.Linq;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Entities.Toolbar
 {
@@ -162,6 +163,9 @@ namespace Signum.Entities.Toolbar
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => $"{Type}: {(Label ?? (Content == null ? "Null" : Content.ToString()))}");
     }
 
     public enum ToolbarElementType
