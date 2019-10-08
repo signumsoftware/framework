@@ -117,13 +117,12 @@ export module Converter {
     });
   }
 
-  export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptionsParsed> {
+  export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined, defaultIncudeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     return toFindOptions(uq, entity)
-      .then(fo => Finder.getQueryDescription(fo.queryName).then(qd => Finder.parseFindOptions(fo, qd)))
+      .then(fo => Finder.getQueryDescription(fo.queryName).then(qd => Finder.parseFindOptions(fo, qd, uq.includeDefaultFilters == null ? defaultIncudeDefaultFilters : uq.includeDefaultFilters)))
       .then(fop2 => {
         if (!uq.appendFilters)
           fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
-
         fop.filterOptions.push(...fop2.filterOptions);
         fop.groupResults = fop2.groupResults;
         fop.orderOptions = fop2.orderOptions;

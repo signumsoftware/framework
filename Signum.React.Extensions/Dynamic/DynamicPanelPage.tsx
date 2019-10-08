@@ -490,7 +490,7 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
 
       const fo = this.props.findOptions;
       Finder.getQueryDescription(fo.queryName)
-        .then(qd => Finder.parseFindOptions(fo, qd))
+        .then(qd => Finder.parseFindOptions(fo, qd, false))
         .then(fop => {
           var request = {
             queryKey: fop.queryKey,

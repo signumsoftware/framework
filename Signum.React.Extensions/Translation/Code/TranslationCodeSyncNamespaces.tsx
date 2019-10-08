@@ -1,9 +1,10 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, NamespaceSyncStats } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import "../Translation.css"
+import { encodeDots, decodeDots } from './TranslationCodeStatus'
 
 interface TranslationCodeStatusProps extends RouteComponentProps<{ culture: string; assembly: string; }> {
 
@@ -26,7 +27,7 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
 
   async loadState() {
     var p = this.props.match.params;
-    const result = await API.namespaceStatus(p.assembly, p.culture);
+    const result = await API.namespaceStatus(decodeDots(p.assembly), p.culture);
     return this.setState({ result });
   }
 
@@ -34,7 +35,7 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
     if (this.state.result && this.state.result.length == 0) {
       return (
         <div>
-          <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.match.params.assembly)}</h2>
+          <h2>{TranslationMessage._0AlreadySynchronized.niceToString(decodeDots(this.props.match.params.assembly))}</h2>
           <Link to={`~/translation/status`}>
             {TranslationMessage.BackToTranslationStatus.niceToString()}
           </Link>
@@ -46,7 +47,7 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
 
     return (
       <div>
-        <h2>{TranslationMessage.Synchronize0In1.niceToString(p.assembly, p.culture)}</h2>
+        <h2>{TranslationMessage.Synchronize0In1.niceToString(decodeDots(p.assembly), p.culture)}</h2>
         {this.renderTable()}
       </div>
     );
@@ -72,7 +73,7 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
         <tbody>
           <tr key={"All"}>
             <th>
-              <Link to={`~/translation/sync/${p.assembly}/${p.culture}`}>
+              <Link to={`~/translation/sync/${encodeDots(decodeDots(p.assembly))}/${p.culture}`}>
                 {TranslationMessage.All.niceToString()}
               </Link>
             </th>
@@ -83,7 +84,7 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
           {this.state.result.map(stats =>
             <tr key={stats.namespace}>
               <td>
-                <Link to={`~/translation/sync/${p.assembly}/${p.culture}/${stats.namespace}`}>
+                <Link to={`~/translation/sync/${encodeDots(decodeDots(p.assembly))}/${p.culture}/${encodeDots(stats.namespace)}`}>
                   {stats.namespace}
                 </Link>
               </td>

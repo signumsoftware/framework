@@ -228,7 +228,7 @@ namespace Signum.Engine.Alerts
                 ToStates = { AlertState.Saved },
                 Execute = (a, args) =>
                 {
-                    a.AlertDate = args.GetArg<DateTime>();
+                    a.AlertDate = args!.GetArg<DateTime>();
                 }
             }.Register();
         }
