@@ -60,16 +60,16 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
     Navigator.setTitle(getQueryNiceName(props.match.params.queryName));
 
+    var fo = Finder.parseFindOptionsPath(props.match.params.queryName, QueryString.parse(props.location.search));
+
     return {
-      findOptions: {
-        ...Finder.parseFindOptionsPath(props.match.params.queryName, QueryString.parse(props.location.search))
-      },
+      findOptions: fo,
     };
   }
 
   changeUrl() {
     const scl = this.searchControl.searchControlLoaded!;
-    const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
+    const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
     const newPath = Finder.findOptionsPath(findOptions);
     const currentLocation = Navigator.history.location;
 
@@ -102,6 +102,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
           </a>
         </h3>
         <SearchControl ref={e => this.searchControl = e!}
+          defaultIncludeDefaultFilters={true}
           findOptions={fo}
           tag="SearchPage"
           throwIfNotFindable={true}
