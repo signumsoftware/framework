@@ -1078,8 +1078,8 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
   }
 
-  count(): QueryTokenString<number> {
-    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count");
+  count(option?: "Distinct" | "Null" | "NotNull"): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count" + ((option == undefined) ? "" : option));
   }
 
   min(): QueryTokenString<T> {
