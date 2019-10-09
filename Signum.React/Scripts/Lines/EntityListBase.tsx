@@ -303,7 +303,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     const rebasedDropIndex = dropBorderIndex > dragIndex ? dropBorderIndex - 1 : dropBorderIndex;
     list.insertAt(rebasedDropIndex, temp);
 
-
+    this.setValue(list);
     this.state.dropBorderIndex = undefined;
     this.state.dragIndex = undefined;
     this.forceUpdate();

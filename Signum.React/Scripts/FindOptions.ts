@@ -29,6 +29,7 @@ export interface FindOptions {
   parentToken?: string | QueryTokenString<any>;
   parentValue?: any;
 
+  includeDefaultFilters?: boolean;
   filterOptions?: FilterOption[];
   orderOptions?: OrderOption[];
   columnOptionsMode?: ColumnOptionsMode;

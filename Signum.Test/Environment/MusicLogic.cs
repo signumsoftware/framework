@@ -233,7 +233,7 @@ namespace Signum.Test.Environment
             new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
             {
                 ToStates = { AlbumState.Saved },
-                Construct = (BandEntity band, object[]? args) =>
+                Construct = (BandEntity band, object?[]? args) =>
                     new AlbumEntity
                     {
                         Author = band,
