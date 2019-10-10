@@ -755,7 +755,7 @@ namespace Signum.Engine.CodeGeneration
                                         col.Precision != 0 ? col.Precision.ToString() : "0"));
             }
 
-            var defaultScale = CurrentSchema.Settings.GetSqlScale(null, col.SqlDbType);
+            var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.SqlDbType);
             if (defaultScale != null)
             {
                 if (!(col.Scale == defaultScale))
