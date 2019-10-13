@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations/EntityOperations'
@@ -10,6 +10,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { RouteComponentProps } from "react-router";
 import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
+import { decodeDots } from './TranslationCodeStatus'
 
 interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string; assembly: string }> {
 
@@ -30,7 +31,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
     const { assembly, culture } = this.props.match.params;
 
-    const message = TranslationMessage.View0In1.niceToString(assembly,
+    const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),
       culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
         this.state.cultures ? this.state.cultures[culture].toStr :
           culture);
@@ -49,7 +50,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
   handleSearch = (filter: string) => {
     const { assembly, culture } = this.props.match.params;
 
-    return API.retrieve(assembly, culture || "", filter)
+    return API.retrieve(decodeDots(assembly), culture || "", filter)
       .then(result => this.setState({ result: result }))
       .done();
   }
@@ -76,7 +77,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
   handleSave = (e: React.FormEvent<any>) => {
     e.preventDefault();
     const params = this.props.match.params;
-    API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
+    API.save(decodeDots(params.assembly), params.culture || "", this.state.result!).then(() => notifySuccess()).done();
   }
 }
 

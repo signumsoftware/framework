@@ -65,7 +65,7 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)
             {
-                List<string> result = translator.TranslateBatch(gr.Select(a => a.Original.Description!).ToList(), gr.Key.Name, target.Culture.Name);
+                List<string?> result = translator.TranslateBatch(gr.Select(a => a.Original.Description!).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
@@ -195,7 +195,7 @@ namespace Signum.Engine.Translation
     public class TypeNameConflict
     {
         public LocalizedType Original;
-        public string Translated;
+        public string? Translated;
 
         public override string ToString()
         {
@@ -206,7 +206,7 @@ namespace Signum.Engine.Translation
     public class MemberNameConflict
     {
         public string? Original;
-        public string Translated;
+        public string? Translated;
 
         public override string ToString()
         {

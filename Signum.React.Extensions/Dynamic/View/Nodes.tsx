@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, 
+  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, 
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
@@ -624,7 +624,7 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
 
 export interface EntityLineNode extends EntityBaseNode {
   kind: "EntityLine",
-  autoComplete?: ExpressionOrValue<boolean>;
+  autoComplete?: ExpressionOrValue<AutocompleteConfig<unknown> | null>;
   itemHtmlAttributes?: HtmlAttributesExpression;
 }
 
@@ -1037,7 +1037,7 @@ NodeUtils.register<EntityListNode>({
 
 export interface EntityStripNode extends EntityListBaseNode {
   kind: "EntityStrip",
-  autoComplete?: ExpressionOrValue<boolean>;
+  autoComplete?: ExpressionOrValue<AutocompleteConfig<unknown> | null>;
   iconStart?: boolean;
   vertical?: boolean;
 }
@@ -1623,7 +1623,7 @@ export namespace NodeConstructor {
       if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
         return { kind: "FileImageLine", field } as FileImageLineNode;
 
-      if (ti.name == FileEntity.typeName && ti.name == FilePathEntity.typeName)
+      if (ti.name == FileEntity.typeName || ti.name == FilePathEntity.typeName)
         return { kind: "FileLine", field } as FileLineNode;
 
       if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
