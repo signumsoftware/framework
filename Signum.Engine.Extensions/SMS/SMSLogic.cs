@@ -299,7 +299,8 @@ namespace Signum.Engine.SMS
                 List<QueryToken> tokens = new List<QueryToken>();
                 t.ParseData(qd);
 
-                tokens.Add(t.To.Token);
+                tokens.Add(t.To!.Token);
+
                 var parsedNodes = t.Messages.ToDictionary(
                     tm => tm.CultureInfo.ToCultureInfo(),
                     tm => TextTemplateParser.Parse(tm.Message, qd, t.Model?.ToType())
@@ -324,7 +325,7 @@ namespace Signum.Engine.SMS
 
                 var columnTokens = table.Columns.ToDictionary(a => a.Column.Token);
 
-                var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To.Token)]!;
+                var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To!.Token)]!;
 
                 var ci = forceCulture ?? ownerData.CultureInfo?.ToCultureInfo() ?? defaultCulture;
 
