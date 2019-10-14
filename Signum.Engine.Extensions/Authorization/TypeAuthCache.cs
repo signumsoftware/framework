@@ -334,10 +334,8 @@ namespace Signum.Entities.Authorization
                             new XAttribute("Resource", resource),
                             new XAttribute("Allowed", allowed.Fallback.ToString()),
                             from c in allowed.Conditions
-                            let conditionName = c.TypeCondition.Key
-                            orderby conditionName
                             select new XElement("Condition",
-                                new XAttribute("Name", conditionName),
+                                new XAttribute("Name", c.TypeCondition.Key),
                                 new XAttribute("Allowed", c.Allowed.ToString()))
                          )
                      )

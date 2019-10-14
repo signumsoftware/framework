@@ -52,7 +52,7 @@ namespace Signum.Engine.Authorization
             {
                 Execute = (u, args) =>
                 {
-                    byte[] passwordHash = args!.GetArg<byte[]>();
+                    byte[] passwordHash = args.GetArg<byte[]>();
                     u.PasswordHash = passwordHash;
                 }
             }.Register();
