@@ -4,7 +4,7 @@ import { SelectorMessage } from './Signum.Entities'
 import { TypeInfo, EnumType } from './Reflection'
 import { Modal, BsSize } from './Components';
 
-interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
+interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps<any> {
   options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
   title: React.ReactNode;
   message: React.ReactNode;

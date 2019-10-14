@@ -21,7 +21,7 @@ import { AutoFocus } from '../Components/AutoFocus';
 import { instanceOf } from 'prop-types';
 
 
-interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
+interface FrameModalProps extends React.Props<FrameModal>, IModalProps<ModifiableEntity | undefined> {
   title?: string;
   entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
   propertyRoute?: PropertyRoute;
@@ -251,7 +251,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         }
       },
       pack: pack,
-      onClose: (ok?: boolean) => this.props.onExited!(ok ? pack.entity : undefined),
+      onClose: (newPack?: EntityPack<ModifiableEntity>) => { this.props.onExited!(newPack && newPack.entity); },
       revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
         GraphExplorer.setModelState(pack.entity, modelState, initialPrefix!);
