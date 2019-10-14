@@ -45,11 +45,9 @@ namespace Signum.Entities.SMS
 
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-
-            if (pi.Name == nameof(To) && To ==null && (Query !=null || Model !=null))
+            if (pi.Name == nameof(To) && To == null && (Query != null || Model != null))
             {
                 return SMSTemplateMessage.ToMustBeSetInTheTemplate.NiceToString();
-
             }
 
             if (pi.Name == nameof(Messages))
