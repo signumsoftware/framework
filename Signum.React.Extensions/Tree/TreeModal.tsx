@@ -10,7 +10,7 @@ import { FilterOption } from "@framework/FindOptions";
 import { Modal } from '@framework/Components';
 import { ModalHeaderButtons } from '@framework/Components/Modal';
 
-interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
+interface TreeModalProps extends React.Props<TreeModal>, IModalProps<TreeNode | undefined> {
   typeName: string;
   filterOptions: FilterOption[];
   title?: React.ReactNode;
@@ -45,7 +45,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
   }
 
   handleOnExited = () => {
-    this.props.onExited!(this.okPressed ? this.selectedNode : null);
+    this.props.onExited!(this.okPressed ? this.selectedNode : undefined);
   }
 
   handleDoubleClick = (selectedNode: TreeNode, e: React.MouseEvent<any>) => {

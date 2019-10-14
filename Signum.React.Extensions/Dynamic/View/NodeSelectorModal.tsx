@@ -7,7 +7,7 @@ import { BaseNode } from './Nodes'
 import { Modal } from '@framework/Components';
 import { ModalHeaderButtons } from '@framework/Components/Modal';
 
-interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {
+interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps<any | undefined> {
 }
 
 export default class NodeSelectorModal extends React.Component<NodeSelectorModalProps, { show: boolean }>  {

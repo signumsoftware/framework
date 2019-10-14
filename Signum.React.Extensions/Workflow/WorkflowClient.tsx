@@ -496,7 +496,7 @@ export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseA
 
   eoc.onExecuteSuccess = pack => {
     notifySuccess();
-    eoc.frame.onClose(true);
+    eoc.frame.onClose(pack);
   }
 
   getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
