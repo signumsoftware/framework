@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
 import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
@@ -96,7 +97,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
         <br />
         <h5>Selected Versions</h5>
         <UncontrolledTabs hideOnly>
-          {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).orderBy(a => a).flatMap((d, i, dates) => [
+          {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d)).orderBy(a => a).flatMap((d, i, dates) => [
             <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
               <RenderEntityVersion lite={lite} asOf={d} />
             </Tab>,
@@ -108,6 +109,14 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
       </div>
     );
   }
+}
+
+function asUTC(date: string): string {
+
+  if (date.contains("+"))
+    return date.tryBefore("+") + "Z"; //Hack
+
+  return date;
 }
 
 
