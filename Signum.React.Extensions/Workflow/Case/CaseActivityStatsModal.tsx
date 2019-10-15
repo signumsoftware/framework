@@ -15,7 +15,7 @@ import { OperationLogEntity } from "@framework/Signum.Entities.Basics";
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import { Modal } from '@framework/Components';
 
-interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
+interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps<undefined> {
   case: CaseEntity;
   caseActivityStats: CaseActivityStats[];
 }
