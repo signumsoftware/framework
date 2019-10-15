@@ -109,9 +109,8 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
     inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
-        eoc.frame.onReload(pack);
         notifySuccess();
-        eoc.frame.onClose(true);
+        eoc.frame.onClose(pack);
       };
       eoc.defaultClick();
     }
