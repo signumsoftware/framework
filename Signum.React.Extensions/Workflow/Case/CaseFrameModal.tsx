@@ -5,7 +5,7 @@ import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
-import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '@framework/Signum.Entities'
+import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import ValidationErrors from '@framework/Frames/ValidationErrors'
 import ButtonBar from '@framework/Frames/ButtonBar'
@@ -24,7 +24,7 @@ import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Frames/FrameModal';
 import * as AuthClient from '../../Authorization/AuthClient'
 
-interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
+interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<CaseActivityEntity | undefined> {
   title?: string;
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;
@@ -201,7 +201,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         }
         this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
-      onClose: (ok?: boolean) => this.props.onExited!(ok ? this.getCaseActivity() : undefined),
+      onClose: (pack?: EntityPack<ModifiableEntity>) => this.props.onExited!(this.getCaseActivity()),
       revalidate: () => {
         this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
         this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
@@ -252,7 +252,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         }
         this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
-      onClose: () => this.props.onExited!(null),
+      onClose: () => this.props.onExited!(undefined),
       revalidate: () => {
         this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
         this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();

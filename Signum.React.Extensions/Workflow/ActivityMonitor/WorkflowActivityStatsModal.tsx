@@ -15,7 +15,7 @@ import { Modal } from '@framework/Components';
 import { ModalHeaderButtons } from '@framework/Components/Modal';
 import { toFilterOptions, isAggregate } from '@framework/Finder';
 
-interface WorkflowActivityStatsModalProps extends React.Props<WorkflowActivityStatsModal>, IModalProps {
+interface WorkflowActivityStatsModalProps extends React.Props<WorkflowActivityStatsModal>, IModalProps<undefined> {
   stats: WorkflowActivityStats;
   config: WorkflowActivityMonitorConfig;
   activity: WorkflowActivityModel;
