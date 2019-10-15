@@ -19,6 +19,7 @@ import { UncontrolledTabs, Tab } from '@framework/Components'
 import { is } from '@framework/Signum.Entities'
 import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
+import { asUTC } from '../../../../Framework/Signum.React/Scripts/SearchControl/SystemTimeEditor'
 
 interface TimeMachinePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -110,15 +111,6 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
     );
   }
 }
-
-function asUTC(date: string): string {
-
-  if (date.contains("+"))
-    return date.tryBefore("+") + "Z"; //Hack
-
-  return date;
-}
-
 
 
 interface RenderEntityVersionProps {
