@@ -115,8 +115,8 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     let st = this.props.findOptions.systemTime!;
     st.mode = e.currentTarget.value as SystemTimeMode;
 
-    st.startDate = st.mode == "All" ? undefined : (st.startDate || moment().format());
-    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || moment().format());
+    st.startDate = st.mode == "All" ? undefined : (st.startDate || asUTC(moment().format()));
+    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || asUTC(moment().format()));
 
     this.forceUpdate();
   }
@@ -137,10 +137,12 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
 
     const handleDatePickerOnChange = (date?: Date, str?: string) => {
       const m = moment(date);
-      systemTime[field] = m.isValid() ? m.format() : undefined;
+      systemTime[field] = m.isValid() ? asUTC(m.format()) : undefined;
     };
 
-    var m = moment(systemTime[field])
+    var utcDate = systemTime[field]
+
+    var m = moment(utcDate && asLocal(utcDate));
     var momentFormat = "YYYY-MM-DDTHH:mm:ss";
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
@@ -151,5 +153,19 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
   }
 }
 
+export function asUTC(date: string): string {
+
+  if (date.contains("+"))
+    return date.tryBefore("+") + "Z"; //Hack
+
+  return date;
+}
+
+export function asLocal(date: string): string {
+  if (date.contains("Z"))
+    return date.before("Z");
+
+  return date;
+}
 
 
