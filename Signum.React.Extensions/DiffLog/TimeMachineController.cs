@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -18,7 +18,7 @@ namespace Signum.React.DiffLog
             var pk = PrimaryKey.Parse(id, type);
 
 
-            using (SystemTime.Override(asOf.AddMilliseconds(1)))
+            using (SystemTime.Override(asOf.AddMilliseconds(1).ToUniversalTime()))
                 return Database.Retrieve(type, pk);
         }
 
