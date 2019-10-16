@@ -189,8 +189,16 @@ let a = document.createElement("a");
 document.body.appendChild(a);
 a.style.display = "none";
 
-export function saveFile(response: Response) {
-  var fileName: string;
+export function saveFile(response: Response, overrideFileName?: string) {
+
+  var fileName = overrideFileName || getFileName(response);
+
+  response.blob().then(blob => {
+    saveFileBlob(blob, fileName);
+  });
+}
+
+export function getFileName(response: Response) {
   const contentDisposition = response.headers.get("Content-Disposition")!;
   const parts = contentDisposition.split(";");
 
@@ -198,15 +206,12 @@ export function saveFile(response: Response) {
   const fileNamePartAscii = parts.filter(a => a.trim().startsWith("filename=")).singleOrNull();
 
   if (fileNamePartUTF8)
-    fileName = decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''").trimEnd("\""));
-  else if (fileNamePartAscii)
-    fileName = fileNamePartAscii.trim().after("filename=").trimStart("\"").trimEnd("\"");
-  else
-    fileName = "file.dat";
+    return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''").trimEnd("\""));
 
-  response.blob().then(blob => {
-    saveFileBlob(blob, fileName);
-  });
+  if (fileNamePartAscii)
+    return fileNamePartAscii.trim().after("filename=").trimStart("\"").trimEnd("\"");
+  else
+    return "file.dat";
 }
 
 export function saveFileBlob(blob: Blob, fileName: string) {
