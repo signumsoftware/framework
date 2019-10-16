@@ -9,7 +9,7 @@ import { ModalHeaderButtons } from '../Components/Modal';
 import { AutoFocus } from '../Components/AutoFocus';
 import { SearchMessage } from '../Signum.Entities';
 
-interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
+interface SearchModalProps extends React.Props<SearchModal>, IModalProps<ResultRow[] | undefined> {
   findOptions: FindOptions;
   findMode: FindMode;
   isMany: boolean;

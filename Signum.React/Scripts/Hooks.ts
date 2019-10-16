@@ -67,22 +67,22 @@ export function useThrottle<T>(value: T, limit: number) : T {
   return throttledValue;
 };
 
-export function useQuery(fo: FindOptions | null): ResultTable | undefined | null {
-  return useAPI(undefined, [fo && Finder.findOptionsPath(fo)], signal =>
+export function useQuery(fo: FindOptions | null, additionalDeps?: any[]): ResultTable | undefined | null {
+  return useAPI(undefined, [fo && Finder.findOptionsPath(fo), ...(additionalDeps || [])], signal =>
     fo == null ? Promise.resolve<ResultTable | null>(null) :
       Finder.getQueryDescription(fo.queryName)
         .then(qd => Finder.parseFindOptions(fo!, qd, false))
         .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)));
 }
 
-export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): Finder.AddToLite<R> | null | undefined {
+export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[]): Finder.AddToLite<R> | null | undefined {
   var resultTable = useQuery(entity == null ? null : {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
     columnOptionsMode: "Replace",
-  });
+  }, additionalDeps);
 
   if (entity == null)
     return null;

@@ -988,9 +988,12 @@ export class Type<T extends ModifiableEntity> implements IType {
    * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc) but this method works in the common simple cases*/
   token(): QueryTokenString<T>;
   token<S>(lambdaToColumn: (v: T) => S) : QueryTokenString<S>;
-  token(lambdaToColumn?: Function): QueryTokenString<any> {
+  token<S>(columnName: string) : QueryTokenString<S>;
+  token(lambdaToColumn?: ((a: any) => any) | string): QueryTokenString<any> {
     if (lambdaToColumn == null)
       return new QueryTokenString("");
+    else if (typeof lambdaToColumn == "string")
+      return new QueryTokenString(lambdaToColumn);
     else
       return new QueryTokenString(tokenSequence(lambdaToColumn));
   }
