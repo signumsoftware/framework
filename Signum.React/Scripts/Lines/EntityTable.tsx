@@ -198,7 +198,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
     const readOnly = ctx.readOnly;
     const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
 
-    var isEmpty = this.props.avoidEmptyTable && ctx.value.length == 0;
+    var elementCtxs = this.getMListItemContext(ctx);
+    var isEmpty = this.props.avoidEmptyTable && elementCtxs.length == 0;
 
     const s = this.state;
     var firstColumnVisible = !(s.readOnly || s.remove == false && s.move == false && s.view == false);
@@ -222,7 +223,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           }
           <tbody>
             {
-              this.getMListItemContext(ctx)
+              elementCtxs
                 .map((mlec, i, array) => <EntityTableRow key={this.keyGenerator.getKey(mlec.value)}
                   ctx={this.props.rowSubContext ? this.props.rowSubContext(mlec) : mlec}
                   array={array}
