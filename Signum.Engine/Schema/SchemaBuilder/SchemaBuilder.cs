@@ -233,27 +233,29 @@ namespace Signum.Engine.Maps
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
                 if (type.IsAbstract)
-                    throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is abstract".FormatWith(type));
+                    throw new InvalidOperationException(ErrorIncluding(route) + $"Impossible to include in the Schema the type {type} because is abstract");
 
                 if (!Reflector.IsEntity(type))
-                    throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is not and Entity".FormatWith(type));
+                    throw new InvalidOperationException(ErrorIncluding(route) + $"Impossible to include in the Schema the type {type} because is not and Entity");
 
                 foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
-                        throw new InvalidOperationException("Type {0} is not marked as serializable".FormatWith(t.TypeName()));
+                        throw new InvalidOperationException(ErrorIncluding(route) + $"Type {t.TypeName()} is not marked as serializable");
 
-                string name = schema.Settings.desambiguatedNames?.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
+                string cleanName = schema.Settings.desambiguatedNames?.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
-                if (schema.NameToType.ContainsKey(name))
-                    throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".FormatWith(schema.NameToType[name].FullName, type.FullName));
+                if (schema.NameToType.ContainsKey(cleanName))
+                    throw new InvalidOperationException(ErrorIncluding(route) + @$"Two types have the same cleanName '{cleanName}', desambiguate using Schema.Current.Settings.Desambiguate method:
+{schema.NameToType[cleanName].FullName}
+{type.FullName}");
 
                 try
                 {
                     result = new Table(type);
 
                     schema.Tables.Add(type, result);
-                    schema.NameToType[name] = type;
-                    schema.TypeToName[type] = name;
+                    schema.NameToType[cleanName] = type;
+                    schema.TypeToName[type] = cleanName;
 
                     Complete(result);
 
@@ -262,11 +264,16 @@ namespace Signum.Engine.Maps
                 catch (Exception) //Avoid half-cooked tables
                 {
                     schema.Tables.Remove(type);
-                    schema.NameToType.Remove(name);
+                    schema.NameToType.Remove(cleanName);
                     schema.TypeToName.Remove(type);
                     throw;
                 }
             }
+        }
+
+        private static string? ErrorIncluding(PropertyRoute? route)
+        {
+            return route?.Let(r => $"Error including {r}: ");
         }
 
         void Complete(Table table)

@@ -106,6 +106,9 @@ namespace Signum.Utilities.ExpressionTrees
             if (source == null)
                 throw new ArgumentNullException("source");
 
+            if (!(source.Provider is QueryProvider))
+                return source; //AsQueryable or any other provider won't implement it
+
             return source.Provider.CreateQuery<T>(Expression.Call(null,
                 ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }),
                 new Expression[] { source.Expression }));
