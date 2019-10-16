@@ -318,7 +318,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
         {
-            var selector = TupleConstructor(query.Context, columns, out BuildExpressionContext newContext);
+            var selector = SelectTupleConstructor(query.Context, columns, out BuildExpressionContext newContext);
 
             return new DQueryable<T>(query.Query.Select(selector), newContext);
         }
@@ -330,7 +330,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, HashSet<QueryToken> columns)
         {
-            var selector = TupleConstructor(collection.Context, columns, out BuildExpressionContext newContext);
+            var selector = SelectTupleConstructor(collection.Context, columns, out BuildExpressionContext newContext);
 
             return new DEnumerable<T>(collection.Collection.Select(selector.Compile()), newContext);
         }
@@ -356,7 +356,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
 
-        static Expression<Func<object, object>> TupleConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
+        static Expression<Func<object, object>> SelectTupleConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
         {
             string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
             if (str == null)
@@ -367,8 +367,8 @@ namespace Signum.Engine.DynamicQuery
 
             var pe = Expression.Parameter(typeof(object));
 
-            newContext =  new BuildExpressionContext(
-                    ctor.Type,pe,
+            newContext = new BuildExpressionContext(
+                    ctor.Type, pe,
                     tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token!, t => t.Expr!)); /*CSBUG*/
 
             return Expression.Lambda<Func<object, object>>(
@@ -510,7 +510,7 @@ namespace Signum.Engine.DynamicQuery
             if (str == null)
                 throw new ApplicationException(str);
 
-            var pairs = orders.Select(o =>(
+            var pairs = orders.Select(o => (
                 lambda: QueryUtils.CreateOrderLambda(o.Token, query.Context),
                 orderType: o.OrderType
             )).ToList();
@@ -610,7 +610,7 @@ namespace Signum.Engine.DynamicQuery
         {
             switch (uniqueType)
             {
-                case UniqueType.First: return  collection.First();
+                case UniqueType.First: return collection.First();
                 case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
                 case UniqueType.Single: return collection.SingleEx();
                 case UniqueType.SingleOrDefault: return collection.SingleOrDefaultEx();
@@ -857,7 +857,7 @@ namespace Signum.Engine.DynamicQuery
 
             if (at.AggregateFunction == AggregateFunction.Count && at.Parent == null)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { elementType }, new[] { collection });
-            
+
             var body = at.Parent!.BuildExpression(context);
 
             if (at.AggregateFunction == AggregateFunction.Count)
@@ -985,6 +985,50 @@ namespace Signum.Engine.DynamicQuery
         }
 
         #endregion
+
+        public struct ExpandColumn<T> : IExpandColumn
+        {
+            public QueryToken Token { get; private set; }
+            
+            public readonly Func<Lite<Entity>, T> GetValue;
+            public ExpandColumn(QueryToken token, Func<Lite<Entity>, T> getValue)
+            {
+                Token = token;
+                GetValue = getValue;
+            }
+
+            Expression IExpandColumn.GetExpression(Expression entitySelector)
+            {
+                return Expression.Invoke(Expression.Constant(GetValue), entitySelector);
+            }
+        }
+
+        public interface IExpandColumn
+        {
+            public QueryToken Token { get;}
+            Expression GetExpression(Expression entitySelector);
+        }
+
+        public static DEnumerable<T> ReplaceColumns<T>(this DEnumerable<T> query, params IExpandColumn[] newColumns)
+        {
+            var entity = query.Context.Replacemens.Single(a => a.Key.FullKey() == "Entity").Value;
+            var newColumnsDic = newColumns.ToDictionary(a => a.Token, a => a.GetExpression(entity));
+
+            List<QueryToken> tokens = query.Context.Replacemens.Keys.Union(newColumns.Select(a => a.Token)).ToList();
+            List<Expression> expressions = tokens.Select(t => newColumnsDic.TryGetC(t) ?? query.Context.Replacemens.GetOrThrow(t)).ToList();
+            Expression ctor = TupleReflection.TupleChainConstructor(expressions);
+
+            var pe = Expression.Parameter(typeof(object));
+
+            var newContext = new BuildExpressionContext(
+                    ctor.Type, pe,
+                    tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token!, t => t.Expr!)); /*CSBUG*/
+
+            var selector = Expression.Lambda<Func<object, object>>(
+                    (Expression)Expression.Convert(ctor, typeof(object)), query.Context.Parameter);
+
+            return new DEnumerable<T>(query.Collection.Select(selector.Compile()), newContext);
+        }
 
         public static ResultTable ToResultTable<T>(this DEnumerableCount<T> collection, QueryRequest req)
         {
