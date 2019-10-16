@@ -236,7 +236,7 @@ namespace Signum.Engine.DynamicQuery
             this.Context = context;
         }
 
-        public IEnumerable<object> Collection{ get; private set; }
+        public IEnumerable<object> Collection { get; private set; }
         public BuildExpressionContext Context { get; private set; }
 
         public Expression<Func<object, V>> GetLambdaExpression<V>(QueryToken token)
@@ -281,6 +281,16 @@ namespace Signum.Engine.DynamicQuery
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
                 .TryPaginateAsync(request.Pagination, token);
+        }
+
+        public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
+        {
+            return query
+                .SelectMany(request.Multiplications())
+                .Where(request.Filters)
+                .OrderBy(request.Orders)
+                .Select(request.Columns)
+                .TryPaginate(request.Pagination);
         }
 
         #endregion
