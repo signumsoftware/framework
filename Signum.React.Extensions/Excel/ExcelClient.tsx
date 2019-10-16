@@ -46,9 +46,9 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
 export namespace API {
 
-  export function generatePlanExcel(request: QueryRequest): void {
+  export function generatePlanExcel(request: QueryRequest, overrideFileName?: string): void {
     ajaxPostRaw({ url: "~/api/excel/plain" }, request)
-      .then(response => saveFile(response))
+      .then(response => saveFile(response, overrideFileName))
       .done();
   }
 
