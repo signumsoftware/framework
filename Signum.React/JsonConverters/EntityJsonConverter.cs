@@ -311,7 +311,16 @@ namespace Signum.React.Json
                             }
                             else
                             {
-                                PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+                                var propertyName = (string)reader.Value;
+                                
+                                PropertyConverter? pc = dic.TryGetC(propertyName);
+                                if(pc == null)
+                                {
+                                    if (specialProps.Contains(propertyName))
+                                        throw new InvalidOperationException($"Property '{propertyName}' is a special property like {specialProps.ToString(a => $"'{a}'", ", ")}, and they can only be at the beginning of the Json object for performance reasons");
+
+                                    throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(propertyName, propertyName.GetType().TypeName(), dic.GetType().TypeName()));
+                                }
 
                                 reader.Read();
                                 ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
@@ -495,6 +504,8 @@ namespace Signum.React.Json
 
             return info;
         }
+
+        static readonly string[] specialProps = new string[] { "toStr", "id", "isNew", "Type", "ticks", "modified" };
 
         public struct IdentityInfo
         {

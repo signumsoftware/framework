@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -34,9 +34,10 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         state.currentItem = this.state.currentItem;
     }
   }
-
+  unmounted = false;
   componentWillUnmount() {
     this.state.autocomplete && this.state.autocomplete.abort();
+    this.unmounted = true;
   }
 
   componentWillMount() {
@@ -58,7 +59,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         if (this.state.currentItem)
           this.setState({ currentItem: undefined });
       } else {
-        if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
+        if (!this.state.currentItem || is(this.state.currentItem.entity as Entity | Lite<Entity>, newEntity as Entity | Lite<Entity>)) {
           var ci = { entity: newEntity!, item: undefined as unknown }
           this.setState({ currentItem: ci });
           var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
@@ -67,7 +68,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
               .then(item => {
                 if (autocomplete == this.state.autocomplete) {
                   ci.item = item;
-                  this.forceUpdate();
+                  if (!this.unmounted)
+                    this.forceUpdate();
                 } else {
                   fillItem(newEntity);
                 }
@@ -84,7 +86,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
   typeahead?: Typeahead | null;
   writeInTypeahead(query: string) {
-    this.typeahead!.writeInInput(query);
+    this.typeahead && this.typeahead.writeInInput(query);
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {

@@ -9,7 +9,7 @@ import { ModalHeaderButtons } from '../Components/Modal';
 import { AutoFocus } from '../Components/AutoFocus';
 import { SearchMessage } from '../Signum.Entities';
 
-interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
+interface SearchModalProps extends React.Props<SearchModal>, IModalProps<ResultRow[] | undefined> {
   findOptions: FindOptions;
   findMode: FindMode;
   isMany: boolean;
@@ -80,7 +80,6 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
   render() {
     const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
-
     return (
       <Modal size="lg" show={this.state.show} onExited={this.handleOnExisted} onHide={this.handleCancelClicked}>
         <ModalHeaderButtons
@@ -107,6 +106,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             throwIfNotFindable={true}
             ref={e => this.searchControl = e!}
             findOptions={this.props.findOptions}
+            defaultIncludeDefaultFilters={true}
             onSelectionChanged={this.handleSelectionChanged}
             showGroupButton={this.props.findMode == "Explore"}
             largeToolbarButtons={true}
