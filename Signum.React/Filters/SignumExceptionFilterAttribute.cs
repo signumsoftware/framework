@@ -28,6 +28,7 @@ namespace Signum.React.Filters
 
         public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
 
+        public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
@@ -60,7 +61,7 @@ namespace Signum.React.Filters
 
                     if (ExpectsJsonResult(context))
                     {
-                        var error = new HttpError(context.Exception);
+                        var error = CustomHttpErrorFactory(context.Exception);
 
                         var response = context.HttpContext.Response;
                         response.StatusCode = (int)statusCode;
