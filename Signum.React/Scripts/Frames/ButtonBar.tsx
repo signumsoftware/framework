@@ -12,7 +12,7 @@ export interface ButtonBarHandle {
 }
 
 
-export const ButtonBar = React.forwardRef((p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) => {
+export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) {
 
   const ctx: ButtonsContext = p;
   const rb = ctx.frame.entityComponent as any as IRenderButtons;

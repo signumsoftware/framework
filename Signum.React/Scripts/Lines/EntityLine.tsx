@@ -9,6 +9,7 @@ import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TypeaheadHandle } from '../Components/Typeahead'
+import { useAPI, useMounted } from '../Hooks'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -38,6 +39,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     var [currentItem, setCurrentItem] = React.useState<ItemPair | undefined>();
     this.currentItem = currentItem;
     this.setCurrentItem = setCurrentItem;
+    const mounted = useMounted();
     this.focusNext = React.useRef(false);
     this.typeahead = React.useRef<TypeaheadHandle>(null);
     React.useEffect(() => {
@@ -55,11 +57,13 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
               const autocomplete = s.autocomplete;
               autocomplete && autocomplete.getItemFromEntity(newEntity)
                 .then(item => {
-                  if (autocomplete == s.autocomplete) {
-                    ci.item = item;
-                    this.forceUpdate();
-                  } else {
-                    fillItem(newEntity);
+                  if (mounted.current) {
+                    if (autocomplete == s.autocomplete) {
+                      ci.item = item;
+                      this.forceUpdate();
+                    } else {
+                      fillItem(newEntity);
+                    }
                   }
                 })
                 .done();
@@ -79,7 +83,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     super.overrideProps(p, overridenProps);
     if (p.autocomplete === undefined) {
       const type = p.type!;
-      p.autocomplete = Navigator.getAutoComplete(type, p.findOptions, p.showType);
+      p.autocomplete = Navigator.getAutoComplete(type, p.findOptions, p.ctx, p.create!, p.showType);
     }
   }
 

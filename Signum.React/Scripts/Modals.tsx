@@ -37,22 +37,20 @@ export function GlobalModalContainer() {
     return () => window.removeEventListener("keydown", hanldleKeyDown);
   }, []);
 
+  var [modals, setModals] = React.useState<React.ReactElement<IModalProps>[]>([]);
   React.useEffect(() => {
     current = {
       pushModal: e => {
-        modals.push(e);
-        setModals(modals);
+        setModals([...modals, e]);
       },
       popModal: e => {
-        modals.remove(e);
-        setModals(modals);
+        setModals(modals.filter(a=>a != e));
       },
       getCount: () => modals.length
     };
     return () => { current = null!; };
-  }, []);
+  }, [modals.length]);
 
-  var [modals, setModals] = React.useState<React.ReactElement<IModalProps>[]>([]);
 
 
   function hanldleKeyDown(e: KeyboardEvent){

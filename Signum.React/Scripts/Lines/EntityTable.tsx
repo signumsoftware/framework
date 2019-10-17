@@ -5,7 +5,7 @@ import * as Navigator from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
-import DynamicComponent, { getAppropiateComponent } from './DynamicComponent'
+import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from './DynamicComponent'
 import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAPI, useForceUpdate } from '../Hooks'
@@ -27,12 +27,13 @@ export interface EntityTableProps extends EntityListBaseProps {
   createOnBlurLastRow?: boolean;
 }
 
-export interface EntityTableColumn<T, RS> {
+export interface EntityTableColumn<T, RS = undefined> {
   property?: ((a: T) => any) | string;
   header?: React.ReactNode | null;
   headerHtmlAttributes?: React.ThHTMLAttributes<any>;
   cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRowHandle, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
   template?: (ctx: TypeContext<T>, row: EntityTableRowHandle, rowState: RS) => React.ReactChild | null | undefined | false;
+  mergeCells?: (boolean | ((a: T) => any) | string);
 }
 
 export class EntityTableController extends EntityListBaseController<EntityTableProps> {
@@ -50,7 +51,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     this.recentlyCreated = React.useRef<Lite<Entity> | ModifiableEntity | null>(null);
 
     React.useEffect(() => {
-      this.containerDiv.current!.addEventListener("scroll", (e) => {
+      this.containerDiv && this.containerDiv.current!.addEventListener("scroll", (e) => {
         var translate = "translate(0," + this.containerDiv.current!.scrollTop + "px)";
         this.thead.current!.style.transform = translate;
       });
@@ -76,6 +77,33 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
           property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
         }) as EntityTableColumn<ModifiableEntity, any>);
     }
+
+    var pr = state.ctx.propertyRoute.addMember("Indexer", "");
+    state.columns.forEach(c => {
+      if (c.template === undefined) {
+        if (c.property == null)
+          throw new Error("Column has no property and no template");
+
+        var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property) : pr.addLambda(c.property!));
+
+        c.template = (ctx, row, state) => {
+          var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
+          return factory(subCtx);
+        };
+      }
+
+      if (c.mergeCells == true) {
+        if (c.property == null)
+          throw new Error("Column has no property but mergeCells is true");
+
+        c.mergeCells = c.property;
+      }
+
+      if (typeof c.mergeCells == "string") {
+        const prop = c.mergeCells;
+        c.mergeCells = a => (a as any)[prop];
+      }
+    });
   }
 
   handleBlur = (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => {
@@ -222,6 +250,7 @@ export function EntityTable(props: EntityTableProps) {
     const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
 
     var isEmpty = p.avoidEmptyTable && ctx.value.length == 0;
+    var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
 
     return (
       <div ref={c.containerDiv}
@@ -232,7 +261,7 @@ export function EntityTable(props: EntityTableProps) {
             !isEmpty &&
             <thead ref={c.thead}>
               <tr className={p.theadClasses || "bg-light"}>
-                <th></th>
+                {firstColumnVisible && <th></th>}
                 {
                   p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                     {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
@@ -244,15 +273,17 @@ export function EntityTable(props: EntityTableProps) {
           <tbody>
             {
               c.getMListItemContext(ctx)
-                .map(mlec => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
-                  index={mlec.index!}
+                .map((mlec, i, array)  => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
+                  ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
+                  array={array}
+                  index={i}
+                  firstColumnVisible={firstColumnVisible}
                   onRowHtmlAttributes={p.onRowHtmlAttributes}
                   fetchRowState={p.fetchRowState}
                   onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
                   onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
                   draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
                   columns={p.columns!}
-                  ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
                   onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
                 />
                 )
@@ -285,18 +316,16 @@ export namespace EntityTable {
     scrollable: false
   }
 
-  export function typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
-    return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, any>[];
-  }
-
-  export function typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
+  export function typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
     return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, RS>[];
   }
 }
 
 export interface EntityTableRowProps {
   ctx: TypeContext<ModifiableEntity>;
+  array: TypeContext<ModifiableEntity>[];
   index: number;
+  firstColumnVisible: boolean;
   columns: EntityTableColumn<ModifiableEntity, any>[],
   onRemove?: (event: React.MouseEvent<any>) => void;
   onView?: (event: React.MouseEvent<any>) => void;
@@ -332,7 +361,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
       onDrop={drag && drag.onDrop}
       className={drag && drag.dropClass}
       onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}>
-      <td>
+      {p.firstColumnVisible && <td>
         <div className="item-group">
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={p.onRemove}
@@ -353,8 +382,39 @@ export function EntityTableRow(p: EntityTableRowProps) {
             {EntityBaseController.viewIcon}
           </a>}
         </div>
-      </td>
-      {p.columns.map((c, i) => <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>)}
+      </td>}
+      {p.columns.map((c, i) => {
+
+        var td = <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>;
+
+        var mc = c.mergeCells as ((a: any) => any) | undefined
+
+        if (!mc)
+          return td;
+
+        var equals = (a: any, b: any) => {
+          var ka = mc!(a);
+          var kb = mc!(b);
+          return ka == kb || is(ka, kb, false, false);
+        }
+
+        var current = p.ctx.value;
+        if (p.index > 0 && equals(p.array[p.index - 1].value, current))
+          return null;
+
+        var rowSpan = 1;
+        for (var i = p.index + 1; i < p.array.length; i++) {
+          if (equals(p.array[i].value, current))
+            rowSpan++;
+          else
+            break;
+        }
+
+        if (rowSpan == 1)
+          return td;
+
+        return React.cloneElement(td, { rowSpan });
+      })}
     </tr>
   );
 

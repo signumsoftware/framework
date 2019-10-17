@@ -13,18 +13,18 @@ import { ValueLineController } from './ValueLine';
 export default function DynamicComponent({ ctx, viewName }: { ctx: TypeContext<ModifiableEntity>, viewName?: string }) {
   const subContexts = subContext(ctx);
   const components = subContexts.map(ctx => getAppropiateComponent(ctx)).filter(a => !!a).map(a => a!);
-    const result = React.createElement("div", undefined, ...components);
+  const result = React.createElement("div", undefined, ...components);
   const es = Navigator.getSettings(ctx.value.Type);
 
   var vos = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName); //Should user viewDispatcher.getViewOverrides promise instead
 
-    if (vos && vos.length) {
+  if (vos && vos.length) {
     const replacer = new ViewReplacer(result, ctx);
-      vos.forEach(vo => vo.override(replacer));
-      return replacer.result;
-    } else {
-      return result;
-    }
+    vos.forEach(vo => vo.override(replacer));
+    return replacer.result;
+  } else {
+    return result;
+  }
 
   function subContext(ctx: TypeContext<ModifiableEntity>): TypeContext<any>[] {
     const members = ctx.propertyRoute.subMembers();
@@ -35,102 +35,101 @@ export default function DynamicComponent({ ctx, viewName }: { ctx: TypeContext<M
 }
 
 export const customTypeComponent: {
-    [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | null | undefined | "continue";
-  } = {};
+  [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | null | undefined | "continue";
+} = {};
 
 export const customPropertyComponent: {
-    [propertyRoute: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | null | undefined;
-  } = {};
+  [propertyRoute: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | null | undefined;
+} = {};
 
 export function registerCustomPropertyComponent<T extends ModifiableEntity, V>(type: Type<T>, property: (e: T) => V, component: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined) {
   customPropertyComponent[type.propertyRoute(property).toString()] = component;
-  }
-
+}
 
 export function getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
-    return DynamicComponent.getAppropiateComponentFactory(ctx.propertyRoute)(ctx);
+  return getAppropiateComponentFactory(ctx.propertyRoute)(ctx);
+}
+
+export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
+  const mi = pr.member;
+  if (mi && (mi.name == "Id" || mi.notVisible == true))
+    return ctx => undefined;
+
+  const ccProp = customPropertyComponent[pr.toString()];
+  if (ccProp) {
+    return ctx => ccProp(ctx) || undefined;
   }
 
-  static getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
-    const mi = pr.member;
-    if (mi && (mi.name == "Id" || mi.notVisible == true))
-      return ctx => undefined;
-
-    const ccProp = DynamicComponent.customPropertyComponent[pr.toString()];
-    if (ccProp) {
-      return ctx => ccProp(ctx) || undefined;
-    }
-
-    const tr = pr.typeReference();
+  const tr = pr.typeReference();
   const ccType = customTypeComponent[tr.name];
-    if (ccType) {
-      var basic = DynamicComponent.getAppropiateComponentFactoryBasic(tr);
+  if (ccType) {
+    var basic = getAppropiateComponentFactoryBasic(tr);
 
-      return ctx => {
+    return ctx => {
       var result = ccType(ctx);
-        return result == "continue" ? basic(ctx) : result || undefined;
-      };
-    }
+      return result == "continue" ? basic(ctx) : result || undefined;
+    };
+  }
 
-    return DynamicComponent.getAppropiateComponentFactoryBasic(tr);
-    }
+  return getAppropiateComponentFactoryBasic(tr);
+}
 
-  static getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
-    let tis = getTypeInfos(tr);
-    if (tis.length == 1 && tis[0] == undefined)
-      tis = [];
+export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
+  let tis = getTypeInfos(tr);
+  if (tis.length == 1 && tis[0] == undefined)
+    tis = [];
 
-    if (tr.isCollection) {
-      if (tr.name == "[ALL]")
-        return ctx => <EntityStrip ctx={ctx} />;
+  if (tr.isCollection) {
+    if (tr.name == "[ALL]")
+      return ctx => <EntityStrip ctx={ctx} />;
 
-      if (tis.length) {
-        if (tis.length == 1 && tis.first().kind == "Enum")
-          return ctx => <EnumCheckboxList ctx={ctx} />;
+    if (tis.length) {
+      if (tis.length == 1 && tis.first().kind == "Enum")
+        return ctx => <EnumCheckboxList ctx={ctx} />;
 
-        if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart"))
-          return ctx => <EntityTable ctx={ctx} />;
-
-        if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-          return ctx => <EntityRepeater ctx={ctx} />;
-
-        if (tis.every(t => t.isLowPopulation == true))
-          return ctx => <EntityCheckboxList ctx={ctx} />;
-
-        return ctx => <EntityStrip ctx={ctx} />;
-      }
-
-      if (tr.isEmbedded)
+      if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart"))
         return ctx => <EntityTable ctx={ctx} />;
 
-      return ctx => <MultiValueLine ctx={ctx} />;
+      if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+        return ctx => <EntityRepeater ctx={ctx} />;
 
-    } else {
+      if (tis.every(t => t.isLowPopulation == true))
+        return ctx => <EntityCheckboxList ctx={ctx} />;
 
-      if (tr.name == "[ALL]")
-        return ctx => <EntityLine ctx={ctx} />;
+      return ctx => <EntityStrip ctx={ctx} />;
+    }
 
-      if (tis.length) {
-        if (tis.length == 1 && tis.first().kind == "Enum")
-          return ctx => <ValueLine ctx={ctx} />;
+    if (tr.isEmbedded)
+      return ctx => <EntityTable ctx={ctx} />;
 
-        if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-          return ctx => <EntityDetail ctx={ctx} />;
+    return ctx => <MultiValueLine ctx={ctx} />;
 
-        if (tis.every(t => t.isLowPopulation == true))
-          return ctx => <EntityCombo ctx={ctx} />;
+  } else {
 
-        return ctx => <EntityLine ctx={ctx} />;
-      }
+    if (tr.name == "[ALL]")
+      return ctx => <EntityLine ctx={ctx} />;
 
-      if (tr.isEmbedded)
-        return ctx =><EntityDetail ctx={ctx} />;
+    if (tis.length) {
+      if (tis.length == 1 && tis.first().kind == "Enum")
+        return ctx => <ValueLine ctx={ctx} />;
+
+      if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+        return ctx => <EntityDetail ctx={ctx} />;
+
+      if (tis.every(t => t.isLowPopulation == true))
+        return ctx => <EntityCombo ctx={ctx} />;
+
+      return ctx => <EntityLine ctx={ctx} />;
+    }
+
+    if (tr.isEmbedded)
+      return ctx => <EntityDetail ctx={ctx} />;
 
     if (ValueLineController.getValueLineType(tr) != undefined)
-        return ctx =><ValueLine ctx={ctx} />;
+      return ctx => <ValueLine ctx={ctx} />;
 
-      return ctx => undefined;
-    }
+    return ctx => undefined;
   }
+}
 
 DynamicComponent.withViewOverrides = true;

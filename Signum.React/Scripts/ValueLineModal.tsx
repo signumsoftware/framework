@@ -22,7 +22,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   const selectedValue = React.useRef<any>(undefined);
   function handleOkClick() {
     selectedValue.current = value.current;
-    setShow(show);
+    setShow(false);
   }
 
   function handleCancelClicked() {

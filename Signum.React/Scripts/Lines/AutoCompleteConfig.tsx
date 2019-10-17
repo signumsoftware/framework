@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
-import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
-import { getTypeInfo, getQueryKey, QueryTokenString } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey } from '../Signum.Entities'
+import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription } from '../FindOptions'
+import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadHandle, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';

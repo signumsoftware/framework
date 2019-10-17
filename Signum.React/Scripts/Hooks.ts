@@ -15,11 +15,20 @@ export function useForceUpdatePromise(): () => Promise<void> {
   return () => setCount(count + 1) as Promise<any>;
 }
 
+export function usePrevious<T>(value: T): T | undefined {
+  var ref = React.useRef<T | undefined>();
+  React.useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref.current;
+}
+
 interface APIHookOptions{
   avoidReset?: boolean;
 }
 
-export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.SetStateAction<T>) => Promise<T>]{
+export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.SetStateAction<T>) => Promise<T>] {
   const [state, setState] = React.useState({ value: defaultValue, resolve: (val: T) => { } });
 
   React.useEffect(() => state.resolve(state.value), [state]);
@@ -28,7 +37,7 @@ export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.Se
     state.value,
     updaterOrValue => new Promise(resolve => {
       setState(prevState => {
-        let nextVal = typeof updaterOrValue == "function" ? (updaterOrValue  as ((val : T) => T))(prevState.value) : updaterOrValue;
+        let nextVal = typeof updaterOrValue == "function" ? (updaterOrValue as ((val: T) => T))(prevState.value) : updaterOrValue;
         return {
           value: nextVal,
           resolve: resolve
@@ -36,6 +45,7 @@ export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.Se
       })
     })
   ]
+}
 
 export function useTitle(title: string, deps?: readonly any[]) {
   React.useEffect(() => {
@@ -64,6 +74,14 @@ export function useAPI<T>(defaultValue: T, makeCall: (signal: AbortSignal, oldDa
   }, deps);
 
   return data;
+}
+
+export function useMounted() {
+  const mounted = React.useRef<boolean>(false);
+  React.useEffect(() => {
+    return () => { mounted.current = false; };
+  }, []);
+  return mounted;
 }
 
 export function useThrottle<T>(value: T, limit: number) : T {

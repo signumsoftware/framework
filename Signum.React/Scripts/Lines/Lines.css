@@ -438,3 +438,14 @@ body:not(.rtl) .sf-mandatory,
 body:not(.rtl) .sf-mandatory-widget .rw-input {
     border-left: 2px solid red;
 }
+
+.sf-no-padding{
+    padding: 1px !important;
+}
+
+.sf-no-border {
+    border: 0;
+    height: 100%;
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+}

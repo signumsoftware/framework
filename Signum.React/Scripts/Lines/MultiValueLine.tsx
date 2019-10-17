@@ -3,7 +3,7 @@ import { TypeContext, FormGroup } from "../Lines";
 import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
 import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DynamicComponent, { getAppropiateComponent } from "./DynamicComponent";
+import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
 import { LineBaseProps, LineBaseController } from "./LineBase";
@@ -105,24 +105,23 @@ export interface MultiValueLineElementProps {
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
   const ctx = props.ctx;
 
-    var renderItem = this.props.onRenderItem || DynamicComponent.getAppropiateComponentFactory(ctx.propertyRoute)
+  var renderItem = props.onRenderItem || getAppropiateComponentFactory(ctx.propertyRoute)
 
-    return (
-      <tr>
-        <td>
-          {!ctx.readOnly &&
-            <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
-              className="sf-line-button sf-remove"
-              onClick={props.onRemove}>
-              <FontAwesomeIcon icon="times" />
-            </a>}
-        </td>
-        <td>
-          {renderItem(ctx)}
-        </td>
-      </tr>
-    );
-  }
+  return (
+    <tr>
+      <td>
+        {!ctx.readOnly &&
+          <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+            className="sf-line-button sf-remove"
+            onClick={props.onRemove}>
+            <FontAwesomeIcon icon="times" />
+          </a>}
+      </td>
+      <td>
+        {renderItem(ctx)}
+      </td>
+    </tr>
+  );
 }
 
 

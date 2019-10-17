@@ -74,11 +74,13 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   }
   
   getDefaultProps(state: P) {
-
+    
     const type = state.type!;
 
-    state.create = EntityBaseController.defaultIsCreable(type, !!this.props.getComponent || !!this.props.getViewPromise);
-    state.view = EntityBaseController.defaultIsViewable(type, !!this.props.getComponent || !!this.props.getViewPromise);
+    const customComponent = !!state.getComponent || !!state.getViewPromise;
+
+    state.create = EntityBaseController.defaultIsCreable(type, customComponent);
+    state.view = EntityBaseController.defaultIsViewable(type, customComponent);
     state.find = EntityBaseController.defaultIsFindable(type);
     state.findOptions = Navigator.defaultFindOptions(type);
 

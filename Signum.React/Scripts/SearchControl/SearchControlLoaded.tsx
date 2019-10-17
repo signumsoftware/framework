@@ -119,7 +119,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
 
     const fo = this.props.findOptions;
     const qs = Finder.getSettings(fo.queryKey);
@@ -139,9 +139,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.searchOnLoad)
       this.doSearch().done();
+
+    this.containerDiv!.addEventListener("scroll", (e) => {
+
+      var table = this.thead!.parentElement!;
+      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
+      this.thead!.style.transform = translate;
+    });
   }
 
-  componentWillReceiveProps(props: SearchControlLoadedProps) {
+  componentDidUpdate(props: SearchControlLoadedProps) {
     if (this.props.refreshKey != props.refreshKey) {
       this.doSearchPage1();
     }
@@ -354,15 +361,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
   }
 
-  componentDidMount() {
-    this.containerDiv!.addEventListener("scroll", (e) => {
-
-      var table = this.thead!.parentElement!;
-      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
-      this.thead!.style.transform = translate;
-    });
-  }
-
+  
   fixScroll() {
     if (this.containerDiv) {
       var table = this.containerDiv.firstChild! as HTMLElement;

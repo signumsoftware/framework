@@ -25,24 +25,23 @@ export function RenderEntity(p: RenderEntityProps) {
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
-  var getComponent = useAPI(null, signal => {
+  var componentBox = useAPI(null, signal => {
     if (p.getComponent)
-      return Promise.resolve(p.getComponent);
+      return Promise.resolve({ func: p.getComponent });
 
     if (entity == null)
       return Promise.resolve(null);
 
     var vp = p.getViewPromise && p.getViewPromise(entity);
     var viewPromise = vp == undefined || typeof vp == "string" ? Navigator.getViewPromise(entity, vp) : vp;
-    return viewPromise.promise;
-
+    return viewPromise.promise.then(p => ({ func: p }));
   }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))]);
 
 
   if (entity == undefined)
     return null;
 
-  if (getComponent == null)
+  if (componentBox == null)
     return null;
 
   const ti = getTypeInfo(entity.Type);
@@ -74,7 +73,7 @@ export function RenderEntity(p: RenderEntityProps) {
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
-  var element = getComponent(newCtx);
+  var element = componentBox.func(newCtx);
 
   if (p.extraProps)
     element = React.cloneElement(element, p.extraProps);

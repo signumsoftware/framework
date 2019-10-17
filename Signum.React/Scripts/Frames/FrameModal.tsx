@@ -47,10 +47,10 @@ interface PackAndComponent {
   getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
-export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) => {
+export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
   const [packComponent, setPackComponent] = useStateWithPromise<PackAndComponent | undefined>(undefined);
-  const [show, setShow] = React.useState<boolean | undefined>();
+  const [show, setShow] = React.useState(true);
   const prefix = React.useMemo(() => "modal" + (modalCount++), []);
 
   const okClicked = React.useRef(false);
@@ -72,7 +72,7 @@ export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<I
 
   React.useEffect(() => {
     Navigator.toEntityPack(p.entityOrPack)
-      .then(pack => loadComponent(pack))
+      .then(pack => loadComponent(pack).promise.then(getComponent => setPack(pack, getComponent)))
       .done();
   }, [p.entityOrPack]);
 
@@ -230,13 +230,13 @@ export const FrameModal = React.forwardRef((p: FrameModalProps, ref: React.Ref<I
 
     const ctx = new TypeContext(undefined, styleOptions, pr, new ReadonlyBinding(pc.pack.entity, ""), prefix!);
 
-    const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pc.pack };
+    const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, frame: frame };
 
     const embeddedWidgets = renderEmbeddedWidgets(wc);
 
     return (
       <div className="modal-body">
-        {renderWidgets({ ctx: ctx, pack: pc.pack })}
+        {renderWidgets(wc)}
         {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
         <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
         {embeddedWidgets.top}
@@ -354,7 +354,7 @@ export class FunctionalAdapter extends React.Component {
 
   static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
-    if (typeof type == "string" || type.prototype.render) {
+    if (typeof type == "string" || type.prototype && type.prototype.render) {
       return React.cloneElement(element, { ref: ref });
     } else {
       return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>

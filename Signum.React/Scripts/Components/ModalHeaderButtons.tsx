@@ -21,45 +21,43 @@ interface ModalHeaderButtonsProps {
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   okButtonProps?: ModalIconProps;
   closeButtonProps?: ModalIconProps;
+  children?: React.ReactNode;
 }
 
-export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
+export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
 
-  render() {
-    const p = this.props;
-    var close = this.props.onClose &&
-      <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
-        <span aria-hidden="true">×</span>
-      </button>;
+  var close = p.onClose &&
+    <button type="button" className="close" aria-label="Close" onClick={p.onClose}>
+      <span aria-hidden="true">×</span>
+    </button>;
 
-    return (
-      <div className="modal-header" {...p.htmlAttributes}>
-        {p.closeBeforeTitle && close}
-        <h4 className="modal-title" >
-          {this.props.children}
-        </h4>
-        {!p.closeBeforeTitle && close}
-        {(this.props.onCancel || this.props.onOk) &&
-          <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
-            {this.props.onOk && <button
-              className={classes("btn", "btn-" + ((this.props.okButtonProps && this.props.okButtonProps.color) || "primary"), "sf-entity-button sf-close-button sf-ok-button", this.props.okButtonProps && this.props.okButtonProps.classes)}
-              disabled={this.props.okDisabled} onClick={this.props.onOk}>
-              {this.renderButton(JavascriptMessage.ok.niceToString(), this.props.okButtonProps)}
-            </button>
-            }
-            {this.props.onCancel && <button
-              className={classes("btn", "btn-" + ((this.props.closeButtonProps && this.props.closeButtonProps.color) || "light"), "sf-entity-button sf-close-button sf-cancel-button", this.props.closeButtonProps && this.props.closeButtonProps.classes)}
-              onClick={this.props.onCancel}>
-              {this.renderButton(JavascriptMessage.cancel.niceToString(), this.props.closeButtonProps)}
-            </button>
-            }
-          </div>
-        }
-      </div>
-    );
-  }
+  return (
+    <div className="modal-header" {...p.htmlAttributes}>
+      {p.closeBeforeTitle && close}
+      <h4 className="modal-title" >
+        {p.children}
+      </h4>
+      {!p.closeBeforeTitle && close}
+      {(p.onCancel || p.onOk) &&
+        <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
+          {p.onOk && <button
+            className={classes("btn", "btn-" + ((p.okButtonProps && p.okButtonProps.color) || "primary"), "sf-entity-button sf-close-button sf-ok-button", p.okButtonProps && p.okButtonProps.classes)}
+            disabled={p.okDisabled} onClick={p.onOk}>
+            {renderButton(JavascriptMessage.ok.niceToString(), p.okButtonProps)}
+          </button>
+          }
+          {p.onCancel && <button
+            className={classes("btn", "btn-" + ((p.closeButtonProps && p.closeButtonProps.color) || "light"), "sf-entity-button sf-close-button sf-cancel-button", p.closeButtonProps && p.closeButtonProps.classes)}
+            onClick={p.onCancel}>
+            {renderButton(JavascriptMessage.cancel.niceToString(), p.closeButtonProps)}
+          </button>
+          }
+        </div>
+      }
+    </div>
+  );
 
-  renderButton(text: string, mip?: ModalIconProps) {
+  function renderButton(text: string, mip?: ModalIconProps) {
     if (mip && mip.icon) {
       switch (mip.iconAlign) {
         case "right": return (<span>{text} <FontAwesomeIcon icon={mip.icon} fixedWidth /></span>);

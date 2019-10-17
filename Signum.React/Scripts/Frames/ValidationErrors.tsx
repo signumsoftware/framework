@@ -9,7 +9,7 @@ export interface ValidationErrorHandle {
   forceUpdate() : void; 
 }
 
-export const ValidationErrors = React.forwardRef((p: { entity: ModifiableEntity, prefix: string }, ref: React.Ref<ValidationErrorHandle>) => {
+export const ValidationErrors = React.forwardRef(function ValidationErrors(p: { entity: ModifiableEntity, prefix: string }, ref: React.Ref<ValidationErrorHandle>) {
 
   const forceUpdate = useForceUpdate();
 

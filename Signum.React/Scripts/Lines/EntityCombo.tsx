@@ -131,7 +131,7 @@ export interface  EntityComboHandle {
   getData(): Lite<Entity>[] | undefined;
 }
 //Extracted to another component
-export const EntityComboSelect = React.forwardRef((p: EntityComboSelectProps, ref: React.Ref<EntityComboHandle>) => {
+export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: EntityComboSelectProps, ref: React.Ref<EntityComboHandle>) {
 
   var [data, _setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
   var requestStarted = React.useRef(false);
@@ -175,7 +175,7 @@ export const EntityComboSelect = React.forwardRef((p: EntityComboSelectProps, re
   const ctx = p.ctx;
 
   if (ctx.readOnly)
-    return <FormControlReadonly ctx={ctx} htmlAttributes={this.props.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
+    return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
 
   return (
     <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}

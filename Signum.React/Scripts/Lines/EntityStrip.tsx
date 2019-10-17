@@ -23,7 +23,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
     if (p.autocomplete === undefined) {
-      p.autocomplete = Navigator.getAutoComplete(p.type!, p.findOptions, p.showType);
+      p.autocomplete = Navigator.getAutoComplete(p.type!, p.findOptions, p.ctx, p.create!, p.showType);
     }
   }
 }

@@ -165,10 +165,7 @@ export default function FramePage(p: FramePageProps) {
 
   const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, "framePage"));
 
-  const wc: WidgetContext<Entity> = {
-    ctx: ctx,
-    pack: state.pack,
-  };
+  const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
   const embeddedWidgets = renderEmbeddedWidgets(wc);
 
