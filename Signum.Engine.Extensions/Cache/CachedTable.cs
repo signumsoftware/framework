@@ -16,6 +16,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Entities.Internal;
+using Signum.Engine.Connection;
 
 namespace Signum.Engine.Cache
 {
@@ -207,30 +208,33 @@ namespace Signum.Engine.Cache
 
             rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
             {
-                CacheLogic.AssertSqlDependencyStarted();
-
-                var connector = (SqlConnector)Connector.Current;
-                Table table = connector.Schema.Table(typeof(T));
-
-                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
-                Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
-                using (MeasureLoad())
-                using (Connector.Override(subConnector))
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                return SqlServerRetry.Retry(() =>
                 {
-                    if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
+                    CacheLogic.AssertSqlDependencyStarted();
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                    var connector = (SqlConnector)Connector.Current;
+                    Table table = connector.Schema.Table(typeof(T));
+
+                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+
+                    Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
+                    using (MeasureLoad())
+                    using (Connector.Override(subConnector))
+                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
-                        object obj = rowReader(fr);
-                        result[idGetter(obj)] = obj; //Could be repeated joins
-                    });
-                    tr.Commit();
-                }
+                        if (CacheLogic.LogWriter != null)
+                            CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                return result;
+                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        {
+                            object obj = rowReader(fr);
+                            result[idGetter(obj)] = obj; //Could be repeated joins
+                    });
+                        tr.Commit();
+                    }
+
+                    return result;
+                });
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
             if(!CacheLogic.WithSqlDependency && lastPartialJoin.HasText()) //Is semi
@@ -471,35 +475,38 @@ namespace Signum.Engine.Cache
 
             relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
             {
-                CacheLogic.AssertSqlDependencyStarted();
-
-                var connector = (SqlConnector)Connector.Current;
-
-                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
-                Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
-
-                using (MeasureLoad())
-                using (Connector.Override(subConnector))
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                return SqlServerRetry.Retry(() =>
                 {
-                    if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
+                    CacheLogic.AssertSqlDependencyStarted();
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                    var connector = (SqlConnector)Connector.Current;
+
+                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+
+                    Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
+
+                    using (MeasureLoad())
+                    using (Connector.Override(subConnector))
+                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
-                        object obj = rowReader(fr);
-                        PrimaryKey parentId = parentIdGetter(obj);
-                        var dic = result.TryGetC(parentId);
-                        if (dic == null)
-                            result[parentId] = dic = new Dictionary<PrimaryKey, object>();
+                        if (CacheLogic.LogWriter != null)
+                            CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        dic[rowIdGetter(obj)] = obj;
-                    });
-                    tr.Commit();
-                }
+                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        {
+                            object obj = rowReader(fr);
+                            PrimaryKey parentId = parentIdGetter(obj);
+                            var dic = result.TryGetC(parentId);
+                            if (dic == null)
+                                result[parentId] = dic = new Dictionary<PrimaryKey, object>();
 
-                return result;
+                            dic[rowIdGetter(obj)] = obj;
+                        });
+                        tr.Commit();
+                    }
+
+                    return result;
+                });
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
@@ -632,30 +639,33 @@ namespace Signum.Engine.Cache
 
             toStrings = new ResetLazy<Dictionary<PrimaryKey, string>>(() =>
             {
-                CacheLogic.AssertSqlDependencyStarted();
-
-                var connector = (SqlConnector)Connector.Current;
-
-                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
-                Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
-
-                using (MeasureLoad())
-                using (Connector.Override(subConnector))
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                return SqlServerRetry.Retry(() =>
                 {
-                    if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
+                    CacheLogic.AssertSqlDependencyStarted();
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                    var connector = (SqlConnector)Connector.Current;
+
+                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+
+                    Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
+
+                    using (MeasureLoad())
+                    using (Connector.Override(subConnector))
+                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
-                        var kvp = rowReader(fr);
-                        result[kvp.Key] = kvp.Value;
-                    });
-                    tr.Commit();
-                }
+                        if (CacheLogic.LogWriter != null)
+                            CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                return result;
+                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        {
+                            var kvp = rowReader(fr);
+                            result[kvp.Key] = kvp.Value;
+                        });
+                        tr.Commit();
+                    }
+
+                    return result;
+                });
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
             if (this.subTables != null)
