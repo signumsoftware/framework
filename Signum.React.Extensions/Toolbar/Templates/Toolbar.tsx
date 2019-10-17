@@ -30,7 +30,9 @@ export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
 
 export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }) {
   return (
-    <EntityTable ctx={ctx} view columns={EntityTable.typedColumns<ToolbarElementEmbedded>([
+    <EntityTable ctx={ctx} view
+      onCreate={() => Promise.resolve(ToolbarElementEmbedded.New({ type: "Item" }))}
+      columns={EntityTable.typedColumns<ToolbarElementEmbedded>([
       {
         header: "Icon",
         headerHtmlAttributes: { style: { width: "5%" } },
