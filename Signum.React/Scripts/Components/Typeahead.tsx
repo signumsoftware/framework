@@ -35,7 +35,7 @@ export interface TypeaheadHandle {
   writeInInput(query: string) : void;
 }
 
-export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<TypeaheadHandle>) => {
+export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadHandle>) {
   const [query, setQuery] = React.useState<string | undefined>(undefined);
   const [shown, setShown] = React.useState<boolean>(false);
   const [items, setItem] = React.useState<any[] | undefined>(undefined);
@@ -45,28 +45,18 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
   const handle = React.useRef<number | undefined>(undefined);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const input = inputRef.current!;
 
   const focused = React.useRef<boolean>(false);
   const container = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    if (shown) {
-      document.addEventListener('click', handleDocumentClick, true);
-      document.addEventListener('touchstart', handleDocumentClick, true);
-
-      return () => {
-        document.removeEventListener('click', handleDocumentClick, true);
-        document.removeEventListener('touchstart', handleDocumentClick, true);
-      };
-    }
-  }, [shown]);
-
-  React.useImperativeHandle(ref, () => ({
-    items,
-    selectedIndex,
-    blur: blur
-  } as TypeaheadHandle), [items, selectedIndex]);
+  React.useImperativeHandle(ref, () => {
+    return ({
+      items,
+      selectedIndex,
+      blur: blur,
+      writeInInput: writeInInput
+    } as TypeaheadHandle);
+  }, [items, selectedIndex]);
 
 
   React.useEffect(() => {
@@ -93,7 +83,7 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
   function populate() {
 
-    if (p.minLength == null || input.value.length < p.minLength) {
+    if (p.minLength == null || inputRef.current!.value.length < p.minLength) {
       setShown(false);
       setItem(undefined);
       setSelectedIndex(undefined);
@@ -102,7 +92,7 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
     //this.setState({ shown: true, items: undefined });
 
-    const query = TypeaheadOptions.normalizeString(input.value);
+    const query = TypeaheadOptions.normalizeString(inputRef.current!.value);
     p.getItems(query).then(items => {
       setItem(items);
       setShown(true);
@@ -119,9 +109,9 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
     const val = p.onSelect!(items![selectedIndex || 0], e);
 
-    input.value = val || "";
+    inputRef.current!.value = val || "";
     if (p.onChange)
-      p.onChange(input.value);
+      p.onChange(inputRef.current!.value);
 
     setShown(false);
     return val != null;
@@ -129,15 +119,15 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
   //public
   function writeInInput(query: string) {
-    input.value = query;
-    input.focus();
+    inputRef.current!.value = query;
+    inputRef.current!.focus();
     lookup();
   }
 
   function handleFocus() {
     if (!focused.current) {
       focused.current = true;
-      if (p.minLength == 0 && !input.value)
+      if (p.minLength == 0 && !inputRef.current!.value)
         lookup();
     }
   }
@@ -151,10 +141,11 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
 
   function blur() {
-    input.blur();
+    inputRef.current!.blur();
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
+    debugger;
     if (!shown)
       return;
 
@@ -198,7 +189,7 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
         if (selectedIndex == undefined || !shown)
           return;
 
-        if (query != input.value)
+        if (query != inputRef.current!.value)
           return;
 
         select(e);
@@ -221,7 +212,7 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
     e.persist();
     setSelectedIndex(index).then(() => {
       if (select(e))
-        input.focus()
+        inputRef.current!.focus()
     }).done();
   }
 
@@ -237,52 +228,60 @@ export const Typeahead = React.forwardRef((p: TypeaheadProps, ref: React.Ref<Typ
 
   function handleOnChange() {
     if (p.onChange)
-      p.onChange(input.value);
+      p.onChange(inputRef.current!.value);
   }
 
+
+  //return (
+  //  <Dropdown>
+  //    <Dropdown.Toggle id="bla">Bla</Dropdown.Toggle>
+
+
+  //    <Dropdown.Menu className={classes("typeahead dropdown-menu", rtl && "dropdown-menu-right")} >
+  //      <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+  //      <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
+  //      <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+  //    </Dropdown.Menu>
+  //  </Dropdown>
+  //);
+
+  //show={shown}
+    //<div ref={container}>
 
   return (
-    <div ref={container}>
-      <Dropdown show={shown} drop="down">
-        <input ref={inputRef} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
-          value={p.value}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyUp={handleKeyUp}
-          onKeyDown={handleKeyDown}
-          onChange={handleOnChange}
-        />
-        {shown ? (p.renderList ? p.renderList({ blur, items, selectedIndex, writeInInput } as TypeaheadHandle) : renderDefaultList()) : null}
+    <>
+      <input ref={inputRef} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
+        value={p.value}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onKeyUp={handleKeyUp}
+        onKeyDown={handleKeyDown}
+        onChange={handleOnChange}
+      />
+      <Dropdown show={shown} onToggle={(isOpen: boolean) => setShown(isOpen)}>
+        {(p.renderList ? p.renderList({ blur, items, selectedIndex, writeInInput } as TypeaheadHandle) : renderDefaultList())}
       </Dropdown>
-    </div>
+      
+    </>
   );
-
-  function handleDocumentClick(e: MouseEvent | TouchEvent) {
-    if ((e as MouseEvent).which === 3)
-      return;
-
-    if (container.current!.contains(e.target as Node) && container.current !== e.target) {
-      return;
-    }
-
-    setShown(false);
-  }
+    //</div>
 
   function renderDefaultList() {
     return (
-      <div className={classes("typeahead dropdown-menu show", rtl && "dropdown-menu-right")} >
+      <Dropdown.Menu alignRight={rtl}>
         {
-          !items!.length ? <button className="no-results dropdown-item"><small>{p.noResultsMessage}</small></button> :
-            items!.map((item, i) => <button key={i}
-              className={classes("dropdown-item", i == selectedIndex ? "active" : undefined)}
-              onMouseEnter={e => handleElementMouseEnter(e, i)}
-              onMouseLeave={e => handleElementMouseLeave(e, i)}
-              onMouseUp={e => handleMenuMouseUp(e, i)}
-              {...p.itemAttrs && p.itemAttrs(item)}>
-              {p.renderItem!(item, query!)}
-            </button>)
+          !items ? null :
+            items.length == 0 ? <button className="no-results dropdown-item"><small>{p.noResultsMessage}</small></button> :
+              items!.map((item, i) => <button key={i}
+                className={classes("dropdown-item", i == selectedIndex ? "active" : undefined)}
+                onMouseEnter={e => handleElementMouseEnter(e, i)}
+                onMouseLeave={e => handleElementMouseLeave(e, i)}
+                onMouseUp={e => handleMenuMouseUp(e, i)}
+                {...p.itemAttrs && p.itemAttrs(item)}>
+                {p.renderItem!(item, query!)}
+              </button>)
         }
-      </div>
+      </Dropdown.Menu>
     );
   }
 });
