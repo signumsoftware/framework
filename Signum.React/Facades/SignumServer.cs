@@ -81,22 +81,8 @@ namespace Signum.React.Facades
         {
             Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
 
-            //app.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
-
             SignumControllerFactory.RegisterArea(typeof(EntitiesController));
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
-
-
-            //// Web API configuration and services
-            //var appXmlType = app.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
-            //app.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
-
-
-            //// Web API routes
-            //app.MapHttpAttributeRoutes();
-
-            //app.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
-
 
             ReflectionServer.Start();
         }

@@ -46,23 +46,31 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
 
 export function useThrottle<T>(value: T, limit: number) : T {
   const [throttledValue, setThrottledValue] = React.useState(value);
-  const lastRan = React.useRef(Date.now());
 
+  const mounted = React.useRef(true);
+  const lastRequested = React.useRef<(undefined | { value: T })>(undefined);
   React.useEffect(
     () => {
-      const handler = setTimeout(function () {
-        if (Date.now() - lastRan.current >= limit) {
-          setThrottledValue(value);
-          lastRan.current = Date.now();
-        }
-      }, limit - (Date.now() - lastRan.current));
+      if (lastRequested.current) {
+        lastRequested.current.value = value;
+      } else {
+        lastRequested.current = { value };
+        const handler = setTimeout(function () {
+          if (mounted.current) {
+            setThrottledValue(lastRequested.current!.value);
+            lastRequested.current = undefined;
 
-      return () => {
-        clearTimeout(handler);
-      };
+            clearTimeout(handler);
+          }
+        }, limit);
+      }
     },
     [value, limit]
   );
+
+  React.useEffect(() => {
+    return () => { mounted.current = false; }
+  }, []);
 
   return throttledValue;
 };
