@@ -1271,7 +1271,7 @@ export interface QuerySettings {
   entityFormatter?: EntityFormatter;
   inPlaceNavigation?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
-  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[]) => void;
   simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[], refresh: () => void) => React.ReactElement<any> | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
