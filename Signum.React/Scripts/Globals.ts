@@ -69,6 +69,8 @@ declare global {
     singleOrNull(this: Array<T>, errorContext?: string): T | null;
     singleOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
 
+    onlyOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
+
     contains(this: Array<T>, element: T): boolean;
     remove(this: Array<T>, element: T): boolean;
     removeAt(this: Array<T>, index: number): void;
@@ -472,6 +474,20 @@ Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: 
 
   if (array.length > 1)
     throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+
+  return array[0];
+};
+
+
+Array.prototype.onlyOrNull = function (this: any[], predicate : (element: any, index: number, array: any[]) => boolean) {
+
+  var array = predicate ? this.filter(predicate) : this;
+
+  if (array.length == 0)
+    return null;
+
+  if (array.length > 1)
+    return null;
 
   return array[0];
 };
