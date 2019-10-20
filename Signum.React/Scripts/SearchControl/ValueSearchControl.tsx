@@ -110,7 +110,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, avoidNotify: boolean | undefined }, number>(
     (abortSignal, a) =>
       Finder.getQueryDescription(a.findOptions.queryName)
-        .then(qd => Finder.parseFindOptions(a.findOptions, qd))
+        .then(qd => Finder.parseFindOptions(a.findOptions, qd, false))
         .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken), a.avoidNotify, abortSignal)));
 
   refreshValue(props?: ValueSearchControlProps) {
