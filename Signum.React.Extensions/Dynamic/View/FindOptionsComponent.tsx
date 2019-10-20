@@ -340,7 +340,7 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
 
 
           <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} extraButtons={() =>
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.avoidDefaultFilters)} refreshView={() => this.forceUpdate()} type="boolean" defaultValue={false}  />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.includeDefaultFilters)} refreshView={() => this.forceUpdate()} type="boolean" defaultValue={null} />
           } />
           <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} extraButtons={() =>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => this.forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
