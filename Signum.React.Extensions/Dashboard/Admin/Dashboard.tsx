@@ -126,6 +126,9 @@ export function iconToString(icon: IconProp) {
 
 export function parseIcon(iconName: string | undefined | null): IconProp | undefined {
 
+  if (iconName == "none")
+    return null as any as undefined;
+
   if (iconName == null)
     return undefined;
 
