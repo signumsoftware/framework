@@ -84,6 +84,8 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
+            fi.SchemaBuilder.Include<L>();
+
             var mListPropertRoute = PropertyRoute.Construct(mListField);
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
@@ -271,6 +273,8 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
+            fi.SchemaBuilder.Include<L>();
+
             Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>>? setter = null;
             var sb = fi.SchemaBuilder;

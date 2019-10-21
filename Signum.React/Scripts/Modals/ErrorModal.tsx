@@ -11,7 +11,7 @@ import "./Modals.css"
 import { newLite } from '../Reflection';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
-interface ErrorModalProps extends IModalProps {
+interface ErrorModalProps extends IModalProps<undefined> {
   error: any;
 }
 

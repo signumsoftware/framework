@@ -19,7 +19,7 @@ export default class TextArea extends React.Component<TextAreaProps> {
   }
 
   render() {
-    const { autoResize, innerRef, ...props } = this.props;
+    const { autoResize, innerRef, minHeight, ...props } = this.props;
     return (
       <textarea onInput={autoResize ? (e => this.handleResize(e.currentTarget)) : undefined} style={
         {

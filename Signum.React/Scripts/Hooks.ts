@@ -46,43 +46,52 @@ export function useAPI<T>(defaultValue: T, key: ReadonlyArray<any> | undefined, 
 
 export function useThrottle<T>(value: T, limit: number) : T {
   const [throttledValue, setThrottledValue] = React.useState(value);
-  const lastRan = React.useRef(Date.now());
 
+  const mounted = React.useRef(true);
+  const lastRequested = React.useRef<(undefined | { value: T })>(undefined);
   React.useEffect(
     () => {
-      const handler = setTimeout(function () {
-        if (Date.now() - lastRan.current >= limit) {
-          setThrottledValue(value);
-          lastRan.current = Date.now();
-        }
-      }, limit - (Date.now() - lastRan.current));
+      if (lastRequested.current) {
+        lastRequested.current.value = value;
+      } else {
+        lastRequested.current = { value };
+        const handler = setTimeout(function () {
+          if (mounted.current) {
+            setThrottledValue(lastRequested.current!.value);
+            lastRequested.current = undefined;
 
-      return () => {
-        clearTimeout(handler);
-      };
+            clearTimeout(handler);
+          }
+        }, limit);
+      }
     },
     [value, limit]
   );
 
+  React.useEffect(() => {
+    return () => { mounted.current = false; }
+  }, []);
+
   return throttledValue;
 };
 
-export function useQuery(fo: FindOptions | null): ResultTable | undefined | null {
-  return useAPI(undefined, [fo && Finder.findOptionsPath(fo)], signal =>
+export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
+  return useAPI(undefined, [fo && Finder.findOptionsPath(fo), ...(additionalDeps || [])], signal =>
     fo == null ? Promise.resolve<ResultTable | null>(null) :
       Finder.getQueryDescription(fo.queryName)
         .then(qd => Finder.parseFindOptions(fo!, qd, false))
-        .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)));
+        .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal))
+    , options);
 }
 
-export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): Finder.AddToLite<R> | null | undefined {
+export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): Finder.AddToLite<R> | null | undefined {
   var resultTable = useQuery(entity == null ? null : {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
     columnOptionsMode: "Replace",
-  });
+  }, additionalDeps, options);
 
   if (entity == null)
     return null;
