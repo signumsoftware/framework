@@ -636,7 +636,10 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
     return new ReadonlyBinding<any>(parentValue, "");
   var suffix = "";
   let val = parentValue;
-  for (let i = 0; i < lambdaMembers.length - 1; i++) {
+
+  var lastIsIndex = lambdaMembers[lambdaMembers.length - 1].type == "Indexer";
+
+  for (let i = 0; i < lambdaMembers.length - (lastIsIndex ? 2 : 1); i++) {
     const member = lambdaMembers[i];
     switch (member.type) {
 
@@ -646,7 +649,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
         break;
       case "Mixin":
         val = val.mixins[member.name];
-        suffix += ".mixins[" + member.name + "].element";
+        suffix += ".mixins[" + member.name + "]";
+        break;
+      case "Indexer":
+        val = val[parseInt(member.name)];
+        suffix += "[" + member.name + "].element";
         break;
       default: throw new Error("Unexpected " + member.type);
 
@@ -657,7 +664,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
   switch (lastMember.type) {
 
     case "Member": return new Binding(val, lastMember.name, suffix + "." + lastMember.name);
-    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "].element");
+    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "]");
+    case "Indexer":
+      const preLastMember = lambdaMembers[lambdaMembers.length - 2];
+      var binding = new Binding<MList<any>>(val, preLastMember.name, suffix + "." + preLastMember.name)
+      return new MListElementBinding(binding, parseInt(lastMember.name));
     default: throw new Error("Unexpected " + lastMember.type);
   }
 }
