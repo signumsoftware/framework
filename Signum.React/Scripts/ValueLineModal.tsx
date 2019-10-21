@@ -8,7 +8,7 @@ import { ValueLineProps } from "./Lines";
 import { MemberInfo } from './Reflection';
 import { Modal, BsSize } from './Components';
 
-interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps {
+interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps<any> {
 
   options: ValueLineModalOptions;
 }

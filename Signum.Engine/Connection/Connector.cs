@@ -152,6 +152,8 @@ namespace Signum.Engine
         public abstract bool SupportsFormat { get; }
 
         public abstract bool SupportsTemporalTables { get; }
+
+        public abstract bool RequiresRetry { get;  }
     }
 
     public abstract class ParameterBuilder

@@ -10,8 +10,8 @@ declare global {
   }
 }
 
-export interface IModalProps {
-  onExited?: (val: any) => void;
+export interface IModalProps<T> {
+  onExited?: (val: T) => void;
 }
 
 
@@ -20,7 +20,7 @@ export interface IHandleKeyboard {
 }
 
 export interface GlobalModalContainerState {
-  modals: React.ReactElement<IModalProps>[];
+  modals: React.ReactElement<IModalProps<any>>[];
   currentUrl: string;
 }
 
@@ -66,10 +66,10 @@ export class GlobalModalContainer extends React.Component<{}, GlobalModalContain
   }
 }
 
-export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {
+export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise<T> {
 
   return new Promise<T>((resolve) => {
-    let cloned: React.ReactElement<IModalProps>;
+    let cloned: React.ReactElement<IModalProps<T>>;
     const onExited = (val: T) => {
       current.state.modals.remove(cloned);
       current.forceUpdate();

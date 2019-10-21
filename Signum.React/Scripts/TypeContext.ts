@@ -446,7 +446,7 @@ export interface EntityFrame {
   onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
-  onClose: (ok?: boolean) => void;
+  onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowChangeEntity: boolean;
 }
