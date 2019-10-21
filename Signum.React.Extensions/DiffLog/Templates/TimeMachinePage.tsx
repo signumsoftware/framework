@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
 import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
@@ -18,6 +19,7 @@ import { UncontrolledTabs, Tab } from '@framework/Components'
 import { is } from '@framework/Signum.Entities'
 import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
+import { asUTC } from '../../../../Framework/Signum.React/Scripts/SearchControl/SystemTimeEditor'
 
 interface TimeMachinePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -96,7 +98,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
         <br />
         <h5>Selected Versions</h5>
         <UncontrolledTabs hideOnly>
-          {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).orderBy(a => a).flatMap((d, i, dates) => [
+          {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d)).orderBy(a => a).flatMap((d, i, dates) => [
             <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
               <RenderEntityVersion lite={lite} asOf={d} />
             </Tab>,
@@ -109,7 +111,6 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
     );
   }
 }
-
 
 
 interface RenderEntityVersionProps {

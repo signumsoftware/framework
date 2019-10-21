@@ -185,7 +185,7 @@ namespace Signum.Engine.Toolbar
             )).ToList();
             result.RemoveAll(extraDividers.Contains);
             var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (
-                i == result.Count ||
+                i == result.Count - 1 ||
                 IsPureHeader(result[i + 1]) ||
                 result[i + 1].type == ToolbarElementType.Divider ||
                 result[i + 1].type == ToolbarElementType.Header && result[i + 1].content is Lite<ToolbarMenuEntity>

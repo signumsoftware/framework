@@ -121,7 +121,7 @@ function ToolbarIconButton({ tr  }: { tr: ToolbarClient.ToolbarResponse<any> }) 
 
 
 
-interface ToolbarMainModalModalProps extends IModalProps {
+interface ToolbarMainModalModalProps extends IModalProps<undefined> {
   tr: ToolbarClient.ToolbarResponse<any>;
 }
 

@@ -6,7 +6,7 @@ import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { Modal } from '@framework/Components';
 
-interface ShowCodeModalProps extends React.Props<ShowCodeModal>, IModalProps {
+interface ShowCodeModalProps extends React.Props<ShowCodeModal>, IModalProps<undefined> {
   typeName: string;
   node: BaseNode;
 }

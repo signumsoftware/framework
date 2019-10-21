@@ -90,7 +90,7 @@ export module Converter {
     return convertedFilters.then(filters => {
 
       fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-
+      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
       fo.columnOptionsMode = uq.columnsMode;
 
       fo.columnOptions = (uq.columns || []).map(f => ({

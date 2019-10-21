@@ -16,7 +16,6 @@ namespace Signum.Entities.Word
         [StringLengthValidator(Min = 3, Max = 200)]
         public string Name { get; set; }
 
-        
         public QueryEntity Query { get; set; }
 
         public WordModelEntity? Model { get; set; }
@@ -27,7 +26,6 @@ namespace Signum.Entities.Word
         public TemplateApplicableEval? Applicable { get; set; }
 
         public bool DisableAuthorization { get; set; }
-
 
         public Lite<FileEntity>? Template { get; set; }
 

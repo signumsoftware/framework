@@ -404,7 +404,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
   }
 }
 
-interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps {
+interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps<boolean | undefined> {
   title: React.ReactNode;
   mainComponent: () => React.ReactElement<any>;
 }
