@@ -113,7 +113,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
         notifySuccess();
         eoc.frame.onClose(true);
       };
-      eoc.defaultClick();
+      eoc.click();
     }
   });
 }
