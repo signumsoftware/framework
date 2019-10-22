@@ -165,8 +165,8 @@ namespace Signum.Entities
                     entity.SetParentEntity(this);
                 else
                 {
-                    foreach (var item in (IEnumerable<ModifiableEntity>)field!)
-                        item.SetParentEntity(this);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)field!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
                 }
             }
         }
