@@ -315,6 +315,6 @@ export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undef
   if (icon === undefined)
     return icon2
 
-  return icon2;
+  return icon;
 }
 
