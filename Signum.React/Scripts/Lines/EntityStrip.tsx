@@ -14,9 +14,10 @@ export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
   iconStart?: boolean;
   autocomplete?: AutocompleteConfig<any> | null;
-  onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
+  onRenderItem?: (item: any /*T*/) => React.ReactNode;
   showType?: boolean;
-  onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -57,6 +58,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                   onRenderItem={s.onRenderItem}
                   drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, this.props.vertical ? "v" : "h") : undefined}
                   onItemHtmlAttributes={s.onItemHtmlAttributes}
+                  onItemContainerHtmlAttributes={s.onItemContainerHtmlAttributes}
                   onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
                   onView={this.canView(mlec.value) ? e => this.handleViewElement(e, mlec.index!) : undefined}
                 />))
@@ -161,6 +163,7 @@ export interface EntityStripElementProps {
   autoComplete?: AutocompleteConfig<any> | null;
   onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
 }
 
@@ -231,7 +234,9 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
     return (
       <li className="sf-strip-element"
-        {...EntityListBase.entityHtmlAttributes(this.props.ctx.value)}>
+        {...EntityListBase.entityHtmlAttributes(this.props.ctx.value)}
+        {...(this.props.onItemContainerHtmlAttributes && this.props.onItemContainerHtmlAttributes(this.props.ctx.value))}
+      >
         <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
           onDragEnter={drag && drag.onDragOver}
           onDragOver={drag && drag.onDragOver}
