@@ -19,6 +19,7 @@ export interface TypeaheadProps {
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
   noResultsMessage?: string;
+  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>
 }
 
 export interface TypeaheadState {
@@ -231,40 +232,26 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
       p.onChange(inputRef.current!.value);
   }
 
+  const input =
+    <input ref={inputRef} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
+      value={p.value}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyUp={handleKeyUp}
+      onKeyDown={handleKeyDown}
+      onChange={handleOnChange}
+    />;
 
-  //return (
-  //  <Dropdown>
-  //    <Dropdown.Toggle id="bla">Bla</Dropdown.Toggle>
-
-
-  //    <Dropdown.Menu className={classes("typeahead dropdown-menu", rtl && "dropdown-menu-right")} >
-  //      <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-  //      <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-  //      <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-  //    </Dropdown.Menu>
-  //  </Dropdown>
-  //);
-
-  //show={shown}
-    //<div ref={container}>
 
   return (
     <>
-      <input ref={inputRef} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
-        value={p.value}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyUp={handleKeyUp}
-        onKeyDown={handleKeyDown}
-        onChange={handleOnChange}
-      />
+      {p.renderInput ? p.renderInput(input) : input}
       <Dropdown show={shown} onToggle={(isOpen: boolean) => setShown(isOpen)}>
+        <Dropdown.Toggle id="dropdown" as={CustomToggle}></Dropdown.Toggle>
         {(p.renderList ? p.renderList({ blur, items, selectedIndex, writeInInput } as TypeaheadHandle) : renderDefaultList())}
       </Dropdown>
-      
     </>
   );
-    //</div>
 
   function renderDefaultList() {
     return (
@@ -285,6 +272,29 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
     );
   }
 });
+
+interface CustomToggleProps {
+  onClick?: (e: React.MouseEvent<any>) => void;
+}
+
+class CustomToggle extends React.Component<CustomToggleProps> {
+  constructor(props: CustomToggleProps, context: any) {
+    super(props, context);
+  }
+
+  handleClick = (e: React.MouseEvent<any>) => {
+    e.preventDefault();
+    this.props.onClick!(e);
+  }
+
+  render() {
+    return (
+      <a href="" onClick={this.handleClick}>
+        {this.props.children}
+      </a>
+    );
+  }
+}
 
 
 Typeahead.defaultProps = {

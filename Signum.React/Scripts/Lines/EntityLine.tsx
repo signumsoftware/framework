@@ -146,17 +146,23 @@ export function EntityLine(props: EntityLineProps) {
       <div className="SF-entity-line">
         {
           !EntityBaseController.hasChildrens(buttons) ?
-            <div style={{ position: "relative" }}>{linkOrAutocomplete}</div> :
-            <div className={p.ctx.inputGroupClass}>
-              {linkOrAutocomplete}
-              {buttons}
-            </div>
+            (hasValue ? renderLink() : renderAutoComplete()) :
+            (hasValue ?
+              <div className={p.ctx.inputGroupClass}>
+                {renderLink()}
+                {buttons}
+              </div> :
+              renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
+                {input}
+                {buttons}
+              </div>)
+            )
         }
       </div>
     </FormGroup>
   );
 
-  function renderAutoComplete() {
+  function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
 
     const ctx = p.ctx;
 
@@ -174,7 +180,9 @@ export function EntityLine(props: EntityLineProps) {
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
-        onSelect={handleOnSelect} />
+        onSelect={handleOnSelect}
+        renderInput={renderInput}
+      />
     );
   }
 
