@@ -2,6 +2,7 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
 import { namespace } from 'd3';
+import { FunctionalAdapter } from './FrameModal';
 
 export interface ButtonBarProps extends ButtonsContext {
   align?: "left" | "right";
@@ -15,7 +16,7 @@ export interface ButtonBarHandle {
 export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) {
 
   const ctx: ButtonsContext = p;
-  const rb = ctx.frame.entityComponent as any as IRenderButtons;
+  const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
 
   const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) || [])
     .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])

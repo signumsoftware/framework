@@ -348,7 +348,17 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
 
 export class FunctionalAdapter extends React.Component {
 
+  innerRef?: any | null;
+
   render() {
+    var only = React.Children.only(this.props.children);
+    if (!React.isValidElement(only))
+      throw new Error("Not a valid react element: " + only);
+
+    if (isForwardRef(only.type)) {
+      return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } });
+    }
+
     return this.props.children;
   }
 
@@ -373,4 +383,16 @@ export class FunctionalAdapter extends React.Component {
 
     return false
   }
+
+  static innerRef(component: React.Component | null | undefined) {
+
+    if (component instanceof FunctionalAdapter) {
+      return component.innerRef;
+    }
+    return component;
+  }
+}
+
+function isForwardRef(type: any) {
+  return type.$$typeof == Symbol.for("react.forward_ref");
 }
