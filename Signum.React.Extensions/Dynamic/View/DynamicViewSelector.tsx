@@ -44,7 +44,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
   updateViewNames(props: DynamicViewSelectorComponentProps) {
     this.setState({ viewNames: undefined });
     if (props.ctx.value.entityType)
-      DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
+      Navigator.viewDispatcher.getViewNames(props.ctx.value.entityType!.cleanName)
         .then(viewNames => this.setState({ viewNames: viewNames }))
         .done();
   }
