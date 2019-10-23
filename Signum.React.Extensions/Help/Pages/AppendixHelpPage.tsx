@@ -12,14 +12,13 @@ import { EditableComponent } from './EditableText';
 import { notifySuccess, confirmInNecessary } from '@framework/Operations/EntityOperations';
 import { getOperationInfo } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
-import ButtonBar from '@framework/Frames/ButtonBar';
 import { classes } from '@framework/Globals';
 
 
 export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
 
   var [count, setCount] = React.useState(0);
-  var appendix = useAPI(undefined, [count], () => API.appendix(p.match.params.uniqueName));
+  var appendix = useAPI(undefined, () => API.appendix(p.match.params.uniqueName), [count]);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)

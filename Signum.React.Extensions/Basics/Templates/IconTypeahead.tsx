@@ -88,16 +88,14 @@ export function IconTypeahead(p: IconTypeaheadProps) {
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      <Typeahead
-        value={p.icon || ""}
-        inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
-        getItems={handleGetItems}
-        onSelect={handleSelect}
-        onChange={handleSelect}
-        renderItem={handleRenderItem}
-        minLength={0}
-      />
-    </div>
+    <Typeahead
+      value={p.icon || ""}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+      getItems={handleGetItems}
+      onSelect={handleSelect}
+      onChange={handleSelect}
+      renderItem={handleRenderItem}
+      minLength={0}
+    />
   );
 }

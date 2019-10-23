@@ -2,79 +2,61 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
-import { API, CacheTableStats, ResetLazyStats } from './CacheClient'
+import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
+import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
 
-interface CacheStatisticsPageProps extends RouteComponentProps<{}> {
+export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
 
-}
 
-interface CacheStatisticsPageState {
-  isEnabled?: boolean;
-  tables?: CacheTableStats[];
-  lazies?: ResetLazyStats[];
-}
+  const [count, setCount] = React.useState<number>(0)
 
-export default class CacheStatisticsPage extends React.Component<CacheStatisticsPageProps, CacheStatisticsPageState> {
+  var state = useAPI(undefined, signal => API.view(), [count], { avoidReset: true });
 
-  constructor(props: CacheStatisticsPageProps) {
-    super(props);
-
-    this.state = {};
+  function handleDisabled(e: React.MouseEvent<any>) {
+    API.disable().then(() => setCount(count + 1)).done();
   }
 
-  componentWillMount() {
-    this.loadState().done();
+  function handleEnabled(e: React.MouseEvent<any>) {
+    API.enable().then(() => setCount(count + 1)).done();
   }
 
-  loadState() {
-    return API.view()
-      .then(s => this.setState({
-        tables: s.tables,
-        lazies: s.lazies,
-        isEnabled: s.isEnabled
-      }));
+  function handleClear(e: React.MouseEvent<any>) {
+    API.clear().then(() => setCount(count + 1)).done();
   }
 
-  handleDisabled = (e: React.MouseEvent<any>) => {
-    API.disable().then(() => this.loadState()).done();
-  }
-
-  handleEnabled = (e: React.MouseEvent<any>) => {
-    API.enable().then(() => this.loadState()).done();
-  }
-
-  handleClear = (e: React.MouseEvent<any>) => {
-    API.clear().then(() => this.loadState()).done();
-  }
-
-  render() {
-
+  if (state == null)
     return (
       <div>
-        <h2>Cache Statistics</h2>
-        <div className="btn-toolbar">
-          {this.state.isEnabled == true && <button onClick={this.handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</button>}
-          {this.state.isEnabled == false && <button onClick={this.handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
-          {<button onClick={this.handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
-        </div >
-        <Tabs id="tabs">
-          {this.state.tables &&
-            <Tab title="Tables" eventKey="table">
-              {this.renderTables()}
-            </Tab>}
-          {this.state.lazies &&
-            <Tab title="Lazies" eventKey="lazy">
-              {this.renderLazies()}
-            </Tab>
-          }
-        </Tabs>
-
-
+        <h2>Loading...</h2>
       </div>
     );
-  }
 
-  renderLazies() {
+
+  return (
+    <div>
+      <h2>Cache Statistics</h2>
+      <div className="btn-toolbar">
+        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</button>}
+        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
+        {<button onClick={handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
+      </div >
+      <Tabs id="tabs">
+        {state.tables &&
+          <Tab title="Tables" eventKey="table">
+            {renderTables(state)}
+          </Tab>}
+        {state.lazies &&
+          <Tab title="Lazies" eventKey="lazy">
+            {renderLazies(state)}
+          </Tab>
+        }
+      </Tabs>
+
+
+    </div>
+  );
+
+  function renderLazies(state: CacheState) {
     return (
       <table className="table table-sm">
         <thead>
@@ -87,7 +69,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
           </tr>
         </thead>
         <tbody>
-          {this.state.lazies!.map((lazy, i) => <tr key={i}>
+          {state.lazies!.map((lazy, i) => <tr key={i}>
             <td> {lazy.typeName} </td>
             <td> {lazy.hits} </td>
             <td> {lazy.invalidations}</td>
@@ -98,11 +80,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
       </table>);
   }
 
-  renderTables() {
-
-    const list: React.ReactNode[] = [];
-    if (this.state.tables)
-      this.state.tables.forEach(st => this.showTree(list, st, 0));
+  function renderTables(state: CacheState) {
 
     return (
       <table className="table table-sm">
@@ -118,13 +96,13 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
           </tr>
         </thead>
         <tbody>
-          {list}
+          {state.tables.map(m => renderTree(m, 0))}
         </tbody>
       </table>);
   }
 
 
-  showTree(list: React.ReactNode[], table: CacheTableStats, depth: number) {
+  function renderTree(table: CacheTableStats, depth: number): React.ReactNode {
 
     const opacity =
       depth == 0 ? 1 :
@@ -132,22 +110,19 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
           depth == 2 ? .5 :
             depth == 3 ? .4 : .3;
 
-    list.push(
-      <tr style={{ opacity: opacity }} key={list.length}>
-        <td> {Array.repeat(depth, " → ").join("") + table.tableName}</td >
-        <td> {table.typeName} </td>
-        <td> {table.count != undefined ? table.count.toString() : "-- not loaded --"} </td>
-        <td> {table.hits} </td>
-        <td> {table.invalidations}</td>
-        <td> {table.loads}</td>
-        <td> {table.sumLoadTime} </td>
-      </tr>
+    return (
+      <>
+        <tr style={{ opacity: opacity }} key={table.tableName}>
+          <td> {Array.repeat(depth, " → ").join("") + table.tableName}</td >
+          <td> {table.typeName} </td>
+          <td> {table.count != undefined ? table.count.toString() : "-- not loaded --"} </td>
+          <td> {table.hits} </td>
+          <td> {table.invalidations}</td>
+          <td> {table.loads}</td>
+          <td> {table.sumLoadTime} </td>
+        </tr>
+        {table.subTables && table.subTables.map(st => renderTree(st, depth + 1))}
+      </>
     );
-
-    if (table.subTables)
-      table.subTables.forEach(st => this.showTree(list, st, depth + 1));
   }
 }
-
-
-

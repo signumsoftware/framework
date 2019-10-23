@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { RouteComponentProps, Link } from 'react-router-dom'
+import { Collapse } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
@@ -16,7 +17,6 @@ import { notifySuccess } from '@framework/Operations/EntityOperations';
 import * as Operations from '@framework/Operations';
 import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
-import { Collapse } from '@framework/Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 (window as any).myHistory = Navigator.history;
@@ -25,8 +25,8 @@ export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string 
 
   var cleanName = p.match.params.cleanName;
   var [count, setCount] = React.useState(0);
-  var typeHelp = useAPI(undefined, [count, cleanName], () => API.type(cleanName));
-  var namespaceHelp = useAPI(undefined, [typeHelp], () => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace));
+  var typeHelp = useAPI(undefined, () => API.type(cleanName), [count, cleanName]);
+  var namespaceHelp = useAPI(undefined, () => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();
 
   useTitle(HelpMessage.Help.niceToString() +
@@ -124,8 +124,10 @@ function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{
           <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {node.value.pr.member!.niceName}
         </span>
       </div>
-      <Collapse isOpen={open} tag="dl" attrs={{ className: "row ml-4" }}>
-        {node.children.map(n => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={onChange} />)}
+      <Collapse in={open}>
+        <dl className="row ml-4">
+          {node.children.map(n => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={onChange} />)}
+        </dl>
       </Collapse>
     </>
   );
@@ -161,7 +163,7 @@ function QueryBlock({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryHelpEn
           <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={onChange} />
         </div>
       </div>
-      <Collapse isOpen={open}>
+      <Collapse in={open}>
         <dl className="row ml-4">
           {mlistItemContext(ctx.subCtx(th => th.columns)).map(qctx => <QueryColumnLine key={qctx.value.columnName} ctx={qctx} cleanName={cleanName} onChange={onChange} />)}
         </dl>

@@ -56,7 +56,9 @@ function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
     <div>
       <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label || getToString(r.content!)}</h4>
       <Collapse in={isOpen}>
-        <ToolbarMainRendererPrivate response={r} />
+        <div>
+          <ToolbarMainRendererPrivate response={r} />
+        </div>
       </Collapse>
     </div>
   );

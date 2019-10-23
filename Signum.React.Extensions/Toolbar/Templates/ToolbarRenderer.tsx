@@ -12,11 +12,8 @@ import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
+import { useAPI } from '@framework/Hooks'
 
-export interface ToolbarRendererProps {
-  location?: ToolbarLocation;
-  tag?: boolean;
-}
 
 export interface ToolbarRendererState {
   response?: ToolbarClient.ToolbarResponse<any>;
@@ -24,76 +21,50 @@ export interface ToolbarRendererState {
   avoidCollapse: ToolbarClient.ToolbarResponse<any>[];
 }
 
-export default class ToolbarRenderer extends React.Component<ToolbarRendererProps, ToolbarRendererState>
-{
-  static defaultProps = { location: "Top" as ToolbarLocation, tag: true };
+export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
+  const r = useAPI(undefined, () => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
 
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      expanded: [],
-      avoidCollapse: [],
-    };
+  const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
+  const [avoidCollapse, setAvoidCollapse] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
+
+  if (!r)
+    return null;
+
+  if (p.location == "Top") {
+
+    var navItems = r.elements && r.elements.map((res, i) => withKey(renderNavItem(res, i), i));
+
+    
+    return (
+      <div className={classes("nav navbar-nav")}>
+        {navItems}
+      </div>
+    );
   }
+  else
+    return (
+      <div className="nav">
+        {r.elements && r.elements.flatMap(sr => renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
+      </div>
+    );
 
-  isAlive = true;
-  componentWillUnmount() {
-    this.isAlive = false;
-  }
 
-  componentWillMount() {
-    ToolbarClient.API.getCurrentToolbar(this.props.location!)
-      .then(res => this.isAlive && this.setState({ response: res }))
-      .done();
-  }
-
-  render() {
-
-    const r = this.state.response;
-
-    if (!r)
-      return null;
-
-    if (this.props.location == "Top") {
-
-      var navItems = r.elements && r.elements.map((res, i) => withKey(this.renderNavItem(res, i), i));
-
-      if (!this.props.tag)
-        return navItems;
-
-      return (
-        <div className={classes("nav navbar-nav", this.props.tag)}>
-          {navItems}
-        </div>
-      );
-    }
-    else
-      return (
-        <DropdownItemContainer tag={this.props.tag}>
-          {r.elements && r.elements.flatMap(sr => this.renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
-        </DropdownItemContainer>
-      );
-  }
-
-  handleOnToggle = (res: ToolbarClient.ToolbarResponse<any>) => {
-
-    if (this.state.avoidCollapse.contains(res)) {
-      this.state.avoidCollapse.remove(res);
+  function handleOnToggle(res: ToolbarClient.ToolbarResponse<any>) {
+    if (avoidCollapse.contains(res)) {
+      avoidCollapse.remove(res);
       return;
     }
 
-    if (!this.state.expanded.contains(res))
-      this.state.expanded.push(res);
+    if (!expanded.contains(res))
+      setExpanded([...expanded, res]);
     else
-      this.state.expanded.clear();
-
-    this.forceUpdate();
+      setExpanded([]);
   }
 
-  renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
+  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
 
     switch (res.type) {
-     
+
       case "Divider":
         return (
           <Nav.Item>{"|"}</Nav.Item>
@@ -103,19 +74,19 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
       case "Item":
         if (res.elements && res.elements.length) {
           var title = res.label || res.content!.toStr;
-          var icon = this.icon(res);
+          var icon = getIcon(res);
           return (
             <Dropdown
-              onToggle={() => this.handleOnToggle(res)}
-              show={this.state.expanded.contains(res)} >
+              onToggle={() => handleOnToggle(res)}
+              show={expanded.contains(res)} >
               <Dropdown.Toggle id={"button" + index}>{!icon ? title : (<span>{icon}{title}</span>)}</Dropdown.Toggle>
               <Dropdown.Menu>
-                {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 1, res)).map((sr, i) => withKey(sr, i))}
+                {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 1, res)).map((sr, i) => withKey(sr, i))}
               </Dropdown.Menu>
             </Dropdown>
           );
         }
-        
+
         if (res.url) {
           return (
             <Nav.Item>
@@ -142,10 +113,10 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
         if (res.type == "Header") {
           return (
-            <Nav.Item>{this.icon(res)}{res.label}</Nav.Item>
+            <Nav.Item>{getIcon(res)}{res.label}</Nav.Item>
           );
         }
-      
+
         return <Nav.Item style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
       default:
@@ -155,23 +126,23 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
 
 
-  handleClick = (e: React.MouseEvent<any>, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) => {
+  function handleClick(e: React.MouseEvent<any>, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) {
 
-    this.state.avoidCollapse.push(topRes);
+    avoidCollapse.push(topRes);
 
     var path = findPath(res, [topRes]);
 
     if (!path)
       throw new Error("Path not found");
 
-    if (this.state.expanded.contains(res))
+    if (expanded.contains(res))
       path.pop();
 
-    this.setState({ expanded: path });
+    setExpanded(path);
   }
 
-  renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
-    
+  function renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
+
     const menuItemN = "menu-item-" + indent;
 
     switch (res.type) {
@@ -188,16 +159,16 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
         if (res.elements && res.elements.length) {
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => this.handleClick(e, res, topRes)}
-              className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
-              {this.icon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={this.state.expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align"  />
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => handleClick(e, res, topRes)}
+              className={classes(menuItemN, "sf-cursor-pointer", expanded.contains(res) && "active")}>
+              {getIcon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align" />
             </HeaderOrItem>
-          ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : [])
+          ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, topRes)) : [])
         }
 
         if (res.url) {
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className = { menuItemN } >
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className={classes("sf-cursor-pointer", menuItemN)} >
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </HeaderOrItem>
           ];
@@ -214,7 +185,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
           }
 
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={menuItemN}>
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN)}>
               {config.getIcon(res)}{config.getLabel(res)}
             </HeaderOrItem>
           ];
@@ -222,21 +193,28 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
         if (res.type == "Header")
           return [
-            <HeaderOrItem className={menuItemN}>{this.icon(res)}{res.label}</HeaderOrItem>
+            <HeaderOrItem className={menuItemN}>{getIcon(res)}{res.label}</HeaderOrItem>
           ];
-        
-        return [<Dropdown.Item style={{ color: "red" }} className={menuItemN}>{"No Content or Url found"}</Dropdown.Item>];
+
+        return [
+          <Dropdown.Item style={{ color: "red" }} className={menuItemN}>
+            {"No Content or Url found"}
+          </Dropdown.Item>
+        ];
+
       default: throw new Error("Unexpected " + res.type);
     }
   }
 
-  icon(res: ToolbarClient.ToolbarResponse<any>) {
+  function getIcon(res: ToolbarClient.ToolbarResponse<any>) {
 
     var icon = parseIcon(res.iconName);
 
     return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} fixedWidth />
   }
 }
+
+ToolbarRenderer.defaultProps = { location: "Top" as ToolbarLocation, tag: true };
 
 function withKey(e: React.ReactElement<any>, index: number) {
   return React.cloneElement(e, { key: index });
@@ -265,32 +243,6 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
   }
 
   return null;
-}
-
-
-export class DropdownItemContainer extends React.Component<{ tag?: boolean }> {
-
-  handleToggle = () => {
-
-  }
-
-  getChildContext() {
-    return { toggle: this.handleToggle };
-  }
-
-  static childContextTypes = { "toggle": PropTypes.func };
-
-  render() {
-
-    if (!this.props.tag)
-      return this.props.children;
-
-    return (
-      <div className="nav">
-        {this.props.children}
-      </div>
-    );
-  }
 }
 
 

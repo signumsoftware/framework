@@ -170,12 +170,10 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     if (this.props.options) {
       if (typeof this.props.options == "function")
         return (
-          <div style={{ position: "relative" }}>
-            <Typeahead
-              inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
-              getItems={this.handleGetItems}
-              onSelect={this.handleTypeaheadSelect} />
-          </div>
+          <Typeahead
+            inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
+            getItems={this.handleGetItems}
+            onSelect={this.handleTypeaheadSelect} />
         );
       else
         return (

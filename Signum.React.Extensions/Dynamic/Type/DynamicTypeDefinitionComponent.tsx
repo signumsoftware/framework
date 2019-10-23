@@ -1194,16 +1194,15 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
           {this.props.binding.member}
         </label>
         <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
-          <div style={{ position: "relative" }}>
-            <Typeahead
-              inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
-              onBlur={this.props.onBlur}
-              getItems={this.handleGetItems}
-              value={this.props.binding.getValue()}
-              onChange={this.handleOnChange} />
-          </div>
+          <Typeahead
+            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
+            onBlur={this.props.onBlur}
+            getItems={this.handleGetItems}
+            value={this.props.binding.getValue()}
+            onChange={this.handleOnChange} />
         </div>
-      </div>);
+      </div>
+    );
   }
 }
 

@@ -11,7 +11,9 @@ import { TypeaheadOptions } from '@framework/Components/Typeahead'
 
 
 export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefined>; onChange?: () => void }){
+
   const forceUpdate = useForceUpdate();
+
   function handleOnChange(newColor: string | undefined | null) {
     p.ctx.value = newColor;
     if (p.onChange)
@@ -75,17 +77,15 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      <Typeahead
-        value={p.color || ""}
-        inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
-        getItems={handleGetItems}
-        onSelect={handleSelect}
-        onChange={handleSelect}
-        renderItem={handleRenderItem}
-        minLength={0}
-      />
-    </div>
+    <Typeahead
+      value={p.color || ""}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+      getItems={handleGetItems}
+      onSelect={handleSelect}
+      onChange={handleSelect}
+      renderItem={handleRenderItem}
+      minLength={0}
+    />
   );
 }
 

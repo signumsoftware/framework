@@ -17,6 +17,7 @@ import { getTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
+import { SearchControlOptions } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
@@ -31,7 +32,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
           isShy: true,
         }) : undefined);
 
-    SearchControl.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
+    SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
     options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
 

@@ -16,7 +16,7 @@ import { getOperationInfo } from '../../../../Framework/Signum.React/Scripts/Ope
 export default function NamespaceHelpPage(p: RouteComponentProps<{ namespace: string }>) {
 
   var [count, setCount] = React.useState(0);
-  var namespace = useAPI(undefined, [count], () => API.namespace(p.match.params.namespace));
+  var namespace = useAPI(undefined, () => API.namespace(p.match.params.namespace), [count]);
   useTitle(HelpMessage.Help.niceToString() + (namespace && (" > " + namespace.title)));
   var forceUpdate = useForceUpdate();
   if (namespace == null)

@@ -8,6 +8,8 @@ import { hasAggregate } from '@framework/FindOptions';
 import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
+import { Rectangle } from '../../../Map/Utils';
+import { useThrottle } from '../../../../../Framework/Signum.React/Scripts/Hooks';
 
 
 export interface ReactChartProps {
@@ -18,93 +20,86 @@ export interface ReactChartProps {
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
 }
 
-export default class ReactChart extends React.Component<ReactChartProps, { width: number | null, height: number | null, initialLoad: boolean }> {
+export default function ReactChart(p: ReactChartProps) {
 
-  static maxRowsForAnimation = 500;
-
-  constructor(props: ReactChartProps) {
-    super(props);
-    this.state = { width: null, height: null, initialLoad: true };
-  }
-
-  divElement?: HTMLDivElement | null;
-
-  setDivElement(div?: HTMLDivElement | null) {
-    if (this.divElement == null && div != null) {
-      const rect = div.getBoundingClientRect();
-      if (this.state.width != rect.width && this.state.height != rect.height) {
-        this.setState({ width: rect.width, height: rect.height });
+  const [initialLoad, setInitialLoad] = React.useState<boolean>(p.data != null && p.data.rows.length < ReactChart.maxRowsForAnimation);
+  const initialLoadHandler = React.useRef<number | null>(null);
+  React.useEffect(() => {
+    if (p.data != null && p.data.rows.length < ReactChart.maxRowsForAnimation) {
+      setInitialLoad(true);
+      if (initialLoadHandler.current != null) {
+        clearTimeout(initialLoadHandler.current);
+        initialLoadHandler.current = null;
       }
+      initialLoadHandler.current = setTimeout(() => {
+        setInitialLoad(false);
+      }, 500);
 
-    }
-    this.divElement = div;
-  }
-
-  componentWillMount() {
-    window.addEventListener('resize', this.onResize);
-    if (this.props.data) {
-      this.setInitialTimer();
-    }
-  }
-
-  resizeHandle?: number;
-  onResize = () => {
-    if (this.resizeHandle != null)
-      clearTimeout(this.resizeHandle);
-
-    this.resizeHandle = setTimeout(this.onResizeTimeout, 300);
-  }
-
-  onResizeTimeout = () => {
-    if (this.divElement) {
-      const rect = this.divElement.getBoundingClientRect();
-      if (this.state.width != rect.width || this.state.height != rect.height) {
-        this.setState({ width: rect.width, height: rect.height });
-      }
-    }
-  }
-
-  initialLoadTimeoutHandle?: number;
-  componentWillReceiveProps(newProps: ReactChartProps) {
-    if (this.props.data == null && newProps.data != null) {
-      if (newProps.data.rows.length < ReactChart.maxRowsForAnimation)
-        this.setInitialTimer();
-      else
-        this.setState({ initialLoad: false }); //To use the same rendering loop
-    }
-  }
-
-  setInitialTimer() {
-    this.initialLoadTimeoutHandle = setTimeout(() => {
-      this.initialLoadTimeoutHandle = undefined;
-      this.setState({ initialLoad: false });
-    }, 500);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.onResize);
-    if (this.initialLoadTimeoutHandle != null) {
-      clearTimeout(this.initialLoadTimeoutHandle);
-      this.initialLoadTimeoutHandle = undefined;
-    }
-  }
-
-  render() {
-    var animated = this.props.data == null || this.props.data.rows.length < ReactChart.maxRowsForAnimation;
-    return (
-      <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={d => this.setDivElement(d)} >
-        {this.state.width != null && this.state.height != null &&
-          this.props.onRenderChart({
-            data: this.props.data,
-            parameters: this.props.parameters,
-            loading: this.props.loading,
-            onDrillDown: this.props.onDrillDown,
-            height: this.state.height,
-            width: this.state.width,
-            initialLoad: this.state.initialLoad,
-          })
+      return () => {
+        if (initialLoadHandler.current != null) {
+          clearTimeout(initialLoadHandler.current);
+          initialLoadHandler.current = null;
         }
-      </div>
-    );
+      };
+    }
+
+  }, [p.data != null]);
+
+  const [size, setSize] = React.useState<{ width: number, height: number } | undefined>();
+  const divElement = React.useRef<HTMLDivElement | null>(null);
+  function setNewSize() {
+    const rect = divElement.current!.getBoundingClientRect();
+    if (size == null || size.width != rect.width || size.height != rect.height)
+      setSize({ width: rect.width, height: rect.height });
   }
+
+  function setDivElement(div: HTMLDivElement | null) {
+    if (divElement.current = div) {
+      setNewSize();
+    }
+  }
+
+  React.useEffect(() => {
+    const handler = React.useRef<number | null>(null);
+    function onResize() {
+      if (handler.current != null)
+        clearTimeout(handler.current);
+
+      handler.current = setTimeout(() => {
+        if (divElement.current) {
+          setNewSize()
+        }
+      }, 300);
+    }
+
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      if (handler.current)
+        clearTimeout(handler.current);
+
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+
+  var animated = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
+  return (
+    <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={d => setDivElement(d)} >
+      {size &&
+        p.onRenderChart({
+          data: p.data,
+          parameters: p.parameters,
+          loading: p.loading,
+          onDrillDown: p.onDrillDown,
+          height: size.height,
+          width: size.width,
+          initialLoad: initialLoad,
+        })
+      }
+    </div>
+  );
 }
+
+
+ReactChart.maxRowsForAnimation = 500;

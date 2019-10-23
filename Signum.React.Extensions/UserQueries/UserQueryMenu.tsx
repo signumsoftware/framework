@@ -12,6 +12,7 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
+import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -23,43 +24,41 @@ interface UserQueryMenuState {
   isOpen: boolean;
 }
 
-export default class UserQueryMenu extends React.Component<UserQueryMenuProps, UserQueryMenuState> {
+export default function UserQueryMenu(p: UserQueryMenuProps) {
 
-  constructor(props: UserQueryMenuProps) {
-    super(props);
-    this.state = { isOpen: false };
-  }
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(undefined)
+  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined)
 
-  componentWillMount() {
+  React.useEffect(() => {
     const userQuery = window.location.search.tryAfter("userQuery=");
-     if (userQuery) {
+    if (userQuery) {
       const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
       Navigator.API.fillToStrings(uq)
-        .then(() => this.setState({ currentUserQuery: uq }))
+        .then(() => setCurrentUserQuery(uq))
         .done();
     }
+  }, []);
+
+
+  function handleSelectedToggle(isOpen: boolean) {
+    if (isOpen && userQueries == undefined)
+      reloadList().done();
+
+    setIsOpen(isOpen);
   }
 
-  handleSelectedToggle = (isOpen: boolean) => {
-    if (isOpen && this.state.userQueries == undefined)
-      this.reloadList().done();
-
-    this.setState({ isOpen: isOpen });
+  function reloadList(): Promise<void> {
+    return UserQueryClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
+      .then(list => setUserQueries(list));
   }
 
-  reloadList(): Promise<void> {
-    return UserQueryClient.API.forQuery(this.props.searchControl.props.findOptions.queryKey)
-      .then(list => this.setState({ userQueries: list }));
-  }
-
-  handleBackToDefault = () => {
-
-    const sc = this.props.searchControl
+  function handleBackToDefault() {
+    const sc = p.searchControl
     const ofo = sc.props.findOptions;
     Finder.getQueryDescription(sc.props.findOptions.queryKey)
       .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd))
       .then(nfo => {
-
         ofo.filterOptions = [
           ...ofo.filterOptions.filter(a => a.frozen),
           ...nfo.filterOptions
@@ -70,7 +69,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
         ofo.pagination = nfo.pagination;
         ofo.systemTime = nfo.systemTime;
         sc.setState({ showFilters: false });
-        this.setState({ currentUserQuery: undefined });
+        setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -78,17 +77,14 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
   }
 
 
-  applyUserQuery(uq: Lite<UserQueryEntity>) {
-
+  function applyUserQuery(uq: Lite<UserQueryEntity>) {
     Navigator.API.fetchAndForget(uq).then(userQuery => {
-      const sc = this.props.searchControl
+      const sc = p.searchControl
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
         .then(newFindOptions => {
           sc.setState({ showFilters: true });
-          this.setState({
-            currentUserQuery: uq,
-          });
+          setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -96,23 +92,21 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     }).done()
   }
 
-  handleOnClick = (uq: Lite<UserQueryEntity>) => {
-
-    this.applyUserQuery(uq);
+  function handleOnClick(uq: Lite<UserQueryEntity>) {
+    applyUserQuery(uq);
   }
 
-  handleEdit = () => {
-    Navigator.API.fetchAndForget(this.state.currentUserQuery!)
+  function handleEdit() {
+    Navigator.API.fetchAndForget(currentUserQuery!)
       .then(userQuery => Navigator.navigate(userQuery))
-      .then(() => this.reloadList())
-      .then(() => this.applyUserQuery(this.state.currentUserQuery!))
+      .then(() => reloadList())
+      .then(() => applyUserQuery(currentUserQuery!))
       .done();
   }
 
+  async function createUserQuery(): Promise<void> {
 
-  async createUserQuery(): Promise<void> {
-
-    const sc = this.props.searchControl;
+    const sc = p.searchControl;
 
     const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription);
 
@@ -143,43 +137,40 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     }));
 
     if (uq && uq.id) {
-      await this.reloadList();
-      this.setState({ currentUserQuery: toLite(uq) },
-        () => this.applyUserQuery(this.state.currentUserQuery!));
+      await reloadList();
+
+      setCurrentUserQuery(toLite(uq));
+      applyUserQuery(toLite(uq));
     }
   }
 
-  render() {
-    const currentUserQueryToStr = this.state.currentUserQuery ? this.state.currentUserQuery.toStr : undefined;
-    const labelText = this.props.searchControl.props.largeToolbarButtons == true ?
-      (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
+  const currentUserQueryToStr = currentUserQuery ? currentUserQuery.toStr : undefined;
+  const labelText = p.searchControl.props.largeToolbarButtons == true ?
+    (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
 
-    const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
-    const userQueries = this.state.userQueries;
-    return (
-      <Dropdown
-        onToggle={this.handleSelectedToggle} show={this.state.isOpen}>
-        <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
-          {label}
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          {
-            userQueries && userQueries.map((uq, i) =>
-              <Dropdown.Item key={i}
-                className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
-                onClick={() => this.handleOnClick(uq)}>
-                {uq.toStr}
-              </Dropdown.Item>)
-          }
-          {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-          <Dropdown.Item onClick={this.handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
-          {this.state.currentUserQuery && <Dropdown.Item onClick={this.handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
-          {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { this.createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
-        </Dropdown.Menu>
-      </Dropdown>
-    );
-  }
-
+  const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
+  return (
+    <Dropdown
+      onToggle={handleSelectedToggle} show={isOpen}>
+      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
+        {label}
+      </Dropdown.Toggle>
+      <Dropdown.Menu>
+        {
+          userQueries && userQueries.map((uq, i) =>
+            <Dropdown.Item key={i}
+              className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
+              onClick={() => handleOnClick(uq)}>
+              {uq.toStr}
+            </Dropdown.Item>)
+        }
+        {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
+        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
+        {currentUserQuery && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
+        {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
 }
 
 
