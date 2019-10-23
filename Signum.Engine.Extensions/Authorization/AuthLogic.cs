@@ -141,16 +141,11 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
                     EntityCache.AddFullGraph(role);
+                    var allRoles = Database.RetrieveAll<RoleEntity>();
 
-                    DirectedGraph<RoleEntity> newRoles = new DirectedGraph<RoleEntity>();
+                    var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.Roles.Select(sr => sr.RetrieveAndRemember()));
 
-                    newRoles.Expand(role, r1 => r1.Roles.Select(a => a.RetrieveAndRemember()));
-                    foreach (var r in Database.RetrieveAll<RoleEntity>())
-                    {
-                        newRoles.Expand(r, r1 => r1.Roles.Select(a => a.RetrieveAndRemember()));
-                    }
-
-                    var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
+                    var problems = roleGraph.FeedbackEdgeSet().Edges.ToList();
 
                     if (problems.Count > 0)
                         throw new ApplicationException(
