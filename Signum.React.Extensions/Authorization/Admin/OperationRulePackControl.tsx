@@ -109,7 +109,7 @@ export const OperationRulePackControl = React.forwardRef(function OperationRuleP
     if (c.coercedValues!.contains(allowed))
       return;
 
-    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() }} />;
+    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
 });
 

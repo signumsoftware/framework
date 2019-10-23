@@ -18,7 +18,7 @@ import {
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
-import ChartRequestView from './Templates/ChartRequestView'
+import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
@@ -102,7 +102,7 @@ export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol): ()
 export namespace ButtonBarChart {
 
   interface ButtonBarChartContext {
-    chartRequestView: ChartRequestView;
+    chartRequestView: ChartRequestViewHandle;
     chartRequest: ChartRequestModel;
   }
 

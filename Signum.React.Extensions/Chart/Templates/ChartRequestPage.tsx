@@ -7,84 +7,56 @@ import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from 'react-router'
+import { useStateWithPromise } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 
 }
 
-interface ChartRequestPageState {
-  chartRequest?: ChartRequestModel;
-  userChart?: Lite<UserChartEntity>;
-}
+let justReplacedPath: null | string = null;
 
-export default class ChartRequestPage extends React.Component<ChartRequestPageProps, ChartRequestPageState> {
+export default function ChartRequestPage(p: ChartRequestPageProps) {
 
-  constructor(props: ChartRequestPageProps) {
-    super(props);
-    this.state = {};
-  }
+  const [pair, setPair] = useStateWithPromise<{ chartRequest: ChartRequestModel; userChart?: Lite<UserChartEntity>; } | undefined>(undefined);
 
-  componentWillMount() {
-    this.load(this.props);
-  }
-
-  componentWillReceiveProps(nextProps: ChartRequestPageProps) {
-    this.load(nextProps);
-  }
-
-  shouldComponentUpdate(nextProps: ChartRequestPageProps, nextState: ChartRequestPageState) {
-
-    if (this.state.chartRequest != nextState.chartRequest || this.state.userChart != nextState.userChart)
-      return true;
-    
-    if ((nextProps.location.pathname + nextProps.location.search) == this.justReplacedPath) {
-      this.justReplacedPath = undefined;
-      return false;
-    }
-
-    return true
-  }
-
-  load(props: ChartRequestPageProps) {
-    
-    var newPath = props.location.pathname + props.location.search;
-    var oldPathPromise: Promise<string | undefined> = this.state.chartRequest ? ChartClient.Encoder.chartPathPromise(this.state.chartRequest, this.state.userChart) : Promise.resolve(undefined);
+  React.useEffect(() => {
+    var newPath = p.location.pathname + p.location.search;
+    var oldPathPromise: Promise<string | undefined> = pair ? ChartClient.Encoder.chartPathPromise(pair.chartRequest, pair.userChart) : Promise.resolve(undefined);
     oldPathPromise.then(oldPath => {
       if (oldPath != newPath) {
-        var query = QueryString.parse(props.location.search);
+        var query = QueryString.parse(p.location.search);
         var uc = query.userChart == null ? undefined : (parseLite(query.userChart as string) as Lite<UserChartEntity>);
-        ChartClient.Decoder.parseChartRequest(props.match.params.queryName, query)
-          .then(cr => this.setState({ chartRequest: cr, userChart: uc }))
+        ChartClient.Decoder.parseChartRequest(p.match.params.queryName, query)
+          .then(cr => setPair({ chartRequest: cr, userChart: uc }))
           .done();
       }
     }).done();
-  }
 
-  handleOnChange = (cr: ChartRequestModel, uc?: Lite<UserChartEntity>) => {
 
-    if (this.state.userChart != uc)
-      this.setState({ userChart: uc }, () => this.changeUrl(cr, uc));
+  }, [p.location.pathname, p.location.search, p.match.params.queryName])
+
+  function handleOnChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
+    if (pair!.userChart != uc)
+      setPair({ userChart: uc, chartRequest: pair!.chartRequest }).then(() => changeUrl(cr, uc));
     else
-      this.changeUrl(cr, uc);
+      changeUrl(cr, uc);
   }
 
-
-  justReplacedPath?: string;
-  changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
+  function changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     ChartClient.Encoder.chartPathPromise(cr, uc)
       .then(path => {
-        this.justReplacedPath = path;
+        justReplacedPath = path;
         Navigator.history.replace(path);
       })
       .done()
   }
 
-  render() {
-    return <ChartRequestView
-      chartRequest={this.state.chartRequest}
-      userChart={this.state.userChart}
-      onChange={(cr, uc) => this.handleOnChange(cr, uc)} />;
-  }
+  return (
+    <ChartRequestView
+      chartRequest={pair && pair.chartRequest}
+      userChart={pair && pair.userChart}
+      onChange={(cr, uc) => handleOnChange(cr, uc)} />
+  );
 }
 
 

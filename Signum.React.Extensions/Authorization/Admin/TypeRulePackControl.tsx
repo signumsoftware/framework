@@ -363,6 +363,8 @@ export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackCon
   }
 });
 
+export default TypesRulesPackControl;
+
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
   return allowed.fallback == allowedBase.fallback
     && allowed.conditions!.length == allowedBase.conditions!.length
