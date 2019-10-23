@@ -113,9 +113,11 @@ Lose changes?")]
         MoveUp,
         Move,
         Navigate,
-        NullValueNotAllowed,
         Remove,
         View,
+        [Description("Add…")]
+        Add,
+
     }
 
     [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
