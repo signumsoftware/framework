@@ -58,7 +58,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
   }
 
   static highlightedTextAll = (val: string, query?: string): React.ReactNode => {
-    debugger;
     if (query == undefined)
       return val;
 
