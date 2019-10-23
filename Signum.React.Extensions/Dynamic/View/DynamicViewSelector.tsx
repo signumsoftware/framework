@@ -11,6 +11,8 @@ import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
+import { ModulesHelp } from "./ModulesHelp";
+
 
 interface DynamicViewSelectorComponentProps {
   ctx: TypeContext<DynamicViewSelectorEntity>;
@@ -225,7 +227,11 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
         <div className="btn-toolbar btn-toolbar-small">
           {this.renderViewNameButtons()}
         </div>
-        <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", modules) =>"}</pre>
+        <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>{"(e: " + ctx.value.entityType!.className + ", "}
+          <div style={{ display: "inline-flex" }}>
+            <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
+          </div>
+        </pre>
         <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
         {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
       </div>
