@@ -121,7 +121,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         if (res.url) {
           return (
             <NavItem>
-              <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
+              <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} href="#">
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </NavLink>
             </NavItem>
@@ -135,7 +135,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
           return (
             <NavItem>
-              <NavLink onClick={e => config.handleNavigateClick(e, res)}>
+              <NavLink onClick={e => config.handleNavigateClick(e, res)} href="#">
                 {config.getIcon(res)}{config.getLabel(res)}
               </NavLink>
             </NavItem>
