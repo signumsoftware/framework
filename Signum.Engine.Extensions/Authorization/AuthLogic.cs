@@ -136,7 +136,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(RoleEntity role)
         {
-            if (!role.IsNew && role.Roles != null && role.Roles.IsGraphModified)
+            if (!role.IsNew && role.Roles.IsGraphModified)
             {
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
