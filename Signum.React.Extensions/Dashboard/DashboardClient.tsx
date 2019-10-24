@@ -16,6 +16,7 @@ import * as UserQueryClient from '../UserQueries/UserQueryClient'
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
+import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -29,7 +30,7 @@ interface IconColor {
 }
 
 export interface PartRenderer<T extends IPartEntity> {
-  component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
+  component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
   defaultIcon: (element: T) => IconColor;
   withPanel?: (element: T) => boolean;
   handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
@@ -175,35 +176,16 @@ export interface DashboardWidgetProps {
   dashboard: DashboardEntity;
 }
 
-export interface DashboardWidgetState {
-  component?: React.ComponentClass<{ dashboard: DashboardEntity, entity?: Entity }>
-}
+export function DashboardWidget(p: DashboardWidgetProps) {
 
-export class DashboardWidget extends React.Component<DashboardWidgetProps, DashboardWidgetState> {
+  const component = useAPI(undefined, () => import("./View/DashboardView").then(mod => mod.default), []);
 
-  state = { component: undefined } as DashboardWidgetState;
+  if (!component)
+    return null;
 
-  componentWillMount() {
-    this.load(this.props);
-  }
-
-
-  load(props: DashboardWidgetProps) {
-
-    import("./View/DashboardView")
-      .then(mod => this.setState({ component: mod.default }))
-      .done();
-  }
-
-  render() {
-
-    if (!this.state.component)
-      return null;
-
-    return React.createElement(this.state.component, {
-      dashboard: this.props.dashboard,
-      entity: this.props.pack.entity
-    });
-  }
+  return React.createElement(component, {
+    dashboard: p.dashboard,
+    entity: p.pack.entity
+  });
 }
 

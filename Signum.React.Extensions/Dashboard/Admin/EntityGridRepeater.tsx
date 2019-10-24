@@ -267,8 +267,6 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
       }
     }
   }
-
-
 }
 
 
@@ -285,45 +283,41 @@ export interface EntityGridItemProps {
 }
 
 
-export class EntityGridItem extends React.Component<EntityGridItemProps>{
+export function EntityGridItem(p : EntityGridItemProps){
+  var style = p.bsStyle == undefined || p.bsStyle == "Default" ? undefined : p.bsStyle.toLowerCase();
 
-  render() {
-
-    var style = this.props.bsStyle == undefined || this.props.bsStyle == "Default" ? undefined : this.props.bsStyle.toLowerCase();
-
-    return (
-      <div className={classes("card", style && ("border-" + style))}>
-        <div className={classes("card-header",
-          style && style != "light" && "text-white",
-          style && ("bg-" + style)
-        )} draggable={!!this.props.onTitleDragStart}
-          onDragStart={this.props.onTitleDragStart}
-          onDragEnd={this.props.onTitleDragEnd} >
-          {this.props.onRemove &&
-            <a href="#" className="sf-line-button sf-remove float-right" onClick={this.props.onRemove}
-              title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
-            </a>
-          }
-          {this.props.title}
-        </div>
-        <div className="card-body">
-          {this.props.children}
-        </div>
-        {this.props.onResizerDragStart &&
-          <div className="sf-leftHandle" draggable={true}
-            onDragStart={e => this.props.onResizerDragStart!("left", e)}>
-          </div>
+  return (
+    <div className={classes("card", style && ("border-" + style))}>
+      <div className={classes("card-header",
+        style && style != "light" && "text-white",
+        style && ("bg-" + style)
+      )} draggable={!!p.onTitleDragStart}
+        onDragStart={p.onTitleDragStart}
+        onDragEnd={p.onTitleDragEnd} >
+        {p.onRemove &&
+          <a href="#" className="sf-line-button sf-remove float-right" onClick={p.onRemove}
+            title={EntityControlMessage.Remove.niceToString()}>
+            <FontAwesomeIcon icon="times" />
+          </a>
         }
-        {this.props.onResizerDragStart &&
-          <div className="sf-rightHandle" draggable={true}
-            onDragStart={e => this.props.onResizerDragStart!("right", e)}>
-          </div>
-        }
+        {p.title}
       </div>
-    );
+      <div className="card-body">
+        {p.children}
+      </div>
+      {p.onResizerDragStart &&
+        <div className="sf-leftHandle" draggable={true}
+          onDragStart={e => p.onResizerDragStart!("left", e)}>
+        </div>
+      }
+      {p.onResizerDragStart &&
+        <div className="sf-rightHandle" draggable={true}
+          onDragStart={e => p.onResizerDragStart!("right", e)}>
+        </div>
+      }
+    </div>
+  );
 
-  }
 }
 
 
