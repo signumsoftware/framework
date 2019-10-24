@@ -99,41 +99,19 @@ interface RenderEntityVersionState {
   entity?: Entity;
 }
 
-export class RenderEntityVersion extends React.Component<RenderEntityVersionProps, RenderEntityVersionState> {
+export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
-  constructor(props: RenderEntityVersionProps) {
-    super(props);
-    this.state = {};
-  }
+  const entity = useAPI(undefined, signal => DiffLogClient.API.retrieveVersion(p.lite, p.asOf), [p.lite, p.asOf]);
+  
+  if (!entity)
+    return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
-
-  componentWillReceiveProps(newProps: RenderEntityVersionProps) {
-    if (!is(newProps.lite, this.props.lite) || newProps.asOf != this.props.asOf)
-      this.loadData(newProps);
-  }
-
-  loadData(props: RenderEntityVersionProps) {
-    DiffLogClient.API.retrieveVersion(props.lite, props.asOf)
-      .then(entity => this.setState({ entity }))
-      .done();
-  }
-
-  render() {
-    if (!this.state.entity)
-      return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
-
-    return (
-      <div>
-        <RenderEntity ctx={TypeContext.root(this.state.entity, { readOnly: true })} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <RenderEntity ctx={TypeContext.root(entity, { readOnly: true })} />
+    </div>
+  );
 }
-
-
 
 interface DiffEntityVersionProps {
   lite: Lite<Entity>;
@@ -141,44 +119,18 @@ interface DiffEntityVersionProps {
   validTo: string;
 }
 
-interface DiffEntityVersionState {
-  diffBlock?: DiffLogClient.DiffBlock;
-}
+export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
-export class DiffEntityVersion extends React.Component<DiffEntityVersionProps, DiffEntityVersionState> {
+  const diffBlock = useAPI(undefined, () => DiffLogClient.API.diffVersions(p.lite, p.validFrom, p.validTo), [p.lite, p.validFrom, p.validTo]);
 
-  constructor(props: DiffEntityVersionProps) {
-    super(props);
-    this.state = {};
-  }
+  if (!diffBlock)
+    return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
-
-  componentWillReceiveProps(newProps: DiffEntityVersionProps) {
-    if (!is(newProps.lite, this.props.lite) ||
-      newProps.validFrom != this.props.validFrom ||
-      newProps.validTo != this.props.validTo)
-      this.loadData(newProps);
-  }
-
-  loadData(props: DiffEntityVersionProps) {
-    DiffLogClient.API.diffVersions(props.lite, props.validFrom, props.validTo)
-      .then(diffBlock => this.setState({ diffBlock }))
-      .done();
-  }
-
-  render() {
-    if (!this.state.diffBlock)
-      return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
-
-    return (
-      <div>
-        <DiffDocument diff={this.state.diffBlock} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <DiffDocument diff={diffBlock} />
+    </div>
+  );
 }
 
 

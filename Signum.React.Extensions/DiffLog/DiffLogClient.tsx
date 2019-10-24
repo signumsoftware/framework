@@ -99,33 +99,29 @@ export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorEle
   inSearch?: boolean;
 }
 
-export default class TimeMachineLink extends React.Component<TimeMachineLinkProps>{
+export default function TimeMachineLink(p : TimeMachineLinkProps){
 
-  render() {
-    const { lite, inSearch, children, ...htmlAtts } = this.props;
-
-    if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
-      return <span data-entity={liteKey(lite)}>{this.props.children || lite.toStr}</span>;
-
-
-    return (
-      <Link
-        to={timeMachineRoute(lite)}
-        title={lite.toStr}
-        onClick={this.handleClick}
-        data-entity={liteKey(lite)}
-        {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
-        {children || lite.toStr}
-      </Link>
-    );
-  }
-
-  handleClick = (event: React.MouseEvent<any>) => {
-
-    const lite = this.props.lite;
+  function handleClick(event: React.MouseEvent<any>) {
+    const lite = p.lite;
 
     event.preventDefault();
 
     window.open(Navigator.toAbsoluteUrl(timeMachineRoute(lite)));
   }
+  const { lite, inSearch, children, ...htmlAtts } = p;
+
+  if (!Navigator.isNavigable(lite.EntityType, undefined, p.inSearch || false))
+    return <span data-entity={liteKey(lite)}>{p.children || lite.toStr}</span>;
+
+
+  return (
+    <Link
+      to={timeMachineRoute(lite)}
+      title={lite.toStr}
+      onClick={handleClick}
+      data-entity={liteKey(lite)}
+      {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
+      {children || lite.toStr}
+    </Link>
+  );
 }
