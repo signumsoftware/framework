@@ -308,9 +308,13 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
 
 
 export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
-  if (icon != null)
-    return icon;
 
-  return icon2;
+  if (icon === null)
+    return undefined;
+
+  if (icon === undefined)
+    return icon2
+
+  return icon;
 }
 

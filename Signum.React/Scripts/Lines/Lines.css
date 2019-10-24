@@ -16,7 +16,7 @@ input[type=checkbox].form-control {
 }
 
 .input-group {
-    flex-wrap:nowrap;
+    flex-wrap: nowrap;
 }
 
 .form-control.readonly, .form-control:disabled, .form-control[readonly] {
@@ -24,10 +24,10 @@ input[type=checkbox].form-control {
     overflow: hidden;
 }
 
-.form-control.readonly.readonly-textarea {
-    height: initial !important;
-    white-space: pre-wrap;
-}
+    .form-control.readonly.readonly-textarea {
+        height: initial !important;
+        white-space: pre-wrap;
+    }
 
 
 .numeric {
@@ -58,7 +58,7 @@ label > input[type=checkbox] {
     }
 
 .sf-entity-line-entity,
-.sf-entity-line-entity:focus{
+.sf-entity-line-entity:focus {
     background-color: #f8f8f8;
     overflow: hidden;
 }
@@ -76,6 +76,15 @@ label > input[type=checkbox] {
     margin: -1px -10px -1px 0px;
     padding: 1px 10px 1px 0px;
 }
+
+li.sf-strip-element {
+    border: 1px solid gray;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 2px 5px;
+}
+
 /* Buttons */
 /*.btn.btn-default.sf-line-button {
     background: transparent;
@@ -195,10 +204,6 @@ ul.sf-strip-vertical > li {
     }
 
 
-.sf-strip-horizontal > li > * {
-    vertical-align: middle;
-}
-
 .sf-strip-element .sf-line-button {
     margin-left: 2px;
 }
@@ -257,8 +262,7 @@ body.rtl .form-group.row > label {
 
     .has-error input,
     .has-error textarea,
-    .has-error select
-    {
+    .has-error select {
         border-color: #a94442;
     }
 
@@ -319,6 +323,7 @@ input[type=checkbox].form-control-xs {
     font-size: 0.875rem;
     margin-bottom: 0px;
 }
+
 .rw-widget-xs .rw-input {
     padding: 0px 3px;
     height: 22px;
@@ -412,7 +417,7 @@ table.sf-multi-value {
 }
 
     table.sf-multi-value > tbody > tr > td {
-        padding:0px;
+        padding: 0px;
         padding-bottom: 2px;
     }
 

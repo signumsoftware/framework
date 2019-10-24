@@ -49,7 +49,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     var toStr = getToString(item);
-    var text = Typeahead.highlightedText(toStr, subStr);
+    var text = Typeahead.highlightedTextAll(toStr, subStr);
     if (this.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
     else
@@ -185,7 +185,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     }
 
     var toStr = getToString(item.entity!);
-    var text = Typeahead.highlightedText(toStr, subStr);
+    var text = Typeahead.highlightedTextAll(toStr, subStr);
     if (this.options && this.options.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
     else

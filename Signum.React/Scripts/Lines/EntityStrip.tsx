@@ -3,7 +3,7 @@ import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, NormalControlMessage } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -14,16 +14,13 @@ export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
   iconStart?: boolean;
   autocomplete?: AutocompleteConfig<any> | null;
-  onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
+  onRenderItem?: (item: any /*T*/) => React.ReactNode;
   showType?: boolean;
-  onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
-
-  calculateDefaultState(state: EntityStripProps) {
-    super.calculateDefaultState(state);
-  }
 
   componentWillUnmount() {
     this.state.autocomplete && this.state.autocomplete.abort();
@@ -35,6 +32,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
       const type = state.type!;
       state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.ctx, state.create!, state.showType);
     }
+    if (state.iconStart == undefined && state.vertical)
+      state.iconStart = true;
   }
   renderInternal() {
 
@@ -57,17 +56,20 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                   onRenderItem={s.onRenderItem}
                   drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(mlec.index!, this.props.vertical ? "v" : "h") : undefined}
                   onItemHtmlAttributes={s.onItemHtmlAttributes}
+                  onItemContainerHtmlAttributes={s.onItemContainerHtmlAttributes}
                   onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, mlec.index!) : undefined}
                   onView={this.canView(mlec.value) ? e => this.handleViewElement(e, mlec.index!) : undefined}
                 />))
             }
-            <li className={classes(s.ctx.inputGroupClass, "sf-strip-input")}>
+            <li className={classes("sf-strip-input")}>
+              <div className={s.ctx.inputGroupClass}>
               {this.renderAutoComplete()}
-              <span>
-                {this.renderCreateButton(false)}
-                {this.renderFindButton(false)}
+              <span className="input-group-append">
+                {this.renderCreateButton(true)}
+                {this.renderFindButton(true)}
                 {this.props.extraButtons && this.props.extraButtons(this)}
               </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -142,7 +144,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     return (
       <Typeahead
-        inputAttrs={{ className: "sf-entity-autocomplete" }}
+        inputAttrs={{ className: classes(this.state.ctx.formControlClass, "sf-entity-autocomplete", this.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString() }}
         getItems={q => ac!.getItems(q)}
         getItemsDelay={ac.getItemsDelay}
         renderItem={(e, str) => ac!.renderItem(e, str)}
@@ -161,6 +163,7 @@ export interface EntityStripElementProps {
   autoComplete?: AutocompleteConfig<any> | null;
   onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
 }
 
@@ -231,7 +234,9 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
     return (
       <li className="sf-strip-element"
-        {...EntityListBase.entityHtmlAttributes(this.props.ctx.value)}>
+        {...EntityListBase.entityHtmlAttributes(this.props.ctx.value)}
+        {...(this.props.onItemContainerHtmlAttributes && this.props.onItemContainerHtmlAttributes(this.props.ctx.value))}
+      >
         <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
           onDragEnter={drag && drag.onDragOver}
           onDragOver={drag && drag.onDragOver}

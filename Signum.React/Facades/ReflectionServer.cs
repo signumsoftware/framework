@@ -184,18 +184,20 @@ namespace Signum.React.Facades
                                 .Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>
                                 {
+                                    var validators = Validator.TryGetPropertyValidator(p)?.Validators;
+
                                     var mi = new MemberInfoTS
                                     {
                                         NiceName = p.PropertyInfo!.NiceName(),
                                         TypeNiceName = GetTypeNiceName(p.PropertyInfo!.PropertyType),
                                         Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                         IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
-                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || (Validator.TryGetPropertyValidator(p)?.Validators.Any(v => (v is NotNullValidatorAttribute) && !v.DisabledInModelBinder)) == true),
+                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!p.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo!.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
-                                        IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-                                        IsVirtualMList = p.IsVirtualMList(),
-                                        MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                                        IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+										IsVirtualMList = p.IsVirtualMList()
+                                        MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                         PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     };
 

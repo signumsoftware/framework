@@ -279,9 +279,9 @@ export module EntityControlMessage {
   export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
   export const Move = new MessageKey("EntityControlMessage", "Move");
   export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
-  export const NullValueNotAllowed = new MessageKey("EntityControlMessage", "NullValueNotAllowed");
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
+  export const Add = new MessageKey("EntityControlMessage", "Add");
 }
 
 export interface ImmutableEntity extends Entity {
