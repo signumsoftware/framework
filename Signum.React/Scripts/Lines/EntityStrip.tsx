@@ -3,7 +3,7 @@ import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, NormalControlMessage } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -22,10 +22,6 @@ export interface EntityStripProps extends EntityListBaseProps {
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
 
-  calculateDefaultState(state: EntityStripProps) {
-    super.calculateDefaultState(state);
-  }
-
   componentWillUnmount() {
     this.state.autocomplete && this.state.autocomplete.abort();
   }
@@ -36,6 +32,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
       const type = state.type!;
       state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.ctx, state.create!, state.showType);
     }
+    if (state.iconStart == undefined && state.vertical)
+      state.iconStart = true;
   }
   renderInternal() {
 
@@ -63,13 +61,15 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                   onView={this.canView(mlec.value) ? e => this.handleViewElement(e, mlec.index!) : undefined}
                 />))
             }
-            <li className={classes(s.ctx.inputGroupClass, "sf-strip-input")}>
+            <li className={classes("sf-strip-input")}>
+              <div className={s.ctx.inputGroupClass}>
               {this.renderAutoComplete()}
-              <span>
-                {this.renderCreateButton(false)}
-                {this.renderFindButton(false)}
+              <span className="input-group-append">
+                {this.renderCreateButton(true)}
+                {this.renderFindButton(true)}
                 {this.props.extraButtons && this.props.extraButtons(this)}
               </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -144,7 +144,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     return (
       <Typeahead
-        inputAttrs={{ className: "sf-entity-autocomplete" }}
+        inputAttrs={{ className: classes(this.state.ctx.formControlClass, "sf-entity-autocomplete", this.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString() }}
         getItems={q => ac!.getItems(q)}
         getItemsDelay={ac.getItemsDelay}
         renderItem={(e, str) => ac!.renderItem(e, str)}
