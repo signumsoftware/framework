@@ -18,6 +18,11 @@ export default class TextArea extends React.Component<TextAreaProps> {
     //window.scrollTo(window.scrollX, (ta.scrollTop + ta.scrollHeight));
   }
 
+  handleRef = (a: HTMLTextAreaElement | null) => {
+    a && this.handleResize(a);
+    this.props.innerRef && this.props.innerRef(a);
+  }
+
   render() {
     const { autoResize, innerRef, minHeight, ...props } = this.props;
     return (
@@ -26,10 +31,7 @@ export default class TextArea extends React.Component<TextAreaProps> {
           ...(autoResize ? { display: "block", overflow: "hidden", resize: "none" } : {}),
           ...props.style
         }
-      } {...props} ref={a => {
-        a && this.handleResize(a);
-        innerRef && innerRef(a);
-      }} />
+      } {...props} ref={this.handleRef} />
     );
   }
 }
