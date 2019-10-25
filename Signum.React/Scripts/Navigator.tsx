@@ -757,9 +757,7 @@ export module API {
     return ajaxGet({ url: "~/api/entityPack/" + typeName + "/" + idVal });
   }
 
-
   export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-
     return ajaxPost({ url: "~/api/entityPackEntity" }, entity);
   }
 

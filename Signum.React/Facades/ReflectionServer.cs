@@ -196,7 +196,7 @@ namespace Signum.React.Facades
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo!.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                         IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-										IsVirtualMList = p.IsVirtualMList()
+										IsVirtualMList = p.IsVirtualMList(),
                                         MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                         PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     };
