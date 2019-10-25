@@ -144,7 +144,7 @@ namespace Signum.Engine.Translation
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\netcoreapp2.2").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
+            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {

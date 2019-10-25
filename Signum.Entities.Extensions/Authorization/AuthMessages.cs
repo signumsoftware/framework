@@ -149,7 +149,7 @@ namespace Signum.Entities.Authorization
         LoginWithWindowsUser,
         [Description("No Windows user found")]
         NoWindowsUserFound,
-        [Description("Looks like you windows user is not allowed to use this application, the browser is not providing identity information, or the server is not propperly configured.")]
+        [Description("Looks like you windows user is not allowed to use this application, the browser is not providing identity information, or the server is not properly configured.")]
         LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication,
     }
 
@@ -163,8 +163,8 @@ namespace Signum.Entities.Authorization
         YouCanResetYourPasswordByFollowingTheLinkBelow,
         [Description("Reset password request")]
         ResetPasswordRequestSubject,
-        [Description("Your reset password request is lapsed")]
-        YourResetPasswordRequestIsLapsed,
+        [Description("Your reset password request has expired")]
+        YourResetPasswordRequestHasExpired,
         [Description("We have send you an email to reset your password")]
         WeHaveSendYouAnEmailToResetYourPassword,
         [Description("Email not found")]

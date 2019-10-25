@@ -96,6 +96,8 @@
   <Type Name="DynamicApiEval" />
   <Type Name="DynamicApiOperation" />
   <Type Name="DynamicBaseType" />
+  <Type Name="DynamicClientEntity" />
+  <Type Name="DynamicClientOperation" />
   <Type Name="DynamicCSSOverrideEntity" />
   <Type Name="DynamicCSSOverrideOperation" />
   <Type Name="DynamicExpressionEntity" />
@@ -157,8 +159,6 @@
   <Type Name="EmailTemplateRecipientEmbedded" />
   <Type Name="EmailTemplateViewMessage" />
   <Type Name="EntityAction" />
-  <Type Name="EntityHelpEntity" />
-  <Type Name="EntityHelpOperation" />
   <Type Name="EvalEmbedded`1" />
   <Type Name="ExcelAttachmentEntity" />
   <Type Name="ExcelMessage" />
@@ -412,6 +412,8 @@
   <Type Name="TypeAllowedRule" />
   <Type Name="TypeConditionRuleEmbedded" />
   <Type Name="TypeConditionSymbol" />
+  <Type Name="TypeHelpEntity" />
+  <Type Name="TypeHelpOperation" />
   <Type Name="TypeRulePack" />
   <Type Name="TypeSearchResult" />
   <Type Name="UserAssetMessage" />
