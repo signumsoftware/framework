@@ -145,7 +145,12 @@ namespace Signum.Entities.Authorization
         IForgotMyPassword,
         [Description("Give us your user's email and we will send you an email so you can reset your password.")]
         GiveUsYourUserEmailToResetYourPassword,
-      
+        [Description("Login with Windows user")]
+        LoginWithWindowsUser,
+        [Description("No Windows user found")]
+        NoWindowsUserFound,
+        [Description("Looks like you windows user is not allowed to use this application, the browser is not providing identity information, or the server is not propperly configured.")]
+        LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication,
     }
 
     public enum AuthEmailMessage

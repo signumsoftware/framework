@@ -16,6 +16,7 @@ import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowe
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
+import Login, { LoginWithWindowsButton } from './Login/Login';
 
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
@@ -41,6 +42,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
   if (Options.windowsAuthentication) {
     if (!authenticators.contains(loginWindowsAuthentication))
       throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
+
+    Login.customLoginButtons = () => <LoginWithWindowsButton />;
   }
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
@@ -439,19 +442,19 @@ export module API {
     return ajaxPost({ url: "~/api/auth/login" }, loginRequest);
   }
 
-  export function loginFromCookie(): Promise<LoginResponse> {
+  export function loginFromCookie(): Promise<LoginResponse | undefined> {
     return ajaxPost({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
   }
 
-  export function loginWindowsAuthentication(): Promise<LoginResponse> {
+  export function loginWindowsAuthentication(): Promise<LoginResponse | undefined> {
     return ajaxPost({ url: "~/api/auth/loginWindowsAuthentication", avoidAuthToken: true }, undefined);
   }
 
-  export function loginWithAzureAD(jwt: string): Promise<LoginResponse> {
+  export function loginWithAzureAD(jwt: string): Promise<LoginResponse | undefined> {
     return ajaxPost({ url: "~/api/auth/loginWithAzureAD", avoidAuthToken: true }, jwt);
   }
 
-  export function refreshToken(oldToken: string): Promise<LoginResponse> {
+  export function refreshToken(oldToken: string): Promise<LoginResponse| undefined> {
     return ajaxPost({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
   }
 
