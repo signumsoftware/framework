@@ -154,11 +154,11 @@ export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer:
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
-    return ajaxGet<Lite<DashboardEntity>[]>({ url: `~/api/dashboard/forEntityType/${type}` });
+    return ajaxGet({ url: `~/api/dashboard/forEntityType/${type}` });
   }
 
   export function home(): Promise<Lite<DashboardEntity> | null> {
-    return ajaxGet<Lite<DashboardEntity> | null>({ url: "~/api/dashboard/home" });
+    return ajaxGet({ url: "~/api/dashboard/home" });
   }
 }
 

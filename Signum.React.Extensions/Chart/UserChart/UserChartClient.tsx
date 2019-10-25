@@ -129,11 +129,11 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
-    return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forEntityType/" + type });
+    return ajaxGet({ url: "~/api/userChart/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserChartEntity>[]> {
-    return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forQuery/" + queryKey });
+    return ajaxGet({ url: "~/api/userChart/forQuery/" + queryKey });
   }
 }
 

@@ -180,11 +180,11 @@ export namespace API {
   }
 
   export function getConstructorType(wordModel: WordModelEntity): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/word/constructorType" }, wordModel);
+    return ajaxPost({ url: "~/api/word/constructorType" }, wordModel);
   }
 
   export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, request: GetWordTemplatesRequest): Promise<Lite<WordTemplateEntity>[]> {
-    return ajaxPost<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+    return ajaxPost({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 }
 

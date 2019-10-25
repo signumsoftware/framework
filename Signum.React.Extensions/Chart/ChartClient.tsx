@@ -754,13 +754,13 @@ export module API {
   }
 
   export function fetchScripts(): Promise<ChartScript[]> {
-    return ajaxGet<ChartScript[]>({
+    return ajaxGet({
       url: "~/api/chart/scripts"
     });
   }
 
   export function fetchColorPalettes(): Promise<string[]> {
-    return ajaxGet<string[]>({
+    return ajaxGet({
       url: "~/api/chart/colorPalettes"
     });
   }

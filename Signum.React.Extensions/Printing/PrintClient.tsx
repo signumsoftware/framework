@@ -28,11 +28,11 @@ export function start(options: { routes: JSX.Element[], }) {
 
 export module API {
   export function getStats(): Promise<PrintStat[]> {
-    return ajaxGet<PrintStat[]>({ url: `~/api/printing/stats` });
+    return ajaxGet({ url: `~/api/printing/stats` });
   }
 
   export function createPrintProcess(fileType: FileTypeSymbol): Promise<ProcessEntity> {
-    return ajaxPost<ProcessEntity>({ url: `~/api/printing/createProcess` }, fileType);
+    return ajaxPost({ url: `~/api/printing/createProcess` }, fileType);
   }
 }
 

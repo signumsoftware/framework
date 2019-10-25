@@ -20,19 +20,19 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
   export function enable(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/cache/enable" }, undefined);
+    return ajaxPost({ url: "~/api/cache/enable" }, undefined);
   }
 
   export function disable(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/cache/disable" }, undefined);
+    return ajaxPost({ url: "~/api/cache/disable" }, undefined);
   }
 
   export function clear(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/cache/clear" }, undefined);
+    return ajaxPost({ url: "~/api/cache/clear" }, undefined);
   }
 
   export function view(): Promise<CacheState> {
-    return ajaxGet<CacheState>({ url: "~/api/cache/view" });
+    return ajaxGet({ url: "~/api/cache/view" });
   }
 }
 

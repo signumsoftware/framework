@@ -100,7 +100,7 @@ function getProvider(resultTypeName: string) {
 export namespace API {
 
   export function getResults(query: string, signal: AbortSignal): Promise<OmniboxResult[]> {
-    return ajaxPost<OmniboxResult[]>({ url: "~/api/omnibox", signal }, {
+    return ajaxPost({ url: "~/api/omnibox", signal }, {
       query: query || "",
       specialActions: Dic.getKeys(specialActions).filter(a => specialActions[a].allowed == null || specialActions[a].allowed())
     })
