@@ -45,7 +45,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         <legend>
           <div>
             <span>{this.state.labelText}</span>
-            <span className="float-right">
+            <span className="float-right ml-2">
               {this.renderCreateButton(false)}
               {this.renderFindButton(false)}
               {this.props.extraButtons && this.props.extraButtons(this)}
@@ -246,12 +246,12 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
       const offset = de.pageX - s.initialPageX!;
       const dCol = Math.round((offset / rect.width) * 12);
       let newCol = s.originalStartColumn! + dCol;
-      let start = list.filter(a => a != c && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max()!;
-      if (!isFinite(start))
+      let start = list.filter(a => a != c && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max();
+      if (start == null)
         start = 0;
 
-      let end = list.filter(a => a != c && a.row == row && a.startColumn > newCol).map(a => a.startColumn - c.columns).min()!;
-      if (!isFinite(end))
+      let end = list.filter(a => a != c && a.row == row && a.startColumn > newCol).map(a => a.startColumn - c.columns).min();
+      if (end == null)
         end = 12 - c.columns;
 
       if (start > end) {
@@ -268,12 +268,13 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         this.forceUpdate();
       }
     } else {
+      debugger;
       const offsetX = (de.pageX + (s.dragMode == "right" ? 15 : -15)) - rect.left;
       let col = Math.round((offsetX / rect.width) * 12);
 
       if (s.dragMode == "left") {
-        const max = list.filter(a => a != c && a.row == c.row && a.startColumn < c.startColumn).map(a => a.startColumn + a.columns).max()!;
-        col = Math.max(col, max);
+        const max = list.filter(a => a != c && a.row == c.row && a.startColumn < c.startColumn).map(a => a.startColumn + a.columns).max();
+        col = max == null ? col : Math.max(col, max);
 
         const cx = c.startColumn - col;
         if (cx != 0) {
@@ -285,8 +286,8 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         }
       }
       else if (s.dragMode == "right") {
-        const min = list.filter(a => a != c && a.row == c.row && a.startColumn > c.startColumn).map(a => a.startColumn).min()!;
-        col = Math.min(col, min);
+        const min = list.filter(a => a != c && a.row == c.row && a.startColumn > c.startColumn).map(a => a.startColumn).min();
+        col = min == null ? col : Math.min(col, min);
         if (col != c.startColumn + c.columns) {
           c.columns = col - c.startColumn;
           c.modified = true;
@@ -318,7 +319,7 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
 
   render() {
 
-    var style = this.props.bsStyle == undefined || this.props.bsStyle == "Default" ? undefined : this.props.bsStyle.toLowerCase();
+    var style = this.props.bsStyle == undefined ? undefined : this.props.bsStyle.toLowerCase();
 
     return (
       <div className={classes("card", style && ("border-" + style))}>

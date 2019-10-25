@@ -62,8 +62,8 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
       <SearchControl
         findOptions={this.state.fo}
         showHeader={"PinnedFilters"}
-        showFooter={false}
-        allowSelection={this.props.part.renderMode == "SearchControl"} />
+        showFooter={this.props.part.showFooter}
+        allowSelection={this.props.part.allowSelection} />
     );
   }
 }
@@ -92,7 +92,7 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps, {
     return (
       <div className={classes(
         "card",
-        this.props.style != "Light" && "text-white",
+        this.props.style != "Light" && this.props.style != "Secondary" && "text-white",
         "bg-" + this.props.style.toLowerCase(),
         "o-hidden"
       )}>

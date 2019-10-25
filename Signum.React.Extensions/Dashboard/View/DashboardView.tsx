@@ -226,7 +226,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
         <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
       </span>;
 
-    var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
+    var style = p.style == undefined ? undefined : p.style.toLowerCase();
 
     return (
       <div className={classes("card", style && ("border-" + style), "mb-4")}>

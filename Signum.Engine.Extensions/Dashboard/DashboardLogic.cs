@@ -51,22 +51,6 @@ namespace Signum.Engine.Dashboard
                         cp.DashboardPriority,
                     });
 
-                sb.Include<LinkListPartEntity>()
-                    .WithQuery(() => cp => new
-                    {
-                        Entity = cp,
-                        ToStr = cp.ToString(),
-                        Links = cp.Links.Count
-                    });
-                
-                sb.Include<ValueUserQueryListPartEntity>()
-                    .WithQuery(() => cp => new
-                    {
-                        Entity = cp,
-                        ToStr = cp.ToString(),
-                        Links = cp.UserQueries.Count
-                    });
-
                 if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserQueryPartEntity)))
                 {
                     sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
