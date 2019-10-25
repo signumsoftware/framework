@@ -50,6 +50,7 @@ export interface MemberInfo {
   required?: boolean;
   maxLength?: number;
   isMultiline?: boolean;
+  isVirtualMList?: boolean;
   preserveOrder?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
@@ -855,6 +856,11 @@ function copyProperties(result: any, original: any, pr: PropertyRoute){
 function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MList<T> {
 
   var elemPr = PropertyRoute.mlistItem(propertyRoute);
+
+  if (propertyRoute.member!.isVirtualMList) {
+    
+    return mlist.map(mle => ({ rowId: null, element: clone(mle.element as any as Entity, elemPr) as any as T }));
+  }
 
   return mlist.map(mle => ({ rowId: null, element: cloneIfNeeded(mle.element, elemPr) as T }));
 }
