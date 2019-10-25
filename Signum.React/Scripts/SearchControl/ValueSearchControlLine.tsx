@@ -24,6 +24,8 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
   badgeColor?: BsColor;
+  customClass?: string;
+  customStyle?: React.CSSProperties;
   isFormControl?: boolean;
   findButton?: boolean;
   viewEntityButton?: boolean;
@@ -126,6 +128,8 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             findOptions={fo}
             initialValue={this.props.initialValue}
             isBadge={isBadge}
+            customClass={this.props.customClass}
+            customStyle={this.props.customStyle}
             badgeColor={this.props.badgeColor}
             isLink={this.props.isLink}
             formControlClass={isFormControl ? this.props.ctx.formControlClass : undefined}
