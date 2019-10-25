@@ -15,6 +15,8 @@ import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
+import { ModulesHelp } from "./ModulesHelp";
+
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
@@ -277,7 +279,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
           {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
           <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
         </div>
-        <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
+        <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, `}
+          <div style={{ display: "inline-flex" }}>
+            <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
+          </div>
+        </pre>
         <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
         {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
       </div>
