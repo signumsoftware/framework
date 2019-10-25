@@ -1059,39 +1059,39 @@ export type AddToLite<T> = T extends Entity ? Lite<T> : T;
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
-    return ajaxGet<QueryDescription>({ url: "~/api/query/description/" + queryKey });
+    return ajaxGet({ url: "~/api/query/description/" + queryKey });
   }
 
   export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-    return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
+    return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
   }
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request);
+    return ajaxPost({ url: "~/api/query/executeQuery", signal }, request);
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost<any>({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/entitiesWithFilter" }, request);
+    return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
-    return ajaxGet<Lite<Entity>[]>({
+    return ajaxGet({
       url: "~/api/query/allLites?" + QueryString.stringify(request)
     });
   }
 
   export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
-    return ajaxGet<Lite<TypeEntity>[]>({
+    return ajaxGet({
       url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
     });
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
+    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
   }
 
   export interface AutocompleteRequest {
@@ -1101,11 +1101,11 @@ export module API {
   }
 
   export function FindRowsLike(request: AutocompleteQueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", signal }, request);
+    return ajaxPost({ url: "~/api/query/findRowsLike", signal }, request);
   }
 
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-    return ajaxPost<QueryToken[]>({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
+    return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
   }
 
   export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {

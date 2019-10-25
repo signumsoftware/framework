@@ -713,7 +713,7 @@ export module API {
   }
 
   export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-    return ajaxGet<Array<T>>({ url: "~/api/fetchAll/" + type.typeName });
+    return ajaxGet({ url: "~/api/fetchAll/" + type.typeName });
   }
 
 
@@ -742,7 +742,7 @@ export module API {
     const typeName = getTypeName(type);
     let idVal = id;
 
-    return ajaxGet<Entity>({ url: "~/api/entity/" + typeName + "/" + id });
+    return ajaxGet({ url: "~/api/entity/" + typeName + "/" + id });
   }
 
 
@@ -754,22 +754,22 @@ export module API {
     const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
     let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
-    return ajaxGet<EntityPack<Entity>>({ url: "~/api/entityPack/" + typeName + "/" + idVal });
+    return ajaxGet({ url: "~/api/entityPack/" + typeName + "/" + idVal });
   }
 
 
   export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
-    return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
+    return ajaxPost({ url: "~/api/entityPackEntity" }, entity);
   }
 
   export function validateEntity(entity: ModifiableEntity): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
+    return ajaxPost({ url: "~/api/validateEntity" }, entity);
   }
 
   export function getType(typeName: string): Promise<TypeEntity | null> {
 
-    return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
+    return ajaxGet({ url: `~/api/reflection/typeEntity/${typeName}` });
   }
 }
 
