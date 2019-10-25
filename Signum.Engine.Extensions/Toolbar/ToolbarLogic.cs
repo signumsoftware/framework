@@ -260,10 +260,10 @@ namespace Signum.Engine.Toolbar
 
         static bool InMemoryFilter<T>(T entity) where T : Entity
         {
-            if (Schema.Current.IsAllowed(typeof(T), inUserInterface: true) != null)
+            if (Schema.Current.IsAllowed(typeof(T), inUserInterface: false) != null)
                 return false;
 
-            var isAllowed = Schema.Current.GetInMemoryFilter<T>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<T>(userInterface: false);
             return isAllowed(entity);
         }
 

@@ -17,17 +17,19 @@ import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
-import { JavascriptMessage, getToString } from '@framework/Signum.Entities';
+import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals';
 
 export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(undefined, [], signal => ToolbarClient.API.getCurrentToolbar("Main"));
-
-  if (response == null)
+  var response = useAPI(undefined, [], signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t || null));
+  if (response === undefined)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (response === null)
+    return <span>{SearchMessage.NoResultsFound.niceToString()}</span>;
 
   return (<ToolbarMainRendererPrivate response={response} />);
 }
