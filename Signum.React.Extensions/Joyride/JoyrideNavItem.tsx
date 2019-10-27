@@ -1,36 +1,26 @@
 import * as React from 'react'
 import { Nav } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import JoyrideComponent from "./JoyrideComponent";
+import { JoyrideComponentHandle } from "./JoyrideComponent";
 
 export interface JoyrideNavItemProps {
-  getJoyrideComponent: () => JoyrideComponent;
+  getJoyrideComponent: () => JoyrideComponentHandle;
 }
 
-export interface JoyrideNavItemState {
-
-}
-
-export default class JoyrideNavItem extends React.Component<JoyrideNavItemProps, JoyrideNavItemState> {
-  constructor(props: JoyrideNavItemProps) {
-    super(props);
-    this.state = {};
-  }
-
-  onClick = () => {
-    const joyrideComponent = this.props.getJoyrideComponent();
+export default function JoyrideNavItem(p : JoyrideNavItemProps){
+  
+  function onClick() {
+    const joyrideComponent = p.getJoyrideComponent();
 
     if (joyrideComponent && joyrideComponent.joyride)
       joyrideComponent.joyride.reset(true);
   }
 
-  render() {
-    return (
-      <Nav.Item id="help-nav-item" onClick={this.onClick}>
-        <a className="nav-link">
-          <FontAwesomeIcon icon={"question-circle"} />
-        </a>
-      </Nav.Item>
-    );
-  }
+  return (
+    <Nav.Item id="help-nav-item" onClick={onClick}>
+      <a className="nav-link">
+        <FontAwesomeIcon icon={"question-circle"} />
+      </a>
+    </Nav.Item>
+  );
 }
