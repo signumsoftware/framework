@@ -23,96 +23,78 @@ import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
 import { validate } from './View/NodeUtils';
 import { JavascriptMessage } from '@framework/Signum.Entities';
+import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
 
-interface DynamicPanelState {
-  startErrors?: WebApiHttpError[];
-  panelInformation?: DynamicPanelInformation;
-}
-
 type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
-export default class DynamicPanelPage extends React.Component<DynamicPanelProps, DynamicPanelState> {
+export default function DynamicPanelPage(p: DynamicPanelProps) {
 
-  handleSelect = (key: any /*string*/) => {
+  const [count, setCount] = React.useState(0);
+
+  const startErrors = useAPI(undefined, () => API.getStartErrors(), [count]);
+  const panelInformation = useAPI(undefined, () => API.getPanelInformation(), [count]);
+  const [restarting, setRestarting] = React.useState<moment.Moment | null>(null);
+
+
+  function handleSelect(key: any /*string*/) {
     Navigator.history.push("~/dynamic/panel?step=" + key);
   }
 
-  handleErrorClick = (e: React.MouseEvent<any>) => {
+  function handleErrorClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.handleSelect("restartServerApp");
+    handleSelect("restartServerApp");
   }
 
-  constructor(props: DynamicPanelProps) {
-    super(props);
 
-    this.state = {};
-  }
+  AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
-  componentWillMount() {
-    this.loadData();
-  }
+  let step = QueryString.parse(p.location.search).step as DynamicPanelTab | undefined;
 
-  loadData() {
-    API.getStartErrors()
-      .then(errors => this.setState({ startErrors: errors }))
-      .then(() => API.getPanelInformation())
-      .then(info => this.setState({ panelInformation: info }))
-      .done();
-  }
-  
+  return (
+    <div>
+      <h2>Dynamic Panel</h2>
+      {startErrors && startErrors.length > 0 && !restarting &&
+        <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
+          <FontAwesomeIcon icon="exclamation-triangle" />
+        {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
+                  </div>
+      }
+      <Tabs activeKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
+        <Tab eventKey="search" title="Search">
+          <SearchPanel />
+        </Tab>
 
-  render() {
-    AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
+        <Tab eventKey="compile" title="1. Edit and Compile">
+          <CompileStep refreshView={() => setCount(count + 1)} panelInformation={panelInformation} />
+        </Tab>
 
-    let step = QueryString.parse(this.props.location.search).step as DynamicPanelTab | undefined;
+        <Tab eventKey="restartServerApp" title="2. Restart Server Application">
+          <RestartServerAppStep
+            startErrors={startErrors}
+            restarting={restarting}
+            setRestarting={setRestarting}
+            refreshView={() => setCount(count + 1)} />
+        </Tab>
 
-    const errors = this.state.startErrors
-    return (
-      <div>
-        <h2>Dynamic Panel</h2>
-        {errors && errors.length > 0 &&
-          <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-            <FontAwesomeIcon icon="exclamation-triangle" />
-            {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
-                    </div>
+        {Options.getDynaicMigrationsStep &&
+
+          <Tab eventKey="migrations" title="3. Sql Migrations">
+            {Options.getDynaicMigrationsStep()}
+          </Tab>
         }
-        <Tabs activeKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
-          <Tab eventKey="search" title="Search">
-            <SearchPanel />
-          </Tab>
+        <Tab eventKey="checkEvals" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
+          <CheckEvalsStep />
+        </Tab>
 
-          <Tab eventKey="compile" title="1. Edit and Compile">
-            <CompileStep refreshView={() => this.loadData()} panelInformation={this.state.panelInformation} />
-          </Tab>
-
-          <Tab eventKey="restartServerApp" title="2. Restart Server Application">
-            <RestartServerAppStep
-              startErrors={this.state.startErrors}
-              setStartErrors={errors => this.setState({ startErrors: errors })}
-              refreshView={() => this.loadData()} />
-          </Tab>
-
-          {Options.getDynaicMigrationsStep &&
-
-            <Tab eventKey="migrations" title="3. Sql Migrations">
-              {Options.getDynaicMigrationsStep()}
-            </Tab>
-          }
-          <Tab eventKey="checkEvals" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
-            <CheckEvalsStep />
-          </Tab>
-
-          <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
-            <RefreshClientsStep />
-          </Tab>
-        </Tabs>
-      </div>
-    );
-  }
-
+        <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
+          <RefreshClientsStep />
+        </Tab>
+      </Tabs>
+    </div>
+  );
 }
 
 export function SearchPanel(props: {}) {
@@ -136,7 +118,7 @@ export function SearchPanel(props: {}) {
         </div>
       </div>
 
-   
+
 
     </div>
   );
@@ -147,69 +129,36 @@ interface DynamicCompileStepProps {
   panelInformation?: DynamicPanelInformation;
 }
 
-interface DynamicCompileStepState {
-  complationErrors?: CompilationError[];
-  selectedErrorIndex?: number;
-  applicationRestarting?: moment.Moment;
-}
+export function CompileStep(p: DynamicCompileStepProps) {
 
-export class CompileStep extends React.Component<DynamicCompileStepProps, DynamicCompileStepState>{
+  const [compilationErrors, setCompilationErrors] = React.useState<CompilationError[] | undefined>(undefined);
 
-  constructor(props: any) {
-    super(props);
-    this.state = { };
-  }
+  const [selectedErrorIndex, setSelectedErrorIndex] = React.useState<number | undefined>(undefined);
 
 
-
-
-  handleCompile = (e: React.MouseEvent<any>) => {
+  function handleCompile(e: React.MouseEvent<any>) {
     e.preventDefault();
     API.compile()
       .then(errors => {
-        this.setState({ complationErrors: errors, selectedErrorIndex: undefined });
-        this.props.refreshView && this.props.refreshView();
+        setSelectedErrorIndex(undefined);
+        setCompilationErrors(errors);
+        p.refreshView && p.refreshView();
       }).done();
   }
 
-  handleCheck = (e: React.MouseEvent<any>) => {
+  function handleCheck(e: React.MouseEvent<any>) {
     e.preventDefault();
     API.getCompilationErrors()
-      .then(errors => this.setState({ complationErrors: errors, selectedErrorIndex: undefined }))
+      .then(errors => {
+        setSelectedErrorIndex(undefined);
+        setCompilationErrors(errors);
+      })
       .done();
   }
 
-  render() {
-    var sc = new StyleContext(undefined, { labelColumns: { sm: 6 } });
 
-    const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
-    const lineContainer = React.cloneElement(<div />, undefined, ...lines);
-
-    const errors = this.state.complationErrors;
-
-    return (
-      <div>
-
-        <div className="row">
-          <div className="col-sm-6">
-            {lineContainer}
-          </div>
-          <div className="col-sm-6">
-            {this.props.panelInformation ? this.renderPanelInformation() : JavascriptMessage.loading.niceToString()}
-          </div>
-        </div>
-
-    
-        <br />
-          {<a href="#" className="sf-button btn btn-warning" onClick={this.handleCheck}>Check</a>}&nbsp;
-          {<a href="#" className="sf-button btn btn-success" onClick={this.handleCompile}>Compile</a>}
-          {errors && this.renderCompileResult(errors)}
-      </div>
-    );
-  }
-
-  renderPanelInformation() {
-    var pi = this.props.panelInformation;
+  function renderPanelInformation() {
+    var pi = p.panelInformation;
     const lastCompile = pi && pi.lastDynamicCompilationDateTime;
     const lastChange = pi && pi.lastDynamicChangeDateTime;
     const loadedAssembly = pi && pi.loadedCodeGenAssemblyDateTime;
@@ -244,8 +193,7 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
     );
   }
 
-  renderCompileResult(errors: CompilationError[]) {
-
+  function renderCompileResult(errors: CompilationError[]) {
     return (
       <div>
         <br />
@@ -255,13 +203,13 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
             "Please fix this errors in the dynamic entities"}
         </div>
         <br />
-        {errors.length > 0 && this.renderErrorTable(errors)}
+        {errors.length > 0 && renderErrorTable(errors)}
       </div>
     );
   }
 
-  renderErrorTable(errors: CompilationError[]) {
-    var err = this.state.selectedErrorIndex == null ? undefined : errors[this.state.selectedErrorIndex]
+  function renderErrorTable(errors: CompilationError[]) {
+    var err = selectedErrorIndex == null ? undefined : errors[selectedErrorIndex]
 
     return (
       <div>
@@ -277,8 +225,8 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
             {
               errors.map((e, i) =>
                 <tr key={i}
-                  onClick={() => this.setState({ selectedErrorIndex: i })}
-                  className={classes("dynamic-error-line", i == this.state.selectedErrorIndex ? "active" : undefined)}>
+                  onClick={() => setSelectedErrorIndex(i)}
+                  className={classes("dynamic-error-line", i == selectedErrorIndex ? "active" : undefined)}>
                   <td>{e.errorNumber}</td>
                   <td>{e.errorText}</td>
                   <td>{e.fileName}({e.line}:{e.column})</td>
@@ -298,51 +246,70 @@ export class CompileStep extends React.Component<DynamicCompileStepProps, Dynami
       </div>
     );
   }
+  var sc = new StyleContext(undefined, { labelColumns: { sm: 6 } });
+
+  const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
+  const lineContainer = React.cloneElement(<div />, undefined, ...lines);
+
+  return (
+    <div>
+
+      <div className="row">
+        <div className="col-sm-6">
+          {lineContainer}
+        </div>
+        <div className="col-sm-6">
+          {p.panelInformation ? renderPanelInformation() : JavascriptMessage.loading.niceToString()}
+        </div>
+      </div>
+
+
+      <br />
+      {<a href="#" className="sf-button btn btn-warning" onClick={handleCheck}>Check</a>}&nbsp;
+      {<a href="#" className="sf-button btn btn-success" onClick={handleCompile}>Compile</a>}
+      {compilationErrors && renderCompileResult(compilationErrors)}
+    </div>
+  );
 }
 
 interface RestartServerAppStepProps {
-  setStartErrors: (startErrors?: WebApiHttpError[]) => void;
   startErrors?: WebApiHttpError[];
-  refreshView?: () => void;
+  refreshView: () => void;
+  setRestarting: (time: moment.Moment | null) => void;
+  restarting: moment.Moment | null;
 }
 
-interface RestartServerAppStepState {
-  serverRestarting?: moment.Moment;
-}
 
-export class RestartServerAppStep extends React.Component<RestartServerAppStepProps, RestartServerAppStepState>{
+export function RestartServerAppStep(p: RestartServerAppStepProps) {
+  const forceUpdate = useForceUpdate();
 
-  constructor(props: any) {
-    super(props);
-    this.state = {};
-  }
-
-  handleRestartApplication = (e: React.MouseEvent<any>) => {
+  function handleRestartApplication(e: React.MouseEvent<any>) {
     e.preventDefault();
 
     API.restartServer()
       .then(() => {
-        this.setState({ serverRestarting: moment() });
-        this.props.setStartErrors(undefined);
-        return Promise.all([this.refreshScreen(), this.reconnectWithServer()]);
+        p.setRestarting(moment());
+        return Promise.all([refreshScreen(), reconnectWithServer()]);
       })
       .done();
   }
 
-  refreshScreen = async () => {
-    while (this.state.serverRestarting) {
+
+  useInterval(p.restarting ? 1000 : null, null, () => null);
+
+  async function refreshScreen() {
+    while (p.restarting) {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      this.forceUpdate();
+      forceUpdate();
     }
   }
 
-  reconnectWithServer = async () => {
+  async function reconnectWithServer() {
     while (true) {
       try {
         var errors = await API.getStartErrors();
-        this.props.setStartErrors(errors);
-        this.setState({ serverRestarting: undefined });
-        this.props.refreshView && this.props.refreshView();
+        p.setRestarting(null);
+        p.refreshView();
         return;
       } catch (e) {
         if (e instanceof SyntaxError) {
@@ -355,65 +322,49 @@ export class RestartServerAppStep extends React.Component<RestartServerAppStepPr
     }
   }
 
-  render() {
-
-    if (this.state.serverRestarting)
-      return this.renderProgress(this.state.serverRestarting);
-
-    return (
-      <div>
-        {
-          AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-          <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Server Application</a>
-        }
-        {this.props.startErrors && this.props.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
-      </div>
-    );
-  }
-
-  renderProgress(since: moment.Moment) {
-
+  if (p.restarting) {
     return (
       <div className="progress">
         <div className="progress-bar progress-bar-striped bg-warning active" role="progressbar" style={{ width: "100%" }}>
-          <span>Restarting...({moment().diff(since, "s")}s)</span>
+          <span>Restarting...({moment().diff(p.restarting, "s")}s)</span>
         </div>
       </div>
     );
   }
-
+    
+  return (
+    <div>
+      {
+        AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
+        <a href="#" className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</a>
+      }
+      {p.startErrors && p.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
+    </div>
+  );
 }
 
-export class ErrorBlock extends React.Component<{ error: WebApiHttpError }, { showDetails: boolean }>{
+export function ErrorBlock(p: { error: WebApiHttpError }) {
 
-  constructor(props: any) {
-    super(props);
+  const [showDetails, setShowDetails] = React.useState(false)
 
-    this.state = {
-      showDetails: false,
-    };
-  }
-
-  handleShowStackTrace = (e: React.MouseEvent<any>) => {
+  function handleShowStackTrace(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.setState({ showDetails: !this.state.showDetails });
+    setShowDetails(!showDetails);
   }
-  render() {
-    var he = this.props.error;
-    return (
-      <div className="alert alert-danger error-block" style={{ marginTop: "20px" }}>
-        <div >
-          <h3>{he.exceptionType}</h3>
-          {textDanger(he.exceptionMessage)}
-        </div >
-        <div>
-          <a href="#" onClick={this.handleShowStackTrace}>StackTrace</a>
-          {this.state.showDetails && <pre>{he.stackTrace}</pre>}
-        </div>
-      </div>
 
-    );
-  }
+  var he = p.error;
+  return (
+    <div className="alert alert-danger error-block" style={{ marginTop: "20px" }}>
+      <div >
+        <h3>{he.exceptionType}</h3>
+        {textDanger(he.exceptionMessage)}
+      </div >
+      <div>
+        <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+        {showDetails && <pre>{he.stackTrace}</pre>}
+      </div>
+    </div>
+  );
 }
 
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
@@ -424,34 +375,22 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
+export function CheckEvalsStep() {
 
+  const [autoStart, setAutoStart] = React.useState<number | undefined>(undefined);
 
-interface CheckEvalsStepState {
-  autoStart: number | undefined;
-}
-
-export class CheckEvalsStep extends React.Component<{}, CheckEvalsStepState>{
-
-  constructor(props: CheckEvalsStepState) {
-    super(props);
-    this.state = { autoStart: undefined };
-  }
-
-  handleOnClick = (e: React.MouseEvent<any>) => {
+  function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.setState(s => ({ autoStart: (s.autoStart || 0) + 1 }));
+    setAutoStart((autoStart || 0) + 1);
   }
 
-
-  render() {
-    var ctx = new StyleContext(undefined, {});
-    return (
-      <div>
-        {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={this.state.autoStart} />)}
-        <button className="btn btn-success" onClick={this.handleOnClick}><FontAwesomeIcon icon="sync" /> Refresh all</button>
-      </div>
-    );
-  }
+  var ctx = new StyleContext(undefined, {});
+  return (
+    <div>
+      {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
+      <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="sync" /> Refresh all</button>
+    </div>
+  );
 }
 
 
@@ -467,101 +406,81 @@ interface CheckEvalTypeState {
 }
 
 
-export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEvalTypeState> {
+export function CheckEvalType(p: CheckEvalTypeProps) {
 
-  constructor(props: CheckEvalTypeProps) {
-    super(props);
-    this.state = { state: "initial" };
+  const [{ state, errors }, setState] = React.useState<CheckEvalTypeState>({ state: "initial", errors: undefined });
+
+  React.useEffect(() => {
+    if (p.autoStart != null)
+      loadData(p);
+  }, [p.autoStart]);
+
+
+  function loadData(props: CheckEvalTypeProps) {
+    setState({ state: "loading" });
+    const fo = p.findOptions;
+    Finder.getQueryDescription(fo.queryName)
+      .then(qd => Finder.parseFindOptions(fo, qd))
+      .then(fop => {
+        var request = {
+          queryKey: fop.queryKey,
+          filters: toFilterRequests(fop.filterOptions || []),
+          orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
+          count: 10000,
+        } as QueryEntitiesRequest;
+        API.getEvalErrors(request)
+          .then(errors => setState({ state: "success", errors: errors }),
+            e => {
+              setState({ state: "failed", errors: undefined });
+              throw e;
+            }).done();
+      });
   }
 
-  componentWillMount() {
-    if (this.props.autoStart != null)
-      this.loadData(this.props);
-  }
+  return (
+    <FormGroup ctx={p.ctx} labelText={getQueryNiceName(p.findOptions.queryName)}>
+      <ValueSearchControl findOptions={p.findOptions} isLink={true} />
+      {
+        state == "loading" ?
+          <FontAwesomeIcon icon="sync" spin={true} /> :
+          <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="sync" className="sf-line-button" /></span>
+      }
+      {
+        state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
+          errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
+            errors && errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+              undefined
+      }
+      {
+        errors && errors.length > 0 &&
+        <div className="table-responsive">
+          <table className="table table-sm">
+            <tbody>
+              {errors.map((e, i) => <tr key={i}>
+                <td><EntityLink lite={e.lite} /></td>
+                <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
+              </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-  componentWillReceiveProps(newProps: CheckEvalTypeProps) {
-    if (newProps.autoStart != null && newProps.autoStart != this.props.autoStart)
-      this.loadData(newProps);
-  }
-
-  loadData(props: CheckEvalTypeProps) {
-    this.setState({ state: "loading" }, () => {
-
-      const fo = this.props.findOptions;
-      Finder.getQueryDescription(fo.queryName)
-        .then(qd => Finder.parseFindOptions(fo, qd))
-        .then(fop => {
-          var request = {
-            queryKey: fop.queryKey,
-            filters: toFilterRequests(fop.filterOptions || []),
-            orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
-            count: 10000,
-          } as QueryEntitiesRequest;
-          API.getEvalErrors(request)
-            .then(errors => this.setState({ state: "success", errors: errors }),
-              e => {
-                this.setState({ state: "failed", errors: undefined });
-                throw e;
-              }).done();
-        });
-    });
-  }
-
-  render() {
-    return (
-      <FormGroup ctx={this.props.ctx} labelText={getQueryNiceName(this.props.findOptions.queryName)}>
-        <ValueSearchControl findOptions={this.props.findOptions} isLink={true} />
-        {
-          this.state.state == "loading" ?
-            <FontAwesomeIcon icon="sync" spin={true} /> :
-            <span onClick={e => { e.preventDefault(); this.loadData(this.props); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="sync" className="sf-line-button" /></span>
-        }
-
-        {
-          this.state.state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(this.props.findOptions.queryName)}</span> :
-            this.state.errors && this.state.errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{this.state.errors.length}</strong> {this.state.errors.length == 1 ? "Error" : "Errors"} found</span> :
-              this.state.errors && this.state.errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
-                undefined
-        }
-        {
-          this.state.errors && this.state.errors.length > 0 &&
-          <div className="table-responsive">
-            <table className="table table-sm">
-              <tbody>
-                {this.state.errors.map((e, i) => <tr key={i}>
-                  <td><EntityLink lite={e.lite} /></td>
-                  <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
-                </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-        }
-      </FormGroup>
-
-    );
-  }
+      }
+    </FormGroup>
+  );
 }
 
 
-interface RefreshClientsStepState {
-
-}
-
-export class RefreshClientsStep extends React.Component<{}, RefreshClientsStepState>{
-
-  handleRefreshClient = (e: React.MouseEvent<any>) => {
+export function RefreshClientsStep() {
+  function handleRefreshClient(e: React.MouseEvent<any>) {
     e.preventDefault();
     window.location.reload(true);
   }
 
-  render() {
-    return (
-      <div>
-        <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-        <a href="#" className="sf-button btn btn-warning" onClick={this.handleRefreshClient}>Refresh this client</a>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
+      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+    </div>
+  );
 }

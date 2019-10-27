@@ -6,50 +6,43 @@ import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { Modal } from 'react-bootstrap';
 
-interface ShowCodeModalProps extends React.Props<ShowCodeModal>, IModalProps {
+interface ShowCodeModalProps extends IModalProps {
   typeName: string;
   node: BaseNode;
 }
 
-export default class ShowCodeModal extends React.Component<ShowCodeModalProps, { show: boolean }>  {
+export default function ShowCodeModal(p: ShowCodeModalProps) {
 
-  constructor(props: ShowCodeModalProps) {
-    super(props);
+  const [show, setShow] = React.useState<boolean>(true);
 
-    this.state = { show: true };
+  function handleCancelClicked() {
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(undefined);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(undefined);
-  }
-
-  render() {
-    return (
-      <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-        <div className="modal-header">
-          <h5 className="modal-title">{this.props.typeName + "Component code"}</h5>
-          <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div className="modal-body">
-          <pre>
-            {renderFile(this.props.typeName, this.props.node)}
-          </pre>
-        </div>
-      </Modal>
-    );
-  }
-
-  static showCode(typeName: string, node: BaseNode): Promise<void> {
-    return openModal<void>(<ShowCodeModal typeName={typeName} node={node} />);
-  }
+  return (
+    <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
+      <div className="modal-header">
+        <h5 className="modal-title">{p.typeName + "Component code"}</h5>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        <pre>
+          {renderFile(p.typeName, p.node)}
+        </pre>
+      </div>
+    </Modal>
+  );
 }
 
+ShowCodeModal.showCode = (typeName: string, node: BaseNode): Promise<void> => {
+  return openModal<void>(<ShowCodeModal typeName={typeName} node={node} />);
+}
 
 function renderFile(typeName: string, node: BaseNode): string {
 

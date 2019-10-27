@@ -15,68 +15,31 @@ import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
 }
 
-interface DynamicViewOverrideComponentState {
-  exampleEntity?: Entity;
-  componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }> | null;
-  syntaxError?: string;
-  viewOverride?: (vr: ViewReplacer<Entity>) => void;
-  scriptChanged?: boolean;
-  viewNames?: string[];
-  typeHelp?: TypeHelpClient.TypeHelp;
-}
+export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps) {
 
-export default class DynamicViewOverrideComponent extends React.Component<DynamicViewOverrideComponentProps, DynamicViewOverrideComponentState> {
+  const typeName = p.ctx.value.entityType.cleanName;
+  const typeHelp = useAPI(undefined, () => TypeHelpClient.API.typeHelp(typeName, "CSharp"), [typeName]);
+  const viewNames = useAPI(undefined, () => Navigator.viewDispatcher.getViewNames(typeName), [typeName]);
 
-  constructor(props: DynamicViewOverrideComponentProps) {
-    super(props);
+  const scriptChangedRef = React.useRef(false);
 
-    this.state = {};
-  }
+  const forceUpdate = useForceUpdate();
+
+  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const [componentType, setComponentType] = React.useState<React.ComponentType<{ ctx: TypeContext<Entity> }> | null>(null);
+
+  const [syntaxError, setSyntaxError] = React.useState<string | undefined>(undefined);
+  const [viewOverride, setViewOverride] = React.useState<((vr: ViewReplacer<Entity>) => void) | undefined>(undefined);
 
 
-  componentWillMount() {
-    this.updateViewNames(this.props);
-    this.updateTypeHelp(this.props);
-  }
-
-  componentWillReceiveProps(newProps: DynamicViewOverrideComponentProps) {
-    if (newProps.ctx.value.entityType && this.props.ctx.value.entityType && !is(this.props.ctx.value.entityType, newProps.ctx.value.entityType)) {
-      this.updateViewNames(newProps);
-      this.updateTypeHelp(newProps);
-    }
-  }
-
-  updateViewNames(props: DynamicViewOverrideComponentProps) {
-    this.setState({ viewNames: undefined });
-    if (props.ctx.value.entityType) {
-      const typeName = props.ctx.value.entityType.cleanName;
-
-      Navigator.viewDispatcher.getViewNames(typeName)
-        .then(vn => this.setState({ viewNames: vn }))
-        .done();
-    }
-  }
-
-  updateTypeHelp(props: DynamicViewOverrideComponentProps) {
-    this.setState({ typeHelp: undefined });
-    if (props.ctx.value.entityType)
-      TypeHelpClient.API.typeHelp(props.ctx.value.entityType!.cleanName, "CSharp")
-        .then(th => this.setState({ typeHelp: th }))
-        .done();
-  }
-
-  handleTypeChange = () => {
-    this.updateViewNames(this.props);
-    this.updateTypeHelp(this.props);
-  }
-
-  handleTypeRemove = () => {
-    if (this.state.scriptChanged == true)
+  function handleTypeRemove() {
+    if (scriptChangedRef.current)
       return MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.loseCurrentChanges.niceToString(),
@@ -88,32 +51,32 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     return Promise.resolve(true);
   }
 
-  handleRemoveClick = (lambda: string) => {
-    setTimeout(() => this.showPropmt("Remove", `vr.removeLine(${lambda})`), 0);
+  function handleRemoveClick(lambda: string) {
+    setTimeout(() => showPropmt("Remove", `vr.removeLine(${lambda})`), 0);
   }
 
-  handleInsertBeforeClick = (lambda: string) => {
-    setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBeforeLine(${lambda}, ctx => [yourElement]);`), 0);
+  function handleInsertBeforeClick(lambda: string) {
+    setTimeout(() => showPropmt("InsertBefore", `vr.insertBeforeLine(${lambda}, ctx => [yourElement]);`), 0);
   }
 
-  handleInsertAfterClick = (lambda: string) => {
-    setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfterLine(${lambda}, ctx => [yourElement]);`), 0);
+  function handleInsertAfterClick(lambda: string) {
+    setTimeout(() => showPropmt("InsertAfter", `vr.insertAfterLine(${lambda}, ctx => [yourElement]);`), 0);
   }
 
-  handleRenderContextualMenu = (pr: PropertyRoute) => {
+  function handleRenderContextualMenu(pr: PropertyRoute) {
     const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
     return (
       <Dropdown.Item>
         <Dropdown.Header>{pr.propertyPath()}</Dropdown.Header>
         <Dropdown.Divider />
-        <Dropdown.Item onClick={() => this.handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash" />&nbsp; Remove</Dropdown.Item>
-        <Dropdown.Item onClick={() => this.handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up" />&nbsp; Insert Before</Dropdown.Item>
-        <Dropdown.Item onClick={() => this.handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down" />&nbsp; Insert After</Dropdown.Item>
+        <Dropdown.Item onClick={() => handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash" />&nbsp; Remove</Dropdown.Item>
+        <Dropdown.Item onClick={() => handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up" />&nbsp; Insert Before</Dropdown.Item>
+        <Dropdown.Item onClick={() => handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down" />&nbsp; Insert After</Dropdown.Item>
       </Dropdown.Item>
     );
   }
 
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
     if (!pr || !pr.member || !pr.parent || pr.parent.propertyRouteType != "Mixin")
       return;
 
@@ -134,193 +97,139 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }).done();
   }
 
-  render() {
-    const ctx = this.props.ctx;
 
-    return (
-      <div>
-        <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
-        {
-          ctx.value.entityType && this.state.viewNames &&
-          <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
-            {
-              <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange}>
-                <option value="">{" - "}</option>
-                {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
-              </select>
-            }
-          </FormGroup>
-        }
-
-        {ctx.value.entityType &&
-          <div>
-            <br />
-            <div className="row">
-              <div className="col-sm-7">
-                {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
-                {this.renderEditor()}
-              </div>
-              <div className="col-sm-5">
-                <TypeHelpComponent
-                  initialType={ctx.value.entityType.cleanName}
-                  mode="TypeScript"
-                  renderContextMenu={this.handleRenderContextualMenu}
-                  onMemberClick={this.handleTypeHelpClick} />
-                <br />
-              </div>
-            </div>
-            <hr />
-            {this.renderTest()}
-          </div>
-        }
-      </div>
-    );
-  }
-
-  handleViewNameChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
-    this.props.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
-    this.props.ctx.value.modified = true;
-    this.forceUpdate();
+  function handleViewNameChange(e: React.SyntheticEvent<HTMLSelectElement>) {
+    p.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
+    p.ctx.value.modified = true;
+    forceUpdate();
   };
 
-  renderTest() {
-    const ctx = this.props.ctx;
+  function renderTest() {
+    const ctx = p.ctx;
     return (
       <div>
-        {this.state.exampleEntity && this.state.componentClass &&
-          <RenderWithReplacements entity={this.state.exampleEntity}
-            componentClass={this.state.componentClass}
-            viewOverride={this.state.viewOverride} />}
+        {exampleEntityRef.current && componentType &&
+          <RenderWithReplacements entity={exampleEntityRef.current}
+            componentType={componentType}
+            viewOverride={viewOverride} />}
       </div>
     );
   }
 
-  renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
+  function renderExampleEntity(typeName: string) {
+    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
       <div className="code-container">
-        <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={this.handleEntityChange} formGroupStyle="Basic"
+        <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEntityChange} formGroupStyle="Basic"
           type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
       </div>
     );
   }
 
-  handleOnView = (exampleEntity: Entity) => {
+  function handleOnView(exampleEntity: Entity) {
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  handleCodeChange = (newCode: string) => {
-    var dvo = this.props.ctx.value;
+  function handleCodeChange(newCode: string) {
+    var dvo = p.ctx.value;
 
     if (dvo.script != newCode) {
       dvo.script = newCode;
       dvo.modified = true;
-      this.setState({ scriptChanged: true });
-      this.compileFunction();
+      scriptChangedRef.current = true;
+      compileFunction();
     };
   }
 
-  handleEntityChange = () => {
-
-    if (!this.state.exampleEntity)
-      this.setState({ componentClass: undefined });
+  function handleEntityChange() {
+    if (!exampleEntityRef.current)
+      setComponentType(null);
     else {
 
-      const entity = this.state.exampleEntity;
+      const entity = exampleEntityRef.current;
       const settings = Navigator.getSettings(entity.Type);
 
       if (!settings)
-        this.setState({ componentClass: null });
-
+        setComponentType(null);
       else {
-        const ctx = this.props.ctx;
+        const ctx = p.ctx;
         return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName || undefined).promise.then(func => {
           var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
           var re = func(tempCtx);
-          this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }> });
-          this.compileFunction();
+          setComponentType(re.type as React.ComponentType<{ ctx: TypeContext<Entity> }>);
+          compileFunction();
         });
       }
     }
   }
 
-  compileFunction() {
+  function compileFunction() {
+    setSyntaxError(undefined);
+    setViewOverride(undefined);
 
-    this.setState({
-      syntaxError: undefined,
-      viewOverride: undefined,
-    });
-
-    const dvo = this.props.ctx.value;
+    const dvo = p.ctx.value;
     let func: (rep: ViewReplacer<Entity>) => void;
     try {
       func = DynamicViewClient.asOverrideFunction(dvo);
-      this.setState({
-        viewOverride: func
-      });
+      setViewOverride(func);
     } catch (e) {
-      this.setState({
-        syntaxError: (e as Error).message
-      });
+      setSyntaxError((e as Error).message);
       return;
     }
   }
 
-  renderEditor() {
-
-    const ctx = this.props.ctx;
+  function renderEditor() {
+    const ctx = p.ctx;
     return (
       <div className="code-container">
         <div className="btn-toolbar btn-toolbar-small">
-          {this.state.viewNames && this.renderViewNameButtons()}
-          {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
+          {viewNames && renderViewNameButtons()}
+          {allExpressions().length > 0 && renderExpressionsButtons()}
           <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
         </div>
         <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
-        <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
-        {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
+        <JavascriptCodeMirror code={ctx.value.script || ""} onChange={handleCodeChange} />
+        {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>
     );
   }
 
-  handleViewNameClick = (viewName: string) => {
-    this.showPropmt("View", `modules.React.createElement(RenderEntity, {ctx: ctx, getViewPromise: ctx => "${viewName}"})`);
+  function handleViewNameClick(viewName: string) {
+    showPropmt("View", `modules.React.createElement(RenderEntity, {ctx: ctx, getViewPromise: ctx => "${viewName}"})`);
   }
 
-  renderViewNameButtons() {
+  function renderViewNameButtons() {
     return (
       <DropdownButton variant="success" title="View Names" id="view_dropdown">
-        {this.state.viewNames!.map((vn, i) =>
-          <Dropdown.Item key={i} onClick={() => this.handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
+        {viewNames!.map((vn, i) =>
+          <Dropdown.Item key={i} onClick={() => handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
       </DropdownButton>
     );
   }
 
-  allExpressions() {
-    var typeHelp = this.state.typeHelp;
+  function allExpressions() {
     if (!typeHelp)
       return [];
 
     return typeHelp.members.filter(m => m.name && m.isExpression == true);
   }
 
-  handleExpressionClick = (member: TypeHelpClient.TypeMemberHelp) => {
+  function handleExpressionClick(member: TypeHelpClient.TypeMemberHelp) {
     var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
-    this.showPropmt("Expression", `modules.React.createElement(ValueSearchControlLine, {ctx: ctx, ${paramValue}})`);
+    showPropmt("Expression", `modules.React.createElement(ValueSearchControlLine, {ctx: ctx, ${paramValue}})`);
   }
 
-  renderExpressionsButtons() {
+  function renderExpressionsButtons() {
     return (
       <DropdownButton variant="warning" title="Expressions" id="expression_dropdown">
-        {this.allExpressions().map((m, i) =>
-          <Dropdown.Item key={i} onClick={() => this.handleExpressionClick(m)}>{m.name}</Dropdown.Item>)}
+        {allExpressions().map((m, i) =>
+          <Dropdown.Item key={i} onClick={() => handleExpressionClick(m)}>{m.name}</Dropdown.Item>)}
       </DropdownButton>
     );
   }
 
-  showPropmt(title: string, text: string) {
-
+  function showPropmt(title: string, text: string) {
     ValueLineModal.show({
       type: { name: "string" },
       initialValue: text,
@@ -330,72 +239,84 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
       initiallyFocused: true,
     }).done();
   }
+  const ctx = p.ctx;
+
+  return (
+    <div>
+      <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={forceUpdate} onRemove={handleTypeRemove} />
+      {
+        ctx.value.entityType && viewNames &&
+        <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
+          {
+            <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={handleViewNameChange}>
+              <option value="">{" - "}</option>
+              {(viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
+            </select>
+          }
+        </FormGroup>
+      }
+
+      {ctx.value.entityType &&
+        <div>
+          <br />
+          <div className="row">
+            <div className="col-sm-7">
+              {renderExampleEntity(ctx.value.entityType!.cleanName)}
+              {renderEditor()}
+            </div>
+            <div className="col-sm-5">
+              <TypeHelpComponent
+                initialType={ctx.value.entityType.cleanName}
+                mode="TypeScript"
+                renderContextMenu={handleRenderContextualMenu}
+                onMemberClick={handleTypeHelpClick} />
+              <br />
+            </div>
+          </div>
+          <hr />
+          {renderTest()}
+        </div>
+      }
+    </div>
+  );
 }
 
 
 interface RenderWithReplacementsProps {
   entity: Entity;
-  componentClass: React.ComponentClass<{ ctx: TypeContext<Entity> }> | React.FunctionComponent<{ ctx: TypeContext<Entity> }>;
+  componentType: React.ComponentType<{ ctx: TypeContext<Entity> }>;
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
 }
 
-interface RenderWithReplacementsState {
-  viewOverride?: (vr: ViewReplacer<Entity>) => void;
-}
+export function RenderWithReplacements(p: RenderWithReplacementsProps) {
 
-export class RenderWithReplacements extends React.Component<RenderWithReplacementsProps, RenderWithReplacementsState> {
+  const originalRenderRef = React.useRef<Function | undefined>(undefined);
 
-  originalRender: any;
+  React.useEffect(() => {
+    if (p.componentType.prototype.render)
+      originalRenderRef.current = p.componentType.prototype.render;
 
-  constructor(props: RenderWithReplacementsProps) {
-    super(props);
-    this.state = {};
-  }
+    return () => { p.componentType.prototype.render = originalRenderRef.current; };
+  }, []);
 
-  componentWillMount() {
-
-    if (this.props.componentClass.prototype.render)
-      this.originalRender = this.props.componentClass.prototype.render;
-
-    this.setState({ viewOverride: this.props.viewOverride });
-  }
-
-  componentWillReceiveProps(newProps: RenderWithReplacementsProps) {
-    if (newProps.componentClass != this.props.componentClass)
-      throw new Error("not implemented");
-
-    if (newProps.viewOverride != this.props.viewOverride)
-      this.setState({ viewOverride: newProps.viewOverride });
-  }
-
-  componentWillUnmount() {
-    if (this.props.componentClass.prototype.render)
-      this.props.componentClass.prototype.render = this.originalRender;
-  }
-
-  render() {
-
-    var ctx = new TypeContext(undefined, undefined, PropertyRoute.root(this.props.entity.Type), new ReadonlyBinding(this.props.entity, "example"));
-
-    return React.createElement(this.applyViewOverrides(this.state.viewOverride), { ctx: ctx });
-  }
-
-  applyViewOverrides(vo?: (vr: ViewReplacer<Entity>) => void) {
-
-    if (this.props.componentClass.prototype.render)
-      DynamicViewClient.unPatchComponent((this.props.componentClass as React.ComponentClass<{ ctx: TypeContext<Entity> }>));
+  function applyViewOverrides(vo?: (vr: ViewReplacer<Entity>) => void) {
+    if (p.componentType.prototype.render)
+      DynamicViewClient.unPatchComponent((p.componentType as React.ComponentClass<{ ctx: TypeContext<Entity> }>));
 
     if (!vo)
-      return this.props.componentClass;
+      return p.componentType;
 
-    if (this.props.componentClass.prototype.render) {
-      DynamicViewClient.patchComponent((this.props.componentClass as React.ComponentClass<{ ctx: TypeContext<Entity> }>), vo);
-      return this.props.componentClass;
+    if (p.componentType.prototype.render) {
+      DynamicViewClient.patchComponent((p.componentType as React.ComponentClass<{ ctx: TypeContext<Entity> }>), vo);
+      return p.componentType;
     }
     else
-      return Navigator.surroundFunctionComponent((this.props.componentClass as React.FunctionComponent<{ ctx: TypeContext<Entity> }>),
-        [{ override: vo }]);
+      return Navigator.surroundFunctionComponent((p.componentType as React.FunctionComponent<{ ctx: TypeContext<Entity> }>), [{ override: vo }]);
   }
+
+  var ctx = new TypeContext(undefined, undefined, PropertyRoute.root(p.entity.Type), new ReadonlyBinding(p.entity, "example"));
+
+  return React.createElement(applyViewOverrides(p.viewOverride), { ctx: ctx });
 }
 
 

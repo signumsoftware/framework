@@ -19,6 +19,7 @@ import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicVie
 import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
+import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
@@ -32,37 +33,28 @@ export interface DynamicViewComponentState {
   selectedNode: DesignerNode<BaseNode>;
   dynamicView: DynamicViewEntity;
   viewOverrides?: Navigator.ViewOverride<ModifiableEntity>[];
+  
 }
 
-export default class DynamicViewComponent extends React.Component<DynamicViewComponentProps, DynamicViewComponentState>{
+export default function DynamicViewComponent(p: DynamicViewComponentProps) {
 
-  constructor(props: DynamicViewComponentProps) {
-    super(props);
+  const [isDesignerOpen, setIsDesignerOpen] = React.useState<boolean>(false);
+  const rootNodeMemo = React.useMemo(() => JSON.parse(p.initialDynamicView.viewContent!) as BaseNode, []);
 
-    const rootNode = JSON.parse(props.initialDynamicView.viewContent!) as BaseNode;
-    this.state = {
-      dynamicView: props.initialDynamicView,
-      isDesignerOpen: false,
-      rootNode: rootNode,
-      selectedNode: this.getZeroNode().createChild(rootNode)
-    };
-  }
+  const [rootNode, setRootNode] = React.useState<BaseNode>(() => rootNodeMemo);
+  const [selectedNode, setSelectedNode] = React.useState<DesignerNode<BaseNode>>(() => getZeroNode().createChild(rootNodeMemo))
+  const [dynamicView, setDynamicView] = React.useState<DynamicViewEntity>(p.initialDynamicView);
 
-  componentWillMount() {
-    Navigator.viewDispatcher.getViewOverrides(this.props.ctx.value.Type)
-      .then(vos => this.setState({ viewOverrides: vos }))
-      .done();
-  }
+  const viewOverrides = useAPI(undefined, () => Navigator.viewDispatcher.getViewOverrides(p.ctx.value.Type), []);
 
-  getZeroNode() {
-
-    var { ctx, children, initialDynamicView, ...extraProps } = this.props;
+  function getZeroNode() {
+    var { ctx, initialDynamicView, ...extraProps } = p;
 
     var context: DesignerContext = {
-      onClose: this.handleClose,
-      refreshView: () => { this.setState({ selectedNode: this.state.selectedNode.reCreateNode() }); },
-      getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
-      setSelectedNode: (newNode) => this.setState({ selectedNode: newNode }),
+      onClose: handleClose,
+      refreshView: () => { setSelectedNode(selectedNode.reCreateNode()); },
+      getSelectedNode: () => isDesignerOpen ? selectedNode : undefined,
+      setSelectedNode: (newNode) => setSelectedNode(newNode),
       props: extraProps,
       propTypes: initialDynamicView.props.toObject(mle => mle.element.name, mle => mle.element.type),
       locals: {},
@@ -72,67 +64,24 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     return DesignerNode.zero(context, ctx.value.Type);
   }
 
-  handleReload = (dynamicView: DynamicViewEntity) => {
-
-    this.setState({
-      dynamicView: dynamicView,
-      rootNode: JSON.parse(dynamicView.viewContent!) as BaseNode,
-      selectedNode: this.getZeroNode().createChild(this.state.rootNode)
-    });
+  function handleReload(dynamicView: DynamicViewEntity) {
+    setDynamicView(dynamicView);
+    setRootNode(JSON.parse(dynamicView.viewContent!) as BaseNode);
+    setSelectedNode(getZeroNode().createChild(rootNode));
   }
 
-  handleOpen = () => {
-    this.setState({ isDesignerOpen: true });
+  function handleOpen() {
+    setIsDesignerOpen(true);
   }
 
-  handleClose = () => {
-    this.setState({ isDesignerOpen: false });
+  function handleClose() {
+    setIsDesignerOpen(false);
   }
 
-  render() {
+  function handleLoseChanges() {
+    const node = JSON.stringify(rootNode);
 
-
-    const rootNode = this.getZeroNode().createChild(this.state.rootNode);
-    const ctx = this.props.ctx;
-
-    if (this.state.viewOverrides == null)
-      return null;
-
-    var topMostEntity = ctx.frame && ctx.frame.pack && ctx.frame.pack.entity;
-    
-    var vos = this.state.viewOverrides.filter(a => a.viewName == this.state.dynamicView.viewName);
-
-    if (!Navigator.isViewable(DynamicViewEntity)) {
-      return (
-        <div className="design-content">
-          <RenderWithViewOverrides dn={rootNode} parentCtx={ctx} vos={vos} />
-        </div>
-      );
-    }
-    return (<div className="design-main">
-      <div className={classes("design-left", this.state.isDesignerOpen && "open")}>
-        {!this.state.isDesignerOpen ?
-          <span onClick={this.handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon" /></span> :
-          <DynamicViewDesigner
-            rootNode={rootNode}
-            dynamicView={this.state.dynamicView}
-            onReload={this.handleReload}
-            onLoseChanges={this.handleLoseChanges}
-            typeName={ctx.value.Type} />
-        }
-      </div>
-      <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-        <AutoFocus disabled={topMostEntity != ctx.value}>
-          <RenderWithViewOverrides dn={rootNode} parentCtx={ctx} vos={vos} />
-        </AutoFocus>
-      </div>
-    </div>);
-  }
-
-  handleLoseChanges = () => {
-    const node = JSON.stringify(this.state.rootNode);
-
-    if (this.state.dynamicView.isNew || node != this.state.dynamicView.viewContent) {
+    if (dynamicView.isNew || node != dynamicView.viewContent) {
       return MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.loseCurrentChanges.niceToString(),
@@ -144,6 +93,42 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
     return Promise.resolve(true);
   }
+
+  const desRootNode = getZeroNode().createChild(rootNode);
+  const ctx = p.ctx;
+
+  if (viewOverrides == null)
+    return null;
+
+  var topMostEntity = ctx.frame && ctx.frame.pack && ctx.frame.pack.entity;
+  
+  var vos = viewOverrides.filter(a => a.viewName == dynamicView.viewName);
+
+  if (!Navigator.isViewable(DynamicViewEntity)) {
+    return (
+      <div className="design-content">
+        <RenderWithViewOverrides dn={desRootNode} parentCtx={ctx} vos={vos} />
+      </div>
+    );
+  }
+  return (<div className="design-main">
+    <div className={classes("design-left", isDesignerOpen && "open")}>
+      {!isDesignerOpen ?
+        <span onClick={handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon" /></span> :
+        <DynamicViewDesigner
+          rootNode={desRootNode}
+          dynamicView={dynamicView}
+          onReload={handleReload}
+          onLoseChanges={handleLoseChanges}
+          typeName={ctx.value.Type} />
+      }
+    </div>
+    <div className={classes("design-content", isDesignerOpen && "open")}>
+      <AutoFocus disabled={topMostEntity != ctx.value}>
+        <RenderWithViewOverrides dn={desRootNode} parentCtx={ctx} vos={vos} />
+      </AutoFocus>
+    </div>
+  </div>);
 }
 
 interface DynamicViewDesignerProps {
@@ -154,126 +139,96 @@ interface DynamicViewDesignerProps {
   typeName: string;
 }
 
-interface DynamicViewDesignerState {
-  viewNames?: string[];
-  isDropdownOpen: boolean;
-}
+function DynamicViewDesigner(p: DynamicViewDesignerProps) {
 
-class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, DynamicViewDesignerState>{
+  const [viewNames, setViewNames] = React.useState<string[] | undefined>(undefined);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState<boolean>(false);
 
-  constructor(props: DynamicViewDesignerProps) {
-    super(props);
-    this.state = { isDropdownOpen: false };
+
+  function reload(entity: DynamicViewEntity) {
+    setViewNames(undefined);
+    p.onReload(entity);
   }
 
-  render() {
-    var dv = this.props.dynamicView;
-    var ctx = TypeContext.root(dv);
+  function handleSave() {
+    p.dynamicView.viewContent = JSON.stringify(p.rootNode.node);
+    p.dynamicView.modified = true;
 
-    return (
-      <div className="code-container">
-        <button type="button" className="close" aria-label="Close" style={{ float: "right" }} onClick={this.props.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
-        <h3>
-          <small>{Navigator.getTypeTitle(this.props.dynamicView, undefined)}</small>
-        </h3>
-        <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="SrOnly" placeholderLabels={true} />
-        {this.renderButtonBar()}
-        <DynamicViewTabs ctx={ctx} rootNode={this.props.rootNode}/>
-        <CollapsableTypeHelp initialTypeName={dv.entityType!.cleanName} />
-      </div>
-    );
-  }
-
-
-
-  reload(entity: DynamicViewEntity) {
-    this.setState({ viewNames: undefined });
-    this.props.onReload(entity);
-  }
-
-  handleSave = () => {
-
-    this.props.dynamicView.viewContent = JSON.stringify(this.props.rootNode.node);
-    this.props.dynamicView.modified = true;
-
-    Operations.API.executeEntity(this.props.dynamicView, DynamicViewOperation.Save)
+    Operations.API.executeEntity(p.dynamicView, DynamicViewOperation.Save)
       .then(pack => {
-        this.reload(pack.entity);
+        reload(pack.entity);
         DynamicViewClient.cleanCaches();
         return EntityOperations.notifySuccess();
       })
       .done();
   }
 
-  handleCreate = () => {
-
-    this.props.onLoseChanges().then(goahead => {
+  function handleCreate() {
+    p.onLoseChanges().then(goahead => {
       if (!goahead)
         return;
 
-      DynamicViewClient.createDefaultDynamicView(this.props.typeName)
-        .then(entity => { this.reload(entity); return EntityOperations.notifySuccess(); })
+      DynamicViewClient.createDefaultDynamicView(p.typeName)
+        .then(entity => { reload(entity); return EntityOperations.notifySuccess(); })
         .done();
 
     }).done();
   }
 
-  handleClone = () => {
-
-    this.props.onLoseChanges().then(goahead => {
+  function handleClone() {
+    p.onLoseChanges().then(goahead => {
       if (!goahead)
         return;
 
-      Operations.API.constructFromEntity(this.props.dynamicView, DynamicViewOperation.Clone)
-        .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
+      Operations.API.constructFromEntity(p.dynamicView, DynamicViewOperation.Clone)
+        .then(pack => { reload(pack.entity); return EntityOperations.notifySuccess(); })
         .done();
     }).done();
   }
 
-  handleChangeView = (viewName: string) => {
-    this.props.onLoseChanges().then(goahead => {
+  function handleChangeView(viewName: string) {
+    p.onLoseChanges().then(goahead => {
       if (!goahead)
         return;
 
-      DynamicViewClient.API.getDynamicView(this.props.typeName, viewName)
-        .then(entity => { this.reload(entity!); })
+      DynamicViewClient.API.getDynamicView(p.typeName, viewName)
+        .then(entity => { reload(entity!); })
         .done();
     }).done();
   }
 
-  handleOnToggle = () => {
-    if (!this.state.isDropdownOpen && !this.state.viewNames)
-      DynamicViewClient.API.getDynamicViewNames(this.props.typeName)
-        .then(viewNames => this.setState({ viewNames: viewNames }))
+  function handleOnToggle() {
+    if (!isDropdownOpen && !viewNames)
+      DynamicViewClient.API.getDynamicViewNames(p.typeName)
+        .then(viewNames => setViewNames(viewNames))
         .done();
 
-    this.setState({ isDropdownOpen: !this.state.isDropdownOpen });
+
+    setIsDropdownOpen(!isDropdownOpen);
   }
 
-  handleShowCode = () => {
-
-    ShowCodeModal.showCode(this.props.typeName, this.props.rootNode.node);
+  function handleShowCode() {
+    ShowCodeModal.showCode(p.typeName, p.rootNode.node);
   }
 
-  renderButtonBar() {
-
+  function renderButtonBar() {
     var operations = Operations.operationInfos(getTypeInfo(DynamicViewEntity)).toObject(a => a.key);
 
     return (
       <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
-        {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
-        <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
-        <Dropdown onToggle={this.handleOnToggle} show={this.state.isDropdownOpen} >
+        {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
+        <button type="button" className="btn btn-success" onClick={handleShowCode}>Show code</button>
+        <Dropdown onToggle={handleOnToggle} show={isDropdownOpen} >
           <Dropdown.Toggle id="bg-nested-dropdown" size="sm">
             {" … "}
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            {operations[DynamicViewOperation.Create.key] && <Dropdown.Item onClick={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</Dropdown.Item>}
-            {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <Dropdown.Item onClick={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</Dropdown.Item>}
-            {this.state.viewNames && this.state.viewNames.length > 0 && <Dropdown.Divider />}
-            {this.state.viewNames && this.state.viewNames.map(vn => <Dropdown.Item key={vn}
-              className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
-              onClick={() => this.handleChangeView(vn)}>
+            {operations[DynamicViewOperation.Create.key] && <Dropdown.Item onClick={handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</Dropdown.Item>}
+            {operations[DynamicViewOperation.Clone.key] && !p.dynamicView.isNew && <Dropdown.Item onClick={handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</Dropdown.Item>}
+            {viewNames && viewNames.length > 0 && <Dropdown.Divider />}
+            {viewNames && viewNames.map(vn => <Dropdown.Item key={vn}
+              className={classes("sf-dynamic-view", vn == p.dynamicView.viewName && "active")}
+              onClick={() => handleChangeView(vn)}>
               {vn}
             </Dropdown.Item>)}
           </Dropdown.Menu>
@@ -281,5 +236,20 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
       </div >
     );
   }
+  var dv = p.dynamicView;
+  var ctx = TypeContext.root(dv);
+
+  return (
+    <div className="code-container">
+      <button type="button" className="close" aria-label="Close" style={{ float: "right" }} onClick={p.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
+      <h3>
+        <small>{Navigator.getTypeTitle(p.dynamicView, undefined)}</small>
+      </h3>
+      <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="SrOnly" placeholderLabels={true} />
+      {renderButtonBar()}
+      <DynamicViewTabs ctx={ctx} rootNode={p.rootNode}/>
+      <CollapsableTypeHelp initialTypeName={dv.entityType!.cleanName} />
+    </div>
+  );
 }
 

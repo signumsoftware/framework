@@ -4,23 +4,7 @@ import {  ChartTable } from '../../ChartClient';
 import { Rule } from './Rule';
 import { JavascriptMessage, SearchMessage } from '@framework/Signum.Entities';
 import { SearchControl } from '@framework/Search';
-
-
-export function useInterval<T>(interval: number, initialState: T, newState: (oldState: T) => T) {
-  const [val, setVal] = React.useState(initialState);
-
-  React.useEffect(() => {
-    var insideVal = val;
-    if (interval) {
-      var handler = setInterval(() => {
-        setVal(insideVal = newState(insideVal));
-      }, interval);
-      return () => clearInterval(handler);
-    }
-  }, [interval]);
-
-  return val;
-}
+import { useInterval } from '@framework/Hooks';
 
 interface InitialMessageProps {
   x?: number;

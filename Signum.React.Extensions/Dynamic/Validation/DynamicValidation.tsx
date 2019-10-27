@@ -17,6 +17,7 @@ import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 interface DynamicValidationProps {
   ctx: TypeContext<DynamicValidationEntity>;
@@ -28,110 +29,52 @@ interface DynamicValidationState {
   routeTypeName?: string;
 }
 
-export default class DynamicValidation extends React.Component<DynamicValidationProps, DynamicValidationState> {
+export default function DynamicValidation(p: DynamicValidationProps) {
 
+  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const dv = p.ctx.value;
+  const routeTypeName = useAPI(undefined, () => dv.subEntity ? API.routeTypeName(dv.subEntity) : Promise.resolve(dv.entityType.className), [dv.subEntity, dv.entityType.cleanName]);
 
-  constructor(props: DynamicValidationProps) {
-    super(props);
+  const [response, setResponse] = React.useState<DynamicValidationTestResponse | undefined>(undefined);
 
-    this.state = {};
+  const forceUpdate = useForceUpdate();
+
+  function handleEntityTypeChange() {
+    p.ctx.value.subEntity = null;
+    exampleEntityRef.current = undefined;
+    setResponse(undefined);
   }
 
-  updateRouteTypeName() {
-
-    this.setState({ routeTypeName: undefined });
-
-    const dv = this.props.ctx.value;
-    if (dv.subEntity) {
-      API.routeTypeName(dv.subEntity)
-        .then(routeTypeName => this.setState({ routeTypeName }))
-        .done();
-    } else if (dv.entityType) {
-      this.setState({ routeTypeName: dv.entityType.className });
-    }
-  }
-
-  componentWillMount() {
-    this.updateRouteTypeName();
-  }
-
-  handleEntityTypeChange = () => {
-    this.props.ctx.value.subEntity = null;
-    this.setState({
-      exampleEntity: undefined,
-      response: undefined,
-      routeTypeName: undefined,
-    }, () => this.updateRouteTypeName());
-  }
-
-  handleCodeChange = (newScript: string) => {
-    const evalEntity = this.props.ctx.value.eval;
+  function handleCodeChange(newScript: string) {
+    const evalEntity = p.ctx.value.eval;
     evalEntity.modified = true;
     evalEntity.script = newScript;
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  handlePropertyRouteChange = () => {
-    this.updateRouteTypeName();
-  }
+  function getCurrentRoute(rootName: string): PropertyRoute {
 
-  render() {
-    var ctx = this.props.ctx;
-    return (
-      <div>
-        <ValueLine ctx={ctx.subCtx(d => d.name)} />
-        <EntityLine ctx={ctx.subCtx(d => d.entityType)} onChange={this.handleEntityTypeChange} />
-        <FormGroup ctx={ctx.subCtx(d => d.subEntity)}>
-          {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.subEntity)} type={ctx.value.entityType} onChange={this.handlePropertyRouteChange} routes={PropertyRoute.generateAll(ctx.value.entityType.cleanName).filter(a => a.propertyRouteType == "Mixin" || a.typeReference().isEmbedded && !a.typeReference().isCollection)} />}
-        </FormGroup>
-        {ctx.value.entityType &&
-          <div>
-            <br />
-            <div className="row">
-              <div className="col-sm-7">
-                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><FontAwesomeIcon icon="play" /> Evaluate</button>}
-                <div className="code-container">
-                  <TypeHelpButtonBarComponent typeName={ctx.value.entityType.cleanName} mode="CSharp" ctx={ctx} extraButtons={
-                    <PropertyIsHelpComponent route={this.getCurrentRoute(ctx.value.entityType.cleanName)} />
-                  } />
-                  <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (this.state.routeTypeName || "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
-                  <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
-                  <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
-                </div>
-                {this.renderTest()}
-              </div>
-              <div className="col-sm-5">
-                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
-              </div>
-            </div>
-          </div>}
-      </div>
-    );
-  }
-
-  getCurrentRoute(rootName: string): PropertyRoute {
-
-    const ctx = this.props.ctx;
+    const ctx = p.ctx;
     return ctx.value.subEntity ?
       PropertyRoute.parse(rootName, ctx.value.subEntity.path) :
       PropertyRoute.root(rootName);
   }
 
-  castToTop(pr: PropertyRoute): string {
+  function castToTop(pr: PropertyRoute): string {
     if (pr.propertyRouteType == "Root")
       return "e";
     else if (pr.propertyRouteType == "Mixin")
-      return `((${pr.parent!.typeReference().name}Entity)${this.castToTop(pr.parent!)}.MainEntity)`;
+      return `((${pr.parent!.typeReference().name}Entity)${castToTop(pr.parent!)}.MainEntity)`;
     else
-      return `((${pr.parent!.typeReference().name}Entity)${this.castToTop(pr.parent!)}.GetParentEntity())`;
+      return `((${pr.parent!.typeReference().name}Entity)${castToTop(pr.parent!)}.GetParentEntity())`;
   }
 
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
-    if (!pr || !this.props.ctx.value.entityType)
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
+    if (!pr || !p.ctx.value.entityType)
       return;
 
-    const ppr = this.getCurrentRoute(this.props.ctx.value.entityType.cleanName);
-    const prefix = this.castToTop(ppr);
+    const ppr = getCurrentRoute(p.ctx.value.entityType.cleanName);
+    const prefix = castToTop(ppr);
 
     ValueLineModal.show({
       type: { name: "string" },
@@ -144,46 +87,45 @@ export default class DynamicValidation extends React.Component<DynamicValidation
   }
 
 
-  handleEvaluate = () => {
-
-    if (this.state.exampleEntity == undefined)
-      this.setState({ response: undefined });
+  function handleEvaluate() {
+    if (exampleEntityRef.current == undefined)
+      setResponse(undefined);
     else {
       API.validationTest({
-        dynamicValidation: this.props.ctx.value,
-        exampleEntity: this.state.exampleEntity,
+        dynamicValidation: p.ctx.value,
+        exampleEntity: exampleEntityRef.current,
       })
-        .then(r => this.setState({ response: r }))
+        .then(r => setResponse(r))
         .done();
     }
   }
 
-  renderTest() {
-    const ctx = this.props.ctx;
-    const res = this.state.response;
+  function renderTest() {
+    const ctx = p.ctx;
+    const res = response;
     return (
       <fieldset>
         <legend>TEST</legend>
-        {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
-        {res && this.renderMessage(res)}
+        {renderExampleEntity(ctx.value.entityType!.cleanName)}
+        {res && renderMessage(res)}
       </fieldset>
     );
   }
 
-  renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
+  function renderExampleEntity(typeName: string) {
+    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
-      <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={this.handleEvaluate}
+      <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
         type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} labelColumns={3} />
     );
   }
 
-  handleOnView = (exampleEntity: Lite<Entity> | ModifiableEntity) => {
+  function handleOnView(exampleEntity: Lite<Entity> | ModifiableEntity) {
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  renderMessage(res: DynamicValidationTestResponse) {
+  function renderMessage(res: DynamicValidationTestResponse) {
     if (res.compileError)
       return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 
@@ -204,24 +146,53 @@ export default class DynamicValidation extends React.Component<DynamicValidation
       </div>
     );
   }
+  var ctx = p.ctx;
+  return (
+    <div>
+      <ValueLine ctx={ctx.subCtx(d => d.name)} />
+      <EntityLine ctx={ctx.subCtx(d => d.entityType)} onChange={handleEntityTypeChange} />
+      <FormGroup ctx={ctx.subCtx(d => d.subEntity)}>
+        {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.subEntity)} type={ctx.value.entityType} onChange={forceUpdate} routes={PropertyRoute.generateAll(ctx.value.entityType.cleanName).filter(a => a.propertyRouteType == "Mixin" || a.typeReference().isEmbedded && !a.typeReference().isCollection)} />}
+      </FormGroup>
+      {ctx.value.entityType &&
+        <div>
+          <br />
+          <div className="row">
+            <div className="col-sm-7">
+              {exampleEntityRef && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play" /> Evaluate</button>}
+              <div className="code-container">
+                <TypeHelpButtonBarComponent typeName={ctx.value.entityType.cleanName} mode="CSharp" ctx={ctx} extraButtons={
+                  <PropertyIsHelpComponent route={getCurrentRoute(ctx.value.entityType.cleanName)} />
+                } />
+                <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (routeTypeName || "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
+                <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={handleCodeChange} />
+                <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+              </div>
+              {renderTest()}
+            </div>
+            <div className="col-sm-5">
+              <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="CSharp" onMemberClick={handleTypeHelpClick} />
+            </div>
+          </div>
+        </div>}
+    </div>
+  );
 }
 
 interface PropertyIsHelpComponentProps {
   route: PropertyRoute;
 }
 
-export class PropertyIsHelpComponent extends React.Component<PropertyIsHelpComponentProps> {
+export function PropertyIsHelpComponent(p: PropertyIsHelpComponentProps) {
 
-  render() {
-    return (
-      <DropdownButton id="property_dropdown" variant="info" title={DynamicValidationMessage.PropertyIs.niceToString()}>
-        {Dic.map(this.props.route.subMembers(), (key, memberInfo) =>
-          <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={key} onClick={() => this.handlePropertyIsClick(key)}>{key}</Dropdown.Item>)}
-      </DropdownButton>
-    );
-  }
+  return (
+    <DropdownButton id="property_dropdown" variant="info" title={DynamicValidationMessage.PropertyIs.niceToString()}>
+      {Dic.map(p.route.subMembers(), (key, memberInfo) =>
+        <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={key} onClick={() => handlePropertyIsClick(key)}>{key}</Dropdown.Item>)}
+    </DropdownButton>
+  );
 
-  handlePropertyIsClick = (key: string) => {
+  function handlePropertyIsClick(key: string) {
 
     var text = `if (pi.Name == nameof(e.${key}) && e.${key} == )
 {
