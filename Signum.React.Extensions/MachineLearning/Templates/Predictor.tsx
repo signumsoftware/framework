@@ -11,7 +11,7 @@ import * as Navigator from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';
-import { toLite } from "@framework/Signum.Entities";
+import { toLite, Lite } from "@framework/Signum.Entities";
 import { newMListElement } from '@framework/Signum.Entities';
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import PredictorSubQuery from './PredictorSubQuery';
@@ -25,6 +25,7 @@ import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 import { toFilterOptions } from '@framework/Finder';
+import { useInterval, useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
   handleClick = () => {
@@ -299,59 +300,51 @@ interface TrainingProgressComponentState {
   trainingProgress?: PredictorClient.TrainingProgress | null;
 }
 
-export class TrainingProgressComponent extends React.Component<TrainingProgressComponentProps, TrainingProgressComponentState> {
+export function TrainingProgressComponent(p: TrainingProgressComponentProps) {
 
-  constructor(props: TrainingProgressComponentProps) {
-    super(props);
-    this.state = {};
-  }
+  const [trainingProgress, setTrainingProgress] = React.useState<PredictorClient.TrainingProgress | null>(null);
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
+  const timeoutHandle = React.useRef<number | null>(null);
+  const dismounted = React.useRef(false);
+  React.useEffect(() => {
+    return () => { dismounted.current = true };
+  });
 
-  componentWillReceiveProps(newProps: TrainingProgressComponentProps) {
-    if (!is(newProps.ctx.value, this.props.ctx.value))
-      this.loadData(newProps);
-  }
+  React.useEffect(() => {
+    loadData(toLite(p.ctx.value), null);
 
-  componentWillUnmount() {
-    if (this.timeoutHandler)
-      clearTimeout(this.timeoutHandler);
-  }
+    return () => {
+      if (timeoutHandle.current)
+        clearTimeout(timeoutHandle.current);
+    };
+  }, [p.ctx.value]);
 
-  refreshInterval = 500;
+  function loadData(lite: Lite<PredictorEntity>, prev: PredictorClient.TrainingProgress | null) {
+    PredictorClient.API.getTrainingState(lite)
+      .then(progress => {
+        if (dismounted.current)
+          return;
 
-  timeoutHandler!: number;
-
-  loadData(props: TrainingProgressComponentProps) {
-    PredictorClient.API.getTrainingState(toLite(props.ctx.value))
-      .then(p => {
-        var prev = this.state.trainingProgress;
-        this.setState({ trainingProgress: p });
-        if (prev != null && prev.state != p.state)
-          this.props.onStateChanged();
+        setTrainingProgress(progress);
+        if (prev != null && prev.state != progress.state)
+          p.onStateChanged();
         else
-          this.timeoutHandler = setTimeout(() => this.loadData(this.props), this.refreshInterval);
+          timeoutHandle.current = setTimeout(() => loadData(lite, progress), 500);
       })
       .done();
   }
 
-  render() {
+  const tp = trainingProgress;
 
-    const tp = this.state.trainingProgress;
-
-    return (
-      <div>
-        {tp && tp.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, this.props.ctx.value)} />}
-        <ProgressBar color={tp == null || tp.running == false ? "warning" : null}
-          value={tp && tp.progress}
-          message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.message}
-        />
-      </div>
-    );
-  }
-
+  return (
+    <div>
+      {tp && tp.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, p.ctx.value)} />}
+      <ProgressBar color={tp == null || tp.running == false ? "warning" : null}
+        value={tp && tp.progress}
+        message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.message}
+      />
+    </div>
+  );
 }
 
 
@@ -359,45 +352,15 @@ interface EpochProgressComponentProps {
   ctx: TypeContext<PredictorEntity>;
 }
 
-interface EpochProgressComponentState {
-  epochProgress?: PredictorClient.EpochProgress[] | null;
-}
+export function EpochProgressComponent(p: EpochProgressComponentProps) {
 
-export class EpochProgressComponent extends React.Component<EpochProgressComponentProps, EpochProgressComponentState> {
+  const eps = useAPI(undefined, () => PredictorClient.API.getEpochLosses(toLite(p.ctx.value)), [p.ctx.value]);
 
-  constructor(props: EpochProgressComponentProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    this.loadData(this.props);
-  }
-
-  componentWillReceiveProps(newProps: EpochProgressComponentProps) {
-    if (!is(newProps.ctx.value, this.props.ctx.value))
-      this.loadData(newProps);
-  }
-
-  loadData(props: EpochProgressComponentProps) {
-    PredictorClient.API.getEpochLosses(toLite(props.ctx.value))
-      .then(p => {
-        var prev = this.state.epochProgress;
-        this.setState({ epochProgress: p });
-      })
-      .done();
-  }
-
-  render() {
-    const eps = this.state.epochProgress;
-
-    return (
-      <div>
-        {eps && <LineChart height={200} series={getSeries(eps, this.props.ctx.value)} />}
-      </div>
-    );
-  }
-
+  return (
+    <div>
+      {eps && <LineChart height={200} series={getSeries(eps, p.ctx.value)} />}
+    </div>
+  );
 }
 
 function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: PredictorEntity): LineChartSerie[] {
