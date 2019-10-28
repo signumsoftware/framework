@@ -48,7 +48,7 @@ namespace Signum.Engine.Basics
 
                 current.SchemaCompleted += () =>
                 {
-                    var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
+                    var attributes = current.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
                     var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\r\n");
 

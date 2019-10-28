@@ -828,17 +828,17 @@ namespace Signum.Engine.DynamicQuery
         {
             Dictionary<QueryToken, Expression> resultExpressions = new Dictionary<QueryToken, Expression>();
             ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
-            resultExpressions.AddRange(keyTokens.Select((kt, i) => KVP.Create(kt,
+            resultExpressions.AddRange(keyTokens.Select((kt, i) => KeyValuePair.Create(kt,
                 TupleReflection.TupleChainProperty(pk, i))));
 
             ParameterExpression pe = Expression.Parameter(typeof(IEnumerable<object>), "e");
-            resultExpressions.AddRange(aggregateTokens.Select(at => KVP.Create((QueryToken)at, BuildAggregateExpressionEnumerable(pe, at, context))));
+            resultExpressions.AddRange(aggregateTokens.Select(at => KeyValuePair.Create((QueryToken)at, BuildAggregateExpressionEnumerable(pe, at, context))));
 
             var resultConstructor = TupleReflection.TupleChainConstructor(resultExpressions.Values);
 
             ParameterExpression pg = Expression.Parameter(typeof(object), "gr");
             newContext = new BuildExpressionContext(resultConstructor.Type, pg,
-                resultExpressions.Keys.Select((t, i) => KVP.Create(t, TupleReflection.TupleChainProperty(Expression.Convert(pg, resultConstructor.Type), i))).ToDictionary());
+                resultExpressions.Keys.Select((t, i) => KeyValuePair.Create(t, TupleReflection.TupleChainProperty(Expression.Convert(pg, resultConstructor.Type), i))).ToDictionary());
 
             return Expression.Lambda(Expression.Convert(resultConstructor, typeof(object)), pk, pe);
         }

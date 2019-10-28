@@ -40,7 +40,7 @@ namespace Signum.Engine.Operations
             return (from t in operations.OverridenTypes
                     from d in operations.GetDefinition(t)!.Keys
                     group t by d into g
-                    select KVP.Create(g.Key, g.ToList())).ToDictionary();
+                    select KeyValuePair.Create(g.Key, g.ToList())).ToDictionary();
         });
 
 
@@ -324,7 +324,7 @@ Consider the following options:
                 return (from o in TypeOperations(entityType)
                         let eo = o as IEntityOperation
                         where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
-                        select KVP.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
+                        select KeyValuePair.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
             }
             catch(Exception e)
             {
@@ -665,7 +665,7 @@ Consider the following options:
             return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
                     let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
                     where invalid.Any()
-                    select KVP.Create(o.OperationSymbol,
+                    select KeyValuePair.Create(o.OperationSymbol,
                         OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();

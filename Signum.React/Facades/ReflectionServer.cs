@@ -167,7 +167,7 @@ namespace Signum.React.Facades
                           where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
                               FullName = type.FullName!,
@@ -248,7 +248,7 @@ namespace Signum.React.Facades
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                                      type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
                               FullName = type.FullName!,
@@ -271,7 +271,7 @@ namespace Signum.React.Facades
 
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
                               FullName = type.FullName!,

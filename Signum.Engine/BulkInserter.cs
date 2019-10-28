@@ -73,7 +73,7 @@ namespace Signum.Engine
 
                 var rowNum = BulkInsertTable<T>(list, copyOptions, preSaving, validateFirst, false, timeout, message);
 
-                var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
+                var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KeyValuePair.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
 
                 var getKeyFunc = keySelector.Compile();
 
