@@ -121,6 +121,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     };
   }
 
+  extraParams = () => null;
+
   componentWillMount() {
 
     const fo = this.props.findOptions;
@@ -683,7 +685,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
 
-    const path = Finder.findOptionsPath(findOptions);
+    const path = Finder.findOptionsPath(findOptions, this.extraParams());
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
       window.open(path);
