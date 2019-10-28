@@ -152,7 +152,7 @@ namespace Signum.Entities.Authorization
             {
                 IEnumerable<Lite<RoleEntity>> related = AuthLogic.RelatedTo(role);
 
-                return merger.Merge(resource.ToType(), role, related.Select(r => KVP.Create(r, GetAllowed(r))));
+                return merger.Merge(resource.ToType(), role, related.Select(r => KeyValuePair.Create(r, GetAllowed(r))));
             }
 
         }
@@ -172,7 +172,7 @@ namespace Signum.Entities.Authorization
 
                 Dictionary<Lite<RoleEntity>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .SelectCatch(ru => KVP.Create(TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru.ToTypeAllowedAndConditions()))
+                          .SelectCatch(ru => KeyValuePair.Create(TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru.ToTypeAllowedAndConditions()))
                           .ToDictionaryEx());
 
                 Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
@@ -265,7 +265,7 @@ namespace Signum.Entities.Authorization
 
                 Func<Type, TypeAllowedAndConditions> defaultAllowed = merger.MergeDefault(role);
 
-                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
+                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
 
 
                 var keys = baseCaches
@@ -306,7 +306,7 @@ namespace Signum.Entities.Authorization
 
             public TypeAllowedAndConditions GetAllowedBase(Type k)
             {
-                return merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
+                return merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
             }
 
             internal DefaultDictionary<Type, TypeAllowedAndConditions> DefaultDictionary()
@@ -379,7 +379,7 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements("Type")
                                let t = getResource(xr.Attribute("Resource").Value)
                                where t != null
-                               select KVP.Create(t, new
+                               select KeyValuePair.Create(t, new
                                {
                                    Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
                                    Condition = Conditions(xr, replacements)
@@ -401,7 +401,7 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements("Type")
                                let t = getResource(xr.Attribute("Resource").Value)
                                where t != null && !t.ToType().IsEnumEntity()
-                               select KVP.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
+                               select KeyValuePair.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
                     SqlPreCommand? restSql = Synchronizer.SynchronizeScript(
                         Spacing.Simple,

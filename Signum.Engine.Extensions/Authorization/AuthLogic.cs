@@ -86,7 +86,7 @@ namespace Signum.Engine.Authorization
                 rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
-                    var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
+                    var strategies = Database.Query<RoleEntity>().Select(r => KeyValuePair.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
 
                     var graph = roles.Value;
 

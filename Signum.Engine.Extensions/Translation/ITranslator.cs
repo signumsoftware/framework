@@ -66,7 +66,7 @@ namespace Signum.Engine.Translation
                                      group trans.Value by trans.Key into g
                                      let only = g.Distinct().Only()
                                      where only != null
-                                     select KVP.Create(g.Key, only))
+                                     select KeyValuePair.Create(g.Key, only))
                                      .ToDictionary();
 
             var dic = list.Distinct().ToDictionary(l => l, l => alreadyTranslated.TryGetC(l));
@@ -97,17 +97,17 @@ namespace Signum.Engine.Translation
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(LocalizedType from, LocalizedType to)
         {
             if (from.Description.HasText() && to.Description.HasText())
-                yield return KVP.Create(from.Description, to.Description);
+                yield return KeyValuePair.Create(from.Description, to.Description);
 
             if (from.PluralDescription.HasText() && to.PluralDescription.HasText())
-                yield return KVP.Create(from.PluralDescription, to.PluralDescription);
+                yield return KeyValuePair.Create(from.PluralDescription, to.PluralDescription);
 
             foreach (var item in from.Members!)
             {
                 var toMember = to.Members!.TryGetC(item.Key);
 
                 if (toMember.HasText())
-                    yield return KVP.Create(item.Value, toMember);
+                    yield return KeyValuePair.Create(item.Value, toMember);
             }
         }
 
