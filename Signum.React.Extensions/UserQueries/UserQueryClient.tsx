@@ -106,8 +106,7 @@ export module Converter {
 
       const qs = Finder.querySettings[query.key];
 
-      fo.pagination = uq.paginationMode == undefined ?
-        ((qs && qs.pagination) || Finder.defaultPagination) : {
+      fo.pagination = uq.paginationMode == undefined ? undefined : {
           mode: uq.paginationMode,
           currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
           elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,

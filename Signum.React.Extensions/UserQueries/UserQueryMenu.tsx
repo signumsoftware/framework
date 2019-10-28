@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, toMList } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, toMList, liteKey } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation } from './Signum.Entities.UserQueries'
@@ -30,14 +30,23 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     this.state = { isOpen: false };
   }
 
+  oldExtraParams!: () => any;
+
   componentWillMount() {
+    this.oldExtraParams = this.props.searchControl.extraParams;
+    this.props.searchControl.extraParams = () => ({ ...this.oldExtraParams(), userQuery: this.state.currentUserQuery && liteKey(this.state.currentUserQuery) });  
+
     const userQuery = window.location.search.tryAfter("userQuery=");
-     if (userQuery) {
+    if (userQuery) {
       const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
+      this.setState({ currentUserQuery: uq });
       Navigator.API.fillToStrings(uq)
-        .then(() => this.setState({ currentUserQuery: uq }))
         .done();
     }
+  }
+
+  componentWillUnmount() {
+    this.props.searchControl.extraParams = this.oldExtraParams;
   }
 
   handleSelectedToggle = () => {
