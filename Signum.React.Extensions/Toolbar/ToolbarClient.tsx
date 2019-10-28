@@ -70,7 +70,7 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export namespace API {
-  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any>> {
+  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
     return ajaxGet({ url: `~/api/toolbar/current/${location}` });
   }
 }

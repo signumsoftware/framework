@@ -30,6 +30,18 @@
     }
 }
 
+.sidebar-container .dropdown-item.active,
+.sidebar-container .dropdown-item:active {
+    background-color: #ececec;
+    color: #333333;
+    font-weight: 500;
+}
+
+.sidebar-container .dropdown-item:focus {
+    outline: 0px;
+    box-shadow: 0 0 0 0.2rem rgba(216, 217, 219, 0.5);
+}
+
 .sidebar ul li {
     border-bottom: 1px solid #e7e7e7;
 }

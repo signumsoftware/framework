@@ -24,7 +24,10 @@ function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: Hi
   if (r.url)
     return (location.pathname + location.search).startsWith(Navigator.toAbsoluteUrl(r.url));
 
-  var config = ToolbarClient.configs[r.content!.EntityType];
+  if (!r.content)
+    return false;
+
+  var config = ToolbarClient.configs[r.content.EntityType];
   if (!config)
     return false;
 
@@ -84,7 +87,10 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
   componentWillMount() { 
     ToolbarClient.API.getCurrentToolbar(this.props.location!)
-      .then(res => this.isAlive && this.setState({ response: res, active: inferActive(res, Navigator.history.location, QueryString.parse(location.search)) }))
+      .then(res => this.isAlive && this.setState({
+        response: res || undefined,
+        active: res == null ? null : inferActive(res, Navigator.history.location, QueryString.parse(location.search))
+      }))
       .done();
   }
 
@@ -234,7 +240,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         if (res.elements && res.elements.length) {
           return [
             <DropdownItem header={isHeader} onClick={e => this.handleClick(e, res, topRes)}
-              className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
+              className={classes(menuItemN)}>
               {this.icon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={this.state.expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align"  />
             </DropdownItem>
           ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : [])
