@@ -1,3 +1,5 @@
+import { Location } from 'history'
+import { OutputParams } from 'query-string'
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -42,6 +44,10 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return Navigator.API.fetchAndForget(res.content!)
       .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
       .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
+  }
+
+  isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: OutputParams): boolean {
+    return query["userQuery"] == liteKey(res.content!);
   }
 }
 
