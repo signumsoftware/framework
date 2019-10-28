@@ -41,7 +41,7 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
           content: part,
           iconName: iconToString(icon.icon),
           iconColor: icon.iconColor,
-          style: "Default"
+          style: "Light"
         });
       });
   }
@@ -125,6 +125,9 @@ export function iconToString(icon: IconProp) {
 }
 
 export function parseIcon(iconName: string | undefined | null): IconProp | undefined {
+
+  if (iconName == "none")
+    return null as any as undefined;
 
   if (iconName == null)
     return undefined;

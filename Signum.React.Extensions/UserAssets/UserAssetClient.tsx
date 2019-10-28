@@ -169,7 +169,7 @@ export module Converter {
 export module API {
 
   export function parseFilters(request: ParseFiltersRequest): Promise<FilterNode[]> {
-    return ajaxPost<FilterNode[]>({ url: "~/api/userAssets/parseFilters/" }, request);
+    return ajaxPost({ url: "~/api/userAssets/parseFilters/" }, request);
   }
 
   export interface ParseFiltersRequest {
@@ -181,7 +181,7 @@ export module API {
 
 
   export function stringifyFilters(request: StringifyFiltersRequest): Promise<QueryFilterItem[]> {
-    return ajaxPost<QueryFilterItem[]>({ url: "~/api/userAssets/stringifyFilters/" }, request);
+    return ajaxPost({ url: "~/api/userAssets/stringifyFilters/" }, request);
   }
   
   export interface StringifyFiltersRequest {
@@ -220,7 +220,7 @@ export module API {
 
 
   export function importPreview(request: FileUpload): Promise<UserAssetPreviewModel> {
-    return ajaxPost<UserAssetPreviewModel>({ url: "~/api/userAssets/importPreview/" }, request);
+    return ajaxPost({ url: "~/api/userAssets/importPreview/" }, request);
   }
 
   export interface FileUpload {
@@ -229,7 +229,7 @@ export module API {
   }
 
   export function importAssets(request: FileUploadWithModel): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/userAssets/import" }, request);
+    return ajaxPost({ url: "~/api/userAssets/import" }, request);
   }
 
   export interface FileUploadWithModel {

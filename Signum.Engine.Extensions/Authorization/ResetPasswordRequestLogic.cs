@@ -54,7 +54,7 @@ namespace Signum.Engine.Authorization
                 {
                     CanBeNew = false,
                     CanBeModified = false,
-                    CanExecute = (e) => e.Lapsed == false ? null : AuthEmailMessage.YourResetPasswordRequestIsLapsed.NiceToString(),
+                    CanExecute = (e) => e.Lapsed == false ? null : AuthEmailMessage.YourResetPasswordRequestHasExpired.NiceToString(),
                     Execute = (e, args) =>
                     {
                         string password = args.GetArg<string>();

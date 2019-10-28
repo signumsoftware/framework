@@ -98,7 +98,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
   handleSave = (e: React.FormEvent<any>) => {
     e.preventDefault();
     const params = this.props.match.params;
-    API.save(params.assembly, params.culture || "", this.state.result!)
+    API.save(decodeDots(params.assembly), params.culture || "", this.state.result!)
       .then(() => notifySuccess())
       .then(() => this.loadSync())
       .done();

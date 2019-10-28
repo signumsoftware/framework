@@ -29,8 +29,8 @@ namespace Signum.React.DiffLog
             var pk = PrimaryKey.Parse(id, type);
 
 
-            var f = SystemTime.Override(from.AddMilliseconds(1)).Using(_ => Database.Retrieve(type, pk));
-            var t = SystemTime.Override(to.AddMilliseconds(1)).Using(_ => Database.Retrieve(type, pk));
+            var f = SystemTime.Override(from.AddMilliseconds(1).ToUniversalTime()).Using(_ => Database.Retrieve(type, pk));
+            var t = SystemTime.Override(to.AddMilliseconds(1).ToUniversalTime()).Using(_ => Database.Retrieve(type, pk));
 
             var fDump = GetDump(f);
             var tDump = GetDump(t);

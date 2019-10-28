@@ -90,7 +90,7 @@ export module Converter {
     return convertedFilters.then(filters => {
 
       fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-
+      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
       fo.columnOptionsMode = uq.columnsMode;
 
       fo.columnOptions = (uq.columns || []).map(f => ({
@@ -106,8 +106,7 @@ export module Converter {
 
       const qs = Finder.querySettings[query.key];
 
-      fo.pagination = uq.paginationMode == undefined ?
-        ((qs && qs.pagination) || Finder.defaultPagination) : {
+      fo.pagination = uq.paginationMode == undefined ? undefined : {
           mode: uq.paginationMode,
           currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
           elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
@@ -135,11 +134,11 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forEntityType/" + type });
+    return ajaxGet({ url: "~/api/userQueries/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forQuery/" + queryKey });
+    return ajaxGet({ url: "~/api/userQueries/forQuery/" + queryKey });
   }
 }
 

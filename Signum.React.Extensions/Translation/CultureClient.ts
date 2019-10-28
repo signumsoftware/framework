@@ -41,15 +41,15 @@ export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite
 
 export module API {
   export function fetchCultures(): Promise<CultureInfoEntity[]> {
-    return ajaxGet<CultureInfoEntity[]>({ url: "~/api/culture/cultures" });
+    return ajaxGet({ url: "~/api/culture/cultures" });
   }
 
   export function fetchCurrentCulture(): Promise<CultureInfoEntity> {
-    return ajaxGet<CultureInfoEntity>({ url: "~/api/culture/currentCulture" });
+    return ajaxGet({ url: "~/api/culture/currentCulture" });
   }
 
   export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/culture/setCurrentCulture" }, culture);
+    return ajaxPost({ url: "~/api/culture/setCurrentCulture" }, culture);
   }
 }
 

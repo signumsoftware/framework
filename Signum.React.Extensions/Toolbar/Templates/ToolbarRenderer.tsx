@@ -1,4 +1,6 @@
 import * as React from 'react'
+import * as History from 'history'
+import * as QueryString from 'query-string'
 import { classes } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation } from '../Signum.Entities.Toolbar'
@@ -18,10 +20,32 @@ export interface ToolbarRendererProps {
   tag?: boolean;
 }
 
+function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.OutputParams): boolean {
+  if (r.url)
+    return (location.pathname + location.search).startsWith(Navigator.toAbsoluteUrl(r.url));
+
+  var config = ToolbarClient.configs[r.content!.EntityType];
+  if (!config)
+    return false;
+
+  return config.isCompatibleWithUrl(r, location, query);
+}
+
+function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.OutputParams): ToolbarClient.ToolbarResponse<any> | null {
+  if (r.elements)
+    return r.elements.map(e => inferActive(e, location, query)).notNull().onlyOrNull();
+
+  if (isCompatibleWithUrl(r, location, query))
+    return r;
+
+  return null;
+}
+
 export interface ToolbarRendererState {
   response?: ToolbarClient.ToolbarResponse<any>;
   expanded: ToolbarClient.ToolbarResponse<any>[];
   avoidCollapse: ToolbarClient.ToolbarResponse<any>[];
+  active?: ToolbarClient.ToolbarResponse<any> | null;
 }
 
 export default class ToolbarRenderer extends React.Component<ToolbarRendererProps, ToolbarRendererState>
@@ -34,6 +58,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
       expanded: [],
       avoidCollapse: [],
     };
+    this.unregisterCallback = Navigator.history.listen(this.locationChanged);
   }
 
   isAlive = true;
@@ -41,9 +66,25 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
     this.isAlive = false;
   }
 
-  componentWillMount() {
+  unregisterCallback: History.UnregisterCallback;
+  locationChanged = (location: History.Location, action: History.Action) => {
+    console.log(location.pathname + location.search);
+    var query = QueryString.parse(location.search);
+
+    if (this.state.response) {
+      const active = this.state.active;
+      if (active && isCompatibleWithUrl(active, location, query)) {
+        return;
+      }
+
+      var newActive = inferActive(this.state.response, location, query);
+      this.setState({ active: newActive });
+    }
+  }
+
+  componentWillMount() { 
     ToolbarClient.API.getCurrentToolbar(this.props.location!)
-      .then(res => this.isAlive && this.setState({ response: res }))
+      .then(res => this.isAlive && this.setState({ response: res, active: inferActive(res, Navigator.history.location, QueryString.parse(location.search)) }))
       .done();
   }
 
@@ -121,7 +162,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         if (res.url) {
           return (
             <NavItem>
-              <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
+              <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} href="#" active={res == this.state.active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </NavLink>
             </NavItem>
@@ -135,7 +176,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
           return (
             <NavItem>
-              <NavLink onClick={e => config.handleNavigateClick(e, res)}>
+              <NavLink onClick={e => config.handleNavigateClick(e, res)} href="#" active={res == this.state.active}>
                 {config.getIcon(res)}{config.getLabel(res)}
               </NavLink>
             </NavItem>
@@ -201,7 +242,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
         if (res.url) {
           return [
-            <DropdownItem header={isHeader} onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} className={menuItemN}>
+            <DropdownItem header={isHeader} onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} className={menuItemN} active={res == this.state.active}>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </DropdownItem>
           ];
@@ -218,7 +259,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
           }
 
           return [
-            <DropdownItem header={isHeader} onClick={e => config.handleNavigateClick(e, res)} className={menuItemN}>
+            <DropdownItem header={isHeader} onClick={e => config.handleNavigateClick(e, res)} className={menuItemN} active={res == this.state.active}>
               {config.getIcon(res)}{config.getLabel(res)}
             </DropdownItem>
           ];
