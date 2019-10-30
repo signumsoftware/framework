@@ -121,7 +121,7 @@ namespace Signum.React.Maps
             {
                 using (Administrator.OverrideDatabaseInSysViews(dbName))
                 {
-                    var dic = Database.View<SysTables>().Select(t => KVP.Create(
+                    var dic = Database.View<SysTables>().Select(t => KeyValuePair.Create(
                         new ObjectName(new SchemaName(dbName, t.Schema().name), t.name),
                         new RuntimeStats
                         {

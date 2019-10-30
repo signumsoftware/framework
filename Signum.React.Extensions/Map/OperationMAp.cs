@@ -36,7 +36,7 @@ namespace Signum.React.Map
             var operationCounts = Database.Query<OperationLogEntity>()
                 .Where(log => symbols.Contains(log.Operation))
                 .GroupBy(log => log.Operation)
-                .Select(a => KVP.Create(a.Key, a.Count()))
+                .Select(a => KeyValuePair.Create(a.Key, a.Count()))
                 .ToDictionary();
 
             return new OperationMapInfo
@@ -82,7 +82,7 @@ namespace Signum.React.Map
         static Dictionary<Enum, int> CountGroupBy<T, S>(Expression<Func<T, S>> expression)
             where T : Entity
         {
-            return Database.Query<T>().GroupBy(expression).Where(a => a.Key != null).Select(gr => KVP.Create((Enum)((object)gr.Key!), gr.Count())).ToDictionary();
+            return Database.Query<T>().GroupBy(expression).Where(a => a.Key != null).Select(gr => KeyValuePair.Create((Enum)((object)gr.Key!), gr.Count())).ToDictionary();
         }
 
         static readonly GenericInvoker<Func<Dictionary<Enum, int>>> giCount =

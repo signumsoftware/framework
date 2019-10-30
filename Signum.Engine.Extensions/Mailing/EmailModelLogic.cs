@@ -179,7 +179,7 @@ namespace Signum.Engine.Mailing
                         registeredModels.Keys,
                         entity => entity.FullClassName,
                         type => type.FullName,
-                        (entity, type) => KVP.Create(type, entity),
+                        (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(EmailModelEntity))
                         .ToDictionary();
                 }, new InvalidateWith(typeof(EmailModelEntity)));

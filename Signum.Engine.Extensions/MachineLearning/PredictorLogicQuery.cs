@@ -66,7 +66,7 @@ namespace Signum.Engine.MachineLearning
                         GroupedValues = groupedValues,
                         SplitBy = splitKeys,
                         ValueColumns = values,
-                        ColumnIndexToValueIndex = values.Select((r, i) => KVP.Create(r.Index, i)).ToDictionary()
+                        ColumnIndexToValueIndex = values.Select((r, i) => KeyValuePair.Create(r.Index, i)).ToDictionary()
                     });
                 }
 

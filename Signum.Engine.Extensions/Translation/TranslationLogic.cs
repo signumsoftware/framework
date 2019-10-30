@@ -131,7 +131,7 @@ namespace Signum.Engine.Translation
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string?)null)));
+            memory.SetRange(toDelete.Select(n => KeyValuePair.Create(n, (string?)null)));
 
             return result;
         }
