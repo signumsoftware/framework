@@ -7,58 +7,26 @@ import { TypeContext } from '@framework/TypeContext'
 import { ProcessEntity, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
 import { BsColor } from '@framework/Components';
+import { useInterval } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default function Process(p : { ctx: TypeContext<ProcessEntity> }){
-  handler: number | undefined;
-  function componentWillMount() {
-    reloadIfNecessary(p.ctx.value);
-  }
+export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
+  const isActive = ctx.value.state == "Executing" || ctx.value.state == "Queued";
 
-  function componentWillReceiveProps(newProps: { ctx: TypeContext<ProcessEntity> }) {
-    reloadIfNecessary(newProps.ctx.value);
-  }
-
-  function reloadIfNecessary(e: ProcessEntity) {
-    if ((e.state == "Executing" || e.state == "Queued") && handler == undefined) {
-      handler = setTimeout(() => {
-        handler = undefined;
-        const lite = toLite(e);
-        processExceptionsCounter && processExceptionsCounter.refreshValue();
-        Navigator.API.fetchEntityPack(lite)
-          .then(pack => p.ctx.frame!.onReload(pack))
-          .done();
-      }, 500);
+  const tick = useInterval(isActive ? 500 : null, 0, n => n + 1);
+  const vscl = React.useRef<ValueSearchControlLine>(null);
+  React.useEffect(() => {
+    if (isActive) {
+      const lite = toLite(ctx.value);
+      vscl.current && vscl.current.refreshValue();
+      Navigator.API.fetchEntityPack(lite)
+        .then(pack => ctx.frame!.onReload(pack))
+        .done();
     }
-  }
+  }, [tick]);
 
-  processExceptionsCounter!: ValueSearchControlLine;
-
-
-  function renderProgress() {
-    const p = p.ctx.value;
-
-    const color: BsColor | undefined =
-      p.state == "Queued" ? "info" :
-        p.state == "Executing" ? undefined :
-          p.state == "Finished" ? "success" :
-            p.state == "Suspending" || p.state == "Suspended" ? "warning" :
-              p.state == "Error" ? "danger" :
-                undefined;
-
-    return (
-      <ProgressBar
-        message={p.state == "Finished" ? null : p.status}
-        value={p.state == "Created" ? 0 : (p.progress == 0 || p.progress == 1) ? null : p.progress}
-        color={color}
-        showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
-        active={p.state == "Finished" ? false : undefined}
-        striped={p.state == "Finished" ? false : undefined}
-      />
-    );
-  }
-  const ctx4 = p.ctx.subCtx({ labelColumns: { sm: 4 } });
-  const ctx5 = p.ctx.subCtx({ labelColumns: { sm: 5 } });
-  const ctx3 = p.ctx.subCtx({ labelColumns: { sm: 3 } });
+  const ctx4 = ctx.subCtx({ labelColumns: { sm: 4 } });
+  const ctx5 = ctx.subCtx({ labelColumns: { sm: 5 } });
+  const ctx3 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
   return (
     <div>
@@ -85,18 +53,40 @@ export default function Process(p : { ctx: TypeContext<ProcessEntity> }){
 
       <EntityLine ctx={ctx3.subCtx(f => f.exception)} hideIfNull={true} readOnly={true} labelColumns={2} />
 
-      <h4>{p.ctx.niceName(a => a.progress)}</h4>
+      <h4>{ctx.niceName(a => a.progress)}</h4>
 
-      {renderProgress()}
+      <ProcessProgressBar p={ctx.value}/>
 
       <ValueSearchControlLine ctx={ctx3}
-        ref={(vsc: ValueSearchControlLine) => processExceptionsCounter = vsc}
+        ref={vscl}
         findOptions={{
           queryName: ProcessExceptionLineEntity,
           parentToken: ProcessExceptionLineEntity.token(e => e.process),
           parentValue: ctx3.value
         }} />
     </div>
+  );
+}
+
+function ProcessProgressBar({ p }: { p: ProcessEntity }) {
+
+  const color: BsColor | undefined =
+    p.state == "Queued" ? "info" :
+      p.state == "Executing" ? undefined :
+        p.state == "Finished" ? "success" :
+          p.state == "Suspending" || p.state == "Suspended" ? "warning" :
+            p.state == "Error" ? "danger" :
+              undefined;
+
+  return (
+    <ProgressBar
+      message={p.state == "Finished" ? null : p.status}
+      value={p.state == "Created" ? 0 : (p.progress == 0 || p.progress == 1) ? null : p.progress}
+      color={color}
+      showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
+      active={p.state == "Finished" ? false : undefined}
+      striped={p.state == "Finished" ? false : undefined}
+    />
   );
 }
 
