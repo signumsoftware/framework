@@ -10,120 +10,87 @@ interface HeavyListProps extends RouteComponentProps<{}> {
 
 }
 
-export default class HeavyList extends React.Component<HeavyListProps, { enabled?: boolean; entries?: HeavyProfilerEntry[], fileToUpload?: File, fileVer: number }> {
-
-  constructor(props: HeavyListProps) {
+export default function HeavyList(p : HeavyListProps, { enabled?: boolean; entries?: HeavyProfilerEntry[], fileToUpload?: File, fileVer: number }){
+  function constructor(props: HeavyListProps) {
     super(props);
-    this.state = { fileVer: 0 };
+    state = { fileVer: 0 };
   }
 
-  componentWillMount() {
-    this.loadIsEnabled().done()
-    this.loadEntries().done();
+  function componentWillMount() {
+    loadIsEnabled().done()
+    loadEntries().done();
     Navigator.setTitle("Heavy Profiler");
   }
 
-  componentWillUnmount() {
+  function componentWillUnmount() {
     Navigator.setTitle();
   }
 
-  async loadEntries() {
+ function loadEntries() {
     const entries = await API.Heavy.entries();
-    return this.setState({ entries });
+    return setState({ entries });
   }
 
-  handleClear = (e: React.MouseEvent<any>) => {
+  function handleClear(e: React.MouseEvent<any>) {
     API.Heavy.clear()
-      .then(() => this.loadEntries())
+      .then(() => loadEntries())
       .done();
   }
 
-  handleUpdate = (e: React.MouseEvent<any>) => {
-    this.loadEntries().done();
-    this.loadIsEnabled().done();
+  function handleUpdate(e: React.MouseEvent<any>) {
+    loadEntries().done();
+    loadIsEnabled().done();
   }
 
-  async loadIsEnabled() {
+ function loadIsEnabled() {
     const enabled = await API.Heavy.isEnabled();
-    return this.setState({ enabled });
+    return setState({ enabled });
   }
 
-  handleSetEnabled(value: boolean) {
+  function handleSetEnabled(value: boolean) {
     API.Heavy.setEnabled(value)
-      .then(() => this.loadIsEnabled())
-      .then(() => this.loadEntries())
+      .then(() => loadIsEnabled())
+      .then(() => loadEntries())
       .done();
   }
 
 
-  handleDownload = () => {
+  function handleDownload() {
     API.Heavy.download(undefined);
   }
 
-  handleInputChange = (e: React.FormEvent<any>) => {
+  function handleInputChange(e: React.FormEvent<any>) {
     let f = (e.currentTarget as HTMLInputElement).files![0];
-    this.setState({ fileToUpload: f });
+    setState({ fileToUpload: f });
   }
 
-  handleUpload = () => {
+  function handleUpload() {
     let fileReader = new FileReader();
     fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
     fileReader.onload = e => {
       let content = ((e.target as any).result as string).after("base64,");
-      let fileName = this.state.fileToUpload!.name;
+      let fileName = fileToUpload!.name;
 
       API.Heavy.upload({ fileName, content })
-        .then(() => this.setState({ fileToUpload: undefined, fileVer: this.state.fileVer + 1 }))
-        .then(() => this.loadEntries())
+        .then(() => setState({ fileToUpload: undefined, fileVer: fileVer + 1 }))
+        .then(() => loadEntries())
         .done();
     };
-    fileReader.readAsDataURL(this.state.fileToUpload!);
+    fileReader.readAsDataURL(fileToUpload!);
   }
 
-  render() {
-    if (this.state.entries == undefined)
-      return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
 
-    return (
-      <div>
-        <h2 className="display-6">Heavy Profiler</h2>
-        <br />
-        <div className="btn-toolbar" style={{ float: "right" }}>
-          <input key={this.state.fileVer} type="file" className="form-control" onChange={this.handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
-          <button onClick={this.handleUpload} className="btn btn-info" disabled={!this.state.fileToUpload}><FontAwesomeIcon icon="cloud-upload" /> Upload</button>
-        </div>
-        <div className="btn-toolbar">
-          {!this.state.enabled ? <button onClick={() => this.handleSetEnabled(true)} className="btn btn-light primary">Enable</button> :
-            <button onClick={() => this.handleSetEnabled(false)} className="btn btn-light" style={{ color: "red" }}>Disable</button>
-          }
-          <button onClick={this.handleUpdate} className="btn btn-light">Update</button>
-          <button onClick={this.handleClear} className="btn btn-light">Clear</button>
-          <button onClick={this.handleDownload} className="btn btn-info"><FontAwesomeIcon icon="cloud-download-alt" /> Download</button>
-        </div>
-        <br />
-        <p className="help-block">Upload previous runs to compare performance.</p>
-        <p className="help-block">Enable the profiler with the debugger with <code>HeavyProfiler.Enabled = true</code> and save the results with <code>HeavyProfiler.ExportXml().Save("profile.xml") </code>.</p>
-
-        <br />
-        <h3>Entries</h3>
-        <div className="sf-profiler-chart" ref={d => this.chartContainer = d}>
-        </div>
-      </div>
-    );
-  }
-
-  componentDidUpdate() {
-    this.mountChart();
+  function componentDidUpdate() {
+    mountChart();
   }
 
   chartContainer?: HTMLDivElement | null;
 
-  mountChart() {
-
-    if (this.chartContainer == undefined)
+  function mountChart() {
+    if (chartContainer == undefined)
       return;
 
-    let data = this.state.entries!;
+    let data = entries!;
 
     let fontSize = 12;
     let fontPadding = 4;
@@ -131,9 +98,9 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
     let labelWidth = 60 * characterWidth; //Max characters: 100
     let rightMargin = 10 * characterWidth; //Aproximate elapsed time length: 10
 
-    let width = this.chartContainer.getBoundingClientRect().width;
+    let width = chartContainer.getBoundingClientRect().width;
     let height = (fontSize + (2 * fontPadding)) * (data.length);
-    this.chartContainer.style.height = height + "px";
+    chartContainer.style.height = height + "px";
 
     let minStart = data.map(a => a.beforeStart).min()!;
     let maxEnd = data.map(a => a.end).max()!;
@@ -148,9 +115,9 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
 
     let entryHeight = y(1);
 
-    d3.select(this.chartContainer).selectAll("svg").remove();
+    d3.select(chartContainer).selectAll("svg").remove();
 
-    let chart = d3.select(this.chartContainer)
+    let chart = d3.select(chartContainer)
       .append('svg:svg').attr('width', width).attr('height', height);
 
     let groups = chart.selectAll("g.entry").data(data).enter()
@@ -205,6 +172,35 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
       }
     });
   }
+  if (entries == undefined)
+    return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
+
+  return (
+    <div>
+      <h2 className="display-6">Heavy Profiler</h2>
+      <br />
+      <div className="btn-toolbar" style={{ float: "right" }}>
+        <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
+        <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-upload" /> Upload</button>
+      </div>
+      <div className="btn-toolbar">
+        {!enabled ? <button onClick={() => handleSetEnabled(true)} className="btn btn-light primary">Enable</button> :
+          <button onClick={() => handleSetEnabled(false)} className="btn btn-light" style={{ color: "red" }}>Disable</button>
+        }
+        <button onClick={handleUpdate} className="btn btn-light">Update</button>
+        <button onClick={handleClear} className="btn btn-light">Clear</button>
+        <button onClick={handleDownload} className="btn btn-info"><FontAwesomeIcon icon="cloud-download-alt" /> Download</button>
+      </div>
+      <br />
+      <p className="help-block">Upload previous runs to compare performance.</p>
+      <p className="help-block">Enable the profiler with the debugger with <code>HeavyProfiler.Enabled = true</code> and save the results with <code>HeavyProfiler.ExportXml().Save("profile.xml") </code>.</p>
+
+      <br />
+      <h3>Entries</h3>
+      <div className="sf-profiler-chart" ref={d => chartContainer = d}>
+      </div>
+    </div>
+  );
 }
 
 

@@ -11,63 +11,37 @@ interface TimesPageProps extends RouteComponentProps<{}> {
 
 }
 
-export default class TimesPage extends React.Component<TimesPageProps, { times?: TimeTrackerEntry[] }> {
-  constructor(props: TimesPageProps) {
+export default function TimesPage(p : TimesPageProps, { times?: TimeTrackerEntry[] }){
+  function constructor(props: TimesPageProps) {
     super(props);
-    this.state = { times: undefined };
+    state = { times: undefined };
   }
 
-  componentWillMount() {
-    this.loadState().done();
+  function componentWillMount() {
+    loadState().done();
     Navigator.setTitle("Times state");
   }
 
-  componentWillUnmount() {
+  function componentWillUnmount() {
     Navigator.setTitle();
   }
 
-  async loadState() {
+ function loadState() {
     const s = await API.Times.fetchInfo();
-    return this.setState({ times: s });
+    return setState({ times: s });
   }
 
-  handleClear = (e: React.MouseEvent<any>) => {
-    API.Times.clear().then(() => this.loadState()).done();
-  }
-
-
-  render() {
-
-    if (this.state.times == undefined)
-      return <h3>Times (loading...)</h3>;
-
-    return (
-      <div>
-        <h3>Times</h3>
-        <div className="btn-toolbar">
-          <button onClick={() => this.loadState()} className="btn btn-light">Reload</button>
-          <button onClick={this.handleClear} className="btn btn-warning">Clear</button>
-        </div>
-        <br />
-        <Tabs id="timeMachineTabs">
-          <Tab eventKey="bars" title="Bars">
-            {this.renderBars()}
-          </Tab>
-          <Tab eventKey="table" title="Table">
-            {this.renderTable()}
-          </Tab>
-        </Tabs>
-      </div>
-    );
+  function handleClear(e: React.MouseEvent<any>) {
+    API.Times.clear().then(() => loadState()).done();
   }
 
 
-  renderBars() {
 
+  function renderBars() {
     const maxWith = 600;
 
 
-    const times = this.state.times!;
+    const times = times!;
     const maxValue = times.map(a => a.maxTime).max()!;
     const maxTotal = times.map(a => a.totalTime).max()!;
 
@@ -127,11 +101,10 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
   }
 
 
-  renderTable() {
-
+  function renderTable() {
     const getColor = (f: number) => `rgb(255, ${(1 - f) * 255}, ${(1 - f) * 255})`;
 
-    const times = this.state.times!;
+    const times = times!;
 
     const max = {
       count: times.map(a => a.count).max()!,
@@ -199,6 +172,27 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
       </table>
     );
   }
+  if (times == undefined)
+    return <h3>Times (loading...)</h3>;
+
+  return (
+    <div>
+      <h3>Times</h3>
+      <div className="btn-toolbar">
+        <button onClick={() => loadState()} className="btn btn-light">Reload</button>
+        <button onClick={handleClear} className="btn btn-warning">Clear</button>
+      </div>
+      <br />
+      <Tabs id="timeMachineTabs">
+        <Tab eventKey="bars" title="Bars">
+          {renderBars()}
+        </Tab>
+        <Tab eventKey="table" title="Table">
+          {renderTable()}
+        </Tab>
+      </Tabs>
+    </div>
+  );
 }
 
 

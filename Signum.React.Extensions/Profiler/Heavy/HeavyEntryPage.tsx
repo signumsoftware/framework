@@ -6,145 +6,114 @@ import * as Navigator from '@framework/Navigator'
 import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 import "./Profiler.css"
+import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 interface HeavyEntryProps extends RouteComponentProps<{ selectedIndex: string }> {
 
 }
 
-export default class HeavyEntry extends React.Component<HeavyEntryProps, { entries?: HeavyProfilerEntry[], stackTrace?: StackTraceTS[], asyncDepth: boolean }> {
+export default function HeavyEntry(p: HeavyEntryProps) {
 
-  constructor(props: HeavyEntryProps) {
-    super(props);
-    this.state = { asyncDepth: true };
-  }
+  const selectedIndex = p.match.params.selectedIndex;
+  const rootIndex = selectedIndex.tryBefore("-") || selectedIndex;
+  const entries = useAPI(undefined, () => API.Heavy.details(rootIndex), [rootIndex]);
+  const stackTrace = useAPI(undefined, () => API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
+  const [asyncDepth, setAsyncDepth] = React.useState<boolean>(false);
 
-  componentWillMount() {
-    this.loadEntries(this.props);
-    this.loadStackTrace(this.props);
-  }
-
-  componentWillReceiveProps(newProps: HeavyEntryProps) {
-    if (this.state.entries == undefined || !this.state.entries.some(a => a.fullIndex == newProps.match.params.selectedIndex))
-      this.loadEntries(newProps);
-
-    this.loadStackTrace(newProps);
-  }
-
-  loadEntries(props: HeavyEntryProps) {
-    let selectedIndex = props.match.params.selectedIndex;
-
-    return API.Heavy.details(selectedIndex.tryBefore("-") || selectedIndex)
-      .then(entries => this.setState({ entries }))
-      .done();
-  }
-
-
-  loadStackTrace(props: HeavyEntryProps) {
-    return API.Heavy.stackTrace(props.match.params.selectedIndex)
-      .then(stackTrace => this.setState({ stackTrace }))
-      .done();
-  }
-
-  handleDownload = () => {
-    let selectedIndex = this.props.match.params.selectedIndex;
+  function handleDownload() {
+    let selectedIndex = p.match.params.selectedIndex;
     API.Heavy.download(selectedIndex.tryBefore("-") || selectedIndex);
   }
 
-  handleUpdate = () => {
-    this.loadEntries(this.props);
+  function handleUpdate() {
+    loadEntries(p);
   }
 
-  render() {
+  const index = p.match.params.selectedIndex;
+  Navigator.setTitle("Heavy Profiler > Entry " + index);
+  if (entries == undefined)
+    return <h3 className="display-6">Heavy Profiler > Entry {index} (loading...) </h3>;
 
-    const index = this.props.match.params.selectedIndex;
-    Navigator.setTitle("Heavy Profiler > Entry " + index);
-    if (this.state.entries == undefined)
-      return <h3 className="display-6">Heavy Profiler > Entry {index} (loading...) </h3>;
-
-    let current = this.state.entries.filter(a => a.fullIndex == this.props.match.params.selectedIndex).single();
-    return (
-      <div>
-        <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
-        <label><input type="checkbox" checked={this.state.asyncDepth} onChange={a => this.setState({ asyncDepth: a.currentTarget.checked })} />Async Stack</label>
-        <br />
-        {this.state.entries && <HeavyProfilerDetailsD3 entries={this.state.entries} selected={current} asyncDepth={this.state.asyncDepth} />}
-        <br />
-        <table className="table table-nonfluid">
-          <tbody>
-            <tr>
-              <th>Role</th>
-              <td>{current.role}</td>
-            </tr>
-            <tr>
-              <th>Time</th>
-              <td>{current.elapsed}</td>
-            </tr>
-            <tr>
-              <td colSpan={2}>
-                <div className="btn-toolbar">
-                  <button onClick={this.handleDownload} className="btn btn-info">Download</button>
-                  {!current.isFinished && <button onClick={this.handleUpdate} className="btn btn-light">Update</button>}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <br />
-        <h3>Aditional Data</h3>
-        <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.additionalData}</code></pre>
-        <br />
-        <h3>StackTrace</h3>
-        {
-          this.state.stackTrace == undefined ? <span>No Stacktrace</span> :
-            <StackFrameTable stackTrace={this.state.stackTrace} />
-        }
-      </div>
-    );
-  }
+  let current = entries.filter(a => a.fullIndex == p.match.params.selectedIndex).single();
+  return (
+    <div>
+      <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
+      <label><input type="checkbox" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
+      <br />
+      {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
+      <br />
+      <table className="table table-nonfluid">
+        <tbody>
+          <tr>
+            <th>Role</th>
+            <td>{current.role}</td>
+          </tr>
+          <tr>
+            <th>Time</th>
+            <td>{current.elapsed}</td>
+          </tr>
+          <tr>
+            <td colSpan={2}>
+              <div className="btn-toolbar">
+                <button onClick={handleDownload} className="btn btn-info">Download</button>
+                {!current.isFinished && <button onClick={handleUpdate} className="btn btn-light">Update</button>}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br />
+      <h3>Aditional Data</h3>
+      <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.additionalData}</code></pre>
+      <br />
+      <h3>StackTrace</h3>
+      {
+        stackTrace == undefined ? <span>No Stacktrace</span> :
+          <StackFrameTable stackTrace={stackTrace} />
+      }
+    </div>
+  );
 }
 
 
-export class StackFrameTable extends React.Component<{ stackTrace: StackTraceTS[] }>{
+export function StackFrameTable(p : { stackTrace: StackTraceTS[] }){
+  if (p.stackTrace == undefined)
+    return <span>No StackTrace</span>;
 
-  render() {
-    if (this.props.stackTrace == undefined)
-      return <span>No StackTrace</span>;
-
-    return (
-      <table className="table table-sm">
-        <thead>
-          <tr>
-            <th>Namespace
-                        </th>
-            <th>Type
-                        </th>
-            <th>Method
-                        </th>
-            <th>FileLine
-                        </th>
+  return (
+    <table className="table table-sm">
+      <thead>
+        <tr>
+          <th>Namespace
+                      </th>
+          <th>Type
+                      </th>
+          <th>Method
+                      </th>
+          <th>FileLine
+                      </th>
+        </tr>
+      </thead>
+      <tbody>
+        {p.stackTrace.map((sf, i) =>
+          <tr key={i}>
+            <td>
+              {sf.namespace && <span style={{ color: sf.color }}>{sf.namespace}</span>}
+            </td>
+            <td>
+              {sf.type && <span style={{ color: sf.color }}>{sf.type}</span>}
+            </td>
+            <td>
+              {sf.method}
+            </td>
+            <td>
+              {sf.fileName} {sf.lineNumber > 0 && "(" + sf.lineNumber + ")"}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {this.props.stackTrace.map((sf, i) =>
-            <tr key={i}>
-              <td>
-                {sf.namespace && <span style={{ color: sf.color }}>{sf.namespace}</span>}
-              </td>
-              <td>
-                {sf.type && <span style={{ color: sf.color }}>{sf.type}</span>}
-              </td>
-              <td>
-                {sf.method}
-              </td>
-              <td>
-                {sf.fileName} {sf.lineNumber > 0 && "(" + sf.lineNumber + ")"}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    );
-  }
+        )}
+      </tbody>
+    </table>
+  );
 }
 
 
@@ -160,56 +129,46 @@ interface HeavyProfilerDetailsD3Props {
 }
 
 
-interface HeavyProfilerDetailsD3State {
+interface MinMax {
   min: number;
   max: number;
 }
 
+export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
 
-export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetailsD3Props, HeavyProfilerDetailsD3State>{
+  const [minMax, setMinMax] = React.useState<MinMax>(() => resetZoom(p.selected))
 
-  componentWillMount() {
-    this.resetZoom(this.props.selected);
-  }
 
-  resetZoom(current: HeavyProfilerEntry) {
-    this.setState({
+  const chartContainer = React.useRef<HTMLDivElement>(null);
+
+  function resetZoom(current: HeavyProfilerEntry): MinMax {
+    return ({
       min: lerp(current.beforeStart, -0.1, current.end),
       max: lerp(current.beforeStart, 1.1, current.end)
     });
   }
 
-  componentDidMount() {
-    this.mountChart(this.props);
-    this.chartContainer.addEventListener("wheel", this.handleWeel, { passive: false, capture: true });
-  }
+  React.useEffect(() => {
+    mountChart(p);
 
-  componentWillReceiveProps(newProps: HeavyProfilerDetailsD3Props) {
-    if (newProps.asyncDepth != this.props.asyncDepth) {
-      this.mountChart(newProps);
-    }
-    else if (newProps.selected != this.props.selected) {
-      this.mountChart(newProps);
-    }
-  }
+    chartContainer.current!.addEventListener("wheel", handleWeel, { passive: false, capture: true });
 
-  componentDidUpdate() {
-    this.updateChart!();
-  }
+    return () => {
+      chartContainer.current!.removeEventListener("wheel", handleWeel);
+    };
+  });
 
-  componentWillUnmount() {
-    this.chartContainer.removeEventListener("wheel", this.handleWeel);
-  }
+  React.useEffect(() => {
+    mountChart(p);
+  }, [p.asyncDepth, p.selected]);
 
-  chartContainer!: HTMLDivElement;
-
-  handleWeel = (e: WheelEvent) => {
-
+  
+  function handleWeel(e: WheelEvent) {
     e.preventDefault();
     e.stopPropagation();
 
-    let dist = this.state.max - this.state.min;
+    let dist = minMax.max - minMax.min;
 
     const inc = 1.2;
 
@@ -223,23 +182,18 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
     const ratio = (ne.clientX - rect.left) / rect.width;
 
-    let newMin = this.state.min - dist * delta * (ratio);
-    let newMax = this.state.max + dist * delta * (1 - ratio);
+    let newMin = minMax.min - dist * delta * (ratio);
+    let newMax = minMax.max + dist * delta * (1 - ratio);
 
-    this.setState({
+    setMinMax({
       min: newMin,
       max: newMax
     });
-
   }
 
-  render() {
-    return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div!}></div>);
-  }
 
-  mountChart(props: HeavyProfilerDetailsD3Props) {
-
-    if (this.chartContainer == undefined)
+  function mountChart(props: HeavyProfilerDetailsD3Props) {
+    if (chartContainer == undefined)
       throw new Error("chartContainer not mounted!");
 
     let data = props.entries;
@@ -256,7 +210,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
     let maxDepth = d3.max(data, getDepth)!;
 
     let height = ((fontSize * 2) + (3 * fontPadding)) * (maxDepth + 1);
-    this.chartContainer.style.height = height + "px";
+    chartContainer.style.height = height + "px";
 
     let y = d3.scaleLinear()
       .domain([0, maxDepth + 1])
@@ -264,17 +218,17 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
     let entryHeight = y(1);
 
-    d3.select(this.chartContainer).select("svg").remove();
+    d3.select(chartContainer.current!).select("svg").remove();
 
-    const chart = d3.select(this.chartContainer)
+    const chart = d3.select(chartContainer.current!)
       .append<SVGElement>('svg:svg').attr('height', height);
 
 
-    this.updateChart = () => {
+    function updateChar () {
 
-      let { min, max } = this.state;
-      let width = this.chartContainer.getBoundingClientRect().width;
-      let sel = this.props.selected;
+      let { min, max } = minMax;
+      let width = chartContainer.current.getBoundingClientRect().width;
+      let sel = p.selected;
       let x = d3.scaleLinear()
         .domain([min, max])
         .range([0, width]);
@@ -314,7 +268,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
       newGroups.on("click", e => {
 
-        if (e == this.props.selected) {
+        if (e == p.selected) {
 
         }
         else {
@@ -330,7 +284,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
       });
 
       newGroups.on("dblclick", e => {
-        this.resetZoom(e);
+         setMinMax(resetZoom(e));
       });
 
       chart.attr('width', width);
@@ -355,8 +309,12 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
         .attr('fill', v => v == sel ? '#000' : '#fff');
     };
 
-    this.updateChart();
   }
 
-  updateChart?: () => void;
+  return (
+    <div className="sf-profiler-chart" ref={chartContainer}>
+
+
+    </div>
+  );
 }
