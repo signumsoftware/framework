@@ -39,7 +39,8 @@
 
 .sidebar-container .dropdown-item:focus {
     outline: 0px;
-    box-shadow: 0 0 0 0.2rem rgba(216, 217, 219, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(121, 161, 241, 0.5);
+    z-index: 10;
 }
 
 .sidebar ul li {
