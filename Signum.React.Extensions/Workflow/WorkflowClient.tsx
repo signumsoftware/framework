@@ -72,6 +72,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
   ]);
 
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.entity(p => p.viewName), type: "Text" },
+  ]);
+
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
