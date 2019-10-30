@@ -9,8 +9,7 @@ import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
-import { useThrottle } from '../../../../../Framework/Signum.React/Scripts/Hooks';
-
+import { useThrottle, useSize } from '@framework/Hooks';
 
 export interface ReactChartProps {
   data?: ChartClient.ChartTable;
@@ -45,47 +44,11 @@ export default function ReactChart(p: ReactChartProps) {
 
   }, [p.data != null]);
 
-  const [size, setSize] = React.useState<{ width: number, height: number } | undefined>();
-  const divElement = React.useRef<HTMLDivElement | null>(null);
-  function setNewSize() {
-    const rect = divElement.current!.getBoundingClientRect();
-    if (size == null || size.width != rect.width || size.height != rect.height)
-      setSize({ width: rect.width, height: rect.height });
-  }
-
-  function setDivElement(div: HTMLDivElement | null) {
-    if (divElement.current = div) {
-      setNewSize();
-    }
-  }
-
-  React.useEffect(() => {
-    const handler = React.useRef<number | null>(null);
-    function onResize() {
-      if (handler.current != null)
-        clearTimeout(handler.current);
-
-      handler.current = setTimeout(() => {
-        if (divElement.current) {
-          setNewSize()
-        }
-      }, 300);
-    }
-
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      if (handler.current)
-        clearTimeout(handler.current);
-
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
+  const { size, setContainer } = useSize();
 
   var animated = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   return (
-    <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={d => setDivElement(d)} >
+    <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={setContainer} >
       {size &&
         p.onRenderChart({
           data: p.data,

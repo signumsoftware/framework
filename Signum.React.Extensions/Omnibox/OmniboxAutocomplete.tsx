@@ -11,11 +11,13 @@ export interface OmniboxAutocompleteProps {
   inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
 }
 
-export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps>
-{
-  handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
+export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
 
-    this.abortRequest.abort();
+  const typeahead = React.useRef<TypeaheadHandle>(null);
+  const abortRequest = React.useMemo(() => new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac)), []);
+
+  function handleOnSelect(result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) {
+    abortRequest.abort();
 
     const ke = e as React.KeyboardEvent<any>;
     if (ke.keyCode && ke.keyCode == 9) {
@@ -31,29 +33,22 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
             Navigator.pushOrOpenInTab(url, e);
         }).done();
     }
-    this.typeahead.blur();
+    typeahead.current!.blur();
 
     return null;
   }
 
-  abortRequest = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
+  let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...p.inputAttrs };
 
-  typeahead!: TypeaheadHandle;
-
-  render() {
-
-    let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
-
-    return (
-      <ErrorBoundary>
-        <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)}
-          renderItem={item => OmniboxClient.renderItem(item as OmniboxClient.OmniboxResult)}
-          onSelect={(item, e) => this.handleOnSelect(item as OmniboxClient.OmniboxResult, e)}
-          inputAttrs={inputAttr}
-          minLength={0} />
-      </ErrorBoundary>
-    );
-  }
+  return (
+    <ErrorBoundary>
+      <Typeahead ref={typeahead } getItems={str => abortRequest.getData(str)}
+        renderItem={item => OmniboxClient.renderItem(item as OmniboxClient.OmniboxResult)}
+        onSelect={(item, e) => handleOnSelect(item as OmniboxClient.OmniboxResult, e)}
+        inputAttrs={inputAttr}
+        minLength={0} />
+    </ErrorBoundary>
+  );
 }
 
 
