@@ -86,7 +86,7 @@ namespace Signum.Engine.Basics
                         QueryNames,
                         q => q.Key,
                         kvp => kvp.Key,
-                        (q, kvp) => KVP.Create(kvp.Value, q),
+                        (q, kvp) => KeyValuePair.Create(kvp.Value, q),
                         "caching " + nameof(QueryEntity)).ToDictionary(),
                     new InvalidateWith(typeof(QueryEntity)),
                     Schema.Current.InvalidateMetadata);

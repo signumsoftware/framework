@@ -293,7 +293,7 @@ namespace Signum.Utilities.DataStructures
 #pragma warning restore CS8629 // Nullable value type may be null.
             return new IntervalDictionary<K, VR>(keys
                 .Select(k => new { Intervalo = k, Valor = mixer(k, me.TryGetValue(k.Min), other.TryGetValue(k.Min)) })
-                .Where(a => a.Valor.HasInterval).Select(a => KVP.Create(a.Intervalo, a.Valor.Value)));
+                .Where(a => a.Valor.HasInterval).Select(a => KeyValuePair.Create(a.Intervalo, a.Valor.Value)));
         }
 
         public static IntervalDictionary<K, VR> Collapse<K, V, VR>(this IEnumerable<IntervalDictionary<K, V>> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
@@ -302,7 +302,7 @@ namespace Signum.Utilities.DataStructures
 #pragma warning disable CS8629 // Nullable value type may be null.
             Interval<K>[] keys = collection.SelectMany(a => a).SelectMany(a => a.Key.Elements()).Distinct().OrderBy().BiSelectS((min, max) => new Interval<K>(min.Value, max.Value)).ToArray();
 #pragma warning restore CS8629 // Nullable value type may be null.
-            return new IntervalDictionary<K, VR>(keys.Select(k => KVP.Create(k, mixer(k, collection.Select(intDic => intDic.TryGetValue(k.Min)).Where(vi => vi.HasInterval).Select(vi => vi.Value)))));
+            return new IntervalDictionary<K, VR>(keys.Select(k => KeyValuePair.Create(k, mixer(k, collection.Select(intDic => intDic.TryGetValue(k.Min)).Where(vi => vi.HasInterval).Select(vi => vi.Value)))));
         }
 
         public static IntervalDictionary<K, VR> AggregateIntervalDictionary<K, V, VR>(this IEnumerable<(Interval<K> interval, V value)> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
@@ -311,7 +311,7 @@ namespace Signum.Utilities.DataStructures
 #pragma warning disable CS8629 // Nullable value type may be null.
             Interval<K>[] keys = collection.SelectMany(a => a.interval.Elements()).Distinct().OrderBy().BiSelectS((min, max) => new Interval<K>(min.Value, max.Value)).ToArray();
 #pragma warning restore CS8629 // Nullable value type may be null.
-            return new IntervalDictionary<K, VR>(keys.Select(k => KVP.Create(k, mixer(k, collection.Where(a => a.interval.Subset(k)).Select(a => a.value)))));
+            return new IntervalDictionary<K, VR>(keys.Select(k => KeyValuePair.Create(k, mixer(k, collection.Where(a => a.interval.Subset(k)).Select(a => a.value)))));
         }
 
         public static IntervalDictionary<K, VR> Filter<K, V, VR>(this IntervalDictionary<K, V> me, Interval<K> filter, Func<Interval<K>, V, VR> mapper)

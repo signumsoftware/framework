@@ -48,7 +48,7 @@ namespace Signum.Entities
 
             var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                        where !pi.HasAttribute<HiddenPropertyAttribute>() && !pi.HasAttribute<ExpressionFieldAttribute>() 
-                       select KVP.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
+                       select KeyValuePair.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
 
             validators.SetDefinition(typeof(T), dic);
         }

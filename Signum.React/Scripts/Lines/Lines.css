@@ -19,6 +19,7 @@ input[type=checkbox].form-control {
     flex-wrap: nowrap;
 }
 
+
 .form-control.readonly, .form-control:disabled, .form-control[readonly] {
     background-color: #ddd;
     overflow: hidden;
@@ -57,9 +58,15 @@ label > input[type=checkbox] {
         max-width: 120px;
     }
 
+
+
 .sf-entity-line-entity,
 .sf-entity-line-entity:focus {
     background-color: #f8f8f8;
+    overflow: hidden;
+}
+
+.SF-entity-line .input-group .form-control{
     overflow: hidden;
 }
 
