@@ -94,7 +94,7 @@ const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined
 export function QueryTokenPart(p: QueryTokenPartProps) {
 
 
-  const subTokens = useAPI(undefined, () => {
+  const subTokens = useAPI(() => {
     if (p.readOnly)
       return Promise.resolve(undefined);
 

@@ -149,7 +149,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
   const entity = p.wc.ctx.value;
 
-  const links = useAPI(undefined, signal => {
+  const links = useAPI(signal => {
     if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind)
       return Promise.resolve([]);
     else

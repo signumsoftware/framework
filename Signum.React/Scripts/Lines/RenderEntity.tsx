@@ -25,7 +25,7 @@ export function RenderEntity(p: RenderEntityProps) {
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
-  var componentBox = useAPI(null, signal => {
+  var componentBox = useAPI(() => {
     if (p.getComponent)
       return Promise.resolve({ func: p.getComponent });
 

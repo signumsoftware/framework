@@ -95,7 +95,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size 
   return { size, setContainer };
 }
 
-interface APIHookOptions{
+interface APIHookOptions<T> {
   avoidReset?: boolean;
 }
 
@@ -124,16 +124,21 @@ export function useTitle(title: string, deps?: readonly any[]) {
     return () => Navigator.setTitle();
   }, deps);
 }
+export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions<T>): [T | undefined, () => void] {
+  const [count, setCount] = React.useState(0);
+  const value = useAPI<T>(makeCall, [...(deps || []), count], options);
+  return [value, () => setCount(count + 1)];
+}
 
-export function useAPI<T>(defaultValue: T, makeCall: (signal: AbortSignal, oldData: T) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): T {
+export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions<T>): T | undefined {
 
-  const [data, setData] = React.useState<T>(defaultValue);
+  const [data, setData] = React.useState<T | undefined>(undefined);
 
   React.useEffect(() => {
     var abortController = new AbortController();
 
     if (options == null || !options.avoidReset)
-      setData(defaultValue);
+      setData(undefined);
 
     makeCall(abortController.signal, data)
       .then(result => !abortController.signal.aborted && setData(result))
@@ -155,7 +160,7 @@ export function useMounted() {
   return mounted;
 }
 
-export function useThrottle<T>(value: T, limit: number) : T {
+export function useThrottle<T>(value: T, limit: number): T {
   const [throttledValue, setThrottledValue] = React.useState(value);
   const lastRan = React.useRef(Date.now());
 
@@ -179,7 +184,7 @@ export function useThrottle<T>(value: T, limit: number) : T {
 };
 
 export function useQuery(fo: FindOptions | null): ResultTable | undefined | null {
-  return useAPI(undefined, signal =>
+  return useAPI(signal =>
     fo == null ? Promise.resolve<ResultTable | null>(null) :
       Finder.getQueryDescription(fo.queryName)
         .then(qd => Finder.parseFindOptions(fo!, qd))
@@ -202,11 +207,11 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   if (resultTable == null)
     return undefined;
 
-  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null; 
+  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
 }
 
 export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
-  return useAPI(undefined, signal =>
+  return useAPI(signal =>
     lite == null ? Promise.resolve<T | null | undefined>(lite) :
       Navigator.API.fetchAndForget(lite),
     [lite && liteKey(lite)]);
@@ -237,5 +242,5 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLo
 }
 
 export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
-  return useAPI(undefined, signal => Navigator.API.fetchAll(type), []);
+  return useAPI(signal => Navigator.API.fetchAll(type), []);
 }

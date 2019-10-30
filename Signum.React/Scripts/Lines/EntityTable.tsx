@@ -345,9 +345,8 @@ export interface EntityTableRowHandle {
 export function EntityTableRow(p: EntityTableRowProps) {
   const forceUpdate = useForceUpdate();
 
-  const rowState = useAPI(undefined,
-    (signal, oldState) => !p.fetchRowState ? Promise.resolve(undefined) : p.fetchRowState(p.ctx, { props: p, rowState: oldState, forceUpdate }),
-    []);
+  const rowState = useAPI((signal, oldState) => !p.fetchRowState ? Promise.resolve(undefined) :
+    p.fetchRowState(p.ctx, { props: p, rowState: oldState, forceUpdate }), []);
 
   const rowHandle = { props: p, rowState, forceUpdate };
 
