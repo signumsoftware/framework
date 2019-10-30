@@ -1,9 +1,9 @@
 ﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
   <Header>
-    <Title>React useState Hook</Title>
+    <Title>React useRef Hook</Title>
     <Author>Signum Software</Author>
-    <Shortcut>useState</Shortcut>
-    <Description>Code snippet for adding a useState Hook to React Function Component</Description>
+    <Shortcut>useRef</Shortcut>
+    <Description>Code snippet for adding a useRef Hook to an React Function Component</Description>
     <SnippetTypes>
       <SnippetType>Expansion</SnippetType>
     </SnippetTypes>
@@ -25,17 +25,17 @@
       <Literal>
         <ID>type</ID>
         <ToolTip>state variable type</ToolTip>
-        <Default>number</Default>
+        <Default>HTMLDivElement</Default>
       </Literal>
       <Literal>
         <ID>init</ID>
         <ToolTip>state variable init value</ToolTip>
-        <Default>0</Default>
+        <Default>null</Default>
       </Literal>
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
-const [$var$, set_$var$] = React.useState<$type$>($init$)
+const $var$ = React.useRef<$type$>($init$)
      ]]>
     </Code>
   </Snippet>

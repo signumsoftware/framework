@@ -15,6 +15,22 @@ export function useForceUpdatePromise(): () => Promise<void> {
   return () => setCount(count + 1) as Promise<any>;
 }
 
+export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T) {
+  const [val, setVal] = React.useState(initialState);
+
+  React.useEffect(() => {
+    var insideVal = val;
+    if (interval) {
+      var handler = setInterval(() => {
+        setVal(insideVal = newState(insideVal));
+      }, interval);
+      return () => clearInterval(handler);
+    }
+  }, [interval]);
+
+  return val;
+}
+
 export function usePrevious<T>(value: T): T | undefined {
   var ref = React.useRef<T | undefined>();
   React.useEffect(() => {
@@ -22,6 +38,61 @@ export function usePrevious<T>(value: T): T | undefined {
   }, [value]);
 
   return ref.current;
+}
+
+export function useExpand() {
+  React.useEffect(() => {
+    const wasExpanded = Navigator.Expander.setExpanded(true);
+    return () => { Navigator.Expander.setExpanded(wasExpanded); }
+  }, []);
+
+}
+
+
+interface Size {
+  width: number;
+  height: number;
+}
+
+export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size | undefined, setContainer: (element: T | null) => void } {
+  const [size, setSize] = React.useState<Size | undefined>();
+  const divElement = React.useRef<T | null>(null);
+  function setNewSize() {
+    const rect = divElement.current!.getBoundingClientRect();
+    if (size == null || size.width != rect.width || size.height != rect.height)
+      setSize({ width: rect.width, height: rect.height });
+  }
+
+  function setContainer(div: T | null) {
+    if (divElement.current = div) {
+      setNewSize();
+    }
+  }
+
+  React.useEffect(() => {
+    const handler = React.useRef<number | null>(null);
+    function onResize() {
+      if (handler.current != null)
+        clearTimeout(handler.current);
+
+      handler.current = setTimeout(() => {
+        if (divElement.current) {
+          setNewSize()
+        }
+      }, 300);
+    }
+
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      if (handler.current)
+        clearTimeout(handler.current);
+
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  return { size, setContainer };
 }
 
 interface APIHookOptions{
@@ -133,8 +204,6 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
 
   return resultTable.rows[0] && resultTable.rows[0].columns[0] || null; 
 }
-
-
 
 export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
   return useAPI(undefined, signal =>

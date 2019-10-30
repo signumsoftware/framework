@@ -36,7 +36,7 @@ namespace Signum.Engine.CodeGeneration
         {
             string folder = GetFolder();
 
-            var files = Directory.EnumerateFiles(folder, "*.tsx", SearchOption.AllDirectories);
+            var files = Directory.EnumerateFiles(folder, "*.tsx", SearchOption.AllDirectories).OrderBy(a => a).ToList();
 
             return SelectFiles(folder, files);
         }
