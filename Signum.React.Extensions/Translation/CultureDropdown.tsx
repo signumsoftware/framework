@@ -9,7 +9,7 @@ import { useAPI } from '@framework/Hooks';
 
 export default function CultureDropdown(props: {}) {
 
-  var cultures = useAPI(undefined, signal => CultureClient.getCultures(false), []);
+  var cultures = useAPI(signal => CultureClient.getCultures(false), []);
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
   }

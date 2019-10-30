@@ -22,7 +22,7 @@ export interface ToolbarRendererState {
 }
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
-  const r = useAPI(undefined, () => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
+  const r = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
 
   const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
   const [avoidCollapse, setAvoidCollapse] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);

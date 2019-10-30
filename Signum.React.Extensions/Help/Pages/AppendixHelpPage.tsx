@@ -3,7 +3,7 @@ import { RouteComponentProps, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
 import * as Operations from '@framework/Operations';
-import { useAPI, useTitle, useForceUpdate } from '@framework/Hooks';
+import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Entities.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
@@ -17,8 +17,7 @@ import { classes } from '@framework/Globals';
 
 export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
 
-  var [count, setCount] = React.useState(0);
-  var appendix = useAPI(undefined, () => API.appendix(p.match.params.uniqueName), [count]);
+  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(p.match.params.uniqueName), []);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)
@@ -36,7 +35,7 @@ export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: st
       <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? Navigator.history.push(Urls.appendixUrl(a.uniqueName)) : setCount(count + 1)} />}
+        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? Navigator.history.push(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
         <DeleteButton ctx={ctx} />
       </div>
     </div>

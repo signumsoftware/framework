@@ -6,22 +6,21 @@ import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'
 import { ProcessEntity } from './Signum.Entities.Processes'
 import { SearchControl } from '@framework/Search';
-import { useAPI, useTitle } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useTitle, useAPIWithReload } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
-  const [count, setCount] = React.useState(0);
-  const state = useAPI(undefined, () => API.view(), [count]);
+  const [state, reloadState] = useAPIWithReload(() => API.view(), []);
 
   useTitle("ProcessLogic state");
   
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => setCount(count+1)).done();
+    API.stop().then(() => reloadState()).done();
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => setCount(count + 1)).done();
+    API.start().then(() => reloadState()).done();
   }
 
 

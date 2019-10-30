@@ -371,7 +371,7 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
   var exampleExpression: string | undefined = undefined;
 
   if (typeName && fixedViewName) {
-    const viewProps = useAPI(undefined, signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
+    const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
     if (viewProps && viewProps.length > 0)
       exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
   }

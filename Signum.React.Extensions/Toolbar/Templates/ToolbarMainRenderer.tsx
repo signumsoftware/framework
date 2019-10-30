@@ -22,7 +22,7 @@ export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(undefined, signal => ToolbarClient.API.getCurrentToolbar("Main"), []);
+  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main"), []);
 
   if (response == null)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;

@@ -354,7 +354,7 @@ interface EpochProgressComponentProps {
 
 export function EpochProgressComponent(p: EpochProgressComponentProps) {
 
-  const eps = useAPI(undefined, () => PredictorClient.API.getEpochLosses(toLite(p.ctx.value)), [p.ctx.value]);
+  const eps = useAPI(() => PredictorClient.API.getEpochLosses(toLite(p.ctx.value)), [p.ctx.value]);
 
   return (
     <div>

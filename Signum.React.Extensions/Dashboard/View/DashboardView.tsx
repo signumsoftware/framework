@@ -173,7 +173,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const content = p.ctx.value.content;
 
-  const state = useAPI(undefined, signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
+  const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
     [content.Type], { avoidReset: true });
 
   if (state == null || state.lastType == null)

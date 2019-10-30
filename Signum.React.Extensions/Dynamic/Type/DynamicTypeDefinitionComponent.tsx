@@ -52,7 +52,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
   const [expressionNames, setExpressionNames] = React.useState<string[] | undefined>(undefined);
 
-  const typeEntity = useAPI(undefined, () =>
+  const typeEntity = useAPI(() =>
     p.dynamicType.baseType != "Entity" ? Promise.resolve(undefined) :
       p.dynamicType.isNew ? Promise.resolve(undefined) :
         Navigator.API.getType(p.dynamicType.typeName!)

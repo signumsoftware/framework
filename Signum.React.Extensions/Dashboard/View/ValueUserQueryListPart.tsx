@@ -33,7 +33,7 @@ export interface ValueUserQueryElementProps {
 
 export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
-  const fo = useAPI(undefined, signal => UserQueryClient.Converter.toFindOptions(p.ctx.value.userQuery, p.entity),
+  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.ctx.value.userQuery, p.entity),
     [p.ctx.value.userQuery, p.entity]);
 
   const ctx = p.ctx;

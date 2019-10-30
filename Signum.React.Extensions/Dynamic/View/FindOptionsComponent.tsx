@@ -203,7 +203,7 @@ interface FetchQueryDescriptionState {
 }
 
 export function FetchQueryDescription(p: FetchQueryDescriptionProps) {
-  const queryDescription = useAPI(undefined, () => !p.queryName ? Promise.resolve(undefined) : Finder.getQueryDescription(p.queryName), [p.queryName]);
+  const queryDescription = useAPI(() => !p.queryName ? Promise.resolve(undefined) : Finder.getQueryDescription(p.queryName), [p.queryName]);
   return p.children(queryDescription);
 }
 
@@ -215,7 +215,7 @@ interface ViewNameComponentProps {
 
 export function ViewNameComponent(p: ViewNameComponentProps) {
 
-  const viewNames = useAPI(undefined, () => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
+  const viewNames = useAPI(() => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
     Promise.all(getTypeInfos(p.typeName || "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
       .then(arrays => [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]), [p.typeName]);
 

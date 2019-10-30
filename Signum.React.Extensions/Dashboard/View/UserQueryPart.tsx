@@ -19,7 +19,7 @@ export interface UserQueryPartProps {
 
 export default function UserQueryPart(p: UserQueryPartProps) {
 
-  const fo = useAPI(undefined, signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;

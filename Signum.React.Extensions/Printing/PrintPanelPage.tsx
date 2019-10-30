@@ -12,7 +12,7 @@ import { JavascriptMessage } from '@framework/Signum.Entities'
 
 export default function PrintPanelPage(p: {}) {
 
-  const stats = useAPI(undefined, () => API.getStats(), []);
+  const stats = useAPI(() => API.getStats(), []);
 
   function renderStateButton(vsc: ValueSearchControl, fileType: FileTypeSymbol) {
     if (vsc.state.value == undefined || vsc.state.value == 0)

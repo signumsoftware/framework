@@ -5,29 +5,26 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { API, AsyncEmailSenderState } from './MailingClient'
 import { EmailMessageEntity } from './Signum.Entities.Mailing'
-import { useTitle, useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useTitle, useAPI, useAPIWithReload } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
 
   useTitle("AsyncEmailSender state");
 
-  const [count, setCount] = React.useState<number>(0)
-
-  const state = useAPI(undefined, () => API.view(), []);
+  const [state, reloadState] = useAPIWithReload(() => API.view(), []);
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => setCount(count +1)).done();
+    API.stop().then(() => reloadState()).done();
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => setCount(count + 1)).done();
+    API.start().then(() => reloadState()).done();
   }
 
   if (state == undefined)
     return <h2>AsyncEmailSender state (loading...) </h2>;
-
 
   return (
     <div>

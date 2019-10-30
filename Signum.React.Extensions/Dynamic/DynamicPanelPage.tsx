@@ -34,8 +34,8 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
 
   const [count, setCount] = React.useState(0);
 
-  const startErrors = useAPI(undefined, () => API.getStartErrors(), [count]);
-  const panelInformation = useAPI(undefined, () => API.getPanelInformation(), [count]);
+  const startErrors = useAPI(() => API.getStartErrors(), [count]);
+  const panelInformation = useAPI(() => API.getPanelInformation(), [count]);
   const [restarting, setRestarting] = React.useState<moment.Moment | null>(null);
 
 

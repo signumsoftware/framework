@@ -26,11 +26,11 @@ function getQueryEntity(props: DashboardPageProps): string {
 
 export default function DashboardPage(p: DashboardPageProps) {
 
-  const dashboard = useAPI(undefined, signal => Navigator.API.fetchEntity(DashboardEntity, p.match.params.dashboardId), [p.match.params.dashboardId]);
+  const dashboard = useAPI(signal => Navigator.API.fetchEntity(DashboardEntity, p.match.params.dashboardId), [p.match.params.dashboardId]);
 
   var entityKey = getQueryEntity(p);
 
-  const entity = useAPI(undefined, signal => entityKey ? Navigator.API.fetchAndForget(parseLite(entityKey)) : Promise.resolve(null), [p.match.params.dashboardId]);
+  const entity = useAPI(signal => entityKey ? Navigator.API.fetchAndForget(parseLite(entityKey)) : Promise.resolve(null), [p.match.params.dashboardId]);
 
   const rtl = React.useMemo(() => document.body.classList.contains("rtl"), []);
 

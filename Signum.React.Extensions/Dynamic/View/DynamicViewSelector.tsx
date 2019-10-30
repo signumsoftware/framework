@@ -16,7 +16,7 @@ import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scrip
 export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }) {
 
   const forceUpdate = useForceUpdate();
-  const viewNames = useAPI(undefined, () => !p.ctx.value.entityType ? Promise.resolve(undefined) : DynamicViewClient.API.getDynamicViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
+  const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : DynamicViewClient.API.getDynamicViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
 
   const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
   const scriptChangedRef = React.useRef(false);

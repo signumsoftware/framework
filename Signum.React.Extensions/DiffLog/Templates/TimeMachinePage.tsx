@@ -25,7 +25,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
 
   var params = p.match.params;
 
-  const lite = useAPI(undefined, () => {
+  const lite = useAPI(() => {
     var lite = newLite(params.type, params.id!);
 
     return Navigator.API.fillToStrings(lite)
@@ -35,7 +35,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
 
   const searchControl = React.useRef<SearchControlHandler>(null);
   const forceUpdate = useForceUpdate();
-  const queryDescription = useAPI(undefined, () => Finder.getQueryDescription(params.type), [params.type]);
+  const queryDescription = useAPI(() => Finder.getQueryDescription(params.type), [params.type]);
 
   var ctx = new StyleContext(undefined, undefined);
   if (lite == null)
@@ -101,7 +101,7 @@ interface RenderEntityVersionState {
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
-  const entity = useAPI(undefined, signal => DiffLogClient.API.retrieveVersion(p.lite, p.asOf), [p.lite, p.asOf]);
+  const entity = useAPI(signal => DiffLogClient.API.retrieveVersion(p.lite, p.asOf), [p.lite, p.asOf]);
   
   if (!entity)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
@@ -121,7 +121,7 @@ interface DiffEntityVersionProps {
 
 export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
-  const diffBlock = useAPI(undefined, () => DiffLogClient.API.diffVersions(p.lite, p.validFrom, p.validTo), [p.lite, p.validFrom, p.validTo]);
+  const diffBlock = useAPI(() => DiffLogClient.API.diffVersions(p.lite, p.validFrom, p.validTo), [p.lite, p.validFrom, p.validTo]);
 
   if (!diffBlock)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;

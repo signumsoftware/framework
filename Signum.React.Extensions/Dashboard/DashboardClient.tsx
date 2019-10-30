@@ -178,7 +178,7 @@ export interface DashboardWidgetProps {
 
 export function DashboardWidget(p: DashboardWidgetProps) {
 
-  const component = useAPI(undefined, () => import("./View/DashboardView").then(mod => mod.default), []);
+  const component = useAPI(() => import("./View/DashboardView").then(mod => mod.default), []);
 
   if (!component)
     return null;
