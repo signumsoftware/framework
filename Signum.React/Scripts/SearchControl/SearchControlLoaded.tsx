@@ -120,7 +120,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     };
   }
 
-  extraParams = () => null;
+  extraParams: () => any = () => null;
 
   componentDidMount() {
 

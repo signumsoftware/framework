@@ -10,6 +10,12 @@ export function useForceUpdate(): () => void {
   return () => setCount(count + 1);
 }
 
+export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
+  const ref = React.useRef(newValue);
+  ref.current = newValue;
+  return ref;
+}
+
 export function useForceUpdatePromise(): () => Promise<void> {
   var [count, setCount] = useStateWithPromise(0);
   return () => setCount(count + 1) as Promise<any>;
