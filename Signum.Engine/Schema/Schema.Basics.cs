@@ -796,7 +796,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            yield return KVP.Create(ReferenceTable, new RelationInfo
+            yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                  IsLite = IsLite,
                  IsCollection = false,
@@ -863,7 +863,7 @@ namespace Signum.Engine.Maps
         {
             if (ReferenceTable == null)
                 yield break;
-            yield return KVP.Create(ReferenceTable, new RelationInfo
+            yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
@@ -903,7 +903,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, new RelationInfo
+            return ImplementationColumns.Select(a => KeyValuePair.Create(a.Value.ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
@@ -959,7 +959,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            yield return KVP.Create(ColumnType.ReferenceTable, new RelationInfo
+            yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
             {
                  IsNullable = this.ColumnType.Nullable.ToBool(),
                  IsLite = this.IsLite,

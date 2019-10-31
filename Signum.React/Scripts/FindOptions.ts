@@ -17,7 +17,7 @@ export interface ValueFindOptionsParsed {
 
 export interface ModalFindOptions {
   title?: React.ReactNode;
-  message?: React.ReactNode; 
+  message?: React.ReactNode;
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
@@ -29,6 +29,7 @@ export interface FindOptions {
   parentToken?: string | QueryTokenString<any>;
   parentValue?: any;
 
+  includeDefaultFilters?: boolean;
   filterOptions?: FilterOption[];
   orderOptions?: OrderOption[];
   columnOptionsMode?: ColumnOptionsMode;

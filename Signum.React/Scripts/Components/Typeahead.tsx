@@ -30,10 +30,10 @@ export interface TypeaheadState {
 }
 
 export interface TypeaheadHandle {
-  items: any[] | undefined; 
-  selectedIndex: number | undefined; 
-  blur(): void; 
-  writeInInput(query: string) : void;
+  items: any[] | undefined;
+  selectedIndex: number | undefined;
+  blur(): void;
+  writeInInput(query: string): void;
 }
 
 export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadHandle>) {
@@ -64,7 +64,7 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
     return () => {
       if (handle.current != undefined)
         clearTimeout(handle.current);
-    }
+    };
   }, []);
 
 
@@ -319,13 +319,46 @@ export namespace TypeaheadOptions {
     if (index == -1)
       return val;
 
-    return [
-      val.substr(0, index),
-      <strong key={0}>{val.substr(index, query.length)}</strong>,
-      val.substr(index + query.length)
-    ];
+    return (
+      <>
+        {val.substr(0, index)}
+        <strong key={0}>{val.substr(index, query.length)}</strong>
+        {val.substr(index + query.length)}
+      </>
+    );
   }
 
+  export function highlightedTextAll(val: string, query?: string): React.ReactNode {
+    if (query == undefined)
+      return val;
+
+    const parts = query.toLocaleLowerCase().split(" ").filter(a => a.length > 0).orderByDescending(a => a.length);
+
+    function splitText(str: string, partIndex: number): React.ReactNode {
+
+      if (str.length == 0)
+        return str;
+
+      if (parts.length <= partIndex)
+        return str;
+
+      var part = parts[partIndex];
+
+      const index = str.toLowerCase().indexOf(part);
+      if (index == -1)
+        return splitText(str, partIndex + 1);
+
+      return (
+        <>
+          {splitText(str.substr(0, index), index + 1)}
+          <strong key={0}>{str.substr(index, part.length)}</strong>
+          {splitText(str.substr(index + part.length), index + 1)}
+        </>
+      );
+    }
+
+    return splitText(val, 0);
+  }
 
   export function normalizeString(str: string): string {
     return str;

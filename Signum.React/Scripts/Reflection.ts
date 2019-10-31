@@ -50,6 +50,7 @@ export interface MemberInfo {
   required?: boolean;
   maxLength?: number;
   isMultiline?: boolean;
+  isVirtualMList?: boolean;
   preserveOrder?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
@@ -636,7 +637,10 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
     return new ReadonlyBinding<any>(parentValue, "");
   var suffix = "";
   let val = parentValue;
-  for (let i = 0; i < lambdaMembers.length - 1; i++) {
+
+  var lastIsIndex = lambdaMembers[lambdaMembers.length - 1].type == "Indexer";
+
+  for (let i = 0; i < lambdaMembers.length - (lastIsIndex ? 2 : 1); i++) {
     const member = lambdaMembers[i];
     switch (member.type) {
 
@@ -646,7 +650,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
         break;
       case "Mixin":
         val = val.mixins[member.name];
-        suffix += ".mixins[" + member.name + "].element";
+        suffix += ".mixins[" + member.name + "]";
+        break;
+      case "Indexer":
+        val = val[parseInt(member.name)];
+        suffix += "[" + member.name + "].element";
         break;
       default: throw new Error("Unexpected " + member.type);
 
@@ -657,7 +665,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
   switch (lastMember.type) {
 
     case "Member": return new Binding(val, lastMember.name, suffix + "." + lastMember.name);
-    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "].element");
+    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "]");
+    case "Indexer":
+      const preLastMember = lambdaMembers[lambdaMembers.length - 2];
+      var binding = new Binding<MList<any>>(val, preLastMember.name, suffix + "." + preLastMember.name)
+      return new MListElementBinding(binding, parseInt(lastMember.name));
     default: throw new Error("Unexpected " + lastMember.type);
   }
 }
@@ -845,6 +857,11 @@ function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MLis
 
   var elemPr = PropertyRoute.mlistItem(propertyRoute);
 
+  if (propertyRoute.member!.isVirtualMList) {
+    
+    return mlist.map(mle => ({ rowId: null, element: clone(mle.element as any as Entity, elemPr) as any as T }));
+  }
+
   return mlist.map(mle => ({ rowId: null, element: cloneIfNeeded(mle.element, elemPr) as T }));
 }
 
@@ -988,9 +1005,12 @@ export class Type<T extends ModifiableEntity> implements IType {
    * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc) but this method works in the common simple cases*/
   token(): QueryTokenString<T>;
   token<S>(lambdaToColumn: (v: T) => S) : QueryTokenString<S>;
-  token(lambdaToColumn?: Function): QueryTokenString<any> {
+  token<S>(columnName: string) : QueryTokenString<S>;
+  token(lambdaToColumn?: ((a: any) => any) | string): QueryTokenString<any> {
     if (lambdaToColumn == null)
       return new QueryTokenString("");
+    else if (typeof lambdaToColumn == "string")
+      return new QueryTokenString(lambdaToColumn);
     else
       return new QueryTokenString(tokenSequence(lambdaToColumn));
   }
@@ -1078,8 +1098,8 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
   }
 
-  count(): QueryTokenString<number> {
-    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count");
+  count(option?: "Distinct" | "Null" | "NotNull"): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count" + ((option == undefined) ? "" : option));
   }
 
   min(): QueryTokenString<T> {

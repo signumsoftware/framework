@@ -11,7 +11,7 @@ import { newLite } from '../Reflection';
 import { Modal } from 'react-bootstrap';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
-interface ErrorModalProps extends IModalProps {
+interface ErrorModalProps extends IModalProps<undefined> {
   error: any;
 }
 

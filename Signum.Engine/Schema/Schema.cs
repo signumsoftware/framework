@@ -426,7 +426,8 @@ namespace Signum.Engine.Maps
                         }
                         catch (Exception ex)
                         {
-                            SafeConsole.WriteLineColor(ConsoleColor.Red, "Error");
+                            SafeConsole.WriteColor(ConsoleColor.Red, "Error");
+                            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " (...it's probably ok, execute this script and try again)");
 
                             return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                         }

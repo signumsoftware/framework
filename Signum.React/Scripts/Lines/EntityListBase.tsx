@@ -313,7 +313,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     const rebasedDropIndex = dropBorderIndex > dragIndex ? dropBorderIndex - 1 : dropBorderIndex;
     list.insertAt(rebasedDropIndex, temp);
 
-
+    this.setValue(list);
     this.setDropBorderIndex(undefined);
     this.setDragIndex(undefined);
     this.forceUpdate();

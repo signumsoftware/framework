@@ -11,7 +11,7 @@ import { Modal, Dropdown } from 'react-bootstrap';
 import { namespace } from 'd3';
 import { useForceUpdate } from '../Hooks';
 
-interface SearchModalProps extends IModalProps {
+interface SearchModalProps extends IModalProps<ResultRow[] | undefined> {
   findOptions: FindOptions;
   findMode: FindMode;
   isMany: boolean;
@@ -73,45 +73,46 @@ function SearchModal(p: SearchModalProps) {
 
   const okEnabled = p.isMany ? selectedRows.current.length > 0 : selectedRows.current.length == 1;
 
-  return (
+    return (
     <Modal size="lg" show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
-      <ModalHeaderButtons
+        <ModalHeaderButtons
         onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}
         onOk={p.findMode == "Find" ? handleOkClicked : undefined}
         onCancel={p.findMode == "Find" ? handleCancelClicked : undefined}
-        okDisabled={!okEnabled}>
-        <span className="sf-entity-title">
+          okDisabled={!okEnabled}>
+          <span className="sf-entity-title">
           {p.title}
           &nbsp;
           </span>
         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e)}>
-          <FontAwesomeIcon icon="external-link-alt" />
-        </a>
+            <FontAwesomeIcon icon="external-link-alt" />
+          </a>
         {p.message && <>
-          <br />
+            <br />
           <small className="sf-type-nice-name text-muted"> {p.message}</small>
-        </>
-        }
-      </ModalHeaderButtons>
-      <div className="modal-body">
-        <SearchControl
+          </>
+          }
+        </ModalHeaderButtons>
+        <div className="modal-body">
+          <SearchControl
           ref={searchControl}
-          hideFullScreenButton={true}
-          throwIfNotFindable={true}
+            hideFullScreenButton={true}
+            throwIfNotFindable={true}
           findOptions={p.findOptions}
+			defaultIncludeDefaultFilters={true}
           onSelectionChanged={handleSelectionChanged}
           showGroupButton={p.findMode == "Explore"}
-          largeToolbarButtons={true}
-          maxResultsHeight={"none"}
-          enableAutoFocus={true}
+            largeToolbarButtons={true}
+            maxResultsHeight={"none"}
+            enableAutoFocus={true}
           onHeighChanged={onResize}
           onDoubleClick={p.findMode == "Find" ? handleDoubleClick : undefined}
           {...p.searchControlProps}
-        />
-      </div>
-    </Modal>
-  );
-}
+          />
+        </div>
+      </Modal>
+    );
+  }
 
 
 namespace SearchModal {

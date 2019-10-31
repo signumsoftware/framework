@@ -103,8 +103,12 @@ export class LineBaseController<P extends LineBaseProps> {
 
 
   get mandatoryClass() {
-    if (this.props.mandatory && !this.props.readOnly && (this.props.ctx.value == null || this.props.ctx.value === ""))
-      return "sf-mandatory"
+
+    if (this.props.mandatory && !this.props.readOnly) {
+      const val = this.props.ctx.value;
+      if (val == null || val === "" || Array.isArray(val) && val.length == 0)
+        return "sf-mandatory";
+    }
 
     return null;
   }

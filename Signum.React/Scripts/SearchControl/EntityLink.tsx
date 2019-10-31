@@ -10,7 +10,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   inPlaceNavigation?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
-  innerRef?: (node: HTMLAnchorElement | null) => void;
+  innerRef?: React.Ref<HTMLAnchorElement>;
 }
 
 export default function EntityLink(p: EntityLinkProps) {
@@ -23,7 +23,7 @@ export default function EntityLink(p: EntityLinkProps) {
 
   return (
     <Link
-      innerRef={p.innerRef}
+      innerRef={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title || getToString(lite) : undefined}
       onClick={handleClick}

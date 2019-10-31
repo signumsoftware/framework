@@ -46,8 +46,8 @@ function SearchPage(p: SearchPageProps) {
 
   function changeUrl() {
     const scl = searchControl.current!.searchControlLoaded!;
-    const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
-    const newPath = Finder.findOptionsPath(findOptions);
+    const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
+    const newPath = Finder.findOptionsPath(findOptions, scl.extraParams());
     const currentLocation = Navigator.history.location;
 
     if (currentLocation.pathname + currentLocation.search != newPath)
@@ -75,6 +75,7 @@ function SearchPage(p: SearchPageProps) {
         </a>
       </h3>
       <SearchControl ref={searchControl}
+        defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="SearchPage"
         throwIfNotFindable={true}

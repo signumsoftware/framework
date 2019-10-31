@@ -23,7 +23,7 @@ import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
-import SystemTimeEditor from './SystemTimeEditor';
+import SystemTimeEditor, { asUTC } from './SystemTimeEditor';
 import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
@@ -47,6 +47,7 @@ export interface SearchControlLoadedProps {
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   tag?: string | {};
 
+  defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
   allowSelection: boolean;
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
@@ -73,7 +74,7 @@ export interface SearchControlLoadedProps {
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
-  onCreate?: () => void;
+  onCreate?: () => Promise<void | boolean>;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -118,6 +119,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       showFilters: props.showFilters
     };
   }
+
+  extraParams = () => null;
 
   componentDidMount() {
 
@@ -361,7 +364,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
   }
 
-  
+
   fixScroll() {
     if (this.containerDiv) {
       var table = this.containerDiv.firstChild! as HTMLElement;
@@ -476,7 +479,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
 
     if (fo.systemTime == null)
-      fo.systemTime = { mode: "AsOf", startDate: moment().format() };
+      fo.systemTime = { mode: "AsOf", startDate: asUTC(moment().format()) };
     else
       fo.systemTime = undefined;
 
@@ -529,7 +532,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const isSearch = isAll || this.state.showFilters ||
       this.state.resultTable == null && !this.props.searchOnLoad ||
-      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey));
+      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey)) ||
+      this.props.findOptions.systemTime != null;
 
     var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
     var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
@@ -629,8 +633,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const onCreate = this.props.onCreate;
 
-    if (onCreate)
-      onCreate();
+    if (onCreate) {
+      onCreate()
+        .then(val => val == false || this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+        .done();
+    }
     else {
       const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
@@ -676,9 +683,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     ev.preventDefault();
 
-    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription);
+    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
 
-    const path = Finder.findOptionsPath(findOptions);
+    const path = Finder.findOptionsPath(findOptions, this.extraParams());
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
       window.open(path);
@@ -776,7 +783,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <Dropdown.Toggle id="selectedButton"
             className="sf-query-button sf-tm-selected ml-2"
           
-            disabled={this.state.selectedRows!.length == 0}>
+          disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>

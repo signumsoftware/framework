@@ -16,7 +16,7 @@ import {
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -64,7 +64,7 @@ export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: (
       return res;
     })
   };
-} 
+}
 
 export function getSettings(queryName: PseudoType | QueryKey): QuerySettings | undefined {
   return querySettings[getQueryKey(queryName)];
@@ -202,6 +202,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 
   const query = {
     groupResults: fo.groupResults || undefined,
+    idf: fo.includeDefaultFilters,
     columnMode: (!fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode) ? undefined : fo.columnOptionsMode,
     paginationMode: fo.pagination && fo.pagination.mode,
     elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
@@ -251,6 +252,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
   const result: FindOptions = {
     queryName: queryName,
     groupResults: parseBoolean(query.groupResults),
+    includeDefaultFilters: parseBoolean(query.idf),
     filterOptions: Decoder.decodeFilters(query),
     orderOptions: Decoder.decodeOrders(query),
     columnOptions: Decoder.decodeColumns(query),
@@ -425,7 +427,7 @@ export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | unde
     .then(filters => getPropsFromFilters(type, filters));
 }
 
-export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): FindOptions {
+export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): FindOptions {
 
   const pair = smartColumns(fo.columnOptions, Dic.getValues(qd.columns));
 
@@ -458,12 +460,18 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
 
   if (findOptions.filterOptions) {
     var defaultFilters = getDefaultFilter(qd, qs);
-
-    if (defaultFilters && defaultFilters.length == findOptions.filterOptions.length) {
-      if (isEqual(defaultFilters, findOptions.filterOptions))
-        findOptions.filterOptions = [];
+    if (defaultFilters && defaultFilters.length <= findOptions.filterOptions.length) {
+      if (isEqual(defaultFilters, findOptions.filterOptions.slice(0, defaultFilters.length))) {
+        findOptions.filterOptions = findOptions.filterOptions.slice(defaultFilters.length);
+        findOptions.includeDefaultFilters = true;
+      }
     }
   }
+  if (!findOptions.includeDefaultFilters)
+    findOptions.includeDefaultFilters = false;
+
+  if (findOptions.includeDefaultFilters == defaultIncludeDefaultFilters)
+    delete findOptions.includeDefaultFilters;
 
   return findOptions;
 }
@@ -472,7 +480,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
   if (as == undefined && bs == undefined)
     return true;
-  
+
   if (as == undefined || bs == undefined)
     return true;
 
@@ -481,9 +489,9 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
-      (a as FilterConditionOption).operation == (b as FilterConditionOption).operation &&
-      JSON.stringify(a.value) == JSON.stringify(b.value) &&
-      JSON.stringify(a.pinned) == JSON.stringify(b.pinned) &&
+      ((a as FilterConditionOption).operation || "EqualTo") == ((b as FilterConditionOption).operation || "EqualsTo") &&
+      (a.value == b.value || is(a.value, b.value)) &&
+      Dic.equals(a.pinned, b.pinned, true) &&
       isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
   });
 }
@@ -564,7 +572,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
   return filterOptionsParsed.map(fop => toFilterOption(fop)).filter(fo => fo != null) as FilterOption[];
 }
 
-export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
+export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
 
   const fo: FindOptions = { ...findOptions };
 
@@ -583,11 +591,10 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
       fo.orderOptions = [defaultOrder];
   }
 
-  if (!fo.filterOptions || fo.filterOptions.length == 0) {
+  if (fo.includeDefaultFilters == null ? defaultIncludeDefaultFilters : fo.includeDefaultFilters) {
     var defaultFilters = getDefaultFilter(qd, qs);
-
     if (defaultFilters)
-      fo.filterOptions = defaultFilters;
+      fo.filterOptions = [...defaultFilters, ...fo.filterOptions || []];
   }
 
   var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
@@ -1016,21 +1023,18 @@ export function clearQueryDescriptionCache() {
   queryDescriptionCache = {};
 }
 
-let queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+let queryDescriptionCache: { [queryKey: string]: Promise<QueryDescription> } = {};
 export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
   const queryKey = getQueryKey(queryName);
 
-  if (queryDescriptionCache[queryKey])
-    return Promise.resolve(queryDescriptionCache[queryKey]);
+  if (!queryDescriptionCache[queryKey]) {
+    queryDescriptionCache[queryKey] = API.fetchQueryDescription(queryKey).then(qd => {
+      return Dic.deepFreeze(qd);
+    });
+  }
 
-  return API.fetchQueryDescription(queryKey).then(qd => {
-    Object.freeze(qd.columns);
-    queryDescriptionCache[queryKey] = Object.freeze(qd);
-    return qd;
-  });
+  return queryDescriptionCache[queryKey];
 }
-
-
 
 export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null> {
 
@@ -1043,7 +1047,7 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
   };
 
   return getQueryDescription(fo.queryName)
-    .then(qd => parseFindOptions(fo!, qd))
+    .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
     .then(rt => rt.rows[0].columns[0]);
 }
@@ -1054,39 +1058,39 @@ export type AddToLite<T> = T extends Entity ? Lite<T> : T;
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
-    return ajaxGet<QueryDescription>({ url: "~/api/query/description/" + queryKey });
+    return ajaxGet({ url: "~/api/query/description/" + queryKey });
   }
 
   export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-    return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
+    return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
   }
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request);
+    return ajaxPost({ url: "~/api/query/executeQuery", signal }, request);
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost<any>({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/entitiesWithFilter" }, request);
+    return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
-    return ajaxGet<Lite<Entity>[]>({
+    return ajaxGet({
       url: "~/api/query/allLites?" + QueryString.stringify(request)
     });
   }
 
   export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
-    return ajaxGet<Lite<TypeEntity>[]>({
+    return ajaxGet({
       url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
     });
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
+    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
   }
 
   export interface AutocompleteRequest {
@@ -1096,11 +1100,11 @@ export module API {
   }
 
   export function FindRowsLike(request: AutocompleteQueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", signal }, request);
+    return ajaxPost({ url: "~/api/query/findRowsLike", signal }, request);
   }
 
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-    return ajaxPost<QueryToken[]>({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
+    return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
   }
 
   export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
@@ -1248,14 +1252,14 @@ export module Decoder {
         var pinned = pinnedText == undefined ? null : parsePinnedFilter(pinnedText);
 
         const parts = gr.key.value.split("~");
-        
+
         if (FilterOperation.isDefined(parts[1])) {
           return ({
             token: parts[0],
             operation: FilterOperation.assertDefined(parts[1]),
             value: ignoreValues ? null :
               parts.length == 3 ? unscapeTildes(parts[2]) :
-              parts.slice(2).map(a => unscapeTildes(a)),
+                parts.slice(2).map(a => unscapeTildes(a)),
             pinned: pinned,
           }) as FilterConditionOption
         } else {
@@ -1500,7 +1504,6 @@ export interface EntityFormatRule {
   formatter: EntityFormatter;
   isApplicable: (row: ResultRow, sc: SearchControlLoaded | undefined) => boolean;
 }
-
 
 export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined;
 

@@ -26,6 +26,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   customClass?: string;
   customStyle?: React.CSSProperties;
   format?: string;
+  throwIfNotFindable?: boolean;
   avoidNotifyPendingRequest?: boolean;
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
@@ -58,8 +59,6 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     super(props);
     this.state = { value: props.initialValue };
   }
-
-  
 
   componentDidMount() {
     if (this.props.initialValue == undefined) {
@@ -110,7 +109,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, avoidNotify: boolean | undefined }, number>(
     (abortSignal, a) =>
       Finder.getQueryDescription(a.findOptions.queryName)
-        .then(qd => Finder.parseFindOptions(a.findOptions, qd))
+        .then(qd => Finder.parseFindOptions(a.findOptions, qd, false))
         .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken), a.avoidNotify, abortSignal)));
 
   refreshValue(props?: ValueSearchControlProps) {
@@ -119,8 +118,11 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     var fo = props.findOptions;
 
-    if (!Finder.isFindable(fo.queryName, false))
+    if (!Finder.isFindable(fo.queryName, false)) {
+      if (this.props.throwIfNotFindable)
+        throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
       return;
+    }
 
     if (Finder.validateNewEntities(fo))
       return;

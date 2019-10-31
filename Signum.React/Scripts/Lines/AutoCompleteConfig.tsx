@@ -49,7 +49,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     var toStr = getToString(item);
-    var text = TypeaheadOptions.highlightedText(toStr, subStr);
+    var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
     else
@@ -67,7 +67,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   getDataKeyFromItem(item: Lite<T> | AutocompleteConstructor<T>): string | undefined {
 
     if (isAutocompleteConstructor(item))
-      return "create-" + getTypeName(item.type); 
+      return "create-" + getTypeName(item.type);
 
     return liteKey(item);
   }
@@ -139,7 +139,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedOrders)
       return Promise.resolve(this.parsedOrders);
 
-    return  Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd)
+    return Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd)
       .then(orders => this.parsedOrders = orders);
   }
 
@@ -185,7 +185,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     }
 
     var toStr = getToString(item.entity!);
-    var text = TypeaheadOptions.highlightedText(toStr, subStr);
+    var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.options && this.options.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
     else
@@ -201,7 +201,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   getDataKeyFromItem(item: ResultRow): string | undefined {
     if (isAutocompleteConstructor(item))
-      return "create-" + getTypeName(item.type); 
+      return "create-" + getTypeName(item.type);
 
     return liteKey(item.entity!);
   }

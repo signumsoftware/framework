@@ -65,8 +65,8 @@ namespace Signum.Entities
                     colb.CollectionChanged -= ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (var item in (IEnumerable<ModifiableEntity>)colb)
-                        item.SetParentEntity(null);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)colb!)
+                        ((ModifiableEntity)item).SetParentEntity(null);
             }
 
             if (field is ModifiableEntity modb)
@@ -84,8 +84,8 @@ namespace Signum.Entities
                     cola.CollectionChanged += ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (var item in (IEnumerable<ModifiableEntity>)cola)
-                        item.SetParentEntity(this);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)cola!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
             }
 
             if (field is ModifiableEntity moda)
@@ -165,8 +165,8 @@ namespace Signum.Entities
                     entity.SetParentEntity(this);
                 else
                 {
-                    foreach (var item in (IEnumerable<ModifiableEntity>)field!)
-                        item.SetParentEntity(this);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)field!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
                 }
             }
         }

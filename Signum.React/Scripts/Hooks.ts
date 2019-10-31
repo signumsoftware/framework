@@ -95,7 +95,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size 
   return { size, setContainer };
 }
 
-interface APIHookOptions<T> {
+interface APIHookOptions {
   avoidReset?: boolean;
 }
 
@@ -124,13 +124,14 @@ export function useTitle(title: string, deps?: readonly any[]) {
     return () => Navigator.setTitle();
   }, deps);
 }
-export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions<T>): [T | undefined, () => void] {
+
+export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): [T | undefined, () => void] {
   const [count, setCount] = React.useState(0);
   const value = useAPI<T>(makeCall, [...(deps || []), count], options);
   return [value, () => setCount(count + 1)];
 }
 
-export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions<T>): T | undefined {
+export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): T | undefined {
 
   const [data, setData] = React.useState<T | undefined>(undefined);
 
@@ -162,44 +163,53 @@ export function useMounted() {
 
 export function useThrottle<T>(value: T, limit: number): T {
   const [throttledValue, setThrottledValue] = React.useState(value);
-  const lastRan = React.useRef(Date.now());
 
+  const mounted = React.useRef(true);
+  const lastRequested = React.useRef<(undefined | { value: T })>(undefined);
   React.useEffect(
     () => {
-      const handler = setTimeout(function () {
-        if (Date.now() - lastRan.current >= limit) {
-          setThrottledValue(value);
-          lastRan.current = Date.now();
-        }
-      }, limit - (Date.now() - lastRan.current));
+      if (lastRequested.current) {
+        lastRequested.current.value = value;
+      } else {
+        lastRequested.current = { value };
+        const handler = setTimeout(function () {
+          if (mounted.current) {
+            setThrottledValue(lastRequested.current!.value);
+            lastRequested.current = undefined;
 
-      return () => {
-        clearTimeout(handler);
-      };
+            clearTimeout(handler);
+          }
+        }, limit);
+      }
     },
     [value, limit]
   );
 
+  React.useEffect(() => {
+    return () => { mounted.current = false; }
+  }, []);
+
   return throttledValue;
 };
 
-export function useQuery(fo: FindOptions | null): ResultTable | undefined | null {
+export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
   return useAPI(signal =>
     fo == null ? Promise.resolve<ResultTable | null>(null) :
       Finder.getQueryDescription(fo.queryName)
-        .then(qd => Finder.parseFindOptions(fo!, qd))
+        .then(qd => Finder.parseFindOptions(fo!, qd, false))
         .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)),
-    [fo && Finder.findOptionsPath(fo)]);
+    [fo && Finder.findOptionsPath(fo), ...(additionalDeps || [])],
+    options);
 }
 
-export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string): Finder.AddToLite<R> | null | undefined {
+export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): Finder.AddToLite<R> | null | undefined {
   var resultTable = useQuery(entity == null ? null : {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
     columnOptionsMode: "Replace",
-  });
+  }, additionalDeps, options);
 
   if (entity == null)
     return null;

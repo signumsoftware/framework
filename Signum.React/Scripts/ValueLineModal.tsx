@@ -10,7 +10,7 @@ import { BsSize } from './Components';
 import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 
-interface ValueLineModalProps extends IModalProps {
+interface ValueLineModalProps extends IModalProps<any> {
   options: ValueLineModalOptions;
 }
 

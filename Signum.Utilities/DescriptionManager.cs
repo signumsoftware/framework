@@ -465,7 +465,7 @@ namespace Signum.Utilities
         public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument? doc, Dictionary<string, string>? replacements /*new -> old*/)
         {
             Dictionary<string, XElement>? file = doc?.Element("Translations").Elements("Type")
-                .Select(x => KVP.Create(x.Attribute("Name").Value, x))
+                .Select(x => KeyValuePair.Create(x.Attribute("Name").Value, x))
                 .Distinct(x => x.Key)
                 .ToDictionary();
 
@@ -558,7 +558,7 @@ namespace Signum.Utilities
                 (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
 
             var xMembers = x?.Elements("Member")
-                .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
+                .Select(m => KeyValuePair.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
                 .Distinct(m => m.Key)
                 .ToDictionary();
 
@@ -584,7 +584,7 @@ namespace Signum.Utilities
                            where DescriptionManager.OnShouldLocalizeMember(m)
                            let value = xMembers?.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DescriptionManager.DefaultMemberDescription(m))
                            where value != null
-                           select KVP.Create(m.Name, value))
+                           select KeyValuePair.Create(m.Name, value))
                            .ToDictionary()
             };
 

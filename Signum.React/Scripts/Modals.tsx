@@ -9,8 +9,8 @@ declare global {
   }
 }
 
-export interface IModalProps {
-  onExited?: (val: any) => void;
+export interface IModalProps<T> {
+  onExited?: (val: T) => void;
 }
 
 export interface IHandleKeyboard {
@@ -18,7 +18,7 @@ export interface IHandleKeyboard {
 }
 
 export interface GlobalModalContainerState {
-  modals: React.ReactElement<IModalProps>[];
+  modals: React.ReactElement<IModalProps<any>>[];
   currentUrl: string;
 }
 let current: GlobalModalContainerHandles;
@@ -37,7 +37,8 @@ export function GlobalModalContainer() {
     return () => window.removeEventListener("keydown", hanldleKeyDown);
   }, []);
 
-  var [modals, setModals] = React.useState<React.ReactElement<IModalProps>[]>([]);
+  var [modals, setModals] = React.useState<React.ReactElement<IModalProps<any>>[]>([]);
+
   React.useEffect(() => {
     current = {
       pushModal: e => {
@@ -50,8 +51,6 @@ export function GlobalModalContainer() {
     };
     return () => { current = null!; };
   }, [modals.length]);
-
-
 
   function hanldleKeyDown(e: KeyboardEvent){
     if (modalInstances.length) {
@@ -73,10 +72,10 @@ export function GlobalModalContainer() {
   return React.createElement("div", { className: "sf-modal-container" }, ...modals);
 }
 
-export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {
+export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise<T> {
 
   return new Promise<T>((resolve) => {
-    let cloned: React.ReactElement<IModalProps>;
+    let cloned: React.ReactElement<IModalProps<T>>;
     const onExited = (val: T) => {
       current.popModal(cloned);
       resolve(val);

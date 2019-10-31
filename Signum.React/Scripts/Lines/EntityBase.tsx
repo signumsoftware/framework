@@ -5,8 +5,8 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { PropertyRoute, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage } from '../Signum.Entities'
+import { PropertyRoute, getTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
@@ -31,12 +31,14 @@ export interface EntityBaseProps extends LineBaseProps {
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+
+  fatLite?: boolean;
 }
 
 export class EntityBaseController<P extends EntityBaseProps> extends LineBaseController<P>{
 
 
-  static createIcon = <FontAwesomeIcon icon="plus"  />;
+  static createIcon = <FontAwesomeIcon icon="plus" />;
   static findIcon = <FontAwesomeIcon icon="search" />;
   static removeIcon = <FontAwesomeIcon icon="times" />;
   static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
@@ -72,9 +74,9 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     return LineBaseController.propEquals(prevProps, nextProps);
   }
-  
+
   getDefaultProps(state: P) {
-    
+
     const type = state.type!;
 
     const customComponent = !!state.getComponent || !!state.getViewPromise;
@@ -101,7 +103,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
       return Promise.resolve(entityOrLite as ModifiableEntity);
-    } else {
+    }
+    else {
       if (type.name != IsByAll && !type.name.split(',').map(a => a.trim()).contains(entityType))
         throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
@@ -110,11 +113,14 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
       if (isLite) {
         const lite = entityOrLite as Lite<Entity>;
-        return Navigator.API.fetchAndRemember(lite);
+        return Navigator.API.fetchAndForget(lite);
       }
 
       const entity = entityOrLite as Entity;
-      return Promise.resolve(toLiteFat(entity, this.props.liteToString && this.props.liteToString(entity)));
+      const ti = getTypeInfo(entity.Type);
+      const toStr = this.props.liteToString && this.props.liteToString(entity);
+      const fatLite = this.props.fatLite || this.props.fatLite == null && (ti.entityKind == "Part" || ti.entityKind == "SharedPart");
+      return Promise.resolve(toLite(entity, fatLite, toStr));
     }
   }
 
@@ -171,7 +177,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         //Modifying the sub entity, saving and coming back should change the entity in the UI (ToString, or EntityDetails), 
         //the parent entity is not really modified, but I'm not sure it his is a real problem in practice, till then the line is commented out
         //if (e.modified || !is(e, entity)) 
-          this.convert(e).then(m => this.setValue(m)).done();
+        this.convert(e).then(m => this.setValue(m)).done();
       }).done();
     }
   }
@@ -361,4 +367,3 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     return view;
   }
 }
-

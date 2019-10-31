@@ -11,7 +11,7 @@ It provides a consistent model for N-layer architectures by moving the entities 
 
 Our cutting-edge ORM, Signum.Engine, has a full LINQ Providers that avoids N + 1 problem and lets you UPDATE / DELETE / INSERT entities without having to retrieve them first.
 
-Signum.React let's you write a Single-Page-Application using React, Bootstrap and TypeScript.
+Signum.React let you write a Single-Page-Application using React, Bootstrap and TypeScript.
  
 
 ### Main Features ###

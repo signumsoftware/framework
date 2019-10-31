@@ -267,7 +267,7 @@ namespace Signum.Engine.Linq
 
                     var newImp = (EntityExpression)ChangeProjector(index + 1, members, imp, changeExpression);
 
-                    var newImplementations = ib.Implementations.Select(kvp => kvp.Key == t ? KVP.Create(kvp.GetType(), newImp) : kvp).ToDictionary();
+                    var newImplementations = ib.Implementations.Select(kvp => kvp.Key == t ? KeyValuePair.Create(kvp.GetType(), newImp) : kvp).ToDictionary();
 
                     return new ImplementedByExpression(ib.Type, ib.Strategy, newImplementations);
                 }
@@ -1865,7 +1865,7 @@ namespace Signum.Engine.Linq
             {
                 var bindings = (from w in expressions
                                 from b in ((EmbeddedEntityExpression)w.Value).Bindings
-                                group KVP.Create(w.Key, b.Binding) by b.FieldInfo into g
+                                group KeyValuePair.Create(w.Key, b.Binding) by b.FieldInfo into g
                                 select new FieldBinding(g.Key,
                                     CombineImplementations(strategy, g.ToDictionary(), g.Key.FieldType))).ToList();
 
@@ -1878,7 +1878,7 @@ namespace Signum.Engine.Linq
             {
                 var bindings = (from w in expressions
                                 from b in ((MixinEntityExpression)w.Value).Bindings
-                                group KVP.Create(w.Key, b.Binding) by b.FieldInfo into g
+                                group KeyValuePair.Create(w.Key, b.Binding) by b.FieldInfo into g
                                 select new FieldBinding(g.Key,
                                   CombineImplementations(strategy, g.ToDictionary(), g.Key.FieldType))).ToList();
 

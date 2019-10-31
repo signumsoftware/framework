@@ -30,6 +30,7 @@ export interface SearchControlProps {
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
+  defaultIncludeDefaultFilters?: boolean;
   showHeader?: boolean | "PinnedFilters";
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -57,7 +58,7 @@ export interface SearchControlProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
-  onCreate?: () => void;
+  onCreate?: () => Promise<void | boolean>;
   styleContext?: StyleContext;
 }
 
@@ -109,7 +110,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
       return;
 
     if (state && state.findOptions) {
-      const fo = Finder.toFindOptions(state.findOptions, state.queryDescription);
+      const fo = Finder.toFindOptions(state.findOptions, state.queryDescription, p.defaultIncludeDefaultFilters!);
       if (path == Finder.findOptionsPath(fo))
         return;
     }
@@ -129,7 +130,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         if (message)
           setState({ queryDescription: qd, message: message });
         else
-          Finder.parseFindOptions(fo, qd).then(fop => {
+          Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
             setState({ findOptions: fop, queryDescription: qd });
           }).done();
       }).done();
@@ -162,7 +163,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
- 
+
 
   return (
     <ErrorBoundary>
@@ -179,6 +180,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         maxResultsHeight={p.maxResultsHeight}
         tag={p.tag}
 
+        defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters!}
         searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
         showHeader={p.showHeader != null ? p.showHeader : true}
         showFilters={p.showFilters != null ? p.showFilters : false}
@@ -226,7 +228,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 (SearchControl as any).defaultProps = {
   allowSelection: true,
   avoidFullScreenButton: false,
-  maxResultsHeight: "400px"
+  maxResultsHeight: "400px",
+  defaultIncludeDefaultFilters: false,
 };
 
 export default SearchControl;

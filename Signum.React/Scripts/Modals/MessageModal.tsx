@@ -16,7 +16,7 @@ export type MessageModalButtons = "ok" | "ok_cancel" | "yes_no" | "yes_no_cancel
 
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
-interface MessageModalProps extends IModalProps {
+interface MessageModalProps extends IModalProps<MessageModalResult | undefined> {
   title: React.ReactChild;
   message: React.ReactChild;
   style?: MessageModalStyle;

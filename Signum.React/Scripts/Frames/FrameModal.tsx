@@ -22,7 +22,7 @@ import { useStateWithPromise, useForceUpdate } from '../Hooks'
 import { Modal } from 'react-bootstrap'
 import { ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 
-interface FrameModalProps extends IModalProps {
+interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
   title?: string;
   entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
   propertyRoute?: PropertyRoute;
@@ -59,7 +59,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const validationErrors = React.useRef<ValidationErrorHandle>(null);
 
   const forceUpdate = useForceUpdate();
-   
+
   React.useImperativeHandle(ref, () => ({
     handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
@@ -146,7 +146,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     return entity.modified && JSON.stringify(entity) != packComponent.lastEntity;
   }
 
-  function handleCancelClicked(){
+  function handleCancelClicked() {
 
     if (hasChanges() && !p.avoidPromptLoseChange) {
       MessageModal.show({
@@ -209,7 +209,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         }
       },
       pack: pc.pack,
-      onClose: (ok?: boolean) => p.onExited!(ok ? pc.pack.entity : undefined),
+      onClose: (newPack?: EntityPack<ModifiableEntity>) => p.onExited!(newPack && newPack.entity),
       revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
         GraphExplorer.setModelState(pc.pack.entity, modelState, initialPrefix!);
@@ -265,7 +265,7 @@ function getTypeName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export namespace FrameModalManager {
-  export function openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack < ModifiableEntity >, options: Navigator.ViewOptions): Promise < Entity | undefined > {
+  export function openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity | undefined> {
 
     return openModal<Entity>(<FrameModal
       entityOrPack={entityOrPack}
@@ -282,7 +282,7 @@ export namespace FrameModalManager {
       isNavigate={false} />);
   }
 
-  export function openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack < ModifiableEntity >, options: Navigator.NavigateOptions): Promise < void> {
+  export function openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {
 
     return openModal<void>(<FrameModal
       entityOrPack={entityOrPack}
@@ -297,7 +297,7 @@ export namespace FrameModalManager {
       isNavigate={true}
     />);
   }
-} 
+}
 
 
 

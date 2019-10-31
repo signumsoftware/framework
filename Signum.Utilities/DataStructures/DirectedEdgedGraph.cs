@@ -186,7 +186,7 @@ namespace Signum.Utilities.DataStructures
             foreach (var item in adjacency)
             {
                 if (item.Value.TryGetValue(node, out E edge))
-                    yield return KVP.Create(item.Key, edge);
+                    yield return KeyValuePair.Create(item.Key, edge);
             }
         }
 

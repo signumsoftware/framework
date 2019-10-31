@@ -326,7 +326,7 @@ namespace Signum.Engine.CodeGeneration
             return from relatedTable in InverseGraph.RelatedTo(table)
                    let mListInfo2 = GetMListInfo(relatedTable)
                    where mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey!.TargetTable.Equals(table.Name)
-                   select KVP.Create(relatedTable, mListInfo2);
+                   select KeyValuePair.Create(relatedTable, mListInfo2);
         }
 
         protected virtual string WriteEnum(DiffTable table)
@@ -755,7 +755,7 @@ namespace Signum.Engine.CodeGeneration
                                         col.Precision != 0 ? col.Precision.ToString() : "0"));
             }
 
-            var defaultScale = CurrentSchema.Settings.GetSqlScale(null, col.SqlDbType);
+            var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.SqlDbType);
             if (defaultScale != null)
             {
                 if (!(col.Scale == defaultScale))

@@ -249,7 +249,8 @@ export function EntityTable(props: EntityTableProps) {
     const readOnly = ctx.readOnly;
     const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
 
-    var isEmpty = p.avoidEmptyTable && ctx.value.length == 0;
+    var elementCtxs = c.getMListItemContext(ctx);
+    var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;
     var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
 
     return (
@@ -272,7 +273,7 @@ export function EntityTable(props: EntityTableProps) {
           }
           <tbody>
             {
-              c.getMListItemContext(ctx)
+              elementCtxs
                 .map((mlec, i, array)  => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
                   ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
                   array={array}
@@ -347,75 +348,75 @@ export function EntityTableRow(p: EntityTableRowProps) {
 
   const rowState = useAPI((signal, oldState) => !p.fetchRowState ? Promise.resolve(undefined) :
     p.fetchRowState(p.ctx, { props: p, rowState: oldState, forceUpdate }), []);
-
+  
   const rowHandle = { props: p, rowState, forceUpdate };
 
   var ctx = p.ctx;
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.draggable;
-  return (
-    <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
-      onDragEnter={drag && drag.onDragOver}
-      onDragOver={drag && drag.onDragOver}
-      onDrop={drag && drag.onDrop}
-      className={drag && drag.dropClass}
+    return (
+      <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
+        onDragEnter={drag && drag.onDragOver}
+        onDragOver={drag && drag.onDragOver}
+        onDrop={drag && drag.onDrop}
+        className={drag && drag.dropClass}
       onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}>
       {p.firstColumnVisible && <td>
-        <div className="item-group">
+          <div className="item-group">
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={p.onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
             {EntityBaseController.removeIcon}
-          </a>}
-          &nbsp;
+            </a>}
+            &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
-            draggable={true}
-            onDragStart={drag.onDragStart}
-            onDragEnd={drag.onDragEnd}
+              draggable={true}
+              onDragStart={drag.onDragStart}
+              onDragEnd={drag.onDragEnd}
             title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
             {EntityBaseController.moveIcon}
-          </a>}
+            </a>}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
             {EntityBaseController.viewIcon}
-          </a>}
-        </div>
-      </td>}
+            </a>}
+          </div>
+        </td>}
       {p.columns.map((c, i) => {
 
         var td = <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>;
 
-        var mc = c.mergeCells as ((a: any) => any) | undefined
+          var mc = c.mergeCells as ((a: any) => any) | undefined
 
-        if (!mc)
-          return td;
+          if (!mc)
+            return td;
 
-        var equals = (a: any, b: any) => {
-          var ka = mc!(a);
-          var kb = mc!(b);
-          return ka == kb || is(ka, kb, false, false);
-        }
+          var equals = (a: any, b: any) => {
+            var ka = mc!(a);
+            var kb = mc!(b);
+            return ka == kb || is(ka, kb, false, false);
+          }
 
         var current = p.ctx.value;
         if (p.index > 0 && equals(p.array[p.index - 1].value, current))
-          return null;
+            return null;
 
-        var rowSpan = 1;
+          var rowSpan = 1;
         for (var i = p.index + 1; i < p.array.length; i++) {
           if (equals(p.array[i].value, current))
-            rowSpan++;
-          else
-            break;
-        }
+              rowSpan++;
+            else
+              break;
+          }
 
-        if (rowSpan == 1)
-          return td;
+          if (rowSpan == 1)
+            return td;
 
-        return React.cloneElement(td, { rowSpan });
-      })}
-    </tr>
-  );
+          return React.cloneElement(td, { rowSpan });
+        })}
+      </tr>
+    );
 
   function getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null | false {
 

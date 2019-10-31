@@ -297,7 +297,7 @@ namespace Signum.Engine.Maps
             return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(SqlDbTypeAttribute? att, SqlDbType sqlDbType)
+        internal int? GetSqlScale(SqlDbTypeAttribute? att, PropertyRoute? route, SqlDbType sqlDbType)
         {
             if (att != null && att.HasScale)
             {
@@ -305,6 +305,13 @@ namespace Signum.Engine.Maps
                     throw  new InvalidOperationException($"{sqlDbType} can not have Scale");
 
                 return att.Scale;
+            }
+
+            if(sqlDbType == SqlDbType.Decimal && route != null)
+            {
+                var dv = ValidatorAttribute<DecimalsValidatorAttribute>(route);
+                if (dv != null)
+                    return dv.DecimalPlaces;
             }
 
             return defaultScale.TryGetS(sqlDbType);

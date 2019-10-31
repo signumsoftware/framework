@@ -104,11 +104,10 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
     inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
-        eoc.frame.onReload(pack);
         notifySuccess();
-        eoc.frame.onClose(true);
+        eoc.frame.onClose(pack);
       };
-      eoc.defaultClick();
+      eoc.click();
     }
   });
 }
@@ -171,6 +170,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
         {...props}
         disabled={disabled}
         title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
+        className={classes(disabled ? "disabled sf-pointer-events" : undefined, props && props.className)}
         onClick={disabled ? undefined : handleOnClick}
         data-operation={eoc.operationInfo.key}>
         {renderChildren()}
@@ -189,8 +189,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
         alternatives && alternatives.map(a => renderAlternative(a))
       </>
     );
-  }
-
+  }    
 
   var button = <Button variant={eoc.color}
     {...props}

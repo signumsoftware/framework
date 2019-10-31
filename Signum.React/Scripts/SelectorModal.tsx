@@ -5,7 +5,7 @@ import { TypeInfo, EnumType } from './Reflection'
 import { BsSize } from './Components';
 import { Modal } from 'react-bootstrap';
 
-interface SelectorModalProps extends IModalProps {
+interface SelectorModalProps extends IModalProps<any> {
   options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
   title: React.ReactNode;
   message: React.ReactNode;

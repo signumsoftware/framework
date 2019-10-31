@@ -77,6 +77,7 @@
     <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="EntityControlMessage">
+    <Member Name="Add" Description="hinzufügen..." />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
     <Member Name="Find" Description="Finden" />
@@ -84,7 +85,6 @@
     <Member Name="MoveDown" Description="Nach unten" />
     <Member Name="MoveUp" Description="Nach oben" />
     <Member Name="Navigate" Description="Navigieren" />
-    <Member Name="NullValueNotAllowed" Description="NULL-Wert nicht zulässig" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="View" Description="Ansehen" />
   </Type>
@@ -289,7 +289,7 @@
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
     <Member Name="As0" Description="Als {0}" />
-    <Member Name="BooleanValue" Description="boolescher Wert (ja oder nein)" />
+    <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="Count" Description="Num" />
     <Member Name="Date" Description="Datum" />
@@ -482,8 +482,8 @@
     <Member Name="_AtLeastOneValueIsNeeded" Description="Es wird mindestens ein Wert benötigt." />
     <Member Name="Be0" Description="{0} sein" />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
-    <Member Name="BeAString" Description="eine Zeichenkette sein" />
     <Member Name="BeAMultilineString" Description="eine mehrzeilige Zeichenkette sein" />
+    <Member Name="BeAString" Description="eine Zeichenkette sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />

@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -26,7 +26,7 @@ interface ItemPair {
 
 
 export class EntityLineController extends EntityBaseController<EntityLineProps> {
-
+  unmounted = false;
   currentItem: ItemPair | undefined;
   setCurrentItem: (v: ItemPair | undefined) => void;
   focusNext: React.MutableRefObject<boolean>;
@@ -41,6 +41,9 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     this.setCurrentItem = setCurrentItem;
     const mounted = useMounted();
     this.focusNext = React.useRef(false);
+    React.useEffect(() => {
+      return () => { this.unmounted = true; };
+    }, []);
     this.typeahead = React.useRef<TypeaheadHandle>(null);
     React.useEffect(() => {
       if (s.autocomplete) {
@@ -50,9 +53,10 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
           if (currentItem)
             setCurrentItem(undefined);
         } else {
-          if (!currentItem || currentItem.entity !== entity) {
+          if (!currentItem || is(currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>)) {
             var ci = { entity: entity!, item: undefined as unknown }
             setCurrentItem(ci);
+
             var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
               const autocomplete = s.autocomplete;
               autocomplete && autocomplete.getItemFromEntity(newEntity)
@@ -60,7 +64,8 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
                   if (mounted.current) {
                     if (autocomplete == s.autocomplete) {
                       ci.item = item;
-                      this.forceUpdate();
+                      if (!this.unmounted)
+                        this.forceUpdate();
                     } else {
                       fillItem(newEntity);
                     }
@@ -68,6 +73,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
                 })
                 .done();
             };
+
             fillItem(entity);
             return () => { s.autocomplete && s.autocomplete.abort(); };
           }
@@ -98,7 +104,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
   }
 
   writeInTypeahead(query: string) {
-    this.typeahead.current!.writeInInput(query);
+    this.typeahead.current && this.typeahead.current.writeInInput(query);
   }
 }
 
@@ -215,7 +221,6 @@ export function EntityLine(props: EntityLineProps) {
       );
     }
   }
-
 
   function setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
     if (c.focusNext.current && linkOrSpan != null) {
