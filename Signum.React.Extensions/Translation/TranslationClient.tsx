@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { TranslationPermission } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
