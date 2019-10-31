@@ -6,7 +6,7 @@ import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { Modal } from 'react-bootstrap';
 
-interface ShowCodeModalProps extends IModalProps {
+interface ShowCodeModalProps extends IModalProps<undefined> {
   typeName: string;
   node: BaseNode;
 }

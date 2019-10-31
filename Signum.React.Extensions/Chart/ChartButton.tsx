@@ -20,7 +20,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
 
     Finder.getQueryDescription(sc.props.findOptions.queryKey).then(qd => {
 
-      const fo = Finder.toFindOptions(sc.props.findOptions, qd);
+      const fo = Finder.toFindOptions(sc.props.findOptions, qd, false);
 
       const path = ChartClient.Encoder.chartPath({
         queryName: fo.queryName,

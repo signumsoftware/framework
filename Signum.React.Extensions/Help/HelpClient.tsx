@@ -69,27 +69,27 @@ export function toHtml(txt: string  | null) {
 export module API {
 
   export function index(): Promise<HelpIndexTS> {
-    return ajaxGet<HelpIndexTS>({ url: "~/api/help/index" });
+    return ajaxGet({ url: "~/api/help/index" });
   }
 
   export function namespace(namespace: string): Promise<NamespaceHelp> {
-    return ajaxGet<NamespaceHelp>({ url: "~/api/help/namespace/" + namespace });
+    return ajaxGet({ url: "~/api/help/namespace/" + namespace });
   }
 
   export function saveNamespace(typeHelp: NamespaceHelpEntity): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/help/saveNamespace" }, typeHelp);
+    return ajaxPost({ url: "~/api/help/saveNamespace" }, typeHelp);
   }
 
   export function type(cleanName: string): Promise<TypeHelpEntity> {
-    return ajaxGet<TypeHelpEntity>({ url: "~/api/help/type/" + cleanName });
+    return ajaxGet({ url: "~/api/help/type/" + cleanName });
   }
 
   export function saveType(typeHelp: TypeHelpEntity): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/help/saveType" }, typeHelp);
+    return ajaxPost({ url: "~/api/help/saveType" }, typeHelp);
   }
 
   export function appendix(uniqueName: string | undefined): Promise<AppendixHelpEntity> {
-    return ajaxGet<AppendixHelpEntity>({ url: "~/api/help/appendix/" + (uniqueName || "") });
+    return ajaxGet({ url: "~/api/help/appendix/" + (uniqueName || "") });
   }
 }
 

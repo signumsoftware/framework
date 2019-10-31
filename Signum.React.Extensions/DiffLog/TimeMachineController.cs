@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -18,7 +18,7 @@ namespace Signum.React.DiffLog
             var pk = PrimaryKey.Parse(id, type);
 
 
-            using (SystemTime.Override(asOf.AddMilliseconds(1)))
+            using (SystemTime.Override(asOf.AddMilliseconds(1).ToUniversalTime()))
                 return Database.Retrieve(type, pk);
         }
 
@@ -29,8 +29,8 @@ namespace Signum.React.DiffLog
             var pk = PrimaryKey.Parse(id, type);
 
 
-            var f = SystemTime.Override(from.AddMilliseconds(1)).Using(_ => Database.Retrieve(type, pk));
-            var t = SystemTime.Override(to.AddMilliseconds(1)).Using(_ => Database.Retrieve(type, pk));
+            var f = SystemTime.Override(from.AddMilliseconds(1).ToUniversalTime()).Using(_ => Database.Retrieve(type, pk));
+            var t = SystemTime.Override(to.AddMilliseconds(1).ToUniversalTime()).Using(_ => Database.Retrieve(type, pk));
 
             var fDump = GetDump(f);
             var tDump = GetDump(t);

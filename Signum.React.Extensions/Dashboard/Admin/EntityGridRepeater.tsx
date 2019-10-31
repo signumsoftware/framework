@@ -51,62 +51,62 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
   if (c.isHidden)
     return null;
 
-  return (
+    return (
     <fieldset className={classes("SF-grid-repeater-field SF-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
-      <legend>
-        <div>
+        <legend>
+          <div>
           <span>{p.labelText}</span>
-          <span className="float-right">
+            <span className="float-right ml-2">
             {c.renderCreateButton(false)}
             {c.renderFindButton(false)}
             {p.extraButtons && p.extraButtons(c)}
-          </span>
-        </div>
-      </legend>
-      <div className="row rule">
-        {Array.range(0, 12).map(i =>
-          <div className="col-sm-1" key={i}>
-            <div className="ruleItem" />
+            </span>
           </div>
-        )}
-      </div>
+        </legend>
+        <div className="row rule">
+          {Array.range(0, 12).map(i =>
+            <div className="col-sm-1" key={i}>
+              <div className="ruleItem" />
+            </div>
+          )}
+        </div>
       <div className={drag && drag.dragMode == "move" ? "sf-dragging" : undefined} onDrop={handleOnDrop}>
-        {
+          {
           c.getMListItemContext<ModifiableEntity & IGridEntity>(p.ctx)
-            .groupBy(ctx => ctx.value.row.toString())
-            .orderBy(gr => parseInt(gr.key))
-            .flatMap((gr, i, groups) => [
+              .groupBy(ctx => ctx.value.row.toString())
+              .orderBy(gr => parseInt(gr.key))
+              .flatMap((gr, i, groups) => [
               renderSeparator(parseInt(gr.key)),
               <div className="row items-row" key={"row" + gr.key} onDragOver={e => handleItemsRowDragOver(e, parseInt(gr.key))}>
-                {gr.elements.orderBy(ctx => ctx.value.startColumn).map((ctx, j, list) => {
+                  {gr.elements.orderBy(ctx => ctx.value.startColumn).map((ctx, j, list) => {
                   let item = p.getComponent!(ctx);
                   const s = p;
-                  item = React.cloneElement(item, {
+                    item = React.cloneElement(item, {
                     onResizerDragStart: ctx.readOnly || !s.resize ? undefined : (resizer, e) => handleResizeDragStart(resizer, e, ctx),
                     onTitleDragStart: ctx.readOnly || !s.move ? undefined : (e) => handleMoveDragStart(e, ctx),
                     onTitleDragEnd: ctx.readOnly || !s.move ? undefined : (e) => handleMoveDragEnd(e, ctx),
                     onRemove: ctx.readOnly || !s.remove ? undefined : (e) => c.handleRemoveElementClick(e, ctx.index!),
                     } as EntityGridItemProps);
 
-                const last = j == 0 ? undefined : list[j - 1].value;
+                    const last = j == 0 ? undefined : list[j - 1].value;
 
-                const offset = ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
+                    const offset = ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
 
-                return (
+                    return (
                       <div key={j} className={`sf-grid-element col-sm-${ctx.value.columns} offset-sm-${offset}`}>
-                  {item}
-                  {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
-                </div>
-                );
-              })}
+                        {item}
+                        {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
+                      </div>
+                    );
+                  })}
                 </div>,
               i == groups.length - 1 && renderSeparator(parseInt(gr.key) + 1)
-            ])
+              ])
 
-        }
-      </div>
-    </fieldset>
-  );
+          }
+        </div>
+      </fieldset>
+    );
 
 
   function renderSeparator(rowIndex: number) {
@@ -150,7 +150,7 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
   function handleCreateClick(e: React.SyntheticEvent<any>) {
 
     e.preventDefault();
-
+    
     const pr = p.ctx.propertyRoute.addLambda(a => a[0]);
     const promise = p.onCreate ?
       p.onCreate(pr) : c.defaultCreate(pr);
@@ -217,12 +217,12 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
       const offset = de.pageX - d.initialPageX!;
       const dCol = Math.round((offset / rect.width) * 12);
       let newCol = d.originalStartColumn! + dCol;
-      let start = list.filter(a => a != item && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max()!;
-      if (!isFinite(start))
+      let start = list.filter(a => a != item && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max();
+      if (start == null)
         start = 0;
 
-      let end = list.filter(a => a != item && a.row == row && a.startColumn > newCol).map(a => a.startColumn - item.columns).min()!;
-      if (!isFinite(end))
+      let end = list.filter(a => a != item && a.row == row && a.startColumn > newCol).map(a => a.startColumn - item.columns).min();
+      if (end == null)
         end = 12 - item.columns;
 
       if (start > end) {
@@ -243,8 +243,8 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
       let col = Math.round((offsetX / rect.width) * 12);
 
       if (d.dragMode == "left") {
-        const max = list.filter(a => a != item && a.row == item.row && a.startColumn < item.startColumn).map(a => a.startColumn + a.columns).max()!;
-        col = Math.max(col, max);
+        const max = list.filter(a => a != item && a.row == item.row && a.startColumn < item.startColumn).map(a => a.startColumn + a.columns).max();
+        col = max == null ? col : Math.max(col, max);
 
         const cx = item.startColumn - col;
         if (cx != 0) {
@@ -256,8 +256,8 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
         }
       }
       else if (d.dragMode == "right") {
-        const min = list.filter(a => a != item && a.row == item.row && a.startColumn > item.startColumn).map(a => a.startColumn).min()!;
-        col = Math.min(col, min);
+        const min = list.filter(a => a != item && a.row == item.row && a.startColumn > item.startColumn).map(a => a.startColumn).min();
+        col = min == null ? col : Math.min(col, min);
         if (col != item.startColumn + item.columns) {
           item.columns = col - item.startColumn;
           item.modified = true;
@@ -284,40 +284,40 @@ export interface EntityGridItemProps {
 
 
 export function EntityGridItem(p : EntityGridItemProps){
-  var style = p.bsStyle == undefined || p.bsStyle == "Default" ? undefined : p.bsStyle.toLowerCase();
+  var style = p.bsStyle == undefined ? undefined : p.bsStyle.toLowerCase();
 
-  return (
-    <div className={classes("card", style && ("border-" + style))}>
-      <div className={classes("card-header",
-        style && style != "light" && "text-white",
-        style && ("bg-" + style)
+    return (
+      <div className={classes("card", style && ("border-" + style))}>
+        <div className={classes("card-header",
+          style && style != "light" && "text-white",
+          style && ("bg-" + style)
       )} draggable={!!p.onTitleDragStart}
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >
         {p.onRemove &&
           <a href="#" className="sf-line-button sf-remove float-right" onClick={p.onRemove}
-            title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
-          </a>
-        }
+              title={EntityControlMessage.Remove.niceToString()}>
+              <FontAwesomeIcon icon="times" />
+            </a>
+          }
         {p.title}
-      </div>
-      <div className="card-body">
+        </div>
+        <div className="card-body">
         {p.children}
-      </div>
+        </div>
       {p.onResizerDragStart &&
-        <div className="sf-leftHandle" draggable={true}
+          <div className="sf-leftHandle" draggable={true}
           onDragStart={e => p.onResizerDragStart!("left", e)}>
-        </div>
-      }
+          </div>
+        }
       {p.onResizerDragStart &&
-        <div className="sf-rightHandle" draggable={true}
+          <div className="sf-rightHandle" draggable={true}
           onDragStart={e => p.onResizerDragStart!("right", e)}>
-        </div>
-      }
-    </div>
-  );
+          </div>
+        }
+      </div>
+    );
 
-}
+  }
 
 

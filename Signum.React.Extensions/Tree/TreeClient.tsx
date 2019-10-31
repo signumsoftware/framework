@@ -224,7 +224,7 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 export namespace API {
   export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
-    return ajaxGet<Array<Lite<TreeEntity>>>({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+    return ajaxGet({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
   }
 
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {

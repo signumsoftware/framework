@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations/EntityOperations'
@@ -10,6 +10,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import { Link } from "react-router-dom";
 import "../Translation.css"
+import { decodeDots } from './TranslationCodeStatus'
 
 interface TranslationCodeSyncProps extends RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }> {
 
@@ -30,18 +31,20 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
   loadSync() {
     const { assembly, culture, namespace } = this.props.match.params;
-    return API.sync(assembly, culture, namespace).then(result => this.setState({ result }))
+    return API.sync(decodeDots(assembly), culture, namespace && decodeDots(namespace)).then(result => this.setState({ result }))
   }
 
   render() {
 
-    const { assembly, culture, namespace } = this.props.match.params;
+    const { culture } = this.props.match.params;
 
+    const assembly = decodeDots(this.props.match.params.assembly);
+    const namespace = this.props.match.params.namespace && decodeDots(this.props.match.params.namespace);
 
     if (this.state.result && this.state.result.totalTypes == 0) {
       return (
         <div>
-          <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.match.params.assembly)}</h2>
+          <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
           <Link to={`~/translation/status`}>
             {TranslationMessage.BackToTranslationStatus.niceToString()}
           </Link>
@@ -95,7 +98,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
   handleSave = (e: React.FormEvent<any>) => {
     e.preventDefault();
     const params = this.props.match.params;
-    API.save(params.assembly, params.culture || "", this.state.result!)
+    API.save(decodeDots(params.assembly), params.culture || "", this.state.result!)
       .then(() => notifySuccess())
       .then(() => this.loadSync())
       .done();

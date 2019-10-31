@@ -134,7 +134,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(Lite<RoleEntity> role)
             {
-                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KVP.Create(r, GetAllowed(r))));
+                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KeyValuePair.Create(r, GetAllowed(r))));
 
                 return coercer(role, result);
             }
@@ -148,7 +148,7 @@ namespace Signum.Entities.Authorization
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
                   .AgGroupToDictionary(ru => ru.Role!, gr => gr
-                    .SelectCatch(ru => KVP.Create(ToKey(ru.Resource!), ru.Allowed))
+                    .SelectCatch(ru => KeyValuePair.Create(ToKey(ru.Resource!), ru.Allowed))
                     .ToDictionaryEx());
 
             Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
@@ -233,7 +233,7 @@ namespace Signum.Entities.Authorization
 
                 Func<K, A> defaultAllowed = merger.MergeDefault(role);
 
-                Func<K, A> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
+                Func<K, A> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
 
                 var keys = baseCaches
                     .Where(b => b.rules.OverrideDictionary != null)
@@ -273,7 +273,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(K key)
             {
-                var raw = merger.Merge(key, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(key))));
+                var raw = merger.Merge(key, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(key))));
 
                 return coercer(key, raw);
             }
@@ -321,7 +321,7 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
-                               select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
+                               select KeyValuePair.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RT
@@ -341,7 +341,7 @@ namespace Signum.Entities.Authorization
                     var shouldResources = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
-                               select KVP.Create(ToKey(r), xr))
+                               select KeyValuePair.Create(ToKey(r), xr))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));

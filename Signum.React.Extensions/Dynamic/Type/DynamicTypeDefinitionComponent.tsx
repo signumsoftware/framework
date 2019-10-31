@@ -52,7 +52,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
   const [expressionNames, setExpressionNames] = React.useState<string[] | undefined>(undefined);
 
-  const typeEntity = useAPI(undefined, () =>
+  const typeEntity = useAPI(() =>
     p.dynamicType.baseType != "Entity" ? Promise.resolve(undefined) :
       p.dynamicType.isNew ? Promise.resolve(undefined) :
         Navigator.API.getType(p.dynamicType.typeName!)
@@ -147,197 +147,197 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
     return React.createElement("div", {}, ...DynamicClientOptions.Options.onGetDynamicLineForType.map(f => f(ctx, p.dynamicType.typeName!)));
   }
   const def = p.definition;
-  const primaryKey = def.primaryKey!;
-  const ticks = def.ticks!;
+    const primaryKey = def.primaryKey!;
+    const ticks = def.ticks!;
 
-  var propNames = def.properties.map(p => "e." + p.name);
+    var propNames = def.properties.map(p => "e." + p.name);
 
   var expressionNamesStr = (expressionNames || []).map(exp => exp + "= e." + exp + "()");
 
   var dt = p.dynamicType;
 
-  return (
-    <div>
-      {dt.baseType == "Entity" &&
-        <div>
+    return (
+      <div>
+        {dt.baseType == "Entity" &&
+          <div>
           {p.showDatabaseMapping &&
             <ValueComponent dc={p.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
-          }
+            }
 
-          < div className="row">
-            <div className="col-sm-6">
+            < div className="row">
+              <div className="col-sm-6">
               <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={handleEntityKindChange} />
-            </div>
-            <div className="col-sm-6">
+              </div>
+              <div className="col-sm-6">
               <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
+              </div>
             </div>
-          </div>
 
           {p.showDatabaseMapping &&
-            <div className="row database-mapping">
-              <div className="col-sm-6">
-                <PrimaryKeyFieldsetComponent
-                  binding={Binding.create(def, d => d.primaryKey)}
-                  title="Primary Key"
-                  onCreate={() => ({ name: "Id", type: "int", identity: true })}
-                  renderContent={item =>
-                    <div>
+              <div className="row database-mapping">
+                <div className="col-sm-6">
+                  <PrimaryKeyFieldsetComponent
+                    binding={Binding.create(def, d => d.primaryKey)}
+                    title="Primary Key"
+                    onCreate={() => ({ name: "Id", type: "int", identity: true })}
+                    renderContent={item =>
+                      <div>
                       <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
                       <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
                       <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
-                    </div>
-                  }
-                />
-              </div>
-              <div className="col-sm-6">
-                <TicksFieldsetComponent
-                  binding={Binding.create(def, d => d.ticks)}
-                  onCreate={() => ({ hasTicks: false })}
-                  renderContent={item =>
-                    <div>
+                      </div>
+                    }
+                  />
+                </div>
+                <div className="col-sm-6">
+                  <TicksFieldsetComponent
+                    binding={Binding.create(def, d => d.ticks)}
+                    onCreate={() => ({ hasTicks: false })}
+                    renderContent={item =>
+                      <div>
                       <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.hasTicks)} type="boolean" defaultValue={null} onChange={handleHasTickChanged} />
                       <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
                       <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
-                    </div>
-                  }
-                />
+                      </div>
+                    }
+                  />
+                </div>
               </div>
-            </div>
-          }
-        </div>
-      }
+            }
+          </div>
+        }
 
       <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={handleTabSelect}>
-        <Tab eventKey="properties" title="Properties">
+          <Tab eventKey="properties" title="Properties">
           <PropertyRepeaterComponent dc={p.dc} properties={def.properties} onRemove={handlePropertyRemoved} showDatabaseMapping={p.showDatabaseMapping} />
-          <br />
+            <br />
+            {dt.baseType == "Entity" &&
+              <MultiColumnUniqueIndexFieldsetComponent
+                binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
+                title="Multi-Column Unique Index"
+                onCreate={() => ({ fields: [""] })}
+                renderContent={item =>
+                  <div className="row">
+                    <div className="col-sm-6">
+                      <ComboBoxRepeaterComponent options={def.properties.filter(p => p.isMList == null).map(p => "e." + p.name)} list={item.fields} />
+                    </div>
+                    <div className="col-sm-6">
+                      <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
+                    </div>
+                  </div>
+                }
+              />
+            }
+
+            <fieldset>
+              <legend>ToString expression</legend>
+              <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + dt.baseType + " e) =>"} />
+            </fieldset>
+          </Tab>
+
           {dt.baseType == "Entity" &&
-            <MultiColumnUniqueIndexFieldsetComponent
-              binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
-              title="Multi-Column Unique Index"
-              onCreate={() => ({ fields: [""] })}
-              renderContent={item =>
-                <div className="row">
-                  <div className="col-sm-6">
-                    <ComboBoxRepeaterComponent options={def.properties.filter(p => p.isMList == null).map(p => "e." + p.name)} list={item.fields} />
-                  </div>
-                  <div className="col-sm-6">
-                    <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
-                  </div>
-                </div>
-              }
-            />
+            <Tab eventKey="query" title="Query">
+            <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNamesStr)} list={def.queryFields} />
+            </Tab>
           }
 
-          <fieldset>
-            <legend>ToString expression</legend>
-            <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + dt.baseType + " e) =>"} />
-          </fieldset>
-        </Tab>
+          {dt.baseType == "Entity" &&
+            <Tab eventKey="operations" title="Operations">
+              <div className="row">
+                <div className="col-sm-7">
+                  <CreateOperationFieldsetComponent
+                    binding={Binding.create(def, d => d.operationCreate)}
+                    title="Create"
+                    onCreate={() => ({ construct: getConstructor(dt.typeName, def) })}
+                    renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
+                  />
 
-        {dt.baseType == "Entity" &&
-          <Tab eventKey="query" title="Query">
-            <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNamesStr)} list={def.queryFields} />
-          </Tab>
-        }
+                  <SaveOperationFieldsetComponent
+                    binding={Binding.create(def, d => d.operationSave)}
+                    title="Save"
+                    onCreate={() => ({ execute: "" })}
+                    renderContent={oe =>
+                      <div>
+                        <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                        <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
+                      </div>}
+                  />
 
-        {dt.baseType == "Entity" &&
-          <Tab eventKey="operations" title="Operations">
-            <div className="row">
-              <div className="col-sm-7">
-                <CreateOperationFieldsetComponent
-                  binding={Binding.create(def, d => d.operationCreate)}
-                  title="Create"
-                  onCreate={() => ({ construct: getConstructor(dt.typeName, def) })}
-                  renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
-                />
+                  <DeleteOperationFieldsetComponent
+                    binding={Binding.create(def, d => d.operationDelete)}
+                    title="Delete"
+                    onCreate={() => ({ delete: "" })}
+                    renderContent={od =>
+                      <div>
+                        <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                        <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
+                      </div>}
+                  />
 
-                <SaveOperationFieldsetComponent
-                  binding={Binding.create(def, d => d.operationSave)}
-                  title="Save"
-                  onCreate={() => ({ execute: "" })}
-                  renderContent={oe =>
-                    <div>
-                      <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                      <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
-                    </div>}
-                />
-
-                <DeleteOperationFieldsetComponent
-                  binding={Binding.create(def, d => d.operationDelete)}
-                  title="Delete"
-                  onCreate={() => ({ delete: "" })}
-                  renderContent={od =>
-                    <div>
-                      <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                      <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
-                    </div>}
-                />
-
-                <CloneOperationFieldsetComponent
-                  binding={Binding.create(def, d => d.operationClone)}
-                  title="Clone"
-                  onCreate={() => ({
-                    construct:
-                      "// NOTE: This sample code is only for simple properties\r\n" +
-                      "// MList/Embedded/Mixin properties were ignored if exists\r\n" +
-                      "return new " + dt.typeName + "Entity\r\n{\r\n" +
-                      def.properties
-                        .filter(p => !p.isMList && !isEmbedded(p.type))
-                        .map(p => "    " + p.name + " = e." + p.name).join(", \r\n") +
-                      "\r\n};"
-                  })}
-                  renderContent={oc =>
-                    <div>
-                      <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.canConstruct)} title="CanConstruct" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                      <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} title="OperationClone" signature={`${dt.typeName}Entity (${dt.typeName}Entity e, object[] args) =>`} />
-                    </div>}
-                />
-              </div>
-              <div className="col-sm-5">
-                {!dt.isNew &&
+                  <CloneOperationFieldsetComponent
+                    binding={Binding.create(def, d => d.operationClone)}
+                    title="Clone"
+                    onCreate={() => ({
+                      construct:
+                        "// NOTE: This sample code is only for simple properties\r\n" +
+                        "// MList/Embedded/Mixin properties were ignored if exists\r\n" +
+                        "return new " + dt.typeName + "Entity\r\n{\r\n" +
+                        def.properties
+                          .filter(p => !p.isMList && !isEmbedded(p.type))
+                          .map(p => "    " + p.name + " = e." + p.name).join(", \r\n") +
+                        "\r\n};"
+                    })}
+                    renderContent={oc =>
+                      <div>
+                        <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.canConstruct)} title="CanConstruct" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                        <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} title="OperationClone" signature={`${dt.typeName}Entity (${dt.typeName}Entity e, object[] args) =>`} />
+                      </div>}
+                  />
+                </div>
+                <div className="col-sm-5">
+                  {!dt.isNew &&
                   <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={handleTypeHelpClick} />
-                }
+                  }
+                </div>
               </div>
-            </div>
+            </Tab>
+          }
+
+          <Tab eventKey="customCode" title="Custom Code">
+            <CustomCodeTab definition={def} dynamicType={dt} />
           </Tab>
-        }
 
-        <Tab eventKey="customCode" title="Custom Code">
-          <CustomCodeTab definition={def} dynamicType={dt} />
-        </Tab>
-
-        {!dt.isNew && dt.baseType == "MixinEntity" &&
-          <Tab eventKey="connections" title="Apply To">
-            <SearchControl findOptions={{
-              queryName: DynamicMixinConnectionEntity,
-              parentToken: DynamicMixinConnectionEntity.token(e => e.mixinName),
-              parentValue: dt.typeName
-            }} />
-          </Tab>
-        }
-
-        {!dt.isNew && dt.baseType == "Entity" && typeEntity != null &&
-          <Tab eventKey="connections" title="Mixins">
-            {typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
+          {!dt.isNew && dt.baseType == "MixinEntity" &&
+            <Tab eventKey="connections" title="Apply To">
               <SearchControl findOptions={{
                 queryName: DynamicMixinConnectionEntity,
-                parentToken: DynamicMixinConnectionEntity.token(e => e.entityType),
-                parentValue: typeEntity
+                parentToken: DynamicMixinConnectionEntity.token(e => e.mixinName),
+                parentValue: dt.typeName
               }} />
-            }
-          </Tab>
-        }
+            </Tab>
+          }
 
-        {!dt.isNew && dt.baseType == "Entity" &&
-          <Tab eventKey="other" title="Other">
+        {!dt.isNew && dt.baseType == "Entity" && typeEntity != null &&
+            <Tab eventKey="connections" title="Mixins">
+            {typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
+                <SearchControl findOptions={{
+                  queryName: DynamicMixinConnectionEntity,
+                  parentToken: DynamicMixinConnectionEntity.token(e => e.entityType),
+                parentValue: typeEntity
+                }} />
+              }
+            </Tab>
+          }
+
+          {!dt.isNew && dt.baseType == "Entity" &&
+            <Tab eventKey="other" title="Other">
             {renderOthers()}
-          </Tab>
-        }
+            </Tab>
+          }
       </Tabs>
-    </div>
-  );
-}
+      </div>
+    );
+  }
 
 
 export function CustomCodeTab(p: { definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }) {
@@ -346,23 +346,23 @@ export function CustomCodeTab(p: { definition: DynamicTypeDefinition, dynamicTyp
     var suffix = p.dynamicType.baseType == "MixinEntity" ? "Mixin" : "Entity";
 
     return `${p.dynamicType.typeName}${suffix}`;
-  }
+            }
 
   function handleWorkflowCustomInheritanceClick() {
     popupCodeSnippet("ICaseMainEntity");
-  }
+            }
 
   function handleTreeCustomInheritanceClick() {
     popupCodeSnippet("TreeEntity");
-  }
+            }
 
   function handleSMSInheritanceClick() {
     popupCodeSnippet("ISMSOwnerEntity");
-  }
+            }
 
   function handleEmailInheritanceClick() {
     popupCodeSnippet("IEmailOwnerEntity");
-  }
+          }
 
 
   function handlePreSavingClick() {
@@ -422,7 +422,7 @@ public SMSOwnerData SMSOwnerData
 public EmailOwnerData EmailOwnerData
 {
     get { return EmailOwnerDataExpression.Evaluate(this); }
-}`)
+}`) 
   }
 
   function handleWithWorkflowClick() {
@@ -432,7 +432,7 @@ public EmailOwnerData EmailOwnerData
     var oc = def.operationCreate;
 
     popupCodeSnippet(`fi.WithWorkflow(
-constructor: () => ${oc ? `OperationLogic.Construct(${entityName}Operation.Create)` : getConstructor(entityName, def)}
+  constructor: () => { ${oc ? `return OperationLogic.Construct(${entityName}Operation.Create);` : getConstructor(entityName, def)} },
 save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 );`);
   }
@@ -454,7 +454,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
     };
     c.Register(replace: true);
 });`);
-  }
+    }
 
   function handleOverrideCreateChild() {
     let entityName = p.dynamicType.typeName!;
@@ -469,7 +469,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
     };
     c.Register(replace: true);
 });`);
-  }
+    }
 
   function handleOverrideNextSibling () {
     let entityName = p.dynamicType.typeName!;
@@ -484,7 +484,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
     };
     c.Register(replace: true);
 });`);
-  }
+    }
 
   function handleRegisterOperationsClick() {
 
@@ -687,7 +687,7 @@ public static class ${entityName}Operation2
                 <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
               </div>
             </div>
-          }
+}
         />
 
         <CustomCodeFieldsetComponent
@@ -806,20 +806,20 @@ export function CSharpExpressionCodeMirror(p: CSharpExpressionCodeMirrorProps) {
   const forceUpdate = useForceUpdate();
   let val = p.binding.getValue();
 
-  return (
-    <div>
+    return (
+      <div>
       {p.title && <h5> <strong>{p.title}</strong></h5>}
-      <div className="code-container">
+        <div className="code-container">
         {p.signature && <pre style={{ border: "0px", margin: "0px" }}>{p.signature}</pre>}
-        <div className="small-codemirror">
-          <CSharpCodeMirror
-            script={val || ""}
+          <div className="small-codemirror">
+            <CSharpCodeMirror
+              script={val || ""}
             onChange={newScript => { p.binding.setValue(newScript); forceUpdate(); }} />
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 export interface CustomFieldsetComponentProps<T> {
   binding: Binding<T | undefined>;
@@ -1037,9 +1037,9 @@ function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
 }
 
 function getConstructor(typeName: string, definition: DynamicTypeDefinition) {
-  return "return new " + typeName + "Entity()\r\n{\r\n" +
-    definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-    "\r\n};"
+    return "return new " + typeName + "Entity()\r\n{\r\n" +
+      definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+      "\r\n};"
 }
 
 export interface PropertyComponentProps {
@@ -1061,47 +1061,47 @@ export function PropertyComponent(p: PropertyComponentProps) {
 
   const dp = p.property
   const dc = p.dc;
-  return (
-    <div>
-      <div className="row">
-        <div className="col-sm-6">
+    return (
+      <div>
+        <div className="row">
+          <div className="col-sm-6">
           <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.name)} type="string" defaultValue={null} onBlur={handleAutoFix} />
           {p.showDatabaseMapping &&
             <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
-          }
+            }
           <TypeCombo dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.type)} onBlur={handleAutoFix} />
           {p.showDatabaseMapping &&
             <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
-          }
+            }
           <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={handleAutoFix} />
           {allowUnit(dp.type) &&
             <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.unit)} type="string" defaultValue={null} />
-          }
+            }
           {allowFormat(dp.type) &&
             <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.format)} type="string" defaultValue={null} />
-          }
+            }
           {(dp.isMList || isEmbedded(dp.type)) &&
             <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.notifyChanges)} type="boolean" defaultValue={null} />
-          }
-        </div>
-        <div className="col-sm-6">
-          <IsMListFieldsetComponent
+            }
+          </div>
+          <div className="col-sm-6">
+            <IsMListFieldsetComponent
             binding={Binding.create(dp, d => d.isMList)}
-            title="Is MList"
-            onCreate={() => ({ preserveOrder: true })}
-            renderContent={mle =>
-              <div className="database-mapping">
+              title="Is MList"
+              onCreate={() => ({ preserveOrder: true })}
+              renderContent={mle =>
+                <div className="database-mapping">
                 <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
                 <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
                 <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
                 <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
-              </div>
-            }
-            onChange={() => {
+                </div>
+              }
+              onChange={() => {
               fetchPropertyType(dp, dc);
               handleAutoFix();
-            }}
-          />
+              }}
+            />
 
           {dp.type && <div>
             {isEntity(dp.type) && <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.isLite)} type="boolean" defaultValue={null} onChange={handleAutoFix} />}
@@ -1113,16 +1113,16 @@ export function PropertyComponent(p: PropertyComponentProps) {
               <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.scale)} type="number" defaultValue={null} onBlur={handleAutoFix} />}
 
             <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.uniqueIndex)} type="string" defaultValue={null} options={DynamicTypeClient.UniqueIndexValues} />
-          </div>}
-        </div>
-      </div >
-      <br />
+            </div>}
+          </div>
+        </div >
+        <br />
       <ValueComponent dc={dc} labelColumns={3} binding={Binding.create(dp, d => d.customFieldAttributes)} type="string" defaultValue={null} onBlur={handleAutoFix} />
       <ValueComponent dc={dc} labelColumns={3} binding={Binding.create(dp, d => d.customPropertyAttributes)} type="string" defaultValue={null} onBlur={handleAutoFix} />
       <ValidatorRepeaterComponent dc={dc} property={dp} />
-    </div>
-  );
-}
+      </div>
+    );
+  }
 
 export function TypeCombo(p: { dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: () => void }) {
 
@@ -1143,20 +1143,20 @@ export function TypeCombo(p: { dc: DynamicTypeDesignContext; binding: Binding<st
   }
 
   let lc = p.labelColumns;
-  return (
-    <div className="form-group form-group-sm row" >
-      <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
+    return (
+      <div className="form-group form-group-sm row" >
+        <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
         {p.binding.member}
-      </label>
-      <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
-        <Typeahead
-          inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
+        </label>
+        <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
+            <Typeahead
+              inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
           onBlur={p.onBlur}
           getItems={handleGetItems}
           value={p.binding.getValue()}
           onChange={handleOnChange} />
-      </div>
-    </div>
+          </div>
+        </div>
   );
 }
 
@@ -1363,30 +1363,30 @@ export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps) {
       </div>
     );
   }
-  return (
-    <div className="validators">
-      <h4>Validators</h4>
-      <div className="panel-group">
-        {
+    return (
+      <div className="validators">
+        <h4>Validators</h4>
+        <div className="panel-group">
+          {
           (p.property.validators || []).map((val, i) =>
-            <CollapsableCard
-              key={i}
+              <CollapsableCard
+                key={i}
               header={renderHeader(val, i)}
-              cardStyle={{ background: "light" }}
-              defaultOpen={true}>
+                cardStyle={{ background: "light" }}
+                defaultOpen={true}>
               {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, p.dc)}
-            </CollapsableCard>
-          )
-        }
-      </div>
-      <a href="#" title="Create Validator"
-        className="sf-line-button sf-create"
+              </CollapsableCard>
+            )
+          }
+        </div>
+        <a href="#" title="Create Validator"
+          className="sf-line-button sf-create"
         onClick={handleCreateClick}>
-        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Validator
-              </a>
-    </div>
-  );
-}
+          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Validator
+                </a>
+      </div>
+    );
+  }
 
 function isReferenceType(type: string) {
   return isEntity(type) || isString(type);

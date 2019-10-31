@@ -61,10 +61,10 @@ function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
 export module API {
  
   export function getRemainingCharacters(message: string, removeNoSMSCharacters: boolean,): Promise<number> {
-    return ajaxPost<number>({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
+    return ajaxPost({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
   }
 
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
-    return ajaxGet<string[]>({ url: "~/api/sms/getAllTypes", signal });
+    return ajaxGet({ url: "~/api/sms/getAllTypes", signal });
   }
 }

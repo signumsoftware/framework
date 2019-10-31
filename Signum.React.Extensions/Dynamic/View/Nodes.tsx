@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, 
+  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, 
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
@@ -371,7 +371,7 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
   var exampleExpression: string | undefined = undefined;
 
   if (typeName && fixedViewName) {
-    const viewProps = useAPI(undefined, signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
+    const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
     if (viewProps && viewProps.length > 0)
       exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
   }
@@ -625,7 +625,7 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
 
 export interface EntityLineNode extends EntityBaseNode {
   kind: "EntityLine",
-  autoComplete?: ExpressionOrValue<boolean>;
+  autoComplete?: ExpressionOrValue<AutocompleteConfig<unknown> | null>;
   itemHtmlAttributes?: HtmlAttributesExpression;
 }
 
@@ -688,9 +688,9 @@ NodeUtils.register<EntityDetailNode>({
       {NodeUtils.designEntityBase(dn, {})}
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onEntityLoaded)} type={null} defaultValue={null} exampleExpression={"() => { /* do something here... */ }"} />
-    </div> 
-  });
-  
+    </div>
+});
+
 export interface FileLineNode extends EntityBaseNode {
   kind: "FileLine",
   download?: ExpressionOrValue<DownloadBehaviour>;
@@ -1038,7 +1038,7 @@ NodeUtils.register<EntityListNode>({
 
 export interface EntityStripNode extends EntityListBaseNode {
   kind: "EntityStrip",
-  autoComplete?: ExpressionOrValue<boolean>;
+  autoComplete?: ExpressionOrValue<AutocompleteConfig<unknown> | null>;
   iconStart?: boolean;
   vertical?: boolean;
 }
@@ -1224,7 +1224,7 @@ export interface SearchControlNode extends BaseNode {
   allowSelection?: ExpressionOrValue<boolean>;
   allowChangeColumns?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
-  onCreate?: Expression<() => void>;
+  onCreate?: Expression<() => Promise<void | boolean>>;
   navigate?: ExpressionOrValue<boolean>;
   refreshKey?: Expression<number | string | undefined>;
   maxResultsHeight?: Expression<number | string>;
@@ -1616,7 +1616,7 @@ export namespace NodeConstructor {
       if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
         return { kind: "FileImageLine", field } as FileImageLineNode;
 
-      if (ti.name == FileEntity.typeName && ti.name == FilePathEntity.typeName)
+      if (ti.name == FileEntity.typeName || ti.name == FilePathEntity.typeName)
         return { kind: "FileLine", field } as FileLineNode;
 
       if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")

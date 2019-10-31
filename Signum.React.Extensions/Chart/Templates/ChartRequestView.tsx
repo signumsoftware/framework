@@ -42,7 +42,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   const [result, setResult] = React.useState<{ lastChartRequest: ChartRequestModel; chartResult: ChartClient.API.ExecuteChartResult; } | undefined>(undefined);
 
-  const queryDescription = useAPI(undefined, signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
+  const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
     [p.chartRequest && p.chartRequest.queryKey]);
 
   const [loading, setLoading] = React.useState<boolean>(false);

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import { Dic } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -64,15 +64,15 @@ export default class TranslationCodeStatus extends React.Component<TranslationCo
             <tr key={assembly}>
               <th> {assembly}</th>
               <td>
-                <Link to={`~/translation/view/${assembly}`}>{TranslationMessage.View.niceToString()}</Link>
+                <Link to={`~/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
               </td>
               {cultures.map(culture =>
                 <td key={culture}>
-                  <Link to={`~/translation/view/${assembly}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
+                  <Link to={`~/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
                   <br />
                   {
                     !tree[assembly][culture].isDefault &&
-                    <Link to={`~/translation/syncNamespaces/${assembly}/${culture}`} className={"status-" + tree[assembly][culture].status}>
+                    <Link to={`~/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
                       {TranslationMessage.Sync.niceToString()}
                     </Link>
                   }
@@ -86,5 +86,13 @@ export default class TranslationCodeStatus extends React.Component<TranslationCo
   }
 }
 
+
+export function encodeDots(value: string) {
+  return value.replaceAll(".", "-");
+}
+
+export function decodeDots(value: string) {
+  return value.replaceAll("-", ".");
+}
 
 

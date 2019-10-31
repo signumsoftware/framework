@@ -153,19 +153,19 @@ export module API {
 
   export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost<EntityPack<ProcessEntity>>({ url: "~/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
+    return ajaxPost({ url: "~/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
   }
 
   export function start(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/processes/start" }, undefined);
+    return ajaxPost({ url: "~/api/processes/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/processes/stop" }, undefined);
+    return ajaxPost({ url: "~/api/processes/stop" }, undefined);
   }
 
   export function view(): Promise<ProcessLogicState> {
-    return ajaxGet<ProcessLogicState>({ url: "~/api/processes/view" });
+    return ajaxGet({ url: "~/api/processes/view" });
   }
 }
 

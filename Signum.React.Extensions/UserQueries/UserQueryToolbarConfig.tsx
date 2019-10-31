@@ -1,3 +1,5 @@
+import { Location } from 'history'
+import { OutputParams } from 'query-string'
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -43,6 +45,10 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
       .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
   }
+
+  isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: OutputParams): boolean {
+    return query["userQuery"] == liteKey(res.content!);
+  }
 }
 
 
@@ -57,7 +63,7 @@ interface CountUserQueryIconProps {
 export function CountUserQueryIcon(p: CountUserQueryIconProps) {
 
   var userQuery = useFetchAndForget(p.userQuery)
-  var findOptions = useAPI(undefined, signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
+  var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
 
   if (findOptions == null)
     return <span className="icon" style={{ color: p.color }}>…</span>;

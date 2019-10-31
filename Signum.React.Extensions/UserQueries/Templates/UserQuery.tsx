@@ -55,6 +55,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
               </div>
             }
             <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} />
+            <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
             <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
             <div>
               <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}

@@ -25,8 +25,8 @@ export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string 
 
   var cleanName = p.match.params.cleanName;
   var [count, setCount] = React.useState(0);
-  var typeHelp = useAPI(undefined, () => API.type(cleanName), [count, cleanName]);
-  var namespaceHelp = useAPI(undefined, () => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
+  var typeHelp = useAPI(() => API.type(cleanName), [count, cleanName]);
+  var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();
 
   useTitle(HelpMessage.Help.niceToString() +

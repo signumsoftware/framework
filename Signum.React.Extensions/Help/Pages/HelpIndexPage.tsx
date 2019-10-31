@@ -15,7 +15,7 @@ export default function HelpIndexPage(p: RouteComponentProps<{}>) {
 
   useTitle(HelpMessage.Help.niceToString());
 
-  var index = useAPI(undefined, () => API.index(), []);
+  var index = useAPI(() => API.index(), []);
 
   return (
     <div id="entityContent">

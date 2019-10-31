@@ -23,7 +23,7 @@ namespace Signum.Entities.SMS
 
         public bool DisableAuthorization { get; set; }
 
-        public QueryEntity Query { get; set; }
+        public QueryEntity? Query { get; set; }
 
         public SMSModelEntity? Model { get; set; }
 
@@ -33,7 +33,7 @@ namespace Signum.Entities.SMS
         [StringLengthValidator(Max = 200)]
         public string? From { get; set; }
 
-        public QueryTokenEmbedded To { get; set; }
+        public QueryTokenEmbedded? To { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
 
@@ -45,6 +45,11 @@ namespace Signum.Entities.SMS
 
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
+            if (pi.Name == nameof(To) && To == null && (Query != null || Model != null))
+            {
+                return SMSTemplateMessage.ToMustBeSetInTheTemplate.NiceToString();
+            }
+
             if (pi.Name == nameof(Messages))
             {
                 if (Messages == null || !Messages.Any())
@@ -59,7 +64,8 @@ namespace Signum.Entities.SMS
 
         internal void ParseData(QueryDescription queryDescription)
         {
-            To.ParseData(this, queryDescription, 0);
+            if (To != null)
+                To.ParseData(this, queryDescription, 0);
         }
 
         [AutoExpressionField]
@@ -114,7 +120,8 @@ namespace Signum.Entities.SMS
         TheresMoreThanOneMessageForTheSameLanguage,
         NewCulture,
         [Description("{0} characters remaining (before replacements)")]
-        _0CharactersRemainingBeforeReplacements
+        _0CharactersRemainingBeforeReplacements,
+        ToMustBeSetInTheTemplate
     }
 
 

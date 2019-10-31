@@ -72,6 +72,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
   ]);
 
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.entity(p => p.viewName), type: "Text" },
+  ]);
+
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
@@ -496,7 +501,7 @@ export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseA
 
   eoc.onExecuteSuccess = pack => {
     notifySuccess();
-    eoc.frame.onClose(true);
+    eoc.frame.onClose(pack);
   }
 
   getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
@@ -630,19 +635,19 @@ export function durationFormat(d: moment.Duration) {
 
 export namespace API {
   export function fetchActivityForViewing(caseActivity: Lite<CaseActivityEntity>): Promise<CaseEntityPack> {
-    return ajaxGet<CaseEntityPack>({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
+    return ajaxGet({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
   }
 
   export function fetchCaseTags(caseLite: Lite<CaseEntity>): Promise<CaseTagTypeEntity[]> {
-    return ajaxGet<CaseTagTypeEntity[]>({ url: `~/api/workflow/tags/${caseLite.id}` });
+    return ajaxGet({ url: `~/api/workflow/tags/${caseLite.id}` });
   }
 
   export function starts(): Promise<Array<WorkflowEntity>> {
-    return ajaxGet<Array<WorkflowEntity>>({ url: `~/api/workflow/starts` });
+    return ajaxGet({ url: `~/api/workflow/starts` });
   }
 
   export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModelAndIssues> {
-    return ajaxGet<WorkflowModelAndIssues>({ url: `~/api/workflow/workflowModel/${workflow.id}` });
+    return ajaxGet({ url: `~/api/workflow/workflowModel/${workflow.id}` });
   }
 
   interface WorkflowModelAndIssues {
@@ -651,12 +656,12 @@ export namespace API {
   }
 
   export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<PreviewResult> {
-    return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
+    return ajaxPost({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
   }
 
   export function saveWorkflow(entity: WorkflowEntity, model: WorkflowModel, replacementModel: WorkflowReplacementModel | undefined): Promise<EntityPackWithIssues> {
     GraphExplorer.propagateAll(entity, model, replacementModel);
-    return ajaxPost<EntityPackWithIssues>({ url: "~/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
+    return ajaxPost({ url: "~/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
   }
 
   interface EntityPackWithIssues {
@@ -671,42 +676,42 @@ export namespace API {
   }
 
   export function findMainEntityType(request: { subString: string, count: number }, signal?: AbortSignal): Promise<Lite<TypeEntity>[]> {
-    return ajaxGet<Lite<TypeEntity>[]>({
+    return ajaxGet({
       url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request),
       signal
     });
   }
 
   export function findNode(request: WorkflowFindNodeRequest, signal?: AbortSignal): Promise<Lite<IWorkflowNodeEntity>[]> {
-    return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode", signal }, request);
+    return ajaxPost({ url: "~/api/workflow/findNode", signal }, request);
   }
 
   export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {
-    return ajaxPost<WorkflowConditionTestResponse>({ url: `~/api/workflow/condition/test` }, request);
+    return ajaxPost({ url: `~/api/workflow/condition/test` }, request);
   }
 
   export function view(): Promise<WorkflowScriptRunnerState> {
-    return ajaxGet<WorkflowScriptRunnerState>({ url: "~/api/workflow/scriptRunner/view" });
+    return ajaxGet({ url: "~/api/workflow/scriptRunner/view" });
   }
 
   export function start(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/start" }, undefined);
+    return ajaxPost({ url: "~/api/workflow/scriptRunner/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
+    return ajaxPost({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
   }
 
   export function caseFlow(c: Lite<CaseEntity>): Promise<CaseFlow> {
-    return ajaxGet<CaseFlow>({ url: `~/api/workflow/caseFlow/${c.id}` });
+    return ajaxGet({ url: `~/api/workflow/caseFlow/${c.id}` });
   }
 
   export function workflowActivityMonitor(request: WorkflowActivityMonitorRequest): Promise<WorkflowActivityMonitor> {
-    return ajaxPost<WorkflowActivityMonitor>({ url: "~/api/workflow/activityMonitor" }, request);
+    return ajaxPost({ url: "~/api/workflow/activityMonitor" }, request);
   }
 
   export function nextConnections(request: NextConnectionsRequest): Promise<Array<Lite<IWorkflowNodeEntity>>> {
-    return ajaxPost<Array<Lite<IWorkflowNodeEntity>>>({ url: "~/api/workflow/nextConnections" }, request);
+    return ajaxPost({ url: "~/api/workflow/nextConnections" }, request);
   }
 }
 

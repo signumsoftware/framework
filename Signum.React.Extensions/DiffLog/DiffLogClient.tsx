@@ -67,15 +67,15 @@ export function timeMachineRoute(lite: Lite<Entity>) {
 export namespace API {
 
   export function diffLog(id: string | number): Promise<DiffLogResult> {
-    return ajaxGet<DiffLogResult>({ url: "~/api/diffLog/" + id });
+    return ajaxGet({ url: "~/api/diffLog/" + id });
   }
 
   export function retrieveVersion(lite: Lite<Entity>, asOf: string, ): Promise<Entity> {
-    return ajaxGet<Entity>({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
+    return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
   }
 
   export function diffVersions(lite: Lite<Entity>, from: string, to: string): Promise<DiffBlock> {
-    return ajaxGet<DiffBlock>({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
+    return ajaxGet({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
   }
 }
 

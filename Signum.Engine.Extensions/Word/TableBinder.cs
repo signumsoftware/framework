@@ -307,9 +307,14 @@ namespace Signum.Engine.Word
     {
         public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
         {
+            return GetDataTable(suffix, context.Entity!);
+        }
+
+        public Data.DataTable GetDataTable(string suffix, Entity entity)
+        {
             var userChart = Database.Query<UserChartEntity>().SingleOrDefault(a => a.Guid == Guid.Parse(suffix));
 
-            using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
+            using (CurrentEntityConverter.SetCurrentEntity(entity))
             {
                 var chartRequest = UserChartLogic.ToChartRequest(userChart);
                 ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;

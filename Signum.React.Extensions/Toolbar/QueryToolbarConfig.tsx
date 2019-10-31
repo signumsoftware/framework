@@ -1,6 +1,9 @@
 import * as React from 'react'
+import { Location } from 'history'
+import { OutputParams } from 'query-string'
 import { getQueryNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
 import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { ValueSearchControl, FindOptions } from '@framework/Search';
@@ -36,6 +39,10 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
 
   navigateTo(res: ToolbarResponse<QueryEntity>): Promise<string> {
     return Promise.resolve(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
+  }
+
+  isCompatibleWithUrl(res: ToolbarResponse<QueryEntity>, location: Location, query: OutputParams): boolean {
+    return location.pathname == Navigator.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
   }
 }
 

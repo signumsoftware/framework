@@ -131,7 +131,7 @@ namespace Signum.Engine.Translation
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string?)null)));
+            memory.SetRange(toDelete.Select(n => KeyValuePair.Create(n, (string?)null)));
 
             return result;
         }
@@ -144,7 +144,7 @@ namespace Signum.Engine.Translation
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\netcoreapp2.2").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
+            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {

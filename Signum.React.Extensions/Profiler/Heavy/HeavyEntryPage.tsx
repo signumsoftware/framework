@@ -16,8 +16,8 @@ export default function HeavyEntry(p: HeavyEntryProps) {
 
   const selectedIndex = p.match.params.selectedIndex;
   const rootIndex = selectedIndex.tryBefore("-") || selectedIndex;
-  const entries = useAPI(undefined, () => API.Heavy.details(rootIndex), [rootIndex]);
-  const stackTrace = useAPI(undefined, () => API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
+  const entries = useAPI(() => API.Heavy.details(rootIndex), [rootIndex]);
+  const stackTrace = useAPI(() => API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
   const [asyncDepth, setAsyncDepth] = React.useState<boolean>(false);
 
   function handleDownload() {

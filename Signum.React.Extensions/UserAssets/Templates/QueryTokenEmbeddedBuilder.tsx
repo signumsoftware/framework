@@ -4,6 +4,7 @@ import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
+import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 interface QueryTokenEmbeddedBuilderProps {
   ctx: TypeContext<QueryTokenEmbedded | null | undefined>;
@@ -14,6 +15,7 @@ interface QueryTokenEmbeddedBuilderProps {
 }
 
 export default function QueryTokenEntityBuilder(p: QueryTokenEmbeddedBuilderProps) {
+  const forceUpdate = useForceUpdate();
   function handleTokenChanged(newToken: QueryToken | undefined) {
     if (newToken == undefined)
       p.ctx.value = undefined;
@@ -25,6 +27,8 @@ export default function QueryTokenEntityBuilder(p: QueryTokenEmbeddedBuilderProp
 
     if (p.onTokenChanged)
       p.onTokenChanged(newToken);
+
+    forceUpdate();
   }
 
   const qte = p.ctx.value;

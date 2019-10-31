@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, toMList } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, toMList, liteKey } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation } from './Signum.Entities.UserQueries'
@@ -34,12 +34,18 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const userQuery = window.location.search.tryAfter("userQuery=");
     if (userQuery) {
       const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
+      setCurrentUserQuery(uq);
       Navigator.API.fillToStrings(uq)
-        .then(() => setCurrentUserQuery(uq))
         .done();
     }
   }, []);
 
+  const oldExtraParams = React.useRef(p.searchControl.extraParams);
+  React.useEffect(() => {
+    oldExtraParams.current = p.searchControl.extraParams;
+    p.searchControl.extraParams = () => ({ ...oldExtraParams.current(), userQuery: currentUserQuery && liteKey(currentUserQuery) });
+    return () => { p.searchControl.extraParams = oldExtraParams.current };
+  }, []);
 
   function handleSelectedToggle(isOpen: boolean) {
     if (isOpen && userQueries == undefined)
@@ -57,7 +63,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const sc = p.searchControl
     const ofo = sc.props.findOptions;
     Finder.getQueryDescription(sc.props.findOptions.queryKey)
-      .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd))
+      .then(qd => Finder.parseFindOptions({ queryName: sc.props.findOptions.queryKey }, qd, sc.props.defaultIncudeDefaultFilters))
       .then(nfo => {
         ofo.filterOptions = [
           ...ofo.filterOptions.filter(a => a.frozen),
@@ -81,7 +87,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     Navigator.API.fetchAndForget(uq).then(userQuery => {
       const sc = p.searchControl
       const oldFindOptions = sc.props.findOptions;
-      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
+      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(newFindOptions => {
           sc.setState({ showFilters: true });
           setCurrentUserQuery(uq);
@@ -108,7 +114,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     const sc = p.searchControl;
 
-    const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription);
+    const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);
 
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
@@ -123,6 +129,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       owner: Navigator.currentUser && toLite(Navigator.currentUser),
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
+      includeDefaultFilters: fo.includeDefaultFilters,
       columns: (fo.columnOptions || []).map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
         displayName: c.displayName
@@ -146,32 +153,32 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const currentUserQueryToStr = currentUserQuery ? currentUserQuery.toStr : undefined;
   const labelText = p.searchControl.props.largeToolbarButtons == true ?
-    (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
+      (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
 
-  const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
-  return (
+    const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
+    return (
     <Dropdown
       onToggle={handleSelectedToggle} show={isOpen}>
       <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-        {
-          userQueries && userQueries.map((uq, i) =>
+          {
+            userQueries && userQueries.map((uq, i) =>
             <Dropdown.Item key={i}
               className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
               onClick={() => handleOnClick(uq)}>
-              {uq.toStr}
+                {uq.toStr}
             </Dropdown.Item>)
-        }
+          }
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
         <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
         {currentUserQuery && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
         {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
-    </Dropdown>
-  );
-}
+      </Dropdown>
+    );
+  }
 
 
 

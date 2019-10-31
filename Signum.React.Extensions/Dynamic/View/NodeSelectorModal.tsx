@@ -7,7 +7,7 @@ import { BaseNode } from './Nodes'
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 
-export default function NodeSelectorModal(p: IModalProps) {
+export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
 
   const [show, setShow] = React.useState<boolean>(true);
 

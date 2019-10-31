@@ -145,6 +145,16 @@ namespace Signum.Engine.Cache
             return new CachedEntityExpression(pk, entityType, typeConstructor, null!);
         }
 
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            var operand = Visit(node.Operand);
+            if (operand != node.Operand && node.NodeType == ExpressionType.Convert)
+            {
+                return Expression.Convert(operand, node.Type);
+            }
+            return node.Update(operand);
+        }
+
         static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
         protected override Expression VisitMethodCall(MethodCallExpression node)

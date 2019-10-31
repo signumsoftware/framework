@@ -144,7 +144,7 @@ namespace Signum.Engine.Word
 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return WordTemplatesLazy.Value.Values.SelectCatch(w => KVP.Create(w.Query.ToQueryName(), w)).GroupToDictionary();
+                    return WordTemplatesLazy.Value.Values.SelectCatch(w => KeyValuePair.Create(w.Query.ToQueryName(), w)).GroupToDictionary();
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 TemplatesByEntityType = sb.GlobalLazy(() =>
@@ -152,7 +152,7 @@ namespace Signum.Engine.Word
                     return (from pair in WordTemplatesLazy.Value.Values.SelectCatch(wr => new { wr, imp = QueryLogic.Queries.GetEntityImplementations(wr.Query.ToQueryName()) })
                             where !pair.imp.IsByAll
                             from t in pair.imp.Types
-                            select KVP.Create(t, pair.wr))
+                            select KeyValuePair.Create(t, pair.wr))
                             .GroupToDictionary();
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 

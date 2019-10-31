@@ -173,7 +173,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const content = p.ctx.value.content;
 
-  const state = useAPI(undefined, signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
+  const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
     [content.Type], { avoidReset: true });
 
   if (state == null || state.lastType == null)
@@ -219,6 +219,7 @@ export function PanelPart(p: PanelPartProps) {
                   {renderer.handleTitleClick == undefined ? title :
           <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
 
+    var style = p.style == undefined ? undefined : p.style.toLowerCase();
       </div>
       <div className="card-body py-2 px-3">
         <ErrorBoundary>

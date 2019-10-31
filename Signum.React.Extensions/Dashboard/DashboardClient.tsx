@@ -155,11 +155,11 @@ export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer:
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
-    return ajaxGet<Lite<DashboardEntity>[]>({ url: `~/api/dashboard/forEntityType/${type}` });
+    return ajaxGet({ url: `~/api/dashboard/forEntityType/${type}` });
   }
 
   export function home(): Promise<Lite<DashboardEntity> | null> {
-    return ajaxGet<Lite<DashboardEntity> | null>({ url: "~/api/dashboard/home" });
+    return ajaxGet({ url: "~/api/dashboard/home" });
   }
 }
 
@@ -178,7 +178,7 @@ export interface DashboardWidgetProps {
 
 export function DashboardWidget(p: DashboardWidgetProps) {
 
-  const component = useAPI(undefined, () => import("./View/DashboardView").then(mod => mod.default), []);
+  const component = useAPI(() => import("./View/DashboardView").then(mod => mod.default), []);
 
   if (!component)
     return null;

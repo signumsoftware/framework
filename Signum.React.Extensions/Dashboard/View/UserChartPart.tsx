@@ -31,7 +31,7 @@ export default function UserChartPart(p: UserChartPartProps) {
   const [error, setError] = React.useState<any | undefined>(undefined);
   const [result, setResult] = React.useState<ChartClient.API.ExecuteChartResult | undefined>(undefined);
   const [showData, setShowData] = React.useState(p.part.showData);
-  const chartRequest = useAPI(undefined, () => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity]);
+  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity]);
 
   function makeQuery() {
     ChartClient.getChartScript(chartRequest!.chartScript)

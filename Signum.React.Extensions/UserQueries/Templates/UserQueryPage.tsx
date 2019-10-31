@@ -20,7 +20,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
 
   const { userQueryId, entity } = p.match.params;
 
-  const fo = useAPI(undefined, () => {
+  const fo = useAPI(() => {
     const lite = entity == undefined ? undefined : parseLite(entity);
     return Navigator.API.fillToStrings(lite)
       .then(() => Navigator.API.fetchEntity(UserQueryEntity, userQueryId))

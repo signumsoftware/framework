@@ -112,11 +112,11 @@ export interface SMSTemplateEntity extends Entities.Entity {
   certified: boolean;
   editableMessage: boolean;
   disableAuthorization: boolean;
-  query: Signum.QueryEntity;
+  query: Signum.QueryEntity | null;
   model: SMSModelEntity | null;
   messages: Entities.MList<SMSTemplateMessageEmbedded>;
   from: string | null;
-  to: UserAssets.QueryTokenEmbedded;
+  to: UserAssets.QueryTokenEmbedded | null;
   messageLengthExceeded: MessageLengthExceeded;
   removeNoSMSCharacters: boolean;
   isActive: boolean;
@@ -128,6 +128,7 @@ export module SMSTemplateMessage {
   export const TheresMoreThanOneMessageForTheSameLanguage = new MessageKey("SMSTemplateMessage", "TheresMoreThanOneMessageForTheSameLanguage");
   export const NewCulture = new MessageKey("SMSTemplateMessage", "NewCulture");
   export const _0CharactersRemainingBeforeReplacements = new MessageKey("SMSTemplateMessage", "_0CharactersRemainingBeforeReplacements");
+  export const ToMustBeSetInTheTemplate = new MessageKey("SMSTemplateMessage", "ToMustBeSetInTheTemplate");
 }
 
 export const SMSTemplateMessageEmbedded = new Type<SMSTemplateMessageEmbedded>("SMSTemplateMessageEmbedded");

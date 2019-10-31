@@ -13,7 +13,7 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
 
   const [count, setCount] = React.useState<number>(0)
 
-  const state = useAPI(undefined, () => API.view(), []);
+  const state = useAPI(() => API.view(), []);
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();

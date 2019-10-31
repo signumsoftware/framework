@@ -202,15 +202,15 @@ export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args:
 
 export module API {
   export function start(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/asyncEmailSender/start" }, undefined);
+    return ajaxPost({ url: "~/api/asyncEmailSender/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, undefined);
+    return ajaxPost({ url: "~/api/asyncEmailSender/stop" }, undefined);
   }
 
   export function view(): Promise<AsyncEmailSenderState> {
-    return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
+    return ajaxGet({ url: "~/api/asyncEmailSender/view" });
   }
 
 
@@ -225,15 +225,15 @@ export module API {
   }
 
   export function getConstructorType(emailModelEntity: EmailModelEntity): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/email/constructorType" }, emailModelEntity);
+    return ajaxPost({ url: "~/api/email/constructorType" }, emailModelEntity);
   }
 
   export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, request: GetEmailTemplatesRequest): Promise<Lite<EmailTemplateEntity>[]> {
-    return ajaxPost<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+    return ajaxPost({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
-    return ajaxGet<string[]>({ url: "~/api/email/getAllTypes", signal });
+    return ajaxGet({ url: "~/api/email/getAllTypes", signal });
   }
 }
 

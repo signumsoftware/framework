@@ -3,6 +3,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
 import { Dic } from '@framework/Globals'
 import TextArea from '@framework/Components/TextArea';
+import { useForceUpdate } from '@framework/Hooks';
 
 export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result: AssemblyResult, currentCulture: string }>{
   render() {
@@ -58,75 +59,77 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
   }
 }
 
-export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean }>{
+export function TranslationMember({ type, member, loc, edit }: { type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }) {
 
-  static normalizeString(str: string): string {
-    return str;
+  const [avoidCombo, setAvoidCombo] = React.useState(false);
+  const forceUpdate = useForceUpdate();
+
+  return (
+    <tr >
+      <td className="leftCell">{loc.culture}</td>
+      <td colSpan={4} className="monospaceCell">
+        {edit ? renderEdit() : member.description}
+      </td>
+    </tr>
+  );
+
+
+  function handleOnChange(e: React.FormEvent<any>) {
+    member.description = TranslationMember.normalizeString((e.currentTarget as HTMLSelectElement).value);
+    forceUpdate();
   }
 
-  constructor(props: any) {
-    super(props);
-    this.state = {};
-  }
-
-  render() {
-    const { member, loc, edit } = this.props;
-
-    return (
-      <tr >
-        <td className="leftCell">{loc.culture}</td>
-        <td colSpan={4} className="monospaceCell">
-          {edit ? this.renderEdit() : member.description}
-        </td>
-      </tr>
-    );
-  }
-
-  handleOnChange = (e: React.FormEvent<any>) => {
-    this.props.member.description = (e.currentTarget as HTMLSelectElement).value;
-    this.forceUpdate();
-  }
-
-  handleAvoidCombo = (e: React.FormEvent<any>) => {
+  function handleAvoidCombo(e: React.FormEvent<any>) {
     e.preventDefault();
-    this.setState({ avoidCombo: true });
+    setAvoidCombo(true);
   }
-  handleKeyDown = (e: React.KeyboardEvent<any>) => {
+
+  function handleKeyDown(e: React.KeyboardEvent<any>) {
     if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
+      debugger;
       e.preventDefault();
-      this.setState({ avoidCombo: true });
+      setAvoidCombo(true);
     }
   }
 
-  renderEdit() {
-    const { member } = this.props;
+  function renderEdit() {
 
-    const translatedMembers = Dic.getValues(this.props.type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
-    if (!translatedMembers.length || this.state.avoidCombo)
-      return (<TextArea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange}
-         innerRef={(ta) => ta && this.state.avoidCombo && ta.focus()} />);
+    const translatedMembers = Dic.getValues(type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
+    if (!translatedMembers.length || avoidCombo)
+      return (<TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={member.description || ""}
+        onChange={e => { member.description = e.currentTarget.value; forceUpdate(); }}
+        onBlur={handleOnChange}
+        innerRef={(ta) => { ta && avoidCombo && ta.focus(); }} />);
 
     return (
       <span>
-        <select value={member.description || ""} onChange={this.handleOnChange} onKeyDown={this.handleKeyDown}>
+        <select value={member.description || ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
           {initialElementIf(member.description == undefined).concat(
             translatedMembers.map(a => <option key={a.culture} value={a.member.translatedDescription}>{a.member.translatedDescription}</option>))}
         </select>
         &nbsp;
-                <a href="#" onClick={this.handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
+                <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
       </span>
     );
   }
 }
 
+TranslationMember.normalizeString = (str: string): string => {
+  return str;
+};
 
 function initialElementIf(condition: boolean) {
   return condition ? [<option key={""} value={""}>{" - "}</option>] : []
 }
 
+export interface TranslationTypeDescriptionProps {
+  type: LocalizableType,
+  loc: LocalizedType,
+  edit: boolean,
+  result: AssemblyResult
+};
 
-
-export class TranslationTypeDescription extends React.Component<{ type: LocalizableType, loc: LocalizedType, edit: boolean, result: AssemblyResult }, { avoidCombo?: boolean, hadComboBox?: boolean }>{
+export class TranslationTypeDescription extends React.Component<TranslationTypeDescriptionProps, { avoidCombo?: boolean }>{
 
   constructor(props: any) {
     super(props);
@@ -165,7 +168,9 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         <th className="monospaceCell">
           {
             type.hasPluralDescription && (edit ?
-              <TextArea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); }} /> :
+              <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription || ""}
+                onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); }}
+                onBlur={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); this.forceUpdate(); }} /> :
               td.pluralDescription)
           }
         </th>
@@ -176,7 +181,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
   handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     const { loc } = this.props;
     const td = loc.typeDescription!;
-    td.description = e.currentTarget.value;
+    td.description = TranslationMember.normalizeString(e.currentTarget.value);
 
     API.pluralize(loc.culture, td.description).then(plural => {
       td.pluralDescription = plural;
@@ -216,7 +221,9 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
     const translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => a.typeDescription != null && a.typeDescription.translatedDescription != null);
     if (!translatedTypes.length || this.state.avoidCombo)
-      return (<TextArea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} innerRef={this.handleRefTextArea} />);
+      return (<TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description || ""}
+        onChange={e => { loc.typeDescription!.description = e.currentTarget.value; this.forceUpdate(); }}
+        onBlur={this.handleOnChange} innerRef={this.handleRefTextArea} />);
 
     return (
       <span>

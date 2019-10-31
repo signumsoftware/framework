@@ -16,6 +16,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { ModulesHelp } from "./ModulesHelp";
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
@@ -24,8 +25,8 @@ interface DynamicViewOverrideComponentProps {
 export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps) {
 
   const typeName = p.ctx.value.entityType.cleanName;
-  const typeHelp = useAPI(undefined, () => TypeHelpClient.API.typeHelp(typeName, "CSharp"), [typeName]);
-  const viewNames = useAPI(undefined, () => Navigator.viewDispatcher.getViewNames(typeName), [typeName]);
+  const typeHelp = useAPI(() => TypeHelpClient.API.typeHelp(typeName, "CSharp"), [typeName]);
+  const viewNames = useAPI(() => Navigator.viewDispatcher.getViewNames(typeName), [typeName]);
 
   const scriptChangedRef = React.useRef(false);
 
@@ -188,7 +189,11 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
           {allExpressions().length > 0 && renderExpressionsButtons()}
           <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
         </div>
-        <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
+        <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, `}
+          <div style={{ display: "inline-flex" }}>
+            <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
+          </div>
+        </pre>
         <JavascriptCodeMirror code={ctx.value.script || ""} onChange={handleCodeChange} />
         {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>
@@ -252,9 +257,9 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
               <option value="">{" - "}</option>
               {(viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
             </select>
-          }
+}
         </FormGroup>
-      }
+}
 
       {ctx.value.entityType &&
         <div>
@@ -276,17 +281,17 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
           <hr />
           {renderTest()}
         </div>
-      }
+  }
     </div>
   );
-}
+  }
 
 
 interface RenderWithReplacementsProps {
   entity: Entity;
   componentType: React.ComponentType<{ ctx: TypeContext<Entity> }>;
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
-}
+  }
 
 export function RenderWithReplacements(p: RenderWithReplacementsProps) {
 

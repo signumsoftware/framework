@@ -15,17 +15,20 @@ import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
-import { JavascriptMessage, getToString } from '@framework/Signum.Entities';
+import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals';
 
 export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(undefined, signal => ToolbarClient.API.getCurrentToolbar("Main"), []);
+  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t || null), []);
 
-  if (response == null)
+  if (response === undefined)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (response === null)
+    return <span>{SearchMessage.NoResultsFound.niceToString()}</span>;
 
   return (<ToolbarMainRendererPrivate response={response} />);
 }
@@ -57,7 +60,7 @@ function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
       <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label || getToString(r.content!)}</h4>
       <Collapse in={isOpen}>
         <div>
-          <ToolbarMainRendererPrivate response={r} />
+        <ToolbarMainRendererPrivate response={r} />
         </div>
       </Collapse>
     </div>
@@ -121,7 +124,7 @@ function ToolbarIconButton({ tr  }: { tr: ToolbarClient.ToolbarResponse<any> }) 
 
 
 
-interface ToolbarMainModalModalProps extends IModalProps {
+interface ToolbarMainModalModalProps extends IModalProps<undefined> {
   tr: ToolbarClient.ToolbarResponse<any>;
 }
 

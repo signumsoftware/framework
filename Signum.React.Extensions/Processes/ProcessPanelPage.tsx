@@ -10,7 +10,7 @@ import { useAPI, useTitle } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
   const [count, setCount] = React.useState(0);
-  const state = useAPI(undefined, () => API.view(), [count]);
+  const state = useAPI(() => API.view(), [count]);
 
   useTitle("ProcessLogic state");
   

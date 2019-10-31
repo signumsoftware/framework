@@ -261,7 +261,7 @@ namespace Signum.Engine.Mailing.Pop3
                             (from em in Database.Query<EmailMessageEntity>()
                              let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
                              where ri != null && l.Contains(ri.UniqueId)
-                             select KVP.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
+                             select KeyValuePair.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
 
                         using (Transaction tr = Transaction.ForceNew())
                         {

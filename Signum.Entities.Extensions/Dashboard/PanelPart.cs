@@ -99,7 +99,7 @@ namespace Signum.Entities.Dashboard
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
-            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Default);
+            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Light);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -111,15 +111,14 @@ namespace Signum.Entities.Dashboard
 
     public enum PanelStyle
     {
-        Default,
+        Light,
+        Dark,
         Primary,
         Secondary,
         Success,
         Info,
         Warning,
         Danger,
-        Light,
-        Dark,
     }
 
     public interface IGridEntity
@@ -141,10 +140,13 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartEntity : Entity, IPartEntity
     {
-        
         public UserQueryEntity UserQuery { get; set; }
 
         public UserQueryPartRenderMode RenderMode { get; set; }
+
+        public bool AllowSelection { get; set; }
+
+        public bool ShowFooter { get; set; }
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => UserQuery + "");
@@ -181,7 +183,6 @@ namespace Signum.Entities.Dashboard
     public enum UserQueryPartRenderMode
     {
         SearchControl,
-        SearchControlWithoutSelection,
         BigValue,
     }
 

@@ -89,19 +89,19 @@ modules.Services.ajaxPost({ url: '~/api/dynamic/getData' }, data: null)
   .done();
 `;
   modules["TreeClient"] = "";
-  modules["AutoCompleteConfig"] = `new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], requiresInitialLoad: false, showType: false)`;
+  modules["AutoCompleteConfig"] = `new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], /*requiresInitialLoad:*/ false, /*showType:*/ false)`;
   modules["Hooks"] = `const forceUpdate = modules.Hooks.useForceUpdate();
 const value = modules.Hooks.useAPI(undefined /*default value*/, [/*Keys*/], signal => Your calling API is here);
 `;
   modules["FontAwesomeIcon"] = `modules.React.createElement(modules.FontAwesomeIcon, { icon: "...", color: "..." })`;
-  modules["SelectorModal"] = `modules.SelectorModal.default.chooseElement<T>(options: T[], config? /*: SelectorConfig<T>*/)
+  modules["SelectorModal"] = `modules.SelectorModal.default.chooseElement<T>(/*options:*/ T[], config? /*: SelectorConfig<T>*/)
 .then(option => {
   if (!option)
     return undefined;
   /* do something here ... */
 }).done();
 
-modules.SelectorModal.default.chooseType(options: ["${p.cleanName}", ....].map(tn => modules.Reflection.getTypeInfo(tn)))
+modules.SelectorModal.default.chooseType(/*options:*/ ["${p.cleanName}", ....].map(tn => modules.Reflection.getTypeInfo(tn)))
 .then(ti => {
   if (!ti)
     return undefined;

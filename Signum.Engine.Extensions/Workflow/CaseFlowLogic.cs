@@ -13,8 +13,8 @@ namespace Signum.Engine.Workflow
         public static CaseFlow GetCaseFlow(CaseEntity @case)
         {
             var averages = new Dictionary<Lite<IWorkflowNodeEntity>, double?>();            
-            averages.AddRange(@case.Workflow.WorkflowActivities().Select(a => KVP.Create((Lite<IWorkflowNodeEntity>)a.ToLite(), a.AverageDuration())));
-            averages.AddRange(@case.Workflow.WorkflowEvents().Where(e => e.Type == WorkflowEventType.IntermediateTimer).Select(e => KVP.Create((Lite<IWorkflowNodeEntity>)e.ToLite(), e.AverageDuration())));
+            averages.AddRange(@case.Workflow.WorkflowActivities().Select(a => KeyValuePair.Create((Lite<IWorkflowNodeEntity>)a.ToLite(), a.AverageDuration())));
+            averages.AddRange(@case.Workflow.WorkflowEvents().Where(e => e.Type == WorkflowEventType.IntermediateTimer).Select(e => KeyValuePair.Create((Lite<IWorkflowNodeEntity>)e.ToLite(), e.AverageDuration())));
 
             var caseActivities = @case.CaseActivities().Select(ca => new CaseActivityStats
             {
@@ -106,13 +106,13 @@ namespace Signum.Engine.Workflow
 
 
             connections.AddRange(caseActivities.Values
-                .Where(c => c.DoneDate.HasValue && !isInPrevious.Contains(c.CaseActivity))
-                .Select(c =>
+                .Where(cs => cs.DoneDate.HasValue && !isInPrevious.Contains(cs.CaseActivity))
+                .Select(cs =>
                 {
-                    var from = gr.GetNode(c.WorkflowActivity);
-                    var nextConnection = gr.NextConnections(from).SingleEx(a => c.DoneType == DoneType.ScriptFailure ? a.Type == ConnectionType.ScriptException : a.Type != ConnectionType.ScriptException);
-                    if (gr.IsParallelGateway(nextConnection.To, WorkflowGatewayDirection.Join))
-                        return new CaseConnectionStats().WithConnection(nextConnection).WithDone(c);
+                    var from = gr.GetNode(cs.WorkflowActivity);
+                    var nextConnection = gr.NextConnections(from).SingleOrDefaultEx(c => IsCompatible(c.Type, cs.DoneType!.Value) && gr.IsParallelGateway(c.To, WorkflowGatewayDirection.Join));
+                    if (nextConnection != null)
+                        return new CaseConnectionStats().WithConnection(nextConnection).WithDone(cs);
 
                     return null;
 
@@ -152,6 +152,22 @@ namespace Signum.Engine.Workflow
                 AllNodes = connections.Select(a => a.FromBpmnElementId!)
                 .Union(connections.Select(a => a.ToBpmnElementId!)).ToList()
             };
+        }
+
+        private static bool IsCompatible(ConnectionType type, DoneType doneType)
+        {
+            switch (doneType)
+            {
+                case DoneType.Next:return type == ConnectionType.Normal;
+                case DoneType.Approve:return type == ConnectionType.Approve;
+                case DoneType.Decline: return type == ConnectionType.Decline;
+                case DoneType.Jump: return type == ConnectionType.Jump;
+                case DoneType.Timeout: return type == ConnectionType.Normal;
+                case DoneType.ScriptSuccess: return type == ConnectionType.Normal;
+                case DoneType.ScriptFailure: return type == ConnectionType.ScriptException;
+                case DoneType.Recompose: return type == ConnectionType.Normal;
+                default: throw new UnexpectedValueException(doneType);
+            }
         }
 
         private static bool IsValidPath(DoneType doneType, Stack<WorkflowConnectionEntity> path)

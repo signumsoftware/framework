@@ -6,6 +6,7 @@ import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { AuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
+import MessageModal from '@framework/MessageModal'
 
 export default function Login() {
 
@@ -110,12 +111,39 @@ export default function Login() {
             }
           </div>
         </div>
-
-        {Login.customLoginProviders && Login.customLoginProviders()}
+        {Login.customLoginButtons && Login.customLoginButtons()}
       </form>
     </div>
   );
 }
 
-Login.customLoginProviders = null as (null | (() => React.ReactElement<any>));
+Login.customLoginButtons = null as (null | (() => React.ReactElement<any>));
+
+export function LoginWithWindowsButton() {
+
+  function onClick() {
+    return AuthClient.API.loginWindowsAuthentication()
+      .then(r => {
+        if (r == null) {
+          MessageModal.showError(AuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), AuthMessage.NoWindowsUserFound.niceToString()).done();
+        } else {
+          AuthClient.setAuthToken(r.token);
+          AuthClient.setCurrentUser(r.userEntity);
+          AuthClient.Options.onLogin();
+        }
+      }).done();
+  }
+
+  return (
+    <div className="row">
+      <div className="col-md-6 offset-md-3 mt-4">
+        <button onClick={e => { e.preventDefault(); onClick(); }} className="btn btn-info">
+          <FontAwesomeIcon icon={["fab", "windows"]} /> {AuthMessage.LoginWithWindowsUser.niceToString()}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
 

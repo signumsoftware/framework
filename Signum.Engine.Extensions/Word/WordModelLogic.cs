@@ -187,7 +187,7 @@ namespace Signum.Engine.Word
                         registeredWordModels.Keys, 
                         swr => swr.FullClassName, 
                         type => type.FullName,
-                        (swr, type) => KVP.Create(type, swr), 
+                        (swr, type) => KeyValuePair.Create(type, swr), 
                         "caching " + nameof(WordModelEntity)).ToDictionary();
                 }, new InvalidateWith(typeof(WordModelEntity)));
 

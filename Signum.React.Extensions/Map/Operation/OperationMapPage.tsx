@@ -63,7 +63,7 @@ export default function OperationMapPage(p: OperationMapPageProps) {
   const [color, setColor] = React.useState<string>("");
   const [nodes, setNodes] = React.useState<Nodes | undefined>(undefined);
 
-  const operationMapInfo = useAPI(undefined, () => MapClient.API.operations(p.match.params.type), [p.match.params.type]);
+  const operationMapInfo = useAPI(() => MapClient.API.operations(p.match.params.type), [p.match.params.type]);
 
   React.useEffect(() => {
     const parsedQuery = getParsedQuery(p.location);

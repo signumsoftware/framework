@@ -45,7 +45,7 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
   const [selectedNode, setSelectedNode] = React.useState<DesignerNode<BaseNode>>(() => getZeroNode().createChild(rootNodeMemo))
   const [dynamicView, setDynamicView] = React.useState<DynamicViewEntity>(p.initialDynamicView);
 
-  const viewOverrides = useAPI(undefined, () => Navigator.viewDispatcher.getViewOverrides(p.ctx.value.Type), []);
+  const viewOverrides = useAPI(() => Navigator.viewDispatcher.getViewOverrides(p.ctx.value.Type), []);
 
   function getZeroNode() {
     var { ctx, initialDynamicView, ...extraProps } = p;

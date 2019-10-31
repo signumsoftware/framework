@@ -3,25 +3,22 @@ import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
 
-
-  const [count, setCount] = React.useState<number>(0)
-
-  var state = useAPI(undefined, signal => API.view(), [count], { avoidReset: true });
+  var [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
 
   function handleDisabled(e: React.MouseEvent<any>) {
-    API.disable().then(() => setCount(count + 1)).done();
+    API.disable().then(() => reloadState()).done();
   }
 
   function handleEnabled(e: React.MouseEvent<any>) {
-    API.enable().then(() => setCount(count + 1)).done();
+    API.enable().then(() => reloadState()).done();
   }
 
   function handleClear(e: React.MouseEvent<any>) {
-    API.clear().then(() => setCount(count + 1)).done();
+    API.clear().then(() => reloadState()).done();
   }
 
   if (state == null)

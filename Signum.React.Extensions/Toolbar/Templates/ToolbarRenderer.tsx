@@ -1,4 +1,6 @@
 import * as React from 'react'
+import * as History from 'history'
+import * as QueryString from 'query-string'
 import { classes } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation } from '../Signum.Entities.Toolbar'
@@ -12,29 +14,76 @@ import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI } from '@framework/Hooks'
+import { useAPI, useUpdatedRef } from '@framework/Hooks'
 
+
+function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.ParsedQuery<string>): boolean {
+  if (r.url)
+    return (location.pathname + location.search).startsWith(Navigator.toAbsoluteUrl(r.url));
+
+  if (!r.content)
+    return false;
+
+  var config = ToolbarClient.configs[r.content.EntityType];
+  if (!config)
+    return false;
+
+  return config.isCompatibleWithUrl(r, location, query);
+}
+
+function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.ParsedQuery<string>): ToolbarClient.ToolbarResponse<any> | null {
+  if (r.elements)
+    return r.elements.map(e => inferActive(e, location, query)).notNull().onlyOrNull();
+
+  if (isCompatibleWithUrl(r, location, query))
+    return r;
+
+  return null;
+}
 
 export interface ToolbarRendererState {
   response?: ToolbarClient.ToolbarResponse<any>;
   expanded: ToolbarClient.ToolbarResponse<any>[];
   avoidCollapse: ToolbarClient.ToolbarResponse<any>[];
+  active?: ToolbarClient.ToolbarResponse<any> | null;
 }
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
-  const r = useAPI(undefined, () => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
+  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
 
   const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
   const [avoidCollapse, setAvoidCollapse] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
 
-  if (!r)
+  const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
+  const activeRef = useUpdatedRef(active);
+  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
+
+  React.useEffect(() => {
+    function locationChanged(location: History.Location, action: History.Action) {
+      var query = QueryString.parse(location.search);
+      if (response) {
+        if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
+          return;
+        }
+
+        var newActive = inferActive(response, location, query);
+        setActive(newActive);
+      }
+    }
+
+    unregisterCallback.current = Navigator.history.listen(locationChanged);
+
+    return () => { unregisterCallback.current!(); }
+  }, [response]);
+
+  if (!response)
     return null;
 
   if (p.location == "Top") {
 
-    var navItems = r.elements && r.elements.map((res, i) => withKey(renderNavItem(res, i), i));
+    var navItems = response.elements && response.elements.map((res, i) => withKey(renderNavItem(res, i), i));
 
-    
+
     return (
       <div className={classes("nav navbar-nav")}>
         {navItems}
@@ -44,7 +93,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
   else
     return (
       <div className="nav">
-        {r.elements && r.elements.flatMap(sr => renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
+        {response.elements && response.elements.flatMap(sr => renderDropdownItem(sr, 0, response)).map((sr, i) => withKey(sr, i))}
       </div>
     );
 
@@ -185,7 +234,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           }
 
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN)}>
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN, res == this.state.active)}>
               {config.getIcon(res)}{config.getLabel(res)}
             </HeaderOrItem>
           ];

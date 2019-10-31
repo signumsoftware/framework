@@ -100,28 +100,28 @@ export function FindOptionsLine(p : FindOptionsLineProps){
   }
   const fo = p.binding.getValue();
 
-  return (
-    <div className="form-group">
-      <label className="control-label">
+    return (
+      <div className="form-group">
+        <label className="control-label">
         {renderMember(fo)}
-      </label>
-      <div>
-        {fo ? <div>
+        </label>
+        <div>
+          {fo ? <div>
           <a href="#" onClick={handleView}>{getDescription(fo)}</a>
-          {" "}
-          <a href="#" className={classes("sf-line-button", "sf-remove")}
+            {" "}
+            <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={handleRemove}
-            title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
-          </a></div> :
-          <a href="#" title={EntityControlMessage.Create.niceToString()}
-            className="sf-line-button sf-create"
+              title={EntityControlMessage.Remove.niceToString()}>
+              <FontAwesomeIcon icon="times" />
+            </a></div> :
+            <a href="#" title={EntityControlMessage.Create.niceToString()}
+              className="sf-line-button sf-create"
             onClick={handleCreate}>
-            <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
-          </a>}
+              <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+            </a>}
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 
@@ -171,24 +171,24 @@ export function QueryTokenLine(p: QueryTokenLineProps) {
   }
   const token = p.binding.getValue();
 
-  return (
-    <div className="form-group">
-      <label className="control-label">
+    return (
+      <div className="form-group">
+        <label className="control-label">
         {renderMember(token)} {p.queryKey && <small>({getQueryNiceName(p.queryKey)})</small>}
-      </label>
-      <div>
+        </label>
+        <div>
         <QueryTokenBuilderString key={p.queryKey}
           queryKey={p.queryKey}
-          token={token}
+            token={token}
           subTokenOptions={p.subTokenOptions}
           parsedToken={parsedToken}
-          hideLabel={true}
+            hideLabel={true}
           onChange={handleChange}
-          label=""
-        />
+            label=""
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 
@@ -203,7 +203,7 @@ interface FetchQueryDescriptionState {
 }
 
 export function FetchQueryDescription(p: FetchQueryDescriptionProps) {
-  const queryDescription = useAPI(undefined, () => !p.queryName ? Promise.resolve(undefined) : Finder.getQueryDescription(p.queryName), [p.queryName]);
+  const queryDescription = useAPI(() => !p.queryName ? Promise.resolve(undefined) : Finder.getQueryDescription(p.queryName), [p.queryName]);
   return p.children(queryDescription);
 }
 
@@ -215,7 +215,7 @@ interface ViewNameComponentProps {
 
 export function ViewNameComponent(p: ViewNameComponentProps) {
 
-  const viewNames = useAPI(undefined, () => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
+  const viewNames = useAPI(() => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
     Promise.all(getTypeInfos(p.typeName || "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
       .then(arrays => [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]), [p.typeName]);
 
@@ -255,40 +255,40 @@ export function FindOptionsComponent(p : FindOptionsComponentProps){
 
   var dn = p.dn;
   const fo = p.findOptions;
-  return (
-    <div className="form-sm filter-options code-container">
+    return (
+      <div className="form-sm filter-options code-container">
       <QueryKeyLine queryKey={fo.queryName} label="queryKey" onChange={handleChangeQueryKey} />
 
-      {fo.queryName &&
-        <div>
-          <div className="row">
-            <div className="col-sm-6">
-              <QueryTokenBuilderString label="parentToken" parsedToken={fo.parsedParentToken} token={fo.parentToken}
+        {fo.queryName &&
+          <div>
+            <div className="row">
+              <div className="col-sm-6">
+                <QueryTokenBuilderString label="parentToken" parsedToken={fo.parsedParentToken} token={fo.parentToken}
                 onChange={handleChangeParentColumn} queryKey={fo.queryName} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
-            </div>
-            <div className="col-sm-6">
-              {fo.parsedParentToken &&
+              </div>
+              <div className="col-sm-6">
+                {fo.parsedParentToken &&
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.parentValue)} refreshView={() => forceUpdate()}
-                  type={FilterOptionsComponent.getValueType(fo.parsedParentToken)} defaultValue={null} />}
+                    type={FilterOptionsComponent.getValueType(fo.parsedParentToken)} defaultValue={null} />}
+              </div>
             </div>
-          </div>
 
 
-        <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
-          <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.avoidDefaultFilters)} refreshView={() => forceUpdate()} type="boolean" defaultValue={false}  />
-        } />
+          <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.includeDefaultFilters)} refreshView={() => forceUpdate()} type="boolean" defaultValue={null} />
+          } />
         <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
           <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
-        } />
+          } />
 
           <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} />
           <PaginationComponent dn={dn} findOptions={fo} refreshView={() => forceUpdate()} />
 
 
-        </div>
-      }
-    </div>
-  );
+          </div>
+        }
+      </div>
+    );
 }
 
 export function QueryKeyLine(p : { queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }){
@@ -363,26 +363,26 @@ function QueryTokenBuilderString(p : QueryTokenBuilderStringProps){
         .done();
   }
 
-  var qt = <QueryTokenBuilder
+    var qt = <QueryTokenBuilder
     queryToken={p.parsedToken}
     queryKey={p.queryKey}
     onTokenChange={p.onChange}
-    readOnly={false}
+      readOnly={false}
     subTokenOptions={p.subTokenOptions} />;
 
   if (p.hideLabel)
-    return qt;
+      return qt;
 
-  return (
-    <div className="form-group">
-      <label className="control-label">
+    return (
+      <div className="form-group">
+        <label className="control-label">
         {p.label}
-      </label>
-      <div>
-        {qt}
+        </label>
+        <div>
+          {qt}
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 interface BaseOptionsComponentProps<T> {
@@ -656,16 +656,16 @@ class ColumnOptionsComponent extends BaseOptionsComponent<ColumnOptionExpr> {
 function PaginationComponent(p : { findOptions: FindOptionsExpr, dn: DesignerNode<BaseNode>; refreshView: () => void }){
   const fo = p.findOptions;
   const dn = p.dn;
-  const mode = fo.paginationMode;
+    const mode = fo.paginationMode;
 
-  return (
-    <fieldset>
-      <legend>Pagination</legend>
+    return (
+      <fieldset>
+        <legend>Pagination</legend>
       <ExpressionOrValueComponent dn={dn} refreshView={p.refreshView} binding={Binding.create(fo, f => f.paginationMode)} type="string" options={PaginationMode.values()} defaultValue={null} allowsExpression={false} />
-      {(mode == "Firsts" || mode == "Paginate") &&
+        {(mode == "Firsts" || mode == "Paginate") &&
         <ExpressionOrValueComponent dn={dn} refreshView={p.refreshView} binding={Binding.create(fo, f => f.elementsPerPage)} type="number" defaultValue={null} />}
-      {(mode == "Paginate") &&
+        {(mode == "Paginate") &&
         <ExpressionOrValueComponent dn={dn} refreshView={p.refreshView} binding={Binding.create(fo, f => f.currentPage)} type="number" defaultValue={null} />}
-    </fieldset>
-  );
+      </fieldset>
+    );
 }

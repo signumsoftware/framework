@@ -18,7 +18,7 @@ import { classes } from '@framework/Globals';
 export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
 
   var [count, setCount] = React.useState(0);
-  var appendix = useAPI(undefined, () => API.appendix(p.match.params.uniqueName), [count]);
+  var appendix = useAPI(() => API.appendix(p.match.params.uniqueName), [count]);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)

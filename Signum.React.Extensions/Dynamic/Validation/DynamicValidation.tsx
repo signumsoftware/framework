@@ -33,7 +33,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
 
   const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
   const dv = p.ctx.value;
-  const routeTypeName = useAPI(undefined, () => dv.subEntity ? API.routeTypeName(dv.subEntity) : Promise.resolve(dv.entityType.className), [dv.subEntity, dv.entityType.cleanName]);
+  const routeTypeName = useAPI(() => dv.subEntity ? API.routeTypeName(dv.subEntity) : Promise.resolve(dv.entityType.className), [dv.subEntity, dv.entityType.cleanName]);
 
   const [response, setResponse] = React.useState<DynamicValidationTestResponse | undefined>(undefined);
 

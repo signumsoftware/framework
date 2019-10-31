@@ -109,8 +109,8 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
     if (p.options) {
       if (typeof p.options == "function")
         return (
-          <Typeahead
-            inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
+            <Typeahead
+              inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
             getItems={handleGetItems}
             onSelect={handleTypeaheadSelect} />
         );
@@ -190,7 +190,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
           />
         </label>
       </div>
-      );
+    );
     } else {
       return (
         <div>
@@ -262,14 +262,14 @@ export function NullableCheckBox(p : NullableCheckBoxProps){
     }
   }
 
-  return (
+    return (
     <a href="#" onClick={handleClick}>
       <FontAwesomeIcon icon={getIcon()} className={getClass()} />
-      {" "}
+        {" "}
       {p.label}
-    </a>
-  );
-}
+      </a>
+    );
+  }
 
 export interface FieldComponentProps {
   dn: DesignerNode<BaseNode>,
@@ -323,20 +323,20 @@ export function FieldComponent(p : FieldComponentProps){
 export function DynamicViewInspector(p : { selectedNode?: DesignerNode<BaseNode> }){
   const sn = p.selectedNode;
 
-  if (!sn)
-    return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
+    if (!sn)
+      return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
 
-  const error = NodeUtils.validate(sn, undefined);
+    const error = NodeUtils.validate(sn, undefined);
 
-  return (<div className="form-sm ">
-    <h4>
-      {sn.node.kind}
-      {sn.route && <small> ({Finder.getTypeNiceName(sn.route.typeReference())})</small>}
-    </h4>
-    {error && <div className="alert alert-danger">{error}</div>}
-    {NodeUtils.renderDesigner(sn)}
-  </div>);
-}
+    return (<div className="form-sm ">
+      <h4>
+        {sn.node.kind}
+        {sn.route && <small> ({Finder.getTypeNiceName(sn.route.typeReference())})</small>}
+      </h4>
+      {error && <div className="alert alert-danger">{error}</div>}
+      {NodeUtils.renderDesigner(sn)}
+    </div>);
+  }
 
 
 export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
@@ -362,23 +362,23 @@ export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
     }).done();
   }
 
-  return (
-    <div>
+    return (
+      <div>
       <a href="#" onClick={handleHelpClick} className="design-help-button">
         {open ?
-          DynamicViewMessage.HideHelp.niceToString() :
-          DynamicViewMessage.ShowHelp.niceToString()}
-      </a>
+            DynamicViewMessage.HideHelp.niceToString() :
+            DynamicViewMessage.ShowHelp.niceToString()}
+        </a>
       {open &&
-        <TypeHelpComponent
+          <TypeHelpComponent
           initialType={p.initialTypeName}
-          mode="TypeScript"
+            mode="TypeScript"
           onMemberClick={handleTypeHelpClick} />}
-    </div>
-  );
-}
+      </div>
+    );
+  }
 
-interface DesignerModalProps extends IModalProps {
+interface DesignerModalProps extends IModalProps<boolean | undefined> {
   title: React.ReactNode;
   mainComponent: () => React.ReactElement<any>;
 }
@@ -401,23 +401,23 @@ export function DesignerModal(p: DesignerModalProps) {
     p.onExited!(okClicked);
   }
 
-  return (
+    return (
     <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
-      <ModalHeaderButtons
+        <ModalHeaderButtons
         onOk={handleOkClicked}
         onCancel={handleCancelClicked}>
         {p.title}
-      </ModalHeaderButtons>
-      <div className="modal-body">
+        </ModalHeaderButtons>
+        <div className="modal-body">
         {p.mainComponent()}
-      </div>
-    </Modal>
-  );
-}
+        </div>
+      </Modal>
+    );
+  }
 
 DesignerModal.show = (title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> => {
-  return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
-}
+    return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
+  }
 
 export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
 

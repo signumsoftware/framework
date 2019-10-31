@@ -57,11 +57,11 @@ namespace Signum.Engine.Translation
 
                             PropertyRoute? mListRoute = pr.GetMListItemsRoute();
                             if (mListRoute == null)
-                                return gr.Select(ti => KVP.Create(new LocalizedInstanceKey(pr, ti.Instance, null), ti));
+                                return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, null), ti));
 
                             Type type = ((FieldMList)Schema.Current.Field(mListRoute.Parent!)).TableMList.PrimaryKey.Type;
 
-                            return gr.Select(ti => KVP.Create(new LocalizedInstanceKey(pr, ti.Instance, new PrimaryKey((IComparable)ReflectionTools.Parse(ti.RowId!, type)!)), ti));
+                            return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, new PrimaryKey((IComparable)ReflectionTools.Parse(ti.RowId!, type)!)), ti));
 
                         }).ToDictionary())
                         , new InvalidateWith(typeof(TranslatedInstanceEntity)));
@@ -75,7 +75,7 @@ namespace Signum.Engine.Translation
                                where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
                                s.Settings.FieldAttribute<TranslateFieldAttribute>(pr) != null &&
                                s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
-                               select KVP.Create(pr, s.Settings.FieldAttribute<TranslateFieldAttribute>(pr)!.TranslatableRouteType)).ToList();
+                               select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslateFieldAttribute>(pr)!.TranslatableRouteType)).ToList();
 
                     foreach (var kvp in prs)
                     {
@@ -152,7 +152,7 @@ namespace Signum.Engine.Translation
             var selector = pr.GetLambdaExpression<T, string>(safeNullAccess: false);
 
             return (from e in Database.Query<T>()
-                    select KVP.Create(new LocalizedInstanceKey(pr, e.ToLite(), null), selector.Evaluate(e))).ToDictionary();
+                    select KeyValuePair.Create(new LocalizedInstanceKey(pr, e.ToLite(), null), selector.Evaluate(e))).ToDictionary();
         }
 
         static GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string>>> giFromRouteMList =
@@ -164,7 +164,7 @@ namespace Signum.Engine.Translation
             var selector = pr.GetLambdaExpression<M, string>(safeNullAccess: false, skipBefore: mlItemPr);
 
             return (from mle in Database.MListQuery(mListProperty)
-                    select KVP.Create(new LocalizedInstanceKey(pr, mle.Parent.ToLite(), mle.RowId), selector.Evaluate(mle.Element))).ToDictionary();
+                    select KeyValuePair.Create(new LocalizedInstanceKey(pr, mle.Parent.ToLite(), mle.RowId), selector.Evaluate(mle.Element))).ToDictionary();
         }
 
         public static Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>> TranslationsForType(Type type, CultureInfo? culture)
@@ -452,7 +452,7 @@ namespace Signum.Engine.Translation
                     (from kvp in gr
                      let t = target?.TryGetC(kvp.Key)
                      where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
-                     select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
+                     select KeyValuePair.Create(kvp.Key, kvp.Value)).ToDictionary();
 
                 if (routeConflicts.IsEmpty())
                     return null;
@@ -497,7 +497,7 @@ namespace Signum.Engine.Translation
             Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslatedInstanceEntity> current =
                 (from ci in TranslatedInstanceLogic.TranslationsForType(t, c)
                  from key in ci.Value
-                 select KVP.Create((culture: ci.Key, instanceKey: key.Key), key.Value)).ToDictionary();
+                 select KeyValuePair.Create((culture: ci.Key, instanceKey: key.Key), key.Value)).ToDictionary();
 
             using (Transaction tr = new Transaction())
             {

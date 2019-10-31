@@ -9,7 +9,7 @@ import { useAPI } from '@framework/Hooks';
 import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components'
 
 export default function WorkflowDropdown(props: {}) {
-  var starts = useAPI(undefined, signal => WorkflowClient.API.starts(), []);
+  var starts = useAPI(signal => WorkflowClient.API.starts(), []);
 
   function getStarts(starts: WorkflowEntity[]) {
     return starts.flatMap(w => {

@@ -22,8 +22,8 @@ export interface ChartBuilderProps {
 export default function ChartBuilder(p: ChartBuilderProps) {
   const forceUpdate = useForceUpdate();
 
-  const colorPalettes = useAPI(undefined, signal => ChartClient.getColorPalettes(), []);
-  const chartScripts = useAPI(undefined, signal => ChartClient.getChartScripts(), []);
+  const colorPalettes = useAPI(signal => ChartClient.getColorPalettes(), []);
+  const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
   function chartTypeImgClass(script: ChartScript): string {
     const cb = p.ctx.value;

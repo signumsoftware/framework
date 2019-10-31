@@ -20,7 +20,7 @@ import { ModalHeaderButtons } from "@framework/Components/ModalHeaderButtons";
 import { NumericTextBox, isNumber } from "@framework/Lines/ValueLine";
 import { AbortableRequest } from "@framework/Services";
 
-interface PredictModalProps extends IModalProps {
+interface PredictModalProps extends IModalProps<undefined> {
   initialPredict: PredictRequest;
   isClassification: boolean;
   entity?: Lite<Entity>;

@@ -39,7 +39,7 @@ namespace Signum.Engine.Help
                     where !imp.IsByAll
                     from t in imp.Types
                     group qn by t into g
-                    select KVP.Create(g.Key, g.ToList())).ToDictionary();
+                    select KeyValuePair.Create(g.Key, g.ToList())).ToDictionary();
 
         });
 

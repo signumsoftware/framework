@@ -41,7 +41,7 @@ export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> 
 
 export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
-  const result = useAPI(undefined, () => API.diffLog(p.ctx.value.id!), [p.ctx.value.id]);
+  const result = useAPI(() => API.diffLog(p.ctx.value.id!), [p.ctx.value.id]);
 
   var mctx = p.ctx.subCtx(DiffLogMixin);
 

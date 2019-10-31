@@ -198,7 +198,7 @@ interface DeviceLineProps {
 
 export function DeviceLine(p: DeviceLineProps) {
 
-  const devices = useAPI(undefined, () => API.availableDevices(p.algorithm), [p.algorithm]);
+  const devices = useAPI(() => API.availableDevices(p.algorithm), [p.algorithm]);
 
   const ctx = p.ctx;
   return (

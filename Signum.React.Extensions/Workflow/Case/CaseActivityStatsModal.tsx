@@ -14,7 +14,7 @@ import { EntityLink, SearchControl } from "@framework/Search";
 import { OperationLogEntity } from "@framework/Signum.Entities.Basics";
 import { Tab, Tabs, Modal } from 'react-bootstrap';
 
-interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
+interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps<undefined> {
   case: CaseEntity;
   caseActivityStats: CaseActivityStats[];
 }

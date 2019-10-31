@@ -11,12 +11,14 @@ import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
-import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { ModulesHelp } from "./ModulesHelp";
+
 
 export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }) {
 
   const forceUpdate = useForceUpdate();
-  const viewNames = useAPI(undefined, () => !p.ctx.value.entityType ? Promise.resolve(undefined) : DynamicViewClient.API.getDynamicViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
+  const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.viewDispatcher.getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
 
   const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
   const scriptChangedRef = React.useRef(false);
@@ -115,13 +117,13 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
     if (exampleEntityRef.current) {
       try {
         setTestResult({
-          type: "RESULT",
+            type: "RESULT",
           result: func(exampleEntityRef.current!)
         });
       } catch (e) {
         setTestResult({
-          type: "ERROR",
-          error: (e as Error).message
+            type: "ERROR",
+            error: (e as Error).message
         });
       }
     }
@@ -158,7 +160,11 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
         <div className="btn-toolbar btn-toolbar-small">
           {renderViewNameButtons()}
         </div>
-        <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", modules) =>"}</pre>
+        <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>{"(e: " + ctx.value.entityType!.className + ", "}
+          <div style={{ display: "inline-flex" }}>
+            <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
+          </div>
+        </pre>
         <JavascriptCodeMirror code={ctx.value.script || ""} onChange={handleCodeChange} />
         {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>

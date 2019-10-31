@@ -425,27 +425,27 @@ export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromis
 export namespace API {
 
   export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
-    return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewProps(typeName: string, viewName: string): Promise<DynamicViewProps[]> {
-    return ajaxGet<DynamicViewProps[]>({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {
-    return ajaxGet<DynamicViewSelectorEntity>({ url: `~/api/dynamic/selector/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/selector/${typeName}` });
   }
 
   export function getDynamicViewOverride(typeName: string): Promise<DynamicViewOverrideEntity[]> {
-    return ajaxGet<DynamicViewOverrideEntity[]>({ url: `~/api/dynamic/override/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/override/${typeName}` });
   }
 
   export function getDynamicViewNames(typeName: string): Promise<string[]> {
-    return ajaxGet<string[]>({ url: `~/api/dynamic/viewNames/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/viewNames/${typeName}` });
   }
 
   export function getSuggestedFindOptions(typeName: string): Promise<SuggestedFindOptions[]> {
-    return ajaxGet<SuggestedFindOptions[]>({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
   }
 }
 
