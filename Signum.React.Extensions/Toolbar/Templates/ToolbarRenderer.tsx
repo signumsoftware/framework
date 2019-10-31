@@ -234,7 +234,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           }
 
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN, res == this.state.active)}>
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN, res == active)}>
               {config.getIcon(res)}{config.getLabel(res)}
             </HeaderOrItem>
           ];
@@ -293,5 +293,3 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
 
   return null;
 }
-
-

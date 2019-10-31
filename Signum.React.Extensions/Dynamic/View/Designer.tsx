@@ -398,7 +398,7 @@ export function DesignerModal(p: DesignerModalProps) {
   }
 
   function handleOnExited() {
-    p.onExited!(okClicked);
+    p.onExited!(okClicked.current);
   }
 
     return (

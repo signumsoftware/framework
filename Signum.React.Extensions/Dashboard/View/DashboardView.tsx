@@ -11,7 +11,7 @@ import { parseIcon } from '../Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default function DashboardView(p : { dashboard: DashboardEntity, entity?: Entity }){
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity }) {
 
   function renderBasic() {
     const db = p.dashboard;
@@ -203,7 +203,7 @@ export function PanelPart(p: PanelPartProps) {
       <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
     </span>;
 
-  var style = part.style == undefined || part.style == "Default" ? undefined : part.style.toLowerCase();
+  var style = part.style == undefined ? undefined : part.style.toLowerCase();
 
   return (
     <div className={classes("card", style && ("border-" + style), "mb-4")}>
@@ -214,12 +214,12 @@ export function PanelPart(p: PanelPartProps) {
         {renderer.handleEditClick &&
           <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
             <FontAwesomeIcon icon="edit" />&nbsp;Edit
-                      </a>}
+          </a>
+        }
         &nbsp;
-                  {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
-
-    var style = p.style == undefined ? undefined : p.style.toLowerCase();
+      {renderer.handleTitleClick == undefined ? title :
+          <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+        }
       </div>
       <div className="card-body py-2 px-3">
         <ErrorBoundary>

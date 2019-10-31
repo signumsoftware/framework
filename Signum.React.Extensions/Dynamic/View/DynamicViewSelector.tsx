@@ -117,13 +117,13 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
     if (exampleEntityRef.current) {
       try {
         setTestResult({
-            type: "RESULT",
+          type: "RESULT",
           result: func(exampleEntityRef.current!)
         });
       } catch (e) {
         setTestResult({
-            type: "ERROR",
-            error: (e as Error).message
+          type: "ERROR",
+          error: (e as Error).message
         });
       }
     }
@@ -147,8 +147,8 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   function renderViewNameButtons() {
     return (
       <DropdownButton variant="success" title="View Names" id="views_dropdown">
-          {allViewNames().map((vn, i) =>
-            <Dropdown.Item key={i} onClick={() => handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
+        {allViewNames().map((vn, i) =>
+          <Dropdown.Item key={i} onClick={() => handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
       </DropdownButton>
     );
   }

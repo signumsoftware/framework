@@ -6,7 +6,7 @@ import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { AuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import MessageModal from '@framework/MessageModal'
+import MessageModal from '@framework/Modals/MessageModal'
 
 export default function Login() {
 

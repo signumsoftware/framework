@@ -1,6 +1,6 @@
 import * as Navigator from '@framework/Navigator'
 import { Location } from 'history'
-import { OutputParams } from 'query-string'
+import { ParsedQuery } from 'query-string'
 import * as React from 'react'
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserChartClient from './UserChart/UserChartClient'
@@ -26,7 +26,7 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
       .then(cr => ChartClient.Encoder.chartPathPromise(cr, element.content!));
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<UserChartEntity>, location: Location, query: OutputParams): boolean {
+  isCompatibleWithUrl(res: ToolbarResponse<UserChartEntity>, location: Location, query: ParsedQuery<string>): boolean {
     return query["userChart"] == liteKey(res.content!);
   }
 }

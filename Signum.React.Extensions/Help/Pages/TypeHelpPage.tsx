@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, Urls } from '../HelpClient'
 import { SearchControl } from '@framework/Search';
-import { useAPI, useTitle, useForceUpdate } from '@framework/Hooks';
+import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, PropertyRouteHelpEmbedded, OperationHelpEmbedded, QueryHelpEntity, QueryColumnHelpEmbedded } from '../Signum.Entities.Help';
 import { getTypeInfo, GraphExplorer, getQueryNiceName } from '@framework/Reflection';
 import { JavascriptMessage } from '@framework/Signum.Entities';
@@ -24,8 +24,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string }>) {
 
   var cleanName = p.match.params.cleanName;
-  var [count, setCount] = React.useState(0);
-  var typeHelp = useAPI(() => API.type(cleanName), [count, cleanName]);
+  var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();
 
@@ -88,7 +87,7 @@ export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string 
       }
 
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        <SaveButton ctx={ctx} onSuccess={() => setCount(count + 1)} />
+        <SaveButton ctx={ctx} onSuccess={() => reloadTypeHelp()} />
       </div>
 
     </div>
