@@ -129,38 +129,34 @@ interface ToolbarMainModalModalState {
   show: boolean;
 }
 
-class ToolbarMainModalModal extends React.Component<ToolbarMainModalModalProps, ToolbarMainModalModalState> {
+function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
 
-  constructor(props: ToolbarMainModalModalProps) {
-    super(props);
-    this.state = { show: true };
+  const [show, setShow] = React.useState<boolean>(true);
+
+  function handleCloseClicked() {
+    setShow(false);
   }
 
-  handleCloseClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(undefined);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(undefined);
-  }
+  return (
+    <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
+      <div className="modal-header">
+        <h5 className="modal-title">{p.tr.label || getToString(p.tr.content!)}</h5>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        <ToolbarMainRendererPrivate response={p.tr} />
+      </div>
+    </Modal>
+  );
+}
 
-  render() {
-    return (
-      <Modal onHide={this.handleCloseClicked} show={this.state.show} className="message-modal" onExited={this.handleOnExited} size="xl">
-        <div className="modal-header">
-          <h5 className="modal-title">{this.props.tr.label || getToString(this.props.tr.content!)}</h5>
-          <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCloseClicked}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div className="modal-body">
-          <ToolbarMainRendererPrivate response={this.props.tr} />
-        </div>
-      </Modal>
-    );
-  }
 
-  static show(tr: ToolbarClient.ToolbarResponse<any>): Promise<undefined> {
-    return openModal<undefined>(<ToolbarMainModalModal tr={tr} />);
-  }
+ToolbarMainModalModal.show = (tr: ToolbarClient.ToolbarResponse<any>): Promise<undefined> => {
+  return openModal<undefined>(<ToolbarMainModalModal tr={tr} />);
 }
