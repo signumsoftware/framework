@@ -8,34 +8,21 @@ import { RouteComponentProps } from "react-router";
 import { FilterOption } from "@framework/FindOptions";
 import * as QueryString from 'query-string'
 import { TreeOperation } from "./Signum.Entities.Tree";
+import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
 
 }
 
-interface TreePageState {
-  filterOptions: FilterOption[];
-}
+export default function TreePage(p: TreePageProps) {
+  var query = QueryString.parse(p.location.search);
 
-export default function TreePage(p : TreePageProps, TreePageState){
-  function constructor(props: TreePageProps) {
-    super(props);
-    state = calculateState(props);
-  }
+  const filterOptions = React.useMemo(() => Finder.Decoder.decodeFilters(query), [query]);
 
-  function componentWillReceiveProps(nextProps: TreePageProps) {
-    setState(calculateState(nextProps));
-  }
-
-  calculateState(props: TreePageProps): TreePageState {
-    var query = QueryString.parse(props.location.search);
-    return {
-      filterOptions: Finder.Decoder.decodeFilters(query)
-    };
-  }
+  const treeViewRef = React.useRef<TreeViewer>(null);
 
   function changeUrl() {
-    var newPath = treeView!.getCurrentUrl();
+    var newPath = treeViewRef.current!.getCurrentUrl();
 
     var currentLocation = Navigator.history.location;
 
@@ -43,7 +30,6 @@ export default function TreePage(p : TreePageProps, TreePageState){
       Navigator.history.replace(newPath);
   }
 
-  treeView?: TreeViewer;
   var ti = getTypeInfo(p.match.params.typeName);
 
   return (
@@ -51,11 +37,11 @@ export default function TreePage(p : TreePageProps, TreePageState){
       <h2>
         <span className="sf-entity-title">{ti.nicePluralName}</span>
         &nbsp;
-                  <a className="sf-popup-fullscreen" href="#" onClick={(e) => treeView!.handleFullScreenClick(e)}>
+                  <a className="sf-popup-fullscreen" href="#" onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
         </a>
       </h2>
-      <TreeViewer ref={tv => treeView = tv!}
+      <TreeViewer ref={treeViewRef}
         initialShowFilters={true}
         typeName={ti.name}
         allowMove={Operations.isOperationAllowed(TreeOperation.Move, ti.name)}
@@ -65,6 +51,3 @@ export default function TreePage(p : TreePageProps, TreePageState){
     </div>
   );
 }
-
-
-

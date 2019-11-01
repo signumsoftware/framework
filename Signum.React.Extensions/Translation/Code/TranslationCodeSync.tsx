@@ -50,17 +50,17 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
     <div>
       <h2>{message}</h2>
       <br />
-      {result && <SyncTable result={result} onSave={handleSave} />}
+      {result && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}
     </div>
   );
 }
 
-function SyncTable({ result, onSave }: { result: AssemblyResult, onSave: ()=>void }) {
+function SyncTable({ result, onSave, currentCulture }: { result: AssemblyResult, onSave: () => void, currentCulture: string }) {
 
   return (
     <div>
       {Dic.getValues(result.types)
-        .map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={p.match.params.culture} />)}
+        .map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={currentCulture} />)}
       <button className="btn btn-primary" onClick={onSave}>{TranslationMessage.Save.niceToString()}</button>
     </div>
   );
