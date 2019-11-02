@@ -28,7 +28,7 @@ interface FilterBuilderEmbeddedProps {
 export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
-  const filterOptions = useAPI(() => qd == null ? Promise.resolve(null) : toFilterOptionParsed(qd, p.ctx.value, p.subTokenOptions), [qd, p.ctx.value, p.subTokenOptions]);
+  const filterOptions = useAPI(() => qd == null ? Promise.resolve(null) : FilterBuilderEmbedded.toFilterOptionParsed(qd, p.ctx.value, p.subTokenOptions), [qd, p.ctx.value, p.subTokenOptions]);
 
   const forceUpdate = useForceUpdate();
   
@@ -145,7 +145,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
   );
 }
 
-async function toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
+FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
   const completer = new TokenCompleter(qd);
 
   allFilters.forEach(mle => {
