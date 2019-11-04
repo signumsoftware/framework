@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
 using System.Linq;
 using System.DirectoryServices.AccountManagement;
+using Signum.Utilities.Reflection;
+using Signum.Engine.Basics;
 
 namespace Signum.React.Authorization
 {
@@ -17,12 +19,13 @@ namespace Signum.React.Authorization
 
         public static UserEntity? DefaultAutoCreateUser(WindowsPrincipal wp)
         {
+            
             if (!(AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada))
                 return null;
 
             var config = ada.GetConfig();
             var userName = wp.Identity.Name!;
-            var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
+            var domainName = config.DomainName.DefaultToNull() ?? userName.TryAfterLast('@') ?? userName.TryBefore('\\');
             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
             if(ada.GetConfig().AllowSimpleUserNames)
@@ -34,46 +37,56 @@ namespace Signum.React.Authorization
 
             if (!config.AutoCreateUsers)
                 return null;
-
-            using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
+            try
             {
-                var user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
-                return user;
+                using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
+                {
+                    var user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                    return user;
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["Identity.Name"] = wp.Identity.Name;
+                e.Data["domainName"] = domainName;
+                e.Data["localName"] = localName;
+                throw;
             }
         }
 
-        public static bool LoginWindowsAuthentication(ActionContext ac)
+        public static string? LoginWindowsAuthentication(ActionContext ac)
         {
             using (AuthLogic.Disable())
             {
                 try
                 {
                     if (!(ac.HttpContext.User is WindowsPrincipal wp))
-                        return false;
+                        return $"User is not a WindowsPrincipal ({ac.HttpContext.User.GetType().Name})";
 
                     if (AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada && !ada.GetConfig().LoginWithWindowsAuthenticator)
-                        return false;
+                        return $"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false";
 
                     UserEntity? user = AuthLogic.RetrieveUser(wp.Identity.Name!);
 
                     if (user == null)
                     {
                         if (AutoCreateUser == null)
-                            return false;
+                            return "AutoCreateUser is null";
 
                         user = AutoCreateUser(wp);
 
                         if (user == null)
-                            return false;
+                            return "AutoCreateUser returned null";
                     }
 
                     AuthServer.OnUserPreLogin(ac, user);
                     AuthServer.AddUserSession(ac, user);
-                    return true;
+                    return null;
                 }
-                catch
+                catch(Exception e)
                 {
-                    return false;
+                    e.LogException();
+                    return e.Message;
                 }
             }
         }

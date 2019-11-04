@@ -131,7 +131,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 export function LoginWithWindowsButton() {
 
   function onClick() {
-    return AuthClient.API.loginWindowsAuthentication()
+    return AuthClient.API.loginWindowsAuthentication(true)
       .then(r => {
         if (r == null) {
           MessageModal.showError(AuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), AuthMessage.NoWindowsUserFound.niceToString()).done();
