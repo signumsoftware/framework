@@ -40,7 +40,7 @@ import {
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
-import Workflow from './Workflow/Workflow'
+import Workflow, { WorkflowHandle } from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
@@ -50,6 +50,7 @@ import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { EntityLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
+import { FunctionalAdapter } from '../../../Framework/Signum.React/Scripts/Frames/FrameModal';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -454,12 +455,12 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
       .done();
   }
 
-  let wf = eoc.frame.entityComponent as Workflow;
+  let wf = FunctionalAdapter.innerRef(eoc.frame.entityComponent) as WorkflowHandle;
   wf.getXml()
     .then(xml => {
       var model = WorkflowModel.New({
         diagramXml: xml,
-        entities: Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
+        entities: Dic.map(wf.workflowState!.entities, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
           bpmnElementId: bpmnId,
           model: model
         })))
