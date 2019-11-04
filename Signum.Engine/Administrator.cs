@@ -1,3 +1,4 @@
+using Signum.Engine;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
@@ -448,15 +449,35 @@ namespace Signum.Engine
         public static void TruncateTable(Type type)
         {
             var table = Schema.Current.Table(type);
-            table.TablesMList().ToList().ForEach(mlist => {
-                SqlBuilder.TruncateTable(mlist.Name).ExecuteLeaves();
-            });
 
-            using (DropAndCreateForeignKeys(table))
-                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+            using (Transaction tr = new Transaction())
+            {
+                table.TablesMList().ToList().ForEach(mlist =>
+                {
+                    TruncateTableSystemVersioning(mlist);
+                });
+
+                using (DropAndCreateIncommingForeignKeys(table))
+                    TruncateTableSystemVersioning(table);
+
+                tr.Commit();
+            }
         }
 
-        private static IDisposable DropAndCreateForeignKeys(Table table)
+        public static void TruncateTableSystemVersioning(ITable table)
+        {
+            if(table.SystemVersioned == null)
+                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+            else
+            {
+                SqlBuilder.AlterTableDisableSystemVersioning(table.Name).ExecuteLeaves();
+                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+                SqlBuilder.TruncateTable(table.SystemVersioned.TableName).ExecuteLeaves();
+                SqlBuilder.AlterTableEnableSystemVersioning(table).ExecuteLeaves();
+            }
+        }
+
+        public static IDisposable DropAndCreateIncommingForeignKeys(Table table)
         {
             var foreignKeys = Administrator.OverrideDatabaseInSysViews(table.Name.Schema.Database).Using(_ =>
             (from targetTable in Database.View<SysTables>()
