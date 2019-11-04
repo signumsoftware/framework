@@ -122,7 +122,7 @@ Login.customLoginButtons = null as (null | (() => React.ReactElement<any>));
 export function LoginWithWindowsButton() {
 
   function onClick() {
-    return AuthClient.API.loginWindowsAuthentication()
+    return AuthClient.API.loginWindowsAuthentication(true)
       .then(r => {
         if (r == null) {
           MessageModal.showError(AuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), AuthMessage.NoWindowsUserFound.niceToString()).done();

@@ -331,7 +331,7 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
   if (Options.disableWindowsAuthentication)
     return Promise.resolve(undefined);
 
-  return API.loginWindowsAuthentication().then(au => {
+  return API.loginWindowsAuthentication(false).then(au => {
     au && console.log("loginWindowsAuthentication");
     return au;
   }).catch(() => undefined);
@@ -446,8 +446,8 @@ export module API {
     return ajaxPost({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
   }
 
-  export function loginWindowsAuthentication(): Promise<LoginResponse | undefined> {
-    return ajaxPost({ url: "~/api/auth/loginWindowsAuthentication", avoidAuthToken: true }, undefined);
+  export function loginWindowsAuthentication(throwError: boolean): Promise<LoginResponse | undefined> {
+    return ajaxPost({ url: `~/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);
   }
 
   export function loginWithAzureAD(jwt: string): Promise<LoginResponse | undefined> {
