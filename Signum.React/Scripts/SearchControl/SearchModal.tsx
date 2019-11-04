@@ -81,7 +81,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
   render() {
     const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
     return (
-      <Modal size="lg" show={this.state.show} onExited={this.handleOnExisted} onHide={this.handleCancelClicked}>
+      <Modal size="lg" show={this.state.show} onExited={this.handleOnExisted} onHide={this.handleCancelClicked} className="sf-search-modal">
         <ModalHeaderButtons
           onClose={this.props.findMode == "Explore" ? this.handleCancelClicked : undefined}
           onOk={this.props.findMode == "Find" ? this.handleOkClicked : undefined}
