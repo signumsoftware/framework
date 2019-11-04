@@ -55,7 +55,7 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   }
 }
 
-export function MultiValueLine(props: MultiValueLineProps) {
+export const MultiValueLine = React.memo(function MultiValueLine(props: MultiValueLineProps) {
   const c = new MultiValueLineController(props);
   const p = c.props;
   const list = p.ctx.value;
@@ -73,7 +73,7 @@ export function MultiValueLine(props: MultiValueLineProps) {
           {
             mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
               (<ErrorBoundary key={i}>
-                <MultiValueLineElement 
+                <MultiValueLineElement
                   ctx={mlec}
                   onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
                   onRenderItem={p.onRenderItem} />
@@ -93,8 +93,7 @@ export function MultiValueLine(props: MultiValueLineProps) {
       </table>
     </FormGroup>
   );
-
-}
+}, (prev, next) => MultiValueLineController.propEquals(prev, next));
 
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;

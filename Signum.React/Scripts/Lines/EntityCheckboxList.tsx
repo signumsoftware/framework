@@ -32,7 +32,7 @@ export default class EntityCheckboxListController extends EntityListBaseControll
 
 }
 
-export function EntityCheckboxList(props: EntityCheckboxListProps) {
+export const EntityCheckboxList = React.memo(function EntityCheckboxList(props: EntityCheckboxListProps) {
   const c = new EntityCheckboxListController(props);
   const p = c.props;
 
@@ -96,7 +96,8 @@ export function EntityCheckboxList(props: EntityCheckboxListProps) {
       }).done();
     }
   }
-}
+}, (prev, next) => EntityListBaseController.propEquals(prev, next));
+
 
 interface EntityCheckboxListSelectProps {
   ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;

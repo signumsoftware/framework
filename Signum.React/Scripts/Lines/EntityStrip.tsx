@@ -31,7 +31,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
   }
 }
 
-export function EntityStrip(props: EntityStripProps) {
+export const EntityStrip = React.memo(function EntityTrip(props: EntityStripProps) {
   const c = new EntityStripController(props);
   const p = c.props;
 
@@ -143,7 +143,7 @@ export function EntityStrip(props: EntityStripProps) {
         onSelect={handleOnSelect} />
     );
   }
-}
+}, (prev, next) => EntityBaseController.propEquals(prev, next));
 
 export interface EntityStripElementProps {
   iconStart?: boolean;

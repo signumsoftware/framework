@@ -152,17 +152,17 @@ function asString(reactChild: React.ReactChild | undefined): string | undefined 
   return undefined;
 }
 
-export function ValueLine(p: ValueLineProps) {
+export const ValueLine = React.memo(function ValueLine(p: ValueLineProps) {
 
   const c = new ValueLineController(p);
 
   if (c.isHidden)
     return null;
 
-  return ValueLine.renderers[c.props.valueLineType!](c);
-}
+  return ValueLineRenderers.renderers[c.props.valueLineType!](c);
+}, (prev, next)=>LineBaseController.propEquals(prev, next));
 
-export namespace ValueLine {
+export namespace ValueLineRenderers {
   export const renderers: {
     [valueLineType: string]: (vl: ValueLineController) => JSX.Element;
   } = {};
@@ -204,7 +204,7 @@ function isDuration(e: React.KeyboardEvent<any>): boolean {
     (c == 190) /*. Colon*/);
 }
 
-ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["Checkbox" as ValueLineType] = (vl) => {
   const s = vl.props;
 
   const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
@@ -231,7 +231,7 @@ ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
   }
 };
 
-ValueLine.renderers["ComboBox"] = (vl) => {
+ValueLineRenderers.renderers["ComboBox"] = (vl) => {
   return internalComboBox(vl);
 };
 
@@ -320,7 +320,7 @@ function internalComboBox(vl: ValueLineController) {
 
 }
 
-ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
@@ -378,7 +378,7 @@ function isIE11(): boolean {
   return (!!(window as any).MSInputMethodContext && !!(document as any).documentMode);
 }
 
-ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
@@ -424,11 +424,11 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
   );
 };
 
-ValueLine.renderers["Number" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["Number" as ValueLineType] = (vl) => {
   return numericTextBox(vl, isNumber);
 };
 
-ValueLine.renderers["Decimal" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["Decimal" as ValueLineType] = (vl) => {
   return numericTextBox(vl, isDecimal);
 };
 
@@ -553,7 +553,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   }
 }
 
-ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
@@ -599,7 +599,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
   );
 }
 
-ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
   return durationTextBox(vl, isDuration);
 };
 

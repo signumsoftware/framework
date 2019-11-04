@@ -54,7 +54,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
   }
 }
 
-export function EntityCombo(props: EntityComboProps) {
+export const EntityCombo = React.memo(function EntityCombo(props: EntityComboProps) {
 
   const c = new EntityComboController(props);
   const p = c.props;
@@ -110,7 +110,7 @@ export function EntityCombo(props: EntityComboProps) {
       </div>
     </FormGroup>
   );
-}
+}, (prev, next) => EntityBaseController.propEquals(prev, next));
 
 export interface EntityComboSelectProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;

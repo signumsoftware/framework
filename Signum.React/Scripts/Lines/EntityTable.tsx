@@ -201,7 +201,9 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 }
 
-export function EntityTable(props: EntityTableProps) {
+export const EntityTable: React.FunctionComponent<EntityTableProps> & {
+  typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[];
+} = React.memo(function EntityTable(props: EntityTableProps) {
   const c = new EntityTableController(props);
   const p = c.props;
 
@@ -274,7 +276,7 @@ export function EntityTable(props: EntityTableProps) {
           <tbody>
             {
               elementCtxs
-                .map((mlec, i, array)  => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
+                .map((mlec, i, array) => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
                   ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
                   array={array}
                   index={i}
@@ -309,18 +311,16 @@ export function EntityTable(props: EntityTableProps) {
       </div >
     );
   }
-}
+}, (prev, next) => EntityBaseController.propEquals(prev, next)) as any;
 
-export namespace EntityTable {
-  export const defaultProps = {
-    maxResultsHeight: "400px",
-    scrollable: false
-  }
+EntityTable.defaultProps = {
+  maxResultsHeight: "400px",
+  scrollable: false
+};
 
-  export function typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
-    return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, RS>[];
-  }
-}
+EntityTable.typedColumns = function typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] {
+  return columns.filter(a => a != null && a != false) as EntityTableColumn<ModifiableEntity, RS>[];
+};
 
 export interface EntityTableRowProps {
   ctx: TypeContext<ModifiableEntity>;
@@ -336,7 +336,6 @@ export interface EntityTableRowProps {
   onBlur?: (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => void;
 }
 
-
 export interface EntityTableRowHandle {
   props: EntityTableRowProps;
   rowState?: any;
@@ -348,8 +347,8 @@ export function EntityTableRow(p: EntityTableRowProps) {
 
   const rowState = useAPI((signal, oldState) => !p.fetchRowState ? Promise.resolve(undefined) :
     p.fetchRowState(p.ctx, { props: p, rowState: oldState, forceUpdate }), []);
-  
-  const rowHandle = { props: p, rowState, forceUpdate };
+
+  const rowHandle = { props: p, rowState, forceUpdate } as EntityTableRowHandle;
 
   var ctx = p.ctx;
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);

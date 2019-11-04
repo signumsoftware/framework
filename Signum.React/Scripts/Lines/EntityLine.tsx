@@ -109,7 +109,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 }
 
 
-export function EntityLine(props: EntityLineProps) {
+export const EntityLine = React.memo(function EntityLine(props: EntityLineProps) {
   const c = new EntityLineController(props);
   const p = c.props;
 
@@ -228,4 +228,4 @@ export function EntityLine(props: EntityLineProps) {
     }
     c.focusNext.current = false;
   }
-}
+}, (prev, next) => EntityBaseController.propEquals(prev, next));

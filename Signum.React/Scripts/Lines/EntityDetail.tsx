@@ -20,7 +20,7 @@ export class EntityDetailController extends EntityBaseController<EntityDetailPro
   }
 }
 
-export function EntityDetail(props: EntityDetailProps) {
+export const EntityDetail = React.memo(function EntityDetail(props: EntityDetailProps) {
 
   const c = new EntityDetailController(props);
   const p = c.props;
@@ -63,6 +63,6 @@ export function EntityDetail(props: EntityDetailProps) {
     );
     return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;
   }
-}
+}, (prev, next) => EntityBaseController.propEquals(prev, next));
 
 

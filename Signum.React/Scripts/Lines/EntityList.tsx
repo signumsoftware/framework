@@ -117,7 +117,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
 }
 
 
-export function EntityList(props: EntityListProps) {
+export const EntityList = React.memo(function EntityList(props: EntityListProps) {
   const c = new EntityListController(props);
   const p = c.props;
   const list = p.ctx.value!;
@@ -148,4 +148,4 @@ export function EntityList(props: EntityListProps) {
       </div>
     </FormGroup>
   );
-}
+}, (prev, next) => EntityListBaseController.propEquals(prev, next));

@@ -72,7 +72,7 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
 
 }
 
-export function EntityTabRepeater(props: EntityTabRepeaterProps) {
+export const EntityTabRepeater = React.memo(function EntityTabRepeater(props: EntityTabRepeaterProps) {
   const c = new EntityTabRepeaterController(props);
   const p = c.props;
 
@@ -177,7 +177,7 @@ export function EntityTabRepeater(props: EntityTabRepeaterProps) {
       </Tabs>
     );
   }
-}
+}, (prev, next) => EntityListBaseController.propEquals(prev, next));
 
 function coerce(index: number | undefined, length: number): number | undefined {
   if (index == undefined)
