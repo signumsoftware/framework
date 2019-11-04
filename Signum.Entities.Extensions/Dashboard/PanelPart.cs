@@ -162,7 +162,8 @@ namespace Signum.Entities.Dashboard
             {
                 UserQuery = this.UserQuery,
                 RenderMode = this.RenderMode,
-
+                AllowSelection = this.AllowSelection,
+                ShowFooter = this.ShowFooter,
             };
         }
 
@@ -170,13 +171,18 @@ namespace Signum.Entities.Dashboard
         {
             return new XElement("UserQueryPart",
                 new XAttribute("UserQuery", ctx.Include(UserQuery)),
-                new XAttribute("RenderMode", RenderMode.ToString()));
+                new XAttribute("RenderMode", RenderMode.ToString()),
+                new XAttribute("AllowSelection", AllowSelection.ToString()),
+                new XAttribute("ShowFooter", ShowFooter.ToString())
+                );
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
             RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
+            AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? true;
+            ShowFooter = element.Attribute("ShowFooter")?.Value.ToBool() ?? false;
         }
     }
 
