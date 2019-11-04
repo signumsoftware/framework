@@ -15,12 +15,12 @@ export default function TextArea(p: TextAreaProps) {
     ta.scrollTop = ta.scrollHeight;
   }
 
-  const { autoResize, innerRef, ...props } = p;
+  const { autoResize, innerRef, minHeight, ...props } = p;
 
   const handleRef = React.useCallback((a: HTMLTextAreaElement | null) => {
     a && handleResize(a);
     innerRef && (typeof innerRef == "function" ? innerRef(a) : (innerRef as any).current = a);
-  }, [innerRef, p.minHeight]);
+  }, [innerRef, minHeight]);
 
   return (
     <textarea onInput={autoResize ? (e => handleResize(e.currentTarget)) : undefined} style={

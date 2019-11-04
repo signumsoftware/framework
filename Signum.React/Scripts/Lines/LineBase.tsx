@@ -29,9 +29,9 @@ export class LineBaseController<P extends LineBaseProps> {
 
   static propEquals(prevProps: LineBaseProps, nextProps: LineBaseProps) {
     if (Dic.equals(prevProps, nextProps, true))
-      return false; //For Debugging
+      return true; //For Debugging
 
-    return true;
+    return false;
   }
 
   props: P;

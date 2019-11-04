@@ -64,7 +64,7 @@ export function taskSetNiceName(lineBase: LineBaseController<any>, state: LineBa
 
 tasks.push(taskSetUnit);
 export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLine) {
+  if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
     if (!vProps.unitText &&
@@ -77,7 +77,7 @@ export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBasePr
 
 tasks.push(taskSetFormat);
 export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLine) {
+  if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
     if (!vProps.formatText &&

@@ -70,7 +70,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     if (
       nextProps.getComponent || prevProps.getComponent ||
       nextProps.extraButtons || prevProps.extraButtons)
-      return true;
+      return false;
 
     return LineBaseController.propEquals(prevProps, nextProps);
   }
