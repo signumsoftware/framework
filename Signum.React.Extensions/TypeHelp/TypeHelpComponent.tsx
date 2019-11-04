@@ -245,7 +245,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
   );
 }
 
-function getExpression(initial: string, pr: PropertyRoute | string, mode: TypeHelpClient.TypeHelpMode, options ?: { stronglyTypedMixinTS?: boolean }): string {
+TypeHelpComponent.getExpression = function getExpression(initial: string, pr: PropertyRoute | string, mode: TypeHelpClient.TypeHelpMode, options ?: { stronglyTypedMixinTS?: boolean }): string {
 
   if (pr instanceof PropertyRoute)
     pr = pr.propertyPath();

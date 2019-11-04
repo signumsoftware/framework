@@ -29,8 +29,6 @@ interface MultiFileLineProps extends EntityListBaseProps {
 
 export class MultiFileLineController extends EntityListBaseController<MultiFileLineProps> {
 
-
-
   getDefaultProps(state: MultiFileLineProps) {
 
     super.getDefaultProps(state);
@@ -69,7 +67,7 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
   }
 }
 
-export function MultiFileLine(props: MultiFileLineProps) {
+export const MultiFileLine = React.memo(function MultiFileLine(props: MultiFileLineProps) {
   const c = new MultiFileLineController(props)
   const p = c.props;
 
@@ -125,9 +123,9 @@ export function MultiFileLine(props: MultiFileLineProps) {
       </table>
     </FormGroup>
   );
-}
+}, (prev, next) => MultiFileLineController.propEquals(prev, next));
 
-MultiFileLine.defaultProps = {
+(MultiFileLine as any).defaultProps = {
   download: "SaveAs",
   dragAndDrop: true
-}
+} as MultiFileLineProps;

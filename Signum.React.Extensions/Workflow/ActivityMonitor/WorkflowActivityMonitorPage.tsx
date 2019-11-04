@@ -12,6 +12,7 @@ import { newLite } from '@framework/Reflection';
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
 import { toFilterRequests } from '@framework/Finder';
+import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 export interface WorkflowActivityMonitorConfig {
   workflow: Lite<WorkflowEntity>;
@@ -19,97 +20,61 @@ export interface WorkflowActivityMonitorConfig {
   columns: ColumnOptionParsed[];
 }
 
-interface WorkflowActivityMonitorPageProps extends RouteComponentProps<{ workflowId: string }> {
-}
-
 interface WorkflowActivityMonitorPageState {
-  config?: WorkflowActivityMonitorConfig;
-  lastConfig?: WorkflowActivityMonitorConfig | undefined;
-  workflowModel?: WorkflowModel;
-  workflowActivityMonitor?: WorkflowActivityMonitor;
+  lastConfig: WorkflowActivityMonitorConfig;
+  workflowActivityMonitor: WorkflowActivityMonitor;
 }
 
-export default class WorkflowActivityMonitorPage extends React.Component<WorkflowActivityMonitorPageProps, WorkflowActivityMonitorPageState> {
-  constructor(props: WorkflowActivityMonitorPageProps) {
-    super(props);
+export default function WorkflowActivityMonitorPage(p: RouteComponentProps<{ workflowId: string }>) {
 
-    this.state = {};
-  }
+  var workflow = useAPI(() => {
+    const lite = newLite(WorkflowEntity, p.match.params.workflowId);
+    return Navigator.API.fillToStrings(lite).then(() => lite);
+  }, [p.match.params.workflowId]);
 
-  workflowActvityMonitorViewerComponent?: WorkflowActivityMonitorViewerComponent | null;
+  const config = React.useMemo(() => workflow == null ? undefined : ({
+    workflow: workflow,
+    filters: [],
+    columns: []
+  }) as WorkflowActivityMonitorConfig, [workflow]);
 
-  loadState(props: WorkflowActivityMonitorPageProps) {
-    var workflow = newLite(WorkflowEntity, props.match.params.workflowId);
-    Navigator.API.fillToStrings(workflow)
-      .then(() => {
-        var config: WorkflowActivityMonitorConfig = {
-          workflow: workflow,
-          filters: [],
-          columns: []
-        };
+  const [result, reloadResult] = useAPIWithReload<WorkflowActivityMonitorPageState | undefined>(() => {
+    if (config == null)
+      return Promise.resolve(undefined);
 
-        this.setState({ config });
-
-        var clone = JSON.parse(JSON.stringify(config));
-
-        API.workflowActivityMonitor(toRequest(config))
-          .then(result => this.setState({
-            workflowActivityMonitor: result,
-            lastConfig: clone,
-          })).done();
-      })
-      .done();
-
-    API.getWorkflowModel(workflow)
-      .then(pair => this.setState({
-        workflowModel: pair.model,
-      }))
-      .done();
-  }
-
-  handleDraw = () => {
-    var clone = JSON.parse(JSON.stringify(this.state.config));
-    API.workflowActivityMonitor(toRequest(this.state.config!))
-      .then(result => this.setState({
+    const clone = JSON.parse(JSON.stringify(config)) as WorkflowActivityMonitorConfig;
+    return API.workflowActivityMonitor(toRequest(config))
+      .then(result => ({
         workflowActivityMonitor: result,
         lastConfig: clone,
-      })).done();
-  }
+      }));
+  }, [config]);
 
-  componentWillReceiveProps(newProps: WorkflowActivityMonitorPageProps) {
-    if (this.props.match.params.workflowId != newProps.match.params.workflowId)
-      this.loadState(newProps);
-  }
+  const workflowModel = useAPI(() => workflow == null ? Promise.resolve(undefined) : API.getWorkflowModel(workflow).then(wmi => wmi.model), [workflow]);
 
-  componentWillMount() {
-    this.loadState(this.props);
-  }
+  return (
+    <div>
+      <h3 className="modal-title">
+        {!config ? JavascriptMessage.loading.niceToString() : config.workflow.toStr}
+        {config && Navigator.isViewable(WorkflowEntity) &&
+          <small>&nbsp;<a href={Navigator.navigateRoute(config.workflow)} target="blank"><FontAwesomeIcon icon="pencil" /></a></small>}
+        <br />
+        <small>{WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}</small>
+      </h3>
+      {config && <WorkflowActivityMonitorConfigComponent config={config} />}
 
-  render() {
-    return (
-      <div>
-        <h3 className="modal-title">
-          {!this.state.config ? JavascriptMessage.loading.niceToString() : this.state.config.workflow.toStr}
-          {this.state.config && Navigator.isViewable(WorkflowEntity) &&
-            <small>&nbsp;<a href={Navigator.navigateRoute(this.state.config.workflow)} target="blank"><FontAwesomeIcon icon="pencil" /></a></small>}
-          <br />
-          <small>{WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}</small>
-        </h3>
-        {this.state.config && <WorkflowActivityMonitorConfigComponent config={this.state.config} />}
-
-        {!this.state.workflowModel || !this.state.workflowActivityMonitor || !this.state.lastConfig ?
-          <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-          <div className="code-container">
-            <WorkflowActivityMonitorViewerComponent ref={m => this.workflowActvityMonitorViewerComponent = m}
-              onDraw={this.handleDraw}
-              workflowModel={this.state.workflowModel}
-              workflowActivityMonitor={this.state.workflowActivityMonitor}
-              workflowConfig={this.state.lastConfig} />
-          </div>
-        }
-      </div>
-    );
-  }
+      {!workflowModel || !result ?
+        <h3>{JavascriptMessage.loading.niceToString()}</h3> :
+        <div className="code-container">
+          <WorkflowActivityMonitorViewerComponent
+            onDraw={reloadResult}
+            workflowModel={workflowModel}
+            workflowActivityMonitor={result.workflowActivityMonitor}
+            workflowConfig={result.lastConfig} />
+        </div>
+      }
+    </div>
+  );
 }
 
 function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowActivityMonitorRequest {
@@ -132,39 +97,22 @@ interface WorkflowActivityMonitorConfigComponentState {
   queryDescription?: QueryDescription;
 }
 
-export class WorkflowActivityMonitorConfigComponent extends React.Component<WorkflowActivityMonitorConfigComponentProps, WorkflowActivityMonitorConfigComponentState> {
+export function WorkflowActivityMonitorConfigComponent(p: WorkflowActivityMonitorConfigComponentProps) {
 
-  constructor(props: WorkflowActivityMonitorConfigComponentProps) {
-    super(props);
-    this.state = {};
-  }
+  const qd = useAPI(() => Finder.getQueryDescription(CaseActivityEntity), []);
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
+  const filterOpts = SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement;
+  const columnOpts = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
 
-  loadData(props: WorkflowActivityMonitorConfigComponentProps) {
-    Finder.getQueryDescription(CaseActivityEntity)
-      .then(qd => this.setState({ queryDescription: qd }))
-      .done();
-  }
-
-  render() {
-    const filterOpts = SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement;
-    const columnOpts = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
-    const qd = this.state.queryDescription;
-
-    return (qd == null ? null :
-      <div>
-        <FilterBuilder title={WorkflowActivityMonitorMessage.Filters.niceToString()}
-          queryDescription={qd} subTokensOptions={filterOpts}
-          filterOptions={this.props.config.filters} />
-        <ColumnBuilder title={WorkflowActivityMonitorMessage.Columns.niceToString()}
-          queryDescription={qd} subTokensOptions={columnOpts}
-          columnOptions={this.props.config.columns} />
-      </div>
-    );
-  }
-
+  return (qd == null ? null :
+    <div>
+      <FilterBuilder title={WorkflowActivityMonitorMessage.Filters.niceToString()}
+        queryDescription={qd} subTokensOptions={filterOpts}
+        filterOptions={p.config.filters} />
+      <ColumnBuilder title={WorkflowActivityMonitorMessage.Columns.niceToString()}
+        queryDescription={qd} subTokensOptions={columnOpts}
+        columnOptions={p.config.columns} />
+    </div>
+  );
 }
 
