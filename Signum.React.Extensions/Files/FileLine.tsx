@@ -55,7 +55,7 @@ export class FileLineController extends EntityBaseController<FileLineProps>{
   }
 }
 
-export function FileLine(props: FileLineProps) {
+export const FileLine = React.memo(function FileLine(props: FileLineProps) {
   const c = new FileLineController(props);
   const p = c.props;
 
@@ -113,9 +113,9 @@ export function FileLine(props: FileLineProps) {
       </div>
     );
   }
-}
+}, (prev, next) => FileLineController.propEquals(prev, next));
 
-FileLine.defaultProps = {
+(FileLine as any).defaultProps = {
   download: "SaveAs",
   dragAndDrop: true
-}
+} as FileLineProps;
