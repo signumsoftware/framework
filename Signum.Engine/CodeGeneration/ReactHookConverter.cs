@@ -140,15 +140,15 @@ namespace Signum.Engine.CodeGeneration
         public virtual string ConvertToFunction(string value)
         {
             {
-                var lambda = Regex.Match(value, @"(?<ident> *)(?<name>\w+) *= *\((?<params>.*)\) *=> *{");
+                var lambda = Regex.Match(value, @"^(?<ident> *)(?<mods>(static )*)(?<name>\w+) *= *\((?<params>.*)\) *(?<return>: *.* *)?=> *{\s*$");
                 if (lambda.Success)
-                    return $"{lambda.Groups["ident"].Value}function {lambda.Groups["name"].Value}({lambda.Groups["params"].Value}) {{\r\n";
+                    return $"{lambda.Groups["ident"].Value}{lambda.Groups["mods"].Value}function {lambda.Groups["name"].Value}({lambda.Groups["params"].Value}) {lambda.Groups["return"].Value}{{\r\n";
             }
 
             {
-                var method = Regex.Match(value, @"(?<ident> *)(?<name>\w+) *\((?<params>.*)\) *{");
+                var method = Regex.Match(value, @"^(?<ident> *)(?<mods>((static|async) )*)(?<name>\w+) *\((?<params>.*)\) *(?<return>: *.* *)?{\s*$");
                 if (method.Success)
-                    return $"{method.Groups["ident"].Value}function {method.Groups["name"].Value}({method.Groups["params"].Value}) {{\r\n";
+                    return $"{method.Groups["ident"].Value}{method.Groups["mods"].Value}function {method.Groups["name"].Value}({method.Groups["params"].Value}) {method.Groups["return"].Value}{{\r\n";
             }
             return value;
         }
