@@ -36,6 +36,7 @@ import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
+import { getSettings } from '../../../../Framework/Signum.React/Scripts/Finder'
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -370,9 +371,16 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
   var exampleExpression: string | undefined = undefined;
 
   if (typeName && fixedViewName) {
-    const viewProps = useAPI(undefined, [typeName, fixedViewName], signal => API.getDynamicViewProps(typeName, fixedViewName));
-    if (viewProps && viewProps.length > 0)
-      exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
+    const es = Navigator.getSettings(typeName);
+    const staticViews = ["STATIC"].concat(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
+
+    if (staticViews.contains(fixedViewName))
+      exampleExpression = undefined;
+    else {
+      const viewProps = useAPI(undefined, [typeName, fixedViewName], signal => API.getDynamicViewProps(typeName, fixedViewName).catch(() => undefined));
+      if (viewProps && viewProps.length > 0)
+        exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
+    }
   }
   else
     if (typeName && dn.node.viewName)
