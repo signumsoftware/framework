@@ -151,9 +151,6 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     }
   }
 
-
-
-
   handleViewElement = (event: React.MouseEvent<any>, index: number) => {
 
     event.preventDefault();
@@ -201,9 +198,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 }
 
-export const EntityTable: React.FunctionComponent<EntityTableProps> & {
-  typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[];
-} = React.memo(function EntityTable(props: EntityTableProps) {
+export function EntityTable(props: EntityTableProps) {
   const c = new EntityTableController(props);
   const p = c.props;
 
@@ -311,7 +306,7 @@ export const EntityTable: React.FunctionComponent<EntityTableProps> & {
       </div >
     );
   }
-}, (prev, next) => EntityBaseController.propEquals(prev, next)) as any;
+}
 
 EntityTable.defaultProps = {
   maxResultsHeight: "400px",

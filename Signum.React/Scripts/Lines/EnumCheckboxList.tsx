@@ -41,7 +41,7 @@ export class EnumCheckboxListController extends LineBaseController<EnumCheckboxL
 
 }
 
-export const EnumCheckboxList = React.memo(function EnumCheckboxList(props: EnumCheckboxListProps) {
+export function EnumCheckboxList(props: EnumCheckboxListProps) {
   const c = new EnumCheckboxListController(props);
   const p = c.props;
 
@@ -121,4 +121,4 @@ export const EnumCheckboxList = React.memo(function EnumCheckboxList(props: Enum
 
     return undefined;
   }
-}, (prev, next) => EnumCheckboxListController.propEquals(prev, next));
+}

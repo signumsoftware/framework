@@ -25,7 +25,7 @@ export class EntityRepeaterController extends EntityListBaseController<EntityRep
 }
 
 
-export const EntityRepeater = React.memo(function EntityRepeater(props: EntityRepeaterProps) {
+export function EntityRepeater(props: EntityRepeaterProps) {
   var c = new EntityRepeaterController(props);
   var p = c.props;
 
@@ -96,7 +96,7 @@ export const EntityRepeater = React.memo(function EntityRepeater(props: EntityRe
       </div>
     );
   }
-}, (prev, next) => EntityListBaseController.propEquals(prev, next));
+}
 
 
 export interface EntityRepeaterElementProps {

@@ -55,7 +55,7 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   }
 }
 
-export const MultiValueLine = React.memo(function MultiValueLine(props: MultiValueLineProps) {
+export function MultiValueLine(props: MultiValueLineProps) {
   const c = new MultiValueLineController(props);
   const p = c.props;
   const list = p.ctx.value;
@@ -93,7 +93,7 @@ export const MultiValueLine = React.memo(function MultiValueLine(props: MultiVal
       </table>
     </FormGroup>
   );
-}, (prev, next) => MultiValueLineController.propEquals(prev, next));
+}
 
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;
