@@ -38,9 +38,9 @@ export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackCon
     const hasChanges = bc.pack.entity.modified;
 
     return [
-      { button: <Button color="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
-      { button: <Button color="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
-      { button: <Button color="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
+      { button: <Button variant="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
     ];
   }
 

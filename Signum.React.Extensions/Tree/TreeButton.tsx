@@ -25,7 +25,7 @@ export default function TreeButton(p : TreeButtonProps){
 
   var label = p.searchControl.props.largeToolbarButtons == true ? " " + TreeMessage.Tree.niceToString() : undefined;
   return (
-    <Button onClick={handleClick} color="light"><FontAwesomeIcon icon="sitemap" />&nbsp; { label }</Button >
+    <Button onClick={handleClick} variant="light"><FontAwesomeIcon icon="sitemap" />&nbsp; { label }</Button >
   );
 }
 

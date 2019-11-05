@@ -26,7 +26,7 @@ const PropertyRulesPackControl = React.forwardRef(function PropertyRulesPackCont
 
   function renderButtons(bc: ButtonsContext) {
     return [
-      { button: <Button color="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
     ];
   }
 

@@ -24,7 +24,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
 
   renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
     ];
   }
 
