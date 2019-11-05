@@ -2,6 +2,7 @@ import * as Navigator from './Navigator';
 
 import * as React from 'react'
 import { FunctionalAdapter } from './Frames/FrameModal';
+import { useStateWithPromise } from './Hooks';
 
 declare global {
   interface KeyboardEvent {
@@ -26,8 +27,8 @@ let current: GlobalModalContainerHandles;
 const modalInstances: (React.Component & IHandleKeyboard)[] = [];
 
 interface GlobalModalContainerHandles {
-  pushModal(element: React.ReactElement<any>) : void;
-  popModal(element: React.ReactElement<any>): void;
+  pushModal(element: React.ReactElement<any>) : Promise<any>;
+  popModal(element: React.ReactElement<any>): Promise<any>;
   getCount(): number;
 }
 
@@ -37,16 +38,12 @@ export function GlobalModalContainer() {
     return () => window.removeEventListener("keydown", hanldleKeyDown);
   }, []);
 
-  var [modals, setModals] = React.useState<React.ReactElement<IModalProps<any>>[]>([]);
+  var [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
 
   React.useEffect(() => {
     current = {
-      pushModal: e => {
-        setModals([...modals, e]);
-      },
-      popModal: e => {
-        setModals(modals.filter(a=>a != e));
-      },
+      pushModal: e => setModals([...modals, e]),
+      popModal: e => setModals(modals.filter(a=>a != e)),
       getCount: () => modals.length
     };
     return () => { current = null!; };
@@ -77,14 +74,17 @@ export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise
   return new Promise<T>((resolve) => {
     let cloned: React.ReactElement<IModalProps<T>>;
     const onExited = (val: T) => {
-      current.popModal(cloned);
-      resolve(val);
+      current.popModal(cloned)
+        .then(() => resolve(val))
+        .done();
     }
 
     cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.getCount() } as any),
-      c => c ? modalInstances.push(c) : modalInstances.pop());
+      c => {
+        c ? modalInstances.push(c) : modalInstances.pop();
+      });
 
-    current.pushModal(cloned);
+    return current.pushModal(cloned);
   });
 }
 
