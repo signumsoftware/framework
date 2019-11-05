@@ -169,7 +169,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (viewName == "CHOOSE")
           return this.chooseViewName(entity, true);
 
-        return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => dynamicViewComponent(dv)));
+        return this.getViewPromiseWithName(entity, viewName);
       } catch (error) {
         return MessageModal.showError("There was an error executing the DynamicViewSelector. Fallback to default").then(() => this.fallback(entity));
       }
