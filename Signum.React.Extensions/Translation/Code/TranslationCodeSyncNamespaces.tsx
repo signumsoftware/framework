@@ -55,7 +55,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
   }
   if (result && result.length == 0) {
     return (
-      <div>
+      <div className="flex-grow-1">
         <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
         <Link to={`~/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
@@ -66,7 +66,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
 
 
   return (
-    <div>
+    <div className="flex-grow-1">
       <h2>{TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
       {renderTable()}
     </div>

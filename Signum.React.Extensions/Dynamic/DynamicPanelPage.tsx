@@ -48,54 +48,54 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
     handleSelect("restartServerApp");
   }
 
-  
-    AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
+
+  AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
   let step = QueryString.parse(p.location.search).step as DynamicPanelTab | undefined;
 
-    return (
-      <div>
-        <h2>Dynamic Panel</h2>
+  return (
+    <div className="flex-grow-1">
+      <h2>Dynamic Panel</h2>
       {startErrors && startErrors.length > 0 && !restarting &&
-          <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-            <FontAwesomeIcon icon="exclamation-triangle" />
-        {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
+        <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
+          <FontAwesomeIcon icon="exclamation-triangle" />
+          {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
                     </div>
-        }
+      }
       <Tabs activeKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
-          <Tab eventKey="search" title="Search">
-            <SearchPanel />
-          </Tab>
+        <Tab eventKey="search" title="Search">
+          <SearchPanel />
+        </Tab>
 
-          <Tab eventKey="compile" title="1. Edit and Compile">
+        <Tab eventKey="compile" title="1. Edit and Compile">
           <CompileStep refreshView={() => setCount(count + 1)} panelInformation={panelInformation} />
-          </Tab>
+        </Tab>
 
-          <Tab eventKey="restartServerApp" title="2. Restart Server Application">
-            <RestartServerAppStep
+        <Tab eventKey="restartServerApp" title="2. Restart Server Application">
+          <RestartServerAppStep
             startErrors={startErrors}
             restarting={restarting}
             setRestarting={setRestarting}
             refreshView={() => setCount(count + 1)} />
-          </Tab>
+        </Tab>
 
-          {Options.getDynaicMigrationsStep &&
+        {Options.getDynaicMigrationsStep &&
 
-            <Tab eventKey="migrations" title="3. Sql Migrations">
-              {Options.getDynaicMigrationsStep()}
-            </Tab>
-          }
-          <Tab eventKey="checkEvals" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
-            <CheckEvalsStep />
+          <Tab eventKey="migrations" title="3. Sql Migrations">
+            {Options.getDynaicMigrationsStep()}
           </Tab>
+        }
+        <Tab eventKey="checkEvals" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
+          <CheckEvalsStep />
+        </Tab>
 
-          <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
-            <RefreshClientsStep />
-          </Tab>
-        </Tabs>
-      </div>
-    );
-  }
+        <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
+          <RefreshClientsStep />
+        </Tab>
+      </Tabs>
+    </div>
+  );
+}
 
 export function SearchPanel(props: {}) {
 
@@ -107,7 +107,6 @@ export function SearchPanel(props: {}) {
 
   return (
     <div>
-
       <div className="row">
         <div className="col-sm-6">
           <div className="form-group has-search">
@@ -117,9 +116,6 @@ export function SearchPanel(props: {}) {
           {React.cloneElement(<div />, undefined, ...elements)}
         </div>
       </div>
-
-   
-
     </div>
   );
 }
@@ -173,22 +169,24 @@ export function CompileStep(p: DynamicCompileStepProps) {
 
     return (
       <table className="table table-condensed form-vertical table-sm">
-        <tr>
-          <th>Last Dynamic Change</th>
-          <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
-        </tr>
-        <tr>
-          <th>Last Dynamic Compilation</th>
-          <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? moment(lastCompile).format("L LT") : "-"}</td>
-        </tr>
-        <tr>
-          <th>Loaded CodeGen Assembly</th>
-          <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
-        </tr>
-        <tr>
-          <th>Loaded CodeGen Controller Assembly</th>
-          <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? moment(loadedControllerAssembly).format("L LT") : "-"}</td>
-        </tr>
+        <tbody>
+          <tr>
+            <th>Last Dynamic Change</th>
+            <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
+          </tr>
+          <tr>
+            <th>Last Dynamic Compilation</th>
+            <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? moment(lastCompile).format("L LT") : "-"}</td>
+          </tr>
+          <tr>
+            <th>Loaded CodeGen Assembly</th>
+            <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
+          </tr>
+          <tr>
+            <th>Loaded CodeGen Controller Assembly</th>
+            <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? moment(loadedControllerAssembly).format("L LT") : "-"}</td>
+          </tr>
+        </tbody>
       </table>
     );
   }
@@ -294,7 +292,6 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
       .done();
   }
 
-
   useInterval(p.restarting ? 1000 : null, null, () => null);
 
   async function refreshScreen() {
@@ -332,16 +329,16 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
     );
   }
 
-    return (
-      <div>
-        {
-          AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
+  return (
+    <div>
+      {
+        AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
         <a href="#" className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</a>
-        }
+      }
       {p.startErrors && p.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
 export function ErrorBlock(p: { error: WebApiHttpError }) {
 
@@ -350,22 +347,22 @@ export function ErrorBlock(p: { error: WebApiHttpError }) {
   function handleShowStackTrace(e: React.MouseEvent<any>) {
     e.preventDefault();
     setShowDetails(!showDetails);
-}
+  }
 
   var he = p.error;
-    return (
-      <div className="alert alert-danger error-block" style={{ marginTop: "20px" }}>
-        <div >
-          <h3>{he.exceptionType}</h3>
-          {textDanger(he.exceptionMessage)}
-        </div >
-        <div>
+  return (
+    <div className="alert alert-danger error-block" style={{ marginTop: "20px" }}>
+      <div >
+        <h3>{he.exceptionType}</h3>
+        {textDanger(he.exceptionMessage)}
+      </div >
+      <div>
         <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
         {showDetails && <pre>{he.stackTrace}</pre>}
-        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
 
@@ -384,14 +381,14 @@ export function CheckEvalsStep() {
     setAutoStart((autoStart || 0) + 1);
   }
 
-    var ctx = new StyleContext(undefined, {});
-    return (
-      <div>
+  var ctx = new StyleContext(undefined, {});
+  return (
+    <div>
       {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
       <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="sync" /> Refresh all</button>
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
 
 interface CheckEvalTypeProps {
@@ -419,56 +416,56 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
   function loadData(props: CheckEvalTypeProps) {
     setState({ state: "loading" });
     const fo = p.findOptions;
-      Finder.getQueryDescription(fo.queryName)
-        .then(qd => Finder.parseFindOptions(fo, qd, false))
-        .then(fop => {
-          var request = {
-            queryKey: fop.queryKey,
-            filters: toFilterRequests(fop.filterOptions || []),
-            orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
-            count: 10000,
-          } as QueryEntitiesRequest;
-          API.getEvalErrors(request)
+    Finder.getQueryDescription(fo.queryName)
+      .then(qd => Finder.parseFindOptions(fo, qd, false))
+      .then(fop => {
+        var request = {
+          queryKey: fop.queryKey,
+          filters: toFilterRequests(fop.filterOptions || []),
+          orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
+          count: 10000,
+        } as QueryEntitiesRequest;
+        API.getEvalErrors(request)
           .then(errors => setState({ state: "success", errors: errors }),
-              e => {
+            e => {
               setState({ state: "failed", errors: undefined });
-                throw e;
-              }).done();
-        });
+              throw e;
+            }).done();
+      });
   }
 
-    return (
+  return (
     <FormGroup ctx={p.ctx} labelText={getQueryNiceName(p.findOptions.queryName)}>
       <ValueSearchControl findOptions={p.findOptions} isLink={true} />
-        {
+      {
         state == "loading" ?
-            <FontAwesomeIcon icon="sync" spin={true} /> :
+          <FontAwesomeIcon icon="sync" spin={true} /> :
           <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="sync" className="sf-line-button" /></span>
-        }
-        {
+      }
+      {
         state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
           errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
             errors && errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
-                undefined
-        }
-        {
+              undefined
+      }
+      {
         errors && errors.length > 0 &&
-          <div className="table-responsive">
-            <table className="table table-sm">
-              <tbody>
+        <div className="table-responsive">
+          <table className="table table-sm">
+            <tbody>
               {errors.map((e, i) => <tr key={i}>
-                  <td><EntityLink lite={e.lite} /></td>
-                  <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
-                </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                <td><EntityLink lite={e.lite} /></td>
+                <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
+              </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        }
-      </FormGroup>
-    );
-  }
+      }
+    </FormGroup>
+  );
+}
 
 
 export function RefreshClientsStep() {
@@ -477,10 +474,10 @@ export function RefreshClientsStep() {
     window.location.reload(true);
   }
 
-    return (
-      <div>
-        <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
+  return (
+    <div>
+      <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
       <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
-      </div>
-    );
-  }
+    </div>
+  );
+}

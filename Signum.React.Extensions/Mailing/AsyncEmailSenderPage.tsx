@@ -27,7 +27,7 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
     return <h2>AsyncEmailSender state (loading...) </h2>;
 
   return (
-    <div>
+    <div className="flex-grow-1">
       <h2>AsyncEmailSender State</h2>
       <div className="btn-toolbar">
         {state.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}

@@ -22,7 +22,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
 
   const [filter, setFilter] = React.useState("");
 
-  const result = useAPI(() => API.retrieve(assembly, culture || "", filter), [assembly, culture, filter]);
+  const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture || "", filter), [assembly, culture, filter]);
 
   function renderTable() {
     if (result == undefined)
@@ -51,7 +51,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
         culture);
 
   return (
-    <div>
+    <div className="flex-grow-1">
       <h2>{message}</h2>
       <TranslateSearchBox setFilter={setFilter} filter={filter} />
       <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
@@ -75,7 +75,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} />
       <div className="input-group-append">
-        <button className="btn btn-light" type="submit" title={TranslationMessage.Search.niceToString()}>
+        <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
           <FontAwesomeIcon icon="search" />
         </button>
       </div>

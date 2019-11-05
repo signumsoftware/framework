@@ -147,7 +147,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
     return null;
 
   return (
-    <div ref={setContainer}>
+    <div ref={setContainer} className="flex-grow-1">
       {renderFilter()}
       {!(schemaInfo && size && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
