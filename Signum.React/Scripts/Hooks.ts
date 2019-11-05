@@ -6,8 +6,10 @@ import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
 import { Type, QueryTokenString } from './Reflection';
 
 export function useForceUpdate(): () => void {
-  var [count, setCount] = React.useState(0);
-  return () => setCount(count + 1);
+  var [object, setObject] = React.useState({});
+  return () => {
+    setObject({});
+  }
 }
 
 export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
@@ -17,8 +19,8 @@ export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
 }
 
 export function useForceUpdatePromise(): () => Promise<void> {
-  var [count, setCount] = useStateWithPromise(0);
-  return () => setCount(count + 1) as Promise<any>;
+  var [object, setObject] = useStateWithPromise({});
+  return () => setObject({}) as Promise<any>;
 }
 
 export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T) {
@@ -74,9 +76,8 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size 
       setNewSize();
     }
   }
-
+  const handler = React.useRef<number | null>(null);
   React.useEffect(() => {
-    const handler = React.useRef<number | null>(null);
     function onResize() {
       if (handler.current != null)
         clearTimeout(handler.current);
