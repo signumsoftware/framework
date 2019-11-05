@@ -10,22 +10,9 @@ import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { PanelPartContentProps } from '../DashboardClient'
 
-export interface UserChartPartProps {
-  part: UserChartPartEntity
-  entity?: Lite<Entity>;
-}
-
-export interface UserChartPartState {
-  chartRequest?: ChartRequestModel;
-  result?: ChartClient.API.ExecuteChartResult;
-  loading: boolean;
-  error?: any;
-  showData?: boolean;
-}
-
-export default function UserChartPart(p: UserChartPartProps) {
-
+export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<any | undefined>(undefined);
