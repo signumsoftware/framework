@@ -14,7 +14,7 @@ import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { FunctionalAdapter } from './FrameModal';
-import { useStateWithPromise, useForceUpdate } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useMounted } from '../Hooks'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -32,7 +32,7 @@ export default function FramePage(p: FramePageProps) {
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
   const validationErrors = React.useRef<React.Component>(null);
-
+  const mounted = useMounted();
   const forceUpdate = useForceUpdate();
 
   const ti = getTypeInfo(p.match.params.type);
@@ -138,7 +138,7 @@ export default function FramePage(p: FramePageProps) {
       else {
         if (reloadComponent) {
           setState(undefined)
-            .then(() => loadComponent(packEntity).then(gc => setState({ getComponent: gc, pack: packEntity, refreshCount: state.refreshCount + 1 })))
+            .then(() => loadComponent(packEntity).then(gc => { mounted.current && setState({ getComponent: gc, pack: packEntity, refreshCount: state.refreshCount + 1 }); }))
             .then(callback)
             .done();
         }
