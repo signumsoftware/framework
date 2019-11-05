@@ -170,7 +170,6 @@ export interface PanelPartState {
 
 
 export function PanelPart(p: PanelPartProps) {
-
   const content = p.ctx.value.content;
 
   const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
@@ -187,10 +186,10 @@ export function PanelPart(p: PanelPartProps) {
 
   if (renderer.withPanel && !renderer.withPanel(content)) {
     return React.createElement(state.component, {
-      partEmbedded: p,
+      partEmbedded: part,
       part: content,
       entity: lite,
-    } as DashboardClient.PanelPartContentProps<IPartEntity>);
+    });
   }
 
   const titleText = part.title || getToString(content);
@@ -225,7 +224,7 @@ export function PanelPart(p: PanelPartProps) {
         <ErrorBoundary>
           {
             React.createElement(state.component, {
-              partEmbedded: p,
+              partEmbedded: part,
               part: content,
               entity: lite,
             } as DashboardClient.PanelPartContentProps<IPartEntity>)

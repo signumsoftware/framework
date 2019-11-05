@@ -2,8 +2,9 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Entities.Dashboard'
+import { PanelPartContentProps } from '../DashboardClient';
 
-export default function LinkListPart(p : { part: LinkListPartEntity }){
+export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity >){
   return (
     <ul className="sf-cp-link-list">
       {
