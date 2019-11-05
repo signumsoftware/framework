@@ -780,10 +780,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton"
-            className="sf-query-button sf-tm-selected ml-2"
-          
-          disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ml-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
