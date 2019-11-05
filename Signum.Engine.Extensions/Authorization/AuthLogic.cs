@@ -15,6 +15,8 @@ using Signum.Engine.Operations;
 using System.Xml.Linq;
 using System.IO;
 using Signum.Engine.Scheduler;
+using Signum.Engine;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Authorization
 {
@@ -43,6 +45,11 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
+
+        [AutoExpressionField]
+        public static IQueryable<UserEntity> Users(this RoleEntity r) =>
+            As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));   
+
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
         static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
@@ -69,7 +76,18 @@ namespace Signum.Engine.Authorization
 
                 CultureInfoLogic.AssertStarted(sb);
 
-                sb.Include<UserEntity>();
+                sb.Include<UserEntity>()
+                  .WithExpressionFrom((RoleEntity r) => r.Users())
+                  .WithQuery(() => e => new
+                  {
+                      Entity = e,
+                      e.Id,
+                      e.UserName,
+                      e.Email,
+                      e.Role,
+                      e.State,
+                      e.CultureInfo,
+                  });
 
                 sb.Include<RoleEntity>()
                     .WithSave(RoleOperation.Save)
@@ -119,16 +137,7 @@ namespace Signum.Engine.Authorization
                         r.Name,
                         Refered = rc,
                     });
-                sb.Include<UserEntity>()
-                    .WithQuery(() => e => new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.UserName,
-                        e.Email,
-                        e.Role,
-                        e.State,
-                    });
+
 
                 UserGraph.Register();
             }
