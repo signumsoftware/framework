@@ -67,7 +67,7 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
   }
 }
 
-export const MultiFileLine = React.memo(function MultiFileLine(props: MultiFileLineProps) {
+export function MultiFileLine(props: MultiFileLineProps) {
   const c = new MultiFileLineController(props)
   const p = c.props;
 
@@ -123,7 +123,7 @@ export const MultiFileLine = React.memo(function MultiFileLine(props: MultiFileL
       </table>
     </FormGroup>
   );
-}, (prev, next) => MultiFileLineController.propEquals(prev, next));
+}
 
 (MultiFileLine as any).defaultProps = {
   download: "SaveAs",
