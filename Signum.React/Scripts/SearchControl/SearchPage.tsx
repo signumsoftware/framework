@@ -56,7 +56,7 @@ function SearchPage(p: SearchPageProps) {
 
   if (!Finder.isFindable(fo.queryName, true))
     return (
-      <div id="divSearchPage">
+      <div id="divSearchPage" className="flex-grow-1">
         <h3>
           <span className="display-6 sf-query-title">{getQueryNiceName(fo.queryName)}</span>
           <small>Error: Query not allowed {Finder.isFindable(fo.queryName, false) ? "in full screen" : ""}</small>
@@ -66,7 +66,7 @@ function SearchPage(p: SearchPageProps) {
 
   var qs = Finder.getSettings(fo.queryName);
   return (
-    <div id="divSearchPage">
+    <div id="divSearchPage" className="flex-grow-1">
       <h3 className="display-6 sf-query-title">
         <span>{getQueryNiceName(fo.queryName)}</span>
         &nbsp;

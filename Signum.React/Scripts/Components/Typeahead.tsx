@@ -146,7 +146,6 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    debugger;
     if (!shown)
       return;
 
