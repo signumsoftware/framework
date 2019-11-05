@@ -11,7 +11,7 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
 
   useTitle("AsyncEmailSender state");
 
-  const [state, reloadState] = useAPIWithReload(() => API.view(), []);
+  const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();

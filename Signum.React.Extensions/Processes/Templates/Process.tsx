@@ -7,7 +7,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { ProcessEntity, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
 import { BsColor } from '@framework/Components';
-import { useInterval } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useInterval } from '@framework/Hooks'
 
 export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
   const isActive = ctx.value.state == "Executing" || ctx.value.state == "Queued";

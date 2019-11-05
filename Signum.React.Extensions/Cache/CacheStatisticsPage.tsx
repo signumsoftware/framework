@@ -64,7 +64,7 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
           </tr>
         </thead>
         <tbody>
-          {state.lazies!.map((lazy, i) => <tr key={i}>
+          {state.lazies.map((lazy, i) => <tr key={i}>
             <td> {lazy.typeName} </td>
             <td> {lazy.hits} </td>
             <td> {lazy.invalidations}</td>
@@ -106,7 +106,7 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
             depth == 3 ? .4 : .3;
 
     return (
-      <>
+      <React.Fragment key={table.tableName}>
         <tr style={{ opacity: opacity }} key={table.tableName}>
           <td> {Array.repeat(depth, " → ").join("") + table.tableName}</td >
           <td> {table.typeName} </td>
@@ -117,7 +117,7 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
           <td> {table.sumLoadTime} </td>
         </tr>
         {table.subTables && table.subTables.map(st => renderTree(st, depth + 1))}
-      </>
+      </React.Fragment>
     );
   }
 }
