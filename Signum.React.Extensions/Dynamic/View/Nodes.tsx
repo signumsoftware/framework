@@ -368,20 +368,19 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
 
   const typeName = dn.route && dn.route.typeReference().name;
   const fixedViewName = dn.route && dn.node.viewName && typeof dn.node.viewName == "string" ? dn.node.viewName : undefined;
-  var exampleExpression: string | undefined = undefined;
 
   if (typeName && fixedViewName) {
-    const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
-    if (viewProps && viewProps.length > 0)
-      exampleExpression = "({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})";
-  }
-  else
-    if (typeName && dn.node.viewName)
-      exampleExpression = `({ prop1: "" })`;
+    const es = Navigator.getSettings(typeName);
+    const staticViews = ["STATIC"].concat(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
 
-  return (
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={exampleExpression} />
-  );
+    if (!staticViews.contains(fixedViewName)) {
+      const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
+    if (viewProps && viewProps.length > 0)
+        return <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={"({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})"} />
+    }
+  }
+
+  return <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} />;
 }
 
 export interface CustomContextNode extends ContainerNode {
