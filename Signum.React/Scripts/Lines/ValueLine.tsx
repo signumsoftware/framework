@@ -4,7 +4,7 @@ import numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
-import { LineBaseController, LineBaseProps } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
@@ -45,9 +45,9 @@ export type ValueLineType =
 
 export class ValueLineController extends LineBaseController<ValueLineProps>{
 
-  inputElement: React.RefObject<HTMLElement>;
-  constructor(p: ValueLineProps) {
-    super(p);
+  inputElement!: React.RefObject<HTMLElement>;
+  init(p: ValueLineProps) {
+    super.init(p);
 
     this.inputElement = React.useRef<HTMLElement>(null);
 
@@ -152,15 +152,15 @@ function asString(reactChild: React.ReactChild | undefined): string | undefined 
   return undefined;
 }
 
-export const ValueLine = React.memo(function ValueLine(p: ValueLineProps) {
+export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: ValueLineProps, ref: React.Ref<ValueLineController>) {
 
-  const c = new ValueLineController(p);
+  const c = useController(ValueLineController, props, ref);
 
   if (c.isHidden)
     return null;
 
   return ValueLineRenderers.renderers[c.props.valueLineType!](c);
-}, (prev, next)=>LineBaseController.propEquals(prev, next));
+}), (prev, next) => LineBaseController.propEquals(prev, next));
 
 export namespace ValueLineRenderers {
   export const renderers: {

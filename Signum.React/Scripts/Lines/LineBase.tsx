@@ -25,6 +25,13 @@ export interface LineBaseProps extends StyleOptions {
 }
 
 
+export function useController<C extends LineBaseController<P>, P extends LineBaseProps>(componentClass: new () => C, props: P, ref: React.Ref<C>) {
+  var controller = React.useMemo<C>(() => new componentClass(), []);
+  controller.init(props);
+  React.useImperativeHandle(ref, () => controller, []);
+  return controller;
+}
+
 export class LineBaseController<P extends LineBaseProps> {
 
   static propEquals(prevProps: LineBaseProps, nextProps: LineBaseProps) {
@@ -34,18 +41,21 @@ export class LineBaseController<P extends LineBaseProps> {
     return false;
   }
 
-  props: P;
-  forceUpdate: () => void;
-  constructor(p: P) {
+  props!: P;
+  forceUpdate!: () => void;
+  changes!: number;
+  setChanges!: (changes: React.SetStateAction<number>) => void;
+
+  init(p: P) {
     this.props = this.expandProps(p);
     this.forceUpdate = useForceUpdate();
+    [this.changes, this.setChanges] = React.useState(0);
   }
 
-  changes = 0;
   setValue(val: any) {
     var oldValue = this.props.ctx.value;
     this.props.ctx.value = val;
-    this.changes++;
+    this.setChanges(c => c + 1);
     this.validate();
     this.forceUpdate();
     if (this.props.onChange)

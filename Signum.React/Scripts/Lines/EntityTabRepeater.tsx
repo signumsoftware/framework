@@ -33,15 +33,12 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
 
   constructor(p: EntityTabRepeaterProps) {
     super(p);
-    [this.selectedIndex, this.setSelectedIndex] = React.useState();
+    [this.selectedIndex, this.setSelectedIndex] = React.useState(() => p.selectedIndex == null ? 0 : coerce(p.selectedIndex, p.ctx.value.length));
   }
 
 
   getDefaultProps(p: EntityTabRepeaterProps) {
     super.getDefaultProps(p);
-
-    this.setSelectedIndex(this.selectedIndex == null ? 0 : coerce(this.selectedIndex, p.ctx.value.length));
-
     p.createAsLink = true;
     p.viewOnCreate = false;
   }
@@ -116,10 +113,12 @@ export function EntityTabRepeater(props: EntityTabRepeaterProps) {
   }
 
   function handleSelectTab(eventKey: any) {
-    if (p.onSelectTab)
-      p.onSelectTab(eventKey as number);
-    else
-      c.setSelectedIndex(eventKey as number);
+    if (typeof eventKey == "number") { //Create tab
+      if (p.onSelectTab)
+        p.onSelectTab(eventKey as number);
+      else
+        c.setSelectedIndex(eventKey as number);
+    }
   }
 
   function renderTabs() {
@@ -167,11 +166,10 @@ export function EntityTabRepeater(props: EntityTabRepeaterProps) {
         {
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
-            <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
-              className="sf-line-button sf-create nav-link"
-              onClick={c.handleCreateClick}>
-              {EntityBaseController.createIcon}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
-            </a>)
+            <Tab eventKey="create-new" title={
+              <span className="sf-line-button sf-create nav-link" onClick={c.handleCreateClick}>
+                {ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+              </span>} />)
         }
         {p.extraTabs && p.extraTabs(c)}
       </Tabs>
