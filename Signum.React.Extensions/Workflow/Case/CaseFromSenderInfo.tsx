@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import * as Navigator from '@framework/Navigator'
 import { JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Entities.Workflow'
-import { useFetchAndForget } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useFetchInState } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 interface CaseFromSenderInfoProps {
   current: CaseActivityEntity;
@@ -15,7 +15,7 @@ interface CaseFromSenderInfoState {
 
 export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
 
-  const prev = useFetchAndForget(p.current.previous);
+  const prev = useFetchInState(p.current.previous);
 
   const c = p.current;
 

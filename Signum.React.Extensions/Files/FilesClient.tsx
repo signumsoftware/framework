@@ -10,7 +10,7 @@ import { ModifiableEntity, Lite, Entity, isLite, registerToString } from "@frame
 import { FileImageLine } from './FileImageLine';
 import { MultiFileLine } from './MultiFileLine';
 import { FileDownloader } from './FileDownloader';
-import { Retrieve } from '@framework/Lines/Retrieve';
+import { FetchInState } from '@framework/Lines/Retrieve';
 import { FileImage } from './FileImage';
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -66,7 +66,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     name: type.typeName + "_Image",
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
-      isLite(cell) ? <Retrieve lite={cell as Lite<IFile & Entity>}>{e => <FileImage file={e} />}</Retrieve> :
+      isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileImage file={e} />}</FetchInState> :
         <FileImage file={cell as IFile & ModifiableEntity} />)
   });
 }

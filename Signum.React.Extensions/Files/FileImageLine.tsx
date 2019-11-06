@@ -9,7 +9,7 @@ import { FileDownloaderConfiguration } from './FileDownloader'
 import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
-import { useFetchAndForget, useFetchAndRemember } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useFetchInState, useFetchAndRemember } from '../../../Framework/Signum.React/Scripts/Hooks'
 import { Retrieve } from '../../../Framework/Signum.React/Scripts/Lines'
 
 export { FileTypeSymbol };
