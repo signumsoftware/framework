@@ -31,8 +31,6 @@ export default function ChartRequestPage(p: ChartRequestPageProps) {
           .done();
       }
     }).done();
-
-
   }, [p.location.pathname, p.location.search, p.match.params.queryName])
 
   function handleOnChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {

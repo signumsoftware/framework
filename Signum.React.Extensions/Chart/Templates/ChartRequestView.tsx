@@ -47,11 +47,9 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   const [loading, setLoading] = React.useState<boolean>(false);
 
-
   React.useEffect(() => {
     setResult(undefined);
-  },[p.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(p.chartRequest, null), p.userChart)]);
-
+  }, [p.chartRequest]);
 
   const abortableQuery = React.useRef(new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal)));
   React.useEffect(() => {
