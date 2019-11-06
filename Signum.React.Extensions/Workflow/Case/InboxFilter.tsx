@@ -48,7 +48,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                 <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
               </div>
               <div className="col-sm-1">
-                <Button color="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
+                <Button variant="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
               </div>
             </div>
           </div>

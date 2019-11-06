@@ -163,13 +163,13 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     return (
       <div>
         <div className="btn-toolbar">
-          <Button color="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
-          <DropdownButton id="colorMenu" color="light" title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}>
+          <Button variant="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+          <DropdownButton id="colorMenu" variant="light" title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}>
             {this.menuItem("CaseMaxDuration")}
             {this.menuItem("AverageDuration")}
             {this.menuItem("EstimatedDuration")}
           </DropdownButton>
-          <Button color="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
+          <Button variant="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
         </div>
         <div ref={de => this.divArea = de!} />
       </div>

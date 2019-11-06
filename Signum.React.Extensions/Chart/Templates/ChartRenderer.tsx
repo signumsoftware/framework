@@ -25,13 +25,6 @@ export interface ChartRendererProps {
   lastChartRequest?: ChartRequestModel;
 }
 
-export interface ChartRendererState {
-  chartScript?: ChartScript;
-  parameters?: { [name: string]: string };
-  chartComponent?: (React.ComponentClass<ChartClient.ChartComponentProps>) | ((p: ChartClient.ChartScriptProps) => React.ReactNode);
-}
-
-
 export default function ChartRenderer(p: ChartRendererProps) {
 
   const cs = useAPI(async signal => {
@@ -42,7 +35,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
     const chartComponentModule = await chartComponentModulePromise();
 
     return { chartComponent: chartComponentModule.default, chartScript };
-  }, [p.chartRequest]);
+  }, [p.chartRequest.chartScript]);
 
   var parameters = cs && ChartClient.API.getParameterWithDefault(p.chartRequest, cs.chartScript)
 

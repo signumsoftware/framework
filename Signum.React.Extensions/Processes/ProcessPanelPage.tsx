@@ -30,7 +30,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
   const s = state;
 
   return (
-    <div>
+    <div className="flex-grow-1">
       <h2>ProcessLogic state</h2>
       <div className="btn-toolbar">
         {s.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}

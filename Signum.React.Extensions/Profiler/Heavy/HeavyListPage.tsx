@@ -13,8 +13,8 @@ interface HeavyListProps extends RouteComponentProps<{}> {
 
 export default function HeavyList(p: HeavyListProps) {
 
-  const [enabled, reloadEnabled] = useAPIWithReload(() => API.Heavy.isEnabled(), []);
-  const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.entries(), []);
+  const [enabled, reloadEnabled] = useAPIWithReload(() => API.Heavy.isEnabled(), [], { avoidReset: true });
+  const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.entries(), [], { avoidReset: true });
 
   const [fileToUpload, setFileToUpload] = React.useState<File | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0)
@@ -71,7 +71,7 @@ export default function HeavyList(p: HeavyListProps) {
     return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
 
   return (
-    <div>
+    <div className="flex-grow-1">
       <h2 className="display-6">Heavy Profiler</h2>
       <br />
       <div className="btn-toolbar" style={{ float: "right" }}>
@@ -127,7 +127,7 @@ function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfi
   function handleOnClick(e: React.MouseEvent, v: HeavyProfilerEntry) {
     let url = "~/profiler/heavy/entry/" + v.fullIndex;
 
-    if (d3.event.ctrlKey) {
+    if (e.ctrlKey) {
       window.open(Navigator.toAbsoluteUrl(url));
     } else {
       Navigator.history.push(url);

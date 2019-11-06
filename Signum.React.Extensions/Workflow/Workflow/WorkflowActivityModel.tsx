@@ -204,9 +204,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
                     </select>
                   </div>
                   <div className="col-sm-6">
-                    <Button color="success" size="sm" onClick={handleCheckView}>
-                      Check View …
-                </Button>
+                  <Button variant="success" size="sm" onClick={handleCheckView}>Check View …</Button>
                   </div>
                 </div>
               }

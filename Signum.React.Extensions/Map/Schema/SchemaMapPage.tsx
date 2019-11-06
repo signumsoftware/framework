@@ -60,7 +60,6 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
   const [tables, setTables] = React.useState<Tables | undefined>(undefined);
   const [schemaInfo, setSchemaInfo] = React.useState<SchemaMapInfo | undefined>(undefined);
   const [providers, setProviders] = React.useState<{ [name: string]: ClientColorProvider } | undefined>(undefined);
-
   useExpand();
 
   React.useEffect(() => {
@@ -85,10 +84,9 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
 
         }).done();
       }).done();
-  });
+  }, []);
 
   const { size, setContainer } = useSize();
-
 
   function handleSetFilter(e: React.FormEvent<any>) {
     setFilter((e.currentTarget as HTMLInputElement).value);
@@ -147,7 +145,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
     return null;
 
   return (
-    <div ref={setContainer}>
+    <div ref={setContainer} className="flex-grow-1">
       {renderFilter()}
       {!(schemaInfo && size && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
@@ -183,10 +181,10 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps) {
     mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
 
     return () => { mapD3Ref.current!.stop(); };
-  });
+  }, []);
 
   React.useEffect(() => mapD3Ref.current!.setColor(p.color), [p.color]);
-  React.useEffect(() => mapD3Ref.current!.setColor(p.filter), [p.filter]);
+  React.useEffect(() => mapD3Ref.current!.setFilter(p.filter), [p.filter]);
 
   function fixSchemaMap(map: SchemaMapInfo, tables: Tables) {
     map.tables.forEach(t => t.mlistTables.forEach(ml => {

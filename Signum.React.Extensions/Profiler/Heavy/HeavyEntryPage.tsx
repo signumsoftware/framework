@@ -27,12 +27,13 @@ export default function HeavyEntry(p: HeavyEntryProps) {
 
   const index = p.match.params.selectedIndex;
   Navigator.setTitle("Heavy Profiler > Entry " + index);
+
   if (entries == undefined)
     return <h3 className="display-6">Heavy Profiler > Entry {index} (loading...) </h3>;
 
   let current = entries.filter(a => a.fullIndex == p.match.params.selectedIndex).single();
   return (
-    <div>
+    <div className="flex-grow-1">
       <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
       <label><input type="checkbox" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
       <br />
@@ -193,8 +194,10 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
   const height = ((fontSize * 2) + (3 * fontPadding)) * (maxDepth + 1);
 
+  const setChartContainer = React.useCallback((e: HTMLDivElement | null) => { setContainer(e); chartContainer.current = e; }, [setContainer, chartContainer]);
+
   return (
-    <div className="sf-profiler-chart" ref={e => { setContainer(e); chartContainer.current = e; }} style={{ height: height + "px" }}>
+    <div className="sf-profiler-chart" ref={setChartContainer} style={{ height: height + "px" }}>
       {size && drawChart(size.width)}
     </div>
   );

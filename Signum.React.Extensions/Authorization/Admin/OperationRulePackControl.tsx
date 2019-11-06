@@ -28,7 +28,7 @@ export const OperationRulePackControl = React.forwardRef(function OperationRuleP
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button color="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
     ];
   }
 

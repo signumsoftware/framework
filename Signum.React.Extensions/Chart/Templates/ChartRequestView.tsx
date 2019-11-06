@@ -50,8 +50,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   React.useEffect(() => {
     setResult(undefined);
-  },
-    [p.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(p.chartRequest, null), p.userChart)]);
+  },[p.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(p.chartRequest, null), p.userChart)]);
 
 
   const abortableQuery = React.useRef(new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal)));
@@ -65,6 +64,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   function handleInvalidate() {
     setResult(undefined);
+    forceUpdate();
   }
 
   function removeObsoleteOrders() {

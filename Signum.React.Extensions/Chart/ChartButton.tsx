@@ -38,7 +38,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
   render() {
     var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + ChartMessage.Chart.niceToString() : undefined;
     return (
-      <Button onMouseUp={this.handleOnMouseUp} color="light"><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>
+      <Button variant="light" onMouseUp={this.handleOnMouseUp}><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>
     );
   }
 
