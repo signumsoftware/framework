@@ -10,6 +10,7 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from '
 import { FileUploader }  from './FileUploader'
 
 import "./Files.css"
+import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 
 export { FileTypeSymbol };
 
@@ -55,8 +56,8 @@ export class FileLineController extends EntityBaseController<FileLineProps>{
   }
 }
 
-export const FileLine = React.memo(function FileLine(props: FileLineProps) {
-  const c = new FileLineController(props);
+export const FileLine = React.memo(React.forwardRef(function FileLine(props: FileLineProps, ref: React.Ref<FileLineController>) {
+  const c = useController(FileLineController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
@@ -113,7 +114,7 @@ export const FileLine = React.memo(function FileLine(props: FileLineProps) {
       </div>
     );
   }
-}, (prev, next) => FileLineController.propEquals(prev, next));
+}), (prev, next) => FileLineController.propEquals(prev, next));
 
 (FileLine as any).defaultProps = {
   download: "SaveAs",

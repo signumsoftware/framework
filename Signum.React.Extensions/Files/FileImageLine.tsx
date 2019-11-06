@@ -10,7 +10,8 @@ import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
 import { useFetchInState, useFetchAndRemember } from '../../../Framework/Signum.React/Scripts/Hooks'
-import { Retrieve } from '../../../Framework/Signum.React/Scripts/Lines'
+import { FetchAndRemember } from '../../../Framework/Signum.React/Scripts/Lines'
+import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 
 export { FileTypeSymbol };
 
@@ -54,9 +55,8 @@ export class FileImageLineController extends EntityBaseController<FileImageLineP
   }
 }
 
-
-export function FileImageLine(props: FileImageLineProps) {
-  const c = new FileImageLineController(props);
+export const FileImageLine = React.forwardRef(function FileImageLine(props: FileImageLineProps, ref: React.Ref<FileImageLineController>) {
+  const c = useController(FileImageLineController, props, ref);
   const p = c.props;
 
   const hasValue = !!p.ctx.value;
@@ -91,7 +91,7 @@ export function FileImageLine(props: FileImageLineProps) {
     const val = ctx.value!;
 
     var content = ctx.propertyRoute.typeReference().isLite ?
-      <Retrieve lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} />}</Retrieve> :
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
       <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} />;
 
     const removeButton = c.renderRemoveButton(true, val);
@@ -106,7 +106,7 @@ export function FileImageLine(props: FileImageLineProps) {
       </div>
     );
   }
-}
+});
 
 FileImageLine.defaultProps = {
   accept: "image/*",

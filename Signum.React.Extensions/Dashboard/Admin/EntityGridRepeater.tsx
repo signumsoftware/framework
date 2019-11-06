@@ -6,6 +6,7 @@ import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entiti
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
 import { PanelStyle } from '../Signum.Entities.Dashboard';
+import { useController } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
 
 interface IGridEntity {
   row: number;
@@ -42,8 +43,8 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
 }
 
 
-export function EntityGridRepeater(props: EntityGridRepeaterProps) {
-  const c = new EntityGridRepeaterController(props);
+export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(props: EntityGridRepeaterProps, ref: React.Ref<EntityGridRepeaterController>) {
+  const c = useController(EntityGridRepeaterController, props, ref)
   const p = c.props;
 
   var [drag, setDrag] = React.useState<EntityGridRepaterDragging | undefined>(undefined);
@@ -51,62 +52,62 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
   if (c.isHidden)
     return null;
 
-    return (
+  return (
     <fieldset className={classes("SF-grid-repeater-field SF-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
-        <legend>
-          <div>
+      <legend>
+        <div>
           <span>{p.labelText}</span>
-            <span className="float-right ml-2">
+          <span className="float-right ml-2">
             {c.renderCreateButton(false)}
             {c.renderFindButton(false)}
             {p.extraButtons && p.extraButtons(c)}
-            </span>
-          </div>
-        </legend>
-        <div className="row rule">
-          {Array.range(0, 12).map(i =>
-            <div className="col-sm-1" key={i}>
-              <div className="ruleItem" />
-            </div>
-          )}
+          </span>
         </div>
+      </legend>
+      <div className="row rule">
+        {Array.range(0, 12).map(i =>
+          <div className="col-sm-1" key={i}>
+            <div className="ruleItem" />
+          </div>
+        )}
+      </div>
       <div className={drag && drag.dragMode == "move" ? "sf-dragging" : undefined} onDrop={handleOnDrop}>
-          {
+        {
           c.getMListItemContext<ModifiableEntity & IGridEntity>(p.ctx)
-              .groupBy(ctx => ctx.value.row.toString())
-              .orderBy(gr => parseInt(gr.key))
-              .flatMap((gr, i, groups) => [
+            .groupBy(ctx => ctx.value.row.toString())
+            .orderBy(gr => parseInt(gr.key))
+            .flatMap((gr, i, groups) => [
               renderSeparator(parseInt(gr.key)),
               <div className="row items-row" key={"row" + gr.key} onDragOver={e => handleItemsRowDragOver(e, parseInt(gr.key))}>
-                  {gr.elements.orderBy(ctx => ctx.value.startColumn).map((ctx, j, list) => {
+                {gr.elements.orderBy(ctx => ctx.value.startColumn).map((ctx, j, list) => {
                   let item = p.getComponent!(ctx);
                   const s = p;
-                    item = React.cloneElement(item, {
+                  item = React.cloneElement(item, {
                     onResizerDragStart: ctx.readOnly || !s.resize ? undefined : (resizer, e) => handleResizeDragStart(resizer, e, ctx),
                     onTitleDragStart: ctx.readOnly || !s.move ? undefined : (e) => handleMoveDragStart(e, ctx),
                     onTitleDragEnd: ctx.readOnly || !s.move ? undefined : (e) => handleMoveDragEnd(e, ctx),
                     onRemove: ctx.readOnly || !s.remove ? undefined : (e) => c.handleRemoveElementClick(e, ctx.index!),
-                    } as EntityGridItemProps);
+                  } as EntityGridItemProps);
 
-                    const last = j == 0 ? undefined : list[j - 1].value;
+                  const last = j == 0 ? undefined : list[j - 1].value;
 
-                    const offset = ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
+                  const offset = ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
 
-                    return (
-                      <div key={j} className={`sf-grid-element col-sm-${ctx.value.columns} offset-sm-${offset}`}>
-                        {item}
-                        {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
-                      </div>
-                    );
-                  })}
-                </div>,
+                  return (
+                    <div key={j} className={`sf-grid-element col-sm-${ctx.value.columns} offset-sm-${offset}`}>
+                      {item}
+                      {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
+                    </div>
+                  );
+                })}
+              </div>,
               i == groups.length - 1 && renderSeparator(parseInt(gr.key) + 1)
-              ])
+            ])
 
-          }
-        </div>
-      </fieldset>
-    );
+        }
+      </div>
+    </fieldset>
+  );
 
 
   function renderSeparator(rowIndex: number) {
@@ -131,7 +132,7 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
     setDrag({ ...drag!, currentRow: undefined });
   }
 
-  function handleRowDrop(e: React.DragEvent<any>, row: number){
+  function handleRowDrop(e: React.DragEvent<any>, row: number) {
 
     const list = p.ctx.value!.map(a => a.element as ModifiableEntity & IGridEntity);
 
@@ -150,7 +151,7 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
   function handleCreateClick(e: React.SyntheticEvent<any>) {
 
     e.preventDefault();
-    
+
     const pr = p.ctx.propertyRoute.addLambda(a => a[0]);
     const promise = p.onCreate ?
       p.onCreate(pr) : c.defaultCreate(pr);
@@ -192,14 +193,14 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
     setDrag({ currentItem: mlec, dragMode: resizer });
   }
 
-  function handleMoveDragStart(e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>)  {
+  function handleMoveDragStart(e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>) {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
 
     setDrag({ dragMode: "move", initialPageX: de.pageX, originalStartColumn: mlec.value.startColumn, currentItem: mlec });
   }
 
-  function handleMoveDragEnd(e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>)  {
+  function handleMoveDragEnd(e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>) {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
     setDrag(undefined);
@@ -267,7 +268,7 @@ export function EntityGridRepeater(props: EntityGridRepeaterProps) {
       }
     }
   }
-}
+});
 
 
 

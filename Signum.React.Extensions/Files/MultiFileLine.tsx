@@ -12,6 +12,7 @@ import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
 import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
+import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 
 export { FileTypeSymbol };
 
@@ -67,8 +68,8 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
   }
 }
 
-export function MultiFileLine(props: MultiFileLineProps) {
-  const c = new MultiFileLineController(props)
+export const MultiFileLine = React.forwardRef(function MultiFileLine(props: MultiFileLineProps, ref: React.Ref<MultiFileLineController>) {
+  const c = useController(MultiFileLineController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
@@ -123,7 +124,7 @@ export function MultiFileLine(props: MultiFileLineProps) {
       </table>
     </FormGroup>
   );
-}
+});
 
 (MultiFileLine as any).defaultProps = {
   download: "SaveAs",
