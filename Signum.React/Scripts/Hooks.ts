@@ -255,7 +255,7 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
 }
 
-export function useFetchAndForget<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
+export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
   return useAPI(signal =>
     lite == null ? Promise.resolve<T | null | undefined>(lite) :
       Navigator.API.fetchAndForget(lite),
@@ -274,7 +274,7 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLo
           forceUpdate();
         })
         .done();
-  }, [lite && liteKey(lite)]);
+  }, [lite]);
 
 
   if (lite == null)

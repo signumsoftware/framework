@@ -23,7 +23,7 @@ export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 import { EntityBaseController } from './Lines/EntityBase'
 export { EntityBaseController }
 
-export { Retrieve } from './Lines/Retrieve'
+export { FetchInState, FetchAndRemember } from './Lines/Retrieve'
 
 export { EntityLine } from './Lines/EntityLine'
 
