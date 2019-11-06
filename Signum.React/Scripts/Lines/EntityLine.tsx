@@ -26,7 +26,6 @@ interface ItemPair {
 
 
 export class EntityLineController extends EntityBaseController<EntityLineProps> {
-  unmounted = false;
   currentItem: ItemPair | undefined;
   setCurrentItem: (v: ItemPair | undefined) => void;
   focusNext: React.MutableRefObject<boolean>;
@@ -41,9 +40,6 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     this.setCurrentItem = setCurrentItem;
     const mounted = useMounted();
     this.focusNext = React.useRef(false);
-    React.useEffect(() => {
-      return () => { this.unmounted = true; };
-    }, []);
     this.typeahead = React.useRef<TypeaheadHandle>(null);
     React.useEffect(() => {
       if (s.autocomplete) {
@@ -53,7 +49,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
           if (currentItem)
             setCurrentItem(undefined);
         } else {
-          if (!currentItem || is(currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>)) {
+          if (!currentItem || !is(currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>)) {
             var ci = { entity: entity!, item: undefined as unknown }
             setCurrentItem(ci);
 
@@ -64,8 +60,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
                   if (mounted.current) {
                     if (autocomplete == s.autocomplete) {
                       ci.item = item;
-                      if (!this.unmounted)
-                        this.forceUpdate();
+                      this.forceUpdate();
                     } else {
                       fillItem(newEntity);
                     }
