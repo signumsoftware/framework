@@ -3,33 +3,22 @@ import { Route, RouteProps, match } from "react-router-dom";
 import * as H from "history";
 import * as PropTypes from "prop-types";
 import { RouteChildrenProps } from "react-router";
+import { useAPI } from "./Hooks";
 
 export interface ComponentModule {
-  default: React.ComponentClass<any> | React.FunctionComponent<any>;
+  default: React.ComponentType<any>;
 }
 
 interface ImportComponentProps {
   onImportModule: () => Promise<ComponentModule>;
   componentProps?: any;
-  onRender?: (module: ComponentModule) => React.ReactElement<any>;
 }
 
-export function ImportComponent({ onImportModule, componentProps, onRender }: ImportComponentProps) {
-  const [module, setModule] = React.useState<ComponentModule | undefined>(undefined);
-
-  React.useEffect(() => {
-    var controller = new AbortController();
-    onImportModule()
-      .then(mod => !controller.signal.aborted && setModule(mod))
-      .done();
-    return () => controller.abort();
-  }, [onImportModule.toString()]);
+export function ImportComponent({ onImportModule, componentProps }: ImportComponentProps) {
+  const module = useAPI(() => onImportModule(), [onImportModule.toString()]);
 
   if (!module)
     return null;
-
-  if (onRender)
-    return onRender(module);
 
   return React.createElement(module.default, componentProps);
 }

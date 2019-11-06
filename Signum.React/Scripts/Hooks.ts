@@ -138,18 +138,17 @@ export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T |
   return [value, () => setCount(count + 1)];
 }
 
-export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): T | undefined {
 
-  const [data, setData] = React.useState<T | undefined>(undefined);
+
+export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): T | undefined {
+
+  const [data, setData] = React.useState<{ deps: ReadonlyArray<any>; result: T } | undefined>(undefined);
 
   React.useEffect(() => {
     var abortController = new AbortController();
 
-    if (options == null || !options.avoidReset)
-      setData(undefined);
-
-    makeCall(abortController.signal, data)
-      .then(result => !abortController.signal.aborted && setData(result))
+    makeCall(abortController.signal, data && data.result)
+      .then(result => !abortController.signal.aborted && setData({ result, deps }))
       .done();
 
     return () => {
@@ -157,7 +156,25 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
     }
   }, deps);
 
-  return data;
+  if (!(options && options.avoidReset)) {
+    if (data && !areEqual(data.deps, deps))
+      return undefined;
+  }
+
+  return data && data.result;
+}
+
+function areEqual(depsA: ReadonlyArray<any>, depsB: ReadonlyArray<any>) {
+
+  if (depsA.length !== depsB.length)
+    return false;
+
+  for (var i = 0; i < depsA.length; i++) {
+    if (depsA[i] !== depsB[i])
+      return false;
+  }
+
+  return true;
 }
 
 export function useMounted() {
