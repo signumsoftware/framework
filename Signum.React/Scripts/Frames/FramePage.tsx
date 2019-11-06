@@ -14,7 +14,7 @@ import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { FunctionalAdapter } from './FrameModal';
-import { useStateWithPromise, useForceUpdate } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useTitle } from '../Hooks'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -35,17 +35,18 @@ export default function FramePage(p: FramePageProps) {
 
   const forceUpdate = useForceUpdate();
 
-  const ti = getTypeInfo(p.match.params.type);
+  const type = getTypeInfo(p.match.params.type).name;
+  const id = p.match.params.id;
+
+  const ti = getTypeInfo(type);
+
+  useTitle(state && state.pack.entity.toStr || "", [state && state.pack.entity]);
 
   React.useEffect(() => {
-
     loadEntity()
-      .then(pack => { Navigator.setTitle(pack.entity.toStr); return pack; })
       .then(pack => loadComponent(pack).then(getComponent => setState({ pack: pack, getComponent: getComponent, refreshCount: state ? state.refreshCount + 1 : 0 })))
       .done();
-
-    return () => Navigator.setTitle();
-  }, [p.match.params.type, p.match.params.id, p.location.search]);
+  }, [type, id, p.location.search]);
 
 
 
@@ -78,11 +79,11 @@ export default function FramePage(p: FramePageProps) {
       return Promise.resolve(pack);
     }
 
-    if (p.match.params.id) {
+    if (id) {
 
       const lite: Lite<Entity> = {
         EntityType: ti.name,
-        id: parseId(ti, p.match.params.id!),
+        id: parseId(ti, id!),
       };
 
       return Navigator.API.fetchEntityPack(lite)
@@ -114,7 +115,7 @@ export default function FramePage(p: FramePageProps) {
 
 
 
-  if (!state) {
+  if (!state || state.pack.entity.Type != type || state.pack.entity.id != id) {
     return (
       <div className="normal-control">
         {renderTitle()}
