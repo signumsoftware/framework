@@ -29,7 +29,7 @@ export default function HeavyEntry(p: HeavyEntryProps) {
   Navigator.setTitle("Heavy Profiler > Entry " + index);
 
   if (entries == undefined)
-    return <h3 className="display-6">Heavy Profiler > Entry {index} (loading...) </h3>;
+    return <h3 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index} (loading...) </h3>;
 
   let current = entries.filter(a => a.fullIndex == p.match.params.selectedIndex).single();
   return (
@@ -81,14 +81,10 @@ export function StackFrameTable(p: { stackTrace: StackTraceTS[] }) {
     <table className="table table-sm">
       <thead>
         <tr>
-          <th>Namespace
-                      </th>
-          <th>Type
-                      </th>
-          <th>Method
-                      </th>
-          <th>FileLine
-                      </th>
+          <th>Namespace</th>
+          <th>Type</th>
+          <th>Method</th>
+          <th>FileLine</th>
         </tr>
       </thead>
       <tbody>
@@ -113,18 +109,15 @@ export function StackFrameTable(p: { stackTrace: StackTraceTS[] }) {
   );
 }
 
-
 function lerp(min: number, ratio: number, max: number) {
   return min * (1 - ratio) + max * ratio;
 }
-
 
 interface HeavyProfilerDetailsD3Props {
   entries: HeavyProfilerEntry[];
   selected: HeavyProfilerEntry;
   asyncDepth: boolean;
 }
-
 
 interface MinMax {
   min: number;
@@ -133,7 +126,7 @@ interface MinMax {
 
 export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
-  const [minMax, setMinMax] = React.useState<MinMax>(() => resetZoom(p.selected))
+  const [minMax, setMinMax] = React.useState<MinMax>(() => resetZoom(p.selected));
 
   const chartContainer = React.useRef<HTMLDivElement | null>(null);
 
@@ -147,38 +140,39 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
   var { size, setContainer } = useSize();
 
   React.useEffect(() => {
-
     chartContainer.current!.addEventListener("wheel", handleWeel, { passive: false, capture: true });
-
     return () => {
       chartContainer.current!.removeEventListener("wheel", handleWeel);
     };
-  });
+  }, []);
 
   function handleWeel(e: WheelEvent) {
     e.preventDefault();
     e.stopPropagation();
 
-    let dist = minMax.max - minMax.min;
+    setMinMax(minMax => {
 
-    const inc = 1.2;
+      let dist = minMax.max - minMax.min;
 
-    let delta = 1 - (e.deltaY > 0 ? (1 / inc) : inc);
+      const inc = 1.2;
 
-    let elem = e.currentTarget as HTMLElement;
+      let delta = 1 - (e.deltaY > 0 ? (1 / inc) : inc);
 
-    let ne = e/*.nativeEvent*/ as MouseEvent;
+      let elem = e.currentTarget as HTMLElement;
 
-    const rect = elem.getBoundingClientRect();
+      let ne = e/*.nativeEvent*/ as MouseEvent;
 
-    const ratio = (ne.clientX - rect.left) / rect.width;
+      const rect = elem.getBoundingClientRect();
 
-    let newMin = minMax.min - dist * delta * (ratio);
-    let newMax = minMax.max + dist * delta * (1 - ratio);
+      const ratio = (ne.clientX - rect.left) / rect.width;
 
-    setMinMax({
-      min: newMin,
-      max: newMax
+      let newMin = minMax.min - dist * delta * (ratio);
+      let newMax = minMax.max + dist * delta * (1 - ratio);
+
+      return ({
+        min: newMin,
+        max: newMax
+      });
     });
   }
 
@@ -226,7 +220,7 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
       else {
         let url = "~/profiler/heavy/entry/" + d.fullIndex;
 
-        if (d3.event.ctrlKey) {
+        if (e.ctrlKey) {
           window.open(Navigator.toAbsoluteUrl(url));
         }
         else {
@@ -236,7 +230,7 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
     }
 
     return (
-      <svg height={height + "px"}>
+      <svg height={height + "px"} width={width}>
         {filteredData.map(d =>
           <g className="entry" data-key={d.fullIndex} key={d.fullIndex} onClick={e => handleOnClick(e, d)} onDoubleClick={e => setMinMax(resetZoom(d))}>
             <rect className="shape"

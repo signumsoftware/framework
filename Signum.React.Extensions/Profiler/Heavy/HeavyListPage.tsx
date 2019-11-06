@@ -76,7 +76,7 @@ export default function HeavyList(p: HeavyListProps) {
       <br />
       <div className="btn-toolbar" style={{ float: "right" }}>
         <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
-        <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-upload" /> Upload</button>
+        <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-upload-alt" /> Upload</button>
       </div>
       <div className="btn-toolbar">
         {!enabled ? <button onClick={() => handleSetEnabled(true)} className="btn btn-light primary">Enable</button> :
