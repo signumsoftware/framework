@@ -48,7 +48,7 @@ function renderFile(typeName: string, node: BaseNode): string {
 
   var cc = new NodeUtils.CodeContext("ctx", [], {}, []);
 
-  var text = NodeUtils.renderCode(node, cc).indent(12);
+  var text = NodeUtils.renderCode(node, cc).indent(4);
 
   return (
     `
@@ -61,15 +61,12 @@ import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDet
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 ${Dic.getValues(cc.imports.toObjectDistinct(a => a)).join("\n")}
 
-export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }> {
-
-    render() {
-        const ctx = this.props.ctx;
-${Dic.map(cc.assignments, (k, v) => `const ${k} = ${v};`).join("\n").indent(8)}
-        return (
+export default function ${typeName}(p: { ctx: TypeContext<${typeName}Entity> }) {
+  const ctx = p.ctx;
+${Dic.map(cc.assignments, (k, v) => `const ${k} = ${v};`).join("\n").indent(2)}
+  return (
 ${text}
-        );
-    }
+  );
 }`
   );
 

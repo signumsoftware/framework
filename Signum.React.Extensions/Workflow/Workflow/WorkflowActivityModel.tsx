@@ -50,7 +50,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
     }
 
     handleTypeChange();
-  });
+  }, []);
 
   function isNamedView(typeName: string, viewName: string) : boolean {
     const es = Navigator.getSettings(typeName);
