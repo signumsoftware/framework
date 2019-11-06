@@ -6,9 +6,9 @@ import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
 import { Type, QueryTokenString } from './Reflection';
 
 export function useForceUpdate(): () => void {
-  var [object, setObject] = React.useState({});
+  var [count, setCount] = React.useState(0);
   return () => {
-    setObject({});
+    setCount(c => c + 1);
   }
 }
 
@@ -19,8 +19,8 @@ export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
 }
 
 export function useForceUpdatePromise(): () => Promise<void> {
-  var [object, setObject] = useStateWithPromise({});
-  return () => setObject({}) as Promise<any>;
+  var [count, setCount] = useStateWithPromise(0);
+  return () => setCount(c => c + 1) as Promise<any>;
 }
 
 export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T) {
@@ -133,9 +133,9 @@ export function useTitle(title: string, deps?: readonly any[]) {
 }
 
 export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): [T | undefined, () => void] {
-  const [obj, setObj] = React.useState({});
-  const value = useAPI<T>(makeCall, [...(deps || []), obj], options);
-  return [value, () => setObj({})];
+  const [count, setCount] = React.useState(0);
+  const value = useAPI<T>(makeCall, [...(deps || []), count], options);
+  return [value, () => setCount(c => c + 1)];
 }
 
 
