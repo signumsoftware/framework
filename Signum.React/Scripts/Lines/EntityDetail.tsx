@@ -4,6 +4,7 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
+import { useController } from './LineBase'
 
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
@@ -20,9 +21,9 @@ export class EntityDetailController extends EntityBaseController<EntityDetailPro
   }
 }
 
-export function EntityDetail(props: EntityDetailProps) {
+export const EntityDetail = React.forwardRef(function EntityDetail(props: EntityDetailProps, ref: React.Ref<EntityDetailController>) {
 
-  const c = new EntityDetailController(props);
+  const c = useController(EntityDetailController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
@@ -63,6 +64,4 @@ export function EntityDetail(props: EntityDetailProps) {
     );
     return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;
   }
-}
-
-
+});

@@ -25,8 +25,8 @@ export interface LineBaseProps extends StyleOptions {
 }
 
 
-export function useController<C extends LineBaseController<P>, P extends LineBaseProps>(componentClass: new () => C, props: P, ref: React.Ref<C>) {
-  var controller = React.useMemo<C>(() => new componentClass(), []);
+export function useController<C extends LineBaseController<P>, P extends LineBaseProps>(controllerType: new () => C, props: P, ref: React.Ref<C>) : C {
+  var controller = React.useMemo<C>(()=> new controllerType(), []);
   controller.init(props);
   React.useImperativeHandle(ref, () => controller, []);
   return controller;

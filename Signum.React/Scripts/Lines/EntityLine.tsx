@@ -10,6 +10,7 @@ import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TypeaheadHandle } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
+import { useController } from './LineBase'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -24,41 +25,38 @@ interface ItemPair {
   item?: unknown;
 }
 
-
 export class EntityLineController extends EntityBaseController<EntityLineProps> {
-  currentItem: ItemPair | undefined;
-  setCurrentItem: (v: ItemPair | undefined) => void;
-  focusNext: React.MutableRefObject<boolean>;
-  typeahead: React.RefObject<TypeaheadHandle>;
+  currentItem!: ItemPair | undefined;
+  setCurrentItem!: (v: ItemPair | undefined) => void;
+  focusNext!: React.MutableRefObject<boolean>;
+  typeahead!: React.RefObject<TypeaheadHandle>;
 
-  constructor(p: EntityLineProps) {
-    super(p);
+  init(p: EntityLineProps) {
+    super.init(p);
 
-    var s = this.props;
-    var [currentItem, setCurrentItem] = React.useState<ItemPair | undefined>();
-    this.currentItem = currentItem;
-    this.setCurrentItem = setCurrentItem;
+    [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
     const mounted = useMounted();
     this.focusNext = React.useRef(false);
     this.typeahead = React.useRef<TypeaheadHandle>(null);
     React.useEffect(() => {
-      if (s.autocomplete) {
-        var entity = s.ctx.value;
+      const p = this.props;
+      if (p.autocomplete) {
+        var entity = p.ctx.value;
 
         if (entity == null) {
-          if (currentItem)
-            setCurrentItem(undefined);
+          if (this.currentItem)
+            this.setCurrentItem(undefined);
         } else {
-          if (!currentItem || !is(currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>)) {
+          if (!this.currentItem || !is(this.currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>)) {
             var ci = { entity: entity!, item: undefined as unknown }
-            setCurrentItem(ci);
+            this.setCurrentItem(ci);
 
             var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
-              const autocomplete = s.autocomplete;
+              const autocomplete = this.props.autocomplete;
               autocomplete && autocomplete.getItemFromEntity(newEntity)
                 .then(item => {
                   if (mounted.current) {
-                    if (autocomplete == s.autocomplete) {
+                    if (autocomplete == this.props.autocomplete) {
                       ci.item = item;
                       this.forceUpdate();
                     } else {
@@ -70,13 +68,13 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
             };
 
             fillItem(entity);
-            return () => { s.autocomplete && s.autocomplete.abort(); };
+            return () => { p.autocomplete && p.autocomplete.abort(); };
           }
         }
       }
 
       return undefined;
-    }, [s.ctx.value]);
+    }, [p.ctx.value]);
 
   }
 
@@ -104,8 +102,8 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 }
 
 
-export const EntityLine = React.memo(function EntityLine(props: EntityLineProps) {
-  const c = new EntityLineController(props);
+export const EntityLine = React.memo(React.forwardRef(function EntityLine(props: EntityLineProps, ref: React.Ref<EntityLineController>) {
+  const c = useController(EntityLineController, props, ref);
   const p = c.props;
 
   function handleOnSelect(item: any, event: React.SyntheticEvent<any>) {
@@ -223,4 +221,4 @@ export const EntityLine = React.memo(function EntityLine(props: EntityLineProps)
     }
     c.focusNext.current = false;
   }
-}, (prev, next) => EntityBaseController.propEquals(prev, next));
+}), (prev, next) => EntityBaseController.propEquals(prev, next));

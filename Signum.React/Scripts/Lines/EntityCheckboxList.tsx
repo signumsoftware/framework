@@ -6,6 +6,7 @@ import { TypeContext } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
+import { useController } from './LineBase'
 
 export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
@@ -15,7 +16,7 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
   refreshKey?: string;
 }
 
-export default class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
+export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
 
   getDefaultProps(state: EntityCheckboxListProps) {
     super.getDefaultProps(state);
@@ -32,8 +33,8 @@ export default class EntityCheckboxListController extends EntityListBaseControll
 
 }
 
-export const EntityCheckboxList = React.memo(function EntityCheckboxList(props: EntityCheckboxListProps) {
-  const c = new EntityCheckboxListController(props);
+export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(props: EntityCheckboxListProps, ref: React.Ref<EntityCheckboxListController>) {
+  const c = useController(EntityCheckboxListController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
@@ -96,7 +97,7 @@ export const EntityCheckboxList = React.memo(function EntityCheckboxList(props: 
       }).done();
     }
   }
-}, (prev, next) => EntityListBaseController.propEquals(prev, next));
+});
 
 
 interface EntityCheckboxListSelectProps {

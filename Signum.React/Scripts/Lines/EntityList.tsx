@@ -2,6 +2,7 @@ import * as React from 'react'
 import { ModifiableEntity, Lite, Entity, is, getToString } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
+import { useController } from './LineBase';
 
 export interface EntityListProps extends EntityListBaseProps {
   size?: number;
@@ -117,8 +118,8 @@ export class EntityListController extends EntityListBaseController<EntityListPro
 }
 
 
-export function EntityList(props: EntityListProps) {
-  const c = new EntityListController(props);
+export const EntityList = React.forwardRef(function EntityList(props: EntityListProps, ref: React.Ref<EntityListController>) {
+  const c = useController(EntityListController, props, ref);
   const p = c.props;
   const list = p.ctx.value!;
 
@@ -148,4 +149,4 @@ export function EntityList(props: EntityListProps) {
       </div>
     </FormGroup>
   );
-}
+});

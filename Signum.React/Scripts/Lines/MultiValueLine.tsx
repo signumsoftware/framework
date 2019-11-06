@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
-import { LineBaseProps, LineBaseController } from "./LineBase";
+import { LineBaseProps, LineBaseController, useController } from "./LineBase";
 
 interface MultiValueLineProps extends LineBaseProps {
   ctx: TypeContext<MList<any>>;
@@ -55,8 +55,8 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   }
 }
 
-export function MultiValueLine(props: MultiValueLineProps) {
-  const c = new MultiValueLineController(props);
+export const MultiValueLine = React.forwardRef(function MultiValueLine(props: MultiValueLineProps, ref: React.Ref<MultiValueLineController>) {
+  const c = useController(MultiValueLineController, props, ref);
   const p = c.props;
   const list = p.ctx.value;
 
@@ -93,7 +93,7 @@ export function MultiValueLine(props: MultiValueLineProps) {
       </table>
     </FormGroup>
   );
-}
+});
 
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;

@@ -9,6 +9,7 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig } from './Ent
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
+import { useController } from './LineBase'
 
 export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -31,10 +32,9 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
   }
 }
 
-export const EntityStrip = React.memo(function EntityTrip(props: EntityStripProps) {
-  const c = new EntityStripController(props);
+export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
+  const c = useController(EntityStripController, props, ref);
   const p = c.props;
-
 
   const readOnly = p.ctx.readOnly;
   return (
@@ -143,7 +143,7 @@ export const EntityStrip = React.memo(function EntityTrip(props: EntityStripProp
         onSelect={handleOnSelect} />
     );
   }
-}, (prev, next) => EntityBaseController.propEquals(prev, next));
+}), (prev, next) => EntityBaseController.propEquals(prev, next));
 
 export interface EntityStripElementProps {
   iconStart?: boolean;

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { getTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { MList, newMListElement } from '../Signum.Entities'
 import { EntityCheckboxList } from './EntityCheckboxList'
 
@@ -41,8 +41,8 @@ export class EnumCheckboxListController extends LineBaseController<EnumCheckboxL
 
 }
 
-export function EnumCheckboxList(props: EnumCheckboxListProps) {
-  const c = new EnumCheckboxListController(props);
+export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props: EnumCheckboxListProps, ref: React.Ref<EnumCheckboxListController>) {
+  const c = useController(EnumCheckboxListController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
@@ -121,4 +121,4 @@ export function EnumCheckboxList(props: EnumCheckboxListProps) {
 
     return undefined;
   }
-}
+});

@@ -9,6 +9,7 @@ import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory
 import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAPI, useForceUpdate } from '../Hooks'
+import { useController } from './LineBase'
 
 export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTableController) => React.ReactElement<any>);
@@ -37,14 +38,13 @@ export interface EntityTableColumn<T, RS = undefined> {
 }
 
 export class EntityTableController extends EntityListBaseController<EntityTableProps> {
-  containerDiv: React.RefObject<HTMLDivElement>;
-  thead: React.RefObject<HTMLTableSectionElement>;
-  tfoot: React.RefObject<HTMLTableSectionElement>;
-  recentlyCreated: React.MutableRefObject<Lite<Entity> | ModifiableEntity | null>;
+  containerDiv!: React.RefObject<HTMLDivElement>;
+  thead!: React.RefObject<HTMLTableSectionElement>;
+  tfoot!: React.RefObject<HTMLTableSectionElement>;
+  recentlyCreated!: React.MutableRefObject<Lite<Entity> | ModifiableEntity | null>;
 
-
-  constructor(p: EntityTableProps) {
-    super(p);
+  init(p: EntityTableProps) {
+    super.init(p);
     this.containerDiv = React.useRef<HTMLDivElement>(null);
     this.thead = React.useRef<HTMLTableSectionElement>(null);
     this.tfoot = React.useRef<HTMLTableSectionElement>(null);
@@ -198,8 +198,10 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 }
 
-export function EntityTable(props: EntityTableProps) {
-  const c = new EntityTableController(props);
+export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & React.RefAttributes<EntityTableController>> &
+{ typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]}
+  = React.forwardRef(function EntityTable(props: EntityTableProps, ref: React.Ref<EntityTableController>) {
+  const c = useController(EntityTableController, props, ref);
   const p = c.props;
 
   if (p.type!.isLite)
@@ -306,7 +308,7 @@ export function EntityTable(props: EntityTableProps) {
       </div >
     );
   }
-}
+}) as any;
 
 EntityTable.defaultProps = {
   maxResultsHeight: "400px",

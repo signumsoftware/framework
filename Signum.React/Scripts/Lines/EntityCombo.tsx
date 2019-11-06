@@ -8,6 +8,7 @@ import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FormGroup } from './FormGroup'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
+import { useController } from './LineBase'
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -54,9 +55,9 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
   }
 }
 
-export const EntityCombo = React.memo(function EntityCombo(props: EntityComboProps) {
+export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(props: EntityComboProps, ref: React.Ref<EntityComboController>) {
 
-  const c = new EntityComboController(props);
+  const c = useController(EntityComboController, props, ref);
   const p = c.props;
   const hasValue = !!c.props.ctx.value;
   const comboRef = React.useRef<EntityComboHandle>(null);
@@ -110,7 +111,7 @@ export const EntityCombo = React.memo(function EntityCombo(props: EntityComboPro
       </div>
     </FormGroup>
   );
-}, (prev, next) => EntityBaseController.propEquals(prev, next));
+}), (prev, next) => EntityBaseController.propEquals(prev, next));
 
 export interface EntityComboSelectProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;

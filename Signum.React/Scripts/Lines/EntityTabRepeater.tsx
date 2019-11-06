@@ -11,6 +11,7 @@ import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
 import { SelectCallback } from 'react-bootstrap/helpers'
+import { useController } from './LineBase'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
@@ -28,14 +29,13 @@ export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
 
 export class EntityTabRepeaterController extends EntityListBaseController<EntityTabRepeaterProps> {
 
-  selectedIndex?: number;
-  setSelectedIndex: (index: number | undefined) => void;
+  selectedIndex!: number | undefined;
+  setSelectedIndex!: (index: number | undefined) => void;
 
-  constructor(p: EntityTabRepeaterProps) {
-    super(p);
+  init(p: EntityTabRepeaterProps) {
+    super.init(p);
     [this.selectedIndex, this.setSelectedIndex] = React.useState(() => p.selectedIndex == null ? 0 : coerce(p.selectedIndex, p.ctx.value.length));
   }
-
 
   getDefaultProps(p: EntityTabRepeaterProps) {
     super.getDefaultProps(p);
@@ -69,8 +69,8 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
 
 }
 
-export function EntityTabRepeater(props: EntityTabRepeaterProps) {
-  const c = new EntityTabRepeaterController(props);
+export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(props: EntityTabRepeaterProps, ref: React.Ref<EntityTabRepeaterController>) {
+  const c = useController(EntityTabRepeaterController, props, ref);
   const p = c.props;
 
   const ctx = p.ctx!;
@@ -175,7 +175,7 @@ export function EntityTabRepeater(props: EntityTabRepeaterProps) {
       </Tabs>
     );
   }
-}
+});
 
 function coerce(index: number | undefined, length: number): number | undefined {
   if (index == undefined)

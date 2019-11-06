@@ -21,13 +21,13 @@ export interface EntityListBaseState extends EntityListBaseProps {
 
 export abstract class EntityListBaseController<T extends EntityListBaseProps> extends EntityBaseController<T>
 {
-  dragIndex: number | undefined;
-  setDragIndex: React.Dispatch<number | undefined>;
-  dropBorderIndex: number | undefined
-  setDropBorderIndex: React.Dispatch<number | undefined>;
+  dragIndex!: number | undefined;
+  setDragIndex!: React.Dispatch<number | undefined>;
+  dropBorderIndex!: number | undefined
+  setDropBorderIndex!: React.Dispatch<number | undefined>;
 
-  constructor(p: T) {
-    super(p);
+  init(p: T) {
+    super.init(p);
     [this.dragIndex, this.setDragIndex] = React.useState<number | undefined>(undefined);
     [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<number | undefined>(undefined);
   }

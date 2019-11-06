@@ -8,6 +8,7 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig } from './Ent
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTypeInfos, getTypeInfo } from '../Reflection';
+import { useController } from './LineBase'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
@@ -25,8 +26,8 @@ export class EntityRepeaterController extends EntityListBaseController<EntityRep
 }
 
 
-export function EntityRepeater(props: EntityRepeaterProps) {
-  var c = new EntityRepeaterController(props);
+export const EntityRepeater = React.forwardRef(function EntityRepeater(props: EntityRepeaterProps, ref: React.Ref<EntityRepeaterController>) {
+  var c = useController(EntityRepeaterController, props, ref);
   var p = c.props;
 
   if (c.isHidden)
@@ -96,7 +97,7 @@ export function EntityRepeater(props: EntityRepeaterProps) {
       </div>
     );
   }
-}
+});
 
 
 export interface EntityRepeaterElementProps {
