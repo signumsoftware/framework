@@ -97,6 +97,10 @@ button.dropdown-item:not(:disabled):not(.disabled) {
     pointer-events: initial !important;
 }
 
+.nav-tabs {
+    margin-bottom: 1rem;
+}
+
 a.expand-window {
     cursor: pointer;
     color: lightgray;

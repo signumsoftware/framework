@@ -77,6 +77,9 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size 
       setNewSize();
     }
   }
+
+  const setContainerMemo = React.useCallback(setContainer, [divElement]);
+
   const handler = React.useRef<number | null>(null);
   React.useEffect(() => {
     function onResize() {
@@ -100,7 +103,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size 
     };
   }, []);
 
-  return { size, setContainer };
+  return { size, setContainer: setContainerMemo };
 }
 
 interface APIHookOptions {

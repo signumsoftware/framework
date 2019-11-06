@@ -137,11 +137,6 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
     });
   }, [p.findOptions]);
 
-
-  function handleFullScreenClick(ev: React.MouseEvent<any>) {
-    searchControlLoaded.current && searchControlLoaded.current.handleFullScreenClick(ev);
-  }
-
   if (state && state.message) {
     return (
       <div className="alert alert-danger" role="alert">
@@ -162,8 +157,6 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
   const qd = state!.queryDescription!;
 
   const tis = getTypeInfos(qd.columns["Entity"].type);
-
-
 
   return (
     <ErrorBoundary>

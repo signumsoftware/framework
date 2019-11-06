@@ -14,7 +14,7 @@ import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { FunctionalAdapter } from './FrameModal';
-import { useStateWithPromise, useForceUpdate, useTitle } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -32,7 +32,7 @@ export default function FramePage(p: FramePageProps) {
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
   const validationErrors = React.useRef<React.Component>(null);
-
+  const mounted = useMounted();
   const forceUpdate = useForceUpdate();
 
   const type = getTypeInfo(p.match.params.type).name;
@@ -44,11 +44,13 @@ export default function FramePage(p: FramePageProps) {
 
   React.useEffect(() => {
     loadEntity()
-      .then(pack => loadComponent(pack).then(getComponent => setState({ pack: pack, getComponent: getComponent, refreshCount: state ? state.refreshCount + 1 : 0 })))
+      .then(pack => loadComponent(pack).then(getComponent => mounted.current ? setState({
+        pack: pack,
+        getComponent: getComponent,
+        refreshCount: state ? state.refreshCount + 1 : 0
+      }) : undefined))
       .done();
   }, [type, id, p.location.search]);
-
-
 
   React.useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -139,8 +141,15 @@ export default function FramePage(p: FramePageProps) {
       else {
         if (reloadComponent) {
           setState(undefined)
-            .then(() => loadComponent(packEntity).then(gc => setState({ getComponent: gc, pack: packEntity, refreshCount: state.refreshCount + 1 })))
-            .then(callback)
+            .then(() => loadComponent(packEntity))
+            .then(gc => {
+              if (mounted.current)
+                setState({
+                  getComponent: gc,
+                  pack: packEntity,
+                  refreshCount: state.refreshCount + 1
+                }).then(callback).done();
+            })
             .done();
         }
         else {

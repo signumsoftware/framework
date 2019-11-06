@@ -19,7 +19,7 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
   }
 
   return (
-    <div className={classes(fluid ? "container-fluid" : "container", "mt-3")}>
+    <div className={classes(fluid ? "container-fluid" : "container", "mt-3", "d-flex")}>
       <a className="expand-window d-none d-md-block" onClick={handleExpandToggle} href="#" >
         <FontAwesomeIcon icon={fluid ? "compress" : "expand"} />
       </a>

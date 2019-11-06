@@ -185,24 +185,18 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     </Modal>
   );
 
-
-
-
-
   function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
       frameComponent: { forceUpdate },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
-        var newPack = pack || packComponent!.pack;
-
+        const newPack = pack || packComponent!.pack;
         if (reloadComponent) {
           setPackComponent(undefined)
             .then(() => loadComponent(newPack).promise)
             .then(getComponent => setPack(newPack, getComponent, callback))
             .done();
-
         }
         else {
           setPack(newPack, packComponent!.getComponent, callback);
