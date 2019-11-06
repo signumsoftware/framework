@@ -132,10 +132,10 @@ export function useTitle(title: string, deps?: readonly any[]) {
   }, deps);
 }
 
-export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any> | undefined, options?: APIHookOptions): [T | undefined, () => void] {
-  const [count, setCount] = React.useState(0);
-  const value = useAPI<T>(makeCall, [...(deps || []), count], options);
-  return [value, () => setCount(count + 1)];
+export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): [T | undefined, () => void] {
+  const [obj, setObj] = React.useState({});
+  const value = useAPI<T>(makeCall, [...(deps || []), obj], options);
+  return [value, () => setObj({})];
 }
 
 
