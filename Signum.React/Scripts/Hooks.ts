@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as History from 'history'
 import { FindOptions, ResultTable } from './Search';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
@@ -138,7 +139,14 @@ export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T |
   return [value, () => setCount(c => c + 1)];
 }
 
+export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, deps: ReadonlyArray<any>) {
 
+  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
+  React.useEffect(() => {
+    unregisterCallback.current = Navigator.history.listen(locationChanged);
+    return () => { unregisterCallback.current!(); }
+  }, []);
+}
 
 export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): T | undefined {
 

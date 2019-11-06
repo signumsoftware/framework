@@ -1,8 +1,8 @@
 import * as Navigator from './Navigator';
-
+import * as History from 'history'
 import * as React from 'react'
 import { FunctionalAdapter } from './Frames/FrameModal';
-import { useStateWithPromise } from './Hooks';
+import { useStateWithPromise, useHistoryListen } from './Hooks';
 
 declare global {
   interface KeyboardEvent {
@@ -39,6 +39,8 @@ export function GlobalModalContainer() {
   }, []);
 
   var [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
+
+  useHistoryListen(() => setModals([]), []);
 
   React.useEffect(() => {
     current = {
