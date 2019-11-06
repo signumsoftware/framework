@@ -14,7 +14,7 @@ import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useUpdatedRef } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.ParsedQuery<string>): boolean {
@@ -56,24 +56,17 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
   const activeRef = useUpdatedRef(active);
-  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
 
-  React.useEffect(() => {
-    function locationChanged(location: History.Location, action: History.Action) {
-      var query = QueryString.parse(location.search);
-      if (response) {
-        if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
-          return;
-        }
-
-        var newActive = inferActive(response, location, query);
-        setActive(newActive);
+  useHistoryListen((location: History.Location, action: History.Action) => {
+    var query = QueryString.parse(location.search);
+    if (response) {
+      if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
+        return;
       }
+
+      var newActive = inferActive(response, location, query);
+      setActive(newActive);
     }
-
-    unregisterCallback.current = Navigator.history.listen(locationChanged);
-
-    return () => { unregisterCallback.current!(); }
   }, [response]);
 
   if (!response)
