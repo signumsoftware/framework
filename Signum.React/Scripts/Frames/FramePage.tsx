@@ -115,8 +115,6 @@ export default function FramePage(p: FramePageProps) {
     }
   }
 
-
-
   if (!state || state.pack.entity.Type != type || state.pack.entity.id != id) {
     return (
       <div className="normal-control">

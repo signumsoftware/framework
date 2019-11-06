@@ -189,7 +189,7 @@ function areEqual(depsA: ReadonlyArray<any>, depsB: ReadonlyArray<any>) {
 }
 
 export function useMounted() {
-  const mounted = React.useRef<boolean>(false);
+  const mounted = React.useRef<boolean>(true);
   React.useEffect(() => {
     return () => { mounted.current = false; };
   }, []);
