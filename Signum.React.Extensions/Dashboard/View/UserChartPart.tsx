@@ -9,26 +9,26 @@ import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
+
+interface ResultOrError {
+
+}
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<any | undefined>(undefined);
-  const [result, setResult] = React.useState<ChartClient.API.ExecuteChartResult | undefined>(undefined);
-  const [showData, setShowData] = React.useState(p.part.showData);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity]);
 
-  function makeQuery() {
+  const [resultOrError, makeQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => chartRequest == null ? Promise.resolve(undefined) :
     ChartClient.getChartScript(chartRequest!.chartScript)
       .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
-      .then(rt => { setResult(rt); setLoading(false); setError(undefined); })
-      .catch(e => { setError(e); })
-      .done();
-  }
+      .then(result => ({ result }))
+      .catch(error => ({ error })), [chartRequest]);
 
 
+  const [showData, setShowData] = React.useState(p.part.showData);
+  
   function renderError(e: any) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
@@ -42,17 +42,20 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     );
 
   }
-  if (error) {
+
+  if (!chartRequest)
+    return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (resultOrError && resultOrError.error) {
     return (
       <div>
         <h4>Error!</h4>
-        {renderError(error)}
+        {renderError(resultOrError.error)}
       </div>
     );
   }
 
-  if (!chartRequest || !result)
-    return <span>{JavascriptMessage.loading.niceToString()}</span>;
+  const result = resultOrError && resultOrError.result!;
 
   return (
     <div>
@@ -63,10 +66,11 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
       {showData ?
-        <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
-          resultTable={result.resultTable} onOrderChanged={() => makeQuery()} /> :
+        (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
+          <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
+          resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
         <ChartRenderer chartRequest={chartRequest} lastChartRequest={chartRequest}
-          data={result.chartTable} loading={loading} />
+          data={result && result.chartTable} loading={result == null} />
       }
     </div>
   );

@@ -9,7 +9,7 @@ import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
-import { useThrottle, useSize } from '@framework/Hooks';
+import { useThrottle, useSize, useAPI } from '@framework/Hooks';
 
 export interface ReactChartProps {
   data?: ChartClient.ChartTable;
@@ -19,32 +19,16 @@ export interface ReactChartProps {
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
 }
 
+
 export default function ReactChart(p: ReactChartProps) {
 
-  const [initialLoad, setInitialLoad] = React.useState<boolean>(p.data != null && p.data.rows.length < ReactChart.maxRowsForAnimation);
-  const initialLoadHandler = React.useRef<number | null>(null);
-  React.useEffect(() => {
-    if (p.data != null && p.data.rows.length < ReactChart.maxRowsForAnimation) {
-      setInitialLoad(true);
-      if (initialLoadHandler.current != null) {
-        clearTimeout(initialLoadHandler.current);
-        initialLoadHandler.current = null;
-      }
-      initialLoadHandler.current = setTimeout(() => {
-        setInitialLoad(false);
-      }, 500);
-
-      return () => {
-        if (initialLoadHandler.current != null) {
-          clearTimeout(initialLoadHandler.current);
-          initialLoadHandler.current = null;
-        }
-      };
-    }
-
-  }, [p.data != null]);
+  const initalLoadEnabled = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
+  const oldData = useThrottle(p.data, 200, { enabled: initalLoadEnabled});
+  const initialLoad = oldData == null && p.data != null && initalLoadEnabled;
 
   const { size, setContainer } = useSize();
+
+  console.log(p.onRenderChart.toString().substr(0, 30), { data: p.data, oldData, initialLoad });
 
   var animated = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   return (

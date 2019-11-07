@@ -45,7 +45,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
   }, [p.chartRequestView!.userChart])
 
   function reloadList() {
-    UserChartClient.API.forQuery(p.chartRequestView.chartRequest!.queryKey)
+    UserChartClient.API.forQuery(p.chartRequestView.chartRequest.queryKey)
       .then(list => setUserCharts(list))
       .done();
   }
@@ -54,8 +54,9 @@ export default function UserChartMenu(p : UserChartMenuProps){
     var crv = p.chartRequestView;
 
     Navigator.API.fetchAndForget(uc).then(userChart => {
-      const chartRequest = crv.chartRequest!;
-      UserChartClient.Converter.applyUserChart(chartRequest, userChart, undefined)
+      const cr = crv.chartRequest;
+      const newCR = ChartRequestModel.New({ queryKey: cr.queryKey });
+      UserChartClient.Converter.applyUserChart( newCR, userChart, undefined)
         .then(newChartRequest => crv.onChange(newChartRequest, toLite(userChart)))
         .done();
     }).done();
@@ -72,7 +73,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
  async function onCreate() {
     const crView = p.chartRequestView;
 
-    const cr = crView.chartRequest!;
+    const cr = crView.chartRequest;
 
     const query = await Finder.API.fetchQueryEntity(cr.queryKey);
 

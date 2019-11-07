@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as QueryString from "query-string"
-import { Lite } from '@framework/Signum.Entities'
+import { Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { parseLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
@@ -13,10 +13,8 @@ interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string;
 
 }
 
-let justReplacedPath: null | string = null;
 
-export default function ChartRequestPage(p: ChartRequestPageProps) {
-
+export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
   const [pair, setPair] = useStateWithPromise<{ chartRequest: ChartRequestModel; userChart?: Lite<UserChartEntity>; } | undefined>(undefined);
 
   React.useEffect(() => {
@@ -42,19 +40,27 @@ export default function ChartRequestPage(p: ChartRequestPageProps) {
 
   function changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     ChartClient.Encoder.chartPathPromise(cr, uc)
-      .then(path => {
-        justReplacedPath = path;
-        Navigator.history.replace(path);
-      })
-      .done()
+      .then(path => Navigator.history.replace(path))
+      .done();
   }
 
+  if (pair == null)
+    return null;
+
   return (
-    <ChartRequestView
-      chartRequest={pair && pair.chartRequest}
-      userChart={pair && pair.userChart}
-      onChange={(cr, uc) => handleOnChange(cr, uc)} />
+    <div>
+      {pair == null && <h2>
+        <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>
+      </h2 >}
+      {pair &&
+        <ChartRequestView
+          chartRequest={pair.chartRequest}
+          userChart={pair.userChart}
+          onChange={(cr, uc) => handleOnChange(cr, uc)} />
+      }
+    </div>
   );
-}
+}, (prev, next) => (prev.location.pathname + prev.location.search) == (next.location.pathname + next.location.search));
+
 
 

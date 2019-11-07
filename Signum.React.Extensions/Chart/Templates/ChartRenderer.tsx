@@ -26,7 +26,6 @@ export interface ChartRendererProps {
 }
 
 export default function ChartRenderer(p: ChartRendererProps) {
-
   const cs = useAPI(async signal => {
     const chartScriptPromise = ChartClient.getChartScript(p.chartRequest.chartScript);
     const chartComponentModulePromise = ChartClient.getRegisteredChartScriptComponent(p.chartRequest.chartScript);

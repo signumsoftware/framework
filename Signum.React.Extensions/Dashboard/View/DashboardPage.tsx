@@ -36,7 +36,6 @@ export default function DashboardPage(p: DashboardPageProps) {
 
   return (
     <div>
-
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
         <div className="sf-show-hover">
           {!AuthClient.navigatorIsReadOnly(DashboardEntity, { entity: dashboard, canExecute: {} } as EntityPack<Entity>) &&
