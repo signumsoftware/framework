@@ -51,7 +51,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
         culture);
 
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2>{message}</h2>
       <TranslateSearchBox setFilter={setFilter} filter={filter} />
       <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>

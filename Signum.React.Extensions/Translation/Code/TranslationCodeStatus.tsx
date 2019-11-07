@@ -12,7 +12,7 @@ export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
   const result = useAPI(() => API.status(), []);
 
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2>{TranslationMessage.CodeTranslations.niceToString()}</h2>
       {result == undefined ? <strong>{JavascriptMessage.loading.niceToString()}</strong> :
         <TranslationTable result={result} />}

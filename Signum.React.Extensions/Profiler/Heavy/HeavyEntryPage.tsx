@@ -33,7 +33,7 @@ export default function HeavyEntry(p: HeavyEntryProps) {
 
   let current = entries.filter(a => a.fullIndex == p.match.params.selectedIndex).single();
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
       <label><input type="checkbox" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
       <br />

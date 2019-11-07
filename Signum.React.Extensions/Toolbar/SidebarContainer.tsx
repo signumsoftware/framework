@@ -21,7 +21,7 @@ export default function SidebarContainer(p : SidebarContainerProps){
   return (
     <div className="sidebar-container">
       {visible && renderSideBar()}
-      <div className="container-fluid d-flex" style={{ paddingTop: "10px" }}>
+      <div className="container-fluid sf-page-container" style={{ paddingTop: "10px" }}>
         <ErrorBoundary>
           {p.children}
         </ErrorBoundary>

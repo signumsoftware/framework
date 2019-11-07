@@ -84,7 +84,6 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
     if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
-      debugger;
       e.preventDefault();
       setAvoidCombo(true);
     }

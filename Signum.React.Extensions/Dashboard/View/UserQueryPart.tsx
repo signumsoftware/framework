@@ -18,7 +18,6 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
-  debugger;
 
   if (p.part.renderMode == "BigValue") {
     return <BigValueSearchCounter

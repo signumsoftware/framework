@@ -54,7 +54,7 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
   let step = QueryString.parse(p.location.search).step as DynamicPanelTab | undefined;
 
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2>Dynamic Panel</h2>
       {startErrors && startErrors.length > 0 && !restarting &&
         <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>

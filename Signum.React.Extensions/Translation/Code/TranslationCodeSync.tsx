@@ -23,7 +23,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
     
   if (result && result.totalTypes == 0) {
     return (
-      <div className="flex-grow-1">
+      <div>
         <h2>{TranslationMessage._0AlreadySynchronized.niceToString(namespace || assembly)}</h2>
         <Link to={`~/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
@@ -47,7 +47,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
   }
 
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2>{message}</h2>
       <br />
       {result && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}

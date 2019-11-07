@@ -71,7 +71,7 @@ export default function HeavyList(p: HeavyListProps) {
     return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
 
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2 className="display-6">Heavy Profiler</h2>
       <br />
       <div className="btn-toolbar" style={{ float: "right" }}>

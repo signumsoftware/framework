@@ -30,7 +30,7 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
 
 
   return (
-    <div className="flex-grow-1">
+    <div>
       <h2>Cache Statistics</h2>
       <div className="btn-toolbar">
         {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</button>}
