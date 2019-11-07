@@ -142,13 +142,15 @@ export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T |
   return [value, () => setCount(c => c + 1)];
 }
 
-export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, deps: ReadonlyArray<any>) {
-
+export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
   const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
   React.useEffect(() => {
+    if (!enabled)
+      return;
+
     unregisterCallback.current = Navigator.history.listen(locationChanged);
     return () => { unregisterCallback.current!(); }
-  }, []);
+  }, [enabled, ...(extraDeps || [])]);
 }
 
 export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): T | undefined {
