@@ -174,3 +174,12 @@ a.expand-window:hover {
 .card.card-xs .card-body {
     padding: 0.3em 0.5em;
 }
+
+
+.sf-page-container {
+  display: flex;
+}
+
+.sf-page-container > div{
+    flex-grow: 1;
+}

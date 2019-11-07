@@ -178,7 +178,7 @@ export default function FramePage(p: FramePageProps) {
   const embeddedWidgets = renderEmbeddedWidgets(wc);
 
   return (
-    <div className="normal-control flex-grow-1">
+    <div className="normal-control">
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
