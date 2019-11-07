@@ -12,6 +12,7 @@ import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './Sear
 import { useAPI } from './Hooks';
 import { StyleContext } from './Lines'
 import { Dropdown } from 'react-bootstrap'
+import DropdownToggle from 'react-bootstrap/DropdownToggle'
 
 export function start() {
 
@@ -163,9 +164,11 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
   if (links != undefined && links.length == 0)
     return null;
 
+  const DDToggle = Dropdown.Toggle as any;
+
   return (
     <Dropdown id="quickLinksWidget">
-      <Dropdown.Toggle as={QuickLinkToggle} links={links} />
+      <DDToggle as={QuickLinkToggle} links={links} />
       <Dropdown.Menu alignRight>
         {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
       </Dropdown.Menu>
