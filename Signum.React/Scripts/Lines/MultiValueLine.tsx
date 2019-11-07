@@ -82,10 +82,10 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
           <tr >
             <td colSpan={4}>
               {!p.ctx.readOnly &&
-                <a href="#" title={p.ctx.titleLabels ? p.addValueText || SearchMessage.AddValue.niceToString() : undefined}
+                <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
                   className="sf-line-button sf-create"
                   onClick={c.handleAddValue}>
-                  {EntityBaseController.createIcon}&nbsp;{p.addValueText || SearchMessage.AddValue.niceToString()}
+                  {EntityBaseController.createIcon}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
                 </a>}
             </td>
           </tr>
@@ -104,7 +104,7 @@ export interface MultiValueLineElementProps {
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
   const ctx = props.ctx;
 
-  var renderItem = props.onRenderItem || getAppropiateComponentFactory(ctx.propertyRoute)
+  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute)
 
   return (
     <tr>

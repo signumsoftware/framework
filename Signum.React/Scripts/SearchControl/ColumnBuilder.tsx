@@ -107,10 +107,10 @@ export function ColumnComponent(p: ColumnComponentProps) {
   function handleTokenChanged(newToken: QueryToken | null | undefined) {
     const c = p.column;
     c.displayName = undefined;
-    c.token = newToken || undefined;
+    c.token = newToken ?? undefined;
 
     if (p.onTokenChanged)
-      p.onTokenChanged(newToken || undefined);
+      p.onTokenChanged(newToken ?? undefined);
 
     p.onColumnChanged(p.column);
 

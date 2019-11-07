@@ -111,7 +111,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
         <DropdownList
           disabled={p.readOnly}
           filter="contains"
-          data={subTokens || []}
+          data={subTokens ?? []}
           value={p.selectedToken}
           onChange={handleOnChange}
           valueField="fullKey"
@@ -127,7 +127,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
 
  
   function handleOnChange (value: any) {
-    p.onTokenSelected(value || p.parentToken);
+    p.onTokenSelected(value ?? p.parentToken);
   }
 
   function handleKeyUp (e: React.KeyboardEvent<any>) {

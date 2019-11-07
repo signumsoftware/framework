@@ -217,7 +217,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
-        this.props.onSearch(fop, dataChanged || false);
+        this.props.onSearch(fop, dataChanged ?? false);
 
       if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
         this.simpleFilterBuilderInstance.onDataChanged();
@@ -231,11 +231,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           selectedRows: [],
           currentMenuItems: undefined,
           markedRows: undefined,
-          searchCount: (this.state.searchCount || 0) + 1
+          searchCount: (this.state.searchCount ?? 0) + 1
         }, () => {
           this.fixScroll();
           if (this.props.onResult)
-            this.props.onResult(rt, dataChanged || false);
+            this.props.onResult(rt, dataChanged ?? false);
           this.notifySelectedRowsChanged();
         });
       });
@@ -738,7 +738,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   loadMenuItems() {
-    var cm = this.props.showContextMenu(this.state.resultFindOptions || this.props.findOptions);
+    var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
 
     if (cm == "Basic")
       this.setState({ currentMenuItems: [] });
@@ -1189,7 +1189,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const qs = this.props.querySettings;
 
-      const getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
+      const getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
       const avoidPopup = s != undefined && s.avoidPopup;
 
@@ -1241,7 +1241,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       systemTime: this.props.findOptions.systemTime,
     };
 
-    const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
+    const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
     return this.state.resultTable.rows.map((row, i) => {
 
@@ -1263,7 +1263,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
           {this.props.navigate && !this.props.findOptions.groupResults &&
             <td>
-              {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
+              {(this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
             </td>
           }
 

@@ -173,7 +173,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
 
     return (
-    <Modal size={p.modalSize || settings && settings.modalSize || "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
+    <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
         <ModalHeaderButtons
         onClose={p.isNavigate ? handleCancelClicked : undefined}
         onOk={!p.isNavigate ? handleOkClicked : undefined}
@@ -253,8 +253,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 });
 
 function getTypeName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
-  return (entityOrPack as Lite<Entity>).EntityType ||
-    (entityOrPack as ModifiableEntity).Type ||
+  return (entityOrPack as Lite<Entity>).EntityType ??
+    (entityOrPack as ModifiableEntity).Type ??
     (entityOrPack as EntityPack<ModifiableEntity>).entity.Type;
 }
 

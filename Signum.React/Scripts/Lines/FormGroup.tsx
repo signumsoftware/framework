@@ -36,7 +36,7 @@ export function FormGroup(p: FormGroupProps) {
   );
 
   let pr = tCtx.propertyRoute;
-  var labelText = p.labelText || (pr && pr.member && pr.member.niceName);
+  var labelText = p.labelText ?? (pr?.member?.niceName);
   const label = (
     <label htmlFor={p.controlId} {...p.labelHtmlAttributes} className={addClass(p.labelHtmlAttributes, labelClasses)} >
       {labelText}

@@ -18,10 +18,10 @@ export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, 
   const ctx: ButtonsContext = p;
   const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
 
-  const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) || [])
+  const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) ?? [])
     .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])
     .filter(a => a != null)
-    .orderBy(a => a!.order || 0);
+    .orderBy(a => a!.order ?? 0);
 
   var shortcuts = buttons.filter(a => a!.shortcut != null).map(a => a!.shortcut!);
 

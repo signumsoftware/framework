@@ -225,11 +225,11 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string) {
-    var operationKey = (operation as OperationSymbol).key || operation as string;
+    const operationKey = (operation as OperationSymbol).key || operation as string;
 
-    var oi = getTypeInfo(pack.entity.Type).operations![operationKey];
+    const oi = getTypeInfo(pack.entity.Type).operations![operationKey];
 
-    var result = new EntityOperationContext<T>(frame, pack.entity, oi);
+    const result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
     result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
     result.complete();
@@ -260,9 +260,9 @@ export class EntityOperationContext<T extends Entity> {
 
   complete() {
     var s = this.settings;
-    this.color = s && s.color || Defaults.getColor(this.operationInfo);
-    this.group = s && s.group !== undefined ? (s.group || undefined) : Defaults.getGroup(this.operationInfo);
-    this.keyboardShortcut = s && s.keyboardShortcut !== undefined ? (s.keyboardShortcut || undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
+    this.color = s?.color ?? Defaults.getColor(this.operationInfo);
+    this.group = s && s.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
+    this.keyboardShortcut = s && s.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
     this.alternatives = s && s.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
   }
 
@@ -282,7 +282,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   textOrNiceName() {
-    return this.settings && this.settings.text && this.settings.text() || this.operationInfo.niceName
+    return (this.settings && this.settings.text && this.settings.text()) ?? this.operationInfo.niceName
   }
 
   onKeyDown(e: KeyboardEvent): boolean {

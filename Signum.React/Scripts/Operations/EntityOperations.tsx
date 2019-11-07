@@ -128,7 +128,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
         var createNew = eoc.frame.frameComponent.createNew;
 
         if (createNew)
-          (createNew() || Promise.resolve(undefined))
+          (createNew() ?? Promise.resolve(undefined))
             .then(newPack => newPack && eoc.frame.onReload(newPack, true))
             .done();
         else
@@ -326,7 +326,7 @@ export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperatio
       return;
 
     API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
-      .then(eoc.onConstructFromSuccess || (pack => {
+      .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
         Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
@@ -342,7 +342,7 @@ export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationC
       return;
 
     API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-      .then(eoc.onConstructFromSuccess || (pack => {
+      .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
         Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
@@ -359,7 +359,7 @@ export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationConte
       return;
 
     API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-      .then(eoc.onExecuteSuccess || (pack => {
+      .then(eoc.onExecuteSuccess ?? (pack => {
         eoc.frame.onReload(pack);
         notifySuccess();
       }))
@@ -375,7 +375,7 @@ export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext
       return;
 
     API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-      .then(eoc.onExecuteSuccess || (pack => {
+      .then(eoc.onExecuteSuccess ?? (pack => {
         eoc.frame.onReload(pack);
         notifySuccess();
       }))
@@ -391,7 +391,7 @@ export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContex
       return;
 
     API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
-      .then(eoc.onDeleteSuccess || (() => {
+      .then(eoc.onDeleteSuccess ?? (() => {
         eoc.frame.onClose();
         notifySuccess();
       }))
@@ -407,7 +407,7 @@ export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<
       return;
 
     API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-      .then(eoc.onDeleteSuccess || (() => {
+      .then(eoc.onDeleteSuccess ?? (() => {
         eoc.frame.onClose();
         notifySuccess();
       }))

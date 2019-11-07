@@ -39,11 +39,11 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   const { title, message, initialValue, ...props } = p.options;
   var vlp: ValueLineProps = {
     ctx: ctx,
-    formatText: props.formatText !== undefined ? props.formatText : props.member && props.member.format,
-    unitText: props.unitText !== undefined ? props.unitText : props.member && props.member.unit,
-    labelText: props.labelText !== undefined ? props.labelText : props.member && props.member.niceName,
-    type: props.type || props.member && props.member.type,
-    valueLineType: props.valueLineType || props.member && (props.member.isMultiline ? "TextArea" : undefined),
+    formatText: props.formatText !== undefined ? props.formatText : props.member?.format,
+    unitText: props.unitText !== undefined ? props.unitText : props.member?.unit,
+    labelText: props.labelText !== undefined ? props.labelText : props.member?.niceName,
+    type: props.type ?? props.member?.type,
+    valueLineType: props.valueLineType ?? (props.member?.isMultiline ? "TextArea" : undefined),
     valueHtmlAttributes: props.valueHtmlAttributes,
     initiallyFocused: props.initiallyFocused,
   };
@@ -52,7 +52,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   const valueOnChanged = p.options.allowEmptyValue == false ? () => forceUpdate() : undefined;
 
   return (
-    <Modal size={p.options.modalSize || "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
+    <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
       <div className="modal-header">
         <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
         <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>

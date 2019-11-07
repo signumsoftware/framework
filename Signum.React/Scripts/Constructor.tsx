@@ -18,7 +18,7 @@ export function constructPack<T extends ModifiableEntity>(type: Type<T>, props?:
 export function constructPack(type: string, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
 export function constructPack(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
 
-  const typeName = (type as Type<any>).typeName || type as string;
+  const typeName = (type as Type<any>).typeName ?? type as string;
 
   const ti = getTypeInfo(typeName);
   if (ti)

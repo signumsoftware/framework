@@ -212,17 +212,17 @@ export namespace MenuItemConstructor { //To allow monkey patching
 
   export function simplifyName(niceName: string) {
     const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
-    return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
+    return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
   }
   export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void) {
 
     const text = coc.settings && coc.settings.text ? coc.settings.text() :
-      coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
+      coc.entityOperationSettings?.text ? coc.entityOperationSettings.text() :
         simplifyName(coc.operationInfo.niceName);
 
-    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Defaults.getColor(coc.operationInfo);
-    const icon = coalesceIcon(coc.settings && coc.settings.icon, coc.entityOperationSettings && coc.entityOperationSettings.icon);
-    const iconColor = coc.settings && coc.settings.iconColor || coc.entityOperationSettings && coc.entityOperationSettings.iconColor;
+    const color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+    const icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
+    const iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
 
     const disabled = !!coc.canExecute;
 
@@ -272,7 +272,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
       case OperationType.ConstructorFrom:
         if (coc.context.lites.length == 1) {
           API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
-            .then(coc.onConstructFromSuccess || (pack => {
+            .then(coc.onConstructFromSuccess ?? (pack => {
               notifySuccess();
               Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => coc.context.markRows({}))
@@ -281,7 +281,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
             .done();
         } else {
           API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-            .then(coc.onContextualSuccess || (report => {
+            .then(coc.onContextualSuccess ?? (report => {
               notifySuccess();
               coc.context.markRows(report.errors);
             }))
@@ -290,7 +290,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         break;
       case OperationType.Execute:
         API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess || (report => {
+          .then(coc.onContextualSuccess ?? (report => {
             notifySuccess();
             coc.context.markRows(report.errors);
           }))
@@ -298,7 +298,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         break;
       case OperationType.Delete:
         API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess || (report => {
+          .then(coc.onContextualSuccess ?? (report => {
             notifySuccess();
             coc.context.markRows(report.errors);
           }))

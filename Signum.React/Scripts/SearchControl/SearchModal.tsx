@@ -125,9 +125,9 @@ namespace SearchModal {
       findOptions={findOptions}
       findMode={"Find"}
       isMany={false}
-      title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
-      message={modalOptions && modalOptions.message || defaultSelectMessage(findOptions.queryName, false)}
-      searchControlProps={modalOptions && modalOptions.searchControlProps}
+      title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
+      message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, false)}
+      searchControlProps={modalOptions?.searchControlProps}
     />)
       .then(a => a ? a[0] : undefined);
   }
@@ -137,9 +137,9 @@ namespace SearchModal {
     return openModal<ResultRow[]>(<SearchModal findOptions={findOptions}
       findMode={"Find"}
       isMany={true}
-      title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
-      message={modalOptions && modalOptions.message || defaultSelectMessage(findOptions.queryName, true)}
-      searchControlProps={modalOptions && modalOptions.searchControlProps}
+      title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
+      message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, true)}
+      searchControlProps={modalOptions?.searchControlProps}
     />);
   }
 

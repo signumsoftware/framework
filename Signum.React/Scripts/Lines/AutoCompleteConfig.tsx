@@ -130,7 +130,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedFilters)
       return Promise.resolve(this.parsedFilters);
 
-    return Finder.parseFilterOptions(this.findOptions.filterOptions || [], false, qd)
+    return Finder.parseFilterOptions(this.findOptions.filterOptions ?? [], false, qd)
       .then(filters => this.parsedFilters = filters);
   }
 
@@ -139,7 +139,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedOrders)
       return Promise.resolve(this.parsedOrders);
 
-    return Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd)
+    return Finder.parseOrderOptions(this.findOptions.orderOptions ?? [], false, qd)
       .then(orders => this.parsedOrders = orders);
   }
 
@@ -148,7 +148,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedColumns)
       return Promise.resolve(this.parsedColumns);
 
-    return Finder.parseColumnOptions(this.findOptions.columnOptions || [], false, qd)
+    return Finder.parseColumnOptions(this.findOptions.columnOptions ?? [], false, qd)
       .then(columns => this.parsedColumns = columns);
   }
 
@@ -168,11 +168,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
             columns: columns.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnRequest),
             filters: toFilterRequests(filters),
             orders: orders.map(o => ({ token: o.token!.fullKey, orderType: o.orderType }) as OrderRequest),
-            count: this.options && this.options.count || 5,
+            count: this.options?.count ?? 5,
             subString: subStr
           }).then(rt => [
             ...rt.rows,
-            ...this.options && this.options.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows) || []
+            ...this.options && this.options.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows) ?? []
           ])
         )
       );

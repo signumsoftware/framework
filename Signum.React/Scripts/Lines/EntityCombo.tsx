@@ -32,7 +32,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
 
 
   doView(entity: ModifiableEntity | Lite<Entity>) {
-    var promise = super.doView(entity) || Promise.resolve(undefined);
+    var promise = super.doView(entity) ?? Promise.resolve(undefined);
 
     if (this.props.refreshKey == null) {
       promise = promise.then(a => {
@@ -159,8 +159,8 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       const fo = p.findOptions;
       if (fo) {
         Finder.expandParentColumn(fo);
-        var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
-        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
+        var limit = fo?.pagination?.elementsPerPage ?? 999;
+        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
           .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
           .done();
       }

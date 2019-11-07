@@ -23,7 +23,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
   }
 
   function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
-    p.columnOption.displayName = event.currentTarget.value || undefined;
+    p.columnOption.displayName = event.currentTarget.value ?? undefined;
     p.onChange(undefined);
   }
 
@@ -44,7 +44,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
           readOnly={false} />
       </div>
       <input className="form-control form-control-xs"
-        value={co.displayName || ""}
+        value={co.displayName ?? ""}
         onChange={handleOnChange} />
     </div>
   );

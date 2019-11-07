@@ -260,7 +260,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
           {
             !isEmpty &&
             <thead ref={c.thead}>
-              <tr className={p.theadClasses || "bg-light"}>
+              <tr className={p.theadClasses ?? "bg-light"}>
                 {firstColumnVisible && <th></th>}
                 {
                   p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
@@ -298,7 +298,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
                     <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
                       className="sf-line-button sf-create"
                       onClick={c.handleCreateClick}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
+                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
                     </a>}
                 </td>
               </tr>
@@ -351,7 +351,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.draggable;
     return (
-      <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
+      <tr style={{ backgroundColor: rowAtts?.style?.backgroundColor ?? undefined }}
         onDragEnter={drag && drag.onDragOver}
         onDragOver={drag && drag.onDragOver}
         onDrop={drag && drag.onDrop}

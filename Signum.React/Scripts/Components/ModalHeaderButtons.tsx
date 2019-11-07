@@ -41,13 +41,13 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
       {(p.onCancel || p.onOk) &&
         <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
           {p.onOk && <button
-            className={classes("btn", "btn-" + ((p.okButtonProps && p.okButtonProps.color) || "primary"), "sf-entity-button sf-close-button sf-ok-button", p.okButtonProps && p.okButtonProps.classes)}
+            className={classes("btn", "btn-" + (p.okButtonProps?.color ?? "primary"), "sf-entity-button sf-close-button sf-ok-button", p.okButtonProps?.classes)}
             disabled={p.okDisabled} onClick={p.onOk}>
             {renderButton(JavascriptMessage.ok.niceToString(), p.okButtonProps)}
           </button>
           }
           {p.onCancel && <button
-            className={classes("btn", "btn-" + ((p.closeButtonProps && p.closeButtonProps.color) || "light"), "sf-entity-button sf-close-button sf-cancel-button", p.closeButtonProps && p.closeButtonProps.classes)}
+            className={classes("btn", "btn-" + (p.closeButtonProps?.color ?? "light"), "sf-entity-button sf-close-button sf-cancel-button", p.closeButtonProps?.classes)}
             onClick={p.onCancel}>
             {renderButton(JavascriptMessage.cancel.niceToString(), p.closeButtonProps)}
           </button>

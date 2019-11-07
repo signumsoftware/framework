@@ -85,7 +85,7 @@ export class LineBaseController<P extends LineBaseProps> {
 
     const so: StyleOptions = { readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-    const p = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.typeReference()) } as LineBaseProps as P;
+    const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute.typeReference()) } as LineBaseProps as P;
 
     this.getDefaultProps(p);
     runTasks(this as any as LineBaseController<LineBaseProps>, p);

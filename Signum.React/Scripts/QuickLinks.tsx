@@ -75,7 +75,7 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[
     promises = promises.concat(specificPromises);
   }
 
-  return Promise.all(promises).then(links => links.flatMap(a => a || []).filter(a => a && a.isVisible).orderBy(a => a.order));
+  return Promise.all(promises).then(links => links.flatMap(a => a ?? []).filter(a => a && a.isVisible).orderBy(a => a.order));
 }
 
 

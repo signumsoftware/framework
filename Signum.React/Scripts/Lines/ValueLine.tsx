@@ -361,7 +361,7 @@ ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
           autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
           {...vl.props.valueHtmlAttributes}
           className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
-          value={s.ctx.value || ""}
+          value={s.ctx.value ?? ""}
           onBlur={handleBlur || htmlAtts && htmlAtts.onBlur}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
           onInput={isIE11() ? handleTextOnChange : undefined}
@@ -416,7 +416,7 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
         <TextArea {...vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
           onInput={isIE11() ? handleTextOnChange : undefined}
-          onBlur={handleBlur || htmlAtts && htmlAtts.onBlur}
+          onBlur={handleBlur ?? htmlAtts?.onBlur}
           placeholder={vl.getPlaceholder()}
           innerRef={vl.inputElement as any} />
       )}
@@ -456,16 +456,16 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
   const handleKeyDown = (e: React.KeyboardEvent<any>) => {
     if (e.keyCode == KeyCodes.down) {
       e.preventDefault();
-      vl.setValue((s.ctx.value || 0) - incNumber);
+      vl.setValue((s.ctx.value ?? 0) - incNumber);
     } else if (e.keyCode == KeyCodes.up) {
       e.preventDefault();
-      vl.setValue((s.ctx.value || 0) + incNumber);
+      vl.setValue((s.ctx.value ?? 0) + incNumber);
     }
   }
 
   const htmlAttributes = {
     placeholder: vl.getPlaceholder(),
-    onKeyDown: vl.props.incrementWithArrow || vl.props.incrementWithArrow == undefined && vl.props.valueLineType == "Number" ? handleKeyDown : undefined,
+    onKeyDown: (vl.props.incrementWithArrow || vl.props.incrementWithArrow == undefined && vl.props.valueLineType == "Number") ? handleKeyDown : undefined,
     ...vl.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
 

@@ -40,7 +40,7 @@ export default function FramePage(p: FramePageProps) {
 
   const ti = getTypeInfo(type);
 
-  useTitle(state && state.pack.entity.toStr || "", [state && state.pack.entity]);
+  useTitle(state?.pack.entity.toStr ?? "", [state?.pack.entity]);
 
   React.useEffect(() => {
     loadEntity()
@@ -64,7 +64,7 @@ export default function FramePage(p: FramePageProps) {
 
 
   function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
-    const viewName = QueryString.parse(p.location.search).viewName || undefined;
+    const viewName = QueryString.parse(p.location.search).viewName ?? undefined;
     return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise;
   }
 
@@ -132,7 +132,7 @@ export default function FramePage(p: FramePageProps) {
     pack: state.pack,
     onReload: (pack, reloadComponent, callback) => {
 
-      var packEntity = (pack || state.pack) as EntityPack<Entity>;
+      var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
       if (packEntity.entity.id != null && entity.id == null)
         Navigator.history.push(Navigator.navigateRoute(packEntity.entity));

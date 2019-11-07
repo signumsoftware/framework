@@ -29,7 +29,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
       {
         allPinned
-          .groupBy(a => (a.pinned!.column || 0).toString())
+          .groupBy(a => (a.pinned!.column ?? 0).toString())
           .orderBy(gr => parseInt(gr.key))
           .map(gr => <div className="col-sm-3" key={gr.key}>
             {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
@@ -44,7 +44,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     const readOnly = f.frozen;
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "ExtraSmall" : "Small" }, undefined as any, Binding.create(f, a => a.value));
 
-    var labelText = f.pinned!.label || f.token && f.token.niceName;
+    var labelText = f.pinned!.label ?? f.token?.niceName;
 
     if (isFilterGroupOptionParsed(f)) {
       return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} labelText={labelText || SearchMessage.Search.niceToString()} />

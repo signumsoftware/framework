@@ -206,12 +206,12 @@ export class BasicViewDispatcher implements ViewDispatcher {
 
   getViewNames(typeName: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
+    return Promise.resolve((es && es.namedViews && Dic.getKeys(es.namedViews)) ?? []);
   }
 
   getViewOverrides(typeName: string, viewName?: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || []);
+    return Promise.resolve(es?.viewOverrides?.filter(a => a.viewName == viewName) ?? []);
   }
 
 
@@ -248,12 +248,12 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
 
   getViewNames(typeName: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
+    return Promise.resolve((es && es.namedViews && Dic.getKeys(es.namedViews)) ?? []);
   }
 
   getViewOverrides(typeName: string, viewName?: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || []);
+    return Promise.resolve(es?.viewOverrides?.filter(a => a.viewName == viewName) ?? []);
   }
 
   getViewPromise(entity: ModifiableEntity, viewName?: string) {
@@ -261,7 +261,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
 
     if (viewName == undefined) {
 
-      if (!es || !es.getViewPromise)
+      if (es?.getViewPromise == null)
         return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
 
       return es.getViewPromise(entity).applyViewOverrides(entity.Type);
@@ -611,7 +611,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
   return NavigatorManager.getFrameModal()
-    .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions || {}));
+    .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
 
 export interface NavigateOptions {
@@ -637,7 +637,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
   return NavigatorManager.getFrameModal()
-    .then(NP => NP.FrameModalManager.openNavigate(entityOrPack, navigateOptions || {}));
+    .then(NP => NP.FrameModalManager.openNavigate(entityOrPack, navigateOptions ?? {}));
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -751,7 +751,7 @@ export module API {
   export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
   export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
 
-    const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
+    const typeName = (typeOrLite as Lite<any>).EntityType ?? getTypeName(typeOrLite as PseudoType);
     let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
     return ajaxGet({ url: "~/api/entityPack/" + typeName + "/" + idVal });
@@ -839,7 +839,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 
-    this.typeName = (type as Type<T>).typeName || type as string;
+    this.typeName = (type as Type<T>).typeName ?? type as string;
     this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
     if (options) {
@@ -873,7 +873,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
   constructor(type: Type<T>, viewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: NamedViewSettingsOptions<T>) {
     this.type = type;
     this.viewName = viewName;
-    var getViewPromise = (getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)))) || (options && options.getViewPromise);
+    var getViewPromise = (getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)))) || (options?.getViewPromise);
     if (!getViewPromise)
       throw new Error("setting getViewModule or options.getViewPromise arguments is mandatory");
     this.getViewPromise = getViewPromise;

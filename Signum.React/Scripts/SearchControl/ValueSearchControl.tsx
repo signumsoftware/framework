@@ -209,10 +209,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     switch (token.filterType) {
       case "Integer":
       case "Decimal":
-        const numbroFormat = toNumbroFormat(this.props.format || token.format);
+        const numbroFormat = toNumbroFormat(this.props.format ?? token.format);
         return numbro(value).format(numbroFormat);
       case "DateTime":
-        const momentFormat = toMomentFormat(this.props.format || token.format);
+        const momentFormat = toMomentFormat(this.props.format ?? token.format);
         return moment(value).format(momentFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;

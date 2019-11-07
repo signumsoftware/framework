@@ -78,7 +78,7 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
       htmlAttributes: config && config.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
     }))}
     title={title || SelectorMessage.ChooseAValue.niceToString()}
-    message={message || SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
+    message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
     size={size}
     dialogClassName={dialogClassName} />);
 };
@@ -86,7 +86,7 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
 SelectorModal.chooseType = (options: TypeInfo[]): Promise<TypeInfo | undefined> => {
   return SelectorModal.chooseElement(options,
     {
-      buttonDisplay: a => a.niceName || "",
+      buttonDisplay: a => a.niceName ?? "",
       buttonName: a => a.name,
       title: SelectorMessage.TypeSelector.niceToString(),
       message: SelectorMessage.PleaseSelectAType.niceToString()

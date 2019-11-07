@@ -78,7 +78,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     const type = state.type!;
 
-    const customComponent = !!state.getComponent || !!state.getViewPromise;
+    const customComponent = Boolean(state.getComponent || state.getViewPromise);
 
     state.create = EntityBaseController.defaultIsCreable(type, customComponent);
     state.view = EntityBaseController.defaultIsViewable(type, customComponent);
@@ -94,8 +94,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     const type = this.props.type!;
 
     const isLite = (entityOrLite as Lite<Entity>).EntityType != undefined;
-    const entityType = (entityOrLite as Lite<Entity>).EntityType || (entityOrLite as ModifiableEntity).Type;
-
+    const entityType = (entityOrLite as Lite<Entity>).EntityType ?? (entityOrLite as ModifiableEntity).Type;
 
     if (type.isEmbedded) {
       if (entityType != type.name || isLite)
@@ -261,7 +260,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     return (
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={this.props.titleLabels ? createMessage || EntityControlMessage.Create.niceToString() : undefined}>
+        title={this.props.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
         {EntityBaseController.createIcon}
       </a>
     );

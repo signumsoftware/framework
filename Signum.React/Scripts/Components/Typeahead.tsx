@@ -108,9 +108,9 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
     if (items!.length == 0)
       return false;
 
-    const val = p.onSelect!(items![selectedIndex || 0], e);
+    const val = p.onSelect!(items![selectedIndex ?? 0], e);
 
-    inputRef.current!.value = val || "";
+    inputRef.current!.value = val ?? "";
     if (p.onChange)
       p.onChange(inputRef.current!.value);
 
@@ -159,14 +159,14 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
       case 38: // up arrow
         {
           e.preventDefault();
-          const newIndex = ((selectedIndex || 0) - 1 + items!.length) % items!.length;
+          const newIndex = ((selectedIndex ?? 0) - 1 + items!.length) % items!.length;
           setSelectedIndex(newIndex).done();
           break;
         }
       case 40: // down arrow
         {
           e.preventDefault();
-          const newIndex = ((selectedIndex || 0) + 1) % items!.length;
+          const newIndex = ((selectedIndex ?? 0) + 1) % items!.length;
           setSelectedIndex(newIndex).done();
           break;
         }

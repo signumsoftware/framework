@@ -83,7 +83,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
               drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
               getComponent={p.getComponent}
               getViewPromise={p.getViewPromise}
-              title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type || mlec.value.EntityType).niceName}</span> : undefined} />))
+              title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
         }
         {
           p.createAsLink && p.create && !readOnly &&
@@ -91,7 +91,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
             <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleCreateClick}>
-              {EntityBaseController.createIcon}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
+              {EntityBaseController.createIcon}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
             </a>)
         }
       </div>

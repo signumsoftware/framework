@@ -185,7 +185,7 @@ MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | u
 }
 
 MessageModal.showError = (message: string, title?: string): Promise<undefined> => {
-  return MessageModal.show({ buttons: "ok", icon: "error", style: "error", title: title || JavascriptMessage.error.niceToString(), message: message })
+  return MessageModal.show({ buttons: "ok", icon: "error", style: "error", title: title ?? JavascriptMessage.error.niceToString(), message: message })
     .then(() => undefined);
 }
 

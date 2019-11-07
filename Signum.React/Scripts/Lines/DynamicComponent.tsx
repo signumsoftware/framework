@@ -57,7 +57,7 @@ export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeCont
 
   const ccProp = customPropertyComponent[pr.toString()];
   if (ccProp) {
-    return ctx => ccProp(ctx) || undefined;
+    return ctx => ccProp(ctx) ?? undefined;
   }
 
   const tr = pr.typeReference();
@@ -67,7 +67,7 @@ export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeCont
 
     return ctx => {
       var result = ccType(ctx);
-      return result == "continue" ? basic(ctx) : result || undefined;
+      return result == "continue" ? basic(ctx) : result ?? undefined;
     };
   }
 

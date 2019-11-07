@@ -126,8 +126,8 @@ export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
       const fo = p.findOptions;
       if (fo) {
         Finder.expandParentColumn(fo);
-        var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
-        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
+        var limit = fo?.pagination?.elementsPerPage ?? 999;
+        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
           .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
           .done();
       }
@@ -209,8 +209,8 @@ export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
     const fo = props.findOptions;
     if (fo) {
       Finder.expandParentColumn(fo);
-      var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
-      Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
+      var limit = fo?.pagination?.elementsPerPage ?? 999;
+      Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
         .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
         .done();
     }

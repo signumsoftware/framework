@@ -44,7 +44,7 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
           if (!context)
             throw new Error("You should not use <Switch> outside a <Router>");
 
-          const location = this.props.location || context.location;
+          const location = this.props.location ?? context.location;
 
           let element: React.ReactElement<any> | undefined;
           let match: match<any> | undefined | null;
@@ -57,7 +57,7 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
             if (match == null && React.isValidElement(child)) {
               element = child;
 
-              const path = child.props.path || child.props.from;
+              const path = child.props.path ?? child.props.from;
 
               match = path
                 ? matchPath(location.pathname, { ...child.props, path: Navigator.toAbsoluteUrl(path as string) })

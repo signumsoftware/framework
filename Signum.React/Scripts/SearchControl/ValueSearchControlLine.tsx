@@ -118,7 +118,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     return (
       <FormGroup ctx={this.props.ctx}
-        labelText={this.props.labelText || (token ? token.niceName : getQueryNiceName(fo.queryName))}
+        labelText={this.props.labelText ?? (token ? token.niceName : getQueryNiceName(fo.queryName))}
         labelHtmlAttributes={this.props.labelHtmlAttributes}
         htmlAttributes={this.props.formGroupHtmlAttributes}>
         <div className={isFormControl ? ((unit || view || extra || find) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>

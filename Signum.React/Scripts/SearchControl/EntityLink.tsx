@@ -18,18 +18,18 @@ export default function EntityLink(p: EntityLinkProps) {
   const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, ...htmlAtts } = p;
 
   if (!Navigator.isNavigable(lite.EntityType, undefined, p.inSearch || false))
-    return <span data-entity={liteKey(lite)}>{p.children || getToString(lite)}</span>;
+    return <span data-entity={liteKey(lite)}>{p.children ?? getToString(lite)}</span>;
 
 
   return (
     <Link
       innerRef={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
-      title={StyleContext.default.titleLabels ? p.title || getToString(lite) : undefined}
+      title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       onClick={handleClick}
       data-entity={liteKey(lite)}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
-      {children || lite.toStr}
+      {children ?? lite.toStr}
     </Link>
   );
 

@@ -47,7 +47,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
       } as FilterGroupOptionParsed :
       {
         token: p.lastToken,
-        operation: lastToken && (filterOperations[lastToken.filterType!] || []).firstOrNull() || undefined,
+        operation: lastToken && (filterOperations[lastToken.filterType!] ?? []).firstOrNull() ?? undefined,
         value: undefined,
         frozen: false
       } as FilterConditionOptionParsed);
@@ -162,9 +162,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps){
   function handleTokenChanged(newToken: QueryToken | null | undefined) {
 
     const f = p.filterGroup;
-    f.token = newToken || undefined;
+    f.token = newToken ?? undefined;
     if (p.onTokenChanged)
-      p.onTokenChanged(newToken || undefined);
+      p.onTokenChanged(newToken ?? undefined);
     p.onFilterChanged();
     forceUpdate();
   }
@@ -405,10 +405,10 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         f.value = f.value && trimDateToFormat(f.value, toMomentFormat(newToken.format));
       }
     }
-    f.token = newToken || undefined;
+    f.token = newToken ?? undefined;
 
     if (p.onTokenChanged)
-      p.onTokenChanged(newToken || undefined);
+      p.onTokenChanged(newToken ?? undefined);
 
     p.onFilterChanged();
 
@@ -528,7 +528,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
       <td>
         <div>
           <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()} readOnly={p.readonly}
-            value={p.pinned.label || ""}
+            value={p.pinned.label ?? ""}
             onChange={e => { p.pinned.label = e.currentTarget.value; p.onChange(); }} />
         </div>
       </td>
