@@ -30,6 +30,59 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
     if (p.iconStart == undefined && p.vertical)
       p.iconStart = true;
   }
+
+  handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
+    this.props.autocomplete!.getEntityFromItem(item)
+      .then(entity => entity && this.convert(entity)
+        .then(e => this.addElement(e))
+      ).done();
+
+    return "";
+  }
+
+  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
+
+    event.preventDefault();
+
+    const ctx = this.props.ctx;
+    const list = ctx.value!;
+    const mle = list[index];
+    const entity = mle.element;
+
+    const openWindow = (event.button == 1 || event.ctrlKey) && !this.props.type!.isEmbedded;
+    if (openWindow) {
+      event.preventDefault();
+      const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+      window.open(route);
+    }
+    else {
+      const pr = ctx.propertyRoute.addLambda(a => a[0]);
+
+      const promise = this.props.onView ?
+        this.props.onView(entity, pr) :
+        this.defaultView(entity, pr);
+
+      if (promise == null)
+        return;
+
+      promise.then(e => {
+        if (e == undefined)
+          return;
+
+        this.convert(e).then(m => {
+          if (is(list[index].element as Entity, e as Entity)) {
+            list[index].element = m;
+            if (e.modified)
+              this.setValue(list);
+            this.forceUpdate();
+          } else {
+            list[index] = { rowId: null, element: m };
+            this.setValue(list);
+          }
+        }).done();
+      }).done();
+    }
+  }
 }
 
 export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
@@ -56,78 +109,40 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
                 onItemHtmlAttributes={p.onItemHtmlAttributes}
                 onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
                 onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-                onView={c.canView(mlec.value) ? e => handleViewElement(e, mlec.index!) : undefined}
+                onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
               />))
           }
-          <li className={classes(p.ctx.inputGroupClass, "sf-strip-input")}>
-            <div className={p.ctx.inputGroupClass}>
-              {renderAutoComplete()}
-              <span className="input-group-append">>
-              {c.renderCreateButton(true)}
-                {c.renderFindButton(true)}
-                {p.extraButtons && p.extraButtons(c)}
-              </span>
-            </div>
-          </li>
+          {renderLastElement()}
         </ul>
       </div>
     </FormGroup>
   );
 
-  function handleOnSelect(item: any, event: React.SyntheticEvent<any>) {
-    p.autocomplete!.getEntityFromItem(item)
-      .then(entity => entity && c.convert(entity)
-        .then(e => c.addElement(e))
-      ).done();
+  function renderLastElement() {
 
-    return "";
+    const buttons = (
+      <span className="input-group-append">
+        {c.renderCreateButton(true)}
+        {c.renderFindButton(true)}
+        {p.extraButtons && p.extraButtons(c)}
+      </span>
+    );
+
+    return (
+      <li className={"sf-strip-input"}>
+        {
+          !EntityBaseController.hasChildrens(buttons) ?
+            renderAutoComplete() :
+            renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
+              {input}
+              {buttons}
+            </div>)
+        }
+      </li>
+    );
   }
 
-  function handleViewElement(event: React.MouseEvent<any>, index: number) {
-
-    event.preventDefault();
-
-    const ctx = p.ctx;
-    const list = ctx.value!;
-    const mle = list[index];
-    const entity = mle.element;
-
-    const openWindow = (event.button == 1 || event.ctrlKey) && !p.type!.isEmbedded;
-    if (openWindow) {
-      event.preventDefault();
-      const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
-      window.open(route);
-    }
-    else {
-      const pr = ctx.propertyRoute.addLambda(a => a[0]);
-
-      const promise = p.onView ?
-        p.onView(entity, pr) :
-        c.defaultView(entity, pr);
-
-      if (promise == null)
-        return;
-
-      promise.then(e => {
-        if (e == undefined)
-          return;
-
-        c.convert(e).then(m => {
-          if (is(list[index].element as Entity, e as Entity)) {
-            list[index].element = m;
-            if (e.modified)
-              c.setValue(list);
-            c.forceUpdate();
-          } else {
-            list[index] = { rowId: null, element: m };
-            c.setValue(list);
-          }
-        }).done();
-      }).done();
-    }
-  }
-
-  function renderAutoComplete() {
+  function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
     var ac = p.autocomplete;
 
     if (!ac || p.ctx!.readOnly)
@@ -140,7 +155,9 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
         getItemsDelay={ac.getItemsDelay}
         renderItem={(e, str) => ac!.renderItem(e, str)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
-        onSelect={handleOnSelect} />
+        onSelect={c.handleOnSelect}
+        renderInput={renderInput}
+      />
     );
   }
 }), (prev, next) => EntityBaseController.propEquals(prev, next));

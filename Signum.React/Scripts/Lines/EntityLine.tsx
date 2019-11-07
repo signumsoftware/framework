@@ -99,6 +99,21 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
   writeInTypeahead(query: string) {
     this.typeahead.current && this.typeahead.current.writeInInput(query);
   }
+
+  handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
+    this.props.autocomplete!.getEntityFromItem(item)
+      .then(entity => entity &&
+        this.convert(entity)
+          .then(entity => {
+            this.props.autocomplete!.getItemFromEntity(entity)
+              .then(newItem => this.setCurrentItem({ entity: entity, item: newItem })); //newItem could be different to item on create new case
+
+            this.setValue(entity);
+          }))
+      .done();
+
+    return "";
+  }
 }
 
 
@@ -106,20 +121,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
 
-  function handleOnSelect(item: any, event: React.SyntheticEvent<any>) {
-    p.autocomplete!.getEntityFromItem(item)
-      .then(entity => entity &&
-        c.convert(entity)
-          .then(entity => {
-            p.autocomplete!.getItemFromEntity(entity)
-              .then(newItem => c.setCurrentItem({ entity: entity, item: newItem })); //newItem could be different to item on create new case
-
-            c.setValue(entity);
-          }))
-      .done();
-
-    return "";
-  }
+ 
 
   if (c.isHidden)
     return null;
@@ -135,8 +137,6 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       {c.props.extraButtons && c.props.extraButtons(c)}
     </span>
   );
-
-  var linkOrAutocomplete = hasValue ? renderLink() : renderAutoComplete();
 
   return (
     <FormGroup ctx={p.ctx} labelText={p.labelText} helpText={p.helpText}
@@ -179,7 +179,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
-        onSelect={handleOnSelect}
+        onSelect={c.handleOnSelect}
         renderInput={renderInput}
       />
     );
