@@ -198,32 +198,40 @@ export function useMounted() {
   return mounted;
 }
 
-export function useThrottle<T>(value: T, limit: number): T {
+export function useThrottle<T>(value: T, limit: number, options?: { enabled?: boolean }): T {
   const [throttledValue, setThrottledValue] = React.useState(value);
 
-  const mounted = React.useRef(true);
   const lastRequested = React.useRef<(undefined | { value: T })>(undefined);
+  const handleRef = React.useRef<number | undefined>(undefined);
+
+  function stop(){
+    if (handleRef.current)
+      clearTimeout(handleRef.current);
+
+    lastRequested.current = undefined;
+  }
+
   React.useEffect(
     () => {
-      if (lastRequested.current) {
-        lastRequested.current.value = value;
+      if (options && options.enabled == false) {
+        stop();
       } else {
-        lastRequested.current = { value };
-        const handler = setTimeout(function () {
-          if (mounted.current) {
+        if (lastRequested.current) {
+          lastRequested.current.value = value;
+        } else {
+          lastRequested.current = { value };
+          handleRef.current = setTimeout(function () {
             setThrottledValue(lastRequested.current!.value);
-            lastRequested.current = undefined;
-
-            clearTimeout(handler);
-          }
-        }, limit);
+            stop();
+          }, limit);
+        }
       }
     },
-    [value, limit]
+    [value, options && options.enabled]
   );
 
   React.useEffect(() => {
-    return () => { mounted.current = false; }
+    return () => stop();
   }, []);
 
   return throttledValue;
