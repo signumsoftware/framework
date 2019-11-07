@@ -45,7 +45,7 @@ interface PackAndComponent {
   lastEntity: string;
   refreshCount: number;
   getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-}
+  }
 
 export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
@@ -61,9 +61,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const forceUpdate = useForceUpdate();
 
   React.useImperativeHandle(ref, () => ({
-    handleKeyDown(e: KeyboardEvent) {
+  handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
-    }
+  }
   }));
 
   const typeName = getTypeName(p.entityOrPack);
@@ -87,7 +87,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     return viewPromise;
   }
-
+  
   function setPack(pack: EntityPack<ModifiableEntity>, getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>, callback?: () => void) {
     setPackComponent({
       pack,
@@ -172,18 +172,18 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
 
-  return (
-    <Modal size={p.modalSize || settings && settings.modalSize || "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-popup-control" >
-      <ModalHeaderButtons
+    return (
+    <Modal size={p.modalSize || settings && settings.modalSize || "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
+        <ModalHeaderButtons
         onClose={p.isNavigate ? handleCancelClicked : undefined}
         onOk={!p.isNavigate ? handleOkClicked : undefined}
         onCancel={!p.isNavigate ? handleCancelClicked : undefined}
         okDisabled={!packComponent}>
         <FrameModalTitle pack={packComponent && packComponent.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
-      </ModalHeaderButtons>
+        </ModalHeaderButtons>
       {packComponent && renderBody(packComponent)}
-    </Modal>
-  );
+      </Modal>
+    );
 
   function renderBody(pc: PackAndComponent) {
 
@@ -298,18 +298,18 @@ export namespace FrameModalManager {
 export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>); }) {
 
   if (!pack)
-    return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
+      return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
   const entity = pack.entity;
 
-  return (
-    <span>
+    return (
+      <span>
       <span className="sf-entity-title">{title || getToString(entity)}</span>&nbsp;
         {renderExpandLink(pack.entity)}
-      <br />
-      <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
-    </span>
-  );
+        <br />
+        <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+      </span>
+    );
 
   function renderExpandLink(entity: ModifiableEntity) {
 
@@ -351,11 +351,11 @@ export class FunctionalAdapter extends React.Component {
 
     if (isForwardRef(only.type)) {
       return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } });
-    }
+}
 
     return this.props.children;
   }
-
+  
   static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
     if (typeof type == "string" || type.prototype && type.prototype.render) {
