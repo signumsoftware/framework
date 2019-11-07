@@ -165,7 +165,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
   return (
     <Dropdown id="quickLinksWidget">
-      <QuickLinkToggle links={links} />
+      <Dropdown.Toggle as={QuickLinkToggle} links={links} />
       <Dropdown.Menu alignRight>
         {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
       </Dropdown.Menu>
@@ -174,27 +174,29 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 }
 
 
-function QuickLinkToggle({ onClick, links }: { onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }) {
+class QuickLinkToggle extends React.Component<{ onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }> {
 
-  function handleClick(e: React.MouseEvent<any>) {
+  handleClick = (e: React.MouseEvent<any>) => {
     e.preventDefault();
-    onClick!(e);
+    this.props.onClick!(e);
   }
 
-  return (
-    <a
-      className={classes("badge badge-pill", links && links.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
-      title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
-      role="button"
-      href="#"
-      data-toggle="dropdown"
-      onClick={e => e.preventDefault()} >
-      {links && <FontAwesomeIcon icon="star" />}
-      {links ? "\u00A0" + links.length : "…"}
-    </a>
-  );
+  render() {
+    const links = this.props.links;
+    return (
+      <a
+        className={classes("badge badge-pill", links && links.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
+        title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
+        role="button"
+        href="#"
+        data-toggle="dropdown"
+        onClick={this.handleClick} >
+        {links && <FontAwesomeIcon icon="star" />}
+        {links ? "\u00A0" + links.length : "…"}
+      </a>
+    );
+  }
 }
-
 
 export interface QuickLinkOptions {
   isVisible?: boolean;
