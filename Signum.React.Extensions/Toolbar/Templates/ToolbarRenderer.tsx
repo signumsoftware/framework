@@ -41,16 +41,10 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
   return null;
 }
 
-export interface ToolbarRendererState {
-  response?: ToolbarClient.ToolbarResponse<any>;
-  expanded: ToolbarClient.ToolbarResponse<any>[];
-  avoidCollapse: ToolbarClient.ToolbarResponse<any>[];
-  active?: ToolbarClient.ToolbarResponse<any> | null;
-}
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
   const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
-
+  const responseRef = useUpdatedRef(response);
   const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
   const [avoidCollapse, setAvoidCollapse] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
 
@@ -59,15 +53,15 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
   useHistoryListen((location: History.Location, action: History.Action) => {
     var query = QueryString.parse(location.search);
-    if (response) {
+    if (responseRef.current) {
       if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
         return;
       }
 
-      var newActive = inferActive(response, location, query);
+      var newActive = inferActive(responseRef.current, location, query);
       setActive(newActive);
     }
-  }, [response]);
+  }, response != null);
 
   if (!response)
     return null;
@@ -132,7 +126,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
         if (res.url) {
           return (
             <Nav.Item>
-              <Nav.Link onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}>
+              <Nav.Link onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} active={res == active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </Nav.Link>
             </Nav.Item>
@@ -146,7 +140,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
           return (
             <Nav.Item>
-              <Nav.Link onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}>
+              <Nav.Link onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
                 {config.getIcon(res)}{config.getLabel(res)}
               </Nav.Link>
             </Nav.Item>
@@ -197,12 +191,12 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
       case "Header":
       case "Item":
 
-        var HeaderOrItem = res.type == "Header" ? Dropdown.Item : Dropdown.Header;
+        var HeaderOrItem = res.type == "Header" ? Dropdown.Header : Dropdown.Item;
 
         if (res.elements && res.elements.length) {
           return [
             <HeaderOrItem onClick={(e: React.MouseEvent<any>) => handleClick(e, res, topRes)}
-              className={classes(menuItemN, "sf-cursor-pointer", expanded.contains(res) && "active")}>
+              className={classes(menuItemN, "sf-cursor-pointer")}>
               {getIcon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align" />
             </HeaderOrItem>
           ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, topRes)) : [])
@@ -210,7 +204,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
         if (res.url) {
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className={classes("sf-cursor-pointer", menuItemN)} >
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </HeaderOrItem>
           ];
@@ -227,7 +221,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           }
 
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN, res == active)}>
+            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN, res == active && "active")}>
               {config.getIcon(res)}{config.getLabel(res)}
             </HeaderOrItem>
           ];
