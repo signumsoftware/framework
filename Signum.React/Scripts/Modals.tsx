@@ -40,7 +40,7 @@ export function GlobalModalContainer() {
 
   var [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
 
-  useHistoryListen(() => setModals([]), []);
+  useHistoryListen(() => setModals([]), true);
 
   React.useEffect(() => {
     current = {
