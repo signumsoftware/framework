@@ -50,7 +50,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
         <br />
         InitialDelayMiliseconds: {s.initialDelayMiliseconds}
         <br />
-        NextPlannedExecution: {s.nextPlannedExecution || "-None-"}
+        NextPlannedExecution: {s.nextPlannedExecution ?? "-None-"}
         <br />
         <table className="table">
           <thead>

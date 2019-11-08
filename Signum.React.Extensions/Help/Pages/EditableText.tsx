@@ -31,7 +31,7 @@ export function EditableComponent({ ctx, markdown, defaultText, inline, onChange
 }
 
 export function MarkdownText({ text, className }: { text: string | null | undefined, className?: string }) {
-  var markdownText = React.useMemo(() => HelpClient.toHtml(text || ""), [text]);
+  var markdownText = React.useMemo(() => HelpClient.toHtml(text ?? ""), [text]);
 
   function handleOnMouseUp(e: React.MouseEvent) {
     var a = e.target as HTMLAnchorElement;

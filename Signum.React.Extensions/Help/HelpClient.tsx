@@ -40,7 +40,7 @@ export function toHtml(txt: string  | null) {
     switch (letter) {
       case 't': {
         var ti = getTypeInfo(link);
-        return markdownLink(Urls.typeUrl(link), ti && ti.niceName || link);
+        return markdownLink(Urls.typeUrl(link), ti?.niceName ?? link);
       }
       case 'a': return markdownLink(Urls.appendixUrl(link), link);
       case 'n': return markdownLink(Urls.namespaceUrl(link), link);
@@ -89,7 +89,7 @@ export module API {
   }
 
   export function appendix(uniqueName: string | undefined): Promise<AppendixHelpEntity> {
-    return ajaxGet({ url: "~/api/help/appendix/" + (uniqueName || "") });
+    return ajaxGet({ url: "~/api/help/appendix/" + (uniqueName ?? "") });
   }
 }
 
@@ -143,7 +143,7 @@ export module Urls {
   }
 
   export function appendixUrl(uniqueName: string | null) {
-    return Navigator.toAbsoluteUrl("~/help/appendix/" + (uniqueName || ""));
+    return Navigator.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
   }
 
   export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {
@@ -151,7 +151,7 @@ export module Urls {
   }
 
   export function idOperation(operation: OperationSymbol | string) {
-    return "o-" + ((operation as OperationSymbol).key || operation as string).replaceAll('.', '_');
+    return "o-" + ((operation as OperationSymbol).key ?? operation as string).replaceAll('.', '_');
   }
 
 

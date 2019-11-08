@@ -62,7 +62,7 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
           {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
                     </div>
       }
-      <Tabs activeKey={step || "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
+      <Tabs activeKey={step ?? "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
         <Tab eventKey="search" title="Search">
           <SearchPanel />
         </Tab>
@@ -378,7 +378,7 @@ export function CheckEvalsStep() {
 
   function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    setAutoStart((autoStart || 0) + 1);
+    setAutoStart((autoStart ?? 0) + 1);
   }
 
   var ctx = new StyleContext(undefined, {});
@@ -421,7 +421,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
       .then(fop => {
         var request = {
           queryKey: fop.queryKey,
-          filters: toFilterRequests(fop.filterOptions || []),
+          filters: toFilterRequests(fop.filterOptions),
           orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
           count: 10000,
         } as QueryEntitiesRequest;

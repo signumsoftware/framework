@@ -93,7 +93,7 @@ export default function ChartTableComponent(p : ChartTableProps){
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
     .map(co => ({
       column: co,
-      cellFormatter: (qs && qs.formatters && qs.formatters[co.token!.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co, undefined)).last("FormatRules").formatter(co),
+      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co, undefined)).last("FormatRules").formatter(co),
       resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
     }));
 
@@ -113,7 +113,7 @@ export default function ChartTableComponent(p : ChartTableProps){
             <th key={i} data-column-name={col.column.token!.fullKey}
               onClick={e=>handleHeaderClick(e, col.column)}>
               <span className={"sf-header-sort " + orderClassName(col.column)} />
-              <span> {col.column.displayName || col.column.token!.niceName}</span>
+              <span> {col.column.displayName ?? col.column.token!.niceName}</span>
             </th>)}
         </tr>
       </thead>
@@ -121,7 +121,7 @@ export default function ChartTableComponent(p : ChartTableProps){
         {
           resultTable.rows.map((row, i) =>
             <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
-              {hasEntity && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
+              {hasEntity && <td>{(qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
               {columns.map((c, j) =>
                 <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                   {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}

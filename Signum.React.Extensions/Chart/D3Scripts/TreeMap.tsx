@@ -32,17 +32,17 @@ export default function renderTreeMap({ data, width, height, parameters, loading
   }
   else if (colorSchemeColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
-    color = r => colorSchemeColumn!.getColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
+    color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
   }
   else {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
-    color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
+    color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)));
-    folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
+    folderColor = folder => parentColumn!.getColor(folder) ?? categoryColor(parentColumn!.getKey(folder));
   }
 
   var root = stratifyTokens(data, keyColumn, parentColumn);
@@ -93,7 +93,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
             <rect className="folder sf-transition" shapeRendering="initial"
               width={nodeWidth(d)}
               height={nodeHeight(d)}
-              fill={parentColumn!.getColor((d.data as Folder).folder) || folderColor!((d.data as Folder).folder)}
+              fill={parentColumn!.getColor((d.data as Folder).folder) ?? folderColor!((d.data as Folder).folder)}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder })} cursor="pointer">
               <title>
                 {folderColor!(((d.data as Folder).folder))}
@@ -129,7 +129,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
           {!isFolder(d.data) && nodeWidth(d) > 10 && nodeHeight(d) > 25 && showNumber &&
             <TextEllipsis maxWidth={nodeWidth(d)} padding={1} etcText=""
-              fill={parameters["NumberColor"] || "#fff"}
+              fill={parameters["NumberColor"] ?? "#fff"}
               dominantBaseline="middle"
               opacity={parseFloat(parameters["NumberOpacity"])}
               textAnchor="middle"

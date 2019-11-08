@@ -516,7 +516,7 @@ function getWorkflowJumpSelector(activity: Lite<WorkflowActivityEntity>): Promis
     .then(jumps => SelectorModal.chooseElement(jumps,
       {
         title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
-        buttonDisplay: a => a.toStr || "",
+        buttonDisplay: a => a.toStr ?? "",
         forceShow: true
       }));
 }
@@ -620,7 +620,7 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
 
   const wa = ca.workflowActivity as WorkflowActivityEntity;
 
-  var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined);
+  var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName ?? undefined);
 
   if (wa.viewNameProps.length) {
     var props = wa.viewNameProps.toObject(a => a.element.name, a => !a.element.expression ? undefined : eval(a.element.expression));

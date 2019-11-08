@@ -68,7 +68,7 @@ export function MixinCombo(p : MixinComboProps){
         <Typeahead
           inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
           getItems={handleGetItems}
-          value={p.binding.getValue() || ""}
+          value={p.binding.getValue() ?? ""}
           onChange={handleOnChange} />
       </div>
     </div>

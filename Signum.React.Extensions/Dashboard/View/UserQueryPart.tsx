@@ -22,10 +22,10 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
   if (p.part.renderMode == "BigValue") {
     return <BigValueSearchCounter
       findOptions={fo}
-      text={p.partEmbedded.title || undefined}
+      text={p.partEmbedded.title ?? undefined}
       style={p.partEmbedded.style}
-      iconName={p.partEmbedded.iconName || undefined}
-      iconColor={p.partEmbedded.iconColor || undefined}
+      iconName={p.partEmbedded.iconName ?? undefined}
+      iconColor={p.partEmbedded.iconColor ?? undefined}
     />;
   }
 
@@ -73,7 +73,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           </div>
         </div>
         <div className={classes("flip", isRTL ? "text-left" : "text-right")}>
-          <h6 className="large">{p.text || getQueryNiceName(p.findOptions.queryName)}</h6>
+          <h6 className="large">{p.text ?? getQueryNiceName(p.findOptions.queryName)}</h6>
         </div>
       </div>
     </div>

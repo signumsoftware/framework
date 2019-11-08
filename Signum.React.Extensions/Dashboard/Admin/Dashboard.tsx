@@ -56,10 +56,10 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
       <div>
         <div className="row">
           <div className="col-sm-1">
-            {icon && <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
+            {icon && <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px", marginTop: "17px" }} />}
           </div>
           <div className="col-sm-11">
-            <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) || tcs.niceName(pp => pp.title)} />
+            <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
             <div className="row">
               <div className="col-sm-4">
                 <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => forceUpdate()} />

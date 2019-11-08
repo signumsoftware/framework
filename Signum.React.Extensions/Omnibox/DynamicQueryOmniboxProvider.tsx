@@ -40,7 +40,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
         if (last != undefined)
           array.push(<span>.</span>);
 
-        array.push(this.coloredSpan(f.queryTokenOmniboxPascal.tryAfterLast(".") || f.queryTokenOmniboxPascal, "gray"));
+        array.push(this.coloredSpan(f.queryTokenOmniboxPascal.tryAfterLast(".") ?? f.queryTokenOmniboxPascal, "gray"));
       }
 
       if (f.canFilter && f.canFilter.length)

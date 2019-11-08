@@ -9,7 +9,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
 
-  const couldHaveNotes = options.couldHaveNotes || (typeName => true);
+  const couldHaveNotes = options.couldHaveNotes ?? (typeName => true);
 
   Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
     isVisible: eoc => couldHaveNotes!(eoc.entity.Type),

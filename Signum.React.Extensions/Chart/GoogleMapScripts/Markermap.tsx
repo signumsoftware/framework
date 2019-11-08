@@ -95,7 +95,7 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
       else if (colorSchemeColumn != null) {
         var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"])!;
         var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorSchemeColumn.getValueKey));
-        color = r => colorSchemeColumn!.getValueColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
+        color = r => colorSchemeColumn!.getValueColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
       }
 
       data.rows.forEach(r => {

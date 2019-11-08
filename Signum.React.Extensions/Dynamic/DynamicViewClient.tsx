@@ -128,7 +128,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewOverrides(typeName: string, viewName?: string): Promise<Navigator.ViewOverride<ModifiableEntity>[]> {
     const es = Navigator.getSettings(typeName);
-    var staticViewOverrides = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || [];
+    var staticViewOverrides = es?.viewOverrides?.filter(a => a.viewName == viewName) || [];
 
     if (!isTypeEntity(typeName))
       return Promise.resolve(staticViewOverrides);
@@ -196,7 +196,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
     const settings = Navigator.getSettings(entity.Type);
 
-    if (!settings || !settings.getViewPromise) {
+    if (settings?.getViewPromise == null) {
 
       if (!isTypeEntity(entity.Type))
         return new ViewPromise(import('@framework/Lines/DynamicComponent'));

@@ -171,7 +171,7 @@ export function openTree(type: Type<TreeEntity> | string, filterOptions?: Filter
   const typeName = type instanceof Type ? type.typeName : type;
 
   return import("./TreeModal")
-    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions || [], options));
+    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions ?? [], options));
 }
 
 export interface TreeModalOptions {

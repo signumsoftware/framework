@@ -76,9 +76,9 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
           if (extraProviders.length)
             throw new Error(`Extra ClientColorProvider for ${extraProviders.map(a => "'" + a.name + "'").joinComma("and")} found`);
 
-          setFilter(parsedQuery.filter || "");
+          setFilter(parsedQuery.filter ?? "");
           setTables(parsedQuery.tables);
-          setColor(parsedQuery.color || smi.providers.first().name);
+          setColor(parsedQuery.color ?? smi.providers.first().name);
           setSchemaInfo(smi);
           setProviders(providers.toObject(a => a.name));
 

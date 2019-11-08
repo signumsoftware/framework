@@ -33,7 +33,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   React.useEffect(() => {
     const userQuery = window.location.search.tryAfter("userQuery=");
     if (userQuery) {
-      const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
+      const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") ?? userQuery)) as Lite<UserQueryEntity>;
       setCurrentUserQuery(uq);
       Navigator.API.fillToStrings(uq)
         .done();
@@ -119,7 +119,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
       queryKey: getQueryKey(fo.queryName),
-      filters: (fo.filterOptions || []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
+      filters: (fo.filterOptions ?? []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
@@ -130,12 +130,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
-      columns: (fo.columnOptions || []).map(c => newMListElement(QueryColumnEmbedded.New({
+      columns: (fo.columnOptions ?? []).map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
         displayName: c.displayName
       }))),
       columnsMode: fo.columnOptionsMode,
-      orders: (fo.orderOptions || []).map(c => newMListElement(QueryOrderEmbedded.New({
+      orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({
         orderType: c.orderType,
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() })
       }))),

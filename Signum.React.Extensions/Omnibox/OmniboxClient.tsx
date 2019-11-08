@@ -101,7 +101,7 @@ export namespace API {
 
   export function getResults(query: string, signal: AbortSignal): Promise<OmniboxResult[]> {
     return ajaxPost({ url: "~/api/omnibox", signal }, {
-      query: query || "",
+      query: query ?? "",
       specialActions: Dic.getKeys(specialActions).filter(a => specialActions[a].allowed == null || specialActions[a].allowed())
     })
   }

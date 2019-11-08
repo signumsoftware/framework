@@ -134,7 +134,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         <FilterBuilder
           title={p.ctx.niceName()}
           queryDescription={qd}
-          filterOptions={filterOptions || []}
+          filterOptions={filterOptions ?? []}
           subTokensOptions={p.subTokenOptions}
           readOnly={p.ctx.readOnly}
           onFiltersChanged={handleFiltersChanged}
@@ -188,9 +188,9 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
 
     function toPinnedFilter(pinned: PinnedQueryFilterEmbedded): PinnedFilter {
       return {
-        label: pinned.label || undefined,
-        column: pinned.column || undefined,
-        row: pinned.row || undefined,
+        label: pinned.label ?? undefined,
+        column: pinned.column ?? undefined,
+        row: pinned.row ?? undefined,
         disableOnNull: pinned.disableOnNull || undefined,
         splitText: pinned.splitText || undefined,
       };
@@ -211,7 +211,7 @@ export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
   const [values, setValues] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    setValues((p.ctx.value || "").split("|"));
+    setValues((p.ctx.value ?? "").split("|"));
   }, [p.ctx.value]);
 
   const handleChangeValue = () => {

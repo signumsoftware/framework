@@ -41,7 +41,7 @@ export function start(options: { routes: JSX.Element[] }) {
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
+      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr ?? "", e => {
         window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
   });
@@ -93,12 +93,12 @@ export module Converter {
       fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
       fo.columnOptionsMode = uq.columnsMode;
 
-      fo.columnOptions = (uq.columns || []).map(f => ({
+      fo.columnOptions = (uq.columns ?? []).map(f => ({
         token: f.element.token!.tokenString,
         displayName: f.element.displayName
       }) as ColumnOption);
 
-      fo.orderOptions = (uq.orders || []).map(f => ({
+      fo.orderOptions = (uq.orders ?? []).map(f => ({
         token: f.element.token!.tokenString,
         orderType: f.element.orderType
       }) as OrderOption);

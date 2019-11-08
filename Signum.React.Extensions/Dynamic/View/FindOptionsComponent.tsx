@@ -216,7 +216,7 @@ interface ViewNameComponentProps {
 export function ViewNameComponent(p: ViewNameComponentProps) {
 
   const viewNames = useAPI(() => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
-    Promise.all(getTypeInfos(p.typeName || "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
+    Promise.all(getTypeInfos(p.typeName ?? "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
       .then(arrays => [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]), [p.typeName]);
 
   return <ExpressionOrValueComponent dn={p.dn} binding={p.binding} type="string" defaultValue={null} options={viewNames}

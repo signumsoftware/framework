@@ -43,7 +43,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
   if (lite == null)
     return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
 
-  var scl = searchControl.current && searchControl.current.searchControlLoaded || undefined;
+  var scl = searchControl.current?.searchControlLoaded ?? undefined;
   var colIndex = scl && scl.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
 
   return (

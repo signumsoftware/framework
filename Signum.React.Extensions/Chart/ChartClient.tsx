@@ -391,7 +391,7 @@ export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isSh
 
     col.orderByType = newOrder;
     if (col.orderByIndex == null)
-      col.orderByIndex = (cr.columns.max(a => a.element.orderByIndex) || 0) + 1;
+      col.orderByIndex = (cr.columns.max(a => a.element.orderByIndex) ?? 0) + 1;
   }
   
   col.modified = true;
@@ -405,7 +405,7 @@ export module Encoder {
 
     return {
       queryName: cr.queryKey,
-      chartScript: cr.chartScript && cr.chartScript.key.after(".") || undefined,
+      chartScript: cr.chartScript?.key.after(".") ?? undefined,
       filterOptions: toFilterOptions(cr.filterOptions),
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
@@ -458,7 +458,7 @@ export module Encoder {
     if (columns)
       columns.forEach((co, i) => query["column" + i] =
         (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
-        (co.token || "") +
+        (co.token ?? "") +
         (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
   }
 
@@ -601,7 +601,7 @@ export module API {
     if (token.type.isLite)
       return v => {
         var lite = v as Lite<Entity> | null;
-        return String(lite && lite.toStr || "");
+        return String(lite?.toStr ?? "");
       };
 
     if (token.filterType == "Enum")
@@ -639,7 +639,7 @@ export module API {
       return defaultParameterValue(a, col && col.element && col.element.token && col.element.token.token);
     });
 
-    return request.parameters.toObject(a => a.element.name!, a => a.element.value || defaultValues[a.element.name!])
+    return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
   export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript): ExecuteChartResult {
@@ -661,7 +661,7 @@ export module API {
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName || token && token.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName ?? token?.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
         token: token,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,

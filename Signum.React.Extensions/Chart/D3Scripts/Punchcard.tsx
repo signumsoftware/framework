@@ -85,7 +85,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     if ((elements as any).__sum__ !== undefined)
       return (elements as any).__sum__;
 
-    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) || 0, 0);
+    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) ?? 0, 0);
   }
 
   var horizontalKeys = groupAndSort(data.rows, parameters["XSort"]!, horizontalColumn, parameters['CompleteHorizontalValues']);
@@ -188,8 +188,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       className:"punch sf-transition",
       shapeRendering: "initial",
       fillOpacity: fillOpacity(r),
-      fill: color == null ? (parameters["FillColor"] || 'black') : color(colorColumn!.getValue(r)),
-      stroke: parameters["StrokeColor"] || (color == null ? 'black' : color(colorColumn!.getValue(r))),
+      fill: color == null ? (parameters["FillColor"] ?? 'black') : color(colorColumn!.getValue(r)),
+      stroke: parameters["StrokeColor"] ?? (color == null ? 'black' : color(colorColumn!.getValue(r))),
       strokeWidth: parameters["StrokeWidth"],
       strokeOpacity: (opacity != null ? opacity(opacityColumn!.getValue(r)) : 1)
     }));
@@ -209,7 +209,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         className: "punch-inner sf-transition",
         shapeRendering: "initial",
         fillOpacity: fillOpacity(r),
-        fill: parameters["InnerFillColor"] || 'black'
+        fill: parameters["InnerFillColor"] ?? 'black'
       })
     );
 

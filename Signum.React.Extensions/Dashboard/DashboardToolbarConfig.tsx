@@ -16,7 +16,7 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
   }
 
   getIcon(element: ToolbarResponse<DashboardEntity>) {
-    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), "th-large"), element.iconColor || "darkslateblue");
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), "th-large"), element.iconColor ?? "darkslateblue");
   }
 
   navigateTo(element: ToolbarResponse<DashboardEntity>): Promise<string> {

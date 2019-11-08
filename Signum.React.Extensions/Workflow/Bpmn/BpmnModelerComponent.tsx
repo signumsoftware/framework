@@ -123,18 +123,18 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     var conIcons = this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.action || undefined;
+      return mod?.action ?? undefined;
     };
 
     conIcons.hasCondition = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.condition || undefined;
+      return mod?.condition ?? undefined;
     };
 
     var cusRenderer = this.modeler.get<customRenderer.CustomRenderer>('customRenderer');
     cusRenderer.getConnectionType = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.type || undefined;
+      return mod?.type ?? undefined;
     }
 
     conIcons.show();
@@ -328,7 +328,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         if (WorkflowConnectionModel.isInstance(me)) {
 
           if (newName)
-            newName = newName.tryBeforeLast(":") || newName;
+            newName = newName.tryBeforeLast(":") ?? newName;
 
           if (me.order)
             newName = newName + ": " + me.order;

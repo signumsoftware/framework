@@ -15,14 +15,14 @@ interface HeavyEntryProps extends RouteComponentProps<{ selectedIndex: string }>
 export default function HeavyEntry(p: HeavyEntryProps) {
 
   const selectedIndex = p.match.params.selectedIndex;
-  const rootIndex = selectedIndex.tryBefore("-") || selectedIndex;
+  const rootIndex = selectedIndex.tryBefore("-") ?? selectedIndex;
   const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.details(rootIndex), [rootIndex]);
   const stackTrace = useAPI(() => API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
   const [asyncDepth, setAsyncDepth] = React.useState<boolean>(false);
 
   function handleDownload() {
     let selectedIndex = p.match.params.selectedIndex;
-    API.Heavy.download(selectedIndex.tryBefore("-") || selectedIndex);
+    API.Heavy.download(selectedIndex.tryBefore("-") ?? selectedIndex);
   }
 
   const index = p.match.params.selectedIndex;

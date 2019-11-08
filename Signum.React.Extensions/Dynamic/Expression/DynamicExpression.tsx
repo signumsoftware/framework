@@ -64,7 +64,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
           size: ctx.value ? ctx.value.length : ctx.niceName().length
         }}
         getItems={query => handleGetItems(query, ctx.propertyRoute.member!.name == "ReturnType" ? "ReturnType" : "FromType")}
-        value={ctx.value || undefined}
+        value={ctx.value ?? undefined}
         onChange={txt => { ctx.value = txt; forceUpdate(); }} />
     );
   }
@@ -75,7 +75,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
         className="input-code"
         placeholder={ctx.niceName()}
         size={ctx.value ? ctx.value.length : ctx.niceName().length}
-        value={ctx.value || undefined}
+        value={ctx.value ?? undefined}
         onChange={e => {
           ctx.value = (e.currentTarget as HTMLInputElement).value;
           forceUpdate();
@@ -130,11 +130,12 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
     return <div className="alert alert-success">VALUE: {res.validationResult}</div>;
   }
+
   var ctx = p.ctx;
 
   let cleanFromType = ctx.value.fromType || undefined;
 
-  if (cleanFromType && cleanFromType.endsWith("Entity"))
+  if (cleanFromType?.endsWith("Entity"))
     cleanFromType = cleanFromType.beforeLast("Entity");
 
   if (cleanFromType && !isTypeEntity(cleanFromType))
@@ -160,7 +161,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
             <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
               {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {renderInput(ctx.subCtx(dt => dt.name))}({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
                           </pre>
-            <CSharpCodeMirror script={ctx.value.body || ""} onChange={handleCodeChange} />
+            <CSharpCodeMirror script={ctx.value.body ?? ""} onChange={handleCodeChange} />
           </div>
           {ctx.value.body && cleanFromType && renderTest(cleanFromType)}
         </div>

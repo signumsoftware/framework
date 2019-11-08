@@ -93,14 +93,14 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
 
     const translatedMembers = Dic.getValues(type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
     if (!translatedMembers.length || avoidCombo)
-      return (<TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={member.description || ""}
+      return (<TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={member.description ?? ""}
         onChange={e => { member.description = e.currentTarget.value; forceUpdate(); }}
         onBlur={handleOnChange}
         innerRef={(ta) => { ta && avoidCombo && ta.focus(); }} />);
 
     return (
       <span>
-        <select value={member.description || ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
+        <select value={member.description ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
           {initialElementIf(member.description == undefined).concat(
             translatedMembers.map(a => <option key={a.culture} value={a.member.translatedDescription}>{a.member.translatedDescription}</option>))}
         </select>
@@ -170,14 +170,14 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     const translatedTypes = Dic.getValues(p.type.cultures).filter(a => a.typeDescription != null && a.typeDescription.translatedDescription != null);
     if (!translatedTypes.length || avoidCombo)
       return (
-        <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description || ""}
+        <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description ?? ""}
           onChange={e => { loc.typeDescription!.description = e.currentTarget.value; forceUpdate(); }}
           onBlur={handleOnChange} innerRef={(ta) => { ta && avoidCombo && ta.focus(); }} />
       );
 
     return (
       <span>
-        <select value={td.description || ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
+        <select value={td.description ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
           {initialElementIf(td.description == undefined).concat(
             translatedTypes.map(a => <option key={a.culture} value={a.typeDescription!.translatedDescription}>{a.typeDescription!.translatedDescription}</option>))}
         </select>
@@ -190,14 +190,14 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
 
   const td = loc.typeDescription!;
 
-  const pronoms = p.result.cultures[loc.culture].pronoms || [];
+  const pronoms = p.result.cultures[loc.culture].pronoms ?? [];
 
   return (
     <tr>
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
         {type.hasGender && (edit ?
-          <select value={td.gender || ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }}>
+          <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }}>
             {initialElementIf(td.gender == undefined).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
           </select> :
@@ -216,7 +216,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
       <th className="monospaceCell">
         {
           type.hasPluralDescription && (edit ?
-            <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription || ""}
+            <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription ?? ""}
               onChange={e => { td.pluralDescription = e.currentTarget.value; forceUpdate(); }}
               onBlur={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); forceUpdate(); }} /> :
             td.pluralDescription)

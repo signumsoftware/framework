@@ -130,7 +130,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   }
 
   function allViewNames() {
-    return ["NEW", "STATIC", "CHOOSE"].concat(viewNames || []);
+    return ["NEW", "STATIC", "CHOOSE"].concat(viewNames ?? []);
   }
 
   function handleViewNameClick(viewName: string) {
@@ -165,7 +165,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
             <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
           </div>
         </pre>
-        <JavascriptCodeMirror code={ctx.value.script || ""} onChange={handleCodeChange} />
+        <JavascriptCodeMirror code={ctx.value.script ?? ""} onChange={handleCodeChange} />
         {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>
     );

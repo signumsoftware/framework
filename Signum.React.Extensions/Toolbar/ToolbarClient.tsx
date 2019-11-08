@@ -48,7 +48,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   getLabel(element: ToolbarResponse<T>) {
-    return element.label || element.content!.toStr;
+    return element.label ?? element.content!.toStr;
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;

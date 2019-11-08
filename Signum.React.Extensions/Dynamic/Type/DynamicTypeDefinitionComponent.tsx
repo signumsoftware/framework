@@ -152,7 +152,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
     var propNames = def.properties.map(p => "e." + p.name);
 
-  var expressionNamesStr = (expressionNames || []).map(exp => exp + "= e." + exp + "()");
+  var expressionNamesStr = (expressionNames ?? []).map(exp => exp + "= e." + exp + "()");
 
   var dt = p.dynamicType;
 
@@ -222,7 +222,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
                       <ComboBoxRepeaterComponent options={def.properties.filter(p => p.isMList == null).map(p => "e." + p.name)} list={item.fields} />
                     </div>
                     <div className="col-sm-6">
-                      <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
+                      <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName ?? "") + "Entity e) =>"} />
                     </div>
                   </div>
                 }
@@ -231,7 +231,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
             <fieldset>
               <legend>ToString expression</legend>
-              <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + dt.baseType + " e) =>"} />
+              <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName ?? "") + dt.baseType + " e) =>"} />
             </fieldset>
           </Tab>
 
@@ -813,7 +813,7 @@ export function CSharpExpressionCodeMirror(p: CSharpExpressionCodeMirrorProps) {
         {p.signature && <pre style={{ border: "0px", margin: "0px" }}>{p.signature}</pre>}
           <div className="small-codemirror">
             <CSharpCodeMirror
-              script={val || ""}
+              script={val ?? ""}
             onChange={newScript => { p.binding.setValue(newScript); forceUpdate(); }} />
           </div>
         </div>
@@ -848,7 +848,7 @@ export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetCo
     let value = this.props.binding.getValue();
     return (
       <fieldset style={{ marginTop: "-5px" }}>
-        <legend><input type="checkbox" checked={!!value} onChange={this.handleChecked} /> {this.props.title || this.props.binding.member.toString().firstUpper()}</legend>
+        <legend><input type="checkbox" checked={!!value} onChange={this.handleChecked} /> {this.props.title ?? this.props.binding.member.toString().firstUpper()}</legend>
         {value && this.props.renderContent(value)}
       </fieldset>
     );
@@ -999,7 +999,7 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps) {
             <FontAwesomeIcon icon="chevron-down" />
           </a>
         </span>
-        {" " + (p._propertyType_ || "") + " " + p.name}
+        {" " + (p._propertyType_ ?? "") + " " + p.name}
       </div>
     );
   }
@@ -1368,7 +1368,7 @@ export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps) {
         <h4>Validators</h4>
         <div className="panel-group">
           {
-          (p.property.validators || []).map((val, i) =>
+          (p.property.validators ?? []).map((val, i) =>
               <CollapsableCard
                 key={i}
               header={renderHeader(val, i)}

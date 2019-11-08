@@ -20,7 +20,7 @@ export default function DynamicCSSOverrideComponent(p : { ctx: TypeContext<Dynam
       <ValueLine ctx={ctx.subCtx(dt => dt.name)} />
       <br />
       <div className="code-container">
-        <CSSCodeMirror script={ctx.value.script || ""} onChange={handleCodeChange} />
+        <CSSCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />
       </div>
     </div>
   );

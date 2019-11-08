@@ -21,10 +21,10 @@ export function start(options: { routes: JSX.Element[] }) {
   registerAutoFileLine(FilePathEntity);
   registerAutoFileLine(FilePathEmbedded);
 
-  registerToString(FileEntity, f => f.toStr || f.fileName);
-  registerToString(FileEmbedded, f => f.toStr || f.fileName);
-  registerToString(FilePathEntity, f => f.toStr || f.fileName);
-  registerToString(FilePathEmbedded, f => f.toStr || f.fileName);
+  registerToString(FileEntity, f => f.toStr ?? f.fileName);
+  registerToString(FileEmbedded, f => f.toStr ?? f.fileName);
+  registerToString(FilePathEntity, f => f.toStr ?? f.fileName);
+  registerToString(FilePathEmbedded, f => f.toStr ?? f.fileName);
   
   Finder.formatRules.push({
     name: "WebDownload",

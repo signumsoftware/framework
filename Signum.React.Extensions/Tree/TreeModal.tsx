@@ -59,7 +59,7 @@ export default function TreeModal(p : TreeModalProps){
   return (
     <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited}>
       <ModalHeaderButtons onClose={handleCancelClicked}>
-        <span className="sf-entity-title"> {p.title || getTypeInfo(p.typeName).nicePluralName}</span>
+        <span className="sf-entity-title"> {p.title ?? getTypeInfo(p.typeName).nicePluralName}</span>
         &nbsp;
                       <a className="sf-popup-fullscreen" href="#" onClick={(e) => treeViewRef.current
           && treeViewRef.current.handleFullScreenClick(e)}>

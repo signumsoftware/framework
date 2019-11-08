@@ -191,7 +191,7 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   if (entityPack && entityPack.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
 
-  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed== "Read";
+  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
 }
 
 export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
@@ -264,11 +264,11 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 }
 
 export function getAuthToken(): string | undefined {
-  return sessionStorage.getItem("authToken") || undefined;
+  return sessionStorage.getItem("authToken") ?? undefined;
 }
 
 export function setAuthToken(authToken: string | undefined): void {
-  sessionStorage.setItem("authToken", authToken || "");
+  sessionStorage.setItem("authToken", authToken ?? "");
 }
 
 export function autoLogin(): Promise<UserEntity | undefined> {
@@ -406,7 +406,7 @@ export namespace Options {
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key || permission as string;
+  var key = (permission as PermissionSymbol).key ?? permission as string;
   const type = getTypeInfo(key.before("."));
   if (!type)
     throw new Error(`Type '${key.before(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
@@ -419,7 +419,7 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
 }
 
 export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key || permission as string;
+  var key = (permission as PermissionSymbol).key ?? permission as string;
   if (!isPermissionAuthorized(key))
     throw new Error(`Permission ${key} is denied`);
 }

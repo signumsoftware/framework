@@ -23,12 +23,6 @@ interface DynamicValidationProps {
   ctx: TypeContext<DynamicValidationEntity>;
 }
 
-interface DynamicValidationState {
-  exampleEntity?: Entity;
-  response?: DynamicValidationTestResponse;
-  routeTypeName?: string;
-}
-
 export default function DynamicValidation(p: DynamicValidationProps) {
 
   const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
@@ -164,8 +158,8 @@ export default function DynamicValidation(p: DynamicValidationProps) {
                 <TypeHelpButtonBarComponent typeName={ctx.value.entityType.cleanName} mode="CSharp" ctx={ctx} extraButtons={
                   <PropertyIsHelpComponent route={getCurrentRoute(ctx.value.entityType.cleanName)} />
                 } />
-                <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (routeTypeName || "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={handleCodeChange} />
+                <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (routeTypeName ?? "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
+                <CSharpCodeMirror script={ctx.value.eval.script ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
               {renderTest()}

@@ -85,8 +85,8 @@ NodeUtils.register<RowNode>({
   validChild: "Column",
   renderTreeNode: NodeUtils.treeNodeKind,
   validate: (dn, parentCtx) => parentCtx && dn.node.children.filter(c => c.kind == "Column").map(col =>
-    (NodeUtils.evaluate(dn, parentCtx, col, f => (f as ColumnNode).width) || 0) +
-    (NodeUtils.evaluate(dn, parentCtx, col, f => (f as ColumnNode).offset) || 0)
+    (NodeUtils.evaluate(dn, parentCtx, col, f => (f as ColumnNode).width) ?? 0) +
+    (NodeUtils.evaluate(dn, parentCtx, col, f => (f as ColumnNode).offset) ?? 0)
   ).sum() > 12 ? "Sum of Column.width/offset should <= 12" : null,
   renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", withClassNameEx(node.htmlAttributes, "row"), node),
   render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...withClassName(toHtmlAttributes(dn, parentCtx, dn.node.htmlAttributes), "row")} />),
@@ -195,7 +195,7 @@ NodeUtils.register<TabNode>({
   avoidHighlight: true,
   validParent: "Tabs",
   initialize: (n, parentNode) => {
-    let byName = (parentNode.node.children.map(a => parseInt((a as TabNode).eventKey.tryAfter("tab") || "")).filter(s => isFinite(s)).max() || 0) + 1;
+    let byName = (parentNode.node.children.map(a => parseInt((a as TabNode).eventKey.tryAfter("tab") ?? "")).filter(s => isFinite(s)).max() ?? 0) + 1;
     let byPosition = parentNode.node.children.length + 1;
     let index = Math.max(byName, byPosition);
     n.title = "My Tab " + index;
@@ -276,12 +276,12 @@ NodeUtils.register<TextNode>({
   group: "Container",
   order: 4,
   initialize: dn => { dn.message = "My message"; },
-  renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.message ? (typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.__code__ || "")).etc(20) : ""}</strong></span>,
-  renderCode: (node, cc) => cc.elementCode(bindExpr(tagName => tagName || "p", node.tagName), node.htmlAttributes,
+  renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.message ? (typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.__code__ ?? "")).etc(20) : ""}</strong></span>,
+  renderCode: (node, cc) => cc.elementCode(bindExpr(tagName => tagName ?? "p", node.tagName), node.htmlAttributes,
     toCodeEx(node.message)
   ),
   render: (dn, ctx) => React.createElement(
-    NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.tagName, NodeUtils.isStringOrNull) || "p",
+    NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.tagName, NodeUtils.isStringOrNull) ?? "p",
     toHtmlAttributes(dn, ctx, dn.node.htmlAttributes),
     ...NodeUtils.addBreakLines(
       NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.breakLines, NodeUtils.isBooleanOrNull) || false,
@@ -307,7 +307,7 @@ NodeUtils.register<ImageNode>({
   group: "Container",
   order: 5,
   initialize: dn => { dn.src = "~/images/logo.png"; },
-  renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.src ? (typeof dn.node.src == "string" ? dn.node.src : (dn.node.src.__code__ || "")).etc(20) : ""}</strong></span>,
+  renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.src ? (typeof dn.node.src == "string" ? dn.node.src : (dn.node.src.__code__ ?? "")).etc(20) : ""}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("img", node.htmlAttributes && { src: node.src }),
   render: (dn, ctx) => <img {...toHtmlAttributes(dn, ctx, dn.node.htmlAttributes)} src={Navigator.toAbsoluteUrl(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.src, NodeUtils.isString) as string)} />,
   renderDesigner: dn => (<div>
@@ -371,7 +371,7 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
 
   if (typeName && fixedViewName) {
     const es = Navigator.getSettings(typeName);
-    const staticViews = ["STATIC"].concat(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
+    const staticViews = ["STATIC"].concat((es && es.namedViews && Dic.getKeys(es.namedViews)) ?? []);
 
     if (!staticViews.contains(fixedViewName)) {
       const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
@@ -532,12 +532,12 @@ NodeUtils.register<ValueLineNode>({
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.valueHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m && m.unit || ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m && m.format || ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m?.unit ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m?.format ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
@@ -598,7 +598,7 @@ NodeUtils.register<MultiValueLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(null)"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.addValueText)} type="string" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
@@ -751,7 +751,7 @@ NodeUtils.register<FileLineNode>({
         {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
@@ -826,7 +826,7 @@ NodeUtils.register<FileImageLineNode>({
         {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.imageHtmlAttributes)} />
@@ -899,7 +899,7 @@ NodeUtils.register<MultiFileLineNode>({
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
@@ -966,7 +966,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     return (<div>
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
@@ -1236,7 +1236,7 @@ NodeUtils.register<SearchControlNode>({
   group: "Search",
   order: 1,
   validate: (dn, ctx) => NodeUtils.mandatory(dn, n => n.findOptions) || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions, ctx),
-  renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryName || " - "}</strong></span>,
+  renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryName ?? " - "}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("SearchControl", {
     ref: node.ref,
     findOptions: node.findOptions,
@@ -1522,7 +1522,7 @@ NodeUtils.register<ButtonNode>({
 
     var ti = dn.route && getTypeInfo(dn.route.typeReference().name);
 
-    var operations = ti && ti.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key) || [];
+    var operations = ti && ti.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key) ?? [];
 
     return (<div>
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}

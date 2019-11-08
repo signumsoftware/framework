@@ -202,6 +202,6 @@ export function DeviceLine(p: DeviceLineProps) {
 
   const ctx = p.ctx;
   return (
-    <ValueLine ctx={ctx} comboBoxItems={(devices || []).map(a => ({ label: a, value: a }) as OptionItem)} valueLineType={"ComboBox"} valueHtmlAttributes={{ size: 1 }} />
+    <ValueLine ctx={ctx} comboBoxItems={(devices ?? []).map(a => ({ label: a, value: a }) as OptionItem)} valueLineType={"ComboBox"} valueHtmlAttributes={{ size: 1 }} />
   );
 }

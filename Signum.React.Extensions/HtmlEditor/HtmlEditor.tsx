@@ -13,7 +13,7 @@ export interface HtmlEditorProps {
 export default function HtmlEditor(p: HtmlEditorProps) {
 
 
-  const [editorValue, setEditorValue] = React.useState<EditorValue>(() => RichTextEditor.createValueFromString(p.binding.getValue() || "", "html"));
+  const [editorValue, setEditorValue] = React.useState<EditorValue>(() => RichTextEditor.createValueFromString(p.binding.getValue() ?? "", "html"));
 
   React.useEffect(() => {
 
@@ -27,7 +27,7 @@ export default function HtmlEditor(p: HtmlEditorProps) {
 
   function saveHtml() {
     if (!p.readonly)
-      p.binding.setValue(editorValue.toString("html") || "");
+      p.binding.setValue(editorValue.toString("html") ?? "");
   }
 
   return (

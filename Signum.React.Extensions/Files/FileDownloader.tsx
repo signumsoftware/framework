@@ -28,7 +28,7 @@ export function FileDownloader(p: FileDownloaderProps) {
 
     promise.then(entity => {
 
-      const configuration = p.configuration || configurtions[entity.Type];
+      const configuration = p.configuration ?? configurtions[entity.Type];
       if (!configuration)
         throw new Error("No configuration registered in FileDownloader.configurations for ");
 
@@ -51,17 +51,17 @@ export function FileDownloader(p: FileDownloaderProps) {
 
   const toStr = getToString(entityOrLite);
 
-  const fileName = toStr!.tryBeforeLast(" - ") || toStr; //Hacky
+  const fileName = toStr!.tryBeforeLast(" - ") ?? toStr; //Hacky
 
   return (
     <a
       href="#"
       onClick={handleOnClick}
       download={p.download == "View" ? undefined : fileName}
-      title={toStr || undefined}
+      title={toStr ?? undefined}
       target="_blank"
       {...p.htmlAttributes}>
-      {p.children || toStr}
+      {p.children ?? toStr}
     </a>
   );
 }

@@ -39,7 +39,7 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
               <ModulesHelp cleanName={typeName} />{", "}<PropsHelp node={rootNode} />{") =>"}
             </div>
           </pre>
-          <JavascriptCodeMirror code={ctx.value.locals || ""} onChange={newCode => { ctx.value.locals = newCode; ctx.value.modified = true; handleChange(); } } />
+          <JavascriptCodeMirror code={ctx.value.locals ?? ""} onChange={newCode => { ctx.value.locals = newCode; ctx.value.modified = true; handleChange(); } } />
         </div>
       </Tab>
     </Tabs>

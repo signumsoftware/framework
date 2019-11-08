@@ -152,7 +152,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       onClose: () => this.onClose(),
       revalidate: () => { throw new Error("Not implemented"); },
       setError: (ms, initialPrefix) => {
-        GraphExplorer.setModelState(pack.activity, ms, initialPrefix || "");
+        GraphExplorer.setModelState(pack.activity, ms, initialPrefix ?? "");
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
@@ -221,7 +221,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
       },
       setError: (ms, initialPrefix) => {
-        GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
+        GraphExplorer.setModelState(mainEntity, ms, initialPrefix ?? "");
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
