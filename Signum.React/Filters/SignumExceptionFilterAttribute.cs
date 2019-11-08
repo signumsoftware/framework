@@ -33,6 +33,10 @@ namespace Signum.React.Filters
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
+            //Eagerly reading the whole body just in case to avoid "Cannot access a disposed object" 
+            //TODO: Make it more eficiently when https://github.com/aspnet/AspNetCore/issues/14396
+            var body = ReadAllBody(precontext.HttpContext); 
+
             var context = await next();
 
             if (context.Exception != null)
@@ -56,7 +60,7 @@ namespace Signum.React.Filters
                         e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
                         e.User = (UserHolder.Current ?? (IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
                         e.QueryString = Try(int.MaxValue, () => req.QueryString.ToString());
-                        e.Form = Try(int.MaxValue, () => ReadAllBody(context.HttpContext));
+                        e.Form = Try(int.MaxValue, () => Encoding.UTF8.GetString(body));
                         e.Session = null;
                     });
                     
@@ -103,10 +107,12 @@ namespace Signum.React.Filters
             return false;
         };
 
-        public string ReadAllBody(HttpContext httpContext)
+        public byte[] ReadAllBody(HttpContext httpContext)
         {
+            httpContext.Request.EnableBuffering();
+            var result = httpContext.Request.Body.ReadAllBytes();
             httpContext.Request.Body.Seek(0, System.IO.SeekOrigin.Begin);
-            return Encoding.UTF8.GetString(httpContext.Request.Body.ReadAllBytes());
+            return result;
         }
 
         private HttpStatusCode GetStatus(Type type)
