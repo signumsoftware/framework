@@ -89,12 +89,12 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     var token = this.valueSearchControl && this.valueSearchControl.state.token;
 
-    const isQuery = this.props.valueToken == undefined || token && token.queryTokenType == "Aggregate";
+    const isQuery = this.props.valueToken == undefined || token?.queryTokenType == "Aggregate";
 
     const isBadge = coalesce(this.props.isBadge, this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
     const isFormControl = coalesce(this.props.isFormControl, this.props.valueToken != undefined);
 
-    const unit = isFormControl && token && token.unit && <span className="input-group-text">{token.unit}</span>;
+    const unit = isFormControl && token?.unit && <span className="input-group-text">{token.unit}</span>;
 
     const ctx = this.props.ctx;
 
@@ -118,7 +118,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     return (
       <FormGroup ctx={this.props.ctx}
-        labelText={this.props.labelText ?? (token ? token.niceName : getQueryNiceName(fo.queryName))}
+        labelText={this.props.labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
         labelHtmlAttributes={this.props.labelHtmlAttributes}
         htmlAttributes={this.props.formGroupHtmlAttributes}>
         <div className={isFormControl ? ((unit || view || extra || find) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>

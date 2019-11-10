@@ -109,7 +109,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
     if (path == (lastProps && Finder.findOptionsPath(lastProps.findOptions)))
       return;
 
-    if (state && state.findOptions) {
+    if (state?.findOptions) {
       const fo = Finder.toFindOptions(state.findOptions, state.queryDescription, p.defaultIncludeDefaultFilters!);
       if (path == Finder.findOptionsPath(fo))
         return;
@@ -137,7 +137,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
     });
   }, [p.findOptions]);
 
-  if (state && state.message) {
+  if (state?.message) {
     return (
       <div className="alert alert-danger" role="alert">
         <strong>Error in SearchControl ({getQueryKey(p.findOptions.queryName)}): </strong>
@@ -179,7 +179,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
         showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
-        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true))}
+        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton != null ? p.showSystemTimeButton : qs?.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler) && p.showGroupButton != null ? p.showGroupButton : false}
         showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
         showFooter={p.showFooter != null ? p.showFooter : true}

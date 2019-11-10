@@ -186,7 +186,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
         setCurrentItem(ci);
         var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
           const autocomplete = p.autoComplete;
-          autocomplete && autocomplete.getItemFromEntity(newEntity)
+          autocomplete?.getItemFromEntity(newEntity)
             .then(item => {
               if (autocomplete == p.autoComplete) {
                 ci.item = item;
@@ -213,7 +213,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentItem && currentItem.item ? p.autoComplete!.renderItem(currentItem.item) :
+      currentItem?.item ? p.autoComplete!.renderItem(currentItem.item) :
         getToString(p.ctx.value);
 
   var drag = p.drag;
@@ -229,10 +229,10 @@ export function EntityStripElement(p: EntityStripElementProps) {
     <li className="sf-strip-element"
       {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}
       {...(p.onItemContainerHtmlAttributes && p.onItemContainerHtmlAttributes(p.ctx.value))}>
-      <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
-        onDragEnter={drag && drag.onDragOver}
-        onDragOver={drag && drag.onDragOver}
-        onDrop={drag && drag.onDrop}
+      <div className={classes(drag && "sf-strip-dropable", drag?.dropClass)}
+        onDragEnter={drag?.onDragOver}
+        onDragOver={drag?.onDragOver}
+        onDrop={drag?.onDrop}
 
       >
         {p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}

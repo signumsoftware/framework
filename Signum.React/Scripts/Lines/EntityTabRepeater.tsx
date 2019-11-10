@@ -137,10 +137,10 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                 className="sf-repeater-element"
                 title={
                   <div
-                    className={classes("item-group", "sf-tab-dropable", drag && drag.dropClass)}
-                    onDragEnter={drag && drag.onDragOver}
-                    onDragOver={drag && drag.onDragOver}
-                    onDrop={drag && drag.onDrop}>
+                    className={classes("item-group", "sf-tab-dropable", drag?.dropClass)}
+                    onDragEnter={drag?.onDragOver}
+                    onDragOver={drag?.onDragOver}
+                    onDrop={drag?.onDrop}>
                     {p.getTitle ? p.getTitle(mlec) : getToString(mlec.value)}
                     {c.canRemove(mlec.value) && !readOnly &&
                       <span className={classes("sf-line-button", "sf-remove", "ml-2")}

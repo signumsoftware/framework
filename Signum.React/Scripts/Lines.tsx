@@ -125,7 +125,7 @@ export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: 
   const vl = lineBase instanceof ValueLineController ? lineBase : undefined;
   const pr = state.ctx.propertyRoute;
   const s = state as ValueLineProps;
-  if (vl && pr && pr.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
+  if (vl && pr?.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
 
     var member = pr.member!;
 

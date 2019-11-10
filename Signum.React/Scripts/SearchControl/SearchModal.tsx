@@ -63,8 +63,8 @@ function SearchModal(p: SearchModalProps) {
 
   function onResize() {
     var sc = searchControl.current;
-    var scl = sc && sc.searchControlLoaded;
-    var containerDiv = scl && scl.containerDiv;
+    var scl = sc?.searchControlLoaded;
+    var containerDiv = scl?.containerDiv;
     if (containerDiv) {
       var maxHeight = (window.innerHeight - SearchModal.marginVertical);
       containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.minHeight) + "px";
@@ -148,9 +148,9 @@ namespace SearchModal {
     return openModal<void>(<SearchModal findOptions={findOptions}
       findMode={"Explore"}
       isMany={true}
-      title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
-      message={modalOptions && modalOptions.message}
-      searchControlProps={modalOptions && modalOptions.searchControlProps}
+      title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
+      message={modalOptions?.message}
+      searchControlProps={modalOptions?.searchControlProps}
     />);
   }
 }

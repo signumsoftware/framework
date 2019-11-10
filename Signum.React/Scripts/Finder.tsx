@@ -97,14 +97,14 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     throw new Error("Use findRow instead");
 
   var qs = getSettings(fo.queryName);
-  if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
+  if (qs?.onFind && !(modalOptions?.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
-    .then(rr => rr && rr.entity);
+    .then(rr => rr?.entity);
 
-  if (modalOptions && modalOptions.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
         if (data.length == 1)
@@ -145,14 +145,14 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     throw new Error("Use findManyRows instead");
 
   var qs = getSettings(fo.queryName);
-  if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
+  if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
-    .then(rows => rows && rows.map(a => a.entity!));
+    .then(rows => rows?.map(a => a.entity!));
 
-  if (modalOptions && modalOptions.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
         if (data.length == 1)
@@ -183,7 +183,7 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
 export function explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {
 
   var qs = getSettings(findOptions.queryName);
-  if (qs && qs.onExplore && !(modalOptions && modalOptions.useDefaultBehaviour))
+  if (qs?.onExplore && !(modalOptions?.useDefaultBehaviour))
     return qs.onExplore(findOptions, modalOptions);
 
   return FinderFindManager.getSearchModal()
@@ -512,10 +512,10 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefi
 }
 
 export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySettings | undefined): FilterOption[] | undefined {
-  if (qs && qs.simpleFilterBuilder)
+  if (qs?.simpleFilterBuilder)
     return undefined;
 
-  if (qs && qs.defaultFilters)
+  if (qs?.defaultFilters)
     return qs.defaultFilters;
 
   if (qd == null || qd.columns["Entity"]) {
@@ -643,7 +643,7 @@ export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): Quer
     groupResults: fo.groupResults,
     filters: toFilterRequests(fo.filterOptions),
     columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-      .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+      .concat((!fo.groupResults && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
     orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
     pagination: fo.pagination,
     systemTime: fo.systemTime,
@@ -1386,7 +1386,7 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
   if (!co.token)
     return undefined;
 
-  const result = qs && qs.formatters && qs.formatters[co.token.fullKey];
+  const result = qs?.formatters && qs.formatters[co.token.fullKey];
 
   if (result)
     return result;
@@ -1514,9 +1514,9 @@ export const entityFormatRules: EntityFormatRule[] = [
     formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
       <EntityLink lite={row.entity}
         inSearch={true}
-        onNavigated={sc && sc.handleOnNavigated}
+        onNavigated={sc?.handleOnNavigated}
         getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc && sc.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
         <span title={EntityControlMessage.View.niceToString()}>
           {EntityBaseController.viewIcon}
         </span>

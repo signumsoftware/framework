@@ -352,10 +352,10 @@ export function EntityTableRow(p: EntityTableRowProps) {
   const drag = p.draggable;
     return (
       <tr style={{ backgroundColor: rowAtts?.style?.backgroundColor ?? undefined }}
-        onDragEnter={drag && drag.onDragOver}
-        onDragOver={drag && drag.onDragOver}
-        onDrop={drag && drag.onDrop}
-        className={drag && drag.dropClass}
+        onDragEnter={drag?.onDragOver}
+        onDragOver={drag?.onDragOver}
+        onDrop={drag?.onDrop}
+        className={drag?.dropClass}
       onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}>
       {p.firstColumnVisible && <td>
           <div className="item-group">

@@ -130,7 +130,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const sfb = this.props.showSimpleFilterBuilder == false ? undefined :
       this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
-        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
+        qs?.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
           undefined;
 
     if (sfb) {
@@ -649,7 +649,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var qs = this.props.querySettings;
 
-        var getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
+        var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
         if (isWindowsOpen || (s != null && s.avoidPopup && this.props.navigate != "InPlace")) {
           var vp = getViewPromise && getViewPromise(null)
@@ -806,7 +806,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const token = fo.columnOptions[cm.columnIndex!].token;
 
     const op: FilterOperation | undefined =
-      token && token.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
+      token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
         token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
           undefined as FilterOperation | undefined;
 
@@ -833,7 +833,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const newColumn: ColumnOptionParsed = {
       token: token,
-      displayName: token && token.niceName,
+      displayName: token?.niceName,
     };
 
     const cm = this.state.contextualMenu!;
@@ -874,7 +874,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var fo = this.state.resultFindOptions;
     function isColumnFilterable(columnIndex: number) {
-      var token = fo && fo.columnOptions[columnIndex].token;
+      var token = fo?.columnOptions[columnIndex].token;
       return token && token.filterType != "Embedded" && token.filterType != undefined;
     }
 
@@ -1150,14 +1150,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     var qs = this.props.querySettings;
-    if (qs && qs.onDoubleClick) {
+    if (qs?.onDoubleClick) {
       e.preventDefault();
       qs.onDoubleClick(e, row, this);
       return;
     }
 
     var resFo = this.state.resultFindOptions;
-    if (resFo && resFo.groupResults) {
+    if (resFo?.groupResults) {
 
       var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
         .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
@@ -1254,7 +1254,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row)}
           {...ra}
-          className={classes(mark && mark.className, ra && ra.className)}>
+          className={classes(mark?.className, ra?.className)}>
           {this.props.allowSelection &&
             <td style={{ textAlign: "center" }}>
               <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
@@ -1277,7 +1277,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         </tr>
       );
 
-      const message = mark && mark.message;
+      const message = mark?.message;
       if (!message)
         return tr;
 

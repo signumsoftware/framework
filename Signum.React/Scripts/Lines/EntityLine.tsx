@@ -53,7 +53,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 
             var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
               const autocomplete = this.props.autocomplete;
-              autocomplete && autocomplete.getItemFromEntity(newEntity)
+              autocomplete?.getItemFromEntity(newEntity)
                 .then(item => {
                   if (mounted.current) {
                     if (autocomplete == this.props.autocomplete) {

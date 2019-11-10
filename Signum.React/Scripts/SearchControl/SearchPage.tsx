@@ -30,8 +30,8 @@ function SearchPage(p: SearchPageProps) {
 
   function onResize() {
     var sc = searchControl.current;
-    var scl = sc && sc.searchControlLoaded;
-    var containerDiv = scl && scl.containerDiv;
+    var scl = sc?.searchControlLoaded;
+    var containerDiv = scl?.containerDiv;
     if (containerDiv) {
 
       var marginTop = containerDiv.offsetTop;
@@ -85,12 +85,12 @@ function SearchPage(p: SearchPageProps) {
         showFilters={SearchPage.showFilters(fo)}
         showGroupButton={true}
         avoidChangeUrl={false}
-        navigate={qs && qs.inPlaceNavigation ? "InPlace" : undefined}
+        navigate={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
         enableAutoFocus={true}
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
-        extraButtons={qs && qs.extraButtons}
+        extraButtons={qs?.extraButtons}
       />
     </div>
   );

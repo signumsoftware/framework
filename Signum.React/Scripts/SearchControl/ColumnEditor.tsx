@@ -18,7 +18,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
 
   function handleTokenChanged(newToken: QueryToken | undefined) {
     p.columnOption.token = newToken;
-    p.columnOption.displayName = newToken && newToken.niceName;
+    p.columnOption.displayName = newToken?.niceName;
     p.onChange(newToken);
   }
 

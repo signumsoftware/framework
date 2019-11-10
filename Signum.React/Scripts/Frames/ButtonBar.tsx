@@ -19,7 +19,7 @@ export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, 
   const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
 
   const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) ?? [])
-    .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])
+    .concat(rb?.renderButtons ? rb.renderButtons(ctx) : [])
     .filter(a => a != null)
     .orderBy(a => a!.order ?? 0);
 

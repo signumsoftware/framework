@@ -56,7 +56,7 @@ export default function ErrorModal(p: ErrorModalProps) {
             renderMessage(e)}
 
         {
-          se && se.httpError.stackTrace && Navigator.isViewable(ExceptionEntity) &&
+          se?.httpError.stackTrace && Navigator.isViewable(ExceptionEntity) &&
           <div>
             <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
             {showDetails && <pre>{se.httpError.stackTrace}</pre>}

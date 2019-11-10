@@ -172,7 +172,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
             subString: subStr
           }).then(rt => [
             ...rt.rows,
-            ...this.options && this.options.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows) ?? []
+            ...(this.options?.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows)) ?? []
           ])
         )
       );

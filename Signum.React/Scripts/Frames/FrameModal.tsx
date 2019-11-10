@@ -133,7 +133,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function hasChanges() {
 
     var hc = entityComponent.current as IHasChanges | null | undefined;
-    if (hc && hc.componentHasChanges)
+    if (hc?.componentHasChanges)
       return hc.componentHasChanges();
 
     if (packComponent == null)
@@ -179,7 +179,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         onOk={!p.isNavigate ? handleOkClicked : undefined}
         onCancel={!p.isNavigate ? handleCancelClicked : undefined}
         okDisabled={!packComponent}>
-        <FrameModalTitle pack={packComponent && packComponent.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
+        <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
         </ModalHeaderButtons>
       {packComponent && renderBody(packComponent)}
       </Modal>
@@ -203,7 +203,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         }
       },
       pack: pc.pack,
-      onClose: (newPack?: EntityPack<ModifiableEntity>) => p.onExited!(newPack && newPack.entity),
+      onClose: (newPack?: EntityPack<ModifiableEntity>) => p.onExited!(newPack?.entity),
       revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
         GraphExplorer.setModelState(pc.pack.entity, modelState, initialPrefix!);
@@ -307,7 +307,7 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
       <span className="sf-entity-title">{title || getToString(entity)}</span>&nbsp;
         {renderExpandLink(pack.entity)}
         <br />
-        <small className="sf-type-nice-name text-muted"> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+        <small className="sf-type-nice-name text-muted"> {pr?.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
       </span>
     );
 
@@ -358,7 +358,7 @@ export class FunctionalAdapter extends React.Component {
   
   static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
-    if (typeof type == "string" || type.prototype && type.prototype.render) {
+    if (typeof type == "string" || type.prototype?.prototype.render) {
       return React.cloneElement(element, { ref: ref });
     } else {
       return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>

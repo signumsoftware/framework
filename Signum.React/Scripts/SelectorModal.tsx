@@ -75,7 +75,7 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
       value: a,
       displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
       name: buttonName ? buttonName(a) : a.toString(),
-      htmlAttributes: config && config.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
+      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
     }))}
     title={title || SelectorMessage.ChooseAValue.niceToString()}
     message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}

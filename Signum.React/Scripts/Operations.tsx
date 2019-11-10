@@ -78,7 +78,7 @@ export function getOperationInfo(operation: OperationSymbol | string, type: Pseu
 
   let ti = getTypeInfo(type);
 
-  let oi = ti && ti.operations && ti.operations[operationKey];
+  let oi = ti?.operations && ti.operations[operationKey];
 
   if (oi == undefined)
     throw new Error(`Operation ${operationKey} not defined for ${ti.name}`);
@@ -231,7 +231,7 @@ export class EntityOperationContext<T extends Entity> {
 
     const result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
-    result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
+    result.canExecute = pack?.canExecute && pack.canExecute[operationKey];
     result.complete();
     return result;
   }
@@ -261,9 +261,9 @@ export class EntityOperationContext<T extends Entity> {
   complete() {
     var s = this.settings;
     this.color = s?.color ?? Defaults.getColor(this.operationInfo);
-    this.group = s && s.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
-    this.keyboardShortcut = s && s.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
-    this.alternatives = s && s.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
+    this.group = s?.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
+    this.keyboardShortcut = s?.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
+    this.alternatives = s?.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
   }
 
   defaultClick(...args: any[]) {
@@ -387,7 +387,7 @@ export interface KeyboardShortcut{
 export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
 
   function toLower(a: string | undefined) {
-    return a && a.toLowerCase();
+    return a?.toLowerCase();
   }
 
   return (toLower(e.key) == toLower(ks.key) || e.keyCode == ks.keyCode) &&

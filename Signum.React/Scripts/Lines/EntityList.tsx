@@ -109,7 +109,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
 
     const pr = this.props.ctx.propertyRoute;
 
-    const type = pr && pr.member && pr.member.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
+    const type = pr?.member?.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
 
     const id = (e as Lite<Entity>).id || (e as Entity).id;
 

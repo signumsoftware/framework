@@ -131,7 +131,7 @@ export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: st
     throw new Error("No Id");
 
   const es = getSettings(typeName);
-  if (es && es.onNavigateRoute)
+  if (es?.onNavigateRoute)
     return es.onNavigateRoute(typeName, id!, viewName);
   else
     return navigateRouteDefault(typeName, id!, viewName);
@@ -201,12 +201,12 @@ export interface ViewDispatcher {
 export class BasicViewDispatcher implements ViewDispatcher {
   hasDefaultView(typeName: string) {
     const es = getSettings(typeName);
-    return (es && es.getViewPromise) != null;
+    return (es?.getViewPromise) != null;
   }
 
   getViewNames(typeName: string) {
     const es = getSettings(typeName);
-    return Promise.resolve((es && es.namedViews && Dic.getKeys(es.namedViews)) ?? []);
+    return Promise.resolve((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
   }
 
   getViewOverrides(typeName: string, viewName?: string) {
@@ -248,7 +248,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
 
   getViewNames(typeName: string) {
     const es = getSettings(typeName);
-    return Promise.resolve((es && es.namedViews && Dic.getKeys(es.namedViews)) ?? []);
+    return Promise.resolve((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
   }
 
   getViewOverrides(typeName: string, viewName?: string) {
@@ -531,7 +531,7 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   if (types.length == 1) {
     var s = getSettings(types[0]);
 
-    if (s && s.findOptions) {
+    if (s?.findOptions) {
       return s.findOptions;
     }
   }
@@ -603,7 +603,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
   const es = getSettings(typeName);
 
-  if (es && es.onView)
+  if (es?.onView)
     return es.onView(entityOrPack, viewOptions);
   else
     return viewDefault(entityOrPack, viewOptions);
@@ -629,7 +629,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
   const es = getSettings(typeName);
 
-  if (es && es.onNavigate)
+  if (es?.onNavigate)
     return es.onNavigate(entityOrPack, navigateOptions);
   else
     return navigateDefault(entityOrPack, navigateOptions);
@@ -651,7 +651,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
     return Promise.resolve();
 
   const es = getSettings(pack.entity.Type);
-  if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
+  if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
     createInNewTab(pack);
     return Promise.resolve();
   }
@@ -801,7 +801,7 @@ export interface AutocompleteConstructor<T extends ModifiableEntity> {
 export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]): AutocompleteConstructor<ModifiableEntity>[]{
   return getTypeInfos(tr.name).map(ti => {
     var es = getSettings(ti);
-    return es && es.autocompleteConstructor && es.autocompleteConstructor(str, ctx, foundLites);
+    return es?.autocompleteConstructor && es.autocompleteConstructor(str, ctx, foundLites);
   }).notNull();
 }
 
@@ -1042,11 +1042,11 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
-  if (appRelativeUrl && appRelativeUrl.startsWith("~/"))
+  if (appRelativeUrl?.startsWith("~/"))
     return window.__baseUrl + appRelativeUrl.after("~/");
 
   var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl && appRelativeUrl.startsWith(relativeCrappyUrl))
+  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
     return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
   if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
@@ -1073,7 +1073,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
 
   const ti = getTypeInfo(type.name);
 
-  if (ti && ti.kind == "Entity") {
+  if (ti?.kind == "Entity") {
 
     if (isLite(value))
       return API.fetchAndForget(value);
@@ -1084,7 +1084,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
     return undefined;
   }
 
-  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti && ti.kind == "Enum") {
+  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
     if (typeof value === "string")
       return Promise.resolve(value);
 

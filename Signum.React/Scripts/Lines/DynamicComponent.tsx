@@ -16,9 +16,9 @@ export default function DynamicComponent({ ctx, viewName }: { ctx: TypeContext<M
   const result = React.createElement("div", undefined, ...components);
   const es = Navigator.getSettings(ctx.value.Type);
 
-  var vos = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName); //Should user viewDispatcher.getViewOverrides promise instead
+  var vos = es?.viewOverrides?.filter(a => a.viewName == viewName); //Should user viewDispatcher.getViewOverrides promise instead
 
-  if (vos && vos.length) {
+  if (vos?.length) {
     const replacer = new ViewReplacer(result, ctx);
     vos.forEach(vo => vo.override(replacer));
     return replacer.result;

@@ -31,7 +31,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
     const op = DomUtils.offsetParent(container);
 
-    const rec = op && op.getBoundingClientRect();
+    const rec = op?.getBoundingClientRect();
 
     var result = ({
       left: e.pageX - (rec ? rec.left : 0),

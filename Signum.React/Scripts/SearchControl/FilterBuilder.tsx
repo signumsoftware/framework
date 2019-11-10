@@ -47,7 +47,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
       } as FilterGroupOptionParsed :
       {
         token: p.lastToken,
-        operation: lastToken && (filterOperations[lastToken.filterType!] ?? []).firstOrNull() ?? undefined,
+        operation: (lastToken && (filterOperations[lastToken.filterType!] ?? []).firstOrNull()) ?? undefined,
         value: undefined,
         frozen: false
       } as FilterConditionOptionParsed);

@@ -48,7 +48,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
         queryKey={p.queryKey}
         readOnly={p.readOnly}
         onTokenSelected={qt => {
-          lastTokenChanged.current = qt && qt.fullKey;
+          lastTokenChanged.current = qt?.fullKey;
           p.onTokenChange && p.onTokenChange(qt);
         }}
         defaultOpen={lastTokenChanged.current && i > 0 && lastTokenChanged.current == tokenList[i - 1]!.fullKey ? true : false}
@@ -67,7 +67,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
           queryKey: p.queryKey
         } : undefined;
       }
-      else if (e.key == "v" && copiedToken && copiedToken.queryKey == p.queryKey) {
+      else if (e.key == "v" && copiedToken?.queryKey == p.queryKey) {
         Finder.parseSingleToken(p.queryKey, copiedToken.fullKey, p.subTokenOptions)
           .then(a => p.onTokenChange(a))
           .done();

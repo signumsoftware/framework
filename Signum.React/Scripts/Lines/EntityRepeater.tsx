@@ -113,10 +113,10 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
 {
 
   return (
-    <div className={drag && drag.dropClass}
-      onDragEnter={drag && drag.onDragOver}
-      onDragOver={drag && drag.onDragOver}
-      onDrop={drag && drag.onDrop}>
+    <div className={drag?.dropClass}
+      onDragEnter={drag?.onDragOver}
+      onDragOver={drag?.onDragOver}
+      onDrop={drag?.onDrop}>
       <fieldset className="sf-repeater-element"
         {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
         <legend>

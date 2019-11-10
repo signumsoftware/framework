@@ -19,24 +19,24 @@ export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, inn
   if (onlyText) { //Text is scrollable in inputs
     if (ctx.readonlyAsPlainText) {
       return (
-        <input {...attrs} readOnly className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
+        <input {...attrs} readOnly className={classes(ctx.formControlPlainTextClass, attrs?.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
       );
     } else {
       return (
-        <input {...attrs} readOnly className={classes(ctx.formControlClass, attrs && attrs.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
+        <input {...attrs} readOnly className={classes(ctx.formControlClass, attrs?.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
       );
     }
   }
   else {
     if (ctx.readonlyAsPlainText) {
       return (
-        <div {...attrs} className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
+        <div {...attrs} className={classes(ctx.formControlPlainTextClass, attrs?.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
           {children ?? <span>&nbsp;</span>}
         </div>
       );
     } else {
       return (
-        <div {...attrs} className={classes(ctx.formControlClass, attrs && attrs.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
+        <div {...attrs} className={classes(ctx.formControlClass, attrs?.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
           {children ?? <span>&nbsp;</span>}
         </div>
       );

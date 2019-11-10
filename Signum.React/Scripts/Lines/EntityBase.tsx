@@ -201,7 +201,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       return Promise.resolve(t.name);
 
     if (t.name == IsByAll)
-      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t && t.toStr /*CleanName*/);
+      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t?.toStr /*CleanName*/);
 
     const tis = getTypeInfos(t).filter(ti => predicate(ti));
 

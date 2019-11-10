@@ -98,14 +98,14 @@ export default function Notify() {
     }
   }
 
-  const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnNotify && options && options.type === "loading") ?
+  const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnNotify && options?.type === "loading") ?
     { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined;
 
   return (
     <div style={styleLock}>
       <div id="sfNotify" >
         <Transition in={options != undefined} timeout={200}>
-          {(state: string) => <span className={classes(options && options.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{getIcon()}&nbsp;{options && options.text}</span>}
+          {(state: string) => <span className={classes(options?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{getIcon()}&nbsp;{options?.text}</span>}
         </Transition>
       </div>
     </div>

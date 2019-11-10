@@ -58,7 +58,7 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
   );
 
   function renderButton(text: string, mip?: ModalIconProps) {
-    if (mip && mip.icon) {
+    if (mip?.icon) {
       switch (mip.iconAlign) {
         case "right": return (<span>{text} <FontAwesomeIcon icon={mip.icon} fixedWidth /></span>);
         default: return (<span><FontAwesomeIcon icon={mip.icon} fixedWidth /> {text}</span>);

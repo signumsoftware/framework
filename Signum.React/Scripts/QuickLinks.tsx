@@ -75,7 +75,7 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[
     promises = promises.concat(specificPromises);
   }
 
-  return Promise.all(promises).then(links => links.flatMap(a => a ?? []).filter(a => a && a.isVisible).orderBy(a => a.order));
+  return Promise.all(promises).then(links => links.flatMap(a => a ?? []).filter(a => a?.isVisible).orderBy(a => a.order));
 }
 
 
@@ -188,7 +188,7 @@ class QuickLinkToggle extends React.Component<{ onClick?: (e: React.MouseEvent<a
     const links = this.props.links;
     return (
       <a
-        className={classes("badge badge-pill", links && links.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
+        className={classes("badge badge-pill", links?.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
         title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
         role="button"
         href="#"
@@ -345,7 +345,7 @@ export class QuickLinkNavigate extends QuickLink {
       return;
 
     const es = Navigator.getSettings(this.lite.EntityType);
-    if (e.ctrlKey || e.button == 1 || es && es.avoidPopup)
+    if (e.ctrlKey || e.button == 1 || es?.avoidPopup)
       window.open(Navigator.navigateRoute(this.lite, this.viewName));
     else
       Navigator.navigate(this.lite, { getViewPromise: e => this.viewName });

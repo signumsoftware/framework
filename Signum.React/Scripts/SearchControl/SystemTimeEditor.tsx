@@ -146,7 +146,7 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     var momentFormat = "YYYY-MM-DDTHH:mm:ss";
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
-        <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
+        <DateTimePicker value={m?.toDate()} onChange={handleDatePickerOnChange}
           format={momentFormat} time={true} />
       </div>
     );

@@ -42,17 +42,17 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         return false;
 
       var ov = ctx.frame.entityComponent as any as IOperationVisible;
-      if (ov && ov.isOperationVisible && !ov.isOperationVisible(eoc))
+      if (ov?.isOperationVisible && !ov.isOperationVisible(eoc))
         return false;
 
       var eos = eoc.settings;
-      if (eos && eos.isVisible && !eos.isVisible(eoc))
+      if (eos?.isVisible && !eos.isVisible(eoc))
         return false;
 
-      if (eos && eos.hideOnCanExecute && eoc.canExecute)
+      if (eos?.hideOnCanExecute && eoc.canExecute)
         return false;
 
-      if (Navigator.isReadOnly(ctx.pack, true) && !(eos && eos.showOnReadOnly))
+      if (Navigator.isReadOnly(ctx.pack, true) && !(eos?.showOnReadOnly))
         return false;
 
       return true;
@@ -169,8 +169,8 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
       <Dropdown.Item
         {...props}
         disabled={disabled}
-        title={eoc && eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-        className={classes(disabled ? "disabled sf-pointer-events" : undefined, props && props.className)}
+        title={eoc?.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
+        className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className)}
         onClick={disabled ? undefined : handleOnClick}
         data-operation={eoc.operationInfo.key}>
         {renderChildren()}
@@ -186,7 +186,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
     return (
       <>
         {item},
-        alternatives && alternatives.map(a => renderAlternative(a))
+        alternatives?.map(a => renderAlternative(a))
       </>
     );
   }    
@@ -195,7 +195,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-    className={classes(disabled ? "disabled" : undefined, props && props.className, eoc.settings && eoc.settings.classes)}
+    className={classes(disabled ? "disabled" : undefined, props?.className, eoc.settings && eoc.settings.classes)}
     onClick={disabled ? undefined : handleOnClick}
     data-operation={eoc.operationInfo.key}>
     {renderChildren()}
@@ -267,11 +267,11 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
       return props.children;
 
     let text: string = eoc.settings && eoc.settings.text ? eoc.settings.text() :
-      group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
+      group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
         eoc.operationInfo.niceName;
 
     const s = eoc.settings;
-    return withIcon(text, s && s.icon, s && s.iconColor, s && s.iconAlign);
+    return withIcon(text, s?.icon, s?.iconColor, s?.iconAlign);
   }
 
   function handleOnClick(event: React.MouseEvent<any>) {

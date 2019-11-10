@@ -71,7 +71,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   static autoFixString(str: string, autoTrim: boolean): string {
 
     if (autoTrim)
-      return str && str.trim();
+      return str?.trim();
 
     return str;
   }
@@ -348,7 +348,7 @@ ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
       if (fixed != input.value)
         vl.setValue(fixed);
 
-      if (htmlAtts && htmlAtts.onBlur)
+      if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
     };
   }
@@ -362,7 +362,7 @@ ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
           {...vl.props.valueHtmlAttributes}
           className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
           value={s.ctx.value ?? ""}
-          onBlur={handleBlur || htmlAtts && htmlAtts.onBlur}
+          onBlur={handleBlur || htmlAtts?.onBlur}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
           onInput={isIE11() ? handleTextOnChange : undefined}
           placeholder={vl.getPlaceholder()}
@@ -405,7 +405,7 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
       if (fixed != input.value)
         vl.setValue(fixed);
 
-      if (htmlAtts && htmlAtts.onBlur)
+      if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
     };
   }
@@ -548,7 +548,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
       e.preventDefault();
     else {
       var atts = p.htmlAttributes;
-      atts && atts.onKeyDown && atts.onKeyDown(e);
+      atts?.onKeyDown && atts.onKeyDown(e);
     }
   }
 }
@@ -566,7 +566,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m && m.format(momentFormat)}
+          {m?.format(momentFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
@@ -591,7 +591,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+          <DateTimePicker value={m?.toDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
             format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
       )}

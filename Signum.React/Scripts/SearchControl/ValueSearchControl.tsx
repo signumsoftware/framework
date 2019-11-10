@@ -43,7 +43,7 @@ function getQueryRequest(fo: FindOptionsParsed, valueToken?: string | QueryToken
   return {
     queryKey: fo.queryKey,
     filters: toFilterRequests(fo.filterOptions),
-    valueToken: valueToken && valueToken.toString(),
+    valueToken: valueToken?.toString(),
     systemTime: fo.systemTime && { ...fo.systemTime }
   };
 }
@@ -70,7 +70,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   componentWillReceiveProps(newProps: ValueSearchControlProps) {
 
     function toString(token: string | QueryTokenString<any> | undefined) {
-      return token && token.toString();
+      return token?.toString();
     }
 
     if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
