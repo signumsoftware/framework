@@ -76,7 +76,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
   function handlePropertyRemoved(dp: DynamicProperty) {
     var qfs = p.definition.queryFields;
-    if (qfs && qfs.contains(dp.name))
+    if (qfs?.contains(dp.name))
       qfs.remove(dp.name);
 
     p.dc.refreshView();

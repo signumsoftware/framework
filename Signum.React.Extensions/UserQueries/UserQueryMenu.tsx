@@ -143,7 +143,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage
     }));
 
-    if (uq && uq.id) {
+    if (uq?.id) {
       await reloadList();
 
       setCurrentUserQuery(toLite(uq));
@@ -164,14 +164,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       </Dropdown.Toggle>
       <Dropdown.Menu>
           {
-            userQueries && userQueries.map((uq, i) =>
+            userQueries?.map((uq, i) =>
             <Dropdown.Item key={i}
               className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
               onClick={() => handleOnClick(uq)}>
                 {uq.toStr}
             </Dropdown.Item>)
           }
-        {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
+          {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
         <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
         {currentUserQuery && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
         {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}

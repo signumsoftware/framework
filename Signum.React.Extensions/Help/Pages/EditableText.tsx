@@ -35,7 +35,7 @@ export function MarkdownText({ text, className }: { text: string | null | undefi
 
   function handleOnMouseUp(e: React.MouseEvent) {
     var a = e.target as HTMLAnchorElement;
-    if (a && a.nodeName == "A" && !e.ctrlKey && e.button == 0) {
+    if (a?.nodeName == "A" && !e.ctrlKey && e.button == 0) {
       var href = a.getAttribute("href");
       if (href != null && href.startsWith(Navigator.toAbsoluteUrl("~/"))) {
         e.preventDefault();

@@ -56,7 +56,7 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
   return (
     <div>
       <h2>Dynamic Panel</h2>
-      {startErrors && startErrors.length > 0 && !restarting &&
+      {startErrors?.length && !restarting &&
         <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
           <FontAwesomeIcon icon="exclamation-triangle" />
           {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
@@ -155,10 +155,10 @@ export function CompileStep(p: DynamicCompileStepProps) {
 
   function renderPanelInformation() {
     var pi = p.panelInformation;
-    const lastCompile = pi && pi.lastDynamicCompilationDateTime;
-    const lastChange = pi && pi.lastDynamicChangeDateTime;
-    const loadedAssembly = pi && pi.loadedCodeGenAssemblyDateTime;
-    const loadedControllerAssembly = pi && pi.loadedCodeGenControllerAssemblyDateTime;
+    const lastCompile = pi?.lastDynamicCompilationDateTime;
+    const lastChange = pi?.lastDynamicChangeDateTime;
+    const loadedAssembly = pi?.loadedCodeGenAssemblyDateTime;
+    const loadedControllerAssembly = pi?.loadedCodeGenControllerAssemblyDateTime;
 
     const validStyle = { color: "green" } as React.CSSProperties;
     const invalidStyle = { color: "red", fontWeight: "bold" } as React.CSSProperties;
@@ -445,11 +445,11 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
       {
         state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
           errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
-            errors && errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+            errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
               undefined
       }
       {
-        errors && errors.length > 0 &&
+        errors?.length &&
         <div className="table-responsive">
           <table className="table table-sm">
             <tbody>

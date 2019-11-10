@@ -12,7 +12,7 @@ export default function JoyrideNavItem(p : JoyrideNavItemProps){
   function onClick() {
     const joyrideComponent = p.getJoyrideComponent();
 
-    if (joyrideComponent && joyrideComponent.joyride)
+    if (joyrideComponent?.joyride)
       joyrideComponent.joyride.reset(true);
   }
 

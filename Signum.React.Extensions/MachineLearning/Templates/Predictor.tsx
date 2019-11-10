@@ -338,9 +338,9 @@ export function TrainingProgressComponent(p: TrainingProgressComponentProps) {
 
   return (
     <div>
-      {tp && tp.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, p.ctx.value)} />}
+      {tp?.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, p.ctx.value)} />}
       <ProgressBar color={tp == null || tp.running == false ? "warning" : null}
-        value={tp && tp.progress}
+        value={tp?.progress}
         message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.message}
       />
     </div>

@@ -308,12 +308,12 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
         cp = ChartParameterEmbedded.New();
         cp.name = sp.name;
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        cp.value = defaultParameterValue(sp, column && column.token && column.token.token);
+        cp.value = defaultParameterValue(sp, column?.token && column.token.token);
       }
       else {
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column && column.token && column.token.token))
-          cp.value = defaultParameterValue(sp, column && column.token && column.token.token);
+        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token))
+          cp.value = defaultParameterValue(sp, column?.token && column.token.token);
         cp.modified = true;
       }
 
@@ -401,7 +401,7 @@ export module Encoder {
 
   export function toChartOptions(cr: ChartRequestModel, cs: ChartScript | null): ChartOptions {
 
-    var params = cs && cs.parameterGroups.flatMap(a => a.parameters).toObject(a => a.name);
+    var params = cs?.parameterGroups.flatMap(a => a.parameters).toObject(a => a.name);
 
     return {
       queryName: cr.queryKey,
@@ -422,7 +422,7 @@ export module Encoder {
 
           var c = scriptParam.columnIndex != null ? cr.columns[scriptParam.columnIndex].element : null;
 
-          return p.element.value != defaultParameterValue(scriptParam, c && c.token && c.token.token);
+          return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption)
     };
@@ -636,7 +636,7 @@ export module API {
 
     var defaultValues = chartScript.parameterGroups.flatMap(g => g.parameters).toObject(a => a.name, a => {
       var col = a.columnIndex == null ? null : request.columns[a.columnIndex];
-      return defaultParameterValue(a, col && col.element && col.element.token && col.element.token.token);
+      return defaultParameterValue(a, col?.element && col.element.token && col.element.token.token);
     });
 
     return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
@@ -661,7 +661,7 @@ export module API {
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName ?? token?.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName ?? token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
@@ -691,7 +691,7 @@ export module API {
     if (!hasAggregates(request)) {
       const value = (r: ChartRow) => r.entity;
       const color = (v: Lite<Entity> | undefined) => !v ? "#555" : null;
-      const niceName = (v: Lite<Entity> | undefined) => v && v.toStr;
+      const niceName = (v: Lite<Entity> | undefined) => v?.toStr;
       const key = (v: Lite<Entity> | undefined) => v ? liteKey(v) : String(v);
       cols.insertAt(0, ({
         name: "entity",

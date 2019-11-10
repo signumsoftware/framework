@@ -35,7 +35,7 @@ export default function QueryTokenEntityBuilder(p: QueryTokenEmbeddedBuilderProp
 
   const tokenBuilder = (
     <div className={p.ctx.rwWidgetClass}>
-      <QueryTokenBuilder queryToken={qte && qte.token}
+      <QueryTokenBuilder queryToken={qte?.token}
         onTokenChange={handleTokenChanged} queryKey={p.queryKey} subTokenOptions={p.subTokenOptions}
         readOnly={p.ctx.readOnly} />
     </div>

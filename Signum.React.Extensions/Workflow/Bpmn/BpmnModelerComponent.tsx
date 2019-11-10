@@ -366,7 +366,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
     else if (e.element.type == "bpmn:IntermediateCatchEvent") {
       var event = this.getModel(e.element) as WorkflowEventModel;
-      if (event && event.timer) {
+      if (event?.timer) {
         var shouldEvent = event.timer.condition ? "bpmn:ConditionalEventDefinition" : "bpmn:TimerEventDefinition";
         this.changeElementDefinition(e.element, shouldEvent);
       }
@@ -440,7 +440,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       }
       else {
         var model = this.props.entities[element.id];
-        if (model && model.isNew)
+        if (model?.isNew)
           delete this.props.entities[element.id];
       };
     });

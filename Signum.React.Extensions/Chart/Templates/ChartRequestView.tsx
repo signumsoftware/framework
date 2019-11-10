@@ -79,7 +79,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   }
 
   function handleOnDrawClick() {
-    setResult({ result: resultAndLoading && resultAndLoading.result, loading: true });
+    setResult({ result: resultAndLoading?.result, loading: true });
 
     var cr = p.chartRequest;
 
@@ -131,8 +131,8 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   const cr = p.chartRequest;
   const tc = new TypeContext<ChartRequestModel>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(p.chartRequest!, "chartRequest"));
 
-  const loading = resultAndLoading && resultAndLoading.loading;
-  const result = resultAndLoading && resultAndLoading.result && resultAndLoading.result.chartRequest == p.chartRequest ? resultAndLoading.result : undefined;
+  const loading = resultAndLoading?.loading;
+  const result = resultAndLoading?.result && resultAndLoading.result.chartRequest == p.chartRequest ? resultAndLoading.result : undefined;
   return (
     <div>
       <h2>
@@ -171,7 +171,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         <div className="sf-scroll-table-container" >
           <Tabs id="chartResultTabs">
             <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-              <ChartRenderer chartRequest={cr} loading={loading == true} lastChartRequest={result && result.lastChartRequest} data={result && result.chartResult.chartTable} />
+              <ChartRenderer chartRequest={cr} loading={loading == true} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} />
             </Tab>
             {result &&
               <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(result.chartResult.resultTable.rows.length)})</span> as any}>

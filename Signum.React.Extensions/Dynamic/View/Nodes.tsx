@@ -371,11 +371,11 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
 
   if (typeName && fixedViewName) {
     const es = Navigator.getSettings(typeName);
-    const staticViews = ["STATIC"].concat((es && es.namedViews && Dic.getKeys(es.namedViews)) ?? []);
+    const staticViews = ["STATIC"].concat((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
 
     if (!staticViews.contains(fixedViewName)) {
       const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
-    if (viewProps && viewProps.length > 0)
+      if (viewProps && viewProps.length > 0)
         return <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={"({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})"} />
     }
   }
@@ -1236,7 +1236,7 @@ NodeUtils.register<SearchControlNode>({
   group: "Search",
   order: 1,
   validate: (dn, ctx) => NodeUtils.mandatory(dn, n => n.findOptions) || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions, ctx),
-  renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryName ?? " - "}</strong></span>,
+  renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions?.queryName ?? " - "}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("SearchControl", {
     ref: node.ref,
     findOptions: node.findOptions,
@@ -1299,7 +1299,7 @@ NodeUtils.register<SearchControlNode>({
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
     <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
     <FetchQueryDescription queryName={dn.node.findOptions && dn.node.findOptions.queryName} >
-      {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd && qd.columns["Entity"].type.name} />}
+      {qd => <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={qd?.columns["Entity"].type.name} />}
     </FetchQueryDescription>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showContextMenu)} type={null} defaultValue={null} exampleExpression={"fop => \"Basic\""} />
@@ -1522,7 +1522,7 @@ NodeUtils.register<ButtonNode>({
 
     var ti = dn.route && getTypeInfo(dn.route.typeReference().name);
 
-    var operations = ti && ti.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key) ?? [];
+    var operations = (ti?.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key)) ?? [];
 
     return (<div>
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}

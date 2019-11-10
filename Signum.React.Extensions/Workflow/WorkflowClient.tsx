@@ -174,8 +174,8 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
     onNavigateRoute: (typeName, id) => Navigator.toAbsoluteUrl("~/workflow/activity/" + id),
-    onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
-    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
+    onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
+    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
@@ -324,11 +324,11 @@ function registerCustomContexts() {
   DynamicViewClient.registeredCustomContexts["case"] = {
     getTypeContext: ctx => {
       var actx = getCaseActivityContext(ctx);
-      return actx && actx.subCtx(a => a.case);
+      return actx?.subCtx(a => a.case);
     },
     getCodeContext: cc => {
       addActx(cc);
-      cc.assignments["cctx"] = "actx && actx.subCtx(a => a.case)";
+      cc.assignments["cctx"] = "actx?.subCtx(a => a.case)";
       return cc.createNewContext("cctx");
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case)
@@ -338,11 +338,11 @@ function registerCustomContexts() {
   DynamicViewClient.registeredCustomContexts["parentCase"] = {
     getTypeContext: ctx => {
       var actx = getCaseActivityContext(ctx);
-      return actx && actx.value.case.parentCase ? actx.subCtx(a => a.case.parentCase) : undefined;
+      return actx?.value.case.parentCase ? actx.subCtx(a => a.case.parentCase) : undefined;
     },
     getCodeContext: cc => {
       addActx(cc);
-      cc.assignments["pcctx"] = "actx && actx.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
+      cc.assignments["pcctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
       return cc.createNewContext("pcctx");
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase)
@@ -351,11 +351,11 @@ function registerCustomContexts() {
   DynamicViewClient.registeredCustomContexts["parentCaseMainEntity"] = {
     getTypeContext: ctx => {
       var actx = getCaseActivityContext(ctx);
-      return actx && actx.value.case.parentCase ? actx.subCtx(a => a.case.parentCase!.mainEntity) : undefined;
+      return actx?.value.case.parentCase ? actx.subCtx(a => a.case.parentCase!.mainEntity) : undefined;
     },
     getCodeContext: cc => {
       addActx(cc);
-      cc.assignments["pmctx"] = "actx && actx.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
+      cc.assignments["pmctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
       return cc.createNewContext("pmctx");
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase!.mainEntity)
@@ -364,8 +364,8 @@ function registerCustomContexts() {
 
 export function getCaseActivityContext(ctx: TypeContext<any>): TypeContext<CaseActivityEntity> | undefined {
   const f = ctx.frame;
-  const fc = f && f.frameComponent as any;
-  const activity = fc && fc.getCaseActivity && fc.getCaseActivity() as CaseActivityEntity;
+  const fc = f?.frameComponent as any;
+  const activity = fc?.getCaseActivity && fc.getCaseActivity() as CaseActivityEntity;
   return activity && TypeContext.root(activity, undefined, ctx);
 }
 
@@ -605,7 +605,7 @@ export interface IHasCaseActivity {
 export function inWorkflow(ctx: TypeContext<any>, workflowName: string, activityName: string): boolean {
   var f = ctx.frame && ctx.frame.frameComponent as any as IHasCaseActivity;
 
-  var ca = f && f.getCaseActivity && f.getCaseActivity();
+  var ca = f?.getCaseActivity && f.getCaseActivity();
 
   if (!ca)
     return false;

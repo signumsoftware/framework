@@ -54,7 +54,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   function isNamedView(typeName: string, viewName: string) : boolean {
     const es = Navigator.getSettings(typeName);
-    return (es && es.namedViews && Dic.getKeys(es.namedViews) ?? []).contains(viewName);
+    return ((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []).contains(viewName);
   }
 
   function fillViewProps() {
@@ -167,7 +167,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   function getViewNamePropsExpressionHelpText(ctx: TypeContext<ViewNamePropEmbedded>) {
     const vp = viewProps;
-    const p = vp && vp.singleOrNull(a => a.name == ctx.value.name);
+    const p = vp?.singleOrNull(a => a.name == ctx.value.name);
 
     return !vp ? undefined :
       !p ? <div style={{ color: "#a94442" }}><strong>Property not found</strong></div> :
@@ -176,7 +176,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   function getViewNamePropsIsMandatory(ctx: TypeContext<ViewNamePropEmbedded>) {
     const vp = viewProps;
-    const p = vp && vp.singleOrNull(a => a.name == ctx.value.name);
+    const p = vp?.singleOrNull(a => a.name == ctx.value.name);
 
     return p != null && !p.type.endsWith("?");
   }

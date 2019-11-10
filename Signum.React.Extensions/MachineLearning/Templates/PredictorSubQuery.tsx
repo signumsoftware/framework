@@ -65,7 +65,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
 
     var t = parentKey.element.token;
 
-    var prefix = t && t.token && t.token.fullKey;
+    var prefix = t?.token && t.token.fullKey;
 
     if (prefix == null)
       return null;

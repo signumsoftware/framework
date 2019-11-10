@@ -49,7 +49,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
       return <MultiFileLine ctx={ctx} />;
 
     var m = ctx.propertyRoute.member;
-    if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
+    if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
       return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
 
     return <FileLine ctx={ctx} />;
@@ -78,7 +78,7 @@ function isImage(propertyRoute: string | undefined) {
 
   const pr = PropertyRoute.parseFull(propertyRoute)
 
-  return Boolean(pr && pr.member && pr.member.defaultFileTypeInfo && pr.member.defaultFileTypeInfo.onlyImages);
+  return Boolean(pr?.member && pr.member.defaultFileTypeInfo && pr.member.defaultFileTypeInfo.onlyImages);
 
 }
   

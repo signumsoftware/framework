@@ -71,7 +71,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
           </div>
         )}
       </div>
-      <div className={drag && drag.dragMode == "move" ? "sf-dragging" : undefined} onDrop={handleOnDrop}>
+      <div className={drag?.dragMode == "move" ? "sf-dragging" : undefined} onDrop={handleOnDrop}>
         {
           c.getMListItemContext<ModifiableEntity & IGridEntity>(p.ctx)
             .groupBy(ctx => ctx.value.row.toString())
@@ -112,7 +112,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
 
   function renderSeparator(rowIndex: number) {
     return (
-      <div className={classes("row separator-row", drag && drag.currentRow == rowIndex ? "sf-over" : undefined)} key={"sep" + rowIndex}
+      <div className={classes("row separator-row", drag?.currentRow == rowIndex ? "sf-over" : undefined)} key={"sep" + rowIndex}
         onDragOver={e => handleRowDragOver(e, rowIndex)}
         onDragEnter={e => handleRowDragOver(e, rowIndex)}
         onDragLeave={() => handleRowDragLeave()}

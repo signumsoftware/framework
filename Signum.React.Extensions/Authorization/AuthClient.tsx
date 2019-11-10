@@ -60,7 +60,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
         var userName = se.newValue!.before("&&");
 
         var cu = currentUser();
-        if (cu && cu.userName == userName)
+        if (cu?.userName == userName)
           logoutInternal();
       }
     });
@@ -188,7 +188,7 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   if (ti == undefined)
     return false;
 
-  if (entityPack && entityPack.typeAllowed)
+  if (entityPack?.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
 
   return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
@@ -200,7 +200,7 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
   if (ti == undefined)
     return true;
 
-  if (entityPack && entityPack.typeAllowed)
+  if (entityPack?.typeAllowed)
     return entityPack.typeAllowed != "None";
 
   return ti.maxTypeAllowed != "None";
@@ -254,7 +254,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
     }, ifError<ServiceError, Response>(ServiceError, e => {
 
-      if (e.httpError.exceptionType && e.httpError.exceptionType.endsWith(".AuthenticationException")) {
+      if (e.httpError.exceptionType?.endsWith(".AuthenticationException")) {
         setAuthToken(undefined);
         Navigator.history.push("~/auth/login");
       }

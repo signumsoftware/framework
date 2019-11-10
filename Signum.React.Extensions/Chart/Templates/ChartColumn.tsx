@@ -74,7 +74,7 @@ export function ChartColumn(p: ChartColumnProps) {
   function getColorPalettes() {
     const token = p.ctx.value.token;
 
-    const t = token && token.token!.type;
+    const t = token?.token!.type;
 
     if (t == undefined || Navigator.isReadOnly(ChartColorEntity))
       return [];

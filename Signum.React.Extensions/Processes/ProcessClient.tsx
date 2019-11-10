@@ -95,7 +95,7 @@ function monkeyPatchCreateContextualMenuItem() {
 
     const processOnClick = (me: React.MouseEvent<any>) => {
       coc.event = me;
-      processSettings && processSettings.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
+      processSettings?.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
     }
 
 
@@ -138,7 +138,7 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
         return;
 
       const es = Navigator.getSettings(pack.entity.Type);
-      if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
+      if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
         Navigator.history.push('~/create/', pack);
         return;
       }

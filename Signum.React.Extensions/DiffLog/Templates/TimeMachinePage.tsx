@@ -44,7 +44,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
     return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
 
   var scl = searchControl.current?.searchControlLoaded ?? undefined;
-  var colIndex = scl && scl.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
+  var colIndex = scl?.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
 
   return (
     <div>
@@ -79,7 +79,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
       <br />
       <h5>Selected Versions</h5>
       <Tabs id="timeMachineTabs">
-        {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d)).orderBy(a => a).flatMap((d, i, dates) => [
+        {scl?.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d)).orderBy(a => a).flatMap((d, i, dates) => [
           <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
             <RenderEntityVersion lite={lite} asOf={d} />
           </Tab>,

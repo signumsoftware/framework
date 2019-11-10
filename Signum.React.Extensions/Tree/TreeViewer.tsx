@@ -113,7 +113,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         Finder.parseFilterOptions(filterOptions, false, qd).then(fop => {
           this.setState({ filterOptions: fop }, () => {
             const qs = Finder.getSettings(typeName);
-            const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: this.state.filterOptions, search: () => this.search(true)});
+            const sfb = qs?.simpleFilterBuilder && qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: this.state.filterOptions, search: () => this.search(true)});
             this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
             if (sfb)
               this.setState({ showFilters: false });
@@ -499,7 +499,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     var nodeParent = this.findParent(over.node);
     const ts = TreeClient.settings[this.props.typeName];
-    if (ts && ts.dragTargetIsValid)
+    if (ts?.dragTargetIsValid)
       ts.dragTargetIsValid(dragged, over.position == "Middle" ? over.node : nodeParent)
         .then(valid => {
           if (!valid)
@@ -536,7 +536,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     } else {
       const s = TreeClient.settings[this.props.typeName];
-      var promise = s && s.createCopyModel ? s.createCopyModel(dragged.lite, partial) : Promise.resolve(MoveTreeModel.New(partial));
+      var promise = s?.createCopyModel ? s.createCopyModel(dragged.lite, partial) : Promise.resolve(MoveTreeModel.New(partial));
       promise.then(treeModel => treeModel &&
         Operations.API.constructFromLite(dragged.lite, TreeOperation.Copy, treeModel).then(() =>
           this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () => {

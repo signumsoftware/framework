@@ -85,9 +85,9 @@ TreeModal.open = (typeName: string, filterOptions: FilterOption[], options ?: Tr
   return openModal<TreeNode>(<TreeModal
     filterOptions={filterOptions}
     typeName={typeName}
-    title={options && options.title}
+    title={options?.title}
   />)
-    .then(tn => tn && tn.lite);
+    .then(tn => tn?.lite);
 }
 
 

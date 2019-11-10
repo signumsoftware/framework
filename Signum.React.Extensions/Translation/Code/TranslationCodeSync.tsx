@@ -21,7 +21,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
 
   const [result, reloadResult] = useAPIWithReload(() => API.sync(assembly, culture, namespace), [assembly, culture, namespace]);  
     
-  if (result && result.totalTypes == 0) {
+  if (result?.totalTypes == 0) {
     return (
       <div>
         <h2>{TranslationMessage._0AlreadySynchronized.niceToString(namespace ?? assembly)}</h2>

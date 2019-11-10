@@ -194,7 +194,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const titleText = part.title ?? getToString(content);
   const defaultIcon = renderer.defaultIcon(content);
-  const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon && defaultIcon.icon);
+  const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
   const color = part.iconColor ?? defaultIcon?.iconColor;
 
   const title = !icon ? titleText :

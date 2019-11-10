@@ -48,7 +48,7 @@ export function FindOptionsLine(p : FindOptionsLineProps){
   function handleCreate(e: React.MouseEvent<any>) {
     e.preventDefault();
     const route = p.dn.route;
-    const ti = route && route.typeReferenceInfo();
+    const ti = route?.typeReferenceInfo();
 
     const promise = p.avoidSuggestion == true || !ti || !isTypeEntity(ti) ? Promise.resolve({} as FindOptionsExpr) :
       DynamicViewClient.API.getSuggestedFindOptions(ti.name)
@@ -58,8 +58,8 @@ export function FindOptionsLine(p : FindOptionsLineProps){
           buttonDisplay: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentToken}</code>)</small></div>
         }))
         .then(sfo => ({
-          queryName: sfo && sfo.queryKey,
-          parentToken: sfo && sfo.parentToken,
+          queryName: sfo?.queryKey,
+          parentToken: sfo?.parentToken,
           parentValue: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity>
         } as FindOptionsExpr));
 
@@ -248,7 +248,7 @@ export function FindOptionsComponent(p : FindOptionsComponentProps){
   }
 
   function handleChangeParentColumn(newToken: QueryToken | undefined) {
-    p.findOptions.parentToken = newToken && newToken.fullKey;
+    p.findOptions.parentToken = newToken?.fullKey;
     p.findOptions.parsedParentToken = newToken;
     forceUpdate();
   }
@@ -474,7 +474,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
           {this.renderHeader()}
         </thead>
         <tbody>
-          {array && array.map((item, i) => this.renderItem(item, i))}
+          {array?.map((item, i) => this.renderItem(item, i))}
           <tr>
             <td colSpan={this.getNumColumns()}>
               <a title={EntityControlMessage.Create.niceToString()}
@@ -511,7 +511,7 @@ class FilterOptionsComponent extends BaseOptionsComponent<FilterOptionExpr> {
   }
 
   handleColumnChange = (item: FilterOptionExpr, newToken: QueryToken | undefined) => {
-    item.token = newToken && newToken.fullKey;
+    item.token = newToken?.fullKey;
     item.parsedToken = newToken;
     this.props.refreshView();
   }
@@ -582,7 +582,7 @@ class OrderOptionsComponent extends BaseOptionsComponent<OrderOptionExpr> {
   }
 
   handleColumnChange = (item: OrderOptionExpr, newToken: QueryToken | undefined) => {
-    item.token = newToken && newToken.fullKey;;
+    item.token = newToken?.fullKey;;
     item.parsedToken = newToken;
     this.props.refreshView();
   }
@@ -625,7 +625,7 @@ class ColumnOptionsComponent extends BaseOptionsComponent<ColumnOptionExpr> {
   }
 
   handleColumnChange = (item: ColumnOptionExpr, newToken: QueryToken | undefined) => {
-    item.token = newToken && newToken.fullKey;
+    item.token = newToken?.fullKey;
     item.parsedToken = newToken;
     this.props.refreshView();
   }

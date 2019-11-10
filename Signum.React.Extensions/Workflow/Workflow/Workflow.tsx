@@ -108,8 +108,8 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
   }
 
   function renderIssuesHeader(): React.ReactNode {
-    const errorCount = (issues && issues.filter(a => a.type == "Error").length) ?? 0;
-    const warningCount = (issues && issues.filter(a => a.type == "Warning").length) ?? 0;
+    const errorCount = (issues?.filter(a => a.type == "Error").length) ?? 0;
+    const warningCount = (issues?.filter(a => a.type == "Warning").length) ?? 0;
 
     return (
       <div>

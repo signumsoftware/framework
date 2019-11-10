@@ -108,7 +108,7 @@ export class CodeContext {
       .map(gr => gr.join(" "))
       .join("    \r\n");
 
-    if (children && children.length) {
+    if (children?.length) {
       var childrenString = children.join("\n").indent(4);
 
       return (`<${type}${propsStr ? " " : ""}${propsStr || ""}>
@@ -464,7 +464,7 @@ export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<Modifi
 
     const sn = dn.context.getSelectedNode();
 
-    if (sn && sn.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
+    if (sn?.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
       return (
         <div style={{ border: "1px solid #337ab7", borderRadius: "2px" }}>
           {registeredNodes[dn.node.kind].render(dn, parentCtx)}

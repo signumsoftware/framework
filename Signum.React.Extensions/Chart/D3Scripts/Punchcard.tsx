@@ -225,8 +225,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
           <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
           cursor="pointer"
           onClick={e => onDrillDown(r)}>
-          {mainShape && mainShape.renderer(r)}
-          {innerShape && innerShape.renderer(r)}
+          {mainShape?.renderer(r)}
+          {innerShape?.renderer(r)}
           {
               parseFloat(parameters["NumberOpacity"]) > 0 &&
               <text className="punch-text sf-transition" transform={translate(

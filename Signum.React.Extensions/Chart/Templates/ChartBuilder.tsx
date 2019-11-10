@@ -123,7 +123,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 
   const chart = p.ctx.value;
 
-  const chartScript = chartScripts && chartScripts.single(cs => is(cs.symbol, chart.chartScript));
+  const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
 
   return (
     <div className="row sf-chart-builder">
@@ -133,7 +133,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
             <h6 className="card-title mb-0">{ChartMessage.Chart.niceToString()}</h6>
           </div>
           <div className="card-body">
-            {chartScripts && chartScripts.map((cs, i) =>
+            {chartScripts?.map((cs, i) =>
               <div key={i} className={chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => handleChartScriptOnClick(cs)}>
                 <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
               </div>)}
