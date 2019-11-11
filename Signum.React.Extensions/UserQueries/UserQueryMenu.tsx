@@ -27,8 +27,13 @@ interface UserQueryMenuState {
 export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(undefined)
-  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined)
+  const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
+    let uq = window.location.search.tryAfter("userQuery=");
+    uq = uq && decodeURIComponent(uq.tryBefore("&") || uq);
+    return uq ? parseLite(uq) as Lite<UserQueryEntity> : undefined;
+  });
+
+  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(p.searchControl.l)
 
   React.useEffect(() => {
     const userQuery = window.location.search.tryAfter("userQuery=");
