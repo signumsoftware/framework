@@ -33,7 +33,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     return uq ? parseLite(uq) as Lite<UserQueryEntity> : undefined;
   });
 
-  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(p.searchControl.l)
+  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
 
   React.useEffect(() => {
     const userQuery = window.location.search.tryAfter("userQuery=");
