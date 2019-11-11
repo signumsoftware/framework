@@ -28,8 +28,6 @@ export default function ReactChart(p: ReactChartProps) {
 
   const { size, setContainer } = useSize();
 
-  console.log(p.onRenderChart.toString().substr(0, 30), { data: p.data, oldData, initialLoad });
-
   var animated = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   return (
     <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={setContainer} >
