@@ -12,9 +12,9 @@ namespace Signum.React.Json
             return typeof(Lite<IEntity>).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            Lite<Entity> lite = (Lite<Entity>)value;
+            Lite<Entity> lite = (Lite<Entity>)value!;
             writer.WriteStartObject();
 
             writer.WritePropertyName("EntityType");
@@ -36,7 +36,7 @@ namespace Signum.React.Json
             writer.WriteEndObject();
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
                 return null;
@@ -51,16 +51,16 @@ namespace Signum.React.Json
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                switch ((string)reader.Value)
+                switch ((string)reader.Value!)
                 {
                     case "toStr": toString = reader.ReadAsString(); break;
                     case "id": idObj = reader.ReadAsString(); break;
                     case "EntityType": typeStr = reader.ReadAsString(); break;
                     case "entity":
                         reader.Read();
-                        entity = (Entity)serializer.Deserialize(reader, typeof(Entity));
+                        entity = (Entity)serializer.Deserialize(reader, typeof(Entity))!;
                         break;
-                    default: throw new InvalidOperationException("unexpected property " + (string)reader.Value);
+                    default: throw new InvalidOperationException("unexpected property " + (string)reader.Value!);
                 }
 
                 reader.Read();
