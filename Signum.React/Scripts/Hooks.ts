@@ -28,10 +28,9 @@ export function useInterval<T>(interval: number | undefined | null, initialState
   const [val, setVal] = React.useState(initialState);
 
   React.useEffect(() => {
-    var insideVal = val;
     if (interval) {
       var handler = setInterval(() => {
-        setVal(insideVal = newState(insideVal));
+        setVal(s => newState(s));
       }, interval);
       return () => clearInterval(handler);
     }
@@ -283,6 +282,12 @@ export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefin
     [lite && liteKey(lite)]);
 }
 
+export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
+  return useAPIWithReload(signal =>
+    lite == null ? Promise.resolve<T | null | undefined>(lite) :
+      Navigator.API.fetchAndForget(lite),
+    [lite && liteKey(lite)]);
+}
 
 export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
 
