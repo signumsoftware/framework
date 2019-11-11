@@ -292,7 +292,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
       .done();
   }
 
-  useInterval(p.restarting ? 1000 : null, null, () => null);
+  useInterval(p.restarting ? 1000 : null, 0, a => a + 1);
 
   async function refreshScreen() {
     while (p.restarting) {
