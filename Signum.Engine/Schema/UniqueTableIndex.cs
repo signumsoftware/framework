@@ -319,7 +319,7 @@ namespace Signum.Engine.Maps
                 if (!SqlBuilder.IsString(col.SqlDbType))
                     return result;
 
-                return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " == " : " <> ") + "''");
+                return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " = " : " <> ") + "''");
 
             }
             else if (field is FieldImplementedBy ib)
