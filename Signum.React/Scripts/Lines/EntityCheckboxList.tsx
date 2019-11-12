@@ -42,14 +42,14 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-checkbox-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      <div className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
         {renderButtons()}
         {renderCheckboxList()}
       </div>
     );
 
   return (
-    <fieldset className={classes("SF-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <legend>
         <div>
           <span>{p.labelText}</span>

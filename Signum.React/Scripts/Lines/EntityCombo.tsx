@@ -92,7 +92,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes} >
-      <div className="SF-entity-combo">
+      <div className="sf-entity-combo">
         <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
           <EntityComboSelect
             ref={comboRef}

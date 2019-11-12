@@ -96,7 +96,7 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-      <div className="SF-entity-strip SF-control-container">
+      <div className="sf-entity-strip sf-control-container">
         <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
           {
             c.getMListItemContext(p.ctx).map(mlec =>

@@ -80,7 +80,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
+      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
         {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         {renderButtons()}
         {renderTabs()}
@@ -88,7 +88,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
     );
 
   return (
-    <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
       {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
       <legend>
         <div>

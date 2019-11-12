@@ -142,7 +142,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     <FormGroup ctx={p.ctx} labelText={p.labelText} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="SF-entity-line">
+      <div className="sf-entity-line">
         {
           !EntityBaseController.hasChildrens(buttons) ?
             (hasValue ? renderLink() : renderAutoComplete()) :
