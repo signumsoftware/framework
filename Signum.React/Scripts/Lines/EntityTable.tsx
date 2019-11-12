@@ -197,8 +197,11 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 }
 
-export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & React.RefAttributes<EntityTableController>> &
-{ typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] }
+interface WithTypeColumns {
+  typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]
+}
+
+export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & React.RefAttributes<EntityTableController>> & WithTypeColumns
   = React.forwardRef(function EntityTable(props: EntityTableProps, ref: React.Ref<EntityTableController>) {
     const c = useController(EntityTableController, props, ref);
     const p = c.props;
