@@ -145,7 +145,7 @@ namespace Signum.React.Authorization
                 {
                     EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash));
 
-                    var password = (string)ctx.JsonReader.Value;
+                    var password = (string)ctx.JsonReader.Value!;
 
                     var error = UserEntity.OnValidatePassword(password);
                     if (error != null)

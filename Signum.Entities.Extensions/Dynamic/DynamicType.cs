@@ -330,10 +330,10 @@ namespace Signum.Entities.Dynamic
             return (objectType == typeof(DynamicValidator));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             JObject obj = JObject.Load(reader);
-            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type").Value.Value<string>());
+            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type")!.Value.Value<string>());
 
             object target = Activator.CreateInstance(type)!;
             serializer.Populate(obj.CreateReader(), target);
@@ -342,7 +342,7 @@ namespace Signum.Entities.Dynamic
 
         public override bool CanWrite { get { return false; } }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
