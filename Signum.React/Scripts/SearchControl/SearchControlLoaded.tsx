@@ -396,7 +396,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
 
     return (
-      <div className="sf-search-control SF-control-container" ref="container"
+      <div className="sf-search-control sf-control-container" ref="container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
         {p.showHeader == true &&
