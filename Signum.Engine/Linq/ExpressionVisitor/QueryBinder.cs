@@ -2362,6 +2362,7 @@ namespace Signum.Engine.Linq
         }
 
         static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => UnsafeEntityExtensions.SetReadonly(null!, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
+        static readonly MethodInfo miSetId = ReflectionTools.GetMethodInfo(() => ((Entity)null!).SetId(0)).GetGenericMethodDefinition();
         static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((Entity)null!).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
 
         public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body, Func<Expression, Expression> visitValue)
@@ -2395,6 +2396,14 @@ namespace Signum.Engine.Linq
 
                     Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
                     Expression expression = visitValue(mce.Arguments[2]);
+                    assignments.AddRange(AdaptAssign(colExpression, expression));
+                }
+                else if (mce.Method.IsInstantiationOf(miSetId))
+                {
+                    var pi = piIdClass;
+
+                    Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, Reflector.FindFieldInfo(body.Type, pi)));
+                    Expression expression = visitValue(mce.Arguments[1]);
                     assignments.AddRange(AdaptAssign(colExpression, expression));
                 }
                 else
@@ -3280,6 +3289,37 @@ namespace Signum.Engine.Linq
         public static Expression Adapt(Expression exp, Expression colExpression)
         {
             return new AssignAdapterExpander (colExpression).Visit(exp);
+        }
+
+        static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create<Entity>(3)).GetGenericMethodDefinition();
+        static MethodInfo miSetId = ReflectionTools.GetMethodInfo(() => new ExceptionEntity().SetId(3)).GetGenericMethodDefinition();
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method.IsInstantiationOf(miLiteCreate))
+            {
+                var type = node.Method.GetGenericArguments()[0];
+                var id = ToPrimaryKey(node.Arguments[0]);
+                return new LiteReferenceExpression(Lite.Generate(type), new EntityExpression(type, id, null, null, null, null, null, false), null, false, false);
+            }
+
+            if (node.Method.IsInstantiationOf(miSetId))
+            {
+                if(node.Arguments[0] is NewExpression ne)
+                {
+                    var id = ToPrimaryKey(node.Arguments[1]);
+                    return new EntityExpression(ne.Type, id, null, null, null, null, null, false);
+                }
+            }
+
+            return base.VisitMethodCall(node);
+        }
+
+        private PrimaryKeyExpression ToPrimaryKey(Expression expression)
+        {
+            var clean = expression.RemoveAllConvert(a => true);
+
+            return new PrimaryKeyExpression(clean.Nullify());
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
