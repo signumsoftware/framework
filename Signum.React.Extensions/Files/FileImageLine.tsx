@@ -48,7 +48,7 @@ export class FileImageLineController extends EntityBaseController<FileImageLineP
     }
   }
 
-  handleFileLoaded(file: IFile & ModifiableEntity){
+  handleFileLoaded = (file: IFile & ModifiableEntity) =>{
     this.convert(file)
       .then(f => this.setValue(f))
       .done();
