@@ -97,7 +97,7 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <div className="sf-entity-strip sf-control-container">
-        <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
+        <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
             c.getMListItemContext(p.ctx).map(mlec =>
               (<EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
@@ -142,11 +142,14 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
     );
   }
 
-  function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
+  function renderAutoComplete(renderInput?: (input: React.ReactElement<any> | null) => React.ReactElement<any>) {
     var ac = p.autocomplete;
 
-    if (!ac || p.ctx!.readOnly)
+    if (p.ctx!.readOnly)
       return undefined;
+
+    if (ac == null)
+      return renderInput == null ? null : renderInput(null);
 
     return (
       <Typeahead
