@@ -48,7 +48,7 @@ export class FileLineController extends EntityBaseController<FileLineProps>{
     }
   }
 
-  handleFileLoaded(file: IFile & ModifiableEntity) {
+  handleFileLoaded = (file: IFile & ModifiableEntity) => {
 
     this.convert(file)
       .then(f => this.setValue(f))
