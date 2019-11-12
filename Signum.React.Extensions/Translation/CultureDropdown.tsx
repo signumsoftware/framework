@@ -22,7 +22,7 @@ export default function CultureDropdown(props: {}) {
   const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
   return (
-    <NavDropdown id="cultureDropdown" data-culture={pair && pair.name} title={current.nativeName}>
+    <NavDropdown id="cultureDropdown" data-culture={pair && pair.name} title={current.nativeName} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
         <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
           {c.toStr}
