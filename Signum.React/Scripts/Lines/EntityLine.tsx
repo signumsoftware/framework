@@ -105,10 +105,11 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
       .then(entity => entity &&
         this.convert(entity)
           .then(entity => {
-            this.props.autocomplete!.getItemFromEntity(entity)
-              .then(newItem => this.setCurrentItem({ entity: entity, item: newItem })); //newItem could be different to item on create new case
-
-            this.setValue(entity);
+            return this.props.autocomplete!.getItemFromEntity(entity) //newItem could be different to item on create new case
+              .then(newItem => {
+                this.setCurrentItem({ entity: entity, item: newItem });
+                this.setValue(entity);
+              });
           }))
       .done();
 

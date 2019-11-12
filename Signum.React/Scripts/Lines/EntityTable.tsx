@@ -107,18 +107,17 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 
   handleBlur = (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => {
-
     const p = this.props;
     var tr = DomUtils.closest(e.target, "tr")!;
 
-    if (tr == DomUtils.closest(e.relatedTarget as HTMLElement, "tr")) {
+    if (e.relatedTarget == null || tr == DomUtils.closest(e.relatedTarget as HTMLElement, "tr")) {
       if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current)
         this.recentlyCreated.current = null;
 
       return;
     }
 
-    if (this.recentlyCreated && sender.props.ctx.value == this.recentlyCreated.current) {
+    if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current) {
       p.ctx.value.extract(a => a.element == this.recentlyCreated.current);
       this.setValue(p.ctx.value);
 
@@ -199,116 +198,116 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
 }
 
 export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & React.RefAttributes<EntityTableController>> &
-{ typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]}
+{ typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[] }
   = React.forwardRef(function EntityTable(props: EntityTableProps, ref: React.Ref<EntityTableController>) {
-  const c = useController(EntityTableController, props, ref);
-  const p = c.props;
+    const c = useController(EntityTableController, props, ref);
+    const p = c.props;
 
-  if (p.type!.isLite)
-    throw new Error("Lite not supported");
+    if (p.type!.isLite)
+      throw new Error("Lite not supported");
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  let ctx = (p.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
+    let ctx = (p.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-        {renderButtons()}
-        {renderTable()}
-      </div>
-    );
-
-  return (
-    <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-      <legend>
-        <div>
-          <span>{p.labelText}</span>
+    if (p.avoidFieldSet == true)
+      return (
+        <div className={classes("sf-table-field sf-control-container", ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
           {renderButtons()}
+          {renderTable()}
         </div>
-      </legend>
-      {renderTable()}
-    </fieldset>
-  );
-
-  function renderButtons() {
-    const buttons = (
-      <span className="ml-2">
-        {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
-        {c.renderFindButton(false)}
-      </span>
-    );
-
-    return (EntityBaseController.hasChildrens(buttons) ? buttons : undefined);
-  }
-
-  function renderTable() {
-
-    const readOnly = ctx.readOnly;
-    const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
-
-    var elementCtxs = c.getMListItemContext(ctx);
-    var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;
-    var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
+      );
 
     return (
-      <div ref={c.containerDiv}
-        className={p.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
-        style={{ maxHeight: p.scrollable ? p.maxResultsHeight : undefined }}>
-        <table className={classes("table table-sm sf-table", p.tableClasses)} >
-          {
-            !isEmpty &&
-            <thead ref={c.thead}>
-              <tr className={p.theadClasses || "bg-light"}>
-                {firstColumnVisible && <th></th>}
-                {
-                  p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
-                    {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
-                  </th>)
-                }
-              </tr>
-            </thead>
-          }
-          <tbody>
-            {
-              elementCtxs
-                .map((mlec, i, array) => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
-                  ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
-                  array={array}
-                  index={i}
-                  firstColumnVisible={firstColumnVisible}
-                  onRowHtmlAttributes={p.onRowHtmlAttributes}
-                  fetchRowState={p.fetchRowState}
-                  onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-                  onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
-                  draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
-                  columns={p.columns!}
-                  onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
-                />
-                )
-            }
-          </tbody>
-          {
-            p.createAsLink && p.create && !readOnly &&
-            <tfoot ref={c.tfoot}>
-              <tr>
-                <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
-                  {typeof p.createAsLink == "function" ? p.createAsLink(c) :
-                    <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
-                      className="sf-line-button sf-create"
-                      onClick={c.handleCreateClick}>
-                      <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
-                    </a>}
-                </td>
-              </tr>
-            </tfoot>
-          }
-        </table>
-      </div >
+      <fieldset className={classes("sf-table-field sf-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
+        <legend>
+          <div>
+            <span>{p.labelText}</span>
+            {renderButtons()}
+          </div>
+        </legend>
+        {renderTable()}
+      </fieldset>
     );
-  }
-}) as any;
+
+    function renderButtons() {
+      const buttons = (
+        <span className="ml-2">
+          {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
+          {c.renderFindButton(false)}
+        </span>
+      );
+
+      return (EntityBaseController.hasChildrens(buttons) ? buttons : undefined);
+    }
+
+    function renderTable() {
+
+      const readOnly = ctx.readOnly;
+      const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
+
+      var elementCtxs = c.getMListItemContext(ctx);
+      var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;
+      var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
+
+      return (
+        <div ref={c.containerDiv}
+          className={p.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
+          style={{ maxHeight: p.scrollable ? p.maxResultsHeight : undefined }}>
+          <table className={classes("table table-sm sf-table", p.tableClasses)} >
+            {
+              !isEmpty &&
+              <thead ref={c.thead}>
+                <tr className={p.theadClasses || "bg-light"}>
+                  {firstColumnVisible && <th></th>}
+                  {
+                    p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
+                      {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
+                    </th>)
+                  }
+                </tr>
+              </thead>
+            }
+            <tbody>
+              {
+                elementCtxs
+                  .map((mlec, i, array) => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
+                    ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
+                    array={array}
+                    index={i}
+                    firstColumnVisible={firstColumnVisible}
+                    onRowHtmlAttributes={p.onRowHtmlAttributes}
+                    fetchRowState={p.fetchRowState}
+                    onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
+                    onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
+                    draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+                    columns={p.columns!}
+                    onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
+                  />
+                  )
+              }
+            </tbody>
+            {
+              p.createAsLink && p.create && !readOnly &&
+              <tfoot ref={c.tfoot}>
+                <tr>
+                  <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
+                    {typeof p.createAsLink == "function" ? p.createAsLink(c) :
+                      <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+                        className="sf-line-button sf-create"
+                        onClick={c.handleCreateClick}>
+                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
+                      </a>}
+                  </td>
+                </tr>
+              </tfoot>
+            }
+          </table>
+        </div >
+      );
+    }
+  }) as any;
 
 EntityTable.defaultProps = {
   maxResultsHeight: "400px",
@@ -336,7 +335,7 @@ export interface EntityTableRowProps {
 export interface EntityTableRowHandle {
   props: EntityTableRowProps;
   rowState?: any;
-  forceUpdate() : void;
+  forceUpdate(): void;
 }
 
 export function EntityTableRow(p: EntityTableRowProps) {
@@ -350,69 +349,69 @@ export function EntityTableRow(p: EntityTableRowProps) {
   var ctx = p.ctx;
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.draggable;
-    return (
-      <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
-        onDragEnter={drag && drag.onDragOver}
-        onDragOver={drag && drag.onDragOver}
-        onDrop={drag && drag.onDrop}
-        className={drag && drag.dropClass}
+  return (
+    <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
+      onDragEnter={drag && drag.onDragOver}
+      onDragOver={drag && drag.onDragOver}
+      onDrop={drag && drag.onDrop}
+      className={drag && drag.dropClass}
       onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}>
       {p.firstColumnVisible && <td>
-          <div className="item-group">
+        <div className="item-group">
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={p.onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
             {EntityBaseController.removeIcon}
-            </a>}
-            &nbsp;
+          </a>}
+          &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
-              draggable={true}
-              onDragStart={drag.onDragStart}
-              onDragEnd={drag.onDragEnd}
+            draggable={true}
+            onDragStart={drag.onDragStart}
+            onDragEnd={drag.onDragEnd}
             title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
             {EntityBaseController.moveIcon}
-            </a>}
+          </a>}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
             {EntityBaseController.viewIcon}
-            </a>}
-          </div>
-        </td>}
+          </a>}
+        </div>
+      </td>}
       {p.columns.map((c, i) => {
 
         var td = <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>;
 
-          var mc = c.mergeCells as ((a: any) => any) | undefined
+        var mc = c.mergeCells as ((a: any) => any) | undefined
 
-          if (!mc)
-            return td;
+        if (!mc)
+          return td;
 
-          var equals = (a: any, b: any) => {
-            var ka = mc!(a);
-            var kb = mc!(b);
-            return ka == kb || is(ka, kb, false, false);
-          }
+        var equals = (a: any, b: any) => {
+          var ka = mc!(a);
+          var kb = mc!(b);
+          return ka == kb || is(ka, kb, false, false);
+        }
 
         var current = p.ctx.value;
         if (p.index > 0 && equals(p.array[p.index - 1].value, current))
-            return null;
+          return null;
 
-          var rowSpan = 1;
+        var rowSpan = 1;
         for (var i = p.index + 1; i < p.array.length; i++) {
           if (equals(p.array[i].value, current))
-              rowSpan++;
-            else
-              break;
-          }
+            rowSpan++;
+          else
+            break;
+        }
 
-          if (rowSpan == 1)
-            return td;
+        if (rowSpan == 1)
+          return td;
 
-          return React.cloneElement(td, { rowSpan });
-        })}
-      </tr>
-    );
+        return React.cloneElement(td, { rowSpan });
+      })}
+    </tr>
+  );
 
   function getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null | false {
 
