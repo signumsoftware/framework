@@ -44,7 +44,7 @@ namespace Signum.Engine
                      Name = c.name,
                      SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type()!.name),
                      UserTypeName = null,
-                     Identity = c.is_identity,
+                     PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
                  }).ToList();
 
@@ -63,13 +63,11 @@ namespace Signum.Engine
         private static string GenerateColumnCode(DiffColumn c)
         {
             var type = CodeGeneration.CodeGenerator.Entities.GetValueType(c);
-            if (c.Nullable)
-                type = type.Nullify();
-
+           
             StringBuilder sb = new StringBuilder();
-            if (c.Identity)
+            if (c.PrimaryKey)
                 sb.AppendLine("[ViewPrimaryKey]");
-            sb.AppendLine($"public {type.TypeName()} {c.Name};");
+            sb.AppendLine($"public {type.TypeName()}{(c.Nullable ? "?" : "")} {c.Name};");
             return sb.ToString();
         }
 
