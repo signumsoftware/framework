@@ -27,14 +27,34 @@ export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
   selectedIndex?: number;
 }
 
+function isControlled(p: EntityTabRepeaterProps) {
+
+  if ((p.selectedIndex != null) != (p.onSelectTab != null))
+    throw new Error("selectedIndex and onSelectTab should be set together");
+
+  return p.selectedIndex != null;
+}
+
 export class EntityTabRepeaterController extends EntityListBaseController<EntityTabRepeaterProps> {
 
-  selectedIndex!: number | undefined;
-  setSelectedIndex!: (index: number | undefined) => void;
+  selectedIndex!: number;
+  setSelectedIndex!: (index: number) => void;
+  initialIsControlled!: boolean;
 
   init(p: EntityTabRepeaterProps) {
     super.init(p);
-    [this.selectedIndex, this.setSelectedIndex] = React.useState(() => p.selectedIndex == null ? 0 : coerce(p.selectedIndex, p.ctx.value.length));
+
+    this.initialIsControlled = React.useMemo(() => isControlled(p), []);
+    const currentIsControlled = isControlled(p);
+    if (currentIsControlled != this.initialIsControlled)
+      throw new Error(`selectedIndex was isControlled=${this.initialIsControlled} but now is ${currentIsControlled}`);
+
+    if (!this.initialIsControlled) {
+      [this.selectedIndex, this.setSelectedIndex] = React.useState(0);
+    } else {
+      this.selectedIndex = p.selectedIndex!;
+      this.setSelectedIndex = p.onSelectTab!;
+    }
   }
 
   getDefaultProps(p: EntityTabRepeaterProps) {
@@ -112,12 +132,10 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
     return React.Children.count(buttons) ? buttons : undefined;
   }
 
-  function handleSelectTab(eventKey: any) {
-    if (typeof eventKey == "number") { //Create tab
-      if (p.onSelectTab)
-        p.onSelectTab(eventKey as number);
-      else
-        c.setSelectedIndex(eventKey as number);
+  function handleSelectTab(eventKey: string) {
+    var num = parseInt(eventKey);
+    if (!isNaN(num)) { //Create tab
+      c.setSelectedIndex(num);
     }
   }
 
@@ -177,15 +195,12 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
   }
 });
 
-function coerce(index: number | undefined, length: number): number | undefined {
-  if (index == undefined)
-    return undefined;
-
+function coerce(index: number, length: number): number {
   if (length <= index)
     index = length - 1;
 
   if (index < 0)
-    return undefined;
+    return 0;
 
   return index;
 }
