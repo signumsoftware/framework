@@ -131,13 +131,13 @@ namespace Signum.React.Json
             return typeof(ModifiableEntity).IsAssignableFrom(objectType) || typeof(IEntity).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value.GetType().Name))
+            using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value!.GetType().Name))
             {
-                PropertyRoute pr = GetCurrentPropertyRoute(value);
+                PropertyRoute pr = GetCurrentPropertyRoute(value!);
 
-                ModifiableEntity mod = (ModifiableEntity)value;
+                ModifiableEntity mod = (ModifiableEntity)value!;
 
                 writer.WriteStartObject();
 
@@ -177,7 +177,7 @@ namespace Signum.React.Json
                 writer.WritePropertyName("modified");
                 writer.WriteValue(mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
 
-                foreach (var kvp in PropertyConverter.GetPropertyConverters(value.GetType()))
+                foreach (var kvp in PropertyConverter.GetPropertyConverters(value!.GetType()))
                 {
                     WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
                 }
@@ -268,7 +268,7 @@ namespace Signum.React.Json
             AfterDeserilization.Register((ModifiableEntity e) => { });
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             using (HeavyProfiler.LogNoStackTrace("ReadJson", () => objectType.Name))
             {
@@ -287,7 +287,7 @@ namespace Signum.React.Json
                     using (JsonSerializerExtensions.SetAllowDirectMListChanges(markedAsModified))
                         while (reader.TokenType == JsonToken.PropertyName)
                         {
-                            if ((string)reader.Value == "mixins")
+                            if ((string)reader.Value! == "mixins")
                             {
                                 var entity = (Entity)mod;
                                 reader.Read();
@@ -296,7 +296,7 @@ namespace Signum.React.Json
                                 reader.Read();
                                 while (reader.TokenType == JsonToken.PropertyName)
                                 {
-                                    var mixin = entity[(string)reader.Value];
+                                    var mixin = entity[(string)reader.Value!];
 
                                     reader.Read();
 
@@ -311,7 +311,7 @@ namespace Signum.React.Json
                             }
                             else
                             {
-                                var propertyName = (string)reader.Value;
+                                var propertyName = (string)reader.Value!;
                                 
                                 PropertyConverter? pc = dic.TryGetC(propertyName);
                                 if(pc == null)
@@ -361,7 +361,7 @@ namespace Signum.React.Json
 
                 using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
                 {
-                    object newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
+                    object? newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
 
                     if (!IsEquals(newValue, oldValue))
                     {
@@ -396,16 +396,16 @@ namespace Signum.React.Json
             }
         }
 
-        private bool IsEquals(object newValue, object? oldValue)
+        private bool IsEquals(object? newValue, object? oldValue)
         {
-            if (newValue is byte[] && oldValue is byte[])
-                return MemComparer.Equals((byte[])newValue, (byte[])oldValue);
+            if (newValue is byte[] nba && oldValue is byte[] oba)
+                return MemComparer.Equals(nba, oba);
 
-            if (newValue is DateTime && oldValue is DateTime)
-                return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
+            if (newValue is DateTime ndt && oldValue is DateTime odt)
+                return Math.Abs(ndt.Subtract(odt).TotalMilliseconds) < 10; //Json dates get rounded
 
-            if (newValue is DateTimeOffset && oldValue is DateTimeOffset)
-                return Math.Abs(((DateTimeOffset)newValue).Subtract((DateTimeOffset)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
+            if (newValue is DateTimeOffset ndto && oldValue is DateTimeOffset odto)
+                return Math.Abs(ndto.Subtract(odto).TotalMilliseconds) < 10; //Json dates get rounded
 
             return object.Equals(newValue, oldValue);
         }
@@ -419,7 +419,7 @@ namespace Signum.React.Json
                 throw new UnauthorizedAccessException(error);
         }
 
-        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, out bool isModified)
+        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object? existingValue, out bool isModified)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
             isModified = identityInfo.Modified == true;
@@ -428,7 +428,7 @@ namespace Signum.React.Json
 
             if (typeof(MixinEntity).IsAssignableFrom(objectType))
             {
-                var mixin = (MixinEntity)existingValue;
+                var mixin = (MixinEntity)existingValue!;
 
                 return mixin;
             }
@@ -469,7 +469,7 @@ namespace Signum.React.Json
             }
             else //Embedded
             {
-                var existingMod = (ModifiableEntity)existingValue;
+                var existingMod = (ModifiableEntity?)existingValue;
 
                 if (existingMod == null || existingMod.GetType() != type)
                     return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
@@ -485,14 +485,14 @@ namespace Signum.React.Json
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                switch ((string)reader.Value)
+                switch ((string)reader.Value!)
                 {
-                    case "toStr": info.ToStr = reader.ReadAsString(); break;
-                    case "id": info.Id = reader.ReadAsString(); break;
+                    case "toStr": info.ToStr = reader.ReadAsString()!; break;
+                    case "id": info.Id = reader.ReadAsString()!; break;
                     case "isNew": info.IsNew = reader.ReadAsBoolean(); break;
-                    case "Type": info.Type = reader.ReadAsString(); break;
-                    case "ticks": info.Ticks = long.Parse(reader.ReadAsString()); break;
-                    case "modified": info.Modified = bool.Parse(reader.ReadAsString()); break;
+                    case "Type": info.Type = reader.ReadAsString()!; break;
+                    case "ticks": info.Ticks = long.Parse(reader.ReadAsString()!); break;
+                    case "modified": info.Modified = bool.Parse(reader.ReadAsString()!); break;
                     default: return info;
                 }
 

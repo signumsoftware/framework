@@ -45,7 +45,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
     <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
   </ItemGroup>

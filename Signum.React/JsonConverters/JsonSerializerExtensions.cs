@@ -8,7 +8,7 @@ namespace Signum.React.Json
 {
     public static class JsonSerializerExtensions
     {
-        public static object DeserializeValue(this JsonSerializer serializer, JsonReader reader, Type valueType, object? oldValue)
+        public static object? DeserializeValue(this JsonSerializer serializer, JsonReader reader, Type valueType, object? oldValue)
         {
             if (oldValue != null)
             {
