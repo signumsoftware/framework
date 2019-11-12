@@ -722,15 +722,16 @@ deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
         {
-            var schemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
+            var systemSchemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
+            var systemSchemasExeptDbo = SqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
-                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript).FormatWith(schemas)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript).FormatWith(systemSchemasExeptDbo)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
                 Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
-                new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(schemas)))
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas)))
                 )!;
         }
 
