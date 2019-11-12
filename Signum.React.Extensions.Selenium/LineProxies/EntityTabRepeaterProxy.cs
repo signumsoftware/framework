@@ -13,7 +13,7 @@ namespace Signum.React.Selenium
         {
         }
 
-        public WebElementLocator Tab(int index) => new WebElementLocator(this.Element, By.CssSelector($".nav-tabs li[data-eventkey=\"{index}\"]"));
+        public WebElementLocator Tab(int index) => new WebElementLocator(this.Element, By.CssSelector($".nav-tabs .nav-item.nav-link[data-rb-event-key=\"{index}\"]"));
         public WebElementLocator ElementPanel() => new WebElementLocator(this.Element, By.CssSelector($".sf-repeater-element"));
 
         public LineContainer<T> SelectTab<T>(int index) where T : ModifiableEntity
@@ -25,9 +25,9 @@ namespace Signum.React.Selenium
 
         public int SelectedTabIndex()
         {
-            var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item .nav-link.active"));
+            var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item.nav-link.active"));
 
-            return int.Parse(active.GetParent().GetAttribute("data-eventkey"));
+            return int.Parse(active.GetAttribute("data-rb-event-key"));
         }
 
         public LineContainer<T> Details<T>() where T : ModifiableEntity
