@@ -185,8 +185,8 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
 
     return (
       <>
-        {item},
-        alternatives && alternatives.map(a => renderAlternative(a))
+        {item}
+        {alternatives && alternatives.map(a => renderAlternative(a))}
       </>
     );
   }    
