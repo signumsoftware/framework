@@ -70,7 +70,6 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
     var navItems = response.elements && response.elements.map((res, i) => withKey(renderNavItem(res, i), i));
 
-
     return (
       <div className={classes("nav navbar-nav")}>
         {navItems}
@@ -126,7 +125,10 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
         if (res.url) {
           return (
             <Nav.Item>
-              <Nav.Link onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} active={res == active}>
+              <Nav.Link
+                onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+                onAuxClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+                active={res == active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </Nav.Link>
             </Nav.Item>
@@ -140,7 +142,9 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
           return (
             <Nav.Item>
-              <Nav.Link onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
+              <Nav.Link
+                onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
+                onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
                 {config.getIcon(res)}{config.getLabel(res)}
               </Nav.Link>
             </Nav.Item>
@@ -204,7 +208,10 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
         if (res.url) {
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)} className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
+            <HeaderOrItem
+              onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+              onAuxClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+              className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </HeaderOrItem>
           ];
@@ -221,7 +228,10 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           }
 
           return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} className={classes("sf-cursor-pointer", menuItemN, res == active && "active")}>
+            <HeaderOrItem
+              onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
+              onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
+              className={classes("sf-cursor-pointer", menuItemN, res == active && "active")}>
               {config.getIcon(res)}{config.getLabel(res)}
             </HeaderOrItem>
           ];

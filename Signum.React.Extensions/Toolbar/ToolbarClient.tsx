@@ -55,6 +55,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: ParsedQuery<string>): boolean;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+    e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
       Navigator.pushOrOpenInTab(url, e);
