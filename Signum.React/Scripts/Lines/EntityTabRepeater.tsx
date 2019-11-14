@@ -144,7 +144,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
     const readOnly = ctx.readOnly;
 
     return (
-      <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"}>
+      <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
           c.getMListItemContext(ctx).map(mlec => {
             const drag = c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;
@@ -185,8 +185,8 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
             <Tab eventKey="create-new" title={
-              <span className="sf-line-button sf-create nav-link" onClick={c.handleCreateClick}>
-                {ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+              <span className="sf-line-button sf-create" onClick={c.handleCreateClick} title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
+                {EntityBaseController.createIcon}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
               </span>} />)
         }
         {p.extraTabs && p.extraTabs(c)}
