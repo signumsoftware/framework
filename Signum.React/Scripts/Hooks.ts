@@ -63,7 +63,7 @@ interface Size {
   height: number;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size | undefined, setContainer: (element: T | null) => void } {
+export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300): { size: Size | undefined, setContainer: (element: T | null) => void } {
   const [size, setSize] = React.useState<Size | undefined>();
   const divElement = React.useRef<T | null>(null);
   function setNewSize() {
@@ -72,32 +72,43 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(): { size: Size 
       setSize({ width: rect.width, height: rect.height });
   }
 
+  const initialHandle = React.useRef<number | null>(null);
   function setContainer(div: T | null) {
+
+    if (initialHandle.current)
+      clearTimeout(initialHandle.current);
+
     if (divElement.current = div) {
-      setNewSize();
+      if (initialTimeout)
+        initialHandle.current = setTimeout(setNewSize, initialTimeout);
+      else
+        setNewSize();
     }
   }
 
   const setContainerMemo = React.useCallback(setContainer, [divElement]);
 
-  const handler = React.useRef<number | null>(null);
+  const resizeHandle = React.useRef<number | null>(null);
   React.useEffect(() => {
     function onResize() {
-      if (handler.current != null)
-        clearTimeout(handler.current);
+      if (resizeHandle.current != null)
+        clearTimeout(resizeHandle.current);
 
-      handler.current = setTimeout(() => {
+      resizeHandle.current = setTimeout(() => {
         if (divElement.current) {
           setNewSize()
         }
-      }, 300);
+      }, resizeTimeout);
     }
 
     window.addEventListener('resize', onResize);
 
     return () => {
-      if (handler.current)
-        clearTimeout(handler.current);
+      if (resizeHandle.current)
+        clearTimeout(resizeHandle.current);
+
+      if (initialHandle.current)
+        clearTimeout(initialHandle.current);
 
       window.removeEventListener("resize", onResize);
     };
