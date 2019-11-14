@@ -7,10 +7,12 @@ import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
 import { Type, QueryTokenString } from './Reflection';
 
 export function useForceUpdate(): () => void {
-  var [count, setCount] = React.useState(0);
-  return () => {
+  const [count, setCount] = React.useState(0);
+  const forceUpdate = React.useCallback(() => {
     setCount(c => c + 1);
-  }
+  }, []);
+
+  return forceUpdate
 }
 
 export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
