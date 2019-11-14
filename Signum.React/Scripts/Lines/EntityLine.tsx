@@ -168,8 +168,10 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     var ac = p.autocomplete;
 
-    if (ac == null || ctx.readOnly)
-      return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+    if (ac == null || ctx.readOnly) {
+      var fcr = <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+      return renderInput ? renderInput(fcr) : fcr;
+    }
 
     return (
       <Typeahead ref={c.typeahead}
