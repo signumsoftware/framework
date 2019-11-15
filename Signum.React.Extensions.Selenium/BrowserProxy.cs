@@ -136,14 +136,14 @@ namespace Signum.React.Selenium
             Selenium.FindElement(By.Id("login")).Click();
             Selenium.WaitElementNotPresent(By.Id("login"));
 
-            Selenium.WaitElementPresent(By.Id("sfUserDropDown"));
+            Selenium.WaitElementPresent(By.ClassName("sf-login-dropdown"));
 
             SetCurrentCulture();
         }
 
         public virtual void SetCurrentCulture()
         {
-            string culture = Selenium.WaitElementPresent(By.Id("cultureDropdown")).GetAttribute("data-culture");
+            string culture = Selenium.WaitElementPresent(By.ClassName("sf-culture-dropdown")).GetAttribute("data-culture");
 
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }

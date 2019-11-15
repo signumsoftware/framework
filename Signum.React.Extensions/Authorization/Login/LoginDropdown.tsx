@@ -18,7 +18,7 @@ export default function LoginDropdown() {
     );
 
   return (
-    <NavDropdown className="sf-user" id="sfUserDropDown" title={user.userName!}>
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={user.userName!} alignRight>
       <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth /> {AuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
       </LinkContainer>

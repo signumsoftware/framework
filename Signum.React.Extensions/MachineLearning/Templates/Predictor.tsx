@@ -17,7 +17,6 @@ import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbed
 import PredictorSubQuery from './PredictorSubQuery';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
 import { QueryEntity } from '@framework/Signum.Entities.Basics';
-import { is } from '@framework/Signum.Entities';
 import ProgressBar from './ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
 import { QueryToken } from '@framework/FindOptions';
@@ -25,7 +24,7 @@ import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 import { toFilterOptions } from '@framework/Finder';
-import { useInterval, useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
   handleClick = () => {

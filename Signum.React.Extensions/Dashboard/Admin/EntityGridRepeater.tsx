@@ -53,7 +53,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
     return null;
 
   return (
-    <fieldset className={classes("SF-grid-repeater-field SF-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
+    <fieldset className={classes("sf-grid-repeater-field sf-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
       <legend>
         <div>
           <span>{p.labelText}</span>

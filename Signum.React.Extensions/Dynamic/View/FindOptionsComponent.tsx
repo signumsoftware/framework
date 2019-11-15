@@ -465,7 +465,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
     const array = this.props.binding.getValue();
 
-    return (<fieldset className="SF-table-field">
+    return (<fieldset className="sf-table-field">
       <legend>
         {this.renderTitle()}
       </legend>

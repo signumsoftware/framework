@@ -142,14 +142,14 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         </a>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
-      <div className="sf-chart-control SF-control-container" >
+      <div className="sf-chart-control sf-control-container" >
         <div>
           <FilterBuilder filterOptions={cr.filterOptions} queryDescription={queryDescription!}
             subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
             lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFilters={true} />
 
         </div>
-        <div className="SF-control-container">
+        <div className="sf-control-container">
           <ChartBuilder queryKey={cr.queryKey} ctx={tc}
             onInvalidate={handleInvalidate}
             onRedraw={handleOnRedraw}
