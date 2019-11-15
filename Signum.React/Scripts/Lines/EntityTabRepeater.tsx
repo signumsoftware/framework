@@ -65,14 +65,10 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
 
   removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>) {
     const list = this.props.ctx.value!;
-    let currentIndex = list.indexOf(mle);
-    if (this.selectedIndex != null && this.selectedIndex < currentIndex)
-      this.setSelectedIndex(this.selectedIndex - 1);
+    let deleteIndex = list.indexOf(mle);
 
     list.remove(mle);
-
-    this.setSelectedIndex(coerce(this.selectedIndex, list.length));
-
+    this.setSelectedIndex(coerce(deleteIndex < this.selectedIndex ? this.selectedIndex - 1 : this.selectedIndex, list.length));
     this.setValue(list);
   }
 
