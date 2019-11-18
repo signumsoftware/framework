@@ -1,3 +1,4 @@
+using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -90,6 +91,7 @@ namespace Signum.Engine
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
+            QueryLogic.Expressions.Register(mListField, () => mListPropertRoute.PropertyInfo!.NiceName());   
             RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
 
             
