@@ -176,7 +176,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     );
 
     if (p.formControlClass)
-      return <p className={className} style={p.customStyle}>{this.renderValue()}</p>
+      return <div className={className} style={p.customStyle}>{this.renderValue()}</div>
 
     if (p.isLink) {
       return (
