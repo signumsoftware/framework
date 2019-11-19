@@ -129,8 +129,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest })
       .then(value => {
-        this.setState({ value : value  || null });
-        this.props.onValueChange && this.props.onValueChange(value || null);
+        const fixedValue = value === undefined ? null : value;
+        this.setState({ value: fixedValue });
+        this.props.onValueChange && this.props.onValueChange(fixedValue);
       })
       .done();
   }
