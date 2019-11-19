@@ -141,7 +141,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
@@ -149,7 +149,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
@@ -157,7 +157,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryEntity>> Autocomplete(string subString, int limit)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueries.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
@@ -169,7 +169,7 @@ namespace Signum.Engine.UserQueries
             {
                 var result = UserQueries.Value.GetOrThrow(userQuery);
 
-                var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
                 if (!isAllowed(result))
                     throw new EntityNotFoundException(userQuery.EntityType, userQuery.Id);
 
