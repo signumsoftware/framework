@@ -105,6 +105,27 @@ namespace Signum.Engine
             SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
         }
 
+        public static IDisposable TemporaryTable<T>() where T : IView
+        {
+            CreateTemporaryTable<T>();
+
+            return new Disposable(() => DropTemporaryTable<T>());
+        }
+
+        public static void DropTemporaryTable<T>()
+            where T : IView
+        {
+            if (!Transaction.HasTransaction)
+                throw new InvalidOperationException("You need to be inside of a transaction to create a Temporary table");
+
+            var view = Schema.Current.View<T>();
+
+            if (!view.Name.IsTemporal)
+                throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
+
+            SqlBuilder.DropTable(view.Name).ExecuteNonQuery();
+        }
+
         public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields, bool unique = false)
              where T : IView
         {
