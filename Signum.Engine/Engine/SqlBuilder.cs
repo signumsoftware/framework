@@ -57,12 +57,12 @@ namespace Signum.Engine
             )!;
         }
 
-        public static SqlPreCommand DropTable(ObjectName tableName)
+        public static SqlPreCommandSimple DropTable(ObjectName tableName)
         {
             return new SqlPreCommandSimple("DROP TABLE {0}".FormatWith(tableName));
         }
 
-        public static SqlPreCommand DropView(ObjectName viewName)
+        public static SqlPreCommandSimple DropView(ObjectName viewName)
         {
             return new SqlPreCommandSimple("DROP VIEW {0}".FormatWith(viewName));
         }
