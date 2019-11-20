@@ -36,6 +36,7 @@
     "@types/react-router-dom": "5.1.1",
     "@types/react-transition-group": "4.2.3",
     "@types/react-widgets": "4.3.3",
+    "@types/query-string": "5.1.0",
     "moment": "2.24.0",
     "numbro": "2.1.2",
     "popper.js": "1.15.0",
