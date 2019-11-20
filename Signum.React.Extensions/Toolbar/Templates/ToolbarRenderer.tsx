@@ -17,7 +17,7 @@ import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 
 
-function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.ParsedQuery<string>): boolean {
+function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
     return (location.pathname + location.search).startsWith(Navigator.toAbsoluteUrl(r.url));
 
@@ -31,7 +31,7 @@ function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: Hi
   return config.isCompatibleWithUrl(r, location, query);
 }
 
-function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: QueryString.ParsedQuery<string>): ToolbarClient.ToolbarResponse<any> | null {
+function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): ToolbarClient.ToolbarResponse<any> | null {
   if (r.elements)
     return r.elements.map(e => inferActive(e, location, query)).notNull().onlyOrNull();
 

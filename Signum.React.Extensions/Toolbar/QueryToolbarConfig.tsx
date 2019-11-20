@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { ParsedQuery } from 'query-string'
 import { getQueryNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -41,7 +40,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     return Promise.resolve(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<QueryEntity>, location: Location, query: ParsedQuery<string>): boolean {
+  isCompatibleWithUrl(res: ToolbarResponse<QueryEntity>, location: Location, query: any): boolean {
     return location.pathname == Navigator.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
   }
 }
