@@ -42,7 +42,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
