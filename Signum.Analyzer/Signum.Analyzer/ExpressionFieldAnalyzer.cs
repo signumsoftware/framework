@@ -96,17 +96,12 @@ namespace Signum.Analyzer
 
                 var expressionType = GetExpressionType(memberSymbol, context.SemanticModel);
 
-                if (!expressionType.Equals(fieldSymbol.Type))
+                if (!expressionType.Equals(fieldSymbol.Type, SymbolEqualityComparer.IncludeNullability))
                 {
-                    if (!expressionType.ToString().Replace("?", "").Equals(
-                        fieldSymbol.Type.ToString().Replace("?", ""))) // Till there is an API to express nullability
-                    {
-                        var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
-                        Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
-                        return;
-                    }
+                    var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
+                    Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
+                    return;
                 }
-
             }
             catch (Exception e)
             {
@@ -116,19 +111,27 @@ namespace Signum.Analyzer
 
         private static INamedTypeSymbol GetExpressionType(ISymbol memberSymbol, SemanticModel sm)
         {
-            var parameters = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).Parameters.Select(p => p.Type).ToList() : new List<ITypeSymbol>();
+            var parameters = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).Parameters.Select(p => (p.Type, p.NullableAnnotation)).ToList() : new List<(ITypeSymbol, NullableAnnotation)>();
 
             if (!memberSymbol.IsStatic)
-                parameters.Insert(0, (ITypeSymbol)memberSymbol.ContainingSymbol);
+                parameters.Insert(0, ((ITypeSymbol)memberSymbol.ContainingSymbol, NullableAnnotation.NotAnnotated));
 
-            var returnType = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).ReturnType : ((IPropertySymbol)memberSymbol).Type;
+            var returnType = memberSymbol is IMethodSymbol mi ? (mi.ReturnType, mi.ReturnNullableAnnotation) :
+                memberSymbol is IPropertySymbol pi ? (pi.Type, pi.NullableAnnotation) :
+                throw new InvalidOperationException("Unexpected member");
 
             parameters.Add(returnType);
 
             var expression = sm.Compilation.GetTypeByMetadataName("System.Linq.Expressions.Expression`1");
             var func = sm.Compilation.GetTypeByMetadataName("System.Func`" + parameters.Count);
 
-            return expression.Construct(func.Construct(parameters.ToArray()));
+            var funcConstruct = func.Construct(
+                parameters.Select(a => a.Item1).ToImmutableArray(),
+                parameters.Select(a => a.Item2).ToImmutableArray());
+
+            return expression.Construct(
+                ImmutableArray.Create((ITypeSymbol)funcConstruct), 
+                ImmutableArray.Create(NullableAnnotation.NotAnnotated));
         }
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)

@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.4.5" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
     <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
   </ItemGroup>
 
