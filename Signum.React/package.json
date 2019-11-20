@@ -39,7 +39,7 @@
     "moment": "2.24.0",
     "numbro": "2.1.2",
     "popper.js": "1.15.0",
-    "query-string": "6.8.3",
+    "query-string": "5.1.1",
     "react": "16.11.0",
     "react-bootstrap": "1.0.0-beta.14",
     "react-dom": "16.11.0"
