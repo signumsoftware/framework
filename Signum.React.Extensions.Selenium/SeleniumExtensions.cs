@@ -331,6 +331,16 @@ namespace Signum.React.Selenium
             return e.FindElement(By.XPath(".."));
         }
 
+        public static IWebElement GetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        {
+            return e.Follow(a => a.GetParent()).FirstEx(predicate);
+        }
+
+        public static IWebElement TryGetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        {
+            return e.Follow(a => a.GetParent()).FirstOrDefault(predicate);
+        }
+
         public static void SelectByPredicate(this SelectElement element, Func<IWebElement, bool> predicate)
         {
             element.Options.SingleEx(predicate).Click();
@@ -380,6 +390,7 @@ namespace Signum.React.Selenium
 
         public static void SafeSendKeys(this IWebElement element, string? text)
         {
+            new Actions(element.GetDriver()).MoveToElement(element).Perform();
             while(element.GetAttribute("value").Length > 0)
                 element.SendKeys(Keys.Backspace);
             element.SendKeys(text);

@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { ParsedQuery } from 'query-string'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
@@ -52,9 +51,10 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
-  abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: ParsedQuery<string>): boolean;
+  abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: any): boolean;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+    e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
       Navigator.pushOrOpenInTab(url, e);
