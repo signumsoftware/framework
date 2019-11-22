@@ -608,6 +608,20 @@ namespace Signum.Utilities
                 this.Description?.Contains(text, StringComparison.InvariantCultureIgnoreCase) == true ||
                 this.PluralDescription?.Contains(text, StringComparison.InvariantCultureIgnoreCase) == true;
         }
+
+        public bool IsTypeCompleted()
+        {
+            if ((Options & DescriptionOptions.Description) != 0 && !this.Description.HasText())
+                return false;
+
+            if ((Options & DescriptionOptions.PluralDescription) != 0 && !this.PluralDescription.HasText())
+                return false;
+
+            if ((Options & DescriptionOptions.Gender) != 0 && this.Gender == null && NaturalLanguageTools.HasGenders(this.Assembly.Culture))
+                return false;
+
+            return true;
+        }
     }
 
 }

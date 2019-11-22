@@ -235,7 +235,7 @@
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
     <Member Name="Type0Id1" Description="{0} {1}" />
   </Type>
-  <Type Name="OperationLogEntity" Description="Operationenprotokoll">
+  <Type Name="OperationLogEntity" Description="Operationenprotokoll" Gender="n">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="End" Description="Ende" />
     <Member Name="Exception" Description="Ausnahme" />
@@ -404,7 +404,7 @@
     <Member Name="TypeSelector" Description="Typselektor" />
     <Member Name="ValueMustBeSpecifiedFor0" Description="Sie müssen einen Wert für {0} angeben" />
   </Type>
-  <Type Name="SemiSymbol" Description="Semi" PluralDescription="Semis">
+  <Type Name="SemiSymbol" Description="Semisymbol" Gender="n">
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -412,7 +412,7 @@
     <Member Name="Lowercase" Description="Kleinbuchstaben" />
     <Member Name="Uppercase" Description="Großbuchstaben" />
   </Type>
-  <Type Name="Symbol" Description="Symbol" PluralDescription="Symbole">
+  <Type Name="Symbol" Description="Symbol" Gender="n">
     <Member Name="Key" Description="Schlüssel" />
   </Type>
   <Type Name="SynchronizerMessage">
@@ -429,7 +429,7 @@
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
   </Type>
-  <Type Name="TypeEntity" Description="Typ">
+  <Type Name="TypeEntity" Description="Typ" PluralDescription="Typen" Gender="m">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />
