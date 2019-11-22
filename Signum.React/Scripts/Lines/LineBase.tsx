@@ -71,7 +71,7 @@ export class LineBaseController<P extends LineBaseProps> {
 
   defaultValidate(val: any) {
     if (this.props.type!.isNotNullable && val == undefined)
-      return ValidationMessage._0IsNotSet.niceToString(this.props.labelText);
+      return ValidationMessage._0IsNotSet.niceToString(this.props.ctx.niceName());
 
     return undefined;
   }
