@@ -39,7 +39,7 @@ namespace Signum.Engine.Translation
                 var ltm = kvp.Value;
                 var ltt = target.Types.TryGetC(kvp.Key);
 
-                var count = (ltm.Description != null && ltt?.Description == null ? 1 : 0) +
+                var count = ((ltm.IsTypeCompleted() && ltt?.IsTypeCompleted() != true) ? 1 : 0) +
                 ltm.Members.Count(kvp2 => kvp2.Value != null && ltt?.Members!.TryGetC(kvp2.Key) == null);
 
                 return new { Type = kvp.Key, count };
@@ -119,10 +119,10 @@ namespace Signum.Engine.Translation
 
         static Dictionary<CultureInfo, TypeNameConflict>? TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)
         {
-            if(master.Description == null)
+            if(!master.IsTypeCompleted())
                 return null;
 
-            if (target != null && target.Description != null)
+            if (target.IsTypeCompleted())
                 return null;
 
             var sentences = new Dictionary<CultureInfo, TypeNameConflict>
