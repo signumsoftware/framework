@@ -1395,7 +1395,8 @@ namespace Signum.Engine.Maps
         Type? CheckType(Type? type)
         {
             if (type != null && !ImplementationColumns.ContainsKey(type))
-                throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".FormatWith(type.Name, ImplementationColumns.ToString(kvp => "{0} -> {1}".FormatWith(kvp.Key.Name, kvp.Value.Name), "\r\n")));
+                throw new InvalidOperationException($"Type {type.Name} is not in the list of ImplementedBy of {Route}, currently types allowed: {ImplementationColumns.Keys.ToString(a => a.Name, ", ")}.\r\n" +
+                    $"Consider writing in your Starter class something like: sb.Schema.Settings.FieldAttributes(({Route.RootType.Name} e) => e.{Route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({ImplementationColumns.Keys.And(type).ToString(t => $"typeof({t.Name})", ", ")}));");
 
             return type;
         }
