@@ -1,4 +1,4 @@
-/// <reference path="react-rte.d.ts" />
+import "./react-rte"
 import * as React from 'react'
 import RichTextEditor, { EditorValue } from 'react-rte';
 import { IBinding } from '@framework/Reflection';

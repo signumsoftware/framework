@@ -1,4 +1,4 @@
-/// <reference path="codemirror.d.ts" />
+import "./codemirror"
 import * as React from 'react'
 import * as CodeMirror from 'codemirror'
 import { classes } from '@framework/Globals'

@@ -1,4 +1,3 @@
-/// <reference path="FilesClient.tsx" />
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
