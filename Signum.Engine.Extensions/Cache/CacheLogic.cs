@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using System.IO;
 using System.Data;
 using Signum.Engine.Scheduler;
+using System.Runtime.InteropServices;
 
 namespace Signum.Engine.Cache
 {
@@ -402,11 +403,14 @@ namespace Signum.Engine.Cache
             if (registered)
                 return;
 
-            SafeConsole.SetConsoleCtrlHandler(ct =>
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Shutdown();
-                return true;
-            }, true);
+                SafeConsole.SetConsoleCtrlHandler(ct =>
+                {
+                    Shutdown();
+                    return true;
+                }, true);
+            }
 
             AppDomain.CurrentDomain.DomainUnload += (o, a) => Shutdown();
 

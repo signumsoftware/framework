@@ -53,7 +53,7 @@ export namespace API {
   }
 
   export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-    return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "~/api/excel/reportsFor/" + queryKey });
+    return ajaxGet({ url: "~/api/excel/reportsFor/" + queryKey });
   }
 
 

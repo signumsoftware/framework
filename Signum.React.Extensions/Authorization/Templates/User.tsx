@@ -28,9 +28,6 @@ function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) {
   var newPass = React.useRef<HTMLInputElement>(null);
   var newPass2 = React.useRef<HTMLInputElement>(null);
 
-
-
-
   function handlePasswordBlur(e: React.SyntheticEvent<any>) {
     const ctx = p.ctx;
 

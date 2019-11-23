@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -18,7 +18,7 @@ import {
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
-import ChartRequestView from './Templates/ChartRequestView'
+import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
@@ -102,7 +102,7 @@ export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol): ()
 export namespace ButtonBarChart {
 
   interface ButtonBarChartContext {
-    chartRequestView: ChartRequestView;
+    chartRequestView: ChartRequestViewHandle;
     chartRequest: ChartRequestModel;
   }
 
@@ -754,13 +754,13 @@ export module API {
   }
 
   export function fetchScripts(): Promise<ChartScript[]> {
-    return ajaxGet<ChartScript[]>({
+    return ajaxGet({
       url: "~/api/chart/scripts"
     });
   }
 
   export function fetchColorPalettes(): Promise<string[]> {
-    return ajaxGet<string[]>({
+    return ajaxGet({
       url: "~/api/chart/colorPalettes"
     });
   }

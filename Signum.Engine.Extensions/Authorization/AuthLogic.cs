@@ -15,6 +15,8 @@ using Signum.Engine.Operations;
 using System.Xml.Linq;
 using System.IO;
 using Signum.Engine.Scheduler;
+using Signum.Engine;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Authorization
 {
@@ -43,6 +45,11 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
+
+        [AutoExpressionField]
+        public static IQueryable<UserEntity> Users(this RoleEntity r) =>
+            As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));   
+
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
         static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
@@ -69,7 +76,18 @@ namespace Signum.Engine.Authorization
 
                 CultureInfoLogic.AssertStarted(sb);
 
-                sb.Include<UserEntity>();
+                sb.Include<UserEntity>()
+                  .WithExpressionFrom((RoleEntity r) => r.Users())
+                  .WithQuery(() => e => new
+                  {
+                      Entity = e,
+                      e.Id,
+                      e.UserName,
+                      e.Email,
+                      e.Role,
+                      e.State,
+                      e.CultureInfo,
+                  });
 
                 sb.Include<RoleEntity>()
                     .WithSave(RoleOperation.Save)
@@ -86,7 +104,7 @@ namespace Signum.Engine.Authorization
                 rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
-                    var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
+                    var strategies = Database.Query<RoleEntity>().Select(r => KeyValuePair.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
 
                     var graph = roles.Value;
 
@@ -119,16 +137,7 @@ namespace Signum.Engine.Authorization
                         r.Name,
                         Refered = rc,
                     });
-                sb.Include<UserEntity>()
-                    .WithQuery(() => e => new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.UserName,
-                        e.Email,
-                        e.Role,
-                        e.State,
-                    });
+
 
                 UserGraph.Register();
             }
@@ -136,21 +145,16 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(RoleEntity role)
         {
-            if (!role.IsNew && role.Roles != null && role.Roles.IsGraphModified)
+            if (!role.IsNew && role.Roles.IsGraphModified)
             {
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
                     EntityCache.AddFullGraph(role);
+                    var allRoles = Database.RetrieveAll<RoleEntity>();
 
-                    DirectedGraph<RoleEntity> newRoles = new DirectedGraph<RoleEntity>();
+                    var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.Roles.Select(sr => sr.RetrieveAndRemember()));
 
-                    newRoles.Expand(role, r1 => r1.Roles.Select(a => a.RetrieveAndRemember()));
-                    foreach (var r in Database.RetrieveAll<RoleEntity>())
-                    {
-                        newRoles.Expand(r, r1 => r1.Roles.Select(a => a.RetrieveAndRemember()));
-                    }
-
-                    var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
+                    var problems = roleGraph.FeedbackEdgeSet().Edges.ToList();
 
                     if (problems.Count > 0)
                         throw new ApplicationException(

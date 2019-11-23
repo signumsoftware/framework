@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
@@ -50,9 +51,10 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
-
+  abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: any): boolean;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+    e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
       Navigator.pushOrOpenInTab(url, e);
@@ -68,8 +70,8 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export namespace API {
-  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any>> {
-    return ajaxGet<ToolbarResponse<any>>({ url: `~/api/toolbar/current/${location}` });
+  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/current/${location}` });
   }
 }
 

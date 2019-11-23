@@ -38,27 +38,27 @@ export module API {
 
   export module Heavy {
     export function setEnabled(isEnabled: boolean): Promise<void> {
-      return ajaxPost<void>({ url: "~/api/profilerHeavy/setEnabled/" + isEnabled }, undefined);
+      return ajaxPost({ url: "~/api/profilerHeavy/setEnabled/" + isEnabled }, undefined);
     }
 
     export function isEnabled(): Promise<boolean> {
-      return ajaxGet<boolean>({ url: "~/api/profilerHeavy/isEnabled" });
+      return ajaxGet({ url: "~/api/profilerHeavy/isEnabled" });
     }
 
     export function clear(): Promise<void> {
-      return ajaxPost<void>({ url: "~/api/profilerHeavy/clear" }, undefined);
+      return ajaxPost({ url: "~/api/profilerHeavy/clear" }, undefined);
     }
 
     export function entries(): Promise<HeavyProfilerEntry[]> {
-      return ajaxGet<HeavyProfilerEntry[]>({ url: "~/api/profilerHeavy/entries" });
+      return ajaxGet({ url: "~/api/profilerHeavy/entries" });
     }
 
     export function details(key: string): Promise<HeavyProfilerEntry[]> {
-      return ajaxGet<HeavyProfilerEntry[]>({ url: "~/api/profilerHeavy/details/" + key });
+      return ajaxGet({ url: "~/api/profilerHeavy/details/" + key });
     }
 
     export function stackTrace(key: string): Promise<StackTraceTS[]> {
-      return ajaxGet<StackTraceTS[]>({ url: "~/api/profilerHeavy/stackTrace/" + key });
+      return ajaxGet({ url: "~/api/profilerHeavy/stackTrace/" + key });
     }
 
     export function download(indices?: string): void {
@@ -68,18 +68,18 @@ export module API {
     }
 
     export function upload(file: { fileName: string; content: string }): Promise<void> {
-      return ajaxPost<void>({ url: "~/api/profilerHeavy/upload" }, file);
+      return ajaxPost({ url: "~/api/profilerHeavy/upload" }, file);
     }
   }
 
   export module Times {
 
     export function clear(): Promise<void> {
-      return ajaxPost<void>({ url: "~/api/profilerTimes/clear" }, undefined);
+      return ajaxPost({ url: "~/api/profilerTimes/clear" }, undefined);
     }
 
     export function fetchInfo(): Promise<TimeTrackerEntry[]> {
-      return ajaxGet<TimeTrackerEntry[]>({ url: "~/api/profilerTimes/times" });
+      return ajaxGet({ url: "~/api/profilerTimes/times" });
     }
   }
 }

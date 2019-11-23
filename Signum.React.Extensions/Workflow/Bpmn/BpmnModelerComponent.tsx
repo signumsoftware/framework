@@ -14,7 +14,7 @@ import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 import { newMListElement } from '@framework/Signum.Entities';
 import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
 import { Dic } from '@framework/Globals';
@@ -507,8 +507,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
   render() {
     return (
       <div>
-        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
-        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick}>
+        <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+        <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick}>
           <FontAwesomeIcon icon="image" />
         </Button>
         <div ref={this.setDiv} />

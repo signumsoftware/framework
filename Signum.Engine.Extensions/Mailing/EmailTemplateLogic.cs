@@ -109,7 +109,7 @@ namespace Signum.Engine.Mailing
                 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
+                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KeyValuePair.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
                 EmailModelLogic.Start(sb);
@@ -527,7 +527,7 @@ namespace Signum.Engine.Mailing
 
         public static List<Lite<EmailTemplateEntity>> GetApplicableEmailTemplates(object queryName, Entity? entity, EmailTemplateVisibleOn visibleOn)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
             return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(a => isAllowed(a) && IsVisible(a, visibleOn))
                 .Where(a => a.IsApplicable(entity))

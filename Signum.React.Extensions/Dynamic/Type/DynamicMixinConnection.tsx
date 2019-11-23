@@ -65,13 +65,11 @@ export function MixinCombo(p : MixinComboProps){
         {p.labelText}
       </label>
       <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
-        <div style={{ position: "relative" }}>
-          <Typeahead
-            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
-            getItems={handleGetItems}
-            value={p.binding.getValue() || ""}
-            onChange={handleOnChange} />
-        </div>
+        <Typeahead
+          inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
+          getItems={handleGetItems}
+          value={p.binding.getValue() || ""}
+          onChange={handleOnChange} />
       </div>
     </div>
   );

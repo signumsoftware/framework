@@ -1,4 +1,4 @@
-﻿import { ClientColorProvider, TableInfo } from '../SchemaMap'
+import { ClientColorProvider, TableInfo } from '../SchemaMap'
 
 export default function getDefaultProviders(info: TableInfo[]): ClientColorProvider[] {
   return [

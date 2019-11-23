@@ -7,8 +7,8 @@ import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
-import ValidationErrors from '@framework/Frames/ValidationErrors'
-import ButtonBar from '@framework/Frames/ButtonBar'
+import { ValidationErrors, ValidationErrorHandle } from '@framework/Frames/ValidationErrors'
+import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
@@ -16,8 +16,8 @@ import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 import { IHasCaseActivity } from '../WorkflowClient';
-import { Modal, ErrorBoundary } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { ErrorBoundary, ModalHeaderButtons } from '@framework/Components';
+import { Modal } from 'react-bootstrap';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
@@ -66,7 +66,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   }
 
   handleKeyDown(e: KeyboardEvent) {
-    this.buttonBar && this.buttonBar.hanldleKeyDown(e);
+    this.buttonBar && this.buttonBar.handleKeyDown(e);
   }
 
   calculateState(props: CaseFrameModalState): CaseFrameModalState {
@@ -185,7 +185,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     }
   }
 
-  buttonBar?: ButtonBar | null;
+  buttonBar?: ButtonBarHandle | null;
 
   renderBody() {
     var pack = this.state.pack!;
@@ -228,8 +228,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     );
   }
 
-  validationErrorsTop?: ValidationErrors | null;
-  validationErrorsBottom?: ValidationErrors | null;
+  validationErrorsTop?: ValidationErrorHandle | null;
+  validationErrorsBottom?: ValidationErrorHandle | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);

@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "@framework/Services";
-import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '@framework/Components';
+import { DropdownButton, Dropdown } from 'react-bootstrap';
 
 export interface WordEntityMenuProps {
   entityPack: EntityPack<Entity>;
@@ -37,19 +37,16 @@ export default function WordEntityMenu(p : WordEntityMenuProps){
   const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;
 
   return (
-    <UncontrolledDropdown id="wordMenu" className="sf-word-dropdown">
-      <DropdownToggle caret>{label as any}</DropdownToggle>
-      <DropdownMenu>
+    <DropdownButton id="wordMenu" className="sf-word-dropdown" title={label}> 
         {
           p.entityPack.wordTemplates!.map((wt, i) =>
-            <DropdownItem key={i}
+            <Dropdown.Item key={i}
               onClick={() => handleOnClick(wt)}>
               {wt.toStr}
-            </DropdownItem>)
+            </Dropdown.Item>)
         }
-      </DropdownMenu>
-    </UncontrolledDropdown>
-  );
+    </DropdownButton>
+  )
 }
 
 

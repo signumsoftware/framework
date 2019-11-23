@@ -112,7 +112,7 @@ namespace Signum.Engine.SMS
 
                 SMSTemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KVP.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
+                    return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 

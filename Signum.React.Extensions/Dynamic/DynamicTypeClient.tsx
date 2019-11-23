@@ -17,7 +17,7 @@ import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, 
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
-import { Tab } from '@framework/Components/Tabs';
+import { Tab } from 'react-bootstrap';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
@@ -64,12 +64,12 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
   DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
-    <Tab eventKey="migrations" title="Migrations" >
+    <>
       <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
       <h3>{DynamicRenameEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
-    </Tab>;
+    </>;
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
     { token: t.append(p => p.typeName), type: "Text" },
@@ -96,11 +96,11 @@ export function start(options: { routes: JSX.Element[] }) {
 export namespace API {
 
   export function getPropertyType(property: DynamicProperty): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
+    return ajaxPost({ url: `~/api/dynamic/type/propertyType` }, property);
   }
 
   export function expressionNames(typeName: string): Promise<Array<string>> {
-    return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
   }
 }
 

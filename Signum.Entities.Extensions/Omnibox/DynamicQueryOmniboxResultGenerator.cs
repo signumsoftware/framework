@@ -493,13 +493,13 @@ namespace Signum.Entities.Omnibox
         }
 
         public override bool CanWrite => true;
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            writer.WriteValue(GetQueryKey(value));
+            writer.WriteValue(GetQueryKey(value!));
         }
 
         public override bool CanRead => false;
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
@@ -514,13 +514,13 @@ namespace Signum.Entities.Omnibox
         }
 
         public override bool CanWrite => true;
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, GetQueryTokenTS((QueryToken)value));
+            serializer.Serialize(writer, GetQueryTokenTS((QueryToken)value!));
         }
 
         public override bool CanRead => false;
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

@@ -68,7 +68,7 @@ export module AuthEmailMessage {
   export const YourUsernameIs = new MessageKey("AuthEmailMessage", "YourUsernameIs");
   export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("AuthEmailMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
   export const ResetPasswordRequestSubject = new MessageKey("AuthEmailMessage", "ResetPasswordRequestSubject");
-  export const YourResetPasswordRequestIsLapsed = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestIsLapsed");
+  export const YourResetPasswordRequestHasExpired = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestHasExpired");
   export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
   export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
 }
@@ -159,6 +159,9 @@ export module AuthMessage {
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("AuthMessage", "TheUserIsNotLongerInTheDatabase");
   export const IForgotMyPassword = new MessageKey("AuthMessage", "IForgotMyPassword");
   export const GiveUsYourUserEmailToResetYourPassword = new MessageKey("AuthMessage", "GiveUsYourUserEmailToResetYourPassword");
+  export const LoginWithWindowsUser = new MessageKey("AuthMessage", "LoginWithWindowsUser");
+  export const NoWindowsUserFound = new MessageKey("AuthMessage", "NoWindowsUserFound");
+  export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication = new MessageKey("AuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
 }
 
 export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");

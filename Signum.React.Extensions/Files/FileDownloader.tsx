@@ -14,34 +14,25 @@ export interface FileDownloaderProps {
   entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
   download?: DownloadBehaviour;
   configuration?: FileDownloaderConfiguration<IFile>;
-  htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
+  htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  children?: React.ReactNode;
 }
 
-export default class FileDownloader extends React.Component<FileDownloaderProps> {
+export function FileDownloader(p: FileDownloaderProps) {
 
-  static configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
-
-  static registerConfiguration<T extends IFile & ModifiableEntity>(type: Type<T>, configuration: FileDownloaderConfiguration<T>) {
-    FileDownloader.configurtions[type.typeName] = configuration as FileDownloaderConfiguration<IFile>;
-  }
-
-  static defaultProps = {
-    download: "SaveAs",
-  }
-
-  handleOnClick = (e: React.MouseEvent<any>) => {
+  function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    const entityOrLite = this.props.entityOrLite;
+    const entityOrLite = p.entityOrLite;
     var promise = isModifiableEntity(entityOrLite) ? Promise.resolve(entityOrLite) :
       Navigator.API.fetchAndRemember(entityOrLite as Lite<IFile & Entity>);
 
     promise.then(entity => {
 
-      const configuration = this.props.configuration || FileDownloader.configurtions[entity.Type];
+      const configuration = p.configuration || configurtions[entity.Type];
       if (!configuration)
         throw new Error("No configuration registered in FileDownloader.configurations for ");
 
-      if (this.props.download == "SaveAs") {
+      if (p.download == "SaveAs") {
         if (entity.binaryFile)
           downloadBase64(e, entity.binaryFile, entity.fileName!);
         else
@@ -56,28 +47,33 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
     }).done();
   }
 
+  const entityOrLite = p.entityOrLite;
 
-  render() {
+  const toStr = getToString(entityOrLite);
 
-    const entityOrLite = this.props.entityOrLite;
+  const fileName = toStr!.tryBeforeLast(" - ") || toStr; //Hacky
 
-    const toStr = getToString(entityOrLite);
+  return (
+    <a
+      href="#"
+      onClick={handleOnClick}
+      download={p.download == "View" ? undefined : fileName}
+      title={toStr || undefined}
+      target="_blank"
+      {...p.htmlAttributes}>
+      {p.children || toStr}
+    </a>
+  );
+}
 
-    const fileName = toStr!.tryBeforeLast(" - ") || toStr; //Hacky
+FileDownloader.defaultProps = {
+  download: "SaveAs",
+}
 
-    return (
-      <a
-        href="#"
-        onClick={this.handleOnClick}
-        download={this.props.download == "View" ? undefined : fileName}
-        title={toStr || undefined}
-        target="_blank"
-        {...this.props.htmlAttributes}>
-        {this.props.children || toStr}
-      </a>
-    );
+export const configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = { };
 
-  }
+export function registerConfiguration<T extends IFile & ModifiableEntity>(type: Type<T>, configuration: FileDownloaderConfiguration<T>) {
+  configurtions[type.typeName] = configuration as FileDownloaderConfiguration<IFile>;
 }
 
 export interface FileDownloaderConfiguration<T extends IFile> {
@@ -86,21 +82,21 @@ export interface FileDownloaderConfiguration<T extends IFile> {
   viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
 
-FileDownloader.registerConfiguration(FileEntity, {
+registerConfiguration(FileEntity, {
   fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
   viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id))
 });
 
-FileDownloader.registerConfiguration(FilePathEntity, {
+registerConfiguration(FilePathEntity, {
   fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
 });
 
-FileDownloader.registerConfiguration(FileEmbedded, {
+registerConfiguration(FileEmbedded, {
   downloadClick: (event, file) => downloadBase64(event, file.binaryFile!, file.fileName!),
   viewClick: (event, file) => viewBase64(event, file.binaryFile!, file.fileName!)
 });
 
-FileDownloader.registerConfiguration(FilePathEmbedded, {
+registerConfiguration(FilePathEmbedded, {
   fileUrl: file => Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }))
 });
 

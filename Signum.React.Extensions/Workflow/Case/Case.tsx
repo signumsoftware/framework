@@ -9,10 +9,10 @@ import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl, SearchControlLoaded } from "@framework/Search";
 import * as Navigator from "@framework/Navigator";
-import { Tab, Tabs } from '@framework/Components/Tabs';
-import { UncontrolledTooltip } from "@framework/Components";
+import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
 import * as AuthClient from '../../Authorization/AuthClient'
+import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 
@@ -21,156 +21,124 @@ interface CaseComponentProps {
   caseActivity?: CaseActivityEntity;
 }
 
-interface CaseComponentState {
-  initialXmlDiagram?: string;
-  entities?: WorkflowEntitiesDictionary;
-  caseFlow?: CaseFlow;
-  activeEventKey: CaseTab;
-}
+export default function CaseComponent(p: CaseComponentProps) {
 
-export default class CaseComponent extends React.Component<CaseComponentProps, CaseComponentState> {
+  const [activeEventKey, setActiveEventKey] = React.useState<CaseTab>("CaseFlow");
 
-  constructor(props: CaseComponentProps) {
-    super(props);
+  const caseFlowViewerComponentRef = React.useRef<CaseFlowViewerComponent>(null);
 
-    this.state = { activeEventKey: "CaseFlow" };
-  }
-
-  caseFlowViewerComponent?: CaseFlowViewerComponent | null;
-
-  loadState(props: CaseComponentProps) {
-
-    if (!AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow))
-      return;
-
-    API.getWorkflowModel(toLite(props.ctx.value.workflow))
-      .then(pair => this.setState({
+  const model = useAPI(() =>
+    !AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) :
+      API.getWorkflowModel(toLite(p.ctx.value.workflow)).then(pair => ({
         initialXmlDiagram: pair.model.diagramXml,
         entities: pair.model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model!)
-      }))
-      .done();
+      })), [p.ctx.value.workflow]);
 
-    API.caseFlow(toLite(props.ctx.value))
-      .then(caseFlow => this.setState({
-        caseFlow: caseFlow
-      }))
-      .done();
+  const caseFlow = useAPI(() => !AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) : API.caseFlow(toLite(p.ctx.value)), [p.ctx.value]);
+
+  function handleToggle(eventKey: unknown) {
+    if (activeEventKey !== eventKey)
+      setActiveEventKey(eventKey as CaseTab);
   }
 
-  componentWillReceiveProps(newProps: CaseComponentProps) {
-    if (!is(this.props.ctx.value, newProps.ctx.value))
-      this.loadState(newProps);
+  function handleOnDiagramNodeLocated() {
+    setActiveEventKey("CaseFlow");
   }
 
-  componentWillMount() {
-    this.loadState(this.props);
-  }
-
-  render() {
-    var ctx = this.props.ctx.subCtx({ readOnly: true, labelColumns: 4 });
-    return (
-      <div>
-        <div className="inline-tags"> <InlineCaseTags case={toLite(this.props.ctx.value)} /></div>
-        <br />
-        <div className="row">
-          <div className="col-sm-6">
-            <EntityLine ctx={ctx.subCtx(a => a.workflow)} />
-            <EntityLine ctx={ctx.subCtx(a => a.parentCase)} />
-            <ValueLine ctx={ctx.subCtx(a => a.startDate)} />
-          </div>
-          <div className="col-sm-6">
-            <EntityLine ctx={ctx.subCtx(a => a.mainEntity)} view={false} />
-            <ValueLine ctx={ctx.subCtx(a => a.description)} />
-            <ValueLine ctx={ctx.subCtx(a => a.finishDate)} />
-          </div>
+  var ctx = p.ctx.subCtx({ readOnly: true, labelColumns: 4 });
+  return (
+    <div>
+      <div className="inline-tags"> <InlineCaseTags case={toLite(p.ctx.value)} /></div>
+      <br />
+      <div className="row">
+        <div className="col-sm-6">
+          <EntityLine ctx={ctx.subCtx(a => a.workflow)} />
+          <EntityLine ctx={ctx.subCtx(a => a.parentCase)} />
+          <ValueLine ctx={ctx.subCtx(a => a.startDate)} />
         </div>
-
-        {AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
-          <Tabs id="caseTabs" hideOnly={true} activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
-            <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
-              {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
-                <div>
-                  <CaseFlowViewerComponent ref={m => this.caseFlowViewerComponent = m}
-                    diagramXML={this.state.initialXmlDiagram}
-                    entities={this.state.entities}
-                    caseFlow={this.state.caseFlow}
-                    case={ctx.value}
-                    caseActivity={this.props.caseActivity}
-                  /></div> :
-                <h3>{JavascriptMessage.loading.niceToString()}</h3>}
-            </Tab>
-            <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
-              <SearchControl
-                showContextMenu={fo => "Basic"}
-                navigate={false}
-                findOptions={{
-                  queryName: CaseActivityEntity,
-                  parentToken: CaseActivityEntity.token(e => e.case),
-                  parentValue: ctx.value,
-                  columnOptionsMode: "Replace",
-                  columnOptions: [
-                    { token: CaseActivityEntity.token(e => e.id) },
-                    { token: CaseActivityEntity.token(e => e.workflowActivity) },
-                    { token: CaseActivityEntity.token(e => e.startDate) },
-                    { token: CaseActivityEntity.token(e => e.doneDate) },
-                    { token: CaseActivityEntity.token(e => e.doneBy) },
-                    { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
-                  ],
-                  orderOptions: [{
-                    token: CaseActivityEntity.token(e => e.startDate),
-                    orderType: "Ascending",
-                  }],
-                }}
-                extraButtons={sc => [
-                  { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
-                  { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
-                ]}
-              />
-            </Tab>
-            <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
-              <SearchControl
-                showContextMenu={fo => "Basic"}
-                navigate={false}
-                findOptions={{
-                  queryName: CaseActivityEntity,
-                  parentToken: CaseActivityEntity.token(e => e.case),
-                  parentValue: ctx.value,
-                  filterOptions: [
-                    { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
-                  ],
-                  columnOptionsMode: "Replace",
-                  columnOptions: [
-                    { token: CaseActivityEntity.token(e => e.id) },
-                    { token: CaseActivityEntity.token(e => e.workflowActivity) },
-                    { token: CaseActivityEntity.token(e => e.startDate) },
-                    { token: CaseActivityEntity.token(e => e.doneDate) },
-                    { token: CaseActivityEntity.token(e => e.doneBy) },
-                    { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
-                  ],
-                  orderOptions: [{
-                    token: CaseActivityEntity.token(e => e.startDate),
-                    orderType: "Descending",
-                  }]
-                }}
-                extraButtons={sc => [
-                  { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} /> },
-                  { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} onLocated={this.handleOnDiagramNodeLocated} /> },
-                ]}
-              />
-            </Tab>
-          </Tabs>}
+        <div className="col-sm-6">
+          <EntityLine ctx={ctx.subCtx(a => a.mainEntity)} view={false} />
+          <ValueLine ctx={ctx.subCtx(a => a.description)} />
+          <ValueLine ctx={ctx.subCtx(a => a.finishDate)} />
+        </div>
       </div>
-    );
-  }
 
-  handleToggle = (eventKey: string | number) => {
-    if (this.state.activeEventKey !== eventKey)
-      this.setState({ activeEventKey: eventKey as CaseTab });
-  }
-
-  handleOnDiagramNodeLocated = () => {
-    this.setState({ activeEventKey: "CaseFlow" });
-  }
+      {AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
+        <Tabs id="caseTabs" unmountOnExit={false} activeKey={activeEventKey} onSelect={handleToggle}>
+          <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
+            {model && caseFlow ?
+              <div>
+                <CaseFlowViewerComponent ref={caseFlowViewerComponentRef}
+                  diagramXML={model.initialXmlDiagram}
+                  entities={model.entities}
+                  caseFlow={caseFlow}
+                  case={ctx.value}
+                  caseActivity={p.caseActivity}
+                /></div> :
+              <h3>{JavascriptMessage.loading.niceToString()}</h3>}
+          </Tab>
+          <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
+            <SearchControl
+              showContextMenu={fo => "Basic"}
+              navigate={false}
+              findOptions={{
+                queryName: CaseActivityEntity,
+                parentToken: CaseActivityEntity.token(e => e.case),
+                parentValue: ctx.value,
+                columnOptionsMode: "Replace",
+                columnOptions: [
+                  { token: CaseActivityEntity.token(e => e.id) },
+                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
+                  { token: CaseActivityEntity.token(e => e.startDate) },
+                  { token: CaseActivityEntity.token(e => e.doneDate) },
+                  { token: CaseActivityEntity.token(e => e.doneBy) },
+                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
+                ],
+                orderOptions: [{
+                  token: CaseActivityEntity.token(e => e.startDate),
+                  orderType: "Ascending",
+                }],
+              }}
+              extraButtons={sc => [
+                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} /> },
+                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} onLocated={handleOnDiagramNodeLocated} /> },
+              ]}
+            />
+          </Tab>
+          <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
+            <SearchControl
+              showContextMenu={fo => "Basic"}
+              navigate={false}
+              findOptions={{
+                queryName: CaseActivityEntity,
+                parentToken: CaseActivityEntity.token(e => e.case),
+                parentValue: ctx.value,
+                filterOptions: [
+                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
+                ],
+                columnOptionsMode: "Replace",
+                columnOptions: [
+                  { token: CaseActivityEntity.token(e => e.id) },
+                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
+                  { token: CaseActivityEntity.token(e => e.startDate) },
+                  { token: CaseActivityEntity.token(e => e.doneDate) },
+                  { token: CaseActivityEntity.token(e => e.doneBy) },
+                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
+                ],
+                orderOptions: [{
+                  token: CaseActivityEntity.token(e => e.startDate),
+                  orderType: "Descending",
+                }]
+              }}
+              extraButtons={sc => [
+                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} /> },
+                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} onLocated={handleOnDiagramNodeLocated} /> },
+              ]}
+            />
+          </Tab>
+        </Tabs>}
+    </div>
+  );
 }
 
 interface CaseActivityButtonBaseProps {
@@ -178,74 +146,65 @@ interface CaseActivityButtonBaseProps {
   caseFlowViewer: CaseFlowViewerComponent;
 }
 
-class CaseActivityStatsButtonComponent extends React.Component<CaseActivityButtonBaseProps> {
+function CaseActivityStatsButtonComponent(p: CaseActivityButtonBaseProps) {
 
-  render() {
-    const sc = this.props.sc;
-    let Div: HTMLDivElement | null;
-
-    const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
-
-    return (
-      <>
-        <div ref={comp => Div = comp}>
-          <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
-            onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
-            <FontAwesomeIcon icon="list" />
-          </a>
-        </div>,
-        <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
-          {WorkflowActivityMessage.OpenCaseActivityStats.niceToString()}
-        </UncontrolledTooltip>
-      </>
-    );
-  }
-
-  handleOnClick(rr: ResultRow) {
+  function handleOnClick(rr: ResultRow) {
     if (rr.entity)
       Navigator.API.fetchAndForget(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
-        this.props.caseFlowViewer.showCaseActivityStatsModal(bpmnElementID);
+        p.caseFlowViewer.showCaseActivityStatsModal(bpmnElementID);
       }).done();
   }
+  const sc = p.sc;
+
+  const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
+
+  return (
+    <OverlayTrigger overlay={<Tooltip placement="top" key="tooltip" id="caseStatsTooltip">
+      {WorkflowActivityMessage.OpenCaseActivityStats.niceToString()}
+    </Tooltip>}>
+      <div>
+        <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
+          onClick={() => handleOnClick(sc.state.selectedRows![0])}>
+          <FontAwesomeIcon icon="list" />
+        </a>
+      </div>
+    </OverlayTrigger>
+  );
 }
 
 interface WorkflowActivityLocateButtonComponentProps extends CaseActivityButtonBaseProps {
   onLocated?: () => void;
 }
 
-class WorkflowActivityLocateButtonComponent extends React.Component<WorkflowActivityLocateButtonComponentProps> {
+function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonComponentProps) {
 
-  render() {
-    const sc = this.props.sc;
-    let Div: HTMLDivElement | null;
-
-    const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
-    return (
-      <>
-        <div ref={comp => Div = comp}>
-          <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
-            onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
-            <FontAwesomeIcon icon="map-marker" />
-          </a>
-        </div>,
-        <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
-          {WorkflowActivityMessage.LocateWorkflowActivityInDiagram.niceToString()}
-        </UncontrolledTooltip>
-      </>
-    );
-  }
-
-  handleOnClick(rr: ResultRow) {
+  function handleOnClick(rr: ResultRow) {
     if (rr.entity) {
       Navigator.API.fetchAndForget(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
-        this.props.caseFlowViewer.focusElement(bpmnElementID);
+        p.caseFlowViewer.focusElement(bpmnElementID);
 
-        if (this.props.onLocated)
-          this.props.onLocated();
+        if (p.onLocated)
+          p.onLocated();
       }).done();
     }
   }
+  const sc = p.sc;
+
+  const enabled = sc.state.selectedRows && sc.state.selectedRows.length == 1;
+  return (
+    <OverlayTrigger overlay={<Tooltip placement="top" id="activityLocatorPopupt">
+      {WorkflowActivityMessage.LocateWorkflowActivityInDiagram.niceToString()}
+    </Tooltip>}>
+      <div>
+        <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
+          onClick={() => handleOnClick(sc.state.selectedRows![0])}>
+          <FontAwesomeIcon icon="map-marker" />
+        </a>
+      </div>,
+
+    </OverlayTrigger>
+  );
 }
 

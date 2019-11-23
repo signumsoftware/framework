@@ -99,7 +99,7 @@ namespace Signum.Entities.Dashboard
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
-            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Default);
+            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Light);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -111,15 +111,14 @@ namespace Signum.Entities.Dashboard
 
     public enum PanelStyle
     {
-        Default,
+        Light,
+        Dark,
         Primary,
         Secondary,
         Success,
         Info,
         Warning,
         Danger,
-        Light,
-        Dark,
     }
 
     public interface IGridEntity
@@ -141,10 +140,13 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartEntity : Entity, IPartEntity
     {
-        
         public UserQueryEntity UserQuery { get; set; }
 
         public UserQueryPartRenderMode RenderMode { get; set; }
+
+        public bool AllowSelection { get; set; }
+
+        public bool ShowFooter { get; set; }
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => UserQuery + "");
@@ -160,7 +162,8 @@ namespace Signum.Entities.Dashboard
             {
                 UserQuery = this.UserQuery,
                 RenderMode = this.RenderMode,
-
+                AllowSelection = this.AllowSelection,
+                ShowFooter = this.ShowFooter,
             };
         }
 
@@ -168,20 +171,24 @@ namespace Signum.Entities.Dashboard
         {
             return new XElement("UserQueryPart",
                 new XAttribute("UserQuery", ctx.Include(UserQuery)),
-                new XAttribute("RenderMode", RenderMode.ToString()));
+                new XAttribute("RenderMode", RenderMode.ToString()),
+                new XAttribute("AllowSelection", AllowSelection.ToString()),
+                new XAttribute("ShowFooter", ShowFooter.ToString())
+                );
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
             RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
+            AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? true;
+            ShowFooter = element.Attribute("ShowFooter")?.Value.ToBool() ?? false;
         }
     }
 
     public enum UserQueryPartRenderMode
     {
         SearchControl,
-        SearchControlWithoutSelection,
         BigValue,
     }
 

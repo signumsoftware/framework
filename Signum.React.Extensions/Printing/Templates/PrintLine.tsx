@@ -4,7 +4,7 @@ import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PrintLineEntity } from '../Signum.Entities.Printing'
 import { ProcessExceptionLineEntity } from '../../Processes/Signum.Entities.Processes'
-import FileLine from '../../Files/FileLine'
+import { FileLine } from '../../Files/FileLine'
 
 export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }){
   const e = p.ctx.subCtx({ readOnly: true });

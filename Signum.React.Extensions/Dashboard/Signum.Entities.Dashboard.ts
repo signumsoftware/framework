@@ -84,15 +84,14 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
 
 export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
 export type PanelStyle =
-  "Default" |
+  "Light" |
+  "Dark" |
   "Primary" |
   "Secondary" |
   "Success" |
   "Info" |
   "Warning" |
-  "Danger" |
-  "Light" |
-  "Dark";
+  "Danger";
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
@@ -108,13 +107,14 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserQueryPart";
   userQuery: UserQueries.UserQueryEntity;
   renderMode: UserQueryPartRenderMode;
+  allowSelection: boolean;
+  showFooter: boolean;
   requiresTitle: boolean;
 }
 
 export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
 export type UserQueryPartRenderMode =
   "SearchControl" |
-  "SearchControlWithoutSelection" |
   "BigValue";
 
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");

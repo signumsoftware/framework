@@ -104,12 +104,18 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
-        public LoginResponse? LoginWindowsAuthentication()
+        public LoginResponse? LoginWindowsAuthentication(bool throwError)
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                if (!WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext))
+                string? error = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
+                if(error != null)
+                {
+                    if (throwError)
+                        throw new InvalidOperationException(error);
+
                     return null;
+                }
 
                 var token = AuthTokenServer.CreateToken(UserEntity.Current);
 

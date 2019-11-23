@@ -4,6 +4,7 @@ import {  ChartTable } from '../../ChartClient';
 import { Rule } from './Rule';
 import { JavascriptMessage, SearchMessage } from '@framework/Signum.Entities';
 import { SearchControl } from '@framework/Search';
+import { useInterval } from '@framework/Hooks';
 
 interface InitialMessageProps {
   x?: number;
@@ -12,71 +13,30 @@ interface InitialMessageProps {
   data?: ChartTable;
 }
 
-export default class InitialMessage extends React.Component<InitialMessageProps, { dots: number | null }> {
+export default function InitialMessage(p: InitialMessageProps) {
 
-  intervalHandle?: number 
+  var dots = useInterval(p.loading ? 1000 : null, 0, d => (d + 1) % 4);
 
-  constructor(props: InitialMessageProps) {
-    super(props);
-    this.state = { dots: null };
-  }
+  if (p.loading)
+    return (
+      <text x={p.x} y={p.y} className="sf-initial-message loading">
+        {JavascriptMessage.loading.niceToString() + ".".repeat(dots) + " ".repeat(3 - dots)}
+      </text >
+    );
 
-  componentWillMount() {
-    if (this.props.loading)
-      this.startTimer();
-  }
+  if (p.data == null)
+    return (
+      <text x={p.x} y={p.y} className="sf-initial-message search">
+        {JavascriptMessage.searchForResults.niceToString()}
+      </text >
+    );
 
-  componentWillUnmount() {
-    this.stopTimer();
-  }
+  if (p.data.rows.length == 0)
+    return (
+      <text x={p.x} y={p.y} className="sf-initial-message no-results">
+        {SearchMessage.NoResultsFound.niceToString()}
+      </text >
+    );
 
-  componentWillReceiveProps(newProps: InitialMessageProps) {
-    if (this.props.loading != newProps.loading) {
-      if (newProps.loading) {
-        this.startTimer();
-      } else {
-        this.stopTimer();
-        this.setState({ dots: null });
-      }
-    }
-  }
-
-  startTimer() {
-    this.intervalHandle = setInterval(() =>
-      this.intervalHandle != null && this.setState({ dots: ((this.state.dots || 0) + 1) % 4 }),
-      1000);
-  }
-
-  stopTimer() {
-    if (this.intervalHandle) {
-      clearInterval(this.intervalHandle);
-      this.intervalHandle = undefined;
-    }
-  }
-
-  render() {
-
-    if (this.state.dots)
-      return (
-        <text x={this.props.x} y={this.props.y} style={{ fontSize: "22px", textAnchor: "middle" }} fill="#aaa">
-          {JavascriptMessage.loading.niceToString() + ".".repeat(this.state.dots) + " ".repeat(3 - this.state.dots)}
-        </text >
-      );
-
-    if (this.props.data == null)
-      return (
-        <text x={this.props.x} y={this.props.y} style={{ fontSize: "22px", textAnchor: "middle" }} fill="#ddd">
-          {JavascriptMessage.searchForResults.niceToString()}
-        </text >
-      );
-
-    if (this.props.data.rows.length == 0)
-      return (
-        <text x={this.props.x} y={this.props.y} style={{ fontSize: "22px", textAnchor: "middle" }} fill="#ffb5b5">
-          {SearchMessage.NoResultsFound.niceToString()}
-        </text >
-      );
-
-    return null;
-  }
+  return null;
 }

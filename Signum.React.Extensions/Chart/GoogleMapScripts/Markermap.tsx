@@ -10,26 +10,25 @@ import { ChartRow } from '../ChartClient';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default class MarkermapChart extends React.Component<ChartClient.ChartComponentProps> {
+export default function MarkermapChart({ data, parameters, onDrillDown }: ChartClient.ChartComponentProps) {
 
-  componentDidMount() {
+  const divElement = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
     GoogleMapsChartUtils.loadGoogleMapsScript(() => {
       GoogleMapsChartUtils.loadGoogleMapsMarkerCluster(() => {
-        this.drawChart(this.props);
-      })
+        drawChart()
+      });
     });
-  }
+  })
 
-  divElement?: HTMLDivElement | null;
+  return (
+    <div className="sf-chart-container" ref={divElement}>
+    </div>
+  );
 
-  render() {
-    return (
-      <div className="sf-chart-container" ref={d => this.divElement = d}>
-      </div>
-    );
-  }
 
-  drawChart({ data, parameters }: ChartClient.ChartComponentProps) {
+  function drawChart() {
 
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
@@ -50,7 +49,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
       mapTypeId: mapType
     } as google.maps.MapOptions;
 
-    var map = new google.maps.Map(this.divElement!, mapOptions);
+    var map = new google.maps.Map(divElement.current, mapOptions);
 
     if (parameters["MapStyle"] != null &&
       parameters["MapStyle"] != "Standard") {
@@ -134,7 +133,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
               var d = document.createElement("div");
               d.innerHTML = html;
               d.querySelector("a")!.onclick = () => {
-                this.props.onDrillDown(r);
+                onDrillDown(r);
               };
 
 
@@ -148,7 +147,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
           }
           else {
             marker.addListener("click", () => {
-              this.props.onDrillDown(r);
+              onDrillDown(r);
             });
           }
 

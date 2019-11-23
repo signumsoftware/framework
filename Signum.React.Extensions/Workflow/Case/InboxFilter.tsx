@@ -6,7 +6,7 @@ import { TypeContext, ValueLine, EnumCheckboxList } from '@framework/Lines'
 import { ISimpleFilterBuilder, extractFilterValue, FilterOption } from '@framework/Search'
 import { FilterOptionParsed } from "@framework/FindOptions";
 import CollapsableCard from "../../Basics/Templates/CollapsableCard";
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {
   handleOnClearFiltersClick = () => {
@@ -48,7 +48,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                 <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
               </div>
               <div className="col-sm-1">
-                <Button color="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
+                <Button variant="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
               </div>
             </div>
           </div>

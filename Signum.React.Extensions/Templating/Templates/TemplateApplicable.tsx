@@ -17,8 +17,7 @@ interface TemplateApplicableProps {
 
 export default function TemplateApplicable(p: TemplateApplicableProps) {
 
-  const typeName = useAPI(undefined, [p.query.key], signal => Finder.getQueryDescription(p.query.key)
-    .then(qd => qd.columns["Entity"].type.name.split(",")[0] || "Entity"));
+  const typeName = useAPI(() => Finder.getQueryDescription(p.query.key).then(qd => qd.columns["Entity"].type.name.split(",")[0] || "Entity"), [p.query.key]);
 
   const forceUpdate = useForceUpdate();
 

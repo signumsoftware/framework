@@ -51,22 +51,6 @@ namespace Signum.Engine.Dashboard
                         cp.DashboardPriority,
                     });
 
-                sb.Include<LinkListPartEntity>()
-                    .WithQuery(() => cp => new
-                    {
-                        Entity = cp,
-                        ToStr = cp.ToString(),
-                        Links = cp.Links.Count
-                    });
-                
-                sb.Include<ValueUserQueryListPartEntity>()
-                    .WithQuery(() => cp => new
-                    {
-                        Entity = cp,
-                        ToStr = cp.ToString(),
-                        Links = cp.UserQueries.Count
-                    });
-
                 if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserQueryPartEntity)))
                 {
                     sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
@@ -120,7 +104,7 @@ namespace Signum.Engine.Dashboard
                     new InvalidateWith(typeof(DashboardEntity)));
 
                 DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
-                .SelectCatch(d => KVP.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
+                .SelectCatch(d => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
                 .GroupToDictionary(),
                     new InvalidateWith(typeof(DashboardEntity)));
             }
@@ -170,7 +154,7 @@ namespace Signum.Engine.Dashboard
 
         static DashboardEntity GetDashboardDefault(string? key)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
 
             var result = Dashboards.Value.Values
                 .Where(d =>
@@ -184,7 +168,7 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardEntity? GetEmbeddedDashboard(Type entityType)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
 
             var result = DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(lite => Dashboards.Value.GetOrThrow(lite))
                 .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && isAllowed(d))
@@ -199,21 +183,21 @@ namespace Signum.Engine.Dashboard
 
         public static List<Lite<DashboardEntity>> GetDashboards()
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
             return Dashboards.Value.Where(d => d.Value.EntityType == null && isAllowed(d.Value))
                 .Select(d => d.Key).ToList();
         }
 
         public static List<Lite<DashboardEntity>> GetDashboardsEntity(Type entityType)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
             return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(Dashboards.Value.GetOrThrow(e))).ToList();
         }
 
         public static List<Lite<DashboardEntity>> Autocomplete(string subString, int limit)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
             return Dashboards.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
         }
@@ -224,7 +208,7 @@ namespace Signum.Engine.Dashboard
             {
                 var result = Dashboards.Value.GetOrThrow(dashboard);
 
-                var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
                 if (!isAllowed(result))
                     throw new EntityNotFoundException(dashboard.EntityType, dashboard.Id);
 

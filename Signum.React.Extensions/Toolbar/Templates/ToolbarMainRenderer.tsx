@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
-import { Modal } from '@framework/Components/Modal'
 import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
@@ -9,25 +8,27 @@ import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem, Collapse } from '@framework/Components';
-import { NavLink } from '@framework/Components/NavItem';
+import { Collapse, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
-import { JavascriptMessage, getToString } from '@framework/Signum.Entities';
+import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals';
 
 export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(undefined, [], signal => ToolbarClient.API.getCurrentToolbar("Main"));
+  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t || null), []);
 
-  if (response == null)
+  if (response === undefined)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (response === null)
+    return <span>{SearchMessage.NoResultsFound.niceToString()}</span>;
 
   return (<ToolbarMainRendererPrivate response={response} />);
 }
@@ -57,14 +58,16 @@ function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
   return (
     <div>
       <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label || getToString(r.content!)}</h4>
-      <Collapse isOpen={isOpen}>
-        <ToolbarMainRendererPrivate response={r} />
+      <Collapse in={isOpen}>
+        <div>
+          <ToolbarMainRendererPrivate response={r} />
+        </div>
       </Collapse>
     </div>
   );
 }
 
-function ToolbarIconButton({ tr  }: { tr: ToolbarClient.ToolbarResponse<any> }) {
+function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
 
   if (tr.elements && tr.elements.length > 0) {
     return (
@@ -129,38 +132,34 @@ interface ToolbarMainModalModalState {
   show: boolean;
 }
 
-class ToolbarMainModalModal extends React.Component<ToolbarMainModalModalProps, ToolbarMainModalModalState> {
+function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
 
-  constructor(props: ToolbarMainModalModalProps) {
-    super(props);
-    this.state = { show: true };
+  const [show, setShow] = React.useState<boolean>(true);
+
+  function handleCloseClicked() {
+    setShow(false);
   }
 
-  handleCloseClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(undefined);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(undefined);
-  }
+  return (
+    <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
+      <div className="modal-header">
+        <h5 className="modal-title">{p.tr.label || getToString(p.tr.content!)}</h5>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        <ToolbarMainRendererPrivate response={p.tr} />
+      </div>
+    </Modal>
+  );
+}
 
-  render() {
-    return (
-      <Modal onHide={this.handleCloseClicked} show={this.state.show} className="message-modal" onExited={this.handleOnExited} size="xl">
-        <div className="modal-header">
-          <h5 className="modal-title">{this.props.tr.label || getToString(this.props.tr.content!)}</h5>
-          <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCloseClicked}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div className="modal-body">
-          <ToolbarMainRendererPrivate response={this.props.tr} />
-        </div>
-      </Modal>
-    );
-  }
 
-  static show(tr: ToolbarClient.ToolbarResponse<any>): Promise<undefined> {
-    return openModal<undefined>(<ToolbarMainModalModal tr={tr} />);
-  }
+ToolbarMainModalModal.show = (tr: ToolbarClient.ToolbarResponse<any>): Promise<undefined> => {
+  return openModal<undefined>(<ToolbarMainModalModal tr={tr} />);
 }

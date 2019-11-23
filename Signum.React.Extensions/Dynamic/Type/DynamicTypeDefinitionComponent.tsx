@@ -28,9 +28,10 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import ValueLineModal from '@framework/ValueLineModal'
 
 import "./DynamicType.css"
-import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
+import { Tabs, Tab } from 'react-bootstrap';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
 import { Typeahead } from '@framework/Components';
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;
@@ -43,82 +44,69 @@ interface DynamicTypeDefinitionComponentProps {
   showDatabaseMapping: boolean;
 }
 
-interface DynamicTypeDefinitionComponentState {
-  expressionsNames?: string[];
-  typeEntity?: Lite<TypeEntity> | false;
-}
 
-export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, DynamicTypeDefinitionComponentState> {
+const requiresSaveKinds: EntityKind[] = ["Main", "Shared", "String", "Relational"];
 
-  constructor(props: DynamicTypeDefinitionComponentProps) {
-    super(props);
-    this.state = {};
+export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponentProps) {
+  const forceUpdate = useForceUpdate();
 
-    this.initialize(props);
-  }
+  const [expressionNames, setExpressionNames] = React.useState<string[] | undefined>(undefined);
 
-  componentWillReceiveProps(nextProps: DynamicTypeDefinitionComponentProps) {
-    this.initialize(nextProps);
-  }
+  const typeEntity = useAPI(() =>
+    p.dynamicType.baseType != "Entity" ? Promise.resolve(undefined) :
+      p.dynamicType.isNew ? Promise.resolve(undefined) :
+        Navigator.API.getType(p.dynamicType.typeName!)
+          .then(te => te ? toLite(te) : false),
+    [p.dynamicType.isNew, p.dynamicType.baseType, p.dynamicType.typeName]);
 
-  initialize(props: DynamicTypeDefinitionComponentProps) {
-    if (props.dynamicType.isNew)
-      this.fixSaveOperation();
 
-    if (props.dynamicType.baseType == "Entity") {
-      if (props.dynamicType.isNew)
-        this.setState({ typeEntity: undefined });
-      else
-        Navigator.API.getType(props.dynamicType.typeName!)
-          .then(te => this.setState({ typeEntity: te ? toLite(te) : false }))
-          .done();
-    } else {
-      this.setState({ typeEntity: undefined });
-    }
-  }
+  React.useEffect(() => {
+    if (p.dynamicType.isNew)
+      fixSaveOperation();
 
-  handleTabSelect = (eventKey: any /*string*/) => {
-    var dt = this.props.dynamicType;
+  });
+
+  function handleTabSelect(eventKey: any /*string*/) {
+    var dt = p.dynamicType;
     if (!dt.isNew && dt.typeName && eventKey == "query")
       DynamicTypeClient.API.expressionNames(dt.typeName + "Entity")
-        .then(exprNames => this.setState({ expressionsNames: exprNames }))
+        .then(exprNames => setExpressionNames(exprNames))
         .done();
   }
 
-  handlePropertyRemoved = (dp: DynamicProperty) => {
-    var qfs = this.props.definition.queryFields;
+  function handlePropertyRemoved(dp: DynamicProperty) {
+    var qfs = p.definition.queryFields;
     if (qfs && qfs.contains(dp.name))
       qfs.remove(dp.name);
 
-    this.props.dc.refreshView();
+    p.dc.refreshView();
   }
 
-  handleEntityKindChange = () => {
-    this.fixSaveOperation();
-    this.forceUpdate();
+  function handleEntityKindChange() {
+    fixSaveOperation();
+    forceUpdate();
   }
 
-  handleHasTickChanged = () => {
-    var ticks = this.props.definition.ticks;
+  function handleHasTickChanged() {
+    var ticks = p.definition.ticks;
 
     if (ticks)
-      this.props.definition.ticks = {
+      p.definition.ticks = {
         hasTicks: ticks.hasTicks,
         name: ticks.hasTicks ? "Ticks" : undefined,
         type: ticks.hasTicks ? "int" : undefined,
       };
   }
 
-  fixSaveOperation() {
-    const def = this.props.definition;
-    var requiresSave = this.props.dynamicType.baseType == "Entity" &&
-      def.entityKind != undefined &&
-      DynamicTypeDefinitionComponent.requiresSave.contains(def.entityKind);
+  function fixSaveOperation() {
+    const def = p.definition;
+    var requiresSave = p.dynamicType.baseType == "Entity" &&
+      def.entityKind != undefined && requiresSaveKinds.contains(def.entityKind);
 
     if (requiresSave && !def.operationSave) {
       def.operationSave = { execute: "" };
     } else if (!requiresSave && def.operationSave) {
-      if (this.isEmpty(def.operationSave))
+      if (isEmpty(def.operationSave))
         def.operationSave = undefined;
       else {
         MessageModal.show({
@@ -134,13 +122,12 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     }
   }
 
-  isEmpty(operation: DynamicTypeClient.OperationExecute) {
+  function isEmpty(operation: DynamicTypeClient.OperationExecute) {
     return !operation.execute && !operation.canExecute;
   }
 
-  static requiresSave: EntityKind[] = ["Main", "Shared", "String", "Relational"];
 
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
     if (!pr)
       return;
 
@@ -154,35 +141,39 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     }).done();
   }
 
-  render() {
-    const def = this.props.definition;
+
+  function renderOthers() {
+    var ctx = new StyleContext(undefined, { labelColumns: 3 });
+    return React.createElement("div", {}, ...DynamicClientOptions.Options.onGetDynamicLineForType.map(f => f(ctx, p.dynamicType.typeName!)));
+  }
+  const def = p.definition;
     const primaryKey = def.primaryKey!;
     const ticks = def.ticks!;
 
     var propNames = def.properties.map(p => "e." + p.name);
 
-    var expressionNames = (this.state.expressionsNames || []).map(exp => exp + "= e." + exp + "()");
+  var expressionNamesStr = (expressionNames || []).map(exp => exp + "= e." + exp + "()");
 
-    var dt = this.props.dynamicType;
+  var dt = p.dynamicType;
 
     return (
       <div>
         {dt.baseType == "Entity" &&
           <div>
-            {this.props.showDatabaseMapping &&
-              <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
+          {p.showDatabaseMapping &&
+            <ValueComponent dc={p.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
             }
 
             < div className="row">
               <div className="col-sm-6">
-                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange} />
+              <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={handleEntityKindChange} />
               </div>
               <div className="col-sm-6">
-                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
+              <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
               </div>
             </div>
 
-            {this.props.showDatabaseMapping &&
+          {p.showDatabaseMapping &&
               <div className="row database-mapping">
                 <div className="col-sm-6">
                   <PrimaryKeyFieldsetComponent
@@ -191,9 +182,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     onCreate={() => ({ name: "Id", type: "int", identity: true })}
                     renderContent={item =>
                       <div>
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
+                      <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
+                      <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
+                      <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
                       </div>
                     }
                   />
@@ -204,9 +195,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     onCreate={() => ({ hasTicks: false })}
                     renderContent={item =>
                       <div>
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.hasTicks)} type="boolean" defaultValue={null} onChange={this.handleHasTickChanged} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
+                      <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.hasTicks)} type="boolean" defaultValue={null} onChange={handleHasTickChanged} />
+                      <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
+                      <ValueComponent dc={p.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
                       </div>
                     }
                   />
@@ -216,9 +207,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
           </div>
         }
 
-        <UncontrolledTabs defaultEventKey="properties" id="DynamicTypeTabs" onToggled={this.handleTabSelect}>
+      <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={handleTabSelect}>
           <Tab eventKey="properties" title="Properties">
-            <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
+          <PropertyRepeaterComponent dc={p.dc} properties={def.properties} onRemove={handlePropertyRemoved} showDatabaseMapping={p.showDatabaseMapping} />
             <br />
             {dt.baseType == "Entity" &&
               <MultiColumnUniqueIndexFieldsetComponent
@@ -246,7 +237,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
           {dt.baseType == "Entity" &&
             <Tab eventKey="query" title="Query">
-              <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNames)} list={def.queryFields} />
+            <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNamesStr)} list={def.queryFields} />
             </Tab>
           }
 
@@ -305,7 +296,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                 </div>
                 <div className="col-sm-5">
                   {!dt.isNew &&
-                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
+                  <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={handleTypeHelpClick} />
                   }
                 </div>
               </div>
@@ -326,13 +317,13 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
             </Tab>
           }
 
-          {!dt.isNew && dt.baseType == "Entity" && this.state.typeEntity != null &&
+        {!dt.isNew && dt.baseType == "Entity" && typeEntity != null &&
             <Tab eventKey="connections" title="Mixins">
-              {this.state.typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
+            {typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
                 <SearchControl findOptions={{
                   queryName: DynamicMixinConnectionEntity,
                   parentToken: DynamicMixinConnectionEntity.token(e => e.entityType),
-                  parentValue: this.state.typeEntity
+                parentValue: typeEntity
                 }} />
               }
             </Tab>
@@ -340,227 +331,61 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
           {!dt.isNew && dt.baseType == "Entity" &&
             <Tab eventKey="other" title="Other">
-              {this.renderOthers()}
+            {renderOthers()}
             </Tab>
           }
-        </UncontrolledTabs>
+      </Tabs>
       </div>
     );
   }
 
-  renderOthers() {
-    var ctx = new StyleContext(undefined, { labelColumns: 3 });
-    return React.createElement("div", {}, ...DynamicClientOptions.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
-  }
-}
 
+export function CustomCodeTab(p: { definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }) {
 
-export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }>{
+  function getDynamicTypeFullName() {
+    var suffix = p.dynamicType.baseType == "MixinEntity" ? "Mixin" : "Entity";
 
-  static suggestWorkflow = true;
-  static suggestTree = true;
-
-  render() {
-    const def = this.props.definition;
-    const dt = this.props.dynamicType;
-    const entityName = this.getDynamicTypeFullName();
-    return (
-      <div className="row">
-        <div className="col-sm-7">
-          <CustomCodeFieldsetComponent
-            binding={Binding.create(def, d => d.customInheritance)}
-            title="Custom Inheritance"
-            onCreate={() => ({ code: dt.baseType })}
-            renderContent={e =>
-              <div>
-                <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
-                    <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
-
-                  {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
-                    <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={this.handleTreeCustomInheritanceClick} />}
-                  {dt.baseType == "Entity" &&
-                    <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS" onClick={this.handleSMSInheritanceClick} />}
-                </div>
-                <div className="code-container">
-                  <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
-                  <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                </div>
-              </div>
+    return `${p.dynamicType.typeName}${suffix}`;
             }
-          />
 
-          <CustomCodeFieldsetComponent
-            binding={Binding.create(def, d => d.customEntityMembers)}
-            title="Entity Members"
-            onCreate={() => ({ code: "" })}
-            renderContent={e =>
-              <div>
-                <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-warning btn-xs sf-button" value="Pre Saving" onClick={this.handlePreSavingClick} />
-                  <input type="button" className="btn btn-success btn-xs sf-button" value="Post Retrieving" onClick={this.handlePostRetrievingClick} />
-                  <input type="button" className="btn btn-info btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
-                  {dt.baseType == "Entity" &&
-                    <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Owner Data" onClick={this.handleSMSOwnerDataClick} />}
-                </div>
-                <div className="code-container">
-                  <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}
-{`}</pre>
-                  <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                  <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
-                </div>
-              </div>
+  function handleWorkflowCustomInheritanceClick() {
+    popupCodeSnippet("ICaseMainEntity");
             }
-          />
 
-          <CustomCodeFieldsetComponent
-              binding={Binding.create(def, d => d.customStartCode)}
-              title="Start Code"
-              onCreate={() => ({ code: "" })}
-              renderContent={e =>
-                  <div>
-                    {dt.baseType == "Entity" &&
-                      <div>
-                          <div className="btn-group" style={{ marginBottom: "3px" }}>
-                              {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
-                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
-                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateRoot" onClick={this.handleOverrideCreateRoot} />}
-                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateChild" onClick={this.handleOverrideCreateChild} />}
-                              {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="NextSibling" onClick={this.handleOverrideNextSibling} />}
-                              <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
-                              <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
-                              <input type="button" className="btn btn-info btn-xs sf-button" value="Add Unit" onClick={this.handleAddUnitClick} />
-                          </div>
-                      </div>}
-                    <div className="btn-group" style={{ marginBottom: "3px" }}>
-                      {dt.baseType == "Entity" &&
-                        <input type="button" className="btn btn-success btn-xs sf-button" value="Register SMS Owner Data" onClick={this.handleRegisterSMSOwnerDataClick} />}
-                      <input type="button" className="btn btn-danger btn-xs sf-button" value="Register SMS Model" onClick={this.handleRegisterSMSModelClick} />
-                      <input type="button" className="btn btn-info btn-xs sf-button" value="Override SMS Provider" onClick={this.handleOverrideSMSProviderClick} />
-                    </div>
-                    <div className="code-container">
-                        <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
-                        <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                    </div>
-                  </div>
-              } />
-
-          <CustomCodeFieldsetComponent
-            binding={Binding.create(def, d => d.customLogicMembers)}
-            title="Logic Members"
-            onCreate={() => ({ code: "" })}
-            renderContent={e =>
-              <div>
-                <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />}
-                  {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />}
-                  <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Model" onClick={this.handleCreateSMSModelClick} />
-                  <input type="button" className="btn btn-info btn-xs sf-button" value="SMS Provider" onClick={this.handleSMSProviderClick} />
-                </div>
-                <div className="code-container">
-                  <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
-{`}</pre>
-                  <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                  <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
-                </div>
-              </div>
+  function handleTreeCustomInheritanceClick() {
+    popupCodeSnippet("TreeEntity");
             }
-          />
 
-          <CustomCodeFieldsetComponent
-            binding={Binding.create(def, d => d.customTypes)}
-            title="Types"
-            onCreate={() => ({ code: "" })}
-            renderContent={e =>
-              <div>
-                <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-success btn-xs sf-button" value="Enum" onClick={this.handleEnumClick} />
-                  {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Operation" onClick={this.handleOperationClick} />}
-                </div>
-                <div className="code-container">
-                  <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
-    {`}</pre>
-                  <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                  <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
-                </div>
-              </div>
+  function handleSMSInheritanceClick() {
+    popupCodeSnippet("ISMSOwnerEntity");
             }
-          />
 
-
-          <CustomCodeFieldsetComponent
-            binding={Binding.create(def, d => d.customBeforeSchema)}
-            title="Before Schema"
-            onCreate={() => ({ code: "" })}
-            renderContent={e =>
-              <div>
-                <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-success btn-xs sf-button" value="Override" onClick={this.handleOverrideClick} />
-                </div>
-                <div className="code-container">
-                  <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
-{`}</pre>
-                  <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                  <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
-                </div>
-              </div>
-            }
-          />
-        </div>
-        <div className="col-sm-5">
-          {!dt.isNew &&
-            <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+  function handleEmailInheritanceClick() {
+    popupCodeSnippet("IEmailOwnerEntity");
           }
-        </div>
-      </div>
-    );
-  }
-
-  getDynamicTypeFullName() {
-
-    var suffix = this.props.dynamicType.baseType == "MixinEntity" ? "Mixin" : "Entity";
-
-    return `${this.props.dynamicType.typeName}${suffix}`;
-  }
-
-  handleWorkflowCustomInheritanceClick = () => {
-    this.popupCodeSnippet("ICaseMainEntity");
-  }
-
-  handleTreeCustomInheritanceClick = () => {
-    this.popupCodeSnippet("TreeEntity");
-  }
-
-  handleSMSInheritanceClick = () => {
-    this.popupCodeSnippet("ISMSOwnerEntity");
-  }
-
-  handleEmailInheritanceClick = () => {
-    this.popupCodeSnippet("IEmailOwnerEntity");
-  }
 
 
-  handlePreSavingClick = () => {
-    this.popupCodeSnippet(`protected override void PreSaving(PreSavingContext ctx)
+  function handlePreSavingClick() {
+    popupCodeSnippet(`protected override void PreSaving(PreSavingContext ctx)
 {
     base.PreSaving(ctx);
     //Your code here
 }`);
   }
 
-  handlePostRetrievingClick = () => {
-    this.popupCodeSnippet(`protected override void PostRetrieving()
+  function handlePostRetrievingClick() {
+    popupCodeSnippet(`protected override void PostRetrieving()
 {
     //Your code here
 }`);
   }
 
-  handlePropertyValidatorClick = () => {
-    this.popupCodeSnippet(`protected override string? PropertyValidation(PropertyInfo pi)
+  function handlePropertyValidatorClick() {
+    popupCodeSnippet(`protected override string? PropertyValidation(PropertyInfo pi)
 {
     if (pi.Name == nameof(YourProperty))
     {
-        if(this.YourProperty == "AAA")
+        if(YourProperty == "AAA")
             return "AAA is not a valid value";
     }
 
@@ -568,14 +393,14 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
 }`);
   }
 
-  handleSMSOwnerDataClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`public static Expression<Func<${entityName}Entity, SMSOwnerData>> SMSOwnerDataExpression =
+  function handleSMSOwnerDataClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`public static Expression<Func<${entityName}Entity, SMSOwnerData>> SMSOwnerDataExpression =
 @this =>  new SMSOwnerData
 {
     CultureInfo = null,
-    Owner = @this.ToLite(),
-    TelephoneNumber = @this.[property that points to telephone number],
+    Owner = @ToLite(),
+    TelephoneNumber = @[property that points to telephone number],
 };
 [ExpressionField("SMSOwnerDataExpression")]
 public SMSOwnerData SMSOwnerData
@@ -584,14 +409,14 @@ public SMSOwnerData SMSOwnerData
 }`);
   }
 
-  handleEmailOwnerDataClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`public static Expression<Func<${entityName}Entity, EmailOwnerData>> EmailOwnerDataExpression = @this => new EmailOwnerData
+  function handleEmailOwnerDataClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`public static Expression<Func<${entityName}Entity, EmailOwnerData>> EmailOwnerDataExpression = @this => new EmailOwnerData
 {
     CultureInfo = null,
     DisplayName = null,
-    Owner = @this.ToLite(),
-    Email = @this.[property that points to email],
+    Owner = @ToLite(),
+    Email = @[property that points to email],
 };
 [ExpressionField("EmailOwnerDataExpression")]
 public EmailOwnerData EmailOwnerData
@@ -600,25 +425,25 @@ public EmailOwnerData EmailOwnerData
 }`) 
   }
 
-  handleWithWorkflowClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    const def = this.props.definition;
+  function handleWithWorkflowClick() {
+    let entityName = p.dynamicType.typeName!;
+    const def = p.definition;
     var os = def.operationSave;
     var oc = def.operationCreate;
 
-    this.popupCodeSnippet(`fi.WithWorkflow(
+    popupCodeSnippet(`fi.WithWorkflow(
   constructor: () => { ${oc ? `return OperationLogic.Construct(${entityName}Operation.Create);` : getConstructor(entityName, def)} },
-  save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
+save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 );`);
   }
 
-  handleWithTreeClick = () => {
-    this.popupCodeSnippet(`fi.WithTree();`);
+  function handleWithTreeClick() {
+    popupCodeSnippet(`fi.WithTree();`);
   }
 
-    handleOverrideCreateRoot = () => {
-      let entityName = this.props.dynamicType.typeName!;
-      this.popupCodeSnippet(`Graph<${entityName}Entity>.Construct.Untyped(TreeOperation.CreateRoot).Do(a =>
+  function handleOverrideCreateRoot() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`Graph<${entityName}Entity>.Construct.Untyped(TreeOperation.CreateRoot).Do(a =>
 {
     c.Construct = (args) => new ${entityName}Entity
     {
@@ -631,9 +456,9 @@ public EmailOwnerData EmailOwnerData
 });`);
     }
 
-    handleOverrideCreateChild = () => {
-      let entityName = this.props.dynamicType.typeName!;
-      this.popupCodeSnippet(`Graph<${entityName}Entity>.ConstructFrom<${entityName}Entity>.Untyped(TreeOperation.CreateChild).Do(c =>
+  function handleOverrideCreateChild() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`Graph<${entityName}Entity>.ConstructFrom<${entityName}Entity>.Untyped(TreeOperation.CreateChild).Do(c =>
 {
     c.Construct = (t, _) => new ${entityName}Entity
     {
@@ -646,9 +471,9 @@ public EmailOwnerData EmailOwnerData
 });`);
     }
 
-    handleOverrideNextSibling = () => {
-      let entityName = this.props.dynamicType.typeName!;
-      this.popupCodeSnippet(`Graph<${entityName}Entity>.ConstructFrom<${entityName}Entity>.Untyped(TreeOperation.CreateNextSibling).Do(c =>
+  function handleOverrideNextSibling () {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`Graph<${entityName}Entity>.ConstructFrom<${entityName}Entity>.Untyped(TreeOperation.CreateNextSibling).Do(c =>
 {
     c.Construct = (t, _) => new ${entityName}Entity
     {
@@ -661,11 +486,11 @@ public EmailOwnerData EmailOwnerData
 });`);
     }
 
-    handleRegisterOperationsClick = () => {
+  function handleRegisterOperationsClick() {
 
-    let entityName = this.props.dynamicType.typeName!;
+    let entityName = p.dynamicType.typeName!;
 
-    this.popupCodeSnippet(
+    popupCodeSnippet(
       `// Sample for Delete symbol operations
 new Graph<${entityName}Entity>.Delete(${entityName}Operation.Delete)
 {
@@ -684,15 +509,14 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
 }.Register();`);
   }
 
-  handleRegisterExpressionsClick = () => {
-
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`QueryLogic.Expressions.Register((${entityName}Entity e) => e.[Expression Name]());`);
+  function handleRegisterExpressionsClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`QueryLogic.Expressions.Register((${entityName}Entity e) => e.[Expression Name]());`);
   }
 
-  handleQueryExpressionClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(
+  function handleQueryExpressionClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(
       `static Expression<Func<[Your Entity], IQueryable<${entityName}Entity>>> QueryExpression =
     e => Database.Query<${entityName}Entity>().Where(a => [Your conditions here]);
 [ExpressionField("QueryExpression")]
@@ -702,9 +526,9 @@ public static IQueryable<${entityName}Entity> Queries(this [Your Entity] e)
 }`);
   }
 
-  handleScalarExpressionClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`static Expression<Func<${entityName}Entity, bool>> IsDisabledExpression =
+  function handleScalarExpressionClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`static Expression<Func<${entityName}Entity, bool>> IsDisabledExpression =
     e => [Your conditions here] ;
 [ExpressionField]
 public static bool IsDisabled(this ${entityName}Entity entity)
@@ -713,17 +537,17 @@ public static bool IsDisabled(this ${entityName}Entity entity)
 }`);
   }
 
-  handleCreateSMSModelClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`public class ${entityName}SMS : SMSModel<${entityName}Entity>
+  function handleCreateSMSModelClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`public class ${entityName}SMS : SMSModel<${entityName}Entity>
 {
     public ${entityName}SMS(${entityName}Entity entity) : base(entity)
     { }
 }`);
   }
 
-  handleSMSProviderClick = () => {
-    this.popupCodeSnippet(`public class SMSProvider : ISMSProvider
+  function handleSMSProviderClick() {
+    popupCodeSnippet(`public class SMSProvider : ISMSProvider
 {
     public List<string> SMSMultipleSendAction(MultipleSMSModel template, List<string> phones)
     {
@@ -742,46 +566,44 @@ public static bool IsDisabled(this ${entityName}Entity entity)
 }`);
   }
 
-  handleCreateEmailModelClassClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`public class ${entityName}Email : EmailModel<${entityName}Entity>
+  function handleCreateEmailModelClassClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`public class ${entityName}Email : EmailModel<${entityName}Entity>
 {
     public ${entityName}Email(${entityName}Entity entity) : base(entity)
     { }
 }`);
   }
 
-  handleRegisterSMSOwnerDataClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`SMSProcessLogic.RegisterSMSOwnerData((${entityName}Entity e) => e.SMSOwnerData);`);
+  function handleRegisterSMSOwnerDataClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`SMSProcessLogic.RegisterSMSOwnerData((${entityName}Entity e) => e.SMSOwnerData);`);
   }
 
-  handleRegisterSMSModelClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`SMSModelLogic.RegisterSMSModel<${entityName}SMS>(() => null!);`);
+  function handleRegisterSMSModelClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`SMSModelLogic.RegisterSMSModel<${entityName}SMS>(() => null!);`);
   }
 
-  handleOverrideSMSProviderClick = () => {
-    this.popupCodeSnippet(`SMSLogic.Provider = new SMSProvider();`);
+  function handleOverrideSMSProviderClick() {
+    popupCodeSnippet(`SMSLogic.Provider = new SMSProvider();`);
   }
 
-  handleRegisterEmailOwnerDataClick = () => {
-
+  function handleRegisterEmailOwnerDataClick() {
   }
 
-  handleRegisterEmailModelClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`EmailModelLogic.RegisterEmailModel<${entityName}Email>(() => null!);`);
+  function handleRegisterEmailModelClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`EmailModelLogic.RegisterEmailModel<${entityName}Email>(() => null!);`);
   }
 
-  handleAddUnitClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
-    this.popupCodeSnippet(`UnitAttribute.UnitTranslations.Add("$", () => ${entityName}Message.Dollar.NiceToString());`);
+  function handleAddUnitClick() {
+    let entityName = p.dynamicType.typeName!;
+    popupCodeSnippet(`UnitAttribute.UnitTranslations.Add("$", () => ${entityName}Message.Dollar.NiceToString());`);
   }
 
-  handleEnumClick = () => {
-
-    this.popupCodeSnippet(`public enum EnumName
+  function handleEnumClick() {
+    popupCodeSnippet(`public enum EnumName
 {
     Item1,
     Item2,
@@ -789,10 +611,10 @@ public static bool IsDisabled(this ${entityName}Entity entity)
 };`);
   }
 
-  handleOperationClick = () => {
-    let entityName = this.props.dynamicType.typeName!;
+  function handleOperationClick() {
+    let entityName = p.dynamicType.typeName!;
 
-    this.popupCodeSnippet(`[AutoInit]
+    popupCodeSnippet(`[AutoInit]
 public static class ${entityName}Operation2
 {
     public static readonly ConstructSymbol<${entityName}Entity>.From<Your Entity> CreateFrom;
@@ -801,11 +623,11 @@ public static class ${entityName}Operation2
 }`);
   }
 
-  handleOverrideClick = () => {
-    this.popupCodeSnippet(`sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));`);
+  function handleOverrideClick() {
+    popupCodeSnippet(`sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));`);
   }
 
-  popupCodeSnippet(snippet: string) {
+  function popupCodeSnippet(snippet: string) {
     ValueLineModal.show({
       type: { name: "string" },
       initialValue: snippet,
@@ -816,7 +638,163 @@ public static class ${entityName}Operation2
       valueHtmlAttributes: { style: { height: 150 } },
     }).done();
   }
+  const def = p.definition;
+  const dt = p.dynamicType;
+  const entityName = getDynamicTypeFullName();
+  return (
+    <div className="row">
+      <div className="col-sm-7">
+        <CustomCodeFieldsetComponent
+          binding={Binding.create(def, d => d.customInheritance)}
+          title="Custom Inheritance"
+          onCreate={() => ({ code: dt.baseType })}
+          renderContent={e =>
+            <div>
+              <div className="btn-group" style={{ marginBottom: "3px" }}>
+                {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
+                  <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWorkflowCustomInheritanceClick} />}
+
+                {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
+                  <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={handleTreeCustomInheritanceClick} />}
+                {dt.baseType == "Entity" &&
+                  <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS" onClick={handleSMSInheritanceClick} />}
+              </div>
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
+                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+              </div>
+            </div>
+          }
+        />
+
+        <CustomCodeFieldsetComponent
+          binding={Binding.create(def, d => d.customEntityMembers)}
+          title="Entity Members"
+          onCreate={() => ({ code: "" })}
+          renderContent={e =>
+            <div>
+              <div className="btn-group" style={{ marginBottom: "3px" }}>
+                <input type="button" className="btn btn-warning btn-xs sf-button" value="Pre Saving" onClick={handlePreSavingClick} />
+                <input type="button" className="btn btn-success btn-xs sf-button" value="Post Retrieving" onClick={handlePostRetrievingClick} />
+                <input type="button" className="btn btn-info btn-xs sf-button" value="Property Validator" onClick={handlePropertyValidatorClick} />
+                {dt.baseType == "Entity" &&
+                  <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Owner Data" onClick={handleSMSOwnerDataClick} />}
+              </div>
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}
+{`}</pre>
+                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+              </div>
+            </div>
 }
+        />
+
+        <CustomCodeFieldsetComponent
+          binding={Binding.create(def, d => d.customStartCode)}
+          title="Start Code"
+          onCreate={() => ({ code: "" })}
+          renderContent={e =>
+            <div>
+              {dt.baseType == "Entity" &&
+                <div>
+                  <div className="btn-group" style={{ marginBottom: "3px" }}>
+                    {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWithWorkflowClick} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={handleWithTreeClick} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateRoot" onClick={handleOverrideCreateRoot} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateChild" onClick={handleOverrideCreateChild} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="NextSibling" onClick={handleOverrideNextSibling} />}
+                    <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={handleRegisterOperationsClick} />
+                    <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={handleRegisterExpressionsClick} />
+                    <input type="button" className="btn btn-info btn-xs sf-button" value="Add Unit" onClick={handleAddUnitClick} />
+                  </div>
+                </div>}
+              <div className="btn-group" style={{ marginBottom: "3px" }}>
+                {dt.baseType == "Entity" &&
+                  <input type="button" className="btn btn-success btn-xs sf-button" value="Register SMS Owner Data" onClick={handleRegisterSMSOwnerDataClick} />}
+                <input type="button" className="btn btn-danger btn-xs sf-button" value="Register SMS Model" onClick={handleRegisterSMSModelClick} />
+                <input type="button" className="btn btn-info btn-xs sf-button" value="Override SMS Provider" onClick={handleOverrideSMSProviderClick} />
+              </div>
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
+                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+              </div>
+            </div>
+          } />
+
+        <CustomCodeFieldsetComponent
+          binding={Binding.create(def, d => d.customLogicMembers)}
+          title="Logic Members"
+          onCreate={() => ({ code: "" })}
+          renderContent={e =>
+            <div>
+              <div className="btn-group" style={{ marginBottom: "3px" }}>
+                {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={handleQueryExpressionClick} />}
+                {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={handleScalarExpressionClick} />}
+                <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Model" onClick={handleCreateSMSModelClick} />
+                <input type="button" className="btn btn-info btn-xs sf-button" value="SMS Provider" onClick={handleSMSProviderClick} />
+              </div>
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
+{`}</pre>
+                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+              </div>
+            </div>
+          }
+        />
+
+        <CustomCodeFieldsetComponent
+          binding={Binding.create(def, d => d.customTypes)}
+          title="Types"
+          onCreate={() => ({ code: "" })}
+          renderContent={e =>
+            <div>
+              <div className="btn-group" style={{ marginBottom: "3px" }}>
+                <input type="button" className="btn btn-success btn-xs sf-button" value="Enum" onClick={handleEnumClick} />
+                {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Operation" onClick={handleOperationClick} />}
+              </div>
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
+  {`}</pre>
+                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+              </div>
+            </div>
+          }
+        />
+
+
+        <CustomCodeFieldsetComponent
+          binding={Binding.create(def, d => d.customBeforeSchema)}
+          title="Before Schema"
+          onCreate={() => ({ code: "" })}
+          renderContent={e =>
+            <div>
+              <div className="btn-group" style={{ marginBottom: "3px" }}>
+                <input type="button" className="btn btn-success btn-xs sf-button" value="Override" onClick={handleOverrideClick} />
+              </div>
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
+{`}</pre>
+                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+              </div>
+            </div>
+          }
+        />
+      </div>
+      <div className="col-sm-5">
+        {!dt.isNew &&
+          <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+        }
+      </div>
+    </div>
+  );
+}
+
+CustomCodeTab.suggestWorkflow = true;
+CustomCodeTab.suggestTree = true;
 
 export interface CSharpExpressionCodeMirrorProps {
   binding: Binding<string | undefined>;
@@ -824,26 +802,24 @@ export interface CSharpExpressionCodeMirrorProps {
   signature?: string;
 }
 
-export class CSharpExpressionCodeMirror extends React.Component<CSharpExpressionCodeMirrorProps>{
-
-  render() {
-    let val = this.props.binding.getValue();
+export function CSharpExpressionCodeMirror(p: CSharpExpressionCodeMirrorProps) {
+  const forceUpdate = useForceUpdate();
+  let val = p.binding.getValue();
 
     return (
       <div>
-        {this.props.title && <h5> <strong>{this.props.title}</strong></h5>}
+      {p.title && <h5> <strong>{p.title}</strong></h5>}
         <div className="code-container">
-          {this.props.signature && <pre style={{ border: "0px", margin: "0px" }}>{this.props.signature}</pre>}
+        {p.signature && <pre style={{ border: "0px", margin: "0px" }}>{p.signature}</pre>}
           <div className="small-codemirror">
             <CSharpCodeMirror
               script={val || ""}
-              onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); }} />
+            onChange={newScript => { p.binding.setValue(newScript); forceUpdate(); }} />
           </div>
         </div>
       </div>
     );
   }
-}
 
 export interface CustomFieldsetComponentProps<T> {
   binding: Binding<T | undefined>;
@@ -913,94 +889,84 @@ export interface PropertyRepeaterComponentProps {
   showDatabaseMapping: boolean;
 }
 
-export interface PropertyRepeaterComponentState {
-  currentEventKey?: number;
-}
+export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps) {
 
-export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterComponentProps, PropertyRepeaterComponentState> {
+  const [currentEventKey, setCurrentEventKey] = React.useState<number | undefined>(0);
 
-  constructor(props: PropertyRepeaterComponentProps) {
-    super(props);
-    this.state = { currentEventKey: 0 };
+  React.useEffect(() => {
+    p.properties.forEach(a => fetchPropertyType(a, p.dc));
+  }, []);
+
+  React.useEffect(() => {
+    p.properties.filter(a => a._propertyType_ == undefined).forEach(a => fetchPropertyType(a, p.dc));
+  });
+
+  function handleSelect(eventKey: number) {
+    setCurrentEventKey(eventKey == currentEventKey ? undefined : eventKey);
   }
 
-  componentWillMount() {
-    this.props.properties.forEach(p => fetchPropertyType(p, this.props.dc));
-  }
-
-  componentWillReceiveProps(newProps: PropertyRepeaterComponentProps) {
-    newProps.properties.filter(a => a._propertyType_ == undefined).forEach(p => fetchPropertyType(p, this.props.dc));
-  }
-
-  handleSelect = (eventKey: number) => {
-    this.setState({
-      currentEventKey: eventKey == this.state.currentEventKey ? undefined : eventKey
-    });
-  }
-
-  handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
+  function handleOnRemove(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
     event.stopPropagation();
-    var old = this.props.properties[index];
-    this.props.properties.removeAt(index);
+    var old = p.properties[index];
+    p.properties.removeAt(index);
 
-    if (this.state.currentEventKey == index)
-      this.setState({ currentEventKey: undefined });
+    if (currentEventKey == index)
+      setCurrentEventKey(undefined);
 
-    this.props.dc.refreshView();
+    p.dc.refreshView();
 
-    if (this.props.onRemove)
-      this.props.onRemove(old);
+    if (p.onRemove)
+      p.onRemove(old);
   }
 
-  handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
+  function handleOnMoveUp(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
     event.stopPropagation();
-    const newIndex = this.props.properties.moveUp(index);
+    const newIndex = p.properties.moveUp(index);
     if (newIndex != index) {
-      if (index == this.state.currentEventKey)
-        this.setState({ currentEventKey: this.state.currentEventKey - 1 });
-      else if (newIndex == this.state.currentEventKey)
-        this.setState({ currentEventKey: this.state.currentEventKey + 1 });
+      if (index == currentEventKey)
+        setCurrentEventKey(currentEventKey - 1);
+      else if (newIndex == currentEventKey)
+        setCurrentEventKey(currentEventKey + 1);
     }
 
-    this.props.dc.refreshView();
+    p.dc.refreshView();
   }
 
-  handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
+  function handleOnMoveDown(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
     event.stopPropagation();
-    const newIndex = this.props.properties.moveDown(index);
+    const newIndex = p.properties.moveDown(index);
 
     if (newIndex != index) {
-      if (index == this.state.currentEventKey)
-        this.setState({ currentEventKey: this.state.currentEventKey + 1 });
-      else if (newIndex == this.state.currentEventKey)
-        this.setState({ currentEventKey: this.state.currentEventKey - 1 });
+      if (index == currentEventKey)
+        setCurrentEventKey(currentEventKey + 1);
+      else if (newIndex == currentEventKey)
+        setCurrentEventKey(currentEventKey - 1);
     }
 
-    this.props.dc.refreshView();
+    p.dc.refreshView();
   }
 
-  handleCreateClick = (event: React.SyntheticEvent<any>) => {
-
+  function handleCreateClick(event: React.SyntheticEvent<any>) {
     event.preventDefault();
 
-    var p = {
-      uid: this.createGuid(),
+    var dp = {
+      uid: createGuid(),
       name: "Name",
       type: "string",
       isNullable: "No",
     } as DynamicProperty;
-    autoFix(p);
-    this.props.properties.push(p);
-    this.setState({ currentEventKey: this.props.properties.length - 1 });
-    this.props.dc.refreshView();
+    autoFix(dp);
+    p.properties.push(dp);
+    setCurrentEventKey(p.properties.length - 1);
+    p.dc.refreshView();
 
-    fetchPropertyType(p, this.props.dc);
+    fetchPropertyType(dp, p.dc);
   }
 
-  createGuid() {
+  function createGuid() {
     let d = new Date().getTime();
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       let r = (d + Math.random() * 16) % 16 | 0;
@@ -1009,51 +975,26 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     });
   }
 
-  render() {
-    return (
-      <div className="properties">
-        <div>
-          {
-            this.props.properties.map((p, i) =>
-              <CollapsableCard
-                key={i}
-                header={this.renderPropertyHeader(p, i)}
-                cardStyle={{ background: "light" }}
-                headerStyle={{ text: "secondary" }}
-                isOpen={this.state.currentEventKey == i}
-                toggle={() => this.handleSelect(i)} >
-                <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
-              </CollapsableCard>)
-          }
-        </div>
-        <a href="#" title="Create Property"
-          className="sf-line-button sf-create"
-          onClick={this.handleCreateClick}>
-          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Property
-                </a>
-      </div>
-    );
-  }
 
-  renderPropertyHeader(p: DynamicProperty, i: number) {
+  function renderPropertyHeader(p: DynamicProperty, i: number) {
     return (
       <div>
 
         <span className="item-group">
           <a href="#" className={classes("sf-line-button", "sf-remove")}
-            onClick={e => this.handleOnRemove(e, i)}
+            onClick={e => handleOnRemove(e, i)}
             title={EntityControlMessage.Remove.niceToString()}>
             <FontAwesomeIcon icon="times" />
           </a>
 
           <a href="#" className={classes("sf-line-button", "move-up")}
-            onClick={e => this.handleOnMoveUp(e, i)}
+            onClick={e => handleOnMoveUp(e, i)}
             title={EntityControlMessage.MoveUp.niceToString()}>
             <FontAwesomeIcon icon="chevron-up" />
           </a>
 
           <a href="#" className={classes("sf-line-button", "move-down")}
-            onClick={e => this.handleOnMoveDown(e, i)}
+            onClick={e => handleOnMoveDown(e, i)}
             title={EntityControlMessage.MoveDown.niceToString()}>
             <FontAwesomeIcon icon="chevron-down" />
           </a>
@@ -1062,6 +1003,29 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
       </div>
     );
   }
+  return (
+    <div className="properties">
+      <div>
+        {
+          p.properties.map((dp, i) =>
+            <CollapsableCard
+              key={i}
+              header={renderPropertyHeader(dp, i)}
+              cardStyle={{ background: "light" }}
+              headerStyle={{ text: "secondary" }}
+              isOpen={currentEventKey == i}
+              toggle={() => handleSelect(i)} >
+              <PropertyComponent property={dp} dc={p.dc} showDatabaseMapping={p.showDatabaseMapping} />
+            </CollapsableCard>)
+        }
+      </div>
+      <a href="#" title="Create Property"
+        className="sf-line-button sf-create"
+        onClick={handleCreateClick}>
+        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Property
+              </a>
+    </div>
+  );
 }
 
 function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
@@ -1084,93 +1048,85 @@ export interface PropertyComponentProps {
   dc: DynamicTypeDesignContext;
 }
 
-export class PropertyComponent extends React.Component<PropertyComponentProps>{
+export function PropertyComponent(p: PropertyComponentProps) {
+  function handleAutoFix() {
+    const dp = p.property;
 
-  handleAutoFix = () => {
+    autoFix(dp);
 
-    const p = this.props.property;
+    p.dc.refreshView();
 
-    autoFix(p);
-
-    this.props.dc.refreshView();
-
-    fetchPropertyType(p, this.props.dc);
+    fetchPropertyType(dp, p.dc);
   }
 
-  render() {
-    var p = this.props.property
+  const dp = p.property
+  const dc = p.dc;
     return (
       <div>
         <div className="row">
           <div className="col-sm-6">
-            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
-            {this.props.showDatabaseMapping &&
-              <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
+          <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.name)} type="string" defaultValue={null} onBlur={handleAutoFix} />
+          {p.showDatabaseMapping &&
+            <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
             }
-            <TypeCombo dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix} />
-            {this.props.showDatabaseMapping &&
-              <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
+          <TypeCombo dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.type)} onBlur={handleAutoFix} />
+          {p.showDatabaseMapping &&
+            <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
             }
-            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
-            {allowUnit(p.type) &&
-              <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.unit)} type="string" defaultValue={null} />
+          <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={handleAutoFix} />
+          {allowUnit(dp.type) &&
+            <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.unit)} type="string" defaultValue={null} />
             }
-            {allowFormat(p.type) &&
-              <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.format)} type="string" defaultValue={null} />
+          {allowFormat(dp.type) &&
+            <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.format)} type="string" defaultValue={null} />
             }
-            {(p.isMList || isEmbedded(p.type)) &&
-              <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.notifyChanges)} type="boolean" defaultValue={null} />
+          {(dp.isMList || isEmbedded(dp.type)) &&
+            <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(dp, d => d.notifyChanges)} type="boolean" defaultValue={null} />
             }
           </div>
           <div className="col-sm-6">
             <IsMListFieldsetComponent
-              binding={Binding.create(p, d => d.isMList)}
+            binding={Binding.create(dp, d => d.isMList)}
               title="Is MList"
               onCreate={() => ({ preserveOrder: true })}
               renderContent={mle =>
                 <div className="database-mapping">
-                  <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
-                  <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
-                  <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
-                  <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
+                <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
+                <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
+                <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
+                <ValueComponent dc={dc} labelColumns={4} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
                 </div>
               }
               onChange={() => {
-                fetchPropertyType(p, this.props.dc);
-                this.handleAutoFix();
+              fetchPropertyType(dp, dc);
+              handleAutoFix();
               }}
             />
 
-            {p.type && <div>
-              {isEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />}
+          {dp.type && <div>
+            {isEntity(dp.type) && <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.isLite)} type="boolean" defaultValue={null} onChange={handleAutoFix} />}
 
-              {allowsSize(p.type) &&
-                <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.size)} type="number" defaultValue={null} onBlur={this.handleAutoFix} />}
+            {allowsSize(dp.type) &&
+              <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.size)} type="number" defaultValue={null} onBlur={handleAutoFix} />}
 
-              {(isDecimal(p.type)) &&
-                <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.scale)} type="number" defaultValue={null} onBlur={this.handleAutoFix} />}
+            {(isDecimal(dp.type)) &&
+              <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.scale)} type="number" defaultValue={null} onBlur={handleAutoFix} />}
 
-              <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.uniqueIndex)} type="string" defaultValue={null} options={DynamicTypeClient.UniqueIndexValues} />
+            <ValueComponent dc={dc} labelColumns={5} binding={Binding.create(dp, d => d.uniqueIndex)} type="string" defaultValue={null} options={DynamicTypeClient.UniqueIndexValues} />
             </div>}
           </div>
         </div >
         <br />
-        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.customFieldAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
-        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.customPropertyAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
-        <ValidatorRepeaterComponent dc={this.props.dc} property={this.props.property} />
+      <ValueComponent dc={dc} labelColumns={3} binding={Binding.create(dp, d => d.customFieldAttributes)} type="string" defaultValue={null} onBlur={handleAutoFix} />
+      <ValueComponent dc={dc} labelColumns={3} binding={Binding.create(dp, d => d.customPropertyAttributes)} type="string" defaultValue={null} onBlur={handleAutoFix} />
+      <ValidatorRepeaterComponent dc={dc} property={dp} />
       </div>
     );
   }
-}
 
-export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: () => void }, { suggestions: string[] }>{
+export function TypeCombo(p: { dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: () => void }) {
 
-  constructor(props: any) {
-    super(props);
-    this.state = { suggestions: [] };
-  }
-
-  handleGetItems = (query: string) => {
+  function handleGetItems(query: string) {
     return TypeHelpClient.API.autocompleteType({
       query: query,
       limit: 5,
@@ -1181,30 +1137,27 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     });
   }
 
-  handleOnChange = (newValue: string) => {
-    this.props.binding.setValue(newValue);
-    this.props.dc.refreshView();
+  function handleOnChange(newValue: string) {
+    p.binding.setValue(newValue);
+    p.dc.refreshView();
   }
 
-  render() {
-    let lc = this.props.labelColumns;
+  let lc = p.labelColumns;
     return (
       <div className="form-group form-group-sm row" >
         <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
-          {this.props.binding.member}
+        {p.binding.member}
         </label>
         <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
-          <div style={{ position: "relative" }}>
             <Typeahead
               inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
-              onBlur={this.props.onBlur}
-              getItems={this.handleGetItems}
-              value={this.props.binding.getValue()}
-              onChange={this.handleOnChange} />
+          onBlur={p.onBlur}
+          getItems={handleGetItems}
+          value={p.binding.getValue()}
+          onChange={handleOnChange} />
           </div>
         </div>
-      </div>);
-  }
+  );
 }
 
 function autoFix(p: DynamicProperty) {
@@ -1270,83 +1223,61 @@ export interface ComboBoxRepeaterComponentProps {
   list: string[];
 }
 
-export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterComponentProps> {
-
-  handleChange = (val: string, index: number) => {
-    var list = this.props.list;
+export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps) {
+  const forceUpdate = useForceUpdate();
+  function handleChange(val: string, index: number) {
+    var list = p.list;
     list[index] = val;
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  handleCreateClick = (event: React.SyntheticEvent<any>) => {
+  function handleCreateClick(event: React.SyntheticEvent<any>) {
     event.preventDefault();
-    this.props.list.push("");
-    this.forceUpdate();
+    p.list.push("");
+    forceUpdate();
   }
 
-  handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
-    event.stopPropagation();
-    this.props.list.removeAt(index);
-    this.forceUpdate();
-  }
-
-  handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
+  function handleOnRemove(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
     event.stopPropagation();
-    this.props.list.moveUp(index);
-    this.forceUpdate();
+    p.list.removeAt(index);
+    forceUpdate();
   }
 
-  handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
+  function handleOnMoveUp(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
     event.stopPropagation();
-    this.props.list.moveDown(index);
-    this.forceUpdate();
+    p.list.moveUp(index);
+    forceUpdate();
   }
 
-  render() {
-    return (
-      <div>
-        <table className="table table-sm">
-          <tbody>
-            {
-              this.props.list.map((value, i) => this.renderHeader(value, i))
-            }
-            <tr>
-              <td colSpan={2}>
-                <a href="#" title="Create Query Column"
-                  className="sf-line-button sf-create"
-                  onClick={this.handleCreateClick}>
-                  <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Query Column
-                                </a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    );
+  function handleOnMoveDown(event: React.MouseEvent<any>, index: number) {
+    event.preventDefault();
+    event.stopPropagation();
+    p.list.moveDown(index);
+    forceUpdate();
   }
 
-  renderHeader(value: string, i: number) {
+
+  function renderHeader(value: string, i: number) {
     return (
       <tr key={i}>
         <td>
           <span className="item-group">
             <a href="#" className={classes("sf-line-button", "sf-remove")}
-              onClick={e => this.handleOnRemove(e, i)}
+              onClick={e => handleOnRemove(e, i)}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="times" />
             </a>
 
             <a href="#" className={classes("sf-line-button", "move-up")}
-              onClick={e => this.handleOnMoveUp(e, i)}
+              onClick={e => handleOnMoveUp(e, i)}
               title={EntityControlMessage.MoveUp.niceToString()}>
               <FontAwesomeIcon icon="chevron-up" />
             </a>
 
             <a href="#" className={classes("sf-line-button", "move-down")}
-              onClick={e => this.handleOnMoveDown(e, i)}
+              onClick={e => handleOnMoveDown(e, i)}
               title={EntityControlMessage.MoveDown.niceToString()}>
               <FontAwesomeIcon icon="chevron-down" />
             </a>
@@ -1354,12 +1285,32 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
         </td>
         <td className="rw-widget-sm">
           <Combobox value={value} key={i}
-            data={this.props.options.filter(o => o == value || !this.props.list.contains(o))}
-            onChange={val => this.handleChange(val, i)} />
+            data={p.options.filter(o => o == value || !p.list.contains(o))}
+            onChange={val => handleChange(val, i)} />
         </td>
       </tr>
     );
   }
+  return (
+    <div>
+      <table className="table table-sm">
+        <tbody>
+          {
+            p.list.map((value, i) => renderHeader(value, i))
+          }
+          <tr>
+            <td colSpan={2}>
+              <a href="#" title="Create Query Column"
+                className="sf-line-button sf-create"
+                onClick={handleCreateClick}>
+                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Query Column
+                              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export interface ValidatorRepeaterComponentProps {
@@ -1367,25 +1318,23 @@ export interface ValidatorRepeaterComponentProps {
   dc: DynamicTypeDesignContext;
 }
 
-export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeaterComponentProps> {
-
-
-  handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
+export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps) {
+  function handleOnRemove(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
-    var list = this.props.property.validators!;
+    var list = p.property.validators!;
     list.removeAt(index);
     if (list.length == 0)
-      delete this.props.property.validators;
-    this.props.dc.refreshView();
+      delete p.property.validators;
+    p.dc.refreshView();
   }
 
-  handleCreateClick = (event: React.SyntheticEvent<any>) => {
+  function handleCreateClick(event: React.SyntheticEvent<any>) {
     event.preventDefault();
-    let val = this.props.property.validators!;
+    let val = p.property.validators!;
     if (val == null)
-      this.props.property.validators = val = [];
+      p.property.validators = val = [];
 
-    SelectorModal.chooseElement(Dic.getValues(registeredValidators).filter(a => a.allowed(this.props.property)), {
+    SelectorModal.chooseElement(Dic.getValues(registeredValidators).filter(a => a.allowed(p.property)), {
       title: "New Validator",
       message: "Please select a validator type",
       buttonDisplay: vo => vo.name
@@ -1394,42 +1343,17 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
         return;
 
       val.push({ type: vo.name });
-      this.props.dc.refreshView();
+      p.dc.refreshView();
     });
   }
 
-  render() {
-    return (
-      <div className="validators">
-        <h4>Validators</h4>
-        <div className="panel-group">
-          {
-            (this.props.property.validators || []).map((val, i) =>
-              <CollapsableCard
-                key={i}
-                header={this.renderHeader(val, i)}
-                cardStyle={{ background: "light" }}
-                defaultOpen={true}>
-                {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
-              </CollapsableCard>
-            )
-          }
-        </div>
-        <a href="#" title="Create Validator"
-          className="sf-line-button sf-create"
-          onClick={this.handleCreateClick}>
-          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Validator
-                </a>
-      </div>
-    );
-  }
 
-  renderHeader(val: Validators.DynamicValidator, i: number) {
+  function renderHeader(val: Validators.DynamicValidator, i: number) {
     return (
       <div>
         <span className="item-group">
           <a href="#" className={classes("sf-line-button", "sf-remove")}
-            onClick={e => this.handleOnRemove(e, i)}
+            onClick={e => handleOnRemove(e, i)}
             title={EntityControlMessage.Remove.niceToString()}>
             <FontAwesomeIcon icon="times" />
           </a>
@@ -1439,7 +1363,30 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
       </div>
     );
   }
-}
+    return (
+      <div className="validators">
+        <h4>Validators</h4>
+        <div className="panel-group">
+          {
+          (p.property.validators || []).map((val, i) =>
+              <CollapsableCard
+                key={i}
+              header={renderHeader(val, i)}
+                cardStyle={{ background: "light" }}
+                defaultOpen={true}>
+              {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, p.dc)}
+              </CollapsableCard>
+            )
+          }
+        </div>
+        <a href="#" title="Create Validator"
+          className="sf-line-button sf-create"
+        onClick={handleCreateClick}>
+          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Validator
+                </a>
+      </div>
+    );
+  }
 
 function isReferenceType(type: string) {
   return isEntity(type) || isString(type);
@@ -1635,5 +1582,3 @@ registerValidator<Validators.NumberIs>({
       </div>
     </div>
 });
-
-

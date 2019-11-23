@@ -13,8 +13,8 @@ namespace Signum.Engine.Workflow
         public static CaseFlow GetCaseFlow(CaseEntity @case)
         {
             var averages = new Dictionary<Lite<IWorkflowNodeEntity>, double?>();            
-            averages.AddRange(@case.Workflow.WorkflowActivities().Select(a => KVP.Create((Lite<IWorkflowNodeEntity>)a.ToLite(), a.AverageDuration())));
-            averages.AddRange(@case.Workflow.WorkflowEvents().Where(e => e.Type == WorkflowEventType.IntermediateTimer).Select(e => KVP.Create((Lite<IWorkflowNodeEntity>)e.ToLite(), e.AverageDuration())));
+            averages.AddRange(@case.Workflow.WorkflowActivities().Select(a => KeyValuePair.Create((Lite<IWorkflowNodeEntity>)a.ToLite(), a.AverageDuration())));
+            averages.AddRange(@case.Workflow.WorkflowEvents().Where(e => e.Type == WorkflowEventType.IntermediateTimer).Select(e => KeyValuePair.Create((Lite<IWorkflowNodeEntity>)e.ToLite(), e.AverageDuration())));
 
             var caseActivities = @case.CaseActivities().Select(ca => new CaseActivityStats
             {

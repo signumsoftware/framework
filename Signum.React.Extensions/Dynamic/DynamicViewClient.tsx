@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
+import * as ReactBootstrap from "react-bootstrap";
 import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
 import * as Search from '@framework/Search'
@@ -358,7 +359,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var EntityTable = Lines.EntityTable;
   var FormGroup = Lines.FormGroup;
   var FormControlReadonly = Lines.FormControlReadonly;
-  var FileLine = FileLineModule.default;
+  var FileLine = FileLineModule.FileLine;
 
   // Search
   var SearchControl = Search.SearchControl;
@@ -367,21 +368,16 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var ValueSearchControlLine = Search.ValueSearchControlLine;
 
   // Components
-  var Button = Components.Button;
-  var Dropdown = Components.Dropdown;
-  var DropdownItem = Components.DropdownItem;
-  var DropdownMenu = Components.DropdownMenu;
-  var DropdownToggle = Components.DropdownToggle;
-  var Fade = Components.ModalFade;
-  var Modal = Components.Modal;
-  var NavItem = Components.NavItem;
-  var PopperContent = Components.PopperContent;
-  var Tooltip = Components.Tooltip;
-  var UncontrolledDropdown = Components.UncontrolledDropdown;
-  var UncontrolledTooltip = Components.UncontrolledTooltip;
-  var Tab = Components.Tab;
-  var Tabs = Components.Tabs;
-  var UncontrolledTabs = Components.UncontrolledTabs;
+  var Button = ReactBootstrap.Button;
+  var Dropdown = ReactBootstrap.Dropdown;
+  var DropdownItem = ReactBootstrap.DropdownButton;
+  var Modal = ReactBootstrap.Modal;
+  var NavItem = ReactBootstrap.NavItem;
+  var Tooltip = ReactBootstrap.Tooltip;
+  var Overlay = ReactBootstrap.Overlay;
+  var OverlayTrigger = ReactBootstrap.OverlayTrigger;
+  var Tab = ReactBootstrap.Tab;
+  var Tabs = ReactBootstrap.Tabs;
   var LinkContainer = Components.LinkContainer;
 
 
@@ -429,27 +425,27 @@ export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromis
 export namespace API {
 
   export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
-    return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewProps(typeName: string, viewName: string): Promise<DynamicViewProps[]> {
-    return ajaxGet<DynamicViewProps[]>({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {
-    return ajaxGet<DynamicViewSelectorEntity>({ url: `~/api/dynamic/selector/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/selector/${typeName}` });
   }
 
   export function getDynamicViewOverride(typeName: string): Promise<DynamicViewOverrideEntity[]> {
-    return ajaxGet<DynamicViewOverrideEntity[]>({ url: `~/api/dynamic/override/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/override/${typeName}` });
   }
 
   export function getDynamicViewNames(typeName: string): Promise<string[]> {
-    return ajaxGet<string[]>({ url: `~/api/dynamic/viewNames/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/viewNames/${typeName}` });
   }
 
   export function getSuggestedFindOptions(typeName: string): Promise<SuggestedFindOptions[]> {
-    return ajaxGet<SuggestedFindOptions[]>({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
   }
 }
 

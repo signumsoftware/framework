@@ -100,7 +100,7 @@ namespace Signum.React.Translation
                      members = t.Members.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
-                 select KVP.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
+                 select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
                  {
                      localizedTypes.cultures = g.ToDictionary(a => a.culture);
                      return localizedTypes;
@@ -162,7 +162,7 @@ namespace Signum.React.Translation
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture || ci == targetCulture
-                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
+                                                                    select KeyValuePair.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
@@ -313,7 +313,7 @@ namespace Signum.React.Translation
                             lt.PluralDescription = td.pluralDescription;
                         }
 
-                        lt.Members!.SetRange(ts.members.Select(a => KVP.Create(a.Key!, a.Value.description!)));
+                        lt.Members!.SetRange(ts.members.Select(a => KeyValuePair.Create(a.Key!, a.Value.description!)));
                     }
                 }
 

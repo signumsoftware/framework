@@ -4,11 +4,12 @@ import { getTypeInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
-import { UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu, LinkContainer } from '@framework/Components'
+import { NavDropdown, Dropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';
+import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components'
 
 export default function WorkflowDropdown(props: {}) {
-  var starts = useAPI(undefined, [], signal => WorkflowClient.API.starts());
+  var starts = useAPI(signal => WorkflowClient.API.starts(), []);
 
   function getStarts(starts: WorkflowEntity[]) {
     return starts.flatMap(w => {
@@ -24,23 +25,18 @@ export default function WorkflowDropdown(props: {}) {
 
 
   return (
-    <UncontrolledDropdown className="sf-workflow" id="workflowDropdown" nav inNavbar>
-      <DropdownToggle nav caret>
-        {WorkflowEntity.nicePluralName()}
-      </DropdownToggle>
-      <DropdownMenu style={{ minWidth: "200px" }}>
-        <LinkContainer exact to={Options.getInboxUrl()}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
-        {starts.length > 0 && <DropdownItem divider />}
-        {starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
+    <NavDropdown className="sf-workflow" id="workflowDropdown" title={WorkflowEntity.nicePluralName()}>
+        <LinkContainer exact to={Options.getInboxUrl()}><Dropdown.Item>{CaseActivityQuery.Inbox.niceName()}</Dropdown.Item></LinkContainer>
+        {starts.length > 0 && <Dropdown.Divider />}
+        {starts.length > 0 && <Dropdown.Item disabled>{JavascriptMessage.create.niceToString()}</Dropdown.Item>}
         {starts.length > 0 && getStarts(starts).flatMap((kvp, i) => [
-          (kvp.elements.length > 1 && <DropdownItem key={i} disabled>{kvp.elements[0].typeInfo.niceName}</DropdownItem>),
+          (kvp.elements.length > 1 && <Dropdown.Item key={i} disabled>{kvp.elements[0].typeInfo.niceName}</Dropdown.Item>),
           ...kvp.elements.map((val, j) =>
             <LinkContainer key={i + "-" + j} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-              <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "CreateNew" ? "" : `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`}</DropdownItem>
+              <Dropdown.Item>{val.workflow.toStr}{val.mainEntityStrategy == "CreateNew" ? "" : `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`}</Dropdown.Item>
             </LinkContainer>)
         ])}
-      </DropdownMenu>
-    </UncontrolledDropdown>
+    </NavDropdown>
   );
 
 }

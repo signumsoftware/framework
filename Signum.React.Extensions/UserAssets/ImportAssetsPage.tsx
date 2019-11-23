@@ -6,6 +6,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction } from './Signum.Entities.UserAssets'
+import { useForceUpdate, useTitle } from '@framework/Hooks'
 
 interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 
@@ -18,73 +19,61 @@ interface ImportAssetsPageState {
   fileVer: number;
 }
 
+export default function ImportAssetsPage(p: ImportAssetsPageProps) {
 
-export default class ImportAssetsPage extends React.Component<ImportAssetsPageProps, ImportAssetsPageState> {
+  const [file, setFile] = React.useState<API.FileUpload | undefined>(undefined);
+  const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);
+  const [success, setSuccess] = React.useState<boolean | undefined>(undefined);
+  const [fileVer, setFileVer] = React.useState<number>(0);
 
-  constructor(props: ImportAssetsPageProps) {
-    super(props);
-    this.state = { fileVer: 0 };
+  const forceUpdate = useForceUpdate();
 
-    Navigator.setTitle("Import Assets Page");
-  }
+  useTitle("Import Assets Page");
 
-  componentWillUnmount() {
-    Navigator.setTitle();
-  }
+  function renderFileInput() {
 
-  render() {
-    return (
-      <div>
-        <h2>{UserAssetMessage.ImportUserAssets.niceToString()}</h2>
-        <br />
-        {this.state.success && this.renderSuccess()}
-        {this.state.model ? this.renderModel() :
-          this.renderFileInput()
-        }
-      </div>
-    );
-  }
+    function handleInputChange(e: React.FormEvent<any>) {
+      let f = (e.currentTarget as HTMLInputElement).files![0];
+      let fileReader = new FileReader();
+      fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
+      fileReader.onload = e => {
+        let content = ((e.target as any).result as string).after("base64,");
+        let fileName = f.name;
 
-  handleInputChange = (e: React.FormEvent<any>) => {
-    let f = (e.currentTarget as HTMLInputElement).files![0];
-    let fileReader = new FileReader();
-    fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
-    fileReader.onload = e => {
-      let content = ((e.target as any).result as string).after("base64,");
-      let fileName = f.name;
+        setFile({ content, fileName });
+        setFileVer(fileVer + 1);
 
-      this.setState({
-        file: { content, fileName },
-        fileVer: this.state.fileVer + 1
-      });
+        API.importPreview(file!).then(model => { setModel(model); setSuccess(false); }).done();
+      };
+      fileReader.readAsDataURL(f);
+    }
 
-      API.importPreview(this.state.file!).then(model => this.setState({ model, success: false })).done();
-    };
-    fileReader.readAsDataURL(f);
-  }
-
-  renderFileInput() {
     return (
       <div>
         <div className="btn-toolbar">
-          <input key={this.state.fileVer} type="file" className="form-control" onChange={this.handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
+          <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
         </div>
         <small>{UserAssetMessage.SelectTheXmlFileWithTheUserAssetsThatYouWantToImport.niceToString()}</small>
       </div>
     );
   }
 
-  handleImport = () => {
-    API.importAssets({
-      file: this.state.file!,
-      model: this.state.model!
-    })
-      .then(model => this.setState({ success: true, model: undefined, file: undefined }))
-      .done();
-  }
+  function renderModel() {
 
-  renderModel() {
-    const tc = TypeContext.root(this.state.model!, undefined);
+    function handleImport() {
+      API.importAssets({
+        file: file!,
+        model: model!
+      })
+        .then(model => {
+          setSuccess(true);
+          setModel(undefined);
+          setFile(undefined);
+        })
+        .done();
+    }
+
+    const tc = TypeContext.root(model!, undefined);
 
     return (
       <div>
@@ -108,7 +97,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                       <input type="checkbox" checked={mle.element.overrideEntity} onChange={e => {
                         mle.element.overrideEntity = (e.currentTarget as HTMLInputElement).checked;
                         mle.element.modified = true;
-                        this.forceUpdate();
+                        forceUpdate();
                       }}></input>
                     }
                   </td>
@@ -119,17 +108,27 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
             }
           </tbody>
         </table>
-        <button onClick={this.handleImport} className="btn btn-info"><FontAwesomeIcon icon="cloud-upload" /> Import</button>
+        <button onClick={handleImport} className="btn btn-info"><FontAwesomeIcon icon="cloud-upload" /> Import</button>
       </div>
     );
   }
 
-  renderSuccess() {
+  function renderSuccess() {
     return (
       <div className="alert alert-success" role="alert">{UserAssetMessage.SucessfullyImported.niceToString()}</div>
     );
   }
 
+  return (
+    <div>
+      <h2>{UserAssetMessage.ImportUserAssets.niceToString()}</h2>
+      <br />
+      {success && renderSuccess()}
+      {model ? renderModel() :
+        renderFileInput()
+      }
+    </div>
+  );
 }
 
 
