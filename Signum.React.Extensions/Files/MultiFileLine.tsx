@@ -12,6 +12,7 @@ import FileUploader from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EntityListBase, EntityListBaseProps } from '@framework/Lines';
 import "./Files.css"
+import FileImageLine from './FileImageLine'
 
 export { FileTypeSymbol };
 
@@ -60,8 +61,6 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
   }
 
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
-    const list = this.state.ctx.value;
-
     this.convert(file)
       .then(f => this.addElement(f))
       .done();
@@ -74,8 +73,6 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
   renderInternal() {
 
     const s = this.state;
-    const list = this.state.ctx.value!;
-
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText}
         htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
@@ -89,19 +86,19 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
                   <td>
                     {!s.ctx.readOnly &&
                       <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-                      className="sf-line-button sf-remove"
-                      onClick={e => { e.preventDefault(); this.handleDeleteValue(mlec.index!); }}>
+                        className="sf-line-button sf-remove"
+                        onClick={e => { e.preventDefault(); this.handleDeleteValue(mlec.index!); }}>
                         <FontAwesomeIcon icon="times" />
                       </a>}
                   </td>
                   <td style={{ width: "100%" }}>
-                    {this.state.download == "None" ?
-                      <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
-                      <FileDownloader
-                        configuration={this.props.configuration}
-                        download={this.props.download}
-                        entityOrLite={mlec.value}
-                        htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
+                    {this.state.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span> :
+                      s.getComponent ? s.getComponent(mlec) :
+                        <FileDownloader
+                          configuration={this.props.configuration}
+                          download={this.props.download}
+                          entityOrLite={mlec.value}
+                          htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
                   </td>
                 </tr>)
             }
