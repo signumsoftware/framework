@@ -11,6 +11,7 @@
     //"noEmit": true,
     "strict": true,
     "baseUrl": ".",
+    "declarationMap": true,
     "paths": {
       "*": [
         "../../Framework/Signum.React/node_modules/@types/*",
@@ -25,10 +26,12 @@
       "dom"
     ]
   },
-  //"exclude": [
-  //  "../../Framework/Signum.React/ts_out",
-  //  "ts_out"
-  //],
+  "exclude": [
+    "../../Framework/Signum.React/ts_out",
+    "../../Framework/Signum.React/node_modules",
+    "./node_modules",
+    "./ts_out"
+  ],
   "references": [
     { "path": "../../Framework/Signum.React" }
   ]
