@@ -91,7 +91,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                       </a>}
                   </td>
                   <td style={{ width: "100%" }}>
-                  { s.getComponent ? s.getComponent(mlec) :
+                  { p.getComponent ? p.getComponent(mlec) :
                     p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
                       <FileDownloader
                       configuration={p.configuration}
