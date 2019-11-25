@@ -207,6 +207,7 @@ Lose changes?")]
         PleaseSelectOneOrSeveralEntities,
         [Description("{0} filters collapsed")]
         _0FiltersCollapsed,
+        DisplayName,
     }
 
     public enum SelectorMessage
