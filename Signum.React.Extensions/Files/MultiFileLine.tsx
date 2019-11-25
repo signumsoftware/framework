@@ -1,4 +1,3 @@
-/// <reference path="FilesClient.tsx" />
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
@@ -66,7 +65,7 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
   defaultCreate() {
     return Constructor.construct(this.props.type!.name);
   }
-}
+  }
 
 export const MultiFileLine = React.forwardRef(function MultiFileLine(props: MultiFileLineProps, ref: React.Ref<MultiFileLineController>) {
   const c = useController(MultiFileLineController, props, ref);
@@ -75,41 +74,41 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
   if (c.isHidden)
     return null;
 
-  return (
+    return (
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <table className="sf-multi-value">
-        <tbody>
-          {
+        <table className="sf-multi-value">
+          <tbody>
+            {
             c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
-              <tr key={mlec.index!}>
-                <td>
+                <tr key={mlec.index!}>
+                  <td>
                   {!p.ctx.readOnly &&
-                    <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+                      <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                       className="sf-line-button sf-remove"
                       onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                      <FontAwesomeIcon icon="times" />
-                    </a>}
-                </td>
-                <td style={{ width: "100%" }}>
+                        <FontAwesomeIcon icon="times" />
+                      </a>}
+                  </td>
+                  <td style={{ width: "100%" }}>
                   {p.download == "None" ?
                     <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
-                    <FileDownloader
+                      <FileDownloader
                       configuration={p.configuration}
                       download={p.download}
-                      entityOrLite={mlec.value}
-                      htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
-                </td>
-              </tr>)
-          }
-          <tr >
-            <td colSpan={4}>
+                        entityOrLite={mlec.value}
+                        htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
+                  </td>
+                </tr>)
+            }
+            <tr >
+              <td colSpan={4}>
               {p.ctx.readOnly ? undefined :
-                <FileUploader
+                  <FileUploader
                   accept={p.accept}
-                  multiple={true}
+                    multiple={true}
                   maxSizeInBytes={p.maxSizeInBytes}
                   dragAndDrop={p.dragAndDrop}
                   dragAndDropMessage={p.dragAndDropMessage}
@@ -117,13 +116,13 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                   onFileLoaded={c.handleFileLoaded}
                   typeName={p.ctx.propertyRoute.typeReference().name}
                   buttonCss={p.ctx.buttonClass}
-                  divHtmlAttributes={{ className: "sf-file-line-new" }} />}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </FormGroup>
-  );
+                    divHtmlAttributes={{ className: "sf-file-line-new" }} />}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </FormGroup>
+    );
 });
 
 (MultiFileLine as any).defaultProps = {

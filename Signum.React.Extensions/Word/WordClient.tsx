@@ -201,3 +201,12 @@ declare module '@framework/FindOptions' {
     wordTemplates?: Array<Lite<WordTemplateEntity>>;
   }
 }
+
+declare module '@framework/SearchControl/SearchControlLoaded' {
+
+  export interface ShowBarExtensionOption {
+    showWordReport?: boolean;
+  }
+}
+
+
