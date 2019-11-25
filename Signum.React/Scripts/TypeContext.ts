@@ -436,7 +436,7 @@ export interface IOperationVisible {
 }
 
 export interface IHasChanges {
-  componentHasChanges?: () => boolean;
+  entityHasChanges?: () => boolean;
 }
 
 export interface EntityFrame {
