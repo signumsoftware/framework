@@ -18,5 +18,8 @@
       "dom"
     ]
   },
-  "exclude": [ "node_modules", "ts_out" ]
+  "exclude": [
+    "./node_modules",
+    "./ts_out" 
+  ]
 }

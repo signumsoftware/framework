@@ -15,7 +15,7 @@
     "D3"
   ],
   "author": "Signum Software",
-  "license": "LGPL-3.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/signumsoftware/framework/issues"
   },
