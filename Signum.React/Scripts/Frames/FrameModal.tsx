@@ -132,16 +132,16 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   function hasChanges() {
 
-    var hc = entityComponent.current as IHasChanges | null | undefined;
-    if (hc && hc.componentHasChanges)
-      return hc.componentHasChanges();
+    const hc = FunctionalAdapter.innerRef(entityComponent.current) as IHasChanges | null;
+    if (hc && hc.entityHasChanges)
+      return hc.entityHasChanges();
 
     if (packComponent == null)
       return false;
 
     const entity = packComponent.pack.entity;
 
-    var ge = GraphExplorer.propagateAll(entity);
+    const ge = GraphExplorer.propagateAll(entity);
 
     return entity.modified && JSON.stringify(entity) != packComponent.lastEntity;
   }

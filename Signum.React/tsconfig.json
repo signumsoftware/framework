@@ -11,11 +11,15 @@
     //"noEmit": true,
     "strict": true,
     "baseUrl": ".",
+    "declarationMap": true,
     "lib": [
       "es2017",
       //"esnext",
       "dom"
     ]
   },
-  "exclude": [ "node_modules", "ts_out" ]
+  "exclude": [
+    "./node_modules",
+    "./ts_out" 
+  ]
 }

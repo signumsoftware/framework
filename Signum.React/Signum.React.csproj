@@ -67,7 +67,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="ts_out\**" />
+    <Content Remove="ts_out\**" />
+    <EmbeddedResource Remove="ts_out\**" />
     <TypeScriptCompile Remove="node_modules\**" />
+    <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
 
   <ItemGroup>

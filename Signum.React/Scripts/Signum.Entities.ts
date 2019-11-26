@@ -466,6 +466,7 @@ export module SearchMessage {
   export const PleaseSelectAnEntity = new MessageKey("SearchMessage", "PleaseSelectAnEntity");
   export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
   export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
+  export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
 }
 
 export module SelectorMessage {
