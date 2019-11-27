@@ -18,7 +18,7 @@ namespace Signum.Engine.Mailing
         IEmailModel? model;
         object queryName;
         QueryDescription qd;
-        SmtpConfigurationEntity? smtpConfig;
+        EmailSenderConfigurationEntity? smtpConfig;
 
         public EmailMessageBuilder(EmailTemplateEntity template, Entity? entity, IEmailModel? systemEmail)
         {
