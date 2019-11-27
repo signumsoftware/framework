@@ -52,12 +52,5 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
   );
 }
 
-declare module '@framework/SearchControl/SearchControlLoaded' {
-
-  export interface ShowBarExtensionOption {
-    showWordReport?: boolean;
-  }
-}
-
 
 

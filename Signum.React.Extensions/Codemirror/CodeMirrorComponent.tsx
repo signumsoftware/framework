@@ -1,4 +1,3 @@
-/// <reference path="codemirror.d.ts" />
 import * as React from 'react'
 import * as CodeMirror from 'codemirror'
 import { classes } from '@framework/Globals'
@@ -55,18 +54,19 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
 
   React.useEffect(() => {
     if (lineHandleRef.current != undefined)
-      codeMirrorRef.current!.removeLineClass(lineHandleRef.current, undefined, undefined);
+      codeMirrorRef.current!.removeLineClass(lineHandleRef.current, undefined as any, undefined);
 
     if (p.errorLineNumber != null)
-      lineHandleRef.current = codeMirrorRef.current!.addLineClass(p.errorLineNumber - 1, undefined, "exceptionLine");
+      lineHandleRef.current = codeMirrorRef.current!.addLineClass(p.errorLineNumber - 1, undefined as any, "exceptionLine");
   }, [p.errorLineNumber]);
 
   React.useEffect(() => {
     if (typeof p.options === 'object') {
       for (let optionName in p.options) {
-        var newValue = (p.options as any)[optionName];
-        if (codeMirrorRef.current!.getOption(optionName) != newValue)
-          codeMirrorRef.current!.setOption(optionName, newValue);
+        const optName = optionName as keyof CodeMirror.EditorConfiguration;
+        var newValue = p.options[optName];
+        if (codeMirrorRef.current!.getOption(optName as keyof CodeMirror.EditorConfiguration) != newValue)
+          codeMirrorRef.current!.setOption(optName, newValue);
       }
     }
   });
