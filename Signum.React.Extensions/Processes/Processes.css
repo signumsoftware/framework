@@ -16,7 +16,7 @@
 span.process-contextual-icon {
     float: right;
     font-size: initial;
-    /*margin-right: -10px;*/
+    margin-left: -10px;
     color: gray;
 }
 
