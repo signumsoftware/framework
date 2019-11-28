@@ -13,29 +13,31 @@ using Signum.Engine.Operations;
 
 namespace Signum.Engine.Mailing
 {
-    public static class SmtpConfigurationLogic
+    public static class EmailSenderConfigurationLogic
     {
-        public static ResetLazy<Dictionary<Lite<SmtpConfigurationEntity>, SmtpConfigurationEntity>> SmtpConfigCache = null!;
+        public static ResetLazy<Dictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> SmtpConfigCache = null!;
 
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SmtpConfigurationEntity>()
+                sb.Include<EmailSenderConfigurationEntity>()
                     .WithQuery(() => s => new
                     {
                         Entity = s,
                         s.Id,
-                        s.DeliveryMethod,
-                        s.Network!.Host,
-                        s.Network!.Username,
-                        s.PickupDirectoryLocation
+                        s.Name,
+                        s.SMTP!.DeliveryMethod,
+                        s.SMTP!.Network!.Host,
+                        s.SMTP!.PickupDirectoryLocation,
+                        s.Exchange!.ExchangeVersion,
+                        s.Exchange!.Url,
                     });
                 
-                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SmtpConfigurationEntity>().ToDictionary(a => a.ToLite()),
-                    new InvalidateWith(typeof(SmtpConfigurationEntity)));
+                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
 
-                new Graph<SmtpConfigurationEntity>.Execute(SmtpConfigurationOperation.Save)
+                new Graph<EmailSenderConfigurationEntity>.Execute(SmtpConfigurationOperation.Save)
                 {
                     CanBeNew = true,
                     CanBeModified = true,
@@ -44,17 +46,17 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static SmtpClient GenerateSmtpClient(this Lite<SmtpConfigurationEntity> config)
+        public static SmtpClient GenerateSmtpClient(this Lite<EmailSenderConfigurationEntity> config)
         {
-            return config.RetrieveFromCache().GenerateSmtpClient();
+            return config.RetrieveFromCache().SMTP.ThrowIfNull("No SMTP config").GenerateSmtpClient();
         }
 
-        public static SmtpConfigurationEntity RetrieveFromCache(this Lite<SmtpConfigurationEntity> config)
+        public static EmailSenderConfigurationEntity RetrieveFromCache(this Lite<EmailSenderConfigurationEntity> config)
         {
             return SmtpConfigCache.Value.GetOrThrow(config);
         }
 
-        public static SmtpClient GenerateSmtpClient(this SmtpConfigurationEntity config)
+        public static SmtpClient GenerateSmtpClient(this SmtpEmbedded config)
         {
             if (config.DeliveryMethod != SmtpDeliveryMethod.Network)
             {
