@@ -35,6 +35,8 @@ namespace Signum.Engine.Maps
         public ConcurrentDictionary<PropertyRoute, AttributeCollection?> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection?>();
         public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
 
+        public Dictionary<Type, LambdaExpression> CustomOrder = new Dictionary<Type, LambdaExpression>();
+
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
             //{ typeof(SqlHierarchyId), "HierarchyId"},
@@ -374,6 +376,10 @@ namespace Signum.Engine.Maps
             return type.IsEnum || TryGetSqlDbTypePair(type) != null;
         }
 
+        public void RegisterCustomOrder<T>(Expression<Func<T, string>> customOrder) where T : Entity
+        {
+            this.CustomOrder.Add(typeof(T), customOrder);
+        }
     }
 
     public class SqlDbTypePair
