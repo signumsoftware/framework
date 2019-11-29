@@ -439,14 +439,14 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
     API.saveWorkflow(entity, model, replacementModel)
       .then(packWithIssues => {
         eoc.frame.onReload(packWithIssues.entityPack);
-        (eoc.frame.entityComponent as any).setIssues(packWithIssues.issues);
+        wf.setIssues(packWithIssues.issues);
         notifySuccess();
       })
       .catch(ifError(ValidationError, e => {
 
         var issuesString = e.modelState["workflowIssues"];
         if (issuesString) {
-          (eoc.frame.entityComponent as any).setIssues(JSON.parse(issuesString[0]));
+          wf.setIssues(JSON.parse(issuesString[0]));
           delete e.modelState["workflowIssues"];
         }
         eoc.frame.setError(e.modelState, "entity");
@@ -482,9 +482,6 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
           }).done();
       }).done();
     }).done();
-
-
-
 }
 
 export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>) {
