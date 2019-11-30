@@ -1346,6 +1346,7 @@ export interface QuerySettings {
   entityFormatter?: EntityFormatter;
   inPlaceNavigation?: boolean;
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
+  allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
