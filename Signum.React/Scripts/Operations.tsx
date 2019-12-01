@@ -454,7 +454,7 @@ export namespace Defaults {
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
     return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s", keyCode: 83 }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
