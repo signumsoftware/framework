@@ -857,7 +857,7 @@
     <Member Name="MaxEmailSendRetries" Description="Max E-mail sendungswiederholungen" />
     <Member Name="OverrideEmailAddress" Description="E-Mail-Adresse überschreiben" />
     <Member Name="ReciveEmails" Description="E-Mails empfangen" />
-    <Member Name="SendEmails" Description="E-Mails senen" />
+    <Member Name="SendEmails" Description="E-Mails senden" />
     <Member Name="UrlLeft" Description="URL-links" />
   </Type>
   <Type Name="EmailFileType">

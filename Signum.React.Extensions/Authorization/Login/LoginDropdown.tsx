@@ -6,7 +6,7 @@ import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
 
 
-export default function LoginDropdown() {
+export default function LoginDropdown(p: { renderName?: (u: UserEntity) => React.ReactChild }) {
 
   const user = AuthClient.currentUser();
 
@@ -18,7 +18,7 @@ export default function LoginDropdown() {
     );
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={user.userName!} alignRight>
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} alignRight >
       <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth /> {AuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
       </LinkContainer>
