@@ -1,6 +1,7 @@
 using Mono.Cecil;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace Signum.TSGenerator
 {
-    internal class PreloadingAssemblyResolver : DefaultAssemblyResolver
+    public class PreloadingAssemblyResolver : DefaultAssemblyResolver
     {
         public AssemblyDefinition SignumUtilities { get; private set; }
         public AssemblyDefinition SignumEntities { get; private set; }
@@ -63,24 +64,25 @@ namespace Signum.TSGenerator
 
         static TypeCache Cache;
 
-        internal static string Process(Options options, PreloadingAssemblyResolver resolver)
+
+        static ConcurrentDictionary<TypeReference, bool> IEntityCache = new ConcurrentDictionary<TypeReference, bool>();
+
+        internal static string Process(AssemblyOptions options, string templateFileName, string currentNamespace)
         {
             StringBuilder sb = new StringBuilder();
 
-            var module = ModuleDefinition.ReadModule(options.CurrentAssemblyReference.AssemblyFullPath, new ReaderParameters { AssemblyResolver = resolver });
-
-            var entities = resolver.SignumEntities;
+            var entities = options.Resolver.SignumEntities;
 
             Cache = new TypeCache(entities);
 
             GetNamespaceReference(options, Cache.ModifiableEntity);
 
-            var exportedTypes = module.Types.Where(a => a.Namespace == options.CurrentNamespace).ToList();
+            var exportedTypes = options.ModuleDefinition.Types.Where(a => a.Namespace == currentNamespace).ToList();
             if (exportedTypes.Count == 0)
-                throw new InvalidOperationException($"Assembly '{options.CurrentAssembly}' has not types in namespace '{options.CurrentNamespace}'");
+                throw new InvalidOperationException($"Assembly '{options.CurrentAssembly}' has not types in namespace '{currentNamespace}'");
 
-            var imported = module.Assembly.CustomAttributes.Where(at => at.AttributeType.FullName == Cache.ImportInTypeScriptAttribute.FullName)
-                .Where(at => (string)at.ConstructorArguments[1].Value == options.CurrentNamespace)
+            var imported = options.ModuleDefinition.Assembly.CustomAttributes.Where(at => at.AttributeType.FullName == Cache.ImportInTypeScriptAttribute.FullName)
+                .Where(at => (string)at.ConstructorArguments[1].Value ==  currentNamespace)
                 .Select(at => ((TypeReference)at.ConstructorArguments[0].Value).Resolve())
                 .ToList();
 
@@ -97,7 +99,7 @@ namespace Signum.TSGenerator
                                  }).ToList();
 
             var interfacesResults = (from type in exportedTypes
-                                     where type.IsInterface && (type.InTypeScript() ?? AllInterfaces(type).Any(i => i.FullName ==  Cache.IEntity.FullName))
+                                     where type.IsInterface && (type.InTypeScript() ?? type.AnyInterfaces(IEntityCache, i => i.FullName ==  Cache.IEntity.FullName))
                                      select new
                                      {
                                          ns = type.Namespace,
@@ -134,7 +136,7 @@ namespace Signum.TSGenerator
             var externalEnums = (from type in usedEnums.Where(options.IsExternal).Concat(importedEnums)
                                 select new
                                 {
-                                    ns = options.CurrentNamespace + ".External",
+                                    ns = currentNamespace + ".External",
                                     type,
                                     text = EnumInTypeScript(type, options),
                                 }).ToList();
@@ -142,7 +144,7 @@ namespace Signum.TSGenerator
             var externalMessages = (from type in importedMessage
                                     select new
                                     {
-                                        ns = options.CurrentNamespace + ".External",
+                                        ns = currentNamespace + ".External",
                                         type,
                                         text = MessageInTypeScript(type, options),
                                     }).ToList();
@@ -179,7 +181,7 @@ namespace Signum.TSGenerator
 
             foreach (var ns in namespaces)
             {
-                var key = RemoveNamespace(ns.Key.ToString(), options.CurrentNamespace);
+                var key = RemoveNamespace(ns.Key.ToString(), currentNamespace);
 
                 if (key.Length == 0)
                 {
@@ -206,12 +208,12 @@ namespace Signum.TSGenerator
 
             var code = sb.ToString();
 
-            return WriteFillFile(options, code);
+            return WriteFillFile(options, code, templateFileName);
         }
 
 
 
-        private static string WriteFillFile(Options options, string code)
+        private static string WriteFillFile(AssemblyOptions options, string code, string templateFileName)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(@"//////////////////////////////////");
@@ -219,17 +221,17 @@ namespace Signum.TSGenerator
             sb.AppendLine(@"//////////////////////////////////");
             sb.AppendLine();
             var path = options.AssemblyReferences.GetOrThrow("Signum.Entities").NamespacesReferences.GetOrThrow("Signum.Entities").Path.Replace("Signum.Entities.ts", "Reflection.ts");
-            sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, options.TemplateFileName)}'");
+            sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, templateFileName)}'");
 
             foreach (var a in options.AssemblyReferences.Values)
             {
                 foreach (var ns in a.NamespacesReferences.Values)
                 {
-                    sb.AppendLine($"import * as {ns.VariableName} from '{RelativePath(ns.Path, options.TemplateFileName)}'");
+                    sb.AppendLine($"import * as {ns.VariableName} from '{RelativePath(ns.Path, templateFileName)}'");
                 }
             }
             sb.AppendLine();
-            sb.AppendLine(File.ReadAllText(options.TemplateFileName));
+            sb.AppendLine(File.ReadAllText(templateFileName));
 
             sb.AppendLine(code);
 
@@ -251,7 +253,7 @@ namespace Signum.TSGenerator
             return result;
         }
 
-        private static string EnumInTypeScript(TypeDefinition type, Options options)
+        private static string EnumInTypeScript(TypeDefinition type, AssemblyOptions options)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"export const {type.Name} = new EnumType<{type.Name}>(\"{type.Name}\");");
@@ -271,7 +273,7 @@ namespace Signum.TSGenerator
             return sb.ToString();
         }
 
-        private static string MessageInTypeScript(TypeDefinition type, Options options)
+        private static string MessageInTypeScript(TypeDefinition type, AssemblyOptions options)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"export module {type.Name} {{");
@@ -287,7 +289,7 @@ namespace Signum.TSGenerator
             return sb.ToString();
         }
 
-        private static string QueryInTypeScript(TypeDefinition type, Options options)
+        private static string QueryInTypeScript(TypeDefinition type, AssemblyOptions options)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"export module {type.Name} {{");
@@ -303,7 +305,9 @@ namespace Signum.TSGenerator
             return sb.ToString();
         }
 
-        private static string SymbolInTypeScript(TypeDefinition type, Options options)
+        static ConcurrentDictionary<TypeReference, bool> IOperationSymbolCache = new ConcurrentDictionary<TypeReference, bool>();
+
+        private static string SymbolInTypeScript(TypeDefinition type, AssemblyOptions options)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"export module {type.Name} {{");
@@ -315,7 +319,7 @@ namespace Signum.TSGenerator
                 var propertyType = TypeScriptName(field.FieldType, type, options, context);
 
                 var fieldTypeDef = field.FieldType.Resolve();
-                var cleanType = fieldTypeDef.IsInterface && AllInterfaces(fieldTypeDef).Any(i => i.Name == "IOperationSymbolContainer") ? "Operation" : CleanTypeName(fieldTypeDef);
+                var cleanType = fieldTypeDef.IsInterface && fieldTypeDef.AnyInterfaces(IOperationSymbolCache, i => i.Name == "IOperationSymbolContainer") ? "Operation" : CleanTypeName(fieldTypeDef);
                 sb.AppendLine($"  export const {field.Name} : {propertyType} = registerSymbol(\"{cleanType}\", \"{type.Name}.{field.Name}\");");
             }
             sb.AppendLine(@"}");
@@ -323,7 +327,7 @@ namespace Signum.TSGenerator
             return sb.ToString();
         }
 
-        private static string EntityInTypeScript(TypeDefinition type, Options options)
+        private static string EntityInTypeScript(TypeDefinition type, AssemblyOptions options)
         {
             StringBuilder sb = new StringBuilder();
             if (!type.IsAbstract)
@@ -370,6 +374,7 @@ namespace Signum.TSGenerator
         }
 
 
+        static ConcurrentDictionary<TypeReference, bool> IsModifiableDictionary = new ConcurrentDictionary<TypeReference, bool>(); 
 
         static bool IsModifiableEntity(TypeDefinition t)
         {
@@ -381,19 +386,20 @@ namespace Signum.TSGenerator
 
             return true;
 
-            bool InheritsFromModEntity(TypeDefinition td)
+            bool InheritsFromModEntity(TypeReference tr)
             {
-                if (td.FullName ==  Cache.ModifiableEntity.FullName)
-                    return true;
+                return IsModifiableDictionary.GetOrAdd(tr, tr =>
+                {
+                    if (tr.FullName == Cache.ModifiableEntity.FullName)
+                        return true;
 
-                if (td.BaseType == null || td.BaseType.FullName == "System.Object")
-                    return false;
+                    var td = tr.Resolve();
 
-                var baseType = td.BaseType.Resolve();
+                    if (td.BaseType == null || td.BaseType.FullName == "System.Object")
+                        return false;
 
-                var result = InheritsFromModEntity(baseType);
-
-                return result;
+                    return InheritsFromModEntity(td.BaseType);
+                });
             }
         }
 
@@ -408,7 +414,7 @@ namespace Signum.TSGenerator
 
         static string CleanTypeName(TypeDefinition t)
         {
-            if (!AllInterfaces(t).Any(tr => tr.FullName == Cache.IEntity.FullName))
+            if (!t.AnyInterfaces(IEntityCache, tr => tr.FullName == Cache.IEntity.FullName))
                 return t.Name;
 
             if (t.Name.EndsWith("Entity"))
@@ -535,6 +541,8 @@ namespace Signum.TSGenerator
             return type is GenericInstanceType gtype && gtype.ElementType.Name == "Nullable`1" ? gtype.GenericArguments.Single() : type;
         }
 
+        static ConcurrentDictionary<TypeReference, bool> IEnumerableCache = new ConcurrentDictionary<TypeReference, bool>();
+
         public static TypeReference ElementType(this TypeReference type)
         {
             if (!(type is GenericInstanceType gen))
@@ -547,15 +555,13 @@ namespace Signum.TSGenerator
             if (def == null)
                 return null;
 
-            var ienum = AllInterfaces(def).SingleOrDefault(tr => tr is GenericInstanceType git && git.ElementType.Name == "IEnumerable`1");
-
-            if (ienum == null)
+            if (!gen.AnyInterfaces(IEnumerableCache, tr => tr is GenericInstanceType git && git.ElementType.Name == "IEnumerable`1"))
                 return null;
 
             return gen.GenericArguments.Single();
         }
 
-        static string TypeScriptName(TypeReference type, TypeDefinition current, Options options, string errorContext)
+        static string TypeScriptName(TypeReference type, TypeDefinition current, AssemblyOptions options, string errorContext)
         {
             var ut = type.UnNullify();
             if (ut != type)
@@ -564,7 +570,7 @@ namespace Signum.TSGenerator
             return TypeScriptNameInternal(type, current, options, errorContext);
         }
 
-        private static string TypeScriptNameInternal(TypeReference type, TypeDefinition current, Options options, string errorContext)
+        private static string TypeScriptNameInternal(TypeReference type, TypeDefinition current, AssemblyOptions options, string errorContext)
         {
             type = type.UnNullify();
 
@@ -614,7 +620,7 @@ namespace Signum.TSGenerator
                 return RelativeName(type.Resolve(), current, options, errorContext);
         }
 
-        private static string RelativeName(TypeDefinition type, TypeDefinition current, Options options, string errorContext)
+        private static string RelativeName(TypeDefinition type, TypeDefinition current, AssemblyOptions options, string errorContext)
         {
             if (type.IsGenericParameter)
                 return type.Name;
@@ -647,12 +653,28 @@ namespace Signum.TSGenerator
             }
         }
 
-        public static IEnumerable<TypeReference> AllInterfaces(this TypeDefinition type)
+
+
+        public static bool AnyInterfaces(this TypeReference type, ConcurrentDictionary<TypeReference, bool> cache, Func<TypeReference, bool> func)
         {
-            return type.Interfaces.Select(a => a.InterfaceType).Concat(type.BaseType == null ? Enumerable.Empty<TypeReference>() : AllInterfaces(type.BaseType.Resolve()));
+            return cache.GetOrAdd(type, type =>
+            {
+                var td = type.Resolve();
+
+                foreach (var item in td.Interfaces)
+                {
+                    if (func(item.InterfaceType))
+                        return true;
+                }
+
+                if (td.BaseType == null)
+                    return false;
+
+                return td.BaseType.AnyInterfaces(cache, func);
+            });
         }
         
-        public static NamespaceTSReference GetNamespaceReference(Options options, TypeDefinition type)
+        public static NamespaceTSReference GetNamespaceReference(AssemblyOptions options, TypeDefinition type)
         {
             AssemblyReference assemblyReference;
             options.AssemblyReferences.TryGetValue(type.Module.Assembly.Name.Name, out assemblyReference);
@@ -675,7 +697,7 @@ namespace Signum.TSGenerator
             return nsReference;
         }
 
-        private static string GetVariableName(Options options, string[] nameParts)
+        private static string GetVariableName(AssemblyOptions options, string[] nameParts)
         {
             var list = options.AssemblyReferences.Values.SelectMany(a => a.NamespacesReferences.Values.Select(ns => ns.VariableName));
 
@@ -775,18 +797,16 @@ namespace Signum.TSGenerator
     }
 
     [Serializable]
-    public class Options
+    public class AssemblyOptions
     {
         public string CurrentAssembly;
-        public string CurrentNamespace;
-
-        public AssemblyReference CurrentAssemblyReference => AssemblyReferences.GetOrThrow(CurrentAssembly);
-
-        public string TemplateFileName { get; internal set; }
 
         public Dictionary<string, AssemblyReference> AssemblyReferences;
 
         public Dictionary<string, string> AllReferences { get; internal set; }
+        
+        public PreloadingAssemblyResolver Resolver { get; internal set; }
+        public ModuleDefinition ModuleDefinition { get; internal set; }
 
         public bool IsExternal(TypeDefinition type)
         {
