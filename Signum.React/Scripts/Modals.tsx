@@ -56,7 +56,7 @@ export function GlobalModalContainer() {
       e.openedModals = true;
       var topMost = modalInstances[modalInstances.length - 1];
       topMost = FunctionalAdapter.innerRef(topMost);
-      if (topMost.handleKeyDown) {
+      if (topMost && topMost.handleKeyDown) {
         topMost.handleKeyDown(e);
       }
     }
