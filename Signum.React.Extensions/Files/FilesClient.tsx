@@ -52,7 +52,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     name: type.typeName + "_Image",
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
-      isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e} />}</FetchInState> :
+      isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
         <FileThumbnail file={cell as IFile & ModifiableEntity } />)
   });
 }
