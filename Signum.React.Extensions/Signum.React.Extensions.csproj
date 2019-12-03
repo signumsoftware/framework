@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.2.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
   </ItemGroup>
 
@@ -77,6 +77,7 @@
     <Compile Remove="ts_out\**" />
     <EmbeddedResource Remove="ts_out\**" />
     <None Remove="ts_out\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
     <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
 

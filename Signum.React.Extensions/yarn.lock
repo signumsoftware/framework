@@ -19,9 +19,10 @@
   version "0.0.39"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
 
-"@types/googlemaps@3.30.16":
-  version "3.30.16"
-  resolved "https://registry.yarnpkg.com/@types/googlemaps/-/googlemaps-3.30.16.tgz#3264d5ef7c3a92fab2a9f00e09e3247866ff3532"
+"@types/googlemaps@3.38.1":
+  version "3.38.1"
+  resolved "https://registry.yarnpkg.com/@types/googlemaps/-/googlemaps-3.38.1.tgz#34f0be176f899bab5563103d7103fa7c3a72c02c"
+  integrity sha512-6rVIwaJOKXAMzg+Cz22+fJkgQd8IMK8q9DBSL3Wg9GAffGCy71MdTEf+8T9bIa4mvC0DClEsyzwrOfuf9rM0Zg==
 
 "@types/prop-types@*":
   version "15.7.3"
