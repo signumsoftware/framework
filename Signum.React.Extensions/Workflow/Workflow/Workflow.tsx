@@ -20,6 +20,7 @@ interface WorkflowState {
 
 export interface WorkflowHandle {
   workflowState: WorkflowState;
+  setIssues: (value: Array<API.WorkflowIssue>) => void;
   getXml(): Promise<string>;
   getSvg(): Promise<string>;
 }
@@ -60,6 +61,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
 
   React.useImperativeHandle(ref, () => ({
     workflowState: workflowState,
+    setIssues: (value) => setIssues(value),
     getXml: () => bpmnModelerComponentRef.current!.getXml(),
     getSvg: () => bpmnModelerComponentRef.current!.getSvg()
   } as WorkflowHandle), [bpmnModelerComponentRef.current]);
