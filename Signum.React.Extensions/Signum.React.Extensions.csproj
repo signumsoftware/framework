@@ -79,4 +79,9 @@
     <None Remove="ts_out\**" />
     <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Files\ImageModal.tsx" />
+    <None Remove="Files\MultiFileImageLine.tsx" />
+  </ItemGroup>
 </Project>
