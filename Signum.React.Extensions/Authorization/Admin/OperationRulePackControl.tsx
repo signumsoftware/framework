@@ -10,7 +10,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export const OperationRulePackControl = React.forwardRef(function OperationRulePackControl({ ctx }: { ctx: TypeContext<OperationRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx: TypeContext<OperationRulePack> }, ref: React.Ref<IRenderButtons>) {
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
@@ -32,7 +32,9 @@ export const OperationRulePackControl = React.forwardRef(function OperationRuleP
     ];
   }
 
-  function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
+
+  function handleRadioClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
 
     ctx.value.rules.forEach(mle => {
       if (!mle.element.coercedValues!.contains(hc)) {
@@ -43,8 +45,6 @@ export const OperationRulePackControl = React.forwardRef(function OperationRuleP
 
     forceUpdate();
   }
-
-
 
   return (
     <div>
@@ -60,13 +60,13 @@ export const OperationRulePackControl = React.forwardRef(function OperationRuleP
               {OperationSymbol.niceName()}
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
+              <a onClick={e => handleRadioClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
+              <a onClick={e => handleRadioClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
+              <a onClick={e => handleRadioClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
             </th>
             <th style={{ textAlign: "center" }}>
               {AuthAdminMessage.Overriden.niceToString()}
@@ -112,6 +112,3 @@ export const OperationRulePackControl = React.forwardRef(function OperationRuleP
     return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
 });
-
-export default OperationRulePackControl;
-
