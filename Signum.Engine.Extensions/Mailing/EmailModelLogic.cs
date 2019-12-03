@@ -220,7 +220,7 @@ namespace Signum.Engine.Mailing
                     });
         }
 
-        public static void RegisterEmailModel<T>(Func<EmailTemplateEntity> defaultTemplateConstructor, object? queryName = null)
+        public static void RegisterEmailModel<T>(Func<EmailTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
           where T : IEmailModel
         {
             RegisterEmailModel(typeof(T), defaultTemplateConstructor, queryName);
@@ -228,9 +228,6 @@ namespace Signum.Engine.Mailing
 
         public static void RegisterEmailModel(Type model, Func<EmailTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
         {
-            if (defaultTemplateConstructor == null)
-                throw new ArgumentNullException(nameof(defaultTemplateConstructor));
-
             registeredModels[model] = new EmailModelInfo(queryName ?? GetEntityType(model))
             { 
                 DefaultTemplateConstructor = defaultTemplateConstructor,

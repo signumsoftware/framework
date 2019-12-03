@@ -15,7 +15,7 @@ namespace Signum.Entities.Processes
         [HiddenProperty]
         public object?[]? OperationArgs
         {
-            get { return OperationArguments != null ? (object[])Serialization.FromBytes(OperationArguments) : null; }
+            get { return OperationArguments != null ? (object?[])Serialization.FromBytes(OperationArguments) : null; }
             set { OperationArguments = value == null ? null : Serialization.ToBytes(value); }
         }
 

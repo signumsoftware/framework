@@ -1,4 +1,3 @@
-/// <reference path="react-rte.d.ts" />
 import * as React from 'react'
 import RichTextEditor, { EditorValue } from 'react-rte';
 import { IBinding } from '@framework/Reflection';
@@ -35,9 +34,9 @@ export default function HtmlEditor(p: HtmlEditorProps) {
       value={editorValue}
       readOnly={p.readonly}
       onChange={ev => setEditorValue(editorValue)}
-      onBlur={() => saveHtml()}
       rootStyle={p.rootStyle}
       editorStyle={p.editorStyle}
+      {...({ onBlur: () => saveHtml() }) as any}
     />
   );
 }

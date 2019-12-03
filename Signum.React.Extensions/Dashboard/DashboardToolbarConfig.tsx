@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { ParsedQuery } from 'query-string'
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
@@ -23,7 +22,7 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
     return Promise.resolve(DashboardClient.dashboardUrl(element.content!));
   } 
 
-  isCompatibleWithUrl(res: ToolbarResponse<DashboardEntity>, location: Location, query: ParsedQuery<string>): boolean {
+  isCompatibleWithUrl(res: ToolbarResponse<DashboardEntity>, location: Location, query: any): boolean {
     return location.pathname == Navigator.toAbsoluteUrl(DashboardClient.dashboardUrl(res.content!));
   }
 }

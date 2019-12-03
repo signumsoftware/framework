@@ -89,10 +89,11 @@ namespace Signum.Entities.Mailing
         static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
             m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
             {
-{EmailMessageState.Created,      false,         false,        false,                    null },
-{EmailMessageState.Sent,         false,         true,         false,                    null },
-{EmailMessageState.SentException,true,          true,         false,                    null },
-{EmailMessageState.ReceptionNotified,true,      true,         true,                     null },
+{EmailMessageState.Created,      false,         false,         false,                    null },
+{EmailMessageState.Draft,        false,         false,         false,                    null },
+{EmailMessageState.Sent,         false,         true,          false,                    null },
+{EmailMessageState.SentException,true,          true,          false,                    null },
+{EmailMessageState.ReceptionNotified,true,      true,          true,                     null },
 {EmailMessageState.Received,     false,         false,         false,                    false },
             };
 

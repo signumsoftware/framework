@@ -1,5 +1,4 @@
 import { Location } from 'history'
-import { ParsedQuery } from 'query-string'
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -44,7 +43,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: ParsedQuery<string>): boolean {
+  isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): boolean {
     return query["userQuery"] == liteKey(res.content!);
   }
 }

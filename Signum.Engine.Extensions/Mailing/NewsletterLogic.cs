@@ -28,16 +28,16 @@ namespace Signum.Engine.Mailing
         public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n) => 
             As.Expression(() => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n)));
         
-        public static Func<NewsletterEntity, SmtpConfigurationEntity> GetStmpConfiguration = null!;
+        public static Func<NewsletterEntity, EmailSenderConfigurationEntity> GetEmailSenderConfiguration = null!;
 
-        public static void Start(SchemaBuilder sb, Func<NewsletterEntity, SmtpConfigurationEntity> getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<NewsletterEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<NewsletterEntity>();
                 sb.Include<NewsletterDeliveryEntity>();
 
-                NewsletterLogic.GetStmpConfiguration = getSmtpConfiguration;
+                NewsletterLogic.GetEmailSenderConfiguration = getEmailSenderConfiguration;
 
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(NewsletterProcess.SendNewsletter, new NewsletterProcessAlgorithm());
@@ -289,15 +289,15 @@ namespace Signum.Engine.Mailing
                     {
                         try
                         {
-                            var smtpConfig = NewsletterLogic.GetStmpConfiguration(newsletter);
+                            var emailSenderConfig = NewsletterLogic.GetEmailSenderConfiguration(newsletter);
 
-                            var client = smtpConfig.GenerateSmtpClient();
+                            var client = emailSenderConfig.SMTP.ThrowIfNull("Only SMTP supported").GenerateSmtpClient();
                             var message = new MailMessage();
                             
                             if (newsletter.From.HasText())
                                 message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
                             else
-                                message.From = smtpConfig.DefaultFrom!.ToMailAddress();
+                                message.From = emailSenderConfig.DefaultFrom!.ToMailAddress();
                             
                             message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
 

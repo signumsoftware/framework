@@ -106,7 +106,7 @@ namespace Signum.Engine.Chart
 
         public static List<Lite<UserChartEntity>> GetUserCharts(object queryName)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
             return UserChartsByQuery.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
@@ -114,7 +114,7 @@ namespace Signum.Engine.Chart
 
         public static List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
             return UserChartsByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
@@ -122,7 +122,7 @@ namespace Signum.Engine.Chart
 
         public static List<Lite<UserChartEntity>> Autocomplete(string subString, int limit)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
             return UserCharts.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
@@ -134,7 +134,7 @@ namespace Signum.Engine.Chart
             {
                 var result = UserCharts.Value.GetOrThrow(userChart);
 
-                var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
                 if (!isAllowed(result))
                     throw new EntityNotFoundException(userChart.EntityType, userChart.Id);
 

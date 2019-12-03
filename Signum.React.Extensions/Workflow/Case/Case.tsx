@@ -202,8 +202,7 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
           onClick={() => handleOnClick(sc.state.selectedRows![0])}>
           <FontAwesomeIcon icon="map-marker" />
         </a>
-      </div>,
-
+      </div>
     </OverlayTrigger>
   );
 }

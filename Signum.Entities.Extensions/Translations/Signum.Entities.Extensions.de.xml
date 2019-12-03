@@ -486,7 +486,7 @@
     <Member Name="None" Description="Keine" />
     <Member Name="Top" Description="Nach oben" />
   </Type>
-  <Type Name="DashboardEntity" Description="Dashboard">
+  <Type Name="DashboardEntity" Description="Dashboard" PluralDescription="Dashboards" Gender="n">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
     <Member Name="CombineSimilarRows" Description="Ähnliche Zeilen kombinieren" />
     <Member Name="DashboardPriority" Description="Dashboard-Priorität" />
@@ -598,7 +598,7 @@
     <Member Name="Errors" Description="Fehler" />
     <Member Name="Type" Description="Typ" />
   </Type>
-  <Type Name="DisconnectedImportEntity" Description="getrennte Import" PluralDescription="getrennte Importe">
+  <Type Name="DisconnectedImportEntity" Description="Getrennte Import" PluralDescription="Getrennte Importe" Gender="f">
     <Member Name="Copies" Description="Kopien" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="DisableForeignKeys" Description="Foreign Keys deaktivieren" />
@@ -625,7 +625,7 @@
     <Member Name="Type" Description="Typ" />
     <Member Name="UpdatedRows" Description="Aktualisierte Zeilen" />
   </Type>
-  <Type Name="DisconnectedMachineEntity" Description="Getrennte Computer" PluralDescription="Getrennten Computer">
+  <Type Name="DisconnectedMachineEntity" Description="Getrennte Maschine">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="MachineName" Description="Computername" />
     <Member Name="SeedInterval" Description="Seed-Intervall" />
@@ -857,7 +857,7 @@
     <Member Name="MaxEmailSendRetries" Description="Max E-mail sendungswiederholungen" />
     <Member Name="OverrideEmailAddress" Description="E-Mail-Adresse überschreiben" />
     <Member Name="ReciveEmails" Description="E-Mails empfangen" />
-    <Member Name="SendEmails" Description="E-Mails senen" />
+    <Member Name="SendEmails" Description="E-Mails senden" />
     <Member Name="UrlLeft" Description="URL-links" />
   </Type>
   <Type Name="EmailFileType">
@@ -876,7 +876,7 @@
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="EmailMessageEntity" Description="E-Mail Nachricht">
+  <Type Name="EmailMessageEntity" Description="E-Mail Nachricht" PluralDescription="E-Mail Nachrichten" Gender="f">
     <Member Name="Attachments" Description="Anhänge" />
     <Member Name="Body" Description="Körper" />
     <Member Name="BodyHash" Description="Körper-hash" />
@@ -943,7 +943,7 @@
     <Member Name="Email" Description="E-Mail" />
     <Member Name="Owner" Description="Besitzer" />
   </Type>
-  <Type Name="EmailPackageEntity" Description="E-Mail-Paket">
+  <Type Name="EmailPackageEntity" Description="E-Mail-Paket" PluralDescription="E-Mail-Pakete" Gender="n">
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="EmailReceptionInfoEmbedded" Description="E-Mail-Empfangsinfo">
@@ -1092,7 +1092,7 @@
     <Member Name="FileType" Description="Dateityp" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
-  <Type Name="FilePathEntity" Description="Datei-Pfad">
+  <Type Name="FilePathEntity" Description="Dateipfad" PluralDescription="Dateipfade" Gender="m">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
@@ -1353,7 +1353,7 @@
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
   </Type>
-  <Type Name="LinkListPartEntity" Description="Link-Listenelement">
+  <Type Name="LinkListPartEntity" Description="Linklisten Teil" PluralDescription="Linklisten Teilen" Gender="n">
     <Member Name="Links" Description="Links" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
@@ -1633,7 +1633,7 @@
   <Type Name="PredictorSubQueryColumnUsage" />
   <Type Name="PredictorSubQueryEntity" />
   <Type Name="PredictSimpleResultEntity" />
-  <Type Name="PrintLineEntity" Description="Zeile drucken">
+  <Type Name="PrintLineEntity" Description="Drucklinie">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="File" Description="Datei" />
     <Member Name="Package" Description="Paket" />
@@ -1658,7 +1658,7 @@
     <Member Name="PrintedAndDeleted" Description="Ausgedruckt und gelöscht" />
     <Member Name="ReadyToPrint" Description="Bereit zum Drucken" />
   </Type>
-  <Type Name="PrintPackageEntity" Description="Druckpaket">
+  <Type Name="PrintPackageEntity" Description="Druckpaket" Gender="n">
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="PrintPackageProcess">
@@ -1808,7 +1808,7 @@
   <Type Name="QueryTokenEmbedded" Description="Abfrage Token">
     <Member Name="TokenString" Description="Token string" />
   </Type>
-  <Type Name="ResetPasswordRequestEntity" Description="Neues Passwort beantragen">
+  <Type Name="ResetPasswordRequestEntity" Description="Resetkennwort Anforderung">
     <Member Name="Code" Description="Code" />
     <Member Name="Lapsed" Description="Verfallen" />
     <Member Name="RequestDate" Description="Datum der Anfrage" />
@@ -1874,15 +1874,15 @@
     <Member Name="Resource" Description="Ressource" />
     <Member Name="Role" Description="Rolle" />
   </Type>
-  <Type Name="RuleOperationEntity" Description="Operationsregel" PluralDescription="Operationsregeln" />
-  <Type Name="RulePermissionEntity" Description="Berechtigungsregel" PluralDescription="Berechtigungsregeln" />
-  <Type Name="RulePropertyEntity" Description="Eigenschaftsregel" PluralDescription="Eigenschaftsregeln" />
-  <Type Name="RuleQueryEntity" Description="Abfrageregel" PluralDescription="Abfrageregeln" />
+  <Type Name="RuleOperationEntity" Description="Operationsregel" PluralDescription="Operationsregeln" Gender="f" />
+  <Type Name="RulePermissionEntity" Description="Berechtigungsregel" PluralDescription="Berechtigungsregeln" Gender="f" />
+  <Type Name="RulePropertyEntity" Description="Eigenschaftsregel" PluralDescription="Eigenschaftsregeln" Gender="f" />
+  <Type Name="RuleQueryEntity" Description="Abfrageregel" PluralDescription="Abfrageregeln" Gender="f" />
   <Type Name="RuleTypeConditionEmbedded" Description="Regelbedingung Typ">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="Condition" Description="Bedingung" />
   </Type>
-  <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln">
+  <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
   <Type Name="ScheduledTaskEntity" Description="Geplante Aufgabe">
@@ -1954,12 +1954,12 @@
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="SchedulerTaskLog" Description="Scheduler Task-Protokoll" />
   </Type>
-  <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich" PluralDescription="Schedule-Regeln minütlich" Gender="f">
+  <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich">
     <Member Name="EachMinutes" Description="Alle Minuten" />
     <Member Name="IsAligned" Description="Ist ausgerichtet" />
     <Member Name="StartingOn" Description="Beginnend am" />
   </Type>
-  <Type Name="ScheduleRuleMonthsEntity" Description="Regel Monate planen">
+  <Type Name="ScheduleRuleMonthsEntity" Description="Schedule-Regel monatlich">
     <Member Name="April" Description="April" />
     <Member Name="August" Description="August" />
     <Member Name="December" Description="Dezember" />
@@ -2180,7 +2180,7 @@
     <Member Name="Header" Description="Kopfzeile" />
     <Member Name="Item" Description="Element" />
   </Type>
-  <Type Name="ToolbarEntity" Description="Toolbar">
+  <Type Name="ToolbarEntity" Description="Toolbar" PluralDescription="Toolbars" Gender="f">
     <Member Name="Elements" Description="Elemente" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Location" Description="Position" />
@@ -2193,7 +2193,7 @@
     <Member Name="Side" Description="Seite" />
     <Member Name="Top" Description="Oben" />
   </Type>
-  <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü">
+  <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
     <Member Name="Elements" Description="Elemente" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Name" Description="Name" />
@@ -2378,7 +2378,7 @@
   <Type Name="UserAssetPreviewModel" Description="Benutzer-Asset-Vorschau">
     <Member Name="Lines" Description="Linien" />
   </Type>
-  <Type Name="UserChartEntity" Description="Benutzer-Diagramm">
+  <Type Name="UserChartEntity" Description="Benutzerdiagramm" PluralDescription="Benutzerdiagramme" Gender="f">
     <Member Name="ChartScript" Description="Diagrammskript" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="DisplayName" Description="Angezeigter Name" />
@@ -2395,13 +2395,13 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="UserChartPartEntity" Description="Benutzerdiagrammteil" PluralDescription="Benutzerdiagrammteile" Gender="n">
+  <Type Name="UserChartPartEntity" Description="Benutzerdiagramm Teil" PluralDescription="Benutzerdiagramm Teilen" Gender="n">
     <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
   </Type>
-  <Type Name="UserEntity" Description="Benutzer">
+  <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Kulturinfo" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
@@ -2459,14 +2459,14 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="UserQueryPartEntity" Description="Benutzerabfrageteil" PluralDescription="Benutzerabfrageteile" Gender="n">
+  <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
-  <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrageteil Rendermodus">
+  <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrage Teil Rendermodus">
     <Member Name="BigValue" Description="Großer Wert" />
     <Member Name="SearchControl" Description="Suchsteuerung" />
   </Type>
@@ -2478,7 +2478,7 @@
     <Member Name="New" Description="Neu" />
     <Member Name="Saved" Description="Gespeichert" />
   </Type>
-  <Type Name="UserTicketEntity" Description="Benutzer-Ticket">
+  <Type Name="UserTicketEntity" Description="Benutzerticket" PluralDescription="Benutzertickets" Gender="n">
     <Member Name="ConnectionDate" Description="Verbindungsdatum" />
     <Member Name="Device" Description="Gerät" />
     <Member Name="Ticket" Description="Ticket" />
@@ -2489,7 +2489,7 @@
     <Member Name="Label" Description="Etikett" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
-  <Type Name="ValueUserQueryListPartEntity" Description="Benutzerwert Abfragelisten-stück">
+  <Type Name="ValueUserQueryListPartEntity" Description="Wert Benutzerabfrage Listen Teil" PluralDescription="Wert Benutzerabfrage Listen Teilen" Gender="n">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQueries" Description="Benutzer-Abfragen" />
   </Type>
@@ -2520,7 +2520,7 @@
     <Member Name="WordTemplate" Description="Word-Vorlage" />
   </Type>
   <Type Name="WordConverterSymbol" Description="Word-Konverter" Gender="m" />
-  <Type Name="WordModelEntity" Description="Word-Modell">
+  <Type Name="WordModelEntity" Description="Word-Modell" PluralDescription="Word-Modelle" Gender="n">
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
   <Type Name="WordTemplateEntity" Description="Word-Vorlage">

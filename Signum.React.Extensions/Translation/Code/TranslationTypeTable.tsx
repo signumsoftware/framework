@@ -62,6 +62,10 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
   const [avoidCombo, setAvoidCombo] = React.useState(false);
   const forceUpdate = useForceUpdate();
 
+  const handleOnTextArea = React.useCallback(function (ta: HTMLTextAreaElement | null) {
+    ta && avoidCombo && ta.focus();
+  }, [avoidCombo]);
+
   return (
     <tr >
       <td className="leftCell">{loc.culture}</td>
@@ -96,7 +100,7 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
       return (<TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={member.description ?? ""}
         onChange={e => { member.description = e.currentTarget.value; forceUpdate(); }}
         onBlur={handleOnChange}
-        innerRef={(ta) => { ta && avoidCombo && ta.focus(); }} />);
+        innerRef={handleOnTextArea} />);
 
     return (
       <span>
@@ -152,10 +156,16 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     forceUpdate();
   }
 
+  const handleOnTextArea = React.useCallback(function (ta: HTMLTextAreaElement | null) {
+    ta && avoidCombo && ta.focus();
+  }, [avoidCombo]);
+
   function handleAvoidCombo(e: React.FormEvent<any>) {
     e.preventDefault();
     setAvoidCombo(true);
   }
+
+
   function handleKeyDown(e: React.KeyboardEvent<any>) {
     if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
       e.preventDefault();
@@ -172,7 +182,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
       return (
         <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description ?? ""}
           onChange={e => { loc.typeDescription!.description = e.currentTarget.value; forceUpdate(); }}
-          onBlur={handleOnChange} innerRef={(ta) => { ta && avoidCombo && ta.focus(); }} />
+          onBlur={handleOnChange} innerRef={handleOnTextArea} />
       );
 
     return (
