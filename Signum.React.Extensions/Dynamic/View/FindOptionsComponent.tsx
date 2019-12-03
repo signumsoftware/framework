@@ -344,13 +344,6 @@ interface QueryTokenBuilderStringProps {
 }
 
 function QueryTokenBuilderString(p : QueryTokenBuilderStringProps){
-  function componentWillMount() {
-    loadInitialToken(p);
-  }
-
-  function componentWillReceiveProps(newProps: QueryTokenBuilderStringProps) {
-    loadInitialToken(newProps);
-  }
 
   function loadInitialToken(props: QueryTokenBuilderStringProps) {
     if (props.token == undefined) {
@@ -363,11 +356,15 @@ function QueryTokenBuilderString(p : QueryTokenBuilderStringProps){
         .done();
   }
 
-    var qt = <QueryTokenBuilder
+  React.useEffect(() => {
+    loadInitialToken(p);
+  }, [p.queryKey, p.token]);
+
+  var qt = <QueryTokenBuilder
     queryToken={p.parsedToken}
     queryKey={p.queryKey}
     onTokenChange={p.onChange}
-      readOnly={false}
+    readOnly={false}
     subTokenOptions={p.subTokenOptions} />;
 
   if (p.hideLabel)

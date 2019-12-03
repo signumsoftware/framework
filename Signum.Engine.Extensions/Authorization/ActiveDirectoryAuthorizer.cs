@@ -64,17 +64,20 @@ namespace Signum.Engine.Authorization
             this.GetConfig = getConfig;
         }
 
-        public virtual UserEntity Login(string userName, string password)
+        public virtual UserEntity Login(string userName, string password, out string authenticationType)
         {
             var passwordHash = Security.EncodePassword(password);
             if (AuthLogic.TryRetrieveUser(userName, passwordHash) != null)
-                return AuthLogic.Login(userName, passwordHash); //Database is faster than Active Directory
+                return AuthLogic.Login(userName, passwordHash, out authenticationType); //Database is faster than Active Directory
 
             UserEntity? user = LoginWithActiveDirectoryRegistry(userName, password);
             if (user != null)
+            {
+                authenticationType = "adRegistry";
                 return user;
-            
-            return AuthLogic.Login(userName, Security.EncodePassword(password));
+            }
+
+            return AuthLogic.Login(userName, Security.EncodePassword(password), out authenticationType);
         }
 
         public virtual UserEntity? LoginWithActiveDirectoryRegistry(string userName, string password)

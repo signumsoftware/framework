@@ -35,7 +35,7 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
 
       AuthClient.API.resetPassword(request)
         .then(lr => {
-          AuthClient.setAuthToken(lr.token);
+          AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
 
           setSuccess(true);
