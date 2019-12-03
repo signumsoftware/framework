@@ -32,7 +32,7 @@ export default function ChangePassword() {
 
       AuthClient.API.changePassword(request)
         .then(lr => {
-          AuthClient.setAuthToken(lr.token);
+          AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
           Navigator.resetUI();
           setSuccess(true);
