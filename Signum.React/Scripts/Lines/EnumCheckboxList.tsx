@@ -50,13 +50,13 @@ export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-checkbox-list", p.ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
+      <div className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
         {renderContent()}
       </div>
     );
 
   return (
-    <fieldset className={classes("SF-checkbox-list", p.ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
+    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
       <legend>
         <div>
           <span>{p.labelText}</span>

@@ -14,6 +14,7 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
   columnWidth?: number;
   avoidFieldSet?: boolean;
   refreshKey?: string;
+  renderCheckbox?: (lite: Lite<Entity>, index: number, checked: boolean, controller: EntityCheckboxListController) => React.ReactElement; 
 }
 
 export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
@@ -31,6 +32,21 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     state.columnWidth = 200;
   }
 
+  handleOnChange = (lite: Lite<Entity>) => {
+    const list = this.props.ctx.value!;
+    const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
+
+    if (toRemove.length) {
+      toRemove.forEach(mle => list.remove(mle));
+      this.setValue(list);
+    }
+    else {
+      this.convert(lite).then(e => {
+        this.addElement(e);
+      }).done();
+    }
+  }
+
 }
 
 export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(props: EntityCheckboxListProps, ref: React.Ref<EntityCheckboxListController>) {
@@ -42,14 +58,14 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-checkbox-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      <div className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
         {renderButtons()}
         {renderCheckboxList()}
       </div>
     );
 
   return (
-    <fieldset className={classes("SF-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <legend>
         <div>
           <span>{p.labelText}</span>
@@ -71,47 +87,21 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   function renderCheckboxList() {
     return (
-      <EntityCheckboxListSelect
-        ctx={p.ctx}
-        onChange={handleOnChange}
-        type={p.type!}
-        data={p.data}
-        
-        findOptions={p.findOptions}
-        columnCount={p.columnCount}
-        columnWidth={p.columnWidth} />
+      <EntityCheckboxListSelect ctx={p.ctx} controller={c} />
     );
-  }
-
-  function handleOnChange(lite: Lite<Entity>) {
-    const list = p.ctx.value!;
-    const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
-
-    if (toRemove.length) {
-      toRemove.forEach(mle => list.remove(mle));
-      c.setValue(list);
-    }
-    else {
-      c.convert(lite).then(e => {
-        c.addElement(e);
-      }).done();
-    }
   }
 });
 
 
 interface EntityCheckboxListSelectProps {
   ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
-  onChange: (lite: Lite<Entity>) => void;
-  type: TypeReference;
-  findOptions?: FindOptions;
-  data?: Lite<Entity>[];
-  columnCount?: number;
-  columnWidth?: number;
-  refreshKey?: string;
+  controller: EntityCheckboxListController;
 }
 
-export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
+export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
+
+  const c = props.controller;
+  const p = c.props;
 
   var [data, setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
   var requestStarted = React.useRef(false);
@@ -136,7 +126,7 @@ export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
           .then(data => setData(data.orderBy(a => a.toStr)))
           .done();
     }
-  }, [p.data, p.type.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
     <div className="sf-checkbox-elements" style={getColumnStyle()}>
@@ -169,7 +159,7 @@ export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
     return undefined;
   }
 
-  function maybeToLite(entityOrLite: Entity | Lite<Entity>) {
+  function maybeToLite(entityOrLite: Entity | Lite<Entity>): Lite<Entity> {
     const entity = entityOrLite as Entity;
 
     if (entity.Type)
@@ -184,7 +174,6 @@ export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
 
     const fixedData = [...data];
 
-
     const list = p.ctx.value!;
 
     list.forEach(mle => {
@@ -192,34 +181,18 @@ export function EntityCheckboxListSelect(p: EntityCheckboxListSelectProps) {
         fixedData.insertAt(0, maybeToLite(mle.element as Entity | Lite<Entity>))
     });
 
+    if (p.renderCheckbox)
+      return fixedData.map((lite, i) => p.renderCheckbox!(lite, i, list.some(mle => is(mle.element as Entity | Lite<Entity>, lite)), c));
+
     return fixedData.map((lite, i) =>
       <label className="sf-checkbox-element" key={i}>
         <input type="checkbox"
           checked={list.some(mle => is(mle.element as Entity | Lite<Entity>, lite))}
           disabled={p.ctx.readOnly}
           name={liteKey(lite)}
-          onChange={e => p.onChange(lite)} />
+          onChange={e => c.handleOnChange(lite)} />
         &nbsp;
-                <span className="sf-entitStrip-link">{lite.toStr}</span>
+        <span className="sf-entitStrip-link">{lite.toStr}</span>
       </label>);
-
-  }
-
-  function reloadData(props: EntityCheckboxListSelectProps) {
-    const fo = props.findOptions;
-    if (fo) {
-      Finder.expandParentColumn(fo);
-      var limit = fo?.pagination?.elementsPerPage ?? 999;
-      Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
-        .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
-        .done();
-    }
-    else
-      Finder.API.fetchAllLites({ types: p.type!.name })
-        .then(data => setData(data.orderBy(a => a.toStr)))
-        .done();
   }
 }
-
-
-

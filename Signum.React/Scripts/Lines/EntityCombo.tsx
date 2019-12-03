@@ -9,6 +9,7 @@ import { FormGroup } from './FormGroup'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
 import { useController } from './LineBase'
+import { useMounted } from '../Hooks'
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -91,7 +92,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes} >
-      <div className="SF-entity-combo">
+      <div className="sf-entity-combo">
         <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
           <EntityComboSelect
             ref={comboRef}
@@ -134,9 +135,10 @@ export interface  EntityComboHandle {
 //Extracted to another component
 export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: EntityComboSelectProps, ref: React.Ref<EntityComboHandle>) {
 
-  var [data, _setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
-  var requestStarted = React.useRef(false);
-  var selectRef = React.useRef<HTMLSelectElement>(null);
+  const [data, _setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  const requestStarted = React.useRef(false);
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+  const mounted = useMounted();
 
   React.useImperativeHandle(ref, () => ({
     getData: () => data,
@@ -144,9 +146,11 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   }));
 
   function setData(data: Lite<Entity>[]) {
-    _setData(data);
-    if (p.onDataLoaded)
-      p.onDataLoaded(data);
+    if (mounted.current) {
+      _setData(data);
+      if (p.onDataLoaded)
+        p.onDataLoaded(data);
+    }
   }
 
   React.useEffect(() => {

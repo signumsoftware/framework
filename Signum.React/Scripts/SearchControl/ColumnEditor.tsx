@@ -35,17 +35,27 @@ export default function ColumnEditor(p: ColumnEditorProps) {
     <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
       title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
       <button type="button" className="close" aria-label="Close" onClick={p.close} ><span aria-hidden="true">×</span></button>
-      <div className="rw-widget-xs">
-        <QueryTokenBuilder
-          queryToken={co.token!}
-          onTokenChange={handleTokenChanged}
-          queryKey={p.queryDescription.queryKey}
-          subTokenOptions={p.subTokensOptions}
-          readOnly={false} />
+      <div className="d-flex">
+        <label htmlFor="inputEmail3" className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "100px" }}>{SearchMessage.Field.niceToString()}</label>
+        <div className="flex-grow-1">
+          <div className="rw-widget-xs">
+            <QueryTokenBuilder
+              queryToken={co.token!}
+              onTokenChange={handleTokenChanged}
+              queryKey={p.queryDescription.queryKey}
+              subTokenOptions={p.subTokensOptions}
+              readOnly={false} />
+          </div>
+        </div>
       </div>
-      <input className="form-control form-control-xs"
-        value={co.displayName ?? ""}
-        onChange={handleOnChange} />
+      <div className="d-flex">
+        <label htmlFor="inputEmail3" className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "100px" }}>{SearchMessage.DisplayName.niceToString()}</label>
+        <div className="flex-grow-1">
+          <input className="form-control form-control-xs"
+            value={co.displayName || ""}
+            onChange={handleOnChange} />
+        </div>
+      </div>
     </div>
   );
 }

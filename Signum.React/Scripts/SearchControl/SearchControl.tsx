@@ -189,7 +189,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
 
 
-        allowSelection={p.allowSelection != null ? p.allowSelection : true}
+        allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
         showContextMenu={p.showContextMenu || qs?.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
         hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
         hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}

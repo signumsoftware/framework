@@ -246,9 +246,9 @@ namespace Signum.Engine.Linq
             private static IEnumerable<ColumnExpression> KeysTable(TableExpression table)
             {
                 if (table.Table is Table t && t.IsView)
-                    yield return new ColumnExpression(typeof(int), table.Alias, t.Columns.Values.Single(a => a.PrimaryKey).Name);
+                    return t.Columns.Values.Where(c => c.PrimaryKey).Select(c => new ColumnExpression(c.Type, table.Alias, c.Name));
                 else
-                    yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name);
+                    return new[] { new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name) };
             }
 
             private static IEnumerable<ColumnExpression?> KeysSelect(SelectExpression select)

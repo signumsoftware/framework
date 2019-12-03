@@ -26,12 +26,12 @@ namespace Signum.React.Json
             return typeof(OperationController.BaseOperationRequest).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             var request = (OperationController.BaseOperationRequest)Activator.CreateInstance(objectType)!;
             serializer.Populate(reader, request);
@@ -46,7 +46,7 @@ namespace Signum.React.Json
             return request;
         }
 
-        private object ConvertObject(JToken token, JsonSerializer serializer, OperationSymbol operationSymbol)
+        private object? ConvertObject(JToken token, JsonSerializer serializer, OperationSymbol operationSymbol)
         {
             if (token == null)
                 return null!;

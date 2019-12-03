@@ -129,8 +129,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest })
       .then(value => {
-        this.setState({ value });
-        this.props.onValueChange && this.props.onValueChange(value);
+        const fixedValue = value === undefined ? null : value;
+        this.setState({ value: fixedValue });
+        this.props.onValueChange && this.props.onValueChange(fixedValue);
       })
       .done();
   }
@@ -176,7 +177,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     );
 
     if (p.formControlClass)
-      return <p className={className} style={p.customStyle}>{this.renderValue()}</p>
+      return <div className={className} style={p.customStyle}>{this.renderValue()}</div>
 
     if (p.isLink) {
       return (

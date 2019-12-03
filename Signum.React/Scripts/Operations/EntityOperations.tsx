@@ -17,6 +17,7 @@ import * as Constructor from "../Constructor"
 import { func } from "prop-types";
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
+import { FunctionalAdapter } from "../Frames/FrameModal";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -41,7 +42,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
       if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
         return false;
 
-      var ov = ctx.frame.entityComponent as any as IOperationVisible;
+      var ov = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IOperationVisible | null;
       if (ov?.isOperationVisible && !ov.isOperationVisible(eoc))
         return false;
 
@@ -185,8 +186,8 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
 
     return (
       <>
-        {item},
-        alternatives?.map(a => renderAlternative(a))
+        {item}
+        {alternatives?.map(a => renderAlternative(a))}
       </>
     );
   }    

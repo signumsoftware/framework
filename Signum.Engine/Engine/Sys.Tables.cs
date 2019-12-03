@@ -197,7 +197,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         [AutoExpressionField]
         public SysTypes? Type() => 
-            As.Expression(() => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == this.system_type_id));
+            As.Expression(() => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == this.system_type_id && a.user_type_id == this.user_type_id));
     }
 
     [TableName("sys.default_constraints")]

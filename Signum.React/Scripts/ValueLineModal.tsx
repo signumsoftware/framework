@@ -18,7 +18,8 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
-  const value = React.useRef<any>(undefined);
+  const { title, message, initialValue, ...props } = p.options;
+  const value = React.useRef<any>(initialValue);
   const selectedValue = React.useRef<any>(undefined);
   function handleOkClick() {
     selectedValue.current = value.current;
@@ -36,7 +37,6 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(value, s => s.current), "valueLineModal");
 
-  const { title, message, initialValue, ...props } = p.options;
   var vlp: ValueLineProps = {
     ctx: ctx,
     formatText: props.formatText !== undefined ? props.formatText : props.member?.format,

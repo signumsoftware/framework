@@ -44,7 +44,7 @@ namespace Signum.Engine
                      Name = c.name,
                      SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type()!.name),
                      UserTypeName = null,
-                     Identity = c.is_identity,
+                     PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
                  }).ToList();
 
@@ -63,13 +63,11 @@ namespace Signum.Engine
         private static string GenerateColumnCode(DiffColumn c)
         {
             var type = CodeGeneration.CodeGenerator.Entities.GetValueType(c);
-            if (c.Nullable)
-                type = type.Nullify();
-
+           
             StringBuilder sb = new StringBuilder();
-            if (c.Identity)
+            if (c.PrimaryKey)
                 sb.AppendLine("[ViewPrimaryKey]");
-            sb.AppendLine($"public {type.TypeName()} {c.Name};");
+            sb.AppendLine($"public {type.TypeName()}{(c.Nullable ? "?" : "")} {c.Name};");
             return sb.ToString();
         }
 
@@ -105,6 +103,27 @@ namespace Signum.Engine
                 throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
 
             SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
+        }
+
+        public static IDisposable TemporaryTable<T>() where T : IView
+        {
+            CreateTemporaryTable<T>();
+
+            return new Disposable(() => DropTemporaryTable<T>());
+        }
+
+        public static void DropTemporaryTable<T>()
+            where T : IView
+        {
+            if (!Transaction.HasTransaction)
+                throw new InvalidOperationException("You need to be inside of a transaction to create a Temporary table");
+
+            var view = Schema.Current.View<T>();
+
+            if (!view.Name.IsTemporal)
+                throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
+
+            SqlBuilder.DropTable(view.Name).ExecuteNonQuery();
         }
 
         public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields, bool unique = false)

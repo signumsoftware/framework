@@ -132,7 +132,7 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="SF-entity-line">
+      <div className="sf-entity-line">
         <div className={p.ctx.inputGroupClass}>
           <select className={p.ctx.formControlClass} size={p.size} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
             {list.map(mle => <option key={c.keyGenerator.getKey(mle)} title={p.ctx.titleLabels ? c.getTitle(mle.element) : undefined} {...EntityListBaseController.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}

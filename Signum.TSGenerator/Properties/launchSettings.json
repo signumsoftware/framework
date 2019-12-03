@@ -2,17 +2,17 @@
   "profiles": {
     "Framework": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.2\\Signum.React.dll\" \"D:\\Signum\\Southwind\\Framework\\Signum.React\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Framework\\Signum.React\\obj\\SignumContent.txt\"",
+      "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp3.0\\Signum.React.dll\" \"D:\\Signum\\Southwind\\Framework\\Signum.React\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Framework\\Signum.React\\obj\\SignumContent.txt\"",
       "workingDirectory": "D:\\Signum\\Southwind\\Framework\\Signum.React\\"
     },
     "Extensions": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.2\\Signum.React.Extensions.dll\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
+      "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp3.0\\Signum.React.Extensions.dll\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
       "workingDirectory": "D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\"
     },
     "Southwind": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.2\\Southwind.React.dll\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumContent.txt\"",
+      "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp3.0\\Southwind.React.dll\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumContent.txt\"",
       "workingDirectory": "D:\\Signum\\Southwind\\Southwind.React\\"
     }
   }

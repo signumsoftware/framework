@@ -27,14 +27,34 @@ export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
   selectedIndex?: number;
 }
 
+function isControlled(p: EntityTabRepeaterProps) {
+
+  if ((p.selectedIndex != null) != (p.onSelectTab != null))
+    throw new Error("selectedIndex and onSelectTab should be set together");
+
+  return p.selectedIndex != null;
+}
+
 export class EntityTabRepeaterController extends EntityListBaseController<EntityTabRepeaterProps> {
 
-  selectedIndex!: number | undefined;
-  setSelectedIndex!: (index: number | undefined) => void;
+  selectedIndex!: number;
+  setSelectedIndex!: (index: number) => void;
+  initialIsControlled!: boolean;
 
   init(p: EntityTabRepeaterProps) {
     super.init(p);
-    [this.selectedIndex, this.setSelectedIndex] = React.useState(() => p.selectedIndex == null ? 0 : coerce(p.selectedIndex, p.ctx.value.length));
+
+    this.initialIsControlled = React.useMemo(() => isControlled(p), []);
+    const currentIsControlled = isControlled(p);
+    if (currentIsControlled != this.initialIsControlled)
+      throw new Error(`selectedIndex was isControlled=${this.initialIsControlled} but now is ${currentIsControlled}`);
+
+    if (!this.initialIsControlled) {
+      [this.selectedIndex, this.setSelectedIndex] = React.useState(0);
+    } else {
+      this.selectedIndex = p.selectedIndex!;
+      this.setSelectedIndex = p.onSelectTab!;
+    }
   }
 
   getDefaultProps(p: EntityTabRepeaterProps) {
@@ -45,14 +65,10 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
 
   removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>) {
     const list = this.props.ctx.value!;
-    let currentIndex = list.indexOf(mle);
-    if (this.selectedIndex != null && this.selectedIndex < currentIndex)
-      this.setSelectedIndex(this.selectedIndex - 1);
+    let deleteIndex = list.indexOf(mle);
 
     list.remove(mle);
-
-    this.setSelectedIndex(coerce(this.selectedIndex, list.length));
-
+    this.setSelectedIndex(coerce(deleteIndex < this.selectedIndex ? this.selectedIndex - 1 : this.selectedIndex, list.length));
     this.setValue(list);
   }
 
@@ -80,7 +96,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
+      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
         {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         {renderButtons()}
         {renderTabs()}
@@ -88,7 +104,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
     );
 
   return (
-    <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
       {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
       <legend>
         <div>
@@ -112,12 +128,10 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
     return React.Children.count(buttons) ? buttons : undefined;
   }
 
-  function handleSelectTab(eventKey: any) {
-    if (typeof eventKey == "number") { //Create tab
-      if (p.onSelectTab)
-        p.onSelectTab(eventKey as number);
-      else
-        c.setSelectedIndex(eventKey as number);
+  function handleSelectTab(eventKey: string) {
+    var num = parseInt(eventKey);
+    if (!isNaN(num)) { //Create tab
+      c.setSelectedIndex(num);
     }
   }
 
@@ -126,7 +140,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
     const readOnly = ctx.readOnly;
 
     return (
-      <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"}>
+      <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
           c.getMListItemContext(ctx).map(mlec => {
             const drag = c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;
@@ -167,8 +181,8 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
             <Tab eventKey="create-new" title={
-              <span className="sf-line-button sf-create nav-link" onClick={c.handleCreateClick}>
-                {ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+              <span className="sf-line-button sf-create" onClick={c.handleCreateClick} title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
+                {EntityBaseController.createIcon}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
               </span>} />)
         }
         {p.extraTabs && p.extraTabs(c)}
@@ -177,15 +191,12 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
   }
 });
 
-function coerce(index: number | undefined, length: number): number | undefined {
-  if (index == undefined)
-    return undefined;
-
+function coerce(index: number, length: number): number {
   if (length <= index)
     index = length - 1;
 
   if (index < 0)
-    return undefined;
+    return 0;
 
   return index;
 }

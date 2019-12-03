@@ -37,7 +37,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
+      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
         {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
         {renderButtons()}
         {renderElements()}
@@ -45,7 +45,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
     );
 
   return (
-    <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
       {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
       <legend>
         <div>

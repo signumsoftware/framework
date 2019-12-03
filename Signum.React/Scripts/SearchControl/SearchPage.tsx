@@ -80,6 +80,7 @@ function SearchPage(p: SearchPageProps) {
         tag="SearchPage"
         throwIfNotFindable={true}
         showBarExtension={true}
+        allowSelection={qs && qs.allowSelection}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
         showFilters={SearchPage.showFilters(fo)}

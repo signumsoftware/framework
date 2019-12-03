@@ -105,10 +105,11 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
       .then(entity => entity &&
         this.convert(entity)
           .then(entity => {
-            this.props.autocomplete!.getItemFromEntity(entity)
-              .then(newItem => this.setCurrentItem({ entity: entity, item: newItem })); //newItem could be different to item on create new case
-
-            this.setValue(entity);
+            return this.props.autocomplete!.getItemFromEntity(entity) //newItem could be different to item on create new case
+              .then(newItem => {
+                this.setCurrentItem({ entity: entity, item: newItem });
+                this.setValue(entity);
+              });
           }))
       .done();
 
@@ -142,7 +143,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     <FormGroup ctx={p.ctx} labelText={p.labelText} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="SF-entity-line">
+      <div className="sf-entity-line">
         {
           !EntityBaseController.hasChildrens(buttons) ?
             (hasValue ? renderLink() : renderAutoComplete()) :
@@ -167,8 +168,10 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     var ac = p.autocomplete;
 
-    if (ac == null || ctx.readOnly)
-      return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+    if (ac == null || ctx.readOnly) {
+      var fcr = <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+      return renderInput ? renderInput(fcr) : fcr;
+    }
 
     return (
       <Typeahead ref={c.typeahead}

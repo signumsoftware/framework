@@ -23,7 +23,7 @@ namespace Signum.Engine.CodeGeneration
                     {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                     {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
                     {"React", React.GenerateReactFromEntities, "React (from entites)"},
-                    {"Hook", Hook.ConvertFilesToHooks, "Hook (from entites)"},
+                    {"Hook", Hook.ConvertFilesToHooks, "Hook (converts tsx files from class to functional components)"},
                 }.Choose();
 
                 if (action == null)

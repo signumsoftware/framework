@@ -4,8 +4,8 @@ export { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOpera
 import EntityLink, { EntityLinkProps } from './SearchControl/EntityLink'
 export { EntityLink, EntityLinkProps };
 
-import SearchControl, { SearchControlProps, ISimpleFilterBuilder } from './SearchControl/SearchControl'
-export { SearchControl, SearchControlProps, ISimpleFilterBuilder };
+import SearchControl, { SearchControlProps, ISimpleFilterBuilder, SearchControlHandler } from './SearchControl/SearchControl'
+export { SearchControl, SearchControlProps, ISimpleFilterBuilder, SearchControlHandler };
 
 import SearchControlLoaded, { SearchControlLoadedProps } from './SearchControl/SearchControlLoaded'
 export { SearchControlLoaded, SearchControlLoadedProps };

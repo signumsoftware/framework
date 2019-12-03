@@ -107,18 +107,17 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 
   handleBlur = (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => {
-
     const p = this.props;
     var tr = DomUtils.closest(e.target, "tr")!;
 
-    if (tr == DomUtils.closest(e.relatedTarget as HTMLElement, "tr")) {
+    if (e.relatedTarget == null || tr == DomUtils.closest(e.relatedTarget as HTMLElement, "tr")) {
       if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current)
         this.recentlyCreated.current = null;
 
       return;
     }
 
-    if (this.recentlyCreated && sender.props.ctx.value == this.recentlyCreated.current) {
+    if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current) {
       p.ctx.value.extract(a => a.element == this.recentlyCreated.current);
       this.setValue(p.ctx.value);
 
@@ -198,8 +197,11 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   }
 }
 
-export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & React.RefAttributes<EntityTableController>> &
-{ typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]}
+interface WithTypeColumns {
+  typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]
+}
+
+export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & React.RefAttributes<EntityTableController>> & WithTypeColumns
   = React.forwardRef(function EntityTable(props: EntityTableProps, ref: React.Ref<EntityTableController>) {
   const c = useController(EntityTableController, props, ref);
   const p = c.props;
@@ -214,14 +216,14 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-table-field SF-control-container", ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
+        <div className={classes("sf-table-field sf-control-container", ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         {renderButtons()}
         {renderTable()}
       </div>
     );
 
   return (
-    <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
+      <fieldset className={classes("sf-table-field sf-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
       <legend>
         <div>
           <span>{p.labelText}</span>
