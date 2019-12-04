@@ -358,7 +358,7 @@ export class FunctionalAdapter extends React.Component {
   
   static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
-    if (typeof type == "string" || type.prototype?.prototype.render) {
+    if (typeof type == "string" || type.prototype?.render) {
       return React.cloneElement(element, { ref: ref });
     } else {
       return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
