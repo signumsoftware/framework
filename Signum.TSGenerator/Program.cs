@@ -13,36 +13,19 @@ namespace Signum.TSGenerator
 {
     public static class Program
     {
+        
+
         public static int Main(string[] args)
         {
+            var log = Console.Out;
+
             Stopwatch sw = Stopwatch.StartNew();
 
             string intermediateAssembly = args[0];
             string[] references = File.ReadAllLines(args[1]);
             string[] content = File.ReadAllLines(args[2]);
 
-            var log = Console.Out;
-
             log.WriteLine("Starting SignumTSGenerator");
-
-            bool hasPdb = File.Exists(Path.ChangeExtension(intermediateAssembly, ".pdb"));
-
-            AssemblyDefinition reactAssembly = AssemblyDefinition.ReadAssembly(intermediateAssembly, new ReaderParameters
-            {
-                ReadingMode = ReadingMode.Deferred,
-                ReadSymbols = hasPdb,
-                InMemory = true,
-                SymbolReaderProvider = hasPdb ? new PdbReaderProvider() : null
-            });
-
-
-            if (AlreadyProcessed(reactAssembly))
-            {
-                log.WriteLine("SignumTSGenerator already processed: {0}", intermediateAssembly);
-                return 0;
-            }
-
-            PreloadingAssemblyResolver resolver = new PreloadingAssemblyResolver(references);
 
             var assemblyReferences = (from r in references
                                       where r.Contains(".Entities")
@@ -57,22 +40,41 @@ namespace Signum.TSGenerator
 
             var entitiesAssembly = Path.GetFileNameWithoutExtension(intermediateAssembly).Replace(".React", ".Entities");
             var entitiesAssemblyReference = assemblyReferences.GetOrThrow(entitiesAssembly);
-            var entitiesModule = ModuleDefinition.ReadModule(entitiesAssemblyReference.AssemblyFullPath, new ReaderParameters { AssemblyResolver = resolver });
+          
+            var currentDir = Directory.GetCurrentDirectory();
+            var files = content
+                .Where(file => Path.GetExtension(file) == ".t4s")
+                .Select(file => Path.Combine(currentDir, file))
+                .ToList();
+
+            var upToDateContent = string.Join("\r\n",
+                 new[] { entitiesAssemblyReference.AssemblyFullPath }
+                 .Concat(files)
+                 .OrderBy(a => a)
+                 .Select(f => File.GetLastWriteTimeUtc(f).ToString("o") + " " + Path.GetFileName(f)));
+
+            var signumUpToDatePath = Path.Combine(Path.GetDirectoryName(args[1]), "SignumUpToDate.txt");
+
+            if(File.Exists(signumUpToDatePath) && File.ReadAllText(signumUpToDatePath) == upToDateContent)
+            {
+                log.WriteLine($"SignumTSGenerator already processed ({sw.ElapsedMilliseconds.ToString()}ms)");
+                return 0;
+            }
+
+            var entityResolver = new PreloadingAssemblyResolver(references);
+            var entitiesModule = ModuleDefinition.ReadModule(entitiesAssemblyReference.AssemblyFullPath, new ReaderParameters
+            {
+                AssemblyResolver = entityResolver
+            });
+
             var options = new AssemblyOptions
             {
                 CurrentAssembly = entitiesAssembly,
                 AssemblyReferences = assemblyReferences,
                 AllReferences = references.ToDictionary(a => Path.GetFileNameWithoutExtension(a)),
                 ModuleDefinition = entitiesModule,
-                Resolver = resolver,
+                Resolver = entityResolver,
             };
-
-
-            var currentDir = Directory.GetCurrentDirectory();
-            var files = content
-                .Where(file => Path.GetExtension(file) == ".t4s")
-                .Select(file => Path.Combine(currentDir, file))
-                .ToList();
 
             bool hasErrors = false;
             foreach (var file in files)
@@ -95,51 +97,25 @@ namespace Signum.TSGenerator
                 catch (Exception ex)
                 {
                     hasErrors = true;
-                    log.WriteLine($"Error in {file}");
+                    log.WriteLine($"{file}:error STSG0001:{ex.Message}");
                     log.WriteLine(ex.Message);
                 }
             }
 
-            MarkAsProcessed(reactAssembly, resolver);
-
-            reactAssembly.Write(intermediateAssembly, new WriterParameters
+            if (hasErrors)
             {
-                WriteSymbols = hasPdb,
-                SymbolWriterProvider = hasPdb ? new PdbWriterProvider() : null
-            });
-
-            log.WriteLine($"SignumTSGenerator finished in {sw.ElapsedMilliseconds.ToString()}ms");
-
-            Console.WriteLine();
-
-            return hasErrors ? -1 : 0;
-        }
-
-        static bool AlreadyProcessed(AssemblyDefinition assembly)
-        {
-            var nameof = typeof(GeneratedCodeAttribute).FullName;
-            var attr = assembly.CustomAttributes
-                .Any(a => a.AttributeType.FullName == nameof && ((string)a.ConstructorArguments[0].Value) == "SignumTask");
-
-            return attr;
-        }
-
-        static void MarkAsProcessed(AssemblyDefinition assembly, IAssemblyResolver resolver)
-        {
-            TypeDefinition generatedCodeAttribute = resolver.Resolve(AssemblyNameReference.Parse(typeof(GeneratedCodeAttribute).Assembly.GetName().Name)).MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
-            MethodDefinition constructor = generatedCodeAttribute.Methods.Single(a => a.IsConstructor && a.Parameters.Count == 2);
-
-            TypeReference stringType = assembly.MainModule.TypeSystem.String;
-            assembly.CustomAttributes.Add(new CustomAttribute(assembly.MainModule.ImportReference(constructor))
+                log.WriteLine($"SignumTSGenerator finished with errors ({sw.ElapsedMilliseconds.ToString()}ms)");
+                Console.WriteLine();
+                return 0;
+            }
+            else
             {
-                ConstructorArguments =
-                {
-                    new CustomAttributeArgument(stringType, "SignumTask"),
-                    new CustomAttributeArgument(stringType, typeof(Program).Assembly.GetName().Version.ToString()),
-                }
-            });
+                File.WriteAllText(signumUpToDatePath, upToDateContent);
+                log.WriteLine($"SignumTSGenerator finished ({sw.ElapsedMilliseconds.ToString()}ms)");
+                Console.WriteLine();
+                return 0;
+            }
         }
-
 
         static string FindReactDirectory(string absoluteFilePath)
         {
