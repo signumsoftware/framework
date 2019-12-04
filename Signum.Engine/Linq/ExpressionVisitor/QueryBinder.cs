@@ -33,8 +33,11 @@ namespace Signum.Engine.Linq
 
         internal SystemTime? systemTime;
 
+        internal Schema schema; 
+
         public QueryBinder(AliasGenerator aliasGenerator)
         {
+            this.schema = Schema.Current;
             this.systemTime = SystemTime.Current;
             this.aliasGenerator = aliasGenerator;
             this.root = null!;
@@ -936,7 +939,7 @@ namespace Signum.Engine.Linq
                 var pc = ColumnProjector.ProjectColumns(projection.Projector, alias, isGroupKey: false, selectTrivialColumns: true);
 
                 SubqueryExpression? se = null;
-                if (Schema.Current.Settings.IsDbType(pc.Projector.Type))
+                if (schema.Settings.IsDbType(pc.Projector.Type))
                     se = new InExpression(newItem, new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
                 else
                 {
@@ -1214,18 +1217,39 @@ namespace Signum.Engine.Linq
                 Expression expr = Visit(lambda.Body);
                 map.Remove(lambda.Parameters[0]);
 
+
+                Expression GetExpressionOrder(EntityExpression exp)
+                {
+                    var custom = this.schema.Settings.CustomOrder.TryGetC(exp.Type);
+                    if(custom != null)
+                    {
+                        map.Add(custom.Parameters[0], exp);
+                        Expression result = Visit(custom.Body);
+                        map.Remove(custom.Parameters[0]);
+                        return result;
+                    }
+
+                    return BindMethodCall(Expression.Call(exp, EntityExpression.ToStringMethod));
+                }
+
                 if (expr is LiteReferenceExpression lite)
                 {
-                    expr = lite.Reference is ImplementedByAllExpression ? ((ImplementedByAllExpression)lite.Reference).Id :
-                          BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+                    expr = lite.Reference is ImplementedByAllExpression iba ? iba.Id :
+                        lite.Reference is EntityExpression e ? GetExpressionOrder(e) :
+                        lite.Reference is ImplementedByExpression ib ? DispatchIb(ib, typeof(string), ee => GetExpressionOrder(ee)) :
+                        throw new NotImplementedException("");
                 }
-                else if (expr is EntityExpression || expr is ImplementedByExpression)
+                else if (expr is EntityExpression e)
                 {
-                    expr = BindMethodCall(Expression.Call(expr, EntityExpression.ToStringMethod));
+                    expr = GetExpressionOrder(e);
                 }
-                else if (expr is ImplementedByAllExpression)
+                else if (expr is ImplementedByExpression ib)
                 {
-                    expr = ((ImplementedByAllExpression)expr).Id;
+                    expr = DispatchIb(ib, typeof(string), ee => GetExpressionOrder(ee));
+                }
+                else if (expr is ImplementedByAllExpression iba)
+                {
+                    expr = iba.Id;
                 }
                 else if (expr is MethodCallExpression && ReflectionTools.MethodEqual(((MethodCallExpression)expr).Method, miToUserInterface))
                 {
@@ -1244,6 +1268,7 @@ namespace Signum.Engine.Linq
                 return DbExpressionNominator.FullNominate(expr)!;
             }
         }
+
 
         static MethodInfo miToUserInterface = ReflectionTools.GetMethodInfo(() => DateTime.MinValue.ToUserInterface());
 
@@ -1316,7 +1341,7 @@ namespace Signum.Engine.Linq
             Type returnType = mce.Method.ReturnType;
             var type = returnType.GetGenericArguments()[0];
 
-            Table table = Schema.Current.ViewBuilder.NewView(type);
+            Table table = schema.ViewBuilder.NewView(type);
 
             Alias tableAlias = NextTableAlias(table.Name);
 
@@ -1448,7 +1473,7 @@ namespace Signum.Engine.Linq
                 {
                     EntityExpression ee = (EntityExpression)source;
 
-                    if (Schema.Current.Table(ee.Type).ToStrColumn != null)
+                    if (schema.Table(ee.Type).ToStrColumn != null)
                     {
                         return Completed(ee).GetBinding(EntityExpression.ToStrField);
                     }
@@ -1463,7 +1488,7 @@ namespace Signum.Engine.Linq
                 }
                 else if (source.NodeType == ExpressionType.Convert && source.Type.UnNullify().IsEnum)
                 {
-                    var table = Schema.Current.Table(EnumEntity.Generate(source.Type.UnNullify()));
+                    var table = schema.Table(EnumEntity.Generate(source.Type.UnNullify()));
 
                     if (table != null)
                     {
@@ -1935,7 +1960,7 @@ namespace Signum.Engine.Linq
                 return new PrimaryKeyStringExpression(valueId, valueType);
             }
 
-            if (!Schema.Current.Settings.IsDbType(returnType.UnNullify()))
+            if (!schema.Settings.IsDbType(returnType.UnNullify()))
                 throw new InvalidOperationException("Impossible to CombineImplementations of {0}".FormatWith(returnType.TypeName()));
 
 
@@ -2860,7 +2885,7 @@ namespace Signum.Engine.Linq
 
         internal Expression? BindAdditionalField(AdditionalFieldExpression af, bool entityCompleter)
         {
-            var lambda = Schema.Current.GetAdditionalQueryBinding(af.Route, entityCompleter);
+            var lambda = schema.GetAdditionalQueryBinding(af.Route, entityCompleter);
 
             if (lambda == null)
                 return null;

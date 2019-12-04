@@ -1,9 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using Mono.Cecil;
+using System.CodeDom.Compiler;
+using Mono.Cecil.Pdb;
 
 namespace Signum.TSGenerator
 {
@@ -11,15 +15,58 @@ namespace Signum.TSGenerator
     {
         public static int Main(string[] args)
         {
-            string projectFile = args[0];
+            Stopwatch sw = Stopwatch.StartNew();
+
+            string intermediateAssembly = args[0];
             string[] references = File.ReadAllLines(args[1]);
             string[] content = File.ReadAllLines(args[2]);
 
             var log = Console.Out;
 
-            var obj = new ProxyGenerator();
-
             log.WriteLine("Starting SignumTSGenerator");
+
+            bool hasPdb = File.Exists(Path.ChangeExtension(intermediateAssembly, ".pdb"));
+
+            AssemblyDefinition reactAssembly = AssemblyDefinition.ReadAssembly(intermediateAssembly, new ReaderParameters
+            {
+                ReadingMode = ReadingMode.Deferred,
+                ReadSymbols = hasPdb,
+                InMemory = true,
+                SymbolReaderProvider = hasPdb ? new PdbReaderProvider() : null
+            });
+
+
+            if (AlreadyProcessed(reactAssembly))
+            {
+                log.WriteLine("SignumTSGenerator already processed: {0}", intermediateAssembly);
+                return 0;
+            }
+
+            PreloadingAssemblyResolver resolver = new PreloadingAssemblyResolver(references);
+
+            var assemblyReferences = (from r in references
+                                      where r.Contains(".Entities")
+                                      let reactDirectory = FindReactDirectory(r)
+                                      select new AssemblyReference
+                                      {
+                                          AssemblyName = Path.GetFileNameWithoutExtension(r),
+                                          AssemblyFullPath = r,
+                                          ReactDirectory = reactDirectory,
+                                          AllTypescriptFiles = GetAllTypescriptFiles(reactDirectory),
+                                      }).ToDictionary(a => a.AssemblyName);
+
+            var entitiesAssembly = Path.GetFileNameWithoutExtension(intermediateAssembly).Replace(".React", ".Entities");
+            var entitiesAssemblyReference = assemblyReferences.GetOrThrow(entitiesAssembly);
+            var entitiesModule = ModuleDefinition.ReadModule(entitiesAssemblyReference.AssemblyFullPath, new ReaderParameters { AssemblyResolver = resolver });
+            var options = new AssemblyOptions
+            {
+                CurrentAssembly = entitiesAssembly,
+                AssemblyReferences = assemblyReferences,
+                AllReferences = references.ToDictionary(a => Path.GetFileNameWithoutExtension(a)),
+                ModuleDefinition = entitiesModule,
+                Resolver = resolver,
+            };
+
 
             var currentDir = Directory.GetCurrentDirectory();
             var files = content
@@ -32,9 +79,7 @@ namespace Signum.TSGenerator
             {
                 try
                 {
-                    //log.WriteLine($"Reading {file}");
-
-                    string result = obj.Process(file, references, projectFile);
+                    string result = EntityDeclarationGenerator.Process(options, file, Path.GetFileNameWithoutExtension(file));
 
                     var targetFile = Path.ChangeExtension(file, ".ts");
                     if (File.Exists(targetFile) && File.ReadAllText(targetFile) == result)
@@ -55,52 +100,48 @@ namespace Signum.TSGenerator
                 }
             }
 
-            log.WriteLine("Finish SignumTSGenerator");
+            MarkAsProcessed(reactAssembly, resolver);
+
+            reactAssembly.Write(intermediateAssembly, new WriterParameters
+            {
+                WriteSymbols = hasPdb,
+                SymbolWriterProvider = hasPdb ? new PdbWriterProvider() : null
+            });
+
+            log.WriteLine($"SignumTSGenerator finished in {sw.ElapsedMilliseconds.ToString()}ms");
+
+            Console.WriteLine();
 
             return hasErrors ? -1 : 0;
         }
-    }
 
-    public class ProxyGenerator
-    {
-        public string Process(string templateFile, string[] referenceList, string projectFile)
+        static bool AlreadyProcessed(AssemblyDefinition assembly)
         {
-            var options = new Options
+            var nameof = typeof(GeneratedCodeAttribute).FullName;
+            var attr = assembly.CustomAttributes
+                .Any(a => a.AttributeType.FullName == nameof && ((string)a.ConstructorArguments[0].Value) == "SignumTask");
+
+            return attr;
+        }
+
+        static void MarkAsProcessed(AssemblyDefinition assembly, IAssemblyResolver resolver)
+        {
+            TypeDefinition generatedCodeAttribute = resolver.Resolve(AssemblyNameReference.Parse(typeof(GeneratedCodeAttribute).Assembly.GetName().Name)).MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
+            MethodDefinition constructor = generatedCodeAttribute.Methods.Single(a => a.IsConstructor && a.Parameters.Count == 2);
+
+            TypeReference stringType = assembly.MainModule.TypeSystem.String;
+            assembly.CustomAttributes.Add(new CustomAttribute(assembly.MainModule.ImportReference(constructor))
             {
-                TemplateFileName = templateFile,
-                CurrentNamespace = Path.GetFileNameWithoutExtension(templateFile),
-                CurrentAssembly = Path.GetFileNameWithoutExtension(projectFile).Replace(".React", ".Entities"),
-                AssemblyReferences = (from r in referenceList
-                                      where r.Contains(".Entities")
-                                      let reactDirectory = ReactDirectoryCache.GetOrAdd(r, FindReactDirectory)
-                                      select new AssemblyReference
-                                      {
-                                          AssemblyName = Path.GetFileNameWithoutExtension(r),
-                                          AssemblyFullPath = r,
-                                          ReactDirectory = reactDirectory,
-                                          AllTypescriptFiles = AllFilesCache.GetOrAdd(reactDirectory, GetAllTypescriptFiles),
-                                      }).ToDictionary(a => a.AssemblyName),
-                AllReferences = referenceList.ToDictionary(a => Path.GetFileNameWithoutExtension(a)),
-            };
-
-            PreloadingAssemblyResolver resolver = new PreloadingAssemblyResolver(referenceList);
-
-            return EntityDeclarationGenerator.Process(options, resolver);
+                ConstructorArguments =
+                {
+                    new CustomAttributeArgument(stringType, "SignumTask"),
+                    new CustomAttributeArgument(stringType, typeof(Program).Assembly.GetName().Version.ToString()),
+                }
+            });
         }
 
-        ConcurrentDictionary<string, List<string>> AllFilesCache = new ConcurrentDictionary<string, List<string>>();
-        public static List<string> GetAllTypescriptFiles(string reactDirectory)
-        {
-            return new DirectoryInfo(reactDirectory).EnumerateFiles("*.ts", SearchOption.AllDirectories)
-                .Concat(new DirectoryInfo(reactDirectory).EnumerateFiles("*.t4s", SearchOption.AllDirectories))
-                .Select(a => a.FullName)
-                .Where(fn => !fn.Contains(@"\obj\") && !fn.Contains(@"\bin\")) //Makes problem when deploying
-                .ToList();
-        }
 
-        ConcurrentDictionary<string, string> ReactDirectoryCache = new ConcurrentDictionary<string, string>();
-
-        private string FindReactDirectory(string absoluteFilePath)
+        static string FindReactDirectory(string absoluteFilePath)
         {
             var prefix = absoluteFilePath;
             while (prefix != null)
@@ -120,34 +161,14 @@ namespace Signum.TSGenerator
 
             throw new InvalidOperationException("Impossible to determine the react directory for '" + absoluteFilePath + "'");
         }
-    }
 
-    public static class Utils
-    {
-        public static string GetReferencedAssembly(this Dictionary<string, string> refs, string assemblyName, string projectName)
+        public static List<string> GetAllTypescriptFiles(string reactDirectory)
         {
-            string value;
-            if (!refs.TryGetValue(assemblyName, out value))
-                throw new InvalidOperationException($"No reference to '{assemblyName}' found in {projectName}.");
-
-            return value;
-        }
-
-        public static V TryConsumeParameter<K, V>(this Dictionary<K, V> dictionary, K key) where V : class
-        {
-            V value;
-            if (!dictionary.TryGetValue(key, out value))
-                return null;
-
-
-            return value;
-        }
-
-        public static int SetLineNumbers(Match m, string file)
-        {
-            var subStr = file.Substring(0, m.Index);
-
-            return subStr.Count(c => c == '\n') + 1;
+            return new DirectoryInfo(reactDirectory).EnumerateFiles("*.ts", SearchOption.AllDirectories)
+                .Concat(new DirectoryInfo(reactDirectory).EnumerateFiles("*.t4s", SearchOption.AllDirectories))
+                .Select(a => a.FullName)
+                .Where(fn => !fn.Contains(@"\obj\") && !fn.Contains(@"\bin\")) //Makes problem when deploying
+                .ToList();
         }
     }
 }
