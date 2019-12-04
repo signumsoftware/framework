@@ -56,18 +56,4 @@ namespace Signum.Entities.Files
         [Description("The name of the file must not contain '%'")]
         TheNameOfTheFileMustNotContainPercentSymbol,
     }
-
-
-    [Serializable, DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
-    public class WebImage
-    {
-        public string? FullWebPath;
-    }
-
-    [Serializable, DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
-    public class WebDownload
-    {
-        public string? FullWebPath;
-        public string FileName;
-    }
 }

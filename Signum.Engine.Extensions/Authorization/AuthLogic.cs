@@ -277,13 +277,15 @@ namespace Signum.Engine.Authorization
             OnRulesChanged?.Invoke();
         }
 
-        public static UserEntity Login(string username, byte[] passwordHash)
+        public static UserEntity Login(string username, byte[] passwordHash, out string authenticationType)
         {
             using (AuthLogic.Disable())
             {
                 UserEntity user = RetrieveUser(username, passwordHash);
 
                 OnUserLogingIn(user);
+
+                authenticationType = "database";
 
                 return user;
             }
@@ -322,16 +324,6 @@ namespace Signum.Engine.Authorization
 
                 return user;
             }
-        }
-
-        public static UserEntity ChangePasswordLogin(string username, byte[] passwordHash, byte[] newPasswordHash)
-        {
-            var userEntity = RetrieveUser(username, passwordHash);
-            userEntity.PasswordHash = newPasswordHash;
-            using (AuthLogic.Disable())
-                userEntity.Execute(UserOperation.Save);
-
-            return Login(username, newPasswordHash);
         }
 
         public static void ChangePassword(Lite<UserEntity> user, byte[] passwordHash, byte[] newPasswordHash)
@@ -682,7 +674,7 @@ namespace Signum.Engine.Authorization
 
     public interface ICustomAuthorizer
     {
-        UserEntity Login(string userName, string password);
+        UserEntity Login(string userName, string password, out string authenticationType);
     }
 
     [Serializable]

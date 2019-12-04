@@ -30,7 +30,7 @@ import "./Mailing.css";
 export var allTypes: string[] = [];
 
 export function start(options: {
-  routes: JSX.Element[], smtpConfig: boolean,
+  routes: JSX.Element[],
   newsletter: boolean,
   pop3Config: boolean,
   sendEmailTask: boolean,
@@ -79,9 +79,7 @@ export function start(options: {
     contextualFromMany: { isVisible: em => true }
   }));
 
-  if (options.smtpConfig) {
-    Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
-  }
+  Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
 
   if (options.newsletter) {
     Navigator.addSettings(new EntitySettings(NewsletterEntity, e => import('./Newsletters/Newsletter')));

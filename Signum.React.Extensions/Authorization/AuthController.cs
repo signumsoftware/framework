@@ -28,14 +28,15 @@ namespace Signum.React.Authorization
             if (string.IsNullOrEmpty(data.password))
                 return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
+            string authenticationType; 
             // Attempt to login
             UserEntity user;
             try
             {
                 if (AuthLogic.Authorizer == null)
-                    user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
+                    user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password), out authenticationType);
                 else
-                    user = AuthLogic.Authorizer.Login(data.userName, data.password);
+                    user = AuthLogic.Authorizer.Login(data.userName, data.password, out authenticationType);
             }
             catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
             {
@@ -73,7 +74,7 @@ namespace Signum.React.Authorization
 
                 var token = AuthTokenServer.CreateToken(user);
 
-                return new LoginResponse { message = message, userEntity = user, token = token };
+                return new LoginResponse { message = message, userEntity = user, token = token, authenticationType = authenticationType };
             }
         }
 
@@ -84,7 +85,7 @@ namespace Signum.React.Authorization
 
             var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
+            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "api-key" };
         }
 
         [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
@@ -99,7 +100,7 @@ namespace Signum.React.Authorization
 
                 var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
+                return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
             }
         }
 
@@ -119,7 +120,7 @@ namespace Signum.React.Authorization
 
                 var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token };
+                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
             }
         }
 
@@ -133,7 +134,7 @@ namespace Signum.React.Authorization
 
                 var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token };
+                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
             }
         }
 
@@ -177,7 +178,7 @@ namespace Signum.React.Authorization
                 user.Save();
             }
 
-            return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
+            return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current), authenticationType = "changePassword" };
         }
 
 
@@ -208,7 +209,7 @@ namespace Signum.React.Authorization
 
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 
-            return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User) };
+            return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }
 
         private BadRequestObjectResult ModelError(string field, string error)
@@ -227,6 +228,7 @@ namespace Signum.React.Authorization
 
         public class LoginResponse
         {
+            public string authenticationType { get; set; }
             public string? message { get; set; }
             public string token { get; set; }
             public UserEntity userEntity { get; set; }

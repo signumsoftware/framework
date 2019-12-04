@@ -27,7 +27,7 @@ import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
 import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
   const [filter, setFilter] = React.useState("");
 
@@ -362,8 +362,6 @@ export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackCon
     );
   }
 });
-
-export default TypesRulesPackControl;
 
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
   return allowed.fallback == allowedBase.fallback

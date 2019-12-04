@@ -15,7 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/codemirror": "0.0.80",
-    "@types/googlemaps": "3.30.16",
+    "@types/googlemaps": "3.38.1",
     "@types/react-rte": "0.16.1"
   }
 }
