@@ -9,7 +9,7 @@ import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";
-import { DropdownButton, Dropdown } from 'react-bootstrap';
+import { NavDropdown, Dropdown } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
@@ -79,22 +79,10 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
   else
     return (
       <div className="nav">
-        {response.elements && response.elements.flatMap(sr => renderDropdownItem(sr, 0, response)).map((sr, i) => withKey(sr, i))}
+        {response.elements && response.elements.flatMap(sr => renderDropdownItem(sr, 0, false, response)).map((sr, i) => withKey(sr, i))}
       </div>
     );
 
-
-  function handleOnToggle(res: ToolbarClient.ToolbarResponse<any>) {
-    if (avoidCollapse.contains(res)) {
-      avoidCollapse.remove(res);
-      return;
-    }
-
-    if (!expanded.contains(res))
-      setExpanded([...expanded, res]);
-    else
-      setExpanded([]);
-  }
 
   function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
 
@@ -111,14 +99,9 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           var title = res.label || res.content!.toStr;
           var icon = getIcon(res);
           return (
-            <Dropdown
-              onToggle={() => handleOnToggle(res)}
-              show={expanded.contains(res)} >
-              <Dropdown.Toggle id={"button" + index}>{!icon ? title : (<span>{icon}{title}</span>)}</Dropdown.Toggle>
-              <Dropdown.Menu>
-                {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 1, res)).map((sr, i) => withKey(sr, i))}
-              </Dropdown.Menu>
-            </Dropdown>
+            <NavDropdown id={"button" + index} title={!icon ? title : (<span>{icon}{title}</span>)}>
+                {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
+            </NavDropdown>
           );
         }
 
@@ -181,7 +164,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
     setExpanded(path);
   }
 
-  function renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
+  function renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, isNavbar: boolean, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
 
     const menuItemN = "menu-item-" + indent;
 
@@ -189,13 +172,18 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
       case "Divider":
         return [
-          <Dropdown.Divider className={menuItemN} />
+          isNavbar ?
+            <NavDropdown.Divider className={menuItemN} /> :
+            <Dropdown.Divider className={menuItemN} />
         ];
 
       case "Header":
       case "Item":
 
-        var HeaderOrItem = res.type == "Header" ? Dropdown.Header : Dropdown.Item;
+        var HeaderOrItem =
+          (isNavbar ?
+            (res.type == "Header" ? NavDropdown.Header : NavDropdown.Item) :
+            (res.type == "Header" ? Dropdown.Header : Dropdown.Item));
 
         if (res.elements && res.elements.length) {
           return [
@@ -203,7 +191,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
               className={classes(menuItemN, "sf-cursor-pointer")}>
               {getIcon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align" />
             </HeaderOrItem>
-          ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, topRes)) : [])
+          ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, isNavbar, topRes)) : [])
         }
 
         if (res.url) {
