@@ -71,7 +71,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
         {p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
         {p.plainExcel && excelReports && excelReports.length > 0 && <Dropdown.Divider />}
         {
-          excelReports && excelReports.map((uq, i) =>
+          excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleClick(uq)}>
               {uq.toStr}

@@ -22,7 +22,7 @@ export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t || null), []);
+  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t ?? null), []);
 
   if (response === undefined)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
@@ -40,7 +40,7 @@ function ToolbarMainRendererPrivate({ response }: { response: ToolbarClient.Tool
         response.elements!.groupWhen(a => a.type == "Divider" || a.type == "Header", false, true).map((gr, i) => <div key={i}>
           {gr.key && gr.key.type == "Divider" && <hr />}
           {gr.key && gr.key.type == "Header" && ToolbarMenuEntity.isLite(gr.key.content) && <CollapsableBlock r={gr.key} />}
-          {gr.key && gr.key.type == "Header" && !ToolbarMenuEntity.isLite(gr.key.content) && <h4>{gr.key.label || getToString(gr.key.content!)}</h4>}
+          {gr.key && gr.key.type == "Header" && !ToolbarMenuEntity.isLite(gr.key.content) && <h4>{gr.key.label ?? getToString(gr.key.content!)}</h4>}
           {gr.elements.length > 0 && <div className="row">
             {gr.elements.map((tr, j) => <div key={j} className="toolbar-card-container">
               <ToolbarIconButton tr={tr} />
@@ -57,7 +57,7 @@ function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div>
-      <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label || getToString(r.content!)}</h4>
+      <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label ?? getToString(r.content!)}</h4>
       <Collapse in={isOpen}>
         <div>
           <ToolbarMainRendererPrivate response={r} />
@@ -77,7 +77,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}
           </div>
           <div className="card-body">
-            <h5 className="card-title">{tr.label || getToString(tr.content!)}</h5>
+            <h5 className="card-title">{tr.label ?? getToString(tr.content!)}</h5>
           </div>
         </div>
       </a>
@@ -147,7 +147,7 @@ function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
   return (
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
-        <h5 className="modal-title">{p.tr.label || getToString(p.tr.content!)}</h5>
+        <h5 className="modal-title">{p.tr.label ?? getToString(p.tr.content!)}</h5>
         <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
           <span aria-hidden="true">&times;</span>
         </button>

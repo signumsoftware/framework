@@ -33,17 +33,17 @@ export default function renderBubblePack({ data, width, height, parameters, load
   }
   else if (colorSchemeColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
-    color = r => colorSchemeColumn!.getColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
+    color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
   }
   else {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
-    color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
+    color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)));
-    folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
+    folderColor = folder => parentColumn!.getColor(folder) ?? categoryColor(parentColumn!.getKey(folder));
   }
 
   var format = d3.format(",d");
@@ -81,8 +81,8 @@ export default function renderBubblePack({ data, width, height, parameters, load
         nodes.orderByDescending(a => a.r).map(d => <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
           onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }) : onDrillDown(d.data)}>
           <circle className="sf-transition" shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
-            fillOpacity={parameters["FillOpacity"] || undefined}
-            stroke={parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || undefined))}
+            fillOpacity={parameters["FillOpacity"] ?? undefined}
+            stroke={parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
             strokeWidth={parameters["StrokeWidth"]} strokeOpacity={1} />
           {!isFolder(d.data) &&
             <TextEllipsis maxWidth={d.r * 2} padding={1} etcText=""
@@ -91,7 +91,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
             </TextEllipsis>
           }
           {showNumber && d.r > numberSizeLimit && !isFolder(d.data) &&
-            <text fill={parameters["NumberColor"] || "#000"}
+            <text fill={parameters["NumberColor"] ?? "#000"}
               dominantBaseline="middle"
               textAnchor="middle"
               fontWeight="bold"

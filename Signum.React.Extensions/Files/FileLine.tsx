@@ -34,7 +34,7 @@ export class FileLineController extends EntityBaseController<FileLineProps>{
     super.getDefaultProps(state);
 
     const m = state.ctx.propertyRoute.member;
-    if (m && m.defaultFileTypeInfo) {
+    if (m?.defaultFileTypeInfo) {
 
       if (state.fileType == null)
         state.fileType = getSymbol(FileTypeSymbol, m.defaultFileTypeInfo.key)

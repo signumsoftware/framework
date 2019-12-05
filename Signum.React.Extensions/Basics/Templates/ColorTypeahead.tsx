@@ -78,7 +78,7 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
 
   return (
     <Typeahead
-      value={p.color || ""}
+      value={p.color ?? ""}
       inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
       getItems={handleGetItems}
       onSelect={handleSelect}

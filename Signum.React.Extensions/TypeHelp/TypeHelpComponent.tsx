@@ -255,7 +255,7 @@ TypeHelpComponent.getExpression = function getExpression(initial: string, pr: Pr
       const mixin = curr.trimStart("[").trimEnd("]");
       return mode == "CSharp" ?
         `${prev}.Mixin<${mixin}>()` :
-        options && options.stronglyTypedMixinTS ?
+        options?.stronglyTypedMixinTS ?
           `getMixin(${prev}, ${mixin})` :
           `${prev}.mixins["${mixin}"]`;
     }

@@ -9,7 +9,7 @@ export default function IFrameRenderer({ html, ...props }: IFrameRendererProps) 
   const iframe = React.useRef<HTMLIFrameElement>(null)
 
   React.useEffect(() => {
-    iframe.current!.contentDocument!.body.innerHTML = html || "";
+    iframe.current!.contentDocument!.body.innerHTML = html ?? "";
   }, [html]);
 
   return <iframe {...props} ref={iframe}></iframe>;

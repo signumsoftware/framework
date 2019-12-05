@@ -56,11 +56,11 @@ export function IconTypeahead(p: IconTypeaheadProps) {
   };
 
   var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${prefix} fa-${name}`));
-  var icons = ([] as string[]).concat(p.extraIcons || []).concat(fontAwesome);
+  var icons = ([] as string[]).concat(p.extraIcons ?? []).concat(fontAwesome);
 
   function handleGetItems(query: string) {
     if (!query)
-      return Promise.resolve(([] as string[]).concat(p.extraIcons || []).concat(["far fa-", "fas fa-"]));
+      return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []).concat(["far fa-", "fas fa-"]));
 
     const result = icons
       .filter(k => k.toLowerCase().contains(query.toLowerCase()))
@@ -89,7 +89,7 @@ export function IconTypeahead(p: IconTypeaheadProps) {
 
   return (
     <Typeahead
-      value={p.icon || ""}
+      value={(p.icon ?? "")}
       inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
       getItems={handleGetItems}
       onSelect={handleSelect}

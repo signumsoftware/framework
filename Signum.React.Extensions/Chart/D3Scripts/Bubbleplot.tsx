@@ -63,7 +63,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
   if (parameters["ColorScale"] == "Ordinal") {
     var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
     var categoryColor = d3.scaleOrdinal(scheme).domain(orderRows.map(r => colorKeyColumn.getValueKey(r)));
-    color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
+    color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
   } else {
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(r => colorKeyColumn.getValue(r) as number), 0, 1, parameters["ColorScale"]);
     var colorInterpolate = parameters["ColorInterpolate"];
@@ -91,8 +91,8 @@ export default function renderBubbleplot({ data, width, height, parameters, load
           onClick={e => onDrillDown(r)}
         >
           <circle className="shape sf-transition"
-            stroke={colorKeyColumn.getValueColor(r) || color(r)}
-            strokeWidth={3} fill={colorKeyColumn.getValueColor(r) || color(r)}
+            stroke={colorKeyColumn.getValueColor(r) ?? color(r)}
+            strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
             fillOpacity={parseFloat(parameters["FillOpacity"])}
             shapeRendering="initial"
             r={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI)} />
@@ -102,7 +102,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
             <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI) * 2}
               padding={0} etcText=""
               className="number-label"
-              fill={parameters["LabelColor"] || colorKeyColumn.getValueColor(r) || color(r)}
+              fill={parameters["LabelColor"] ?? colorKeyColumn.getValueColor(r) ?? color(r)}
               dominantBaseline="middle"
               textAnchor="middle"
               fontWeight="bold">

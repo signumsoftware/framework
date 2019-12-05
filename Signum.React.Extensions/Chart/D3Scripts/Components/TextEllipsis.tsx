@@ -27,7 +27,7 @@ export default function TextEllipsis({ maxWidth, padding, children, etcText, ...
       text = text.slice(0, -1);
       while (text[text.length - 1] == ' ' && text.length > 0)
         text = text.slice(0, -1);
-      txtElem.textContent = text + (etcText ||  "…");
+      txtElem.textContent = text + (etcText ??  "…");
       textLength = txtElem.getComputedTextLength();
     }
 
@@ -35,7 +35,7 @@ export default function TextEllipsis({ maxWidth, padding, children, etcText, ...
 
   return (
     <text ref={txt} {...atts} >
-      {children || ""}
+      {children ?? ""}
     </text>
   );
 }

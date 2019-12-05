@@ -16,7 +16,7 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
   }
 
   getIcon(element: ToolbarResponse<UserChartEntity>) {
-    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), "chart-bar"), element.iconColor || "darkviolet");
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), "chart-bar"), element.iconColor ?? "darkviolet");
   }
 
   navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {

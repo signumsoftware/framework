@@ -61,8 +61,8 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
       <fieldset>
         <legend>TEST</legend>
         {renderExampleEntity(ctx.value.entityType!.cleanName)}
-        {res && res.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
-        {res && res.type == "RESULT" && <div className={classes("alert", getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
+        {res?.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
+        {res?.type == "RESULT" && <div className={classes("alert", getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
       </fieldset>
     );
   }
@@ -130,7 +130,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   }
 
   function allViewNames() {
-    return ["NEW", "STATIC", "CHOOSE"].concat(viewNames || []);
+    return ["NEW", "STATIC", "CHOOSE"].concat(viewNames ?? []);
   }
 
   function handleViewNameClick(viewName: string) {
@@ -165,7 +165,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
             <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
           </div>
         </pre>
-        <JavascriptCodeMirror code={ctx.value.script || ""} onChange={handleCodeChange} />
+        <JavascriptCodeMirror code={ctx.value.script ?? ""} onChange={handleCodeChange} />
         {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>
     );

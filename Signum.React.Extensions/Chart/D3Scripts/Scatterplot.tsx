@@ -59,7 +59,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   var color: (val: ChartRow) => string;
   if (parameters["ColorScale"] == "Ordinal" || (colorKeyColumn.type != "Integer" && colorKeyColumn.type != "Real")) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorKeyColumn.getValueKey));
-    color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
+    color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
 
   } else {
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(colorKeyColumn.getValue) as number[], 0, 1, parameters["ColorScale"]);
@@ -79,8 +79,8 @@ export default function renderScatterplot({ data, width, height, parameters, loa
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
             <circle className="shape sf-transition"
               transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}
-              stroke={colorKeyColumn.getValueColor(r) || color(r)}
-              fill={colorKeyColumn.getValueColor(r) || color(r)}
+              stroke={colorKeyColumn.getValueColor(r) ?? color(r)}
+              fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
               r={pointSize}
               onClick={e => onDrillDown(r)}
@@ -147,7 +147,7 @@ class CanvasScatterplot extends React.Component<{
     vctx.clearRect(0, 0, w, h);
     data.rows.forEach((r, i) => {
 
-      var c = colorKeyColumn.getValueColor(r) || color(r);
+      var c = colorKeyColumn.getValueColor(r) ?? color(r);
 
       ctx.fillStyle = c;
       ctx.strokeStyle = c;

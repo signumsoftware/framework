@@ -37,7 +37,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
 
   React.useEffect(() => {
     var uc = p.chartRequestView.userChart;
-    if (uc && uc.toStr == null) {
+    if (uc?.toStr == null) {
       Navigator.API.fillToStrings(uc)
         .then(() => forceUpdate())
         .done();
@@ -94,7 +94,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
       parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
     }));
 
-    if (uc && uc.id) {
+    if (uc?.id) {
       crView.onChange(cr, toLite(uc));
     }
   }
@@ -109,14 +109,14 @@ export default function UserChartMenu(p : UserChartMenuProps){
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {
-          userCharts && userCharts.map((uc, i) =>
+          userCharts?.map((uc, i) =>
             <Dropdown.Item key={i}
               className={classes("sf-userquery", is(uc, crView.userChart) && "active")}
               onClick={() => handleSelect(uc)}>
               {uc.toStr}
             </Dropdown.Item>)
         }
-        {userCharts && userCharts.length > 0 && <Dropdown.Divider />}
+        {userCharts?.length && <Dropdown.Divider />}
         {crView.userChart && <Dropdown.Item onClick={handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
         <Dropdown.Item onClick={() => onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
       </Dropdown.Menu>

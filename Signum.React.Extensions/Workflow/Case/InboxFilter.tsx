@@ -115,7 +115,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
 
     var result = InboxFilterModel.New({
       range: extractFilterValue(filters, "Range", "EqualTo"),
-      states: (extractFilterValue(filters, "State", "IsIn") as CaseNotificationState[] || []).map(b => newMListElement(b)),
+      states: (extractFilterValue(filters, "State", "IsIn") as CaseNotificationState[] ?? []).map(b => newMListElement(b)),
       fromDate: extractFilterValue(filters, "StartDate", "GreaterThanOrEqual"),
       toDate: extractFilterValue(filters, "StartDate", "LessThanOrEqual"),
     });

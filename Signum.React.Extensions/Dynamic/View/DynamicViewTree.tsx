@@ -375,7 +375,7 @@ export function DynamicViewNode(p: DynamicViewNodeProps) {
         {renderIcon()}
         <span
           className={className}
-          title={error || undefined}
+          title={error ?? undefined}
           onClick={e => dn.context.setSelectedNode(dn)}
           onContextMenu={e => tree.handleNodeTextContextMenu(dn, e)}>
           {NodeUtils.registeredNodes[dn.node.kind].renderTreeNode(dn)}

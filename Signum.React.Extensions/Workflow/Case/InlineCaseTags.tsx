@@ -17,7 +17,7 @@ export interface InlineCaseTagsProps {
 
 export default function InlineCaseTags(p: InlineCaseTagsProps) {
 
-  const [tags, setTags] = React.useState<CaseTagTypeEntity[]>(() => p.defaultTags || []);
+  const [tags, setTags] = React.useState<CaseTagTypeEntity[]>(() => p.defaultTags ?? []);
 
   React.useEffect(() => {
     if (p.defaultTags) {
@@ -28,7 +28,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
         .done();
     }
 
-  }, [p.case, ...p.defaultTags || []]);
+  }, [p.case, ...p.defaultTags ?? []]);
 
   function handleTagsClick(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -39,7 +39,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
     });
 
     Navigator.view(model,
-      { title: p.case.toStr || "" })
+      { title: p.case.toStr ?? "" })
       .then(cm => {
         if (!cm)
           return;

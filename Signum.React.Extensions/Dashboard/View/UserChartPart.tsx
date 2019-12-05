@@ -46,7 +46,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   if (!chartRequest)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-  if (resultOrError && resultOrError.error) {
+  if (resultOrError?.error) {
     return (
       <div>
         <h4>Error!</h4>
@@ -55,7 +55,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     );
   }
 
-  const result = resultOrError && resultOrError.result!;
+  const result = resultOrError?.result!;
 
   return (
     <div>
@@ -70,7 +70,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
           resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
         <ChartRenderer chartRequest={chartRequest} lastChartRequest={chartRequest}
-          data={result && result.chartTable} loading={result == null} />
+          data={result?.chartTable} loading={result == null} />
       }
     </div>
   );

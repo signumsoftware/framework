@@ -32,7 +32,7 @@ export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
           </div>
       }
       {
-        prev && prev.note && <div className="alert alert-warning case-alert">
+        prev?.note && <div className="alert alert-warning case-alert">
           <strong>{CaseActivityEntity.nicePropertyName(a => a.note)}:</strong>
           {prev.note.contains("\n") ? "\n" : null}
           {prev.note}

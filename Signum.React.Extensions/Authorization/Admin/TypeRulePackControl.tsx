@@ -189,7 +189,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
 
 
   function handleAddConditionClick(remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
-    SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") || a.toStr })
+    SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") ?? a.toStr })
       .then(tc => {
         if (!tc)
           return;
@@ -278,7 +278,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
             {"\u00A0 \u00A0".repeat(i + 1)}
             <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
-            <small>{c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr}</small>
+            <small>{c.typeCondition.toStr.tryAfter(".") ?? c.typeCondition.toStr}</small>
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
             {colorRadio(b, "Write", "green")}

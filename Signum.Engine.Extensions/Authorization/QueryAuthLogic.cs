@@ -17,6 +17,8 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed> cache = null!;
 
+        public static HashSet<object> AvoidCoerce = new HashSet<object>();
+
         public static IManualAuth<object, QueryAllowed> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
@@ -149,6 +151,11 @@ namespace Signum.Engine.Authorization
 
             return implementations.Types.All(t => getAllowed(t).MaxUI() != TypeAllowedBasic.None);
         }
+
+        public static void SetAvoidCoerce(object queryName)
+        {
+            AvoidCoerce.Add(queryName);
+        }
     }
 
     class QueryMerger : IMerger<object, QueryAllowed>
@@ -241,6 +248,9 @@ namespace Signum.Engine.Authorization
         {
             return (queryName, allowed) =>
             {
+                if (QueryAuthLogic.AvoidCoerce.Contains(queryName))
+                    return allowed;
+
                 if (allowed == QueryAllowed.None)
                     return allowed;
 
@@ -254,6 +264,9 @@ namespace Signum.Engine.Authorization
         {
             return (role, allowed) =>
             {
+                if (QueryAuthLogic.AvoidCoerce.Contains(queryName))
+                    return allowed;
+
                 if (allowed == QueryAllowed.None)
                     return allowed;
 

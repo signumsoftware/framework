@@ -22,10 +22,10 @@ export function start(options: { routes: JSX.Element[] }) {
   registerAutoFileLine(FilePathEntity);
   registerAutoFileLine(FilePathEmbedded);
 
-  registerToString(FileEntity, f => f.toStr || f.fileName);
-  registerToString(FileEmbedded, f => f.toStr || f.fileName);
-  registerToString(FilePathEntity, f => f.toStr || f.fileName);
-  registerToString(FilePathEmbedded, f => f.toStr || f.fileName);
+  registerToString(FileEntity, f => f.toStr ?? f.fileName);
+  registerToString(FileEmbedded, f => f.toStr ?? f.fileName);
+  registerToString(FilePathEntity, f => f.toStr ?? f.fileName);
+  registerToString(FilePathEmbedded, f => f.toStr ?? f.fileName);
 }
 
 
@@ -36,7 +36,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
       return <MultiFileLine ctx={ctx} />;
 
     var m = ctx.propertyRoute.member;
-    if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
+    if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
       return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
 
     return <FileLine ctx={ctx} />;
@@ -76,10 +76,10 @@ function isImage(propertyRoute: string | undefined) {
 
   let pr = PropertyRoute.parseFull(propertyRoute);
 
+  return Boolean(pr?.member && pr.member.defaultFileTypeInfo && pr.member.defaultFileTypeInfo.onlyImages);
   if (pr.propertyRouteType == "MListItem")
     pr = pr.parent!;
 
-  return Boolean(pr && pr.member && pr.member.defaultFileTypeInfo && pr.member.defaultFileTypeInfo.onlyImages);
 
 }
 

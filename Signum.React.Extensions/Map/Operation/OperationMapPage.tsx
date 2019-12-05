@@ -69,7 +69,7 @@ export default function OperationMapPage(p: OperationMapPageProps) {
     const parsedQuery = getParsedQuery(p.location);
 
     setNodes(parsedQuery.nodes);
-    setColor(parsedQuery.color || "");
+    setColor(parsedQuery.color ?? "");
   }, []);
 
   const { size, setContainer } = useSize();

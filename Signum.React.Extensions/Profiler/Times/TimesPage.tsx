@@ -59,7 +59,7 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
           <tr className="task" key={i}>
             <td>
               <div>
-                <span className="processName"> {pair.key.tryBefore(' ') || pair.key}</span>
+                <span className="processName"> {pair.key.tryBefore(' ') ?? pair.key}</span>
                 {pair.key.tryAfter(' ') != undefined && <span className="entityName"> {pair.key.after(' ')} </span>}
               </div>
               <div>
@@ -131,7 +131,7 @@ function TimesTable({ times }: { times: TimeTrackerEntry[] }) {
         {times.map((pair, i) =>
           <tr style={{ background: "#FFFFFF" }} key={i}>
             <td>
-              <span className="processName"> {pair.key.tryBefore(' ') || pair.key}</span>
+              <span className="processName"> {pair.key.tryBefore(' ') ?? pair.key}</span>
             </td>
             <td>
               {pair.key.tryAfter(' ') && <span className="entityName">{pair.key.tryAfter(' ')}</span>}

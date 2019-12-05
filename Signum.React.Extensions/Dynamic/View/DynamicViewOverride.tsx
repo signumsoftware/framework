@@ -155,7 +155,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
         setComponentType(null);
       else {
         const ctx = p.ctx;
-        return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName || undefined).promise.then(func => {
+        return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName ?? undefined).promise.then(func => {
           var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
           var re = func(tempCtx);
           setComponentType(re.type as React.ComponentType<{ ctx: TypeContext<Entity> }>);
@@ -194,7 +194,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
             <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
           </div>
         </pre>
-        <JavascriptCodeMirror code={ctx.value.script || ""} onChange={handleCodeChange} />
+        <JavascriptCodeMirror code={ctx.value.script ?? ""} onChange={handleCodeChange} />
         {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>
     );
@@ -255,7 +255,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
           {
             <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={handleViewNameChange}>
               <option value="">{" - "}</option>
-              {(viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
+              {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
             </select>
 }
         </FormGroup>

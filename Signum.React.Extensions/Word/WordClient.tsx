@@ -69,7 +69,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
               .then<Response | undefined>(lite => lite && API.createAndDownloadReport({ template, lite }));
           else {
             var s = settings[ct];
-            var promise = (s && s.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.constructPack(ct).then(a => a && Navigator.view(a)));
+            var promise = (s?.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.constructPack(ct).then(a => a && Navigator.view(a)));
             return promise.then<Response | undefined>(entity => entity && API.createAndDownloadReport({ template, entity }));
           }
         })

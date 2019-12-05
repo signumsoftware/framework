@@ -33,7 +33,7 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
       codeMirror.on('change', codemirrorValueChanged);
     codeMirror.on('focus', () => focusChanged(true));
     codeMirror.on('blur', () => focusChanged.bind(false));
-    codeMirror.setValue(p.value || '');
+    codeMirror.setValue(p.value ?? '');
 
     return () => {
       codeMirror.toTextArea();
@@ -45,7 +45,7 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
     const codeMirror = codeMirrorRef.current;
     if (codeMirror && p.value != codeMirror.getValue()) {
       codeMirror.off('change', codemirrorValueChanged);
-      codeMirror.setValue(p.value || "");
+      codeMirror.setValue(p.value ?? "");
       codeMirror.on('change', codemirrorValueChanged);
     }
   }, [p.value]);
@@ -102,7 +102,7 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
   return (
     <div className={editorClassName}>
       <style>{css}</style>
-      <textarea ref={textAreaRef} name={p.path} defaultValue={p.value || undefined} autoComplete="off" />
+      <textarea ref={textAreaRef} name={p.path} defaultValue={p.value ?? undefined} autoComplete="off" />
     </div>
   );
 });

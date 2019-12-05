@@ -107,18 +107,18 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     var conIcons = this.viewer.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.action || undefined;
+      return mod?.action || undefined;
     };
 
     conIcons.hasCondition = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.condition || undefined;
+      return mod?.condition || undefined;
     };
 
     var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
     caseFlowRenderer.getConnectionType = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.type || undefined;
+      return mod?.type || undefined;
     }
 
     caseFlowRenderer.viewer = this.viewer;

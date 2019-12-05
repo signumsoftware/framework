@@ -226,7 +226,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
             {operations[DynamicViewOperation.Create.key] && <Dropdown.Item onClick={handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</Dropdown.Item>}
             {operations[DynamicViewOperation.Clone.key] && !p.dynamicView.isNew && <Dropdown.Item onClick={handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</Dropdown.Item>}
             {viewNames && viewNames.length > 0 && <Dropdown.Divider />}
-            {viewNames && viewNames.map(vn => <Dropdown.Item key={vn}
+            {viewNames?.map(vn => <Dropdown.Item key={vn}
               className={classes("sf-dynamic-view", vn == p.dynamicView.viewName && "active")}
               onClick={() => handleChangeView(vn)}>
               {vn}

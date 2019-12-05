@@ -45,10 +45,10 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
   return (
     <div>
-      <FormGroup ctx={ctx} labelText={ctx.value.label || getQueryNiceName(fo.queryName)}>
+      <FormGroup ctx={ctx} labelText={ctx.value.label ?? getQueryNiceName(fo.queryName)}>
         <span className="form-inline">
-          <span>{ctx.value.label || getQueryNiceName(fo.queryName)}</span>&nbsp;
-                      <ValueSearchControlLine ctx={ctx2} findOptions={fo} />
+          <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>&nbsp;
+          <ValueSearchControlLine ctx={ctx2} findOptions={fo} />
         </span>
       </FormGroup>
     </div>

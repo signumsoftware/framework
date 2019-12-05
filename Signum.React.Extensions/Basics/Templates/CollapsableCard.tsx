@@ -26,9 +26,9 @@ interface CardStyle {
 
 function cardStyleClasses(style?: CardStyle) {
   return classes(
-    style && style.text && "text-" + style.text,
-    style && style.background && "bg-" + style.background,
-    style && style.border && "border-" + style.border,
+    style?.text && "text-" + style.text,
+    style?.background && "bg-" + style.background,
+    style?.border && "border-" + style.border,
   )
 }
 

@@ -52,7 +52,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
 
         const t = a.element.token;
 
-        if (t && t.token && !hasAggregate(t!.token!) && r.hasOwnProperty("c" + i)) {
+        if (t?.token && !hasAggregate(t!.token!) && r.hasOwnProperty("c" + i)) {
           filters.push({
             token: t!.token!,
             operation: "EqualTo",
@@ -61,7 +61,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
           } as FilterOptionParsed);
         }
 
-        if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+        if (t?.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
         {
           var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
 

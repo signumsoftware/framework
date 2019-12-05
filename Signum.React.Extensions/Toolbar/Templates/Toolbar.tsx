@@ -39,7 +39,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
         template: ctx => {
           var icon = Dashboard.parseIcon(ctx.value.iconName);
           var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "white" ? "black" : undefined)
-          return icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx.value.iconColor || undefined, fontSize: "25px" }} />
+          return icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
         },
       },
       { property: a => a.type, headerHtmlAttributes: { style: { width: "15%" } }, template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.type)} onChange={() => { fixToolbarElementType(ctx.value); row.forceUpdate(); }} /> },

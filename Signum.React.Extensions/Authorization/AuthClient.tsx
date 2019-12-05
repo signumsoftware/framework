@@ -60,7 +60,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
         var userName = se.newValue!.before("&&");
 
         var cu = currentUser();
-        if (cu && cu.userName == userName)
+        if (cu?.userName == userName)
           logoutInternal();
       }
     });
@@ -188,10 +188,10 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   if (ti == undefined)
     return false;
 
-  if (entityPack && entityPack.typeAllowed)
+  if (entityPack?.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
 
-  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed== "Read";
+  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
 }
 
 export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
@@ -200,7 +200,7 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
   if (ti == undefined)
     return true;
 
-  if (entityPack && entityPack.typeAllowed)
+  if (entityPack?.typeAllowed)
     return entityPack.typeAllowed != "None";
 
   return ti.maxTypeAllowed != "None";
@@ -254,7 +254,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
     }, ifError<ServiceError, Response>(ServiceError, e => {
 
-      if (e.httpError.exceptionType && e.httpError.exceptionType.endsWith(".AuthenticationException")) {
+      if (e.httpError.exceptionType?.endsWith(".AuthenticationException")) {
         setAuthToken(undefined, undefined);
         Navigator.history.push("~/auth/login");
       }
@@ -264,16 +264,16 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 }
 
 export function getAuthToken(): string | undefined {
-  return sessionStorage.getItem("authToken") || undefined;
+  return sessionStorage.getItem("authToken") ?? undefined;
 }
 
 export function getAuthorizationType(): string | undefined {
-  return sessionStorage.getItem("authorizationType") || undefined;
+  return sessionStorage.getItem("authorizationType") ?? undefined;
 }
 
 export function setAuthToken(authToken: string | undefined, authorizationType: string | undefined): void {
-  sessionStorage.setItem("authToken", authToken || "");
-  sessionStorage.setItem("authorizationType", authorizationType || "");
+  sessionStorage.setItem("authToken", authToken ?? "");
+  sessionStorage.setItem("authorizationType", authorizationType ?? "");
 }
 
 export function autoLogin(): Promise<UserEntity | undefined> {
@@ -412,7 +412,7 @@ export namespace Options {
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key || permission as string;
+  var key = (permission as PermissionSymbol).key ?? permission as string;
   const type = getTypeInfo(key.before("."));
   if (!type)
     throw new Error(`Type '${key.before(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
@@ -425,7 +425,7 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
 }
 
 export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key || permission as string;
+  var key = (permission as PermissionSymbol).key ?? permission as string;
   if (!isPermissionAuthorized(key))
     throw new Error(`Permission ${key} is denied`);
 }

@@ -69,7 +69,7 @@ export module Converter {
     else
       return ({
         token: fr.token,
-        operation: fr.operation || "EqualTo",
+        operation: fr.operation ?? "EqualTo",
         value: fr.value,
         frozen: false,
         pinned: fr.pinned,
@@ -87,7 +87,7 @@ export module Converter {
     else
       return ({
         token: fr.token!.fullKey,
-        operation: fr.operation || "EqualTo",
+        operation: fr.operation ?? "EqualTo",
         value: fr.value,
         pinned: fr.pinned
       } as FilterConditionOption);
@@ -107,7 +107,7 @@ export module Converter {
     else
       return ({
         tokenString: fr.token!.toString(),
-        operation: fr.operation || "EqualTo",
+        operation: fr.operation ?? "EqualTo",
         value: fr.value,
         pinned: fr.pinned,
       });
@@ -153,10 +153,10 @@ export module Converter {
 
     return ({
       isGroup: e.isGroup,
-      groupOperation: e.groupOperation || undefined,
+      groupOperation: e.groupOperation ?? undefined,
       tokenString: e.token ? e.token.tokenString! : undefined,
-      operation: e.operation || undefined,
-      valueString: e.valueString || undefined,
+      operation: e.operation ?? undefined,
+      valueString: e.valueString ?? undefined,
       pinned: e.pinned ? toPinnedFilter(e.pinned) : undefined,
       indentation: e.indentation!,
     });

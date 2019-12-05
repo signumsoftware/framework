@@ -102,8 +102,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
   handleGroupChange = () => {
 
     const p = this.props.ctx.value;
-    p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false)!);
-    p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false)!);
+    p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token ?? null, p.mainQuery.groupResults)!);
+    p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token ?? null, p.mainQuery.groupResults)!);
     this.forceUpdate();
   }
 
@@ -337,9 +337,9 @@ export function TrainingProgressComponent(p: TrainingProgressComponentProps) {
 
   return (
     <div>
-      {tp && tp.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, p.ctx.value)} />}
+      {tp?.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, p.ctx.value)} />}
       <ProgressBar color={tp == null || tp.running == false ? "warning" : null}
-        value={tp && tp.progress}
+        value={tp?.progress}
         message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.message}
       />
     </div>

@@ -69,7 +69,7 @@ export function SMSTemplateMessageComponent(p: SMSTemplateMessageComponentProps)
   }
 
 
-  var throttleText = useThrottle(p.ctx.value.message || "", 1000);
+  var throttleText = useThrottle(p.ctx.value.message ?? "", 1000);
   var remaining = useAPI(abort => SMSClient.API.getRemainingCharacters(throttleText, p.removeNoSMSCharacters), [throttleText, p.removeNoSMSCharacters], { avoidReset: true });
 
   const ec = p.ctx.subCtx({ labelColumns: { sm: 1 } });

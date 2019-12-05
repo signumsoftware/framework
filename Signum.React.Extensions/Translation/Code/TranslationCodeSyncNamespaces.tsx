@@ -53,7 +53,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
       </table>
     );
   }
-  if (result && result.length == 0) {
+  if (result?.length == 0) {
     return (
       <div>
         <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>

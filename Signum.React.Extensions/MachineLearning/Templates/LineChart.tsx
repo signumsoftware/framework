@@ -79,7 +79,7 @@ export default function LineChart(p: LineChartProps) {
 
     return (
       <g key={index}>
-        <path className="line" fill="none" d={line(s.values) || undefined} style={{
+        <path className="line" fill="none" d={line(s.values) ?? undefined} style={{
           stroke: s.color, strokeWidth: s.strokeWidth
         }}>
         </path>

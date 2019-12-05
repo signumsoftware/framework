@@ -123,18 +123,18 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     var conIcons = this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.action || undefined;
+      return mod?.action ?? undefined;
     };
 
     conIcons.hasCondition = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.condition || undefined;
+      return mod?.condition ?? undefined;
     };
 
     var cusRenderer = this.modeler.get<customRenderer.CustomRenderer>('customRenderer');
     cusRenderer.getConnectionType = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.type || undefined;
+      return mod?.type ?? undefined;
     }
 
     conIcons.show();
@@ -328,7 +328,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         if (WorkflowConnectionModel.isInstance(me)) {
 
           if (newName)
-            newName = newName.tryBeforeLast(":") || newName;
+            newName = newName.tryBeforeLast(":") ?? newName;
 
           if (me.order)
             newName = newName + ": " + me.order;
@@ -366,7 +366,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
     else if (e.element.type == "bpmn:IntermediateCatchEvent") {
       var event = this.getModel(e.element) as WorkflowEventModel;
-      if (event && event.timer) {
+      if (event?.timer) {
         var shouldEvent = event.timer.condition ? "bpmn:ConditionalEventDefinition" : "bpmn:TimerEventDefinition";
         this.changeElementDefinition(e.element, shouldEvent);
       }
@@ -440,7 +440,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       }
       else {
         var model = this.props.entities[element.id];
-        if (model && model.isNew)
+        if (model?.isNew)
           delete this.props.entities[element.id];
       };
     });

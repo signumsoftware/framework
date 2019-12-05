@@ -37,7 +37,7 @@ interface ExpressionOrValueComponentHandle {
 export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
   function updateValue(value: string | boolean | null | undefined) {
 
-    var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
+    var parsedValue = p.type != "number" ? value : (parseFloat(value as string) ?? null);
 
     if (parsedValue === "")
       parsedValue = null;
@@ -47,7 +47,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
     else
       p.binding.setValue(parsedValue);
 
-    (p.refreshView || p.dn.context.refreshView)();
+    (p.refreshView ?? p.dn.context.refreshView)();
   }
 
   function handleChangeCheckbox(e: React.ChangeEvent<any>) {
@@ -78,10 +78,10 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
     }
     else
       p.binding.setValue({
-        __code__: p.exampleExpression || JSON.stringify(value == undefined ? p.defaultValue : value)
+        __code__: p.exampleExpression ?? JSON.stringify(value == undefined ? p.defaultValue : value)
       } as Expression<any>);
 
-    (p.refreshView || p.dn.context.refreshView)();
+    (p.refreshView ?? p.dn.context.refreshView)();
   }
 
 
