@@ -4,90 +4,86 @@ import { classes, Dic } from '@framework/Globals'
 import { Binding } from '@framework/Reflection'
 import { EntityControlMessage } from '@framework/Signum.Entities'
 import { ExpressionOrValueComponent, DesignerModal } from './Designer'
-import { DesignerNode } from './NodeUtils'
+import { DesignerNode, isExpression } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { StyleOptionsExpression, formGroupStyle, formSize } from './StyleOptionsExpression'
+import { useForceUpdate } from '@framework/Hooks'
 
 interface StyleOptionsLineProps {
   binding: Binding<StyleOptionsExpression | undefined>;
   dn: DesignerNode<BaseNode>;
 }
 
-export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
-
-  renderMember(expr: StyleOptionsExpression | undefined): React.ReactNode {
+export function StyleOptionsLine(p : StyleOptionsLineProps){
+  function renderMember(expr: StyleOptionsExpression | undefined): React.ReactNode {
     return (<span
       className={expr === undefined ? "design-default" : "design-changed"}>
-      {this.props.binding.member}
+      {p.binding.member}
     </span>);
   }
 
-  handleRemove = (e: React.MouseEvent<any>) => {
+  function handleRemove(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.props.binding.deleteValue();
-    this.props.dn.context.refreshView();
+    p.binding.deleteValue();
+    p.dn.context.refreshView();
   }
 
-  handleCreate = (e: React.MouseEvent<any>) => {
+  function handleCreate(e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.modifyExpression({} as StyleOptionsExpression);
+    modifyExpression({} as StyleOptionsExpression);
   }
 
-  handleView = (e: React.MouseEvent<any>) => {
+  function handleView(e: React.MouseEvent<any>) {
     e.preventDefault();
-    var hae = JSON.parse(JSON.stringify(this.props.binding.getValue())) as StyleOptionsExpression;
-    this.modifyExpression(hae);
+    var hae = JSON.parse(JSON.stringify(p.binding.getValue())) as StyleOptionsExpression;
+    modifyExpression(hae);
   }
 
-  modifyExpression(soe: StyleOptionsExpression) {
-
-    DesignerModal.show("StyleOptions", () => <StyleOptionsComponent dn={this.props.dn} styleOptions={soe} />).then(result => {
+  function modifyExpression(soe: StyleOptionsExpression) {
+    DesignerModal.show("StyleOptions", () => <StyleOptionsComponent dn={p.dn} styleOptions={soe} />).then(result => {
       if (result) {
 
         if (Dic.getKeys(soe).length == 0)
-          this.props.binding.deleteValue();
+          p.binding.deleteValue();
         else
-          this.props.binding.setValue(soe);
+          p.binding.setValue(soe);
       }
 
-      this.props.dn.context.refreshView();
+      p.dn.context.refreshView();
     }).done();
   }
 
-  render() {
-    const val = this.props.binding.getValue();
 
-    return (
-      <div className="form-group form-group-xs">
-        <label className="control-label label-xs">
-          {this.renderMember(val)}
-
-          {val && " "}
-          {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
-            onClick={this.handleRemove}
-            title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
-          </a>}
-        </label>
-        <div>
-          {val ?
-            <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
-            :
-            <a href="#" title={EntityControlMessage.Create.niceToString()}
-              className="sf-line-button sf-create"
-              onClick={this.handleCreate}>
-              <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
-            </a>}
-        </div>
-      </div>
-    );
-  }
-
-  getDescription(soe: StyleOptionsExpression) {
-
-    var keys = Dic.map(soe as any, (key, value) => key + ":" + value);
+  function getDescription(soe: StyleOptionsExpression) {
+    var keys = Dic.map(soe as any, (key, value) => key + ": " + (isExpression(value) ? value.__code__ : value));
     return keys.join("\n");
   }
+  const val = p.binding.getValue();
+
+  return (
+    <div className="form-group form-group-xs">
+      <label className="control-label label-xs">
+        {renderMember(val)}
+
+        {val && " "}
+        {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
+          onClick={handleRemove}
+          title={EntityControlMessage.Remove.niceToString()}>
+          <FontAwesomeIcon icon="times" />
+        </a>}
+      </label>
+      <div>
+        {val ?
+          <a href="#" onClick={handleView}><pre style={{ padding: "0px", border: "none", color: "blue" }}>{getDescription(val)}</pre></a>
+          :
+          <a href="#" title={EntityControlMessage.Create.niceToString()}
+            className="sf-line-button sf-create"
+            onClick={handleCreate}>
+            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+          </a>}
+      </div>
+    </div>
+  );
 }
 
 export interface StyleOptionsComponentProps {
@@ -95,22 +91,21 @@ export interface StyleOptionsComponentProps {
   styleOptions: StyleOptionsExpression
 }
 
-export class StyleOptionsComponent extends React.Component<StyleOptionsComponentProps>{
-  render() {
-    const so = this.props.styleOptions;
-    const dn = this.props.dn;
+export function StyleOptionsComponent(p : StyleOptionsComponentProps){
+  const forceUpdate = useForceUpdate();
+  const so = p.styleOptions;
+  const dn = p.dn;
 
-    return (
-      <div className="form-sm code-container">
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formGroupStyle)} type="string" options={formGroupStyle} defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formSize)} type="string" options={formSize} defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.placeholderLabels)} type="boolean" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.readonlyAsPlainText)} type="string" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.labelColumns)} type="number" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.valueColumns)} type="number" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.readOnly)} type="boolean" defaultValue={null} />
-      </div>
-    );
-  }
+  return (
+    <div className="form-sm code-container">
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.formGroupStyle)} type="string" options={formGroupStyle} defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.formSize)} type="string" options={formSize} defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.placeholderLabels)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.readonlyAsPlainText)} type="string" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.labelColumns)} type="number" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.valueColumns)} type="number" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} refreshView={() => forceUpdate()} binding={Binding.create(so, s => s.readOnly)} type="boolean" defaultValue={null} />
+    </div>
+  );
 }
 

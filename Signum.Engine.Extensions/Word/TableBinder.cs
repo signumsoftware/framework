@@ -59,7 +59,7 @@ namespace Signum.Engine.Word
             var graphicFrames = part.RootElement.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
             foreach (var item in graphicFrames)
             {
-                var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
+                var nonVisualProps = item.Descendants().SingleEx(a => a.LocalName == "cNvPr");
                 var title = GetTitle(nonVisualProps);
 
                 Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
@@ -84,21 +84,17 @@ namespace Signum.Engine.Word
             }
         }
 
- 
-
-        static string GetTitle(OpenXmlElement nonVisualProps)
+        static string? GetTitle(OpenXmlElement? nonVisualProps)
         {
-            if (nonVisualProps is Drawing.NonVisualDrawingProperties)
-                return ((Drawing.NonVisualDrawingProperties)nonVisualProps).Title?.Value;
+            if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
+                return draw.Title?.Value;
 
-            if (nonVisualProps is Presentation.NonVisualDrawingProperties)
-                return ((Presentation.NonVisualDrawingProperties)nonVisualProps).Title?.Value;
+            if (nonVisualProps is Presentation.NonVisualDrawingProperties pres)
+                return pres.Title?.Value;
             
-            throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps.GetType().FullName);
+            throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps?.GetType().FullName);
         }
 
- 
-        
         static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)
             where N : OpenXmlElement
         {
@@ -222,7 +218,7 @@ namespace Signum.Engine.Word
 
             var provider = WordTemplateLogic.ToDataTableProviders.GetOrThrow(key);
 
-            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext(parameters.Template, (Entity?)parameters.Entity, parameters.SystemWordTemplate));
+            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext(parameters.Template, (Entity?)parameters.Entity, parameters.Model));
 
             return table;
         }
@@ -234,30 +230,30 @@ namespace Signum.Engine.Word
         {
             MethodInfo mi = GetMethod(ctx.Template, suffix);
 
-            object result;
+            object? result;
             try
             {
-                result = mi.Invoke(ctx.SystemWordTemplate, null);
+                result = mi.Invoke(ctx.Model, null);
             }
             catch (TargetInvocationException e)
             {
-                e.InnerException.PreserveStackTrace();
+                e.InnerException!.PreserveStackTrace();
 
-                throw e.InnerException;
+                throw e.InnerException!;
             }
 
-            if (!(result is Data.DataTable))
-                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.SystemWordTemplate!.GetType().Name}' did not return a DataTable");
+            if (!(result is Data.DataTable dt))
+                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.Model!.GetType().Name}' did not return a DataTable");
 
-            return (Data.DataTable)result;
+            return dt;
         }
 
         private static MethodInfo GetMethod(WordTemplateEntity template, string method)
         {
-            if (template.SystemWordTemplate == null)
-                throw new InvalidOperationException($"No SystemWordTemplate found in template '{template}' to call '{method}'");
+            if (template.Model == null)
+                throw new InvalidOperationException($"No WordModel found in template '{template}' to call '{method}'");
 
-            var type = template.SystemWordTemplate.ToType();
+            var type = template.Model.ToType();
             var mi = type.GetMethod(method);
             if (mi == null)
                 throw new InvalidOperationException($"No Method with name '{method}' found in type '{type.Name}'");
@@ -311,9 +307,14 @@ namespace Signum.Engine.Word
     {
         public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
         {
+            return GetDataTable(suffix, context.Entity!);
+        }
+
+        public Data.DataTable GetDataTable(string suffix, Entity entity)
+        {
             var userChart = Database.Query<UserChartEntity>().SingleOrDefault(a => a.Guid == Guid.Parse(suffix));
 
-            using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
+            using (CurrentEntityConverter.SetCurrentEntity(entity))
             {
                 var chartRequest = UserChartLogic.ToChartRequest(userChart);
                 ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;

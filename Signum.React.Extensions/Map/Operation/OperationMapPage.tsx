@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as QueryString from "query-string"
 import { RouteComponentProps } from 'react-router'
@@ -9,6 +10,7 @@ import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition } from './OperationMap'
 import "./operationMap.css"
+import { useExpand, useAPI, useSize } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string }> {
 
@@ -24,115 +26,79 @@ interface OperationMapPropsState {
 
 interface ParsedQueryString {
   color?: string;
-  nodes: { [tableName: string]: { x: number; y: number } };
+  nodes: Nodes;
 }
 
-export default class OperationMapPage extends React.Component<OperationMapPageProps, OperationMapPropsState> {
-  state = { filter: "", color: "" } as OperationMapPropsState;
-  wasExpanded!: boolean;
+export interface Nodes {
+  [nodeName: string]: { x: number; y: number }
+}
 
-  componentWillMount() {
-    this.wasExpanded = Navigator.Expander.setExpanded(true);
 
-    MapClient.API.operations(this.props.match.params.type)
-      .then(omi => {
-        const parsedQuery = this.getParsedQuery();
+function getParsedQuery(loc: Location): ParsedQueryString {
+  const result: ParsedQueryString = { nodes: {} };
 
-        this.setState({
-          operationMapInfo: omi,
-          parsedQuery: parsedQuery,
-          color: parsedQuery.color
-        });
-      }).done();
-  }
-
-  componentWillUnmount() {
-    Navigator.Expander.setExpanded(this.wasExpanded);
-  }
-
-  getParsedQuery(): ParsedQueryString {
-    const result: ParsedQueryString = { nodes: {} };
-
-    const query = QueryString.parse(this.props.location.search) as { [name: string]: string };
-    if (!query)
-      return result;
-
-    Dic.foreach(query, (name, value) => {
-
-      if (name == "color")
-        result.color = value;
-      else {
-        result.nodes[name] = {
-          x: parseFloat(value.before(",")),
-          y: parseFloat(value.after(",")),
-        };
-      }
-    });
-
+  const query = QueryString.parse(loc.search) as { [name: string]: string };
+  if (!query)
     return result;
-  }
 
-  div!: HTMLDivElement;
-  handleSetInitialSize = (div: HTMLDivElement) => {
-    if (this.div)
-      return;
+  Dic.foreach(query, (name, value) => {
 
-    this.div = div;
-    const rect = div.getBoundingClientRect();
-    this.setState({ width: rect.width, height: window.innerHeight - 200 });
-  }
+    if (name == "color")
+      result.color = value;
+    else {
+      result.nodes[name] = {
+        x: parseFloat(value.before(",")),
+        y: parseFloat(value.after(",")),
+      };
+    }
+  });
 
-  render() {
-    if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
-      return null;
+  return result;
+}
 
-    const s = this.state;
-    return (
-      <div ref={this.handleSetInitialSize}>
-        {this.renderFilter()}
-        {!s.operationMapInfo || this.div == undefined ?
-          <span>{JavascriptMessage.loading.niceToString()}</span> :
-          <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery!} color={s.color!} height={s.height!} width={s.width!} queryName={this.props.match.params.type} />}
-      </div>
-    );
-  }
+export default function OperationMapPage(p: OperationMapPageProps) {
 
-  handleSetColor = (e: React.FormEvent<any>) => {
-    this.setState({
-      color: (e.currentTarget as HTMLInputElement).value
-    });
-  }
+  useExpand();
 
-  handleFullscreenClick = (e: React.MouseEvent<any>) => {
+  const [color, setColor] = React.useState<string>("");
+  const [nodes, setNodes] = React.useState<Nodes | undefined>(undefined);
 
+  const operationMapInfo = useAPI(() => MapClient.API.operations(p.match.params.type), [p.match.params.type]);
+
+  React.useEffect(() => {
+    const parsedQuery = getParsedQuery(p.location);
+
+    setNodes(parsedQuery.nodes);
+    setColor(parsedQuery.color ?? "");
+  }, []);
+
+  const { size, setContainer } = useSize();
+
+  function handleFullscreenClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    const s = this.state;
-
-    const tables = s.operationMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
+    const tables = operationMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
       .toObject(a => a.key, a =>
-        (a.fx! / s.width!).toPrecision(4) + "," +
-        (a.fy! / s.height!).toPrecision(4));
+        (a.fx! / size!.width!).toPrecision(4) + "," +
+        (a.fy! / size!.height!).toPrecision(4));
 
-    var query = { ...tables, color: s.color };
+    var query = { ...tables, color: color };
 
     const url = Navigator.history.createHref({
-      pathname: "~/map/" + this.props.match.params.type,
+      pathname: "~/map/" + p.match.params.type,
       search: QueryString.stringify(query)
     });
 
     window.open(url);
   }
 
-  renderFilter() {
-
-    const s = this.state;
-
+  function renderFilter() {
     return (
       <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
         <div className="form-group" style={{ marginLeft: "10px" }}>
-          <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>&nbsp;
-                    <select className="form-control" id="color" value={s.color} onChange={this.handleSetColor}>
+          <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>
+          &nbsp;
+          <select className="form-control" id="color" value={color} onChange={e => setColor(e.currentTarget.value)}>
             <option value="state">{MapMessage.StateColor.niceToString()}</option>
             <option value="rows">{MapMessage.Rows.niceToString()}</option>
           </select>
@@ -141,12 +107,23 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
           {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
         </span>
         &nbsp;
-                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
+                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
           <FontAwesomeIcon icon="external-link-alt" />
         </a>
       </div>
     );
   }
+  if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
+    return null;
+
+  return (
+    <div ref={setContainer}>
+      {renderFilter()}
+      {!(operationMapInfo && size && nodes) ?
+        <span>{JavascriptMessage.loading.niceToString()}</span> :
+        <OperationMapRenderer operationMapInfo={operationMapInfo} nodes={nodes} color={color!} height={size.height!} width={size.width!} queryName={p.match.params.type} />}
+    </div>
+  );
 }
 
 export interface OperationMapRendererProps {
@@ -154,39 +131,37 @@ export interface OperationMapRendererProps {
   operationMapInfo: OperationMapInfo;
   width: number;
   height: number;
-  parsedQuery: ParsedQueryString;
+  nodes: Nodes;
   color: string;
 }
 
-export class OperationMapRenderer extends React.Component<OperationMapRendererProps, { mapD3?: OperationMapD3 }> {
+export function OperationMapRenderer(p: OperationMapRendererProps) {
 
-  constructor(props: OperationMapRendererProps) {
-    super(props);
-    this.state = {};
-  }
+  const svg = React.useRef<SVGSVGElement>(null);
+  const mapD3 = React.useRef<OperationMapD3 | null>(null);
 
-  componentDidMount() {
-    const p = this.props;
+  React.useEffect(() => {
+    fixSchemaMap(p.operationMapInfo, p.nodes);
+    mapD3.current = new OperationMapD3(svg.current!, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
+    return () => mapD3.current!.stop();
+  });
 
-    this.fixSchemaMap(p.operationMapInfo, p.parsedQuery);
-
-    const d3 = new OperationMapD3(this.svg, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
-    this.setState({ mapD3: d3 });
-  }
+  React.useEffect(() => {
+    mapD3.current!.setColor(p.color);
+  }, [p.color]);
 
 
-  fixSchemaMap(map: OperationMapInfo, parsedQuery: ParsedQueryString) {
-
+  function fixSchemaMap(map: OperationMapInfo, nodes: Nodes) {
     map.allNodes = (map.operations as ForceNode[]).concat(map.states);
 
     map.allNodes.forEach(a => {
-      const c = parsedQuery.nodes[a.key];
+      const c = nodes[a.key];
       if (c) {
-        a.fx = c.x * this.props.width;
-        a.fy = c.y * this.props.height;
+        a.fx = c.x * p.width;
+        a.fy = c.y * p.height;
       } else {
-        a.x = Math.random() * this.props.width;
-        a.y = Math.random() * this.props.height;
+        a.x = Math.random() * p.width;
+        a.y = Math.random() * p.height;
       }
     });
 
@@ -216,30 +191,21 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
     });
   }
 
-  componentWillReceiveProps(newProps: OperationMapRendererProps) {
-    if (newProps.color != this.props.color)
-      this.state.mapD3!.setColor(newProps.color);
+  function componentWillReceiveProps(newProps: OperationMapRendererProps) {
   }
 
-  componentWillUnmount() {
-    this.state.mapD3!.stop();
-  }
 
-  svg!: SVGElement;
-
-  render() {
-    return (
-      <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: this.props.height + "px" }}>
-        <svg id="svgMap" ref={svg => this.svg = svg!}>
-          <defs>
-            <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
-              <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
-            </marker>
-          </defs>
-        </svg>
-      </div>
-    );
-  }
+  return (
+    <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: p.height + "px" }}>
+      <svg id="svgMap" ref={svg => svg = svg!}>
+        <defs>
+          <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
+            <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  );
 }
 
 

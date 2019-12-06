@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as History from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as QueryString from 'query-string'
 import { Dic } from '@framework/Globals'
@@ -9,42 +10,62 @@ import * as MapClient from '../MapClient'
 import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 import { RouteComponentProps } from "react-router";
 import "./schemaMap.css"
+import { useExpand, useSize } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-interface SchemaMapPageProps extends RouteComponentProps<{}> {
-
-}
-
-interface SchemaMapPropsState {
+interface SchemaMapState {
   schemaMapInfo?: SchemaMapInfo;
-  filter?: string;
-  color?: string;
-  width?: number;
-  height?: number;
   providers?: { [name: string]: ClientColorProvider };
-  parsedQuery?: ParsedQueryString;
 }
 
 interface ParsedQueryString {
   filter?: string;
   color?: string;
-  tables: { [tableName: string]: { x: number; y: number } };
+  tables: Tables;
 }
 
-export default class SchemaMapPage extends React.Component<SchemaMapPageProps, SchemaMapPropsState> {
-  constructor(props: SchemaMapPageProps) {
-    super(props);
-    this.state = { filter: "", color: "" };
-  }
+interface Tables {
+  [tableName: string]: { x: number; y: number }
+}
 
-  wasExpanded!: boolean;
+function getParsedQuery(location: History.Location): ParsedQueryString {
 
-  componentWillMount() {
+  const result: ParsedQueryString = { tables: {} };
 
-    this.wasExpanded = Navigator.Expander.setExpanded(true);
+  const query = QueryString.parse(location.search) as { [name: string]: string };
+  if (!query)
+    return result;
 
+  Dic.foreach(query, (name, value) => {
+
+    if (name == "filter")
+      result.filter = value;
+    else if (name == "color")
+      result.color = value;
+    else {
+      result.tables[name] = {
+        x: parseFloat(value.before(",")),
+        y: parseFloat(value.after(",")),
+      };
+    }
+  });
+
+  return result;
+}
+
+
+export default function SchemaMapPage(p: RouteComponentProps<{}>) {
+
+  const [filter, setFilter] = React.useState<string>("");
+  const [color, setColor] = React.useState<string>("");
+  const [tables, setTables] = React.useState<Tables | undefined>(undefined);
+  const [schemaInfo, setSchemaInfo] = React.useState<SchemaMapInfo | undefined>(undefined);
+  const [providers, setProviders] = React.useState<{ [name: string]: ClientColorProvider } | undefined>(undefined);
+  useExpand();
+
+  React.useEffect(() => {
     MapClient.API.types()
       .then(smi => {
-        const parsedQuery = this.getParsedQuery();
+        const parsedQuery = getParsedQuery(p.location);
         MapClient.getAllProviders(smi).then(providers => {
 
           const missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
@@ -55,109 +76,36 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
           if (extraProviders.length)
             throw new Error(`Extra ClientColorProvider for ${extraProviders.map(a => "'" + a.name + "'").joinComma("and")} found`);
 
-          this.setState({
-            providers: providers.toObject(a => a.name),
-            schemaMapInfo: smi,
-            parsedQuery: parsedQuery,
-            filter: parsedQuery.filter || "",
-            color: parsedQuery.color || smi.providers.first().name
-          });
+          setFilter(parsedQuery.filter ?? "");
+          setTables(parsedQuery.tables);
+          setColor(parsedQuery.color ?? smi.providers.first().name);
+          setSchemaInfo(smi);
+          setProviders(providers.toObject(a => a.name));
+
         }).done();
       }).done();
+  }, []);
+
+  const { size, setContainer } = useSize();
+
+  function handleSetFilter(e: React.FormEvent<any>) {
+    setFilter((e.currentTarget as HTMLInputElement).value);
   }
 
-
-  componentWillUnmount() {
-    Navigator.Expander.setExpanded(this.wasExpanded);
+  function handleSetColor(e: React.FormEvent<any>) {
+    setColor((e.currentTarget as HTMLInputElement).value);
   }
 
-
-
-  getParsedQuery(): ParsedQueryString {
-
-    const result: ParsedQueryString = { tables: {} };
-
-    const query = QueryString.parse(this.props.location.search) as { [name: string]: string };
-    if (!query)
-      return result;
-
-    Dic.foreach(query, (name, value) => {
-
-      if (name == "filter")
-        result.filter = value;
-      else if (name == "color")
-        result.color = value;
-      else {
-        result.tables[name] = {
-          x: parseFloat(value.before(",")),
-          y: parseFloat(value.after(",")),
-        };
-      }
-    });
-
-    return result;
-  }
-
-  div!: HTMLDivElement;
-  handleSetInitialSize = (div: HTMLDivElement) => {
-
-    if (this.div)
-      return;
-
-    this.div = div;
-    const rect = div.getBoundingClientRect();
-    this.setState({ width: rect.width, height: window.innerHeight - 200 });
-  }
-
-
-  render() {
-
-    if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
-      return null;
-
-    const s = this.state;
-    return (
-      <div ref={this.handleSetInitialSize}>
-        {this.renderFilter()}
-        {!s.schemaMapInfo || this.div == undefined ?
-          <span>{JavascriptMessage.loading.niceToString()}</span> :
-          <SchemaMapRenderer
-            schemaMapInfo={s.schemaMapInfo}
-            parsedQuery={s.parsedQuery!}
-            filter={s.filter!}
-            color={s.color!}
-            height={s.height!}
-            width={s.width!}
-            providers={s.providers!} />}
-      </div>
-    );
-  }
-
-  handleSetFilter = (e: React.FormEvent<any>) => {
-    this.setState({
-      filter: (e.currentTarget as HTMLInputElement).value
-    });
-  }
-
-  handleSetColor = (e: React.FormEvent<any>) => {
-    this.setState({
-      color: (e.currentTarget as HTMLInputElement).value
-    });
-  }
-
-  handleFullscreenClick = (e: React.MouseEvent<any>) => {
-
+  function handleFullscreenClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    const s = this.state;
-
-    const tables = s.schemaMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
+    const tables = schemaInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
       .toObject(a => a.tableName, a =>
-        (a.fx! / s.width!).toPrecision(4) + "," +
-        (a.fy! / s.height!).toPrecision(4));
+        (a.fx! / size!.width!).toPrecision(4) + "," +
+        (a.fy! / size!.height!).toPrecision(4));
 
     const query = {
-      ...tables, filter: s.filter, color: s.color
+      ...tables, filter: filter, color: color
     };
 
     const url = Navigator.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
@@ -165,22 +113,20 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     window.open(url);
   }
 
-  renderFilter() {
-
-    const s = this.state;
+  function renderFilter() {
 
     return (
       <div className="form-inline container" style={{ marginTop: "10px" }}>
         <div className="form-group form-group-sm">
           <label htmlFor="filter"> {MapMessage.Filter.niceToString()}</label>&nbsp;
-                    <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={s.filter} onChange={this.handleSetFilter} />
+                    <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={filter} onChange={handleSetFilter} />
         </div>
         <div className="form-group form-group-sm" style={{ marginLeft: "10px" }}>
           <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>&nbsp;
-                    <select className="form-control form-control-sm" id="color" value={s.color} onChange={this.handleSetColor}>
+          <select className="form-control form-control-sm" id="color" value={color} onChange={handleSetColor}>
             {
-              s.schemaMapInfo &&
-              s.schemaMapInfo.providers.map((a, i) =>
+              schemaInfo &&
+              schemaInfo.providers.map((a, i) =>
                 <option key={i} value={a.name}>{a.niceName}</option>)
             }
           </select>
@@ -189,12 +135,30 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
           {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
         </span>
         &nbsp;
-                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
+                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
           <FontAwesomeIcon icon="external-link-alt" />
         </a>
       </div>
     );
   }
+  if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
+    return null;
+
+  return (
+    <div ref={setContainer}>
+      {renderFilter()}
+      {!(schemaInfo && size && schemaInfo && providers) ?
+        <span>{JavascriptMessage.loading.niceToString()}</span> :
+        <SchemaMapRenderer
+          schemaMapInfo={schemaInfo}
+          tables={tables!}
+          filter={filter}
+          color={color}
+          height={size.height!}
+          width={size.width!}
+          providers={providers} />}
+    </div>
+  );
 }
 
 export interface SchemaMapRendererProps {
@@ -204,20 +168,25 @@ export interface SchemaMapRendererProps {
   width: number;
   height: number;
   providers: { [name: string]: ClientColorProvider };
-  parsedQuery: ParsedQueryString;
+  tables: Tables;
 }
 
-export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, { mapD3: SchemaMapD3 }> {
-  componentDidMount() {
-    const p = this.props;
+export function SchemaMapRenderer(p: SchemaMapRendererProps) {
 
-    this.fixSchemaMap(p.schemaMapInfo, p.parsedQuery);
+  const mapD3Ref = React.useRef<SchemaMapD3 | undefined>(undefined);
+  const svgRef = React.useRef<SVGSVGElement>(null);
 
-    const d3 = new SchemaMapD3(this.svg, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
-    this.setState({ mapD3: d3 });
-  }
+  React.useEffect(() => {
+    fixSchemaMap(p.schemaMapInfo, p.tables);
+    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
 
-  fixSchemaMap(map: SchemaMapInfo, parsedQuery: ParsedQueryString) {
+    return () => { mapD3Ref.current!.stop(); };
+  }, []);
+
+  React.useEffect(() => mapD3Ref.current!.setColor(p.color), [p.color]);
+  React.useEffect(() => mapD3Ref.current!.setFilter(p.filter), [p.filter]);
+
+  function fixSchemaMap(map: SchemaMapInfo, tables: Tables) {
     map.tables.forEach(t => t.mlistTables.forEach(ml => {
       ml.entityKind = t.entityKind;
       ml.entityData = t.entityData;
@@ -228,14 +197,14 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
     map.allNodes = (map.tables as ITableInfo[]).concat(map.tables.flatMap(t => t.mlistTables));
 
     map.allNodes.forEach(a => {
-      const c = parsedQuery.tables[a.tableName];
+      const c = tables[a.tableName];
       if (c) {
-        a.fx = c.x * this.props.width;
-        a.fy = c.y * this.props.height;
+        a.fx = c.x * p.width;
+        a.fy = c.y * p.height;
       }
       else {
-        a.x = Math.random() * this.props.width;
-        a.y = Math.random() * this.props.height;
+        a.x = Math.random() * p.width;
+        a.y = Math.random() * p.height;
       }
     });
 
@@ -274,46 +243,29 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
     });
   }
 
-  componentWillReceiveProps(newProps: SchemaMapRendererProps) {
+  return (
+    <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: p.height + "px" }}>
+      <svg id="svgMap" ref={svgRef}>
+        <defs>
+          <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
+            <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
+          </marker>
 
-    if (newProps.color != this.props.color)
-      this.state.mapD3.setColor(newProps.color);
+          <marker id="lite_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
+            <path fill="gray" d="M5,0L0,-5L10,0L0,5L5,0" />
+          </marker>
 
-    if (newProps.filter != this.props.filter)
-      this.state.mapD3.setFilter(newProps.filter);
-  }
-
-  componentWillUnmount() {
-    this.state.mapD3.stop();
-  }
-
-  svg!: SVGElement;
-
-  render() {
-    return (
-      <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: this.props.height + "px" }}>
-        <svg id="svgMap" ref={svg => this.svg = svg!}>
-          <defs>
-            <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
-              <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
-            </marker>
-
-            <marker id="lite_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
-              <path fill="gray" d="M5,0L0,-5L10,0L0,5L5,0" />
-            </marker>
-
-            <marker id="mlist_arrow" viewBox="-10 -5 20 10" refX="10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
-              <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
-            </marker>
-            {
-              React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs).filter(defs => !!defs).flatMap(defs => defs!),
-                (c, i) => React.cloneElement(c as React.ReactElement<any>, { key: i }))
-            }
-          </defs>
-        </svg>
-      </div>
-    );
-  }
+          <marker id="mlist_arrow" viewBox="-10 -5 20 10" refX="10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
+            <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
+          </marker>
+          {
+            React.Children.map(Dic.getValues(p.providers).map(a => a.defs).filter(defs => !!defs).flatMap(defs => defs!),
+              (c, i) => React.cloneElement(c as React.ReactElement<any>, { key: i }))
+          }
+        </defs>
+      </svg>
+    </div>
+  );
 }
 
 

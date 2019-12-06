@@ -89,18 +89,20 @@ namespace Signum.Entities.Mailing
         static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
             m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
             {
-{EmailMessageState.Created,      false,         false,        false,                    null },
-{EmailMessageState.Sent,         false,         true,         false,                    null },
-{EmailMessageState.SentException,true,          true,         false,                    null },
-{EmailMessageState.ReceptionNotified,true,      true,         true,                     null },
+{EmailMessageState.Created,      false,         false,         false,                    null },
+{EmailMessageState.Draft,        false,         false,         false,                    null },
+{EmailMessageState.Sent,         false,         true,          false,                    null },
+{EmailMessageState.SentException,true,          true,          false,                    null },
+{EmailMessageState.ReceptionNotified,true,      true,          true,                     null },
 {EmailMessageState.Received,     false,         false,         false,                    false },
             };
 
-        static Expression<Func<EmailMessageEntity, string>> ToStringExpression = e => e.Subject!;
-        [ExpressionField]
-        public override string ToString()
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Subject!);
+
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
-            return ToStringExpression.Evaluate(this);
+            return validator.Validate(this, pi);
         }
     }
 
@@ -174,7 +176,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return file?.ToString();
+            return file?.ToString() ?? "";
         }
     }
 
@@ -213,14 +215,10 @@ namespace Signum.Entities.Mailing
             };
         }
 
+        public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
         public bool Equals(EmailRecipientEmbedded other)
         {
             return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is EmailAddressEmbedded && Equals((EmailAddressEmbedded)obj);
         }
 
         public override int GetHashCode()
@@ -297,15 +295,12 @@ namespace Signum.Entities.Mailing
             };
         }
 
+        public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
         public bool Equals(EmailAddressEmbedded other)
         {
             return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is EmailAddressEmbedded && Equals((EmailAddressEmbedded)obj);
-        }
 
         public override int GetHashCode()
         {
@@ -339,15 +334,12 @@ namespace Signum.Entities.Mailing
         public string? DisplayName { get; set; }
         public CultureInfoEntity? CultureInfo { get; set; }
 
+        public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
         public bool Equals(EmailOwnerData other)
         {
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is EmailOwnerData && Equals((EmailOwnerData)obj);
-        }
 
         public override int GetHashCode()
         {

@@ -36,6 +36,19 @@ export type DynamicBaseType =
   "EmbeddedEntity" |
   "ModelEntity";
 
+export const DynamicClientEntity = new Type<DynamicClientEntity>("DynamicClient");
+export interface DynamicClientEntity extends Entities.Entity {
+  Type: "DynamicClient";
+  name: string;
+  code: string;
+}
+
+export module DynamicClientOperation {
+  export const Clone : Entities.ConstructSymbol_From<DynamicClientEntity, DynamicClientEntity> = registerSymbol("Operation", "DynamicClientOperation.Clone");
+  export const Save : Entities.ExecuteSymbol<DynamicClientEntity> = registerSymbol("Operation", "DynamicClientOperation.Save");
+  export const Delete : Entities.DeleteSymbol<DynamicClientEntity> = registerSymbol("Operation", "DynamicClientOperation.Delete");
+}
+
 export const DynamicCSSOverrideEntity = new Type<DynamicCSSOverrideEntity>("DynamicCSSOverride");
 export interface DynamicCSSOverrideEntity extends Entities.Entity {
   Type: "DynamicCSSOverride";
@@ -201,6 +214,7 @@ export interface DynamicViewEntity extends Entities.Entity {
   viewName: string;
   entityType: Basics.TypeEntity;
   props: Entities.MList<DynamicViewPropEmbedded>;
+  locals: string | null;
   viewContent: string;
 }
 
@@ -220,6 +234,8 @@ export module DynamicViewMessage {
   export const ExampleEntity = new MessageKey("DynamicViewMessage", "ExampleEntity");
   export const ShowHelp = new MessageKey("DynamicViewMessage", "ShowHelp");
   export const HideHelp = new MessageKey("DynamicViewMessage", "HideHelp");
+  export const ModulesHelp = new MessageKey("DynamicViewMessage", "ModulesHelp");
+  export const PropsHelp = new MessageKey("DynamicViewMessage", "PropsHelp");
 }
 
 export module DynamicViewOperation {

@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using System.IO;
 using System.Data;
 using Signum.Engine.Scheduler;
+using System.Runtime.InteropServices;
 
 namespace Signum.Engine.Cache
 {
@@ -123,7 +124,7 @@ namespace Signum.Engine.Cache
             c.NotifyInvalidated();
         }
 
-        public static TextWriter LogWriter;
+        public static TextWriter? LogWriter;
         public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, Type type, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
         {
             if (!WithSqlDependency)
@@ -234,6 +235,7 @@ namespace Signum.Engine.Cache
             }
 
             public MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field)
+                where K : notnull
             {
                 throw new InvalidOperationException("Subqueries can not be used on simple queries");
             }
@@ -401,11 +403,14 @@ namespace Signum.Engine.Cache
             if (registered)
                 return;
 
-            SafeConsole.SetConsoleCtrlHandler(ct =>
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Shutdown();
-                return true;
-            }, true);
+                SafeConsole.SetConsoleCtrlHandler(ct =>
+                {
+                    Shutdown();
+                    return true;
+                }, true);
+            }
 
             AppDomain.CurrentDomain.DomainUnload += (o, a) => Shutdown();
 
@@ -492,7 +497,7 @@ namespace Signum.Engine.Cache
                     throw new InvalidOperationException("Cache for {0} is not enabled".FormatWith(typeof(T).TypeName()));
             }
 
-            public event EventHandler<CacheEventArgs> Invalidated;
+            public event EventHandler<CacheEventArgs>? Invalidated;
 
             public void OnChange(object sender, SqlNotificationEventArgs args)
             {
@@ -525,11 +530,11 @@ namespace Signum.Engine.Cache
                 return cachedTable.GetToString(id);
             }
 
-            public override string? TryGetToString(PrimaryKey id)
+            public override string? TryGetToString(PrimaryKey?/*CSBUG*/ id)
             {
                 AssertEnabled();
 
-                return cachedTable.TryGetToString(id);
+                return cachedTable.TryGetToString(id.Value)!;
             }
 
             public override void Complete(T entity, IRetriever retriver)
@@ -558,7 +563,7 @@ namespace Signum.Engine.Cache
 
                 return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
             }
-#pragma warning enable CS8631
+#pragma warning restore CS8631
 
             public Type Type
             {

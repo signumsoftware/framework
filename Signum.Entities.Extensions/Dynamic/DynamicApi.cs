@@ -19,12 +19,8 @@ namespace Signum.Entities.Dynamic
         [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicApiEval Eval { get; set; }
 
-        static Expression<Func<DynamicApiEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

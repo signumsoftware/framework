@@ -9,7 +9,7 @@ namespace Signum.Entities.Files
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
     public class FilePathEntity : LockableEntity, IFile, IFilePath
     {
-        public static string ForceExtensionIfEmpty = ".dat";
+        public static string? ForceExtensionIfEmpty = ".dat";
 
         public FilePathEntity() { }
 
@@ -21,7 +21,7 @@ namespace Signum.Entities.Files
         public FilePathEntity(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
-            this.FileName = Path.GetFileName(path);
+            this.FileName = Path.GetFileName(path)!;
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
@@ -63,13 +63,8 @@ namespace Signum.Entities.Files
 
         public int FileLength { get; internal set; }
 
-        static Expression<Func<FilePathEntity, string>> FileLengthStringExpression =
-          @this => ((long)@this.FileLength).ToComputerSize(true);
-        [ExpressionField]
-        public string FileLengthString
-        {
-            get { return FileLengthStringExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize(true));
 
         [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }

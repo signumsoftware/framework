@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ifError } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
@@ -10,7 +11,7 @@ import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
-import ValidationErrors from '@framework/Frames/ValidationErrors'
+import { ValidationErrors } from '@framework/Frames/ValidationErrors'
 import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartBuilder from './ChartBuilder'
@@ -18,92 +19,69 @@ import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "@framework/SearchControl/Search.css"
 import "../Chart.css"
-import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import { ChartScript } from '../ChartClient';
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 
 interface ChartRequestViewProps {
-  chartRequest?: ChartRequestModel;
+  chartRequest: ChartRequestModel;
   userChart?: Lite<UserChartEntity>;
   onChange: (newChartRequest: ChartRequestModel, userChart?: Lite<UserChartEntity>) => void;
   title?: string;
 }
 
-interface ChartRequestViewState {
-  queryDescription?: QueryDescription;
-  lastChartRequest?: ChartRequestModel;
-  chartResult?: ChartClient.API.ExecuteChartResult;
-  loading: boolean;
+export interface ChartRequestViewHandle {
+  chartRequest: ChartRequestModel;
+  userChart?: Lite<UserChartEntity>;
+  onChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>): void;
 }
 
-export default class ChartRequestView extends React.Component<ChartRequestViewProps, ChartRequestViewState> {
+export default function ChartRequestView(p: ChartRequestViewProps) {
+  const forceUpdate = useForceUpdate();
+  const lastToken = React.useRef<QueryToken | undefined>(undefined);
 
-  lastToken: QueryToken | undefined;
+  const [resultAndLoading, setResult] = React.useState<{
+    result: {
+      chartRequest: ChartRequestModel; //Use to check validity of results
+      lastChartRequest: ChartRequestModel; 
+      chartResult: ChartClient.API.ExecuteChartResult;
+    } | undefined, loading: boolean;
+  } | undefined>(undefined);
 
-  constructor(props: ChartRequestViewProps) {
-    super(props);
-    this.state = { loading: false };
+  const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
+    [p.chartRequest.queryKey]);
 
+  const abortableQuery = React.useRef(new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal)));
+  React.useEffect(() => {
+    return () => { abortableQuery.current.abort(); }
+  }, []);
+
+  function handleTokenChange() {
+    removeObsoleteOrders();
   }
 
-  componentWillMount() {
-    this.loadQueryDescription(this.props);
+  function handleInvalidate() {
+    setResult(undefined);
+    forceUpdate();
   }
 
-  componentWillReceiveProps(nextProps: ChartRequestViewProps) {
-
-    var oldPath = this.props.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(this.props.chartRequest, null), this.props.userChart);
-    var newPath = nextProps.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(nextProps.chartRequest, null), nextProps.userChart);
-
-    if (oldPath == newPath)
-      return;
-
-    this.setState({ chartResult: undefined, lastChartRequest: undefined });
-    this.loadQueryDescription(nextProps);
+  function removeObsoleteOrders() {
+    var cr = p.chartRequest;
+    cr.columns.filter(a => a.element.token == null).forEach(a => {
+      a.element.orderByIndex = null;
+      a.element.orderByType = null;
+    })
   }
 
-  loadQueryDescription(props: ChartRequestViewProps) {
-    if (props.chartRequest) {
-      Finder.getQueryDescription(props.chartRequest.queryKey).then(qd => {
-        this.setState({ queryDescription: qd });
-      }).done();
-    }
+  function handleOnRedraw() {
+    forceUpdate();
+    p.onChange(p.chartRequest, p.userChart);
   }
 
-  handleTokenChange = () => {
-    this.removeObsoleteOrders();
-  }
+  function handleOnDrawClick() {
+    setResult({ result: resultAndLoading?.result, loading: true });
 
-  handleInvalidate = () => {
-    this.setState({ chartResult: undefined, lastChartRequest: undefined });
-  }
-
-  removeObsoleteOrders() {
-    var cr = this.props.chartRequest;
-    if (cr) {
-      cr.columns.filter(a => a.element.token == null).forEach(a => {
-        a.element.orderByIndex = null;
-        a.element.orderByType = null;
-      })
-    }
-  }
-
-  handleOnRedraw = () => {
-    this.forceUpdate();
-    this.props.onChange(this.props.chartRequest!, this.props.userChart);
-  }
-
-  componentWillUnmount() {
-    this.abortableQuery.abort();
-  }
-
-  abortableQuery = new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal))
-
-  handleOnDrawClick = () => {
-
-    this.setState({ loading: true, });
-
-    var cr = this.props.chartRequest!;
+    var cr = p.chartRequest;
 
     cr.columns.filter(a => a.element.token == null).forEach(a => {
       a.element.orderByIndex = null;
@@ -113,90 +91,31 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     GraphExplorer.setModelState(cr, undefined, "");
 
     ChartClient.getChartScript(cr.chartScript)
-      .then(cs => this.abortableQuery.getData({ cr, cs }))
+      .then(cs => abortableQuery.current.getData({ cr, cs }))
       .then(rt => {
-        this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)), loading: false });
-        this.props.onChange(cr, this.props.userChart);
+        setResult({
+          result: {
+            chartResult: rt,
+            chartRequest: cr,
+            lastChartRequest: JSON.parse(JSON.stringify(cr))
+          }, loading: false
+        });
+        p.onChange(cr, p.userChart);
       }, ifError(ValidationError, e => {
         GraphExplorer.setModelState(cr, e.modelState, "");
-        this.forceUpdate();
+        forceUpdate();
       })).done();
   }
 
-  handleOnFullScreen = (e: React.MouseEvent<any>) => {
+  function handleOnFullScreen(e: React.MouseEvent<any>) {
     e.preventDefault();
-    ChartClient.Encoder.chartPathPromise(this.props.chartRequest!)
+    ChartClient.Encoder.chartPathPromise(p.chartRequest)
       .then(path => Navigator.history.push(path))
       .done();
   }
 
-  render() {
-    const cr = this.props.chartRequest;
-    const qd = this.state.queryDescription;
-    const s = this.state;
-
-    if (cr == undefined || qd == undefined)
-      return null;
-
-    const tc = new TypeContext<ChartRequestModel>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest!, "chartRequest"));
-
-    return (
-      <div>
-        <h2>
-          <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
-                    <a className="sf-popup-fullscreen" href="#" onClick={this.handleOnFullScreen}>
-            <FontAwesomeIcon icon="external-link-alt" />
-          </a>
-        </h2 >
-        <ValidationErrors entity={cr} prefix="chartRequest" />
-        <div className="sf-chart-control SF-control-container" >
-          <div>
-            <FilterBuilder filterOptions={cr.filterOptions} queryDescription={this.state.queryDescription!}
-              subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-              lastToken={this.lastToken} onTokenChanged={t => this.lastToken = t} showPinnedFilters={true}/>
-
-          </div>
-          <div className="SF-control-container">
-            <ChartBuilder queryKey={cr.queryKey} ctx={tc}
-              onInvalidate={this.handleInvalidate}
-              onRedraw={this.handleOnRedraw}
-              onTokenChange={this.handleTokenChange}
-              onOrderChanged={() => {
-                if (this.state.lastChartRequest)
-                  this.handleOnDrawClick();
-                else
-                  this.forceUpdate();
-              }}
-            />
-          </div >
-          <div className="sf-query-button-bar btn-toolbar">
-            <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
-            {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-            <button className="btn btn-light" onMouseUp={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
-          </div>
-          <br />
-          <div className="sf-scroll-table-container" >
-            <UncontrolledTabs id="chartResultTabs">
-              <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-                <ChartRenderer chartRequest={cr} loading={s.loading} lastChartRequest={s.lastChartRequest} data={s.chartResult && s.chartResult.chartTable} />
-              </Tab>
-
-              {s.chartResult && s.lastChartRequest &&
-                <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(s.chartResult.resultTable.rows.length)})</span> as any}>
-                  <ChartTableComponent chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable}
-                    onOrderChanged={() => this.handleOnDrawClick()} />
-                </Tab>
-              }
-            </UncontrolledTabs>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-
-  handleExplore = (e: React.MouseEvent<any>) => {
-    const cr = this.props.chartRequest!;
+  function handleExplore(e: React.MouseEvent<any>) {
+    const cr = p.chartRequest;
 
     var path = Finder.findOptionsPath({
       queryName: cr.queryKey,
@@ -205,4 +124,64 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     Navigator.pushOrOpenInTab(path, e);
   }
+  const qd = queryDescription;
+  if (qd == undefined)
+    return null;
+
+  const cr = p.chartRequest;
+  const tc = new TypeContext<ChartRequestModel>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(p.chartRequest!, "chartRequest"));
+
+  const loading = resultAndLoading?.loading;
+  const result = resultAndLoading?.result && resultAndLoading.result.chartRequest == p.chartRequest ? resultAndLoading.result : undefined;
+  return (
+    <div>
+      <h2>
+        <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
+        <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen}>
+          <FontAwesomeIcon icon="external-link-alt" />
+        </a>
+      </h2 >
+      <ValidationErrors entity={cr} prefix="chartRequest" />
+      <div className="sf-chart-control sf-control-container" >
+        <div>
+          <FilterBuilder filterOptions={cr.filterOptions} queryDescription={queryDescription!}
+            subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+            lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFilters={true} />
+
+        </div>
+        <div className="sf-control-container">
+          <ChartBuilder queryKey={cr.queryKey} ctx={tc}
+            onInvalidate={handleInvalidate}
+            onRedraw={handleOnRedraw}
+            onTokenChange={handleTokenChange}
+            onOrderChanged={() => {
+              if (result)
+                handleOnDrawClick();
+              else
+                forceUpdate();
+            }}
+          />
+        </div >
+        <div className="sf-query-button-bar btn-toolbar">
+          <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
+          {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange } }).map((a, i) => React.cloneElement(a, { key: i }))}
+          <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        </div>
+        <br />
+        <div className="sf-scroll-table-container" >
+          <Tabs id="chartResultTabs">
+            <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
+              <ChartRenderer chartRequest={cr} loading={loading == true} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} />
+            </Tab>
+            {result &&
+              <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(result.chartResult.resultTable.rows.length)})</span> as any}>
+                <ChartTableComponent chartRequest={cr} lastChartRequest={result.lastChartRequest} resultTable={result.chartResult.resultTable}
+                  onOrderChanged={() => handleOnDrawClick()} />
+              </Tab>
+            }
+          </Tabs>
+        </div>
+      </div>
+    </div>
+  );
 }

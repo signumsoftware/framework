@@ -1,12 +1,12 @@
 import * as React from 'react'
+import * as moment from 'moment';
 import * as QueryString from 'query-string';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import {
-  EntityPack, Lite, toLite,
-  newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity
+  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
@@ -36,19 +36,23 @@ import {
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
   WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
   WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimerEmbedded, CaseTagsModel, CaseTagTypeEntity,
-  WorkflowPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType
+  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin,
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
-import Workflow from './Workflow/Workflow'
+import Workflow, { WorkflowHandle } from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
+import { EntityLine } from '@framework/Lines';
+import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
+import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
+import { FunctionalAdapter } from '../../../Framework/Signum.React/Scripts/Frames/FrameModal';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
   options.routes.push(
     <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
@@ -64,14 +68,64 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.entity(p => p.viewName), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
+    { token: t.append(p => p.name), type: "Text" },
+    { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.eval.script), type: "Code" },
+  ]);
+
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       Navigator.API.fetchAndForget(ctx.lite)
         .then(ca => Navigator.navigate(ca.case, { extraProps: { caseActivity: ca } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
-    }, { icon: "random", iconColor: "green" })
+    },
+      {
+        isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
+        icon: "random",
+        iconColor: "green"
+      })
   ]);
+
+
+  Finder.addSettings({
+    queryName: CaseActivityEntity,
+    defaultFilters: [
+      { token: CaseActivityEntity.token(a => a.doneDate).expression("HasValue"), value: null, pinned: { disableOnNull: true, column: 1, label: "Is Done" } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { disableOnNull: true, column: 2, label: WorkflowActivityEntity.niceName() } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(w => w.lane.pool.workflow), pinned: { disableOnNull: true, column: 3 } },
+      { token: CaseActivityEntity.token(a => a.case), pinned: { disableOnNull: true, column: 4 } },
+    ]
+  })
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
     new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentToken: CaseEntity.token(e => e.workflow), parentValue: ctx.lite },
@@ -79,7 +133,7 @@ export function start(options: { routes: JSX.Element[] }) {
   ]);
 
   OmniboxClient.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel),
+    allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
     key: "WorkflowPanel",
     onClick: () => Promise.resolve("~/workflow/panel")
   });
@@ -104,8 +158,8 @@ export function start(options: { routes: JSX.Element[] }) {
       "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />)
     },
     defaultOrderColumn: "StartDate",
-    simpleFilterBuilder: (qd, fos) => {
-      var model = InboxFilter.extract(fos);
+    simpleFilterBuilder: sfbc => {
+      var model = InboxFilter.extract(sfbc.initialFilterOptions);
 
       if (!model)
         return undefined;
@@ -120,16 +174,26 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
     onNavigateRoute: (typeName, id) => Navigator.toAbsoluteUrl("~/workflow/activity/" + id),
-    onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
-    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
+    onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
+    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump), contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
+    icon: "share",
+    iconColor: "blue",
+    onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
+    contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
+  }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timer, { isVisible: ctx => false }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, {
+    color: "dark",
+    hideOnCanExecute: true,
+    isVisible: ctx => false,
+    contextual: { isVisible: ctx => true }
+  }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptExecute, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptFailureJump, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptScheduleRetry, { isVisible: ctx => false }));
@@ -190,7 +254,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor(WorkflowTimerConditionEntity, () => WorkflowTimerConditionEntity.New({ eval: WorkflowTimerConditionEval.New() }));
   Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
   Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
-  Constructor.registerConstructor(WorkflowTimerEmbedded, () => Constructor.construct(TimeSpanEmbedded).then(ep => ep && WorkflowTimerEmbedded.New({ duration: ep.entity })));
+  Constructor.registerConstructor(WorkflowTimerEmbedded, () => Constructor.construct(TimeSpanEmbedded).then(ts => ts && WorkflowTimerEmbedded.New({ duration: ts })));
 
   registerCustomContexts();
 
@@ -198,6 +262,23 @@ export function start(options: { routes: JSX.Element[] }) {
     element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
     order: 0,
   })]);
+
+  if (options.overrideCaseActivityMixin == true) {
+
+    if (SMSMessageEntity.hasMixin(CaseActivityMixin))
+      Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
+        vr.insertAfterLine(a => a.referred, ctx => [
+          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+        ]);
+      });
+
+    if (EmailMessageEntity.hasMixin(CaseActivityMixin))
+      Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
+        vr.insertAfterLine(a => a.target, ctx => [
+          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+        ]);
+      });
+  }
 }
 
 function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
@@ -243,11 +324,11 @@ function registerCustomContexts() {
   DynamicViewClient.registeredCustomContexts["case"] = {
     getTypeContext: ctx => {
       var actx = getCaseActivityContext(ctx);
-      return actx && actx.subCtx(a => a.case);
+      return actx?.subCtx(a => a.case);
     },
     getCodeContext: cc => {
       addActx(cc);
-      cc.assignments["cctx"] = "actx && actx.subCtx(a => a.case)";
+      cc.assignments["cctx"] = "actx?.subCtx(a => a.case)";
       return cc.createNewContext("cctx");
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case)
@@ -257,11 +338,11 @@ function registerCustomContexts() {
   DynamicViewClient.registeredCustomContexts["parentCase"] = {
     getTypeContext: ctx => {
       var actx = getCaseActivityContext(ctx);
-      return actx && actx.value.case.parentCase ? actx.subCtx(a => a.case.parentCase) : undefined;
+      return actx?.value.case.parentCase ? actx.subCtx(a => a.case.parentCase) : undefined;
     },
     getCodeContext: cc => {
       addActx(cc);
-      cc.assignments["pcctx"] = "actx && actx.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
+      cc.assignments["pcctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
       return cc.createNewContext("pcctx");
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase)
@@ -270,11 +351,11 @@ function registerCustomContexts() {
   DynamicViewClient.registeredCustomContexts["parentCaseMainEntity"] = {
     getTypeContext: ctx => {
       var actx = getCaseActivityContext(ctx);
-      return actx && actx.value.case.parentCase ? actx.subCtx(a => a.case.parentCase!.mainEntity) : undefined;
+      return actx?.value.case.parentCase ? actx.subCtx(a => a.case.parentCase!.mainEntity) : undefined;
     },
     getCodeContext: cc => {
       addActx(cc);
-      cc.assignments["pmctx"] = "actx && actx.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
+      cc.assignments["pmctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
       return cc.createNewContext("pmctx");
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase!.mainEntity)
@@ -283,8 +364,8 @@ function registerCustomContexts() {
 
 export function getCaseActivityContext(ctx: TypeContext<any>): TypeContext<CaseActivityEntity> | undefined {
   const f = ctx.frame;
-  const fc = f && f.frameComponent as any;
-  const activity = fc && fc.getCaseActivity && fc.getCaseActivity() as CaseActivityEntity;
+  const fc = f?.frameComponent as any;
+  const activity = fc?.getCaseActivity && fc.getCaseActivity() as CaseActivityEntity;
   return activity && TypeContext.root(activity, undefined, ctx);
 }
 
@@ -358,14 +439,14 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
     API.saveWorkflow(entity, model, replacementModel)
       .then(packWithIssues => {
         eoc.frame.onReload(packWithIssues.entityPack);
-        (eoc.frame.entityComponent as any).setIssues(packWithIssues.issues);
+        wf.setIssues(packWithIssues.issues);
         notifySuccess();
       })
       .catch(ifError(ValidationError, e => {
 
         var issuesString = e.modelState["workflowIssues"];
         if (issuesString) {
-          (eoc.frame.entityComponent as any).setIssues(JSON.parse(issuesString[0]));
+          wf.setIssues(JSON.parse(issuesString[0]));
           delete e.modelState["workflowIssues"];
         }
         eoc.frame.setError(e.modelState, "entity");
@@ -374,12 +455,12 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
       .done();
   }
 
-  let wf = eoc.frame.entityComponent as Workflow;
+  let wf = FunctionalAdapter.innerRef(eoc.frame.entityComponent) as WorkflowHandle;
   wf.getXml()
     .then(xml => {
       var model = WorkflowModel.New({
         diagramXml: xml,
-        entities: Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
+        entities: Dic.map(wf.workflowState!.entities, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
           bpmnElementId: bpmnId,
           model: model
         })))
@@ -401,9 +482,6 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
           }).done();
       }).done();
     }).done();
-
-
-
 }
 
 export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>) {
@@ -421,7 +499,7 @@ export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseA
 
   eoc.onExecuteSuccess = pack => {
     notifySuccess();
-    eoc.frame.onClose(true);
+    eoc.frame.onClose(pack);
   }
 
   getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
@@ -435,7 +513,7 @@ function getWorkflowJumpSelector(activity: Lite<WorkflowActivityEntity>): Promis
     .then(jumps => SelectorModal.chooseElement(jumps,
       {
         title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
-        buttonDisplay: a => a.toStr || "",
+        buttonDisplay: a => a.toStr ?? "",
         forceShow: true
       }));
 }
@@ -524,7 +602,7 @@ export interface IHasCaseActivity {
 export function inWorkflow(ctx: TypeContext<any>, workflowName: string, activityName: string): boolean {
   var f = ctx.frame && ctx.frame.frameComponent as any as IHasCaseActivity;
 
-  var ca = f && f.getCaseActivity && f.getCaseActivity();
+  var ca = f?.getCaseActivity && f.getCaseActivity();
 
   if (!ca)
     return false;
@@ -539,32 +617,35 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
 
   const wa = ca.workflowActivity as WorkflowActivityEntity;
 
-  var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined);
+  var viewPromise = Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName ?? undefined);
 
   if (wa.viewNameProps.length) {
-    var props = wa.viewNameProps.toObject(a => a.element.name, a => eval(a.element.expression));
+    var props = wa.viewNameProps.toObject(a => a.element.name, a => !a.element.expression ? undefined : eval(a.element.expression));
     viewPromise = viewPromise.withProps(props);
   }
 
   return viewPromise.promise;
 }
 
+export function durationFormat(d: moment.Duration) {
+  return `${d.days()}d ${d.hours()}h ${d.minutes()}m ${d.seconds()}s`;
+}
 
 export namespace API {
   export function fetchActivityForViewing(caseActivity: Lite<CaseActivityEntity>): Promise<CaseEntityPack> {
-    return ajaxGet<CaseEntityPack>({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
+    return ajaxGet({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
   }
 
   export function fetchCaseTags(caseLite: Lite<CaseEntity>): Promise<CaseTagTypeEntity[]> {
-    return ajaxGet<CaseTagTypeEntity[]>({ url: `~/api/workflow/tags/${caseLite.id}` });
+    return ajaxGet({ url: `~/api/workflow/tags/${caseLite.id}` });
   }
 
   export function starts(): Promise<Array<WorkflowEntity>> {
-    return ajaxGet<Array<WorkflowEntity>>({ url: `~/api/workflow/starts` });
+    return ajaxGet({ url: `~/api/workflow/starts` });
   }
 
   export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModelAndIssues> {
-    return ajaxGet<WorkflowModelAndIssues>({ url: `~/api/workflow/workflowModel/${workflow.id}` });
+    return ajaxGet({ url: `~/api/workflow/workflowModel/${workflow.id}` });
   }
 
   interface WorkflowModelAndIssues {
@@ -573,12 +654,12 @@ export namespace API {
   }
 
   export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<PreviewResult> {
-    return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
+    return ajaxPost({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
   }
 
   export function saveWorkflow(entity: WorkflowEntity, model: WorkflowModel, replacementModel: WorkflowReplacementModel | undefined): Promise<EntityPackWithIssues> {
     GraphExplorer.propagateAll(entity, model, replacementModel);
-    return ajaxPost<EntityPackWithIssues>({ url: "~/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
+    return ajaxPost({ url: "~/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
   }
 
   interface EntityPackWithIssues {
@@ -593,42 +674,42 @@ export namespace API {
   }
 
   export function findMainEntityType(request: { subString: string, count: number }, signal?: AbortSignal): Promise<Lite<TypeEntity>[]> {
-    return ajaxGet<Lite<TypeEntity>[]>({
+    return ajaxGet({
       url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request),
       signal
     });
   }
 
   export function findNode(request: WorkflowFindNodeRequest, signal?: AbortSignal): Promise<Lite<IWorkflowNodeEntity>[]> {
-    return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode", signal }, request);
+    return ajaxPost({ url: "~/api/workflow/findNode", signal }, request);
   }
 
   export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {
-    return ajaxPost<WorkflowConditionTestResponse>({ url: `~/api/workflow/condition/test` }, request);
+    return ajaxPost({ url: `~/api/workflow/condition/test` }, request);
   }
 
   export function view(): Promise<WorkflowScriptRunnerState> {
-    return ajaxGet<WorkflowScriptRunnerState>({ url: "~/api/workflow/scriptRunner/view" });
+    return ajaxGet({ url: "~/api/workflow/scriptRunner/view" });
   }
 
   export function start(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/start" }, undefined);
+    return ajaxPost({ url: "~/api/workflow/scriptRunner/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
+    return ajaxPost({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
   }
 
   export function caseFlow(c: Lite<CaseEntity>): Promise<CaseFlow> {
-    return ajaxGet<CaseFlow>({ url: `~/api/workflow/caseFlow/${c.id}` });
+    return ajaxGet({ url: `~/api/workflow/caseFlow/${c.id}` });
   }
 
   export function workflowActivityMonitor(request: WorkflowActivityMonitorRequest): Promise<WorkflowActivityMonitor> {
-    return ajaxPost<WorkflowActivityMonitor>({ url: "~/api/workflow/activityMonitor" }, request);
+    return ajaxPost({ url: "~/api/workflow/activityMonitor" }, request);
   }
 
   export function nextConnections(request: NextConnectionsRequest): Promise<Array<Lite<IWorkflowNodeEntity>>> {
-    return ajaxPost<Array<Lite<IWorkflowNodeEntity>>>({ url: "~/api/workflow/nextConnections" }, request);
+    return ajaxPost({ url: "~/api/workflow/nextConnections" }, request);
   }
 }
 

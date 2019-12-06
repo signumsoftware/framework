@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
                 ToStates = { UserState.Disabled },
                 Execute = (u, _) =>
                 {
-                    u.AnulationDate = TimeZoneManager.Now;
+                    u.DisabledOn = TimeZoneManager.Now;
                     u.State = UserState.Disabled;
                 },
             }.Register();
@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
                 ToStates = { UserState.Saved },
                 Execute = (u, _) =>
                 {
-                    u.AnulationDate = null;
+                    u.DisabledOn = null;
                     u.State = UserState.Saved;
                 },
             }.Register();

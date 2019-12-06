@@ -82,6 +82,9 @@ namespace Signum.Engine.Cache
             if (field is FieldEnum)
                 return Expression.Convert(constructor.GetTupleProperty((IColumn)field), field.FieldType);
 
+            if (field is FieldPrimaryKey)
+                return constructor.GetTupleProperty((IColumn)field);
+
             if (field is IFieldReference)
             {
                 bool isLite = ((IFieldReference)field).IsLite;
@@ -140,6 +143,16 @@ namespace Signum.Engine.Cache
                 constructor.cachedTable.SubTables!.SingleEx(a => a.ParentColumn == column).Constructor;
 
             return new CachedEntityExpression(pk, entityType, typeConstructor, null!);
+        }
+
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            var operand = Visit(node.Operand);
+            if (operand != node.Operand && node.NodeType == ExpressionType.Convert)
+            {
+                return Expression.Convert(operand, node.Type);
+            }
+            return node.Update(operand);
         }
 
         static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());

@@ -19,6 +19,17 @@ namespace Signum.React.Dynamic
             return res;
         }
 
+        [HttpGet("api/dynamic/viewProps/{typeName}")]
+        public List<DynamicViewProps> GetDynamicViewProps(string typeName, string viewName)
+        {
+            Type type = TypeLogic.GetType(typeName);
+            var res = DynamicViewLogic.DynamicViews.Value.GetOrThrow(type).GetOrThrow(viewName)
+                .Props.Select(p => new DynamicViewProps() { name = p.Name, type = p.Type })
+                .ToList();
+
+            return res;
+        }
+
         [HttpGet("api/dynamic/viewNames/{typeName}")]
         public List<string> GetDynamicViewNames(string typeName)
         {
@@ -47,6 +58,12 @@ namespace Signum.React.Dynamic
         {
             Type type = TypeLogic.GetType(typeName);
             return DynamicViewLogic.DynamicViewOverrides.Value.TryGetC(type) ?? new List<DynamicViewOverrideEntity>();
+        }
+
+        public class DynamicViewProps
+        {
+            public string name;
+            public string type;
         }
     }
 }

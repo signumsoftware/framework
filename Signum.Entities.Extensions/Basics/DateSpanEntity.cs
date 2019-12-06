@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
@@ -18,21 +18,11 @@ namespace Signum.Entities.Basics
             return Years == 0 && Months == 0 && Days == 0;
         }
 
-        static Expression<Func<DateSpanEmbedded, DateTime, DateTime>> AddExpression =
-             (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
-        [ExpressionField]
-        public DateTime Add(DateTime date)
-        {
-            return AddExpression.Evaluate(this, date);
-        }
+        [AutoExpressionField]
+        public DateTime Add(DateTime date) => As.Expression(() => date.AddYears(Years).AddMonths(Months).AddDays(Days));
 
-        static Expression<Func<DateSpanEmbedded, DateTime, DateTime>> SubtractExpression =
-           (ds, dt) => dt.AddYears(-ds.Years).AddMonths(-ds.Months).AddDays(-ds.Days);
-        [ExpressionField]
-        public DateTime Subtract(DateTime date)
-        {
-            return SubtractExpression.Evaluate(this, date);
-        }
+        [AutoExpressionField]
+        public DateTime Subtract(DateTime date) => As.Expression(() => date.AddYears(-Years).AddMonths(-Months).AddDays(-Days));
 
         public DateSpan ToDateSpan()
         {
@@ -74,21 +64,11 @@ namespace Signum.Entities.Basics
             return Days == 0 && Hours == 0 && Minutes == 0  && Seconds == 0;
         }
 
-        static Expression<Func<TimeSpanEmbedded, DateTime, DateTime>> AddExpression =
-             (ds, dt) => dt.AddDays(ds.Days).AddHours(ds.Hours).AddMinutes(ds.Minutes).AddMinutes(ds.Seconds);
-        [ExpressionField]
-        public DateTime Add(DateTime date)
-        {
-            return AddExpression.Evaluate(this, date);
-        }
+        [AutoExpressionField]
+        public DateTime Add(DateTime date) => As.Expression(() => date.AddDays(Days).AddHours(Hours).AddMinutes(Minutes).AddSeconds(Seconds));
 
-        static Expression<Func<TimeSpanEmbedded, DateTime, DateTime>> SubtractExpression =
-           (ds, dt) => dt.AddDays(-ds.Days).AddHours(-ds.Hours).AddMinutes(-ds.Minutes).AddMinutes(-ds.Seconds);
-        [ExpressionField]
-        public DateTime Subtract(DateTime date)
-        {
-            return SubtractExpression.Evaluate(this, date);
-        }
+        [AutoExpressionField]
+        public DateTime Subtract(DateTime date) => As.Expression(() => date.AddDays(-Days).AddHours(-Hours).AddMinutes(-Minutes).AddMinutes(-Seconds));
 
         public TimeSpan ToTimeSpan()
         {

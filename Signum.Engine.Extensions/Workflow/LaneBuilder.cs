@@ -40,7 +40,7 @@ namespace Signum.Engine.Workflow
             public void ApplyChanges(XElement processElement, XElement laneElement, Locator locator)
             {
                 var laneIds = laneElement.Elements(bpmn + "flowNodeRef").Select(a => a.Value).ToHashSet();
-                var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value));
+                var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value!));
 
                 var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
                 var oldEvents = this.events.Values.Where(a => a.Entity.BoundaryOf == null).ToDictionaryEx(a => a.bpmnElementId, "events");
@@ -48,7 +48,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(events, oldEvents,
                    (id, e) =>
                    {
-                       var already = (WorkflowEventEntity)locator.FindEntity(id);
+                       var already = (WorkflowEventEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).events.Remove(id);
@@ -80,7 +80,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(activities, oldActivities,
                    (id, a) =>
                    {
-                       var already = (WorkflowActivityEntity)locator.FindEntity(id);
+                       var already = (WorkflowActivityEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).activities.Remove(id);
@@ -111,7 +111,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(gateways, oldGateways,
                    (id, g) =>
                    {
-                       var already = (WorkflowGatewayEntity)locator.FindEntity(id);
+                       var already = (WorkflowGatewayEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).gateways.Remove(id);
@@ -362,7 +362,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (locator!.HasReplacement(node.ToLite()))
                     {
-                        var replacement = locator.GetReplacement(node.ToLite());
+                        var replacement = locator.GetReplacement(node.ToLite())!;
 
                         node.CaseActivities()
                             .Where(a => a.State == CaseActivityState.Done)
@@ -401,7 +401,7 @@ namespace Signum.Engine.Workflow
                     Name = oldLane.Name,
                     BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval != null ? oldLane.ActorsEval.Clone() : null,
+                    ActorsEval = oldLane.ActorsEval?.Clone(),
                     Xml = oldLane.Xml,
                 }.Save();
 
@@ -410,6 +410,7 @@ namespace Signum.Engine.Workflow
                     Lane = newLane,
                     Name = e.Name,
                     BpmnElementId = e.BpmnElementId,
+                    Timer = e.Timer?.Clone(),
                     Type = e.Type,
                     Xml = e.Xml,
                 });

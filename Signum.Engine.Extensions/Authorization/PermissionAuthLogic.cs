@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
             get { return permissions; }
         }
 
-        static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache;
+        static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache = null!;
 
         public static IManualAuth<PermissionSymbol, bool> Manual { get { return cache; } }
 

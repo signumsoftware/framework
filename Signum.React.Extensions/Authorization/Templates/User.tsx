@@ -13,12 +13,11 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
     <div>
       <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
       <ValueLine ctx={ctx.subCtx(e => e.userName)} />
-      <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} />
+      {!ctx.readOnly &&
+        <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} />}
       <EntityLine ctx={ctx.subCtx(e => e.role)} />
       <ValueLine ctx={ctx.subCtx(e => e.email)} />
       <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
-      <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires)} />
-      <ValueLine ctx={ctx.subCtx(e => e.passwordSetDate)} />
     </div>
   );
 }
@@ -28,9 +27,6 @@ function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) {
   const [withPassword, setWithPassword] = React.useState(p.isNew);
   var newPass = React.useRef<HTMLInputElement>(null);
   var newPass2 = React.useRef<HTMLInputElement>(null);
-
-
-
 
   function handlePasswordBlur(e: React.SyntheticEvent<any>) {
     const ctx = p.ctx;

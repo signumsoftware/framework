@@ -25,16 +25,11 @@ namespace Signum.Engine.Printing
     {
         public static int DeleteFilesAfter = 24 * 60; //Minutes
 
-        public static Action<PrintLineEntity> Print;
+        public static Action<PrintLineEntity> Print = e => throw new NotImplementedException("PrintingLogic.Print is not defined");
          
-        static Expression<Func<PrintPackageEntity, IQueryable<PrintLineEntity>>> LinesExpression =
-            e => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e));
-        
-        [ExpressionField]
-        public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e)
-        {
-            return LinesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e) => 
+            As.Expression(() => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e)));
 
         public static FileTypeSymbol? TestFileType; 
 
@@ -178,7 +173,7 @@ namespace Signum.Engine.Printing
         public static FileContent SavePrintLine(this FileContent file, Entity entity, FileTypeSymbol fileTypeForPrinting)
         {
             CancelPrinting(entity, fileTypeForPrinting);
-            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
+            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName)!, file.Bytes);
 
             return file;
         }
@@ -266,7 +261,7 @@ namespace Signum.Engine.Printing
             {
                 try
                 {
-                    PrintingLogic.Print(line);
+                    PrintingLogic.Print?.Invoke(line);
                     
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;

@@ -21,9 +21,9 @@ namespace Signum.Engine.UserQueries
 {
     public static class UserQueryLogic
     {
-        public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries;
-        public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks;
-        public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery;
+        public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries = null!;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks = null!;
+        public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -56,10 +56,10 @@ namespace Signum.Engine.UserQueries
                 UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
-                UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KVP.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
+                UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KeyValuePair.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
-                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KVP.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite())).GroupToDictionary(),
+                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserQueryEntity)));
             }
         }
@@ -141,7 +141,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
@@ -149,7 +149,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
@@ -157,7 +157,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryEntity>> Autocomplete(string subString, int limit)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueries.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
@@ -169,7 +169,7 @@ namespace Signum.Engine.UserQueries
             {
                 var result = UserQueries.Value.GetOrThrow(userQuery);
 
-                var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
                 if (!isAllowed(result))
                     throw new EntityNotFoundException(userQuery.EntityType, userQuery.Id);
 
@@ -190,7 +190,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
         }
 
 

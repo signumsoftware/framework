@@ -30,13 +30,8 @@ namespace Signum.Entities.Authorization
                 User?.ToString(), SessionStart, SessionEnd);
         }
 
-        static Expression<Func<SessionLogEntity, double?>> DurationExpression =
-            sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).TotalSeconds : (double?)null;
-        [ExpressionField, Unit("s")]
-        public double? Duration
-        {
-            get { return DurationExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public double? Duration => As.Expression(() => SessionEnd != null ? (SessionEnd.Value - SessionStart).TotalSeconds : (double?)null);
     }
 
     [AutoInit]

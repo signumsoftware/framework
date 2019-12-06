@@ -51,8 +51,8 @@ namespace Signum.Engine.Workflow
                          .Set(a => a.To, a => newTo)
                          .Execute();
 
-                         osf.Entity.From = newFrom;
-                         osf.Entity.To = newTo;
+                         osf.Entity.From = newFrom!;
+                         osf.Entity.To = newTo!;
                          osf.Entity.SetCleanModified(false);
                      }
                  });

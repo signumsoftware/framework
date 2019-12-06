@@ -33,7 +33,7 @@ namespace Signum.React.Authorization
             SignumAuthenticationFilter.Authenticators.Add(InvalidAuthenticator);
         }
 
-        public static SignumAuthenticationResult InvalidAuthenticator(FilterContext actionContext)
+        public static SignumAuthenticationResult? InvalidAuthenticator(FilterContext actionContext)
         {
             throw new AuthenticationException("No authentication information found!");
         }
@@ -50,7 +50,7 @@ namespace Signum.React.Authorization
         public static SignumAuthenticationResult? AllowAnonymousAuthenticator(FilterContext actionContext)
         {
             if (actionContext.ActionDescriptor is ControllerActionDescriptor cad && 
-                (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() || cad.ControllerTypeInfo.HasAttribute<AllowAnonymousAttribute>()))
+                (cad.MethodInfo.HasAttribute<SignumAllowAnonymousAttribute>() || cad.ControllerTypeInfo.HasAttribute<SignumAllowAnonymousAttribute>()))
                 return new SignumAuthenticationResult();
 
             return null;
@@ -58,7 +58,7 @@ namespace Signum.React.Authorization
 
         static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
-            var authHeader = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            var authHeader = ctx.HttpContext.Request.Headers["Signum_Authorization"].FirstOrDefault();
             if (authHeader == null)
             {
                 return null;
@@ -82,28 +82,28 @@ namespace Signum.React.Authorization
 
         static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
         {
-            newUser = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
+            var user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 
-            if (newUser == null)
+            if (user == null)
                 throw new AuthenticationException(AuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
-            if (newUser.State == UserState.Disabled)
-                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(newUser));
+            if (user.State == UserState.Disabled)
+                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(user));
 
-            if (newUser.UserName != oldToken.User.UserName)
+            if (user.UserName != oldToken.User.UserName)
                 throw new AuthenticationException(AuthMessage.InvalidUsername.NiceToString());
 
-            if (!newUser.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
+            if (!user.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
                 throw new AuthenticationException(AuthMessage.InvalidPassword.NiceToString());
 
             AuthToken newToken = new AuthToken
             {
-                User = newUser,
+                User = user,
                 CreationDate = TimeZoneManager.Now,
             };
 
             var result = SerializeToken(newToken);
-
+            newUser = user;
             return result;
         }
 

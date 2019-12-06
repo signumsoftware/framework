@@ -13,11 +13,7 @@ namespace Signum.Entities.Migrations
 
         public DateTime ExecutionDate { get; set; }
 
-        static Expression<Func<CSharpMigrationEntity, string>> ToStringExpression = e => e.UniqueName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UniqueName);
     }
 }

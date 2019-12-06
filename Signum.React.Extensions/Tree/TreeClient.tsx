@@ -65,7 +65,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 function moveModal(lite: Lite<TreeEntity>) {
   const s = settings[lite.EntityType];
-  if (s && s.createMoveModel)
+  if (s?.createMoveModel)
     return s.createMoveModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
@@ -77,7 +77,7 @@ function moveModal(lite: Lite<TreeEntity>) {
 
 function copyModal(lite: Lite<TreeEntity>) {
   const s = settings[lite.EntityType];
-  if (s && s.createCopyModel)
+  if (s?.createCopyModel)
     return s.createCopyModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
@@ -135,7 +135,7 @@ export function overrideOnFind(ti: TypeInfo) {
   var qs = getQuerySetting(ti.name);
 
   if (!qs.onFind)
-    qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+    qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo?.title });
 }
 
 export function overrideAutocomplete(ti: TypeInfo) {
@@ -171,7 +171,7 @@ export function openTree(type: Type<TreeEntity> | string, filterOptions?: Filter
   const typeName = type instanceof Type ? type.typeName : type;
 
   return import("./TreeModal")
-    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions || [], options));
+    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions ?? [], options));
 }
 
 export interface TreeModalOptions {
@@ -224,7 +224,7 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 export namespace API {
   export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
-    return ajaxGet<Array<Lite<TreeEntity>>>({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+    return ajaxGet({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
   }
 
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {

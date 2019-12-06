@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { Upload, Download } from '../../../Disconnected/Signum.Entities.Disconnected'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
@@ -8,7 +8,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
       name: "disconnected",
       getFill: t => t.extra["disc-upload"] == undefined ? "white" : "url(#disconnected-" + t.extra["disc-upload"] + "-" + t.extra["disc-download"] + ")",
       getTooltip: t => t.extra["disc-upload"] == undefined ? "" : "Download " + t.extra["disc-download"] + " - " + "Upload " + t.extra["disc-upload"],
-      defs: info.tables.groupBy(t => (t.extra["disc-upload"] || "None") + "-" + (t.extra["disc-download"] || "None"))
+      defs: info.tables.groupBy(t => (t.extra["disc-upload"] ?? "None") + "-" + (t.extra["disc-download"] ?? "None"))
         .map(gr => gradientDef(
           gr.key.before("-") as Upload,
           gr.key.after("-") as Download))

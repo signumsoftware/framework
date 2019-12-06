@@ -42,7 +42,7 @@ namespace Signum.Entities.Chart
 
         public bool HideQuickLink { get; set; }
 
-        public Lite<Entity> Owner { get; set; }
+        public Lite<Entity>? Owner { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 200)]
         public string DisplayName { get; set; }
@@ -87,12 +87,8 @@ namespace Signum.Entities.Chart
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.DisplayName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => DisplayName);
 
         internal void ParseData(QueryDescription description)
         {
@@ -154,7 +150,7 @@ namespace Signum.Entities.Chart
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
-            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
             Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));

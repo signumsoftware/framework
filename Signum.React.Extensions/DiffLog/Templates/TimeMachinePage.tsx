@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
 import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
@@ -14,103 +15,82 @@ import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
-import { UncontrolledTabs, Tab } from '@framework/Components'
+import { Tabs, Tab } from 'react-bootstrap'
 import { is } from '@framework/Signum.Entities'
 import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
+import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { asUTC } from '@framework/SearchControl/SystemTimeEditor'
 
-interface TimeMachinePageProps extends RouteComponentProps<{ type: string; id?: string }> {
+export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id?: string }>) {
 
-}
+  var params = p.match.params;
 
-export interface TimeMachinePageState {
-  lite?: Lite<Entity>;
-  queryDescription?: QueryDescription;
-}
+  const lite = useAPI(() => {
+    var lite = newLite(params.type, params.id!);
 
-export default class TimeMachinePage extends React.Component<TimeMachinePageProps, TimeMachinePageState> {
+    return Navigator.API.fillToStrings(lite)
+      .then(() => lite)
+      .catch(() => { lite.toStr = TimeMachineMessage.EntityDeleted.niceToString(); return lite });
+  }, [])
 
-  constructor(props: TimeMachinePageProps) {
-    super(props);
+  const searchControl = React.useRef<SearchControlHandler>(null);
+  const forceUpdate = useForceUpdate();
+  const queryDescription = useAPI(() => Finder.getQueryDescription(params.type), [params.type]);
 
-    this.state = { lite: undefined, queryDescription: undefined };
-  }
+  var ctx = new StyleContext(undefined, undefined);
+  if (lite == null)
+    return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
 
-  componentWillMount() {
-    var p = this.props.match.params;
-    var lite = newLite(p.type, p.id);
+  var scl = searchControl.current?.searchControlLoaded ?? undefined;
+  var colIndex = scl?.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
 
-    Navigator.API.fillToStrings(lite).then(() => {
-      this.setState({ lite });
-    }).catch(a => {
-      lite.toStr = TimeMachineMessage.EntityDeleted.niceToString();
-      this.setState({ lite });
-    });
-
-    Finder.getQueryDescription(p.type)
-      .then(qd => this.setState({ queryDescription: qd }))
-      .done();
-  }
-
-  searchControl?: SearchControl | null;
-
-  render() {
-    var ctx = new StyleContext(undefined, undefined);
-    const lite = this.state.lite;
-    if (lite == null)
-      return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
-
-    var scl = this.searchControl && this.searchControl.searchControlLoaded || undefined;
-    var colIndex = scl && scl.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
-
-    return (
-      <div>
-        <h4>
-          <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
-          <br />
-          <small className="sf-type-nice-name">
-            <EntityLink lite={lite}>{NormalWindowMessage.Type0Id1.niceToString().formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
-            &nbsp;
+  return (
+    <div>
+      <h4>
+        <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
+        <br />
+        <small className="sf-type-nice-name">
+          <EntityLink lite={lite}>{NormalWindowMessage.Type0Id1.niceToString().formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
+          &nbsp;
                         <span style={{ color: "#aaa" }}>{lite.toStr}</span>
-          </small>
-        </h4>
+        </small>
+      </h4>
 
-        <br />
-        <h5>All Versions</h5>
-        {
-          this.state.queryDescription && <SearchControl ref={sc => this.searchControl = sc} findOptions={{
-            queryName: lite.EntityType,
-            filterOptions: [{ token: QueryTokenString.entity(), operation: "EqualTo", value: lite }],
-            columnOptions: [
-              { token: QueryTokenString.entity().expression("SystemValidFrom") },
-              { token: QueryTokenString.entity().expression("SystemValidTo") },
-            ],
-            columnOptionsMode: "InsertStart",
-            orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Ascending" }],
-            systemTime: { mode: "All" }
-          }}
-            onSelectionChanged={() => this.forceUpdate()}
-          />
-        }
+      <br />
+      <h5>All Versions</h5>
+      {
+        queryDescription && <SearchControl ref={searchControl} findOptions={{
+          queryName: lite.EntityType,
+          filterOptions: [{ token: QueryTokenString.entity(), operation: "EqualTo", value: lite }],
+          columnOptions: [
+            { token: QueryTokenString.entity().expression("SystemValidFrom") },
+            { token: QueryTokenString.entity().expression("SystemValidTo") },
+          ],
+          columnOptionsMode: "InsertStart",
+          orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Ascending" }],
+          systemTime: { mode: "All" }
+        }}
+          onSelectionChanged={() => forceUpdate()}
+        />
+      }
 
-        <br />
-        <h5>Selected Versions</h5>
-        <UncontrolledTabs hideOnly>
-          {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).orderBy(a => a).flatMap((d, i, dates) => [
-            <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
-              <RenderEntityVersion lite={lite} asOf={d} />
-            </Tab>,
-            (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
-              <DiffEntityVersion lite={lite} validFrom={d} validTo={dates[i + 1]} />
-            </Tab>
-          ])}
-        </UncontrolledTabs>
-      </div>
-    );
-  }
+      <br />
+      <h5>Selected Versions</h5>
+      <Tabs id="timeMachineTabs">
+        {scl?.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d)).orderBy(a => a).flatMap((d, i, dates) => [
+          <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
+            <RenderEntityVersion lite={lite} asOf={d} />
+          </Tab>,
+          (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
+            <DiffEntityVersion lite={lite} validFrom={d} validTo={dates[i + 1]} />
+          </Tab>
+        ])}
+      </Tabs>
+    </div>
+  );
 }
-
-
 
 interface RenderEntityVersionProps {
   lite: Lite<Entity>;
@@ -121,41 +101,19 @@ interface RenderEntityVersionState {
   entity?: Entity;
 }
 
-export class RenderEntityVersion extends React.Component<RenderEntityVersionProps, RenderEntityVersionState> {
+export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
-  constructor(props: RenderEntityVersionProps) {
-    super(props);
-    this.state = {};
-  }
+  const entity = useAPI(signal => DiffLogClient.API.retrieveVersion(p.lite, p.asOf), [p.lite, p.asOf]);
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
+  if (!entity)
+    return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-  componentWillReceiveProps(newProps: RenderEntityVersionProps) {
-    if (!is(newProps.lite, this.props.lite) || newProps.asOf != this.props.asOf)
-      this.loadData(newProps);
-  }
-
-  loadData(props: RenderEntityVersionProps) {
-    DiffLogClient.API.retrieveVersion(props.lite, props.asOf)
-      .then(entity => this.setState({ entity }))
-      .done();
-  }
-
-  render() {
-    if (!this.state.entity)
-      return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
-
-    return (
-      <div>
-        <RenderEntity ctx={TypeContext.root(this.state.entity, { readOnly: true })} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <RenderEntity ctx={TypeContext.root(entity, { readOnly: true })} />
+    </div>
+  );
 }
-
-
 
 interface DiffEntityVersionProps {
   lite: Lite<Entity>;
@@ -163,44 +121,18 @@ interface DiffEntityVersionProps {
   validTo: string;
 }
 
-interface DiffEntityVersionState {
-  diffBlock?: DiffLogClient.DiffBlock;
-}
+export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
-export class DiffEntityVersion extends React.Component<DiffEntityVersionProps, DiffEntityVersionState> {
+  const diffBlock = useAPI(() => DiffLogClient.API.diffVersions(p.lite, p.validFrom, p.validTo), [p.lite, p.validFrom, p.validTo]);
 
-  constructor(props: DiffEntityVersionProps) {
-    super(props);
-    this.state = {};
-  }
+  if (!diffBlock)
+    return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
-
-  componentWillReceiveProps(newProps: DiffEntityVersionProps) {
-    if (!is(newProps.lite, this.props.lite) ||
-      newProps.validFrom != this.props.validFrom ||
-      newProps.validTo != this.props.validTo)
-      this.loadData(newProps);
-  }
-
-  loadData(props: DiffEntityVersionProps) {
-    DiffLogClient.API.diffVersions(props.lite, props.validFrom, props.validTo)
-      .then(diffBlock => this.setState({ diffBlock }))
-      .done();
-  }
-
-  render() {
-    if (!this.state.diffBlock)
-      return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
-
-    return (
-      <div>
-        <DiffDocument diff={this.state.diffBlock} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <DiffDocument diff={diffBlock} />
+    </div>
+  );
 }
 
 

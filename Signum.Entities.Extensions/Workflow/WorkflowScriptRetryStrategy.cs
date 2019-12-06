@@ -14,12 +14,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Rule { get; set; }
 
-        static Expression<Func<WorkflowScriptRetryStrategyEntity, string>> ToStringExpression = @this => @this.Rule;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Rule);
 
         static readonly Regex Regex = new Regex(@"^\s*(?<part>\d+[smhd])(\s*,\s*(?<part>\d+[smhd]))*\s*$", RegexOptions.IgnoreCase);
         protected override string? PropertyValidation(PropertyInfo pi)

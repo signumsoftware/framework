@@ -1,50 +1,33 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { Lite, is } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
+import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default class SendEmailTask extends React.Component<{ ctx: TypeContext<SendEmailTaskEntity> }, { type?: string }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { type: undefined };
-  }
+export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity> }) {
 
-  componentWillMount() {
-    this.loadEntity(this.props.ctx.value.emailTemplate);
-  }
+  const forceUpdate = useForceUpdate();
 
-  componentWillReceiveProps(newProps: { ctx: TypeContext<SendEmailTaskEntity> }) {
-    if (!is(this.props.ctx.value.emailTemplate, newProps.ctx.value.emailTemplate))
-      this.loadEntity(newProps.ctx.value.emailTemplate);
-  }
+  const type = useAPI(() =>
+    p.ctx.value.emailTemplate == null ? Promise.resolve(undefined) :
+    Navigator.API.fetchAndForget(p.ctx.value.emailTemplate)
+      .then(et => Finder.getQueryDescription(et.query!.key))
+      .then(qd => qd.columns["Entity"].type.name),
+    [p.ctx.value.emailTemplate])
 
-  loadEntity(lite: Lite<EmailTemplateEntity> | null | undefined) {
-    if (lite) {
-      Navigator.API.fetchAndForget(lite)
-        .then(et => Finder.getQueryDescription(et.query!.key))
-        .then(qd => this.setState({ type: qd.columns["Entity"].type.name }))
-        .done();
-    }
-    else
-      this.setState({ type: undefined });
-  }
+  const sc = p.ctx;
+  const ac = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
-  render() {
-
-    const sc = this.props.ctx;
-    const ac = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
-
-    return (
-      <div>
-        <ValueLine ctx={sc.subCtx(s => s.name)} />
-        <EntityLine ctx={sc.subCtx(s => s.emailTemplate)} onChange={e => this.loadEntity(e.newValue)} />
-        {this.state.type && <EntityLine ctx={sc.subCtx(s => s.targetsFromUserQuery)} />}
-        {this.state.type && <EntityLine ctx={sc.subCtx(s => s.uniqueTarget)} type={{ isLite: true, name: this.state.type }} />}
-      </div>
-    );
-  };
+  return (
+    <div>
+      <ValueLine ctx={sc.subCtx(s => s.name)} />
+      <EntityLine ctx={sc.subCtx(s => s.emailTemplate)} onChange={forceUpdate} />
+      {type && <EntityLine ctx={sc.subCtx(s => s.targetsFromUserQuery)} />}
+      {type && <EntityLine ctx={sc.subCtx(s => s.uniqueTarget)} type={{ isLite: true, name: type }} />}
+    </div>
+  );
 }
 

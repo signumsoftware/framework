@@ -13,12 +13,8 @@ namespace Signum.Entities.Isolation
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public static readonly SessionVariable<Lite<IsolationEntity>> DefaultVariable = Statics.SessionVariable<Lite<IsolationEntity>>("DefaultIsolation");
         public static Lite<IsolationEntity> Default
@@ -110,13 +106,9 @@ namespace Signum.Entities.Isolation
 
     public static class IsolationExtensions
     {
-        static Expression<Func<IEntity, Lite<IsolationEntity>?>> IsolationExpression =
-             entity => ((Entity)entity).Mixin<IsolationMixin>().Isolation;
-        [ExpressionField]
-        public static Lite<IsolationEntity>? Isolation(this IEntity entity)
-        {
-            return IsolationExpression.Evaluate(entity);
-        }
+        [AutoExpressionField]
+        public static Lite<IsolationEntity>? Isolation(this IEntity entity) => 
+            As.Expression(() => ((Entity)entity).Mixin<IsolationMixin>().Isolation);
 
         public static Lite<IsolationEntity>? TryIsolation(this IEntity entity)
         {

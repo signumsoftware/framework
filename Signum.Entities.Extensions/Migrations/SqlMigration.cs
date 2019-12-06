@@ -14,11 +14,7 @@ namespace Signum.Entities.Migrations
         [StringLengthValidator(Min = 0, Max = 400)]
         public string? Comment { get; set; }
 
-        static Expression<Func<SqlMigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => VersionNumber);
     }
 }

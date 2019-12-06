@@ -97,22 +97,17 @@ namespace Signum.Entities.Disconnected
             return result;
         }
 
-        static Expression<Func<DisconnectedExportEntity, int>> CalculateTotalExpression =
-            stat =>
-                stat.Lock!.Value +
-                stat.CreateDatabase!.Value +
-                stat.CreateSchema!.Value +
-                stat.DisableForeignKeys!.Value +
-                stat.Copies.Sum(a => a.CopyTable!.Value) +
-                stat.EnableForeignKeys!.Value +
-                stat.ReseedIds!.Value +
-                stat.BackupDatabase!.Value +
-                stat.DropDatabase!.Value;
-        [ExpressionField]
-        public int CalculateTotal()
-        {
-            return CalculateTotalExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public int CalculateTotal() => As.Expression(() => 
+                Lock!.Value +
+                CreateDatabase!.Value +
+                CreateSchema!.Value +
+                DisableForeignKeys!.Value +
+                Copies.Sum(a => a.CopyTable!.Value) +
+                EnableForeignKeys!.Value +
+                ReseedIds!.Value +
+                BackupDatabase!.Value +
+                DropDatabase!.Value);
 
         internal DisconnectedExportEntity Clone()
         {

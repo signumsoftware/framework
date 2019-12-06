@@ -197,8 +197,8 @@ namespace Signum.Engine.Templating
             var type = modelType;
             foreach (var field in (fieldOrPropertyChain ?? "").Trim().Split('.'))
             {
-                var info = (MemberInfo)type.GetField(field, Flags) ??
-                           (MemberInfo)type.GetProperty(field, Flags);
+                var info = (MemberInfo?)type.GetField(field, Flags) ??
+                           (MemberInfo?)type.GetProperty(field, Flags);
 
                 if (info == null)
                 {

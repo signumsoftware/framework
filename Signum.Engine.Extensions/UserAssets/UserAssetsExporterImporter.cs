@@ -37,22 +37,22 @@ namespace Signum.Engine.UserAssets
 
             public Guid Include(Lite<IUserAssetEntity> content)
             {
-                return this.Include(content.Retrieve());
+                return this.Include(content.RetrieveAndRemember());
             }
 
             public string TypeToName(Lite<TypeEntity> type)
             {
-                return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.Retrieve()));
+                return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.RetrieveAndRemember()));
             }
             
             public string QueryToName(Lite<QueryEntity> query)
             {
-                return query.Retrieve().Key;
+                return query.RetrieveAndRemember().Key;
             }
 
             public string PermissionToName(Lite<PermissionSymbol> symbol)
             {
-                return symbol.Retrieve().Key;
+                return symbol.RetrieveAndRemember().Key;
             }
         }
 
@@ -119,7 +119,7 @@ namespace Signum.Engine.UserAssets
 
                     previews.Add(guid, new UserAssetPreviewLineEmbedded
                     {
-                        Text = entity.ToString(),
+                        Text = entity.ToString()!,
                         Type = entity.GetType().ToTypeEntity(),
                         Guid = guid,
                         Action = entity.IsNew ? EntityAction.New :
@@ -140,7 +140,7 @@ namespace Signum.Engine.UserAssets
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
 
                 part.FromXml(element, this);
 
@@ -168,9 +168,9 @@ namespace Signum.Engine.UserAssets
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
 
-            public SystemEmailEntity GetSystemEmail(string fullClassName)
+            public EmailModelEntity GetEmailModel(string fullClassName)
             {
-                return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
+                return EmailModelLogic.GetEmailModelEntity(fullClassName);
             }
 
             public CultureInfoEntity GetCultureInfoEntity(string cultureName)
@@ -247,16 +247,16 @@ namespace Signum.Engine.UserAssets
                 return TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
             }
 
-            public SystemEmailEntity GetSystemEmail(string fullClassName)
+            public EmailModelEntity GetEmailModel(string fullClassName)
             {
-                return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
+                return EmailModelLogic.GetEmailModelEntity(fullClassName);
             }
 
             public IPartEntity GetPart(IPartEntity old, XElement element)
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
 
                 part.FromXml(element, this);
 
@@ -289,6 +289,30 @@ namespace Signum.Engine.UserAssets
             public CultureInfoEntity GetCultureInfoEntity(string cultureName)
             {
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
+            }
+        }
+
+        public static void ImportConsole(string filePath)
+        {
+            var bytes = File.ReadAllBytes(filePath);
+
+            var preview = Preview(bytes);
+            foreach (var item in preview.Lines)
+            {
+                switch (item.Action)
+                {
+                    case EntityAction.New: SafeConsole.WriteLineColor(ConsoleColor.Green, $"Create {item.Type} {item.Guid} {item.Text}"); break;
+                    case EntityAction.Identical: SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {item.Type} {item.Guid} {item.Text}"); break;
+                    case EntityAction.Different: SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Override {item.Type} {item.Guid} {item.Text}");
+                        item.OverrideEntity = true;
+                        break;
+                }
+            }
+
+            if (!preview.Lines.Any(a => a.OverrideEntity) || SafeConsole.Ask("Override all?"))
+            {
+                Import(bytes, preview);
+                SafeConsole.WriteLineColor(ConsoleColor.Green, $"Imported Succesfully");
             }
         }
 

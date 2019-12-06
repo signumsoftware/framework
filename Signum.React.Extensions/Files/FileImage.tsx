@@ -1,6 +1,6 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { IFile, IFilePath } from "./Signum.Entities.Files";
-import FileDownloader from "./FileDownloader";
+import { configurtions } from "./FileDownloader";
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import * as Services from '@framework/Services'
 
@@ -12,48 +12,28 @@ interface FileImageState {
   objectUrl: string | undefined;
 }
 
-export class FileImage extends React.Component<FileImageProps, FileImageState> {
-  constructor(props: FileImageProps) {
-    super(props);
-    this.state = { objectUrl: undefined };
-  }
+export function FileImage(p: FileImageProps) {
 
-  componentWillMount() {
-    this.loadData(this.props.file);
-  }
+  var [objectUrl, setObjectUrl] = React.useState<string | undefined>(undefined);
+  var { file, ...rest } = p;
 
-  componentWillReceiveProps(newProps: FileImageProps) {
-    if (newProps.file != this.props.file)
-      this.loadData(newProps.file);
-  }
+  React.useEffect(() => {
+    if (file && !file.fullWebPath && !file.binaryFile) {
+      var url = configurtions[file.Type].fileUrl!(file);
+      var oldFile = file;
 
-  loadData(file: IFile & ModifiableEntity | null | undefined) {
+      Services.ajaxGetRaw({ url: url })
+        .then(resp => resp.blob())
+        .then(blob => setObjectUrl(URL.createObjectURL(blob)))
+        .done();
+    }
+    return () => { objectUrl && URL.revokeObjectURL(objectUrl) };
+  }, [p.file]);
 
-    this.setState({ objectUrl: undefined }, () => {
-      if (file && !file.fullWebPath && !file.binaryFile) {
-        var url = FileDownloader.configurtions[file.Type].fileUrl!(file);
-
-        Services.ajaxGetRaw({ url: url })
-          .then(resp => resp.blob())
-          .then(blob => this.setState({ objectUrl: URL.createObjectURL(blob) }))
-          .done();
-      }
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.state.objectUrl)
-      URL.revokeObjectURL(this.state.objectUrl);
-  }
-
-  render() {
-    var { file, ...props } = this.props;
-    var src = file == null ? undefined :
-      (file as IFilePath).fullWebPath ||
-        file.binaryFile != null ? "data:image/jpeg;base64," + file.binaryFile :
-        this.state.objectUrl;
-    return (
-      <img {...props} src={src} />
-    );
-  }
+  var src = file == null ? undefined :
+    (file as IFilePath).fullWebPath || file.binaryFile != null ? "data:image/jpeg;base64," + file.binaryFile :
+      objectUrl;
+  return (
+    <img {...rest} src={src} />
+  );
 }

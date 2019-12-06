@@ -1,90 +1,74 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import { Dic } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, TranslationFileStatus } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import "../Translation.css"
+import { useAPI } from '@framework/Hooks'
 
-interface TranslationCodeStatusProps extends RouteComponentProps<{}> {
+export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
 
+  const result = useAPI(() => API.status(), []);
+
+  return (
+    <div>
+      <h2>{TranslationMessage.CodeTranslations.niceToString()}</h2>
+      {result == undefined ? <strong>{JavascriptMessage.loading.niceToString()}</strong> :
+        <TranslationTable result={result} />}
+    </div>
+  );
 }
 
-export default class TranslationCodeStatus extends React.Component<TranslationCodeStatusProps, { result?: TranslationFileStatus[] }> {
-  constructor(props: TranslationCodeStatusProps) {
-    super(props);
-    this.state = { result: undefined };
-  }
 
-  componentWillMount() {
-    this.loadState().done();
-  }
+function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
+  const tree = result.groupBy(a => a.assembly)
+    .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
 
-  componentWillReceiveProps() {
-    this.loadState().done();
-  }
+  const assemblies = Dic.getKeys(tree);
+  const cultures = Dic.getKeys(tree[assemblies.first()]);
 
-  loadState() {
-    return API.status()
-      .then(result => this.setState({ result }));
-  }
-
-  render() {
-
-    return (
-      <div>
-        <h2>{TranslationMessage.CodeTranslations.niceToString()}</h2>
-        {this.renderTable()}
-      </div>
-    );
-  }
-
-  renderTable() {
-    if (this.state.result == undefined)
-      return <strong>{JavascriptMessage.loading.niceToString()}</strong>;
-
-    const tree = this.state.result.groupBy(a => a.assembly)
-      .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
-
-    const assemblies = Dic.getKeys(tree);
-    const cultures = Dic.getKeys(tree[assemblies.first()]);
-
-
-    return (
-      <table className="st">
-        <thead>
-          <tr>
-            <th></th>
-            <th> {TranslationMessage.All.niceToString()} </th>
-            {cultures.map(culture => <th key={culture}>{culture}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {assemblies.map(assembly =>
-            <tr key={assembly}>
-              <th> {assembly}</th>
-              <td>
-                <Link to={`~/translation/view/${assembly}`}>{TranslationMessage.View.niceToString()}</Link>
+  return (
+    <table className="st">
+      <thead>
+        <tr>
+          <th></th>
+          <th> {TranslationMessage.All.niceToString()} </th>
+          {cultures.map(culture => <th key={culture}>{culture}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {assemblies.map(assembly =>
+          <tr key={assembly}>
+            <th> {assembly}</th>
+            <td>
+              <Link to={`~/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
+            </td>
+            {cultures.map(culture =>
+              <td key={culture}>
+                <Link to={`~/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
+                <br />
+                {
+                  !tree[assembly][culture].isDefault &&
+                  <Link to={`~/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
+                    {TranslationMessage.Sync.niceToString()}
+                  </Link>
+                }
               </td>
-              {cultures.map(culture =>
-                <td key={culture}>
-                  <Link to={`~/translation/view/${assembly}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                  <br />
-                  {
-                    !tree[assembly][culture].isDefault &&
-                    <Link to={`~/translation/syncNamespaces/${assembly}/${culture}`} className={"status-" + tree[assembly][culture].status}>
-                      {TranslationMessage.Sync.niceToString()}
-                    </Link>
-                  }
-                </td>
-              )}
-            </tr>
-          )}
-        </tbody>
-      </table>
-    );
-  }
+            )}
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
 }
 
+export function encodeDots(value: string) {
+  return value.replaceAll(".", "-");
+}
+
+export function decodeDots(value: string) {
+  return value.replaceAll("-", ".");
+}
 
 

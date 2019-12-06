@@ -15,7 +15,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors;
+        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors = null!;
 
         public static readonly int Limit = 360;
 
@@ -118,7 +118,7 @@ namespace Signum.Engine.Chart
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
+                    Color = dic?.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }

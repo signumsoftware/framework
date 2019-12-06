@@ -28,7 +28,7 @@ namespace Signum.Engine.Isolation
     {
         public static bool IsStarted;
 
-        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations;
+        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations = null!;
 
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
@@ -71,7 +71,7 @@ namespace Signum.Engine.Isolation
             return IsolationEntity.Override(process.Data!.TryIsolation());
         }
 
-        static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object[]? args)
+        static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)
         {
             return IsolationEntity.Override(entity?.TryIsolation() ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
@@ -18,7 +19,7 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
   Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
   Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));
 
-  Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
+  Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: ToolbarEntity.token(a => a.priority), defaultOrderType: "Descending" });
 
   Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
 
@@ -46,15 +47,14 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   getLabel(element: ToolbarResponse<T>) {
-    return element.label || element.content!.toStr;
+    return element.label ?? element.content!.toStr;
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
-
+  abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: any): boolean;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
-
-    var openWindow = e.ctrlKey || e.button == 1;
+    e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
       Navigator.pushOrOpenInTab(url, e);
@@ -70,8 +70,8 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export namespace API {
-  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any>> {
-    return ajaxGet<ToolbarResponse<any>>({ url: `~/api/toolbar/current/${location}` });
+  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/current/${location}` });
   }
 }
 

@@ -17,6 +17,7 @@ import { getTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
+import { SearchControlOptions } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
@@ -27,10 +28,11 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         TimeMachineMessage.TimeMachine.niceToString(),
         timeMachineRoute(ctx.lite), {
           icon: "history",
-          iconColor: "blue"
+          iconColor: "blue",
+          isShy: true,
         }) : undefined);
 
-    SearchControl.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
+    SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
     options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
 
@@ -65,15 +67,15 @@ export function timeMachineRoute(lite: Lite<Entity>) {
 export namespace API {
 
   export function diffLog(id: string | number): Promise<DiffLogResult> {
-    return ajaxGet<DiffLogResult>({ url: "~/api/diffLog/" + id });
+    return ajaxGet({ url: "~/api/diffLog/" + id });
   }
 
   export function retrieveVersion(lite: Lite<Entity>, asOf: string, ): Promise<Entity> {
-    return ajaxGet<Entity>({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
+    return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
   }
 
   export function diffVersions(lite: Lite<Entity>, from: string, to: string): Promise<DiffBlock> {
-    return ajaxGet<DiffBlock>({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
+    return ajaxGet({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
   }
 }
 
@@ -92,38 +94,34 @@ export interface DiffPair<T> {
   value: T;
 }
 
-export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {
+export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
   inSearch?: boolean;
 }
 
-export default class TimeMachineLink extends React.Component<TimeMachineLinkProps>{
+export default function TimeMachineLink(p : TimeMachineLinkProps){
 
-  render() {
-    const { lite, inSearch, children, ...htmlAtts } = this.props;
-
-    if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
-      return <span data-entity={liteKey(lite)}>{this.props.children || lite.toStr}</span>;
-
-
-    return (
-      <Link
-        to={timeMachineRoute(lite)}
-        title={lite.toStr}
-        onClick={this.handleClick}
-        data-entity={liteKey(lite)}
-        {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
-        {children || lite.toStr}
-      </Link>
-    );
-  }
-
-  handleClick = (event: React.MouseEvent<any>) => {
-
-    const lite = this.props.lite;
+  function handleClick(event: React.MouseEvent<any>) {
+    const lite = p.lite;
 
     event.preventDefault();
 
     window.open(Navigator.toAbsoluteUrl(timeMachineRoute(lite)));
   }
+  const { lite, inSearch, children, ...htmlAtts } = p;
+
+  if (!Navigator.isNavigable(lite.EntityType, undefined, p.inSearch || false))
+    return <span data-entity={liteKey(lite)}>{p.children ?? lite.toStr}</span>;
+
+
+  return (
+    <Link
+      to={timeMachineRoute(lite)}
+      title={lite.toStr}
+      onClick={handleClick}
+      data-entity={liteKey(lite)}
+      {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
+      {children ?? lite.toStr}
+    </Link>
+  );
 }

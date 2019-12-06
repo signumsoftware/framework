@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider, specialActions } from './OmniboxClient'
 
 export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmniboxResult>

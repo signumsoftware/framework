@@ -1,0 +1,47 @@
+﻿ul.responsive-columns {
+    column-width: 360px;
+}
+
+    ul.responsive-columns > li {
+        break-inside: avoid-column;
+    }
+
+.sf-edit-container:hover .sf-edit-button {
+    color: #bbb;
+}
+
+.sf-edit-button {
+    color: #eee;
+    font-size: 16px;
+}
+
+    .sf-edit-button:hover {
+        color: #888 !important;
+    }
+
+.sf-edit-button.active {
+    color: #888 !important;
+}
+
+    .sf-edit-button.block {
+        margin-top: -16px;
+        display: block;
+    }
+
+.sf-info {
+    opacity: .6;
+    margin-bottom: -10px;
+}
+
+.sf-no-text{
+    opacity: .3;
+}
+
+.shortcut {
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+}
+
+.shortcut-container:hover .shortcut {
+    opacity: 1;
+}

@@ -9,10 +9,9 @@ using System.Linq;
 
 namespace Signum.Engine.Workflow
 {
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class WorkflowNodeGraph
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public WorkflowEntity Workflow { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> NextGraph { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> PreviousGraph { get; internal set; }
@@ -21,6 +20,7 @@ namespace Signum.Engine.Workflow
         public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
         {
@@ -48,7 +48,7 @@ namespace Signum.Engine.Workflow
                     gateways
                 }
             .Except(excludes.EmptyIfNull())
-            .OrderByDescending(a => a.ToString().Length)
+            .OrderByDescending(a => a.ToString()!.Length)
             .Take(count)
             .ToList();
         }
@@ -67,8 +67,10 @@ namespace Signum.Engine.Workflow
             this.PreviousGraph = graph.Inverse();
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public Dictionary<IWorkflowNodeEntity, int> TrackId;
         public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy;
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public IWorkflowNodeEntity GetSplit(WorkflowGatewayEntity entity)
         {
@@ -174,6 +176,9 @@ namespace Signum.Engine.Workflow
                             issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
                         }
                     }
+
+                    if (e.Type == WorkflowEventType.IntermediateTimer && !e.Name.HasText())
+                        issues.AddError(e, WorkflowValidationMessage.IntermediateTimer0ShouldHaveName.NiceToString(e));
                 }
             });
 
@@ -416,7 +421,7 @@ namespace Signum.Engine.Workflow
             return type == ConnectionType.Approve || type == ConnectionType.Decline;
         }
 
-        private bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
+        public bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
         {
             var gateway = a as WorkflowGatewayEntity;
 

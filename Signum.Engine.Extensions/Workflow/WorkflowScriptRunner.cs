@@ -17,10 +17,10 @@ namespace Signum.Engine.Workflow
 {
     public static class WorkflowScriptRunner
     {
-        static Timer timer;
+        static Timer timer = null!;
         internal static DateTime? nextPlannedExecution;
         static bool running = false;
-        static CancellationTokenSource CancelProcess;
+        static CancellationTokenSource CancelProcess = null!;
         static long queuedItems;
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
@@ -95,14 +95,16 @@ namespace Signum.Engine.Workflow
 
                                 using (HeavyProfiler.Log("WorkflowScriptRunner", () => "Execute process"))
                                 {
+                                    var queryCaseActivities = Database.Query<CaseActivityEntity>()
+                                                                  .Where(m => !m.Workflow().HasExpired() &&
+                                                                         m.DoneDate == null &&
+                                                                         m.ScriptExecution!.ProcessIdentifier == processIdentifier);
                                     processIdentifier = Guid.NewGuid();
                                     if (RecruitQueuedItems())
                                     {
                                         while (queuedItems > 0 || RecruitQueuedItems())
                                         {
-                                            var items = Database.Query<CaseActivityEntity>().Where(m => m.DoneDate == null && 
-                                                m.ScriptExecution!.ProcessIdentifier == processIdentifier)
-                                                .Take(WorkflowLogic.Configuration.ChunkSizeRunningScripts).ToList();
+                                            var items = queryCaseActivities.Take(WorkflowLogic.Configuration.ChunkSizeRunningScripts).ToList();
                                             queuedItems = items.Count;
                                             foreach (var caseActivity in items)
                                             {
@@ -121,7 +123,7 @@ namespace Signum.Engine.Workflow
                                                 { 
                                                     try
                                                     {
-                                                        var ca = caseActivity.ToLite().Retrieve();
+                                                        var ca = caseActivity.ToLite().RetrieveAndRemember();
                                                         var retry = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.RetryStrategy;
                                                         var nextDate = retry?.NextDate(ca.ScriptExecution!.RetryCount);
                                                         if(nextDate == null)
@@ -141,9 +143,7 @@ namespace Signum.Engine.Workflow
                                                 }
                                                 queuedItems--;
                                             }
-                                            queuedItems = Database.Query<CaseActivityEntity>()
-                                            .Where(m => m.ScriptExecution!.ProcessIdentifier == processIdentifier && m.DoneDate == null)
-                                            .Count();
+                                            queuedItems = queryCaseActivities.Count();
                                         }
                                     }
                                     SetTimer();
@@ -183,7 +183,7 @@ namespace Signum.Engine.Workflow
             if(sqlDependencyRegistered)
                 return;
             
-            var query = Database.Query<CaseActivityEntity>().Where(m => m.ScriptExecution != null).Select(m => m.Id);
+            var query = Database.Query<CaseActivityEntity>().Where(m => !m.Workflow().HasExpired() && m.ScriptExecution != null).Select(m => m.Id);
             sqlDependencyRegistered = true;
             query.ToListWithInvalidation(typeof(CaseActivityEntity), "WorkflowScriptRunner ReadyToExecute dependency", a => {
                 sqlDependencyRegistered = false;
@@ -197,9 +197,10 @@ namespace Signum.Engine.Workflow
                 null : (DateTime?)TimeZoneManager.Now.AddHours(-WorkflowLogic.Configuration.AvoidExecutingScriptsOlderThan.Value);
 
             queuedItems = Database.Query<CaseActivityEntity>()
-                .Where(ca => ca.DoneDate == null &&
+                .Where(ca => !ca.Workflow().HasExpired() &&
+                             ca.DoneDate == null &&
                              ((firstDate == null || firstDate < ca.ScriptExecution!.NextExecution) &&
-                            ca.ScriptExecution!.NextExecution < TimeZoneManager.Now))
+                             ca.ScriptExecution!.NextExecution < TimeZoneManager.Now))
                 .UnsafeUpdate()
                 .Set(m => m.ScriptExecution!.ProcessIdentifier, m => processIdentifier)
                 .Execute();

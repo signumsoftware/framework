@@ -19,8 +19,8 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
-        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
-        public static ResetLazy<HashSet<Type>> AvailableModelEntities;
+        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities = null!;
+        public static ResetLazy<HashSet<Type>> AvailableModelEntities = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -42,7 +42,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -54,7 +54,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -104,7 +104,7 @@ namespace Signum.Engine.Dynamic
 
                         if (!e.IsNew)
                         {
-                            var old = e.ToLite().Retrieve();
+                            var old = e.ToLite().RetrieveAndRemember();
                             if (e.TypeName != old.TypeName)
                                 DynamicSqlMigrationLogic.AddDynamicRename(TypeNameKey, old.TypeName, e.TypeName);
 
@@ -191,8 +191,8 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"{item}Logic.Start(sb);".Indent(indent));
         }
 
-        public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
-        public static Func<Dictionary<string, Dictionary<string, Tuple<string?, string?>>>> GetFormattedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, string>>>? GetAlreadyTranslatedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>>? GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {
@@ -480,11 +480,9 @@ namespace Signum.Engine.Dynamic
             if (property.NotifyChanges == true)
             {
                 if (property.IsMList != null)
-                {
                     atts.Add("NotifyCollectionChanged");
-                    atts.Add("NotifyChildProperty");
-                }
-                else if (property.Type.EndsWith("Embedded"))
+
+                if (property.Type.EndsWith("Embedded") || property.Type.EndsWith("Entity") && !property.IsLite)
                     atts.Add("NotifyChildProperty");
             }
 
@@ -570,16 +568,15 @@ namespace Signum.Engine.Dynamic
 
         private string ParseTableName(string value)
         {
-
             var objName = ObjectName.Parse(value);
 
             return new List<string?>
-                {
-                     Literal(objName.Name),
-                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
-                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+            {
+                Literal(objName.Name),
+                !objName.Schema.IsDefault() ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
                 objName.Schema.Database?.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
-                }.NotNull().ToString(", ");
+            }.NotNull().ToString(", ");
         }
 
         public virtual string GetPropertyType(DynamicProperty property)
@@ -675,7 +672,7 @@ namespace Signum.Engine.Dynamic
         public bool IsTreeEntity { get; private set; }
 
         public Dictionary<string, string>? AlreadyTranslated { get; set; }
-        public Dictionary<string, Tuple<string, string>>? Formatted { get; set; }
+        public Dictionary<string, FormatUnit>? Formatted { get; set; }
 
         public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicBaseType baseType, DynamicTypeDefinition def, HashSet<string> usings)
         {
@@ -810,12 +807,12 @@ namespace Signum.Engine.Dynamic
 { lines.ToString(",\r\n").Indent(8)}
     }})
 {complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {this.AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{this.TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
-{complexQueryFields.Where(f => this.Formatted?.TryGetC(f) != null).Select(f =>
+{complexQueryFields.Where(f => this.Formatted?.TryGetS(f) != null).Select(f =>
             {
-                (string format, string unit) = this.Formatted?.TryGetC(f);
+                var fu = this.Formatted?.TryGetS(f);
 
-                var formatText = format.HasText() ? $"c.Format = \"{format}\";" : "";
-                var unitText = unit.HasText() ? $"c.Unit = \"{unit}\";" : "";
+                var formatText = fu != null && fu.Value.Format.HasText() ? $"c.Format = \"{fu.Value.Format}\";" : "";
+                var unitText = fu != null && fu.Value.Unit.HasText() ? $"c.Unit = \"{fu.Value.Unit}\";" : "";
 
                 return $".Column(a => a.{f}, c => {{ {formatText} {unitText} }})";
             }).ToString("\r\n").Indent(4)}
@@ -829,7 +826,7 @@ namespace Signum.Engine.Dynamic
         {
             StringBuilder sb = new StringBuilder();
             var operationConstruct = this.Def.OperationCreate?.Construct.Trim();
-            if (!string.IsNullOrWhiteSpace(operationConstruct))
+            if (operationConstruct.HasText())
             {
                 sb.AppendLine();
 
@@ -896,6 +893,18 @@ namespace Signum.Engine.Dynamic
             }
 
             return sb.ToString();
+        }
+    }
+
+    public struct FormatUnit
+    {
+        public string? Format { get; set; }
+        public string? Unit { get; set; }
+
+        public FormatUnit(string? format, string? unit)
+        {
+            Format = format;
+            Unit = unit;
         }
     }
 

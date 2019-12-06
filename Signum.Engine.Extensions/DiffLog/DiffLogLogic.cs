@@ -41,7 +41,7 @@ namespace Signum.Engine.DiffLog
             ShouldLog.SetDefinition(typeof(T), func);
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object[]? args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)
         {
             if (entity != null && ShouldLog.Invoke(entity, operation))
             {
@@ -56,7 +56,7 @@ namespace Signum.Engine.DiffLog
 
             return new Disposable(() =>
             {
-                var target = log.GetTarget();
+                var target = log.GetTemporalTarget();
 
                 if (target != null && ShouldLog.Invoke(target, operation) && operation.OperationType != OperationType.Delete)
                 {
@@ -71,7 +71,7 @@ namespace Signum.Engine.DiffLog
         private static Entity RetrieveFresh(Entity entity)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-                return entity.ToLite().Retrieve();
+                return entity.ToLite().RetrieveAndRemember();
         }
 
         public static MinMax<OperationLogEntity?> OperationLogNextPrev(OperationLogEntity log)

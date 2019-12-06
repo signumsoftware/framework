@@ -19,15 +19,20 @@ export function start(options: { routes: JSX.Element[] }) {
     parentToken: DynamicValidationEntity.token(a => a.entityType!.cleanName),
     parentValue: type
   }} />);
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
+    { token: t.entity(p => p.entityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.name), type: "Text" },
+    { token: t.entity(p => p.eval!.script), type: "Text" },
+  ]);
 }
 
 export namespace API {
   export function validationTest(request: DynamicValidationTestRequest): Promise<DynamicValidationTestResponse> {
-    return ajaxPost<DynamicValidationTestResponse>({ url: `~/api/dynamic/validation/test` }, request);
+    return ajaxPost({ url: `~/api/dynamic/validation/test` }, request);
   }
 
   export function routeTypeName(request: PropertyRouteEntity): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/dynamic/validation/routeTypeName` }, request);
+    return ajaxPost({ url: `~/api/dynamic/validation/routeTypeName` }, request);
   }
 }
 

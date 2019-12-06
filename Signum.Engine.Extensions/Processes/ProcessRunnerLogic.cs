@@ -22,12 +22,12 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessRunnerLogic
     {
-        public static Action<ExecutingProcess> OnFinally;
+        public static Action<ExecutingProcess>? OnFinally;
 
         static Dictionary<Lite<ProcessEntity>, ExecutingProcess> executing = new Dictionary<Lite<ProcessEntity>, ExecutingProcess>();
 
-        static Timer timerNextExecution;
-        static Timer timerPeriodic;
+        static Timer timerNextExecution = null!;
+        static Timer timerPeriodic = null!;
         public static int PoolingPeriodMilliseconds = 30 * 1000;
 
         internal static DateTime? nextPlannedExecution;
@@ -38,7 +38,7 @@ namespace Signum.Engine.Processes
 
         static int initialDelayMiliseconds;
 
-        static CancellationTokenSource CancelNewProcesses;
+        static CancellationTokenSource CancelNewProcesses = null!;
 
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
@@ -107,21 +107,13 @@ namespace Signum.Engine.Processes
             process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
         }
 
-        static Expression<Func<ProcessEntity, bool>> IsMineExpression =
-            p => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName; 
-        [ExpressionField] 
-        public static bool IsMine(this ProcessEntity p)
-        {
-            return IsMineExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static bool IsMine(this ProcessEntity p) => 
+            As.Expression(() => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName);
 
-        static Expression<Func<ProcessEntity, bool>> IsSharedExpression =
-            p => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessEntity.None;
-        [ExpressionField]
-        public static bool IsShared(this ProcessEntity p)
-        {
-            return IsSharedExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static bool IsShared(this ProcessEntity p) => 
+            As.Expression(() => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessEntity.None);
 
         internal static List<T> ToListWakeup<T>(this IQueryable<T> query, string action)
         {
@@ -227,7 +219,7 @@ namespace Signum.Engine.Processes
 
                                             foreach (var pair in afordable)
                                             {
-                                                ProcessEntity pro = pair.Process!.Retrieve();
+                                                ProcessEntity pro = pair.Process!.RetrieveAndRemember();
 
                                                 IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
 
@@ -280,7 +272,7 @@ namespace Signum.Engine.Processes
 
                                                 if (execProc.CurrentProcess.State != ProcessState.Finished)
                                                 {
-                                                    execProc.CurrentProcess = s.Retrieve();
+                                                    execProc.CurrentProcess = s.RetrieveAndRemember();
                                                     execProc.CancelationSource.Cancel();
                                                 }
                                             }
@@ -470,7 +462,7 @@ namespace Signum.Engine.Processes
         
         public void Execute()
         {
-            var user = ExecutionMode.Global().Using(_ => CurrentProcess.User.Retrieve());
+            var user = ExecutionMode.Global().Using(_ => CurrentProcess.User.RetrieveAndRemember());
 
             using (UserHolder.UserSession(user))
             {

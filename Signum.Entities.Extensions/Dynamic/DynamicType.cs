@@ -63,12 +63,8 @@ namespace Signum.Entities.Dynamic
         }
 
 
-        static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => TypeName);
     }
 
     [AutoInit]
@@ -334,19 +330,19 @@ namespace Signum.Entities.Dynamic
             return (objectType == typeof(DynamicValidator));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             JObject obj = JObject.Load(reader);
-            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type").Value.Value<string>());
+            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type")!.Value.Value<string>());
 
-            object target = Activator.CreateInstance(type);
+            object target = Activator.CreateInstance(type)!;
             serializer.Populate(obj.CreateReader(), target);
             return target;
         }
 
         public override bool CanWrite { get { return false; } }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
@@ -392,8 +388,15 @@ namespace Signum.Entities.Dynamic
         {
             [JsonProperty(PropertyName = "disabled", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public bool Disabled;
-        }
 
+            public override string? ExtraArguments()
+            {
+                return new string?[]
+                {
+                    Disabled ? "Disabled=true" : null,
+                }.NotNull().ToString(", ");
+            }
+        }
 
         public class StringLength : DynamicValidator
         {

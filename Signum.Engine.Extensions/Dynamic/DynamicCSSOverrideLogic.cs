@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities.Basics;
@@ -13,7 +13,7 @@ namespace Signum.Engine.Dynamic
 
     public static class DynamicCSSOverrideLogic
     {
-        public static ResetLazy<List<DynamicCSSOverrideEntity>> Cached;
+        public static ResetLazy<List<DynamicCSSOverrideEntity>> Cached = null!;
 
         public static void Start(SchemaBuilder sb)
         {

@@ -81,11 +81,11 @@ namespace Signum.Engine.Files
         //No GUID, use only for icons or public domain files
         public static class UNSAFE
         {
-            public static readonly Func<IFilePath, string> FileName = (IFilePath fp) => Path.GetFileName(fp.FileName);
-            public static readonly Func<IFilePath, string> CalculatedDirectory_FileName = (IFilePath fp) => Path.Combine(fp.CalculatedDirectory, Path.GetFileName(fp.FileName));
+            public static readonly Func<IFilePath, string> FileName = (IFilePath fp) => Path.GetFileName(fp.FileName)!;
+            public static readonly Func<IFilePath, string> CalculatedDirectory_FileName = (IFilePath fp) => Path.Combine(fp.CalculatedDirectory!, Path.GetFileName(fp.FileName)!);
 
-            public static readonly Func<IFilePath, string> Year_FileName = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.GetFileName(fp.FileName));
-            public static readonly Func<IFilePath, string> Year_Month_FileName = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), TimeZoneManager.Now.Month.ToString(), Path.GetFileName(fp.FileName));
+            public static readonly Func<IFilePath, string> Year_FileName = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.GetFileName(fp.FileName)!);
+            public static readonly Func<IFilePath, string> Year_Month_FileName = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), TimeZoneManager.Now.Month.ToString(), Path.GetFileName(fp.FileName)!);
 
         }
 
@@ -95,8 +95,8 @@ namespace Signum.Engine.Files
             public static readonly Func<IFilePath, string> Year_GuidExtension = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
             public static readonly Func<IFilePath, string> Year_Month_GuidExtension = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName));
 
-            public static readonly Func<IFilePath, string> YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName));
-            public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName));
+            public static readonly Func<IFilePath, string> YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
+            public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
         }
     }
 
@@ -122,7 +122,7 @@ namespace Signum.Engine.Files
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
-           Path.Combine(Path.GetDirectoryName(sufix),
+           Path.Combine(Path.GetDirectoryName(sufix)!,
               "{0}({1}){2}".FormatWith(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
 
         
@@ -174,7 +174,7 @@ namespace Signum.Engine.Files
             string? fullPhysicalPath = null;
             try
             {
-                string path = Path.GetDirectoryName(fp.FullPhysicalPath());
+                string path = Path.GetDirectoryName(fp.FullPhysicalPath())!;
                 fullPhysicalPath = path;
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
@@ -184,7 +184,7 @@ namespace Signum.Engine.Files
             catch (IOException ex)
             {
                 ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
-                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal.Identity.Name);
+                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal!.Identity!.Name);
 
                 throw;
             }

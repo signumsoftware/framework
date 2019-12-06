@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { FormGroup } from '@framework/Lines'
 import { FindOptions } from '@framework/FindOptions'
@@ -8,25 +8,23 @@ import { ValueSearchControlLine } from '@framework/Search'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
+import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { PanelPartContentProps } from '../DashboardClient'
 
-export default class ValueUserQueryListPart extends React.Component<{ part: ValueUserQueryListPartEntity; entity?: Lite<Entity> }> {
-
-  render() {
-
-    const entity = this.props.part;
-    const ctx = TypeContext.root(entity, { formGroupStyle: "None" });
-    return (
-      <div>
-        {
-          mlistItemContext(ctx.subCtx(a => a.userQueries))
-            .map((ctx, i) =>
-              <div key={i} >
-                <ValueUserQueryElement ctx={ctx} entity={this.props.entity} />
-              </div>)
-        }
-      </div>
-    );
-  }
+export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>) {
+  const entity = p.part;
+  const ctx = TypeContext.root(entity, { formGroupStyle: "None" });
+  return (
+    <div>
+      {
+        mlistItemContext(ctx.subCtx(a => a.userQueries))
+          .map((ctx, i) =>
+            <div key={i} >
+              <ValueUserQueryElement ctx={ctx} entity={p.entity} />
+            </div>)
+      }
+    </div>
+  );
 }
 
 export interface ValueUserQueryElementProps {
@@ -34,48 +32,27 @@ export interface ValueUserQueryElementProps {
   entity?: Lite<Entity>;
 }
 
-export class ValueUserQueryElement extends React.Component<ValueUserQueryElementProps, { fo?: FindOptions }> {
+export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
-  state = { fo: undefined } as { fo?: FindOptions };
+  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.ctx.value.userQuery, p.entity),
+    [p.ctx.value.userQuery, p.entity]);
 
-  componentWillMount() {
-    this.loadFindOptions(this.props);
-  }
+  const ctx = p.ctx;
+  const ctx2 = ctx.subCtx({ formGroupStyle: "SrOnly" });
 
-  componentWillReceiveProps(newProps: ValueUserQueryElementProps) {
+  if (!fo)
+    return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-    if (is(this.props.ctx.value.userQuery, newProps.ctx.value.userQuery))
-      return;
-
-    this.loadFindOptions(newProps);
-  }
-
-  loadFindOptions(props: ValueUserQueryElementProps) {
-
-    UserQueryClient.Converter.toFindOptions(props.ctx.value.userQuery!, this.props.entity)
-      .then(fo => this.setState({ fo: fo }))
-      .done();
-  }
-
-  render() {
-
-    const ctx = this.props.ctx;
-    const ctx2 = ctx.subCtx({ formGroupStyle: "SrOnly" });
-
-    if (!this.state.fo)
-      return <span>{JavascriptMessage.loading.niceToString()}</span>;
-
-    return (
-      <div>
-        <FormGroup ctx={ctx} labelText={ctx.value.label || getQueryNiceName(this.state.fo.queryName)}>
-          <span className="form-inline">
-            <span>{ctx.value.label || getQueryNiceName(this.state.fo.queryName)}</span>&nbsp;
-                        <ValueSearchControlLine ctx={ctx2} findOptions={this.state.fo} />
-          </span>
-        </FormGroup>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <FormGroup ctx={ctx} labelText={ctx.value.label ?? getQueryNiceName(fo.queryName)}>
+        <span className="form-inline">
+          <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>&nbsp;
+          <ValueSearchControlLine ctx={ctx2} findOptions={fo} />
+        </span>
+      </FormGroup>
+    </div>
+  );
 }
 
 

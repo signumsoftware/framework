@@ -24,12 +24,8 @@ namespace Signum.Entities.Mailing
 
         public ModelConverterSymbol? ModelConverter { get; set; }
 
-        static Expression<Func<SendEmailTaskEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

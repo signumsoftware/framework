@@ -7,25 +7,23 @@ import googleMapStyles from "./GoogleMapStyles"
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from '../D3Scripts/Components/ChartUtils';
 
 
-export default class HeatmapChart extends React.Component<ChartClient.ChartComponentProps> {
+export default function HeatmapChart({ data, parameters }: ChartClient.ChartComponentProps) {
 
-  componentDidMount() {
+  const divElement = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
     GoogleMapsChartUtils.loadGoogleMapsScript(() => {
-      this.drawChart(this.props)
+      drawChart()
     });
-  }
+  })
 
+  return (
+    <div className="sf-chart-container" ref={divElement}>
+    </div>
+  );
 
-  divElement?: HTMLDivElement | null;
-
-  render() {
-    return (
-      <div className="sf-chart-container" ref={d => this.divElement = d}>
-      </div>
-    );
-  }
-
-  drawChart({ data, parameters }: ChartClient.ChartComponentProps) {
+  
+  function drawChart() {
     
     var bounds = new google.maps.LatLngBounds();
     
@@ -41,14 +39,14 @@ export default class HeatmapChart extends React.Component<ChartClient.ChartCompo
           longitudeColumn.getValue(r) != null) {
           var position = new google.maps.LatLng(latitudeColumn.getValue(r), longitudeColumn.getValue(r));
           bounds.extend(position);
-          coords.push(weightColumn && weightColumn.getValue(r) != null ? { location: position, weight: weightColumn.getValue(r) } : position);
+          coords.push(weightColumn?.getValue(r) != null ? { location: position, weight: weightColumn.getValue(r) } : position);
         }
       });
     }
 
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
-    var map = new google.maps.Map(this.divElement!, {
+    var map = new google.maps.Map(divElement.current!, {
       center: new google.maps.LatLng(coords[0].lat, coords[0].lng),
       zoom: 2,
       mapTypeControlOptions: {

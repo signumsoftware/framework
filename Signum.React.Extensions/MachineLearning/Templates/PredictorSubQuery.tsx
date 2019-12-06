@@ -36,7 +36,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
         queryKey: sqd.queryKey,
         canAggregate: true,
         entity: undefined,
-        filters: (getMainFilters() || []).concat(sq.filters).map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
+        filters: (getMainFilters() ?? []).concat(sq.filters).map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
       }).then(filters => {
         var fo: FindOptions = {
           queryName: sq.query!.key,
@@ -65,7 +65,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
 
     var t = parentKey.element.token;
 
-    var prefix = t && t.token && t.token.fullKey;
+    var prefix = t?.token && t.token.fullKey;
 
     if (prefix == null)
       return null;

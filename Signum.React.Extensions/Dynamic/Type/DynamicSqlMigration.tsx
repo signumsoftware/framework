@@ -41,7 +41,7 @@ export default function DynamicSqlMigrationComponent(p : DynamicSqlMigrationComp
 
       <ValueLine ctx={ctx.subCtx(sm => sm.comment)} readOnly={executed} />
       <div className="code-container">
-        <SqlCodeMirror script={ctx.value.script || ""} onChange={handleScriptChange} isReadOnly={executed} />
+        <SqlCodeMirror script={ctx.value.script ?? ""} onChange={handleScriptChange} isReadOnly={executed} />
       </div>
     </div>
   );

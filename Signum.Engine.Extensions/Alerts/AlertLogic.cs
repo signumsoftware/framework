@@ -19,21 +19,13 @@ namespace Signum.Engine.Alerts
 {
     public static class AlertLogic
     {
-        static Expression<Func<Entity, IQueryable<AlertEntity>>> AlertsExpression =
-            e => Database.Query<AlertEntity>().Where(a => a.Target.Is(e));
-        [ExpressionField]
-        public static IQueryable<AlertEntity> Alerts(this Entity e)
-        {
-            return AlertsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<AlertEntity> Alerts(this Entity e) => 
+            As.Expression(() => Database.Query<AlertEntity>().Where(a => a.Target.Is(e)));
 
-        static Expression<Func<Entity, IQueryable<AlertEntity>>> MyActiveAlertsExpression =
-            e => e.Alerts().Where(a => a.Recipient == UserHolder.Current.ToLite() && a.CurrentState == AlertCurrentState.Alerted);
-        [ExpressionField]
-        public static IQueryable<AlertEntity> MyActiveAlerts(this Entity e)
-        {
-            return MyActiveAlertsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<AlertEntity> MyActiveAlerts(this Entity e) => 
+            As.Expression(() => e.Alerts().Where(a => a.Recipient == UserHolder.Current.ToLite() && a.CurrentState == AlertCurrentState.Alerted));
 
         public static Func<IUserEntity?> DefaultRecipient = () => null;
 

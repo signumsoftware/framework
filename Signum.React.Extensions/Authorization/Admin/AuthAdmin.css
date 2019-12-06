@@ -83,7 +83,7 @@ span.group.active
 
 
 table.sf-auth-rules tr.sf-auth-type td {
-    border-top: 0px;
+    border-top: 1px solid #eee;
 }
 
 table.sf-auth-rules tr.sf-auth-type.sf-auth-with-conditions td {

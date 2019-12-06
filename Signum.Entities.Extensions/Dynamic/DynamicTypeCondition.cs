@@ -19,12 +19,8 @@ namespace Signum.Entities.Dynamic
         [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicTypeConditionEval Eval { get; set; }
 
-        static Expression<Func<DynamicTypeConditionEntity, string>> ToStringExpression = @this => (@this.EntityType == null ? "" : @this.EntityType.CleanName + " : ") + @this.SymbolName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => (EntityType == null ? "" : EntityType.CleanName + " : ") + SymbolName);
     }
 
     [AutoInit]

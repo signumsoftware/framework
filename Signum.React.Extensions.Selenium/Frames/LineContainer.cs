@@ -169,13 +169,13 @@ namespace Signum.React.Selenium
         {
             var lite = lineContainer.EntityLine(property).GetLite();
 
-            return lite is V ? (V)lite : (V)(object)lite?.Retrieve()!;
+            return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
         }
 
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : IModifiableEntity
         {
-            lineContainer.EntityLine(property).SetLite( value as Lite<IEntity> ?? ((IEntity)value)?.ToLite());
+            lineContainer.EntityLine(property).SetLite(value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite());
         }
 
         public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -191,7 +191,7 @@ namespace Signum.React.Selenium
         {
             var lite = lineContainer.EntityCombo(property).LiteValue;
             
-            return lite is V ? (V)lite : (V)(object)lite?.Retrieve()!;
+            return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
         }
 
         public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
@@ -199,7 +199,7 @@ namespace Signum.React.Selenium
         {
             var combo = lineContainer.EntityCombo(property);
 
-            combo.LiteValue = value as Lite<IEntity> ?? ((IEntity)value)?.ToLite();
+            combo.LiteValue = value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite();
 
             if (loseFocus)
                 combo.ComboElement.WrappedElement.LoseFocus();

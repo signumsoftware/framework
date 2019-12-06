@@ -17,43 +17,44 @@ using Microsoft.AspNetCore.Hosting;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using Signum.React.Authorization;
+using Microsoft.Extensions.Hosting;
 
 namespace Signum.React.Translation
 {
     [ValidateModelFilter]
     public class CultureController : ControllerBase
     {
-        IHostingEnvironment _env;
-        public CultureController(IHostingEnvironment env)
+        IHostApplicationLifetime _env;
+        public CultureController(IHostApplicationLifetime env)
         {
             _env = env;
         }
 
-        [HttpGet("api/culture/cultures"), AllowAnonymous]
+        [HttpGet("api/culture/cultures"), SignumAllowAnonymous]
         public List<CultureInfoEntity> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToList();
         }
 
-        [HttpGet("api/culture/currentCulture"), AllowAnonymous]
+        [HttpGet("api/culture/currentCulture"), SignumAllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.TryGetCultureInfoEntity() ?? CultureInfoLogic.CultureInfoToEntity.Value.Values.FirstEx();
         }
 
-        [HttpPost("api/culture/setCurrentCulture"), AllowAnonymous]
+        [HttpPost("api/culture/setCurrentCulture"), SignumAllowAnonymous]
         public string SetCurrentCulture([Required, FromBody]Lite<CultureInfoEntity> culture)
         {
-            var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
+            var ci = ExecutionMode.Global().Using(_ => culture.RetrieveAndRemember().ToCultureInfo());
 
             if (UserEntity.Current != null && !UserEntity.Current.Is(AuthLogic.AnonymousUser)) //Won't be used till next refresh
             {
-                var user = UserEntity.Current.ToLite().Retrieve();
-                user.CultureInfo = culture.Retrieve();
-
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
                 {
+                    var user = UserEntity.Current.ToLite().RetrieveAndRemember();
+                    user.CultureInfo = culture.RetrieveAndRemember();
                     UserEntity.Current = user;
                     user.Save();
                 }

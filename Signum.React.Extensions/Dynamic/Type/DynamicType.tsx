@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic, classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
@@ -13,90 +13,90 @@ import * as DynamicTypeClient from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
 
 interface DynamicTypeComponentProps {
-    ctx: TypeContext<DynamicTypeEntity>;
+  ctx: TypeContext<DynamicTypeEntity>;
 }
 
 interface DynamicTypeComponentState {
-    typeDefinition?: DynamicTypeClient.DynamicTypeDefinition;
-    showDatabaseMapping?: boolean;
+  typeDefinition?: DynamicTypeClient.DynamicTypeDefinition;
+  showDatabaseMapping?: boolean;
 }
 
 export default class DynamicTypeComponent extends React.Component<DynamicTypeComponentProps, DynamicTypeComponentState> implements IHasChanges {
 
-    constructor(props: DynamicTypeComponentProps) {
-        super(props);
+  constructor(props: DynamicTypeComponentProps) {
+    super(props);
 
-        this.state = {};
-    }
+    this.state = {};
+  }
 
-    componentWillMount() {
-        this.parseDefinition();
-    }
+  componentWillMount() {
+    this.parseDefinition();
+  }
 
-    beforeSave() {
-        const ctx = this.props.ctx;
-        this.state.typeDefinition!.properties.forEach(a => delete a._propertyType_);
-        ctx.value.typeDefinition = JSON.stringify(this.state.typeDefinition);
-        ctx.value.modified = true;
-    }
+  beforeSave() {
+    const ctx = this.props.ctx;
+    this.state.typeDefinition!.properties.forEach(a => delete a._propertyType_);
+    ctx.value.typeDefinition = JSON.stringify(this.state.typeDefinition);
+    ctx.value.modified = true;
+  }
 
-    componentHasChanges() {
+    entityHasChanges() {
         const entity = this.props.ctx.value;
 
-        GraphExplorer.propagateAll(entity);
+    GraphExplorer.propagateAll(entity);
 
-        var clone = JSON.parse(JSON.stringify(this.state.typeDefinition)) as DynamicTypeClient.DynamicTypeDefinition;
-        clone.properties.forEach(a => delete a._propertyType_);
-        return entity.modified || entity.typeDefinition != JSON.stringify(clone);
-    }
+    var clone = JSON.parse(JSON.stringify(this.state.typeDefinition)) as DynamicTypeClient.DynamicTypeDefinition;
+    clone.properties.forEach(a => delete a._propertyType_);
+    return entity.modified || entity.typeDefinition != JSON.stringify(clone);
+  }
 
-    parseDefinition() {
+  parseDefinition() {
 
-        const ctx = this.props.ctx;
+    const ctx = this.props.ctx;
 
-        const def = !ctx.value.typeDefinition ?
-            { entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["e.Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
-            JSON.parse(ctx.value.typeDefinition) as DynamicTypeClient.DynamicTypeDefinition;
+    const def = !ctx.value.typeDefinition ?
+      { entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["e.Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
+      JSON.parse(ctx.value.typeDefinition) as DynamicTypeClient.DynamicTypeDefinition;
 
-        this.setState({
-            typeDefinition: def,
-            showDatabaseMapping: !!def.tableName || def.properties.some(p => !!p.columnName || !!p.columnType)
-        });
-    }
+    this.setState({
+      typeDefinition: def,
+      showDatabaseMapping: !!def.tableName || def.properties.some(p => !!p.columnName || !!p.columnType)
+    });
+  }
 
-    render() {
-        const ctx = this.props.ctx;
-        const dc = { refreshView: () => this.forceUpdate() };
+  render() {
+    const ctx = this.props.ctx;
+    const dc = { refreshView: () => this.forceUpdate() };
 
-        const suffix =
-            ctx.value.baseType == "MixinEntity" ? "Mixin" :
-                ctx.value.baseType == "EmbeddedEntity" ? "Embedded" :
-                    ctx.value.baseType == "ModelEntity" ? "Model" :
-                        "Entity";
+    const suffix =
+      ctx.value.baseType == "MixinEntity" ? "Mixin" :
+        ctx.value.baseType == "EmbeddedEntity" ? "Embedded" :
+          ctx.value.baseType == "ModelEntity" ? "Model" :
+            "Entity";
 
-        return (
-            <div>
-                <div className="row">
-                    <div className="col-sm-8">
-                        <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} readOnly={!ctx.value.isNew} />
-                        <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={suffix} />
-                    </div>
-                    <div className="col-sm-4">
-                        <button className={classes("btn btn-sm btn-success float-right", this.state.showDatabaseMapping && "active")}
-                            onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })}>
-                            Show Database Mapping
+    return (
+      <div>
+        <div className="row">
+          <div className="col-sm-8">
+            <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} readOnly={!ctx.value.isNew} />
+            <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={suffix} />
+          </div>
+          <div className="col-sm-4">
+            <button className={classes("btn btn-sm btn-success float-right", this.state.showDatabaseMapping && "active")}
+              onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })}>
+              Show Database Mapping
                         </button>
-                    </div>
-                </div>
-                {this.state.typeDefinition &&
-                    <DynamicTypeDefinitionComponent
-                        dc={dc}
-                        dynamicType={ctx.value}
-                        definition={this.state.typeDefinition}
-                        showDatabaseMapping={this.state.showDatabaseMapping!}
-                        />
-                }
-            </div>
-        );
-    }
+          </div>
+        </div>
+        {this.state.typeDefinition &&
+          <DynamicTypeDefinitionComponent
+            dc={dc}
+            dynamicType={ctx.value}
+            definition={this.state.typeDefinition}
+            showDatabaseMapping={this.state.showDatabaseMapping!}
+          />
+        }
+      </div>
+    );
+  }
 }

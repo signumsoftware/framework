@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -87,6 +87,13 @@ namespace Signum.Entities.Authorization
         PasswordHasBeenChangedSuccessfully,
         [Description("The password must have a value")]
         PasswordMustHaveAValue,
+        [Description("An error occurred, request not processed.")]
+        AnErrorOccurredRequestNotProcessed,
+        [Description("We have sent you an email with a link that will allow you to reset your password.")]
+        WeHaveSentYouAnEmailToResetYourPassword,
+        EnterYourUserEmail,
+        RequestAccepted,
+
         YourPasswordIsNearExpiration,
         PasswordsAreDifferent,
         PasswordsDoNotMatch,
@@ -134,6 +141,16 @@ namespace Signum.Entities.Authorization
         Welcome0,
         LoginWithAnotherUser,
         TheUserIsNotLongerInTheDatabase,
+        [Description("I forgot my password")]
+        IForgotMyPassword,
+        [Description("Give us your user's email and we will send you an email so you can reset your password.")]
+        GiveUsYourUserEmailToResetYourPassword,
+        [Description("Login with Windows user")]
+        LoginWithWindowsUser,
+        [Description("No Windows user found")]
+        NoWindowsUserFound,
+        [Description("Looks like you windows user is not allowed to use this application, the browser is not providing identity information, or the server is not properly configured.")]
+        LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication,
     }
 
     public enum AuthEmailMessage
@@ -145,7 +162,13 @@ namespace Signum.Entities.Authorization
         [Description("You can reset your password by following the link below")]
         YouCanResetYourPasswordByFollowingTheLinkBelow,
         [Description("Reset password request")]
-        ResetPasswordRequestSubject
+        ResetPasswordRequestSubject,
+        [Description("Your reset password request has expired")]
+        YourResetPasswordRequestHasExpired,
+        [Description("We have send you an email to reset your password")]
+        WeHaveSendYouAnEmailToResetYourPassword,
+        [Description("Email not found")]
+        EmailNotFound,
     }
 
     public enum AuthAdminMessage

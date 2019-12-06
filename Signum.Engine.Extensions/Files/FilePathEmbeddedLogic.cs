@@ -12,23 +12,7 @@ using System.Reflection;
 namespace Signum.Engine.Files
 {
     public static class FilePathEmbeddedLogic
-    {
-        static Expression<Func<FilePathEmbedded, WebImage>> WebImageExpression =
-            fp => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() };
-        [ExpressionField]
-        public static WebImage? WebImage(this FilePathEmbedded fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FilePathEmbedded, WebDownload>> WebDownloadExpression =
-           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName };
-        [ExpressionField]
-        public static WebDownload WebDownload(this FilePathEmbedded fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
-
+    { 
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathEmbeddedLogic.Start(null!)));
@@ -49,9 +33,6 @@ namespace Signum.Engine.Files
                         efp.SaveFile();
                     }
                 };
-
-                QueryLogic.Expressions.Register((FilePathEmbedded f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                QueryLogic.Expressions.Register((FilePathEmbedded f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
                 FilePathEmbedded.CalculatePrefixPair += CalculatePrefixPair;
             }

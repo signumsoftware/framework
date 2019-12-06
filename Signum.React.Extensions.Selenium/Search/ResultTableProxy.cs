@@ -37,7 +37,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator RowElement(int rowIndex)
         {
-            return this.Element.WithLocator(By.CssSelector("tr[data-row-index={0}]".FormatWith(rowIndex + 1)));
+            return this.Element.WithLocator(By.CssSelector("tr[data-row-index='{0}']".FormatWith(rowIndex)));
         }
 
         public WebElementLocator RowElement(Lite<IEntity> lite)
@@ -199,6 +199,11 @@ namespace Signum.React.Selenium
         {
             var element = EntityLink(lite).Find().CaptureOnClick();
             return new FrameModalProxy<T>(element);
+        }
+
+        public void WaitRows(int rows)
+        {
+            this.Selenium.Wait(() => this.RowsCount() == rows);
         }
 
         public FrameModalProxy<T> EntityClick<T>(int rowIndex) where T : Entity

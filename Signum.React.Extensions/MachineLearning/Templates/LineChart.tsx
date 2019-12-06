@@ -23,39 +23,26 @@ interface LineChartProps {
   height: number;
 }
 
-export default class LineChart extends React.Component<LineChartProps, { width?: number; logMode: boolean; }> {
-  constructor(p: LineChartProps) {
-    super(p);
-    this.state = { width: undefined, logMode: false };
-  }
+export default function LineChart(p: LineChartProps) {
 
-  divRef?: HTMLDivElement | null;
-  handleSetRef = (d: HTMLDivElement | null) => {
-    if (this.divRef == null && d != null && this.props.width == null) {
-      this.divRef = d;
+
+  const [width, setWidth] = React.useState<number | undefined>(undefined);
+  const [logMode, setLogMode] = React.useState<boolean>(false);
+
+  const divRef = React.useRef<HTMLDivElement | null>(null)
+
+
+  function handleSetRef(d: HTMLDivElement | null) {
+    if (divRef.current == null && d != null && p.width == null) {
+      divRef.current = d;
       setTimeout(() => {
-        this.setState({ width: d.getBoundingClientRect().width })
+        setWidth(d.getBoundingClientRect().width);
       }, 100);
-
     }
   }
 
-  render() {
-    let width = this.props.width;
-
-    if (width == null)
-      width = this.state.width;
-
-    return (
-      <div ref={d => this.handleSetRef(d)} style={{ width: this.props.width == null ? "100%" : this.props.width }} onDoubleClick={() => this.setState({ logMode: !this.state.logMode })}>
-        {width != null && this.renderSvg(width)}
-      </div>
-    );
-  }
-
-  renderSvg(width: number) {
-
-    let { height, series } = this.props;
+  function renderSvg(width: number) {
+    let { height, series } = p;
 
     var allValues = series.flatMap(s => s.values);
 
@@ -65,7 +52,7 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
 
     return (
       <svg width={width} height={height}>
-        {series.map((s, i) => this.renderSerie(scaleX, height, s, i))}
+        {series.map((s, i) => renderSerie(scaleX, height, s, i))}
         <line x1={0} x2={width} y1={height - 20} y2={height - 20} stroke="black" strokeWidth={1} />
         {series.map((s, i) => (
           <g key={i}>
@@ -77,12 +64,11 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
     );
   }
 
-  renderSerie(scaleX: d3.ScaleLinear<number, number>, height: number, s: LineChartSerie, index: number) {
-
+  function renderSerie(scaleX: d3.ScaleLinear<number, number>, height: number, s: LineChartSerie, index: number) {
     var minValue: number = s.minValue != null ? s.minValue : s.values.min(a => a.y)!;
     var maxValue: number = s.maxValue != null ? s.maxValue : s.values.max(a => a.y)!;
 
-    var scaleY = this.state.logMode ?
+    var scaleY = logMode ?
       d3.scaleLog().domain([Math.max(0.0001, minValue), maxValue]).range([height - 20, 2]) :
       d3.scaleLinear().clamp(true).domain([minValue, maxValue]).range([height - 20, 2]);
 
@@ -93,7 +79,7 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
 
     return (
       <g key={index}>
-        <path className="line" fill="none" d={line(s.values) || undefined} style={{
+        <path className="line" fill="none" d={line(s.values) ?? undefined} style={{
           stroke: s.color, strokeWidth: s.strokeWidth
         }}>
         </path>
@@ -101,6 +87,13 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
       </g>
     );
   }
+  let w = p.width == null ? width : p.width;
+
+  return (
+    <div ref={d => handleSetRef(d)} style={{ width: p.width == null ? "100%" : p.width }} onDoubleClick={() => setLogMode(!logMode)}>
+      {width != null && renderSvg(width)}
+    </div>
+  );
 }
 
 

@@ -146,7 +146,7 @@ const cssPropertyList = ["color", "opacity", "background", "background-attachmen
   "rest-after", "rest-before", "voice-balance", "voice-duration", "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "marquee-direction",
   "marquee-play-count", "marquee-speed", "marquee-style"].sort();
 
-export function HtmlExpressionComponent(p : HtmlExpressionComponentProps){
+export function HtmlExpressionComponent(p: HtmlExpressionComponentProps) {
   return (
     <div className="form-sm code-container">
       <fieldset>
@@ -170,7 +170,7 @@ export interface ExpressionOrValueStripProps {
   filterKey: (key: string) => boolean;
 }
 
-export function ExpressionOrValueStrip(p : ExpressionOrValueStripProps){
+export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps) {
   const forceUpdate = useForceUpdate();
 
   function handleOnRemove(e: React.MouseEvent<any>, key: string) {
@@ -216,12 +216,10 @@ export function ExpressionOrValueStrip(p : ExpressionOrValueStripProps){
 
   function renderTypeahead() {
     return (
-      <div style={{ position: "relative" }}>
-        <Typeahead
-          inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
-          getItems={handleGetItems}
-          onSelect={handleSelect} />
-      </div>
+      <Typeahead
+        inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
+        getItems={handleGetItems}
+        onSelect={handleSelect} />
     );
   }
 

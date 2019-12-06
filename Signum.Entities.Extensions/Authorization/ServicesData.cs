@@ -9,6 +9,7 @@ namespace Signum.Entities.Authorization
 {
     [Serializable]
     public class DefaultDictionary<K, A>
+        where K : notnull
     {
         public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A>? overridesDictionary)
         {
@@ -101,8 +102,8 @@ namespace Signum.Entities.Authorization
 
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class AllowedRule<R, A> : ModelEntity
-        where R : object
-        where A : object
+        where R : notnull
+        where A : notnull
     {
         A allowedBase;
         [InTypeScript(Null = false)]
@@ -203,16 +204,11 @@ namespace Signum.Entities.Authorization
 
         public MList<TypeConditionRuleEmbedded> Conditions { get; set; } = new MList<TypeConditionRuleEmbedded>();
 
+        public override bool Equals(object? obj) => obj is TypeAllowedAndConditions tac && Equals(tac);
         public bool Equals(TypeAllowedAndConditions other)
         {
             return this.fallback.Equals(other.fallback) &&
                 this.Conditions.SequenceEqual(other.Conditions);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as TypeAllowedAndConditions;
-            return other != null && Equals(other);
         }
 
         public override int GetHashCode()
@@ -275,7 +271,7 @@ namespace Signum.Entities.Authorization
         public override string ToString()
         {
             if (Conditions.IsEmpty())
-                return Fallback.ToString();
+                return Fallback.ToString()!;
 
             return "{0} | {1}".FormatWith(Fallback, Conditions.ToString(c => "{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
         }
@@ -318,6 +314,8 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
+        where R : notnull
+        where A : notnull
     {
         public A[] CoercedValues { get; internal set; }
     }

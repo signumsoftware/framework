@@ -1,17 +1,17 @@
-/// <reference path="FilesClient.tsx" />
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
-import { TypeContext, mlistItemContext } from '@framework/TypeContext'
+import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
-import { default as FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
-import FileUploader from './FileUploader'
+import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
+import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EntityListBase, EntityListBaseProps } from '@framework/Lines';
 import "./Files.css"
+import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
+import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 
 export { FileTypeSymbol };
 
@@ -27,19 +27,14 @@ interface MultiFileLineProps extends EntityListBaseProps {
   maxSizeInBytes?: number;
 }
 
-export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileLineProps> {
+export class MultiFileLineController extends EntityListBaseController<MultiFileLineProps> {
 
-  static defaultProps = {
-    download: "SaveAs",
-    dragAndDrop: true
-  }
+  getDefaultProps(state: MultiFileLineProps) {
 
-  calculateDefaultState(state: MultiFileLineProps) {
-
-    super.calculateDefaultState(state);
+    super.getDefaultProps(state);
 
     const m = state.ctx.propertyRoute.member;
-    if (m && m.defaultFileTypeInfo) {
+    if (m?.defaultFileTypeInfo) {
 
       if (state.fileType == null)
         state.fileType = getSymbol(FileTypeSymbol, m.defaultFileTypeInfo.key)
@@ -54,52 +49,53 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
   }
 
   handleDeleteValue = (index: number) => {
-    const list = this.state.ctx.value;
+    const list = this.props.ctx.value;
     list.removeAt(index);
     this.setValue(list);
   }
 
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
-    const list = this.state.ctx.value;
-
     this.convert(file)
       .then(f => this.addElement(f))
       .done();
   }
 
   defaultCreate() {
-    return Constructor.construct(this.state.type!.name).then(a => a && a.entity);
+    return Constructor.construct(this.props.type!.name);
+  }
   }
 
-  renderInternal() {
+export const MultiFileLine = React.forwardRef(function MultiFileLine(props: MultiFileLineProps, ref: React.Ref<MultiFileLineController>) {
+  const c = useController(MultiFileLineController, props, ref);
+  const p = c.props;
 
-    const s = this.state;
-    const list = this.state.ctx.value!;
+  if (c.isHidden)
+    return null;
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
-        helpText={this.state.helpText}
-        labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} labelText={p.labelText}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+      helpText={p.helpText}
+      labelHtmlAttributes={p.labelHtmlAttributes}>
         <table className="sf-multi-value">
           <tbody>
             {
-              mlistItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-                <tr key={i}>
+            c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
+                <tr key={mlec.index!}>
                   <td>
-                    {!s.ctx.readOnly &&
+                  {!p.ctx.readOnly &&
                       <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-                        className="sf-line-button sf-remove"
-                        onClick={e => { e.preventDefault(); this.handleDeleteValue(i); }}>
+                      className="sf-line-button sf-remove"
+                      onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
                         <FontAwesomeIcon icon="times" />
                       </a>}
                   </td>
                   <td style={{ width: "100%" }}>
-                    {this.state.download == "None" ?
-                      <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
+                  { p.getComponent ? p.getComponent(mlec) :
+                    p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
                       <FileDownloader
-                        configuration={this.props.configuration}
-                        download={this.props.download}
+                      configuration={p.configuration}
+                      download={p.download}
                         entityOrLite={mlec.value}
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
                   </td>
@@ -107,17 +103,17 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
             }
             <tr >
               <td colSpan={4}>
-                {s.ctx.readOnly ? undefined :
+              {p.ctx.readOnly ? undefined :
                   <FileUploader
-                    accept={s.accept}
+                  accept={p.accept}
                     multiple={true}
-                    maxSizeInBytes={s.maxSizeInBytes}
-                    dragAndDrop={this.state.dragAndDrop}
-                    dragAndDropMessage={this.state.dragAndDropMessage}
-                    fileType={this.state.fileType}
-                    onFileLoaded={this.handleFileLoaded}
-                    typeName={s.ctx.propertyRoute.typeReference().name}
-                    buttonCss={s.ctx.buttonClass}
+                  maxSizeInBytes={p.maxSizeInBytes}
+                  dragAndDrop={p.dragAndDrop}
+                  dragAndDropMessage={p.dragAndDropMessage}
+                  fileType={p.fileType}
+                  onFileLoaded={c.handleFileLoaded}
+                  typeName={p.ctx.propertyRoute.typeReference().name}
+                  buttonCss={p.ctx.buttonClass}
                     divHtmlAttributes={{ className: "sf-file-line-new" }} />}
               </td>
             </tr>
@@ -125,6 +121,9 @@ export class MultiFileLine extends EntityListBase<MultiFileLineProps, MultiFileL
         </table>
       </FormGroup>
     );
-  }
-}
+});
 
+(MultiFileLine as any).defaultProps = {
+  download: "SaveAs",
+  dragAndDrop: true
+} as MultiFileLineProps;

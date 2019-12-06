@@ -159,7 +159,7 @@ namespace Signum.Engine.Cache
                             NewPrimaryKey(typeId.UnNullify()),
                             id.UnNullify());
 
-                        var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
+                        var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)!), liteCreate);
 
                         return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(id), NullId), liteRequest, nullRef);
                     }

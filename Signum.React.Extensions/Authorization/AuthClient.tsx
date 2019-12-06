@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
-import { tasks, LineBase, LineBaseProps } from '@framework/Lines/LineBase'
+import { tasks, LineBaseProps, LineBaseController } from '@framework/Lines/LineBase'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -16,10 +16,7 @@ import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowe
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
-
-export let userTicket: boolean;
-export let resetPassword: boolean;
-
+import Login, { LoginWithWindowsButton } from './Login/Login';
 
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
@@ -27,18 +24,32 @@ export function registerUserTicketAuthenticator() {
   authenticators.push(loginFromCookie);
 }
 
-export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean, notifyLogout: boolean }) {
-  userTicket = options.userTicket;
-  resetPassword = options.resetPassword;
+/* Install and enable Windows authentication in IIS https://docs.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-2.2&tabs=visual-studio */
+export function registerWindowsAuthenticator() {
+  authenticators.push(loginWindowsAuthentication);
+}
 
-  if (userTicket) {
+export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
+  Options.userTicket = options.userTicket;
+  Options.windowsAuthentication = options.windowsAuthentication;
+  Options.resetPassword = options.resetPassword;
+
+  if (Options.userTicket) {
     if (!authenticators.contains(loginFromCookie))
       throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
   }
 
+  if (Options.windowsAuthentication) {
+    if (!authenticators.contains(loginWindowsAuthentication))
+      throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
+
+    Login.customLoginButtons = () => <LoginWithWindowsButton />;
+  }
+
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
   options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
-
+  options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
+  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
 
   if (options.notifyLogout) {
     notifyLogout = options.notifyLogout;
@@ -49,7 +60,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
         var userName = se.newValue!.before("&&");
 
         var cu = currentUser();
-        if (cu && cu.userName == userName)
+        if (cu?.userName == userName)
           logoutInternal();
       }
     });
@@ -92,7 +103,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.isCreableEvent.push(navigatorIsCreable);
     Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
     Navigator.isViewableEvent.push(navigatorIsViewable);
-
+    Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
@@ -132,7 +143,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   }
 
   PropertyRoute.prototype.canModify = function () {
-    return this.member != null && this.member.propertyAllowed == "Modify"
+    return this.member != null && this.member.propertyAllowed == "Write"
   }
 }
 
@@ -147,7 +158,12 @@ export function isOperationInfoAllowed(oi: OperationInfo) {
   return oi.operationAllowed;
 }
 
-export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
+export function isOperationAllowed(type: PseudoType, operation: OperationSymbol) {
+  var ti = getTypeInfo(type);
+  return isOperationInfoAllowed(ti.operations![operation.key]);
+}
+
+export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
 
@@ -160,7 +176,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
       case "Read":
         state.ctx.readOnly = true;
         break;
-      case "Modify":
+      case "Write":
         break;
     }
   }
@@ -172,10 +188,10 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   if (ti == undefined)
     return false;
 
-  if (entityPack && entityPack.typeAllowed)
+  if (entityPack?.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
 
-  return ti.typeAllowed == "None" || ti.typeAllowed == "Read";
+  return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
 }
 
 export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
@@ -184,16 +200,16 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
   if (ti == undefined)
     return true;
 
-  if (entityPack && entityPack.typeAllowed)
+  if (entityPack?.typeAllowed)
     return entityPack.typeAllowed != "None";
 
-  return ti.typeAllowed != "None";
+  return ti.maxTypeAllowed != "None";
 }
 
 export function navigatorIsCreable(typeName: PseudoType) {
   const ti = getTypeInfo(typeName);
 
-  return ti == undefined || ti.typeAllowed == "Create";
+  return ti == undefined || ti.maxTypeAllowed == "Write";
 }
 
 export function currentUser(): UserEntity {
@@ -222,13 +238,13 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
   if (options.headers == undefined)
     options.headers = {};
 
-  options.headers["Authorization"] = "Bearer " + token;
+  options.headers["Signum_Authorization"] = "Bearer " + token;
 
   return makeCall()
     .then(r => {
       var newToken = r.headers.get("New_Token");
       if (newToken) {
-        setAuthToken(newToken);
+        setAuthToken(newToken, getAuthorizationType());
         API.fetchCurrentUser()
           .then(cu => setCurrentUser(cu))
           .done();
@@ -238,8 +254,8 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
     }, ifError<ServiceError, Response>(ServiceError, e => {
 
-      if (e.httpError.exceptionType && e.httpError.exceptionType.endsWith(".AuthenticationException")) {
-        setAuthToken(undefined);
+      if (e.httpError.exceptionType?.endsWith(".AuthenticationException")) {
+        setAuthToken(undefined, undefined);
         Navigator.history.push("~/auth/login");
       }
 
@@ -248,11 +264,16 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 }
 
 export function getAuthToken(): string | undefined {
-  return sessionStorage.getItem("authToken") || undefined;
+  return sessionStorage.getItem("authToken") ?? undefined;
 }
 
-export function setAuthToken(authToken: string | undefined): void {
-  sessionStorage.setItem("authToken", authToken || "");
+export function getAuthorizationType(): string | undefined {
+  return sessionStorage.getItem("authorizationType") ?? undefined;
+}
+
+export function setAuthToken(authToken: string | undefined, authorizationType: string | undefined): void {
+  sessionStorage.setItem("authToken", authToken ?? "");
+  sessionStorage.setItem("authorizationType", authorizationType ?? "");
 }
 
 export function autoLogin(): Promise<UserEntity | undefined> {
@@ -277,15 +298,15 @@ export function autoLogin(): Promise<UserEntity | undefined> {
           });
       } else {
         authenticate()
-          .then(authenticatedUser => {
+          .then(au => {
 
-            if (!authenticatedUser) {
+            if (!au) {
               resolve(undefined);
             } else {
-              setAuthToken(authenticatedUser.token);
-              setCurrentUser(authenticatedUser.userEntity);
+              setAuthToken(au.token, au.authenticationType);
+              setCurrentUser(au.userEntity);
               Navigator.resetUI();
-              resolve(authenticatedUser.userEntity);
+              resolve(au.userEntity);
             }
           });
       }
@@ -308,6 +329,17 @@ export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
       return au;
     });
   }
+}
+
+export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
+
+  if (Options.disableWindowsAuthentication)
+    return Promise.resolve(undefined);
+
+  return API.loginWindowsAuthentication(false).then(au => {
+    au && console.log("loginWindowsAuthentication");
+    return au;
+  }).catch(() => undefined);
 }
 
 function getCookie(name: string) {
@@ -343,6 +375,7 @@ export async function authenticate(): Promise<AuthenticatedUser | undefined> {
 export interface AuthenticatedUser {
   userEntity: UserEntity;
   token: string;
+  authenticationType: string;
 }
 
 export function logout() {
@@ -357,9 +390,9 @@ export function logout() {
 }
 
 function logoutInternal() {
-  setAuthToken(undefined);
+  setAuthToken(undefined, undefined);
   setCurrentUser(undefined);
-
+  Options.disableWindowsAuthentication = true; 
   Options.onLogout();
 }
 
@@ -371,10 +404,15 @@ export namespace Options {
   export let onLogin: (url?: string) => void = (url?: string) => {
     throw new Error("onLogin should be defined (check Main.tsx in Southwind)");
   }
+
+  export let disableWindowsAuthentication: boolean;
+  export let windowsAuthentication: boolean;
+  export let userTicket: boolean;
+  export let resetPassword: boolean;
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key || permission as string;
+  var key = (permission as PermissionSymbol).key ?? permission as string;
   const type = getTypeInfo(key.before("."));
   if (!type)
     throw new Error(`Type '${key.before(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
@@ -387,7 +425,7 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
 }
 
 export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key || permission as string;
+  var key = (permission as PermissionSymbol).key ?? permission as string;
   if (!isPermissionAuthorized(key))
     throw new Error(`Permission ${key} is denied`);
 }
@@ -401,22 +439,30 @@ export module API {
   }
 
   export interface LoginResponse {
-    message: string;
-    userEntity: UserEntity;
+    authenticationType: string;
+    message?: string;
     token: string;
+    userEntity: UserEntity;
   }
 
   export function login(loginRequest: LoginRequest): Promise<LoginResponse> {
-    return ajaxPost<LoginResponse>({ url: "~/api/auth/login" }, loginRequest);
+    return ajaxPost({ url: "~/api/auth/login" }, loginRequest);
   }
 
-  export function loginFromCookie(): Promise<LoginResponse> {
-    return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
+  export function loginFromCookie(): Promise<LoginResponse | undefined> {
+    return ajaxPost({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
   }
 
+  export function loginWindowsAuthentication(throwError: boolean): Promise<LoginResponse | undefined> {
+    return ajaxPost({ url: `~/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);
+  }
 
-  export function refreshToken(oldToken: string): Promise<LoginResponse> {
-    return ajaxPost<LoginResponse>({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
+  export function loginWithAzureAD(jwt: string): Promise<LoginResponse | undefined> {
+    return ajaxPost({ url: "~/api/auth/loginWithAzureAD", avoidAuthToken: true }, jwt);
+  }
+
+  export function refreshToken(oldToken: string): Promise<LoginResponse| undefined> {
+    return ajaxPost({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
   }
 
   export interface ChangePasswordRequest {
@@ -424,62 +470,80 @@ export module API {
     newPassword: string;
   }
 
+  export interface ForgotPasswordEmailRequest {
+    email: string;
+   
+  }
+
+  export interface ResetPasswordRequest {
+    code: string ;
+    newPassword: string;
+  }
+
+  export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<string> {
+    return ajaxPost({ url: "~/api/auth/forgotPasswordEmail" }, request);
+  }
+
+  export function resetPassword(request: ResetPasswordRequest): Promise<LoginResponse> {
+    return ajaxPost({ url: "~/api/auth/resetPassword" }, request);
+  }
+
   export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
-    return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
+    return ajaxPost({ url: "~/api/auth/changePassword" }, request);
   }
 
   export function fetchCurrentUser(): Promise<UserEntity> {
-    return ajaxGet<UserEntity>({ url: "~/api/auth/currentUser", cache: "no-cache" });
+    return ajaxGet({ url: "~/api/auth/currentUser", cache: "no-cache" });
   }
 
   export function logout(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/auth/logout" }, undefined);
+    return ajaxPost({ url: "~/api/auth/logout" }, undefined);
   }
 
   export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {
-    return ajaxGet<PermissionRulePack>({ url: "~/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "~/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
   }
 
   export function savePermissionRulePack(rules: PermissionRulePack): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/authAdmin/permissionRules" }, rules);
+    return ajaxPost({ url: "~/api/authAdmin/permissionRules" }, rules);
   }
 
 
   export function fetchTypeRulePack(roleId: number | string): Promise<TypeRulePack> {
-    return ajaxGet<TypeRulePack>({ url: "~/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "~/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
   }
 
   export function saveTypeRulePack(rules: TypeRulePack): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/authAdmin/typeRules" }, rules);
+    return ajaxPost({ url: "~/api/authAdmin/typeRules" }, rules);
   }
 
 
   export function fetchPropertyRulePack(typeName: string, roleId: number | string): Promise<PropertyRulePack> {
-    return ajaxGet<PropertyRulePack>({ url: "~/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "~/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
   }
 
   export function savePropertyRulePack(rules: PropertyRulePack): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/authAdmin/propertyRules" }, rules);
+    return ajaxPost({ url: "~/api/authAdmin/propertyRules" }, rules);
   }
 
 
 
   export function fetchOperationRulePack(typeName: string, roleId: number | string): Promise<OperationRulePack> {
-    return ajaxGet<OperationRulePack>({ url: "~/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "~/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
   }
 
   export function saveOperationRulePack(rules: OperationRulePack): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/authAdmin/operationRules" }, rules);
+    return ajaxPost({ url: "~/api/authAdmin/operationRules" }, rules);
   }
 
 
 
   export function fetchQueryRulePack(typeName: string, roleId: number | string): Promise<QueryRulePack> {
-    return ajaxGet<QueryRulePack>({ url: "~/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "~/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
   }
 
   export function saveQueryRulePack(rules: QueryRulePack): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/authAdmin/queryRules" }, rules);
+    return ajaxPost({ url: "~/api/authAdmin/queryRules" }, rules);
   }
 
 
@@ -495,7 +559,8 @@ export module API {
 declare module '@framework/Reflection' {
 
   export interface TypeInfo {
-    typeAllowed: TypeAllowedBasic;
+    minTypeAllowed: TypeAllowedBasic;
+    maxTypeAllowed: TypeAllowedBasic;
     queryAllowed: QueryAllowed;
   }
 

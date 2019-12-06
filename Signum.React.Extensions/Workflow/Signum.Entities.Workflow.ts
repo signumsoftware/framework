@@ -90,6 +90,13 @@ export module CaseActivityMessage {
   export const CurrentUserHasNotification = new MessageKey("CaseActivityMessage", "CurrentUserHasNotification");
   export const NoNewOrOpenedOrInProgressNotificationsFound = new MessageKey("CaseActivityMessage", "NoNewOrOpenedOrInProgressNotificationsFound");
   export const NoActorsFoundToInsertCaseActivityNotifications = new MessageKey("CaseActivityMessage", "NoActorsFoundToInsertCaseActivityNotifications");
+  export const ThereAreInprogressActivities = new MessageKey("CaseActivityMessage", "ThereAreInprogressActivities");
+}
+
+export const CaseActivityMixin = new Type<CaseActivityMixin>("CaseActivityMixin");
+export interface CaseActivityMixin extends Entities.MixinEntity {
+  Type: "CaseActivityMixin";
+  caseActivity: Entities.Lite<CaseActivityEntity> | null;
 }
 
 export module CaseActivityOperation {
@@ -285,7 +292,7 @@ export const ViewNamePropEmbedded = new Type<ViewNamePropEmbedded>("ViewNameProp
 export interface ViewNamePropEmbedded extends Entities.EmbeddedEntity {
   Type: "ViewNamePropEmbedded";
   name: string;
-  expression: string;
+  expression: string | null;
 }
 
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
@@ -632,6 +639,7 @@ export interface WorkflowModel extends Entities.ModelEntity {
 }
 
 export module WorkflowOperation {
+  export const Create : Entities.ConstructSymbol_Simple<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Create");
   export const Clone : Entities.ConstructSymbol_From<WorkflowEntity, WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Clone");
   export const Save : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Save");
   export const Delete : Entities.DeleteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Delete");
@@ -639,8 +647,9 @@ export module WorkflowOperation {
   export const Deactivate : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Deactivate");
 }
 
-export module WorkflowPanelPermission {
-  export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPanelPermission.ViewWorkflowPanel");
+export module WorkflowPermission {
+  export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewWorkflowPanel");
+  export const ViewCaseFlow : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewCaseFlow");
 }
 
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");
@@ -778,6 +787,7 @@ export module WorkflowValidationMessage {
   export const Activity0OfType1CanNotHaveConnectionsOfType2 = new MessageKey("WorkflowValidationMessage", "Activity0OfType1CanNotHaveConnectionsOfType2");
   export const BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2 = new MessageKey("WorkflowValidationMessage", "BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2");
   export const IntermediateTimer0ShouldHaveOneOutputOfType1 = new MessageKey("WorkflowValidationMessage", "IntermediateTimer0ShouldHaveOneOutputOfType1");
+  export const IntermediateTimer0ShouldHaveName = new MessageKey("WorkflowValidationMessage", "IntermediateTimer0ShouldHaveName");
   export const ParallelSplit0ShouldHaveAtLeastOneConnection = new MessageKey("WorkflowValidationMessage", "ParallelSplit0ShouldHaveAtLeastOneConnection");
   export const ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions = new MessageKey("WorkflowValidationMessage", "ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions");
   export const Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3 = new MessageKey("WorkflowValidationMessage", "Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3");

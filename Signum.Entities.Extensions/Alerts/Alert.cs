@@ -40,46 +40,23 @@ namespace Signum.Entities.Alerts
             return Text.FirstNonEmptyLine()?.Etc(100)!;
         }
 
-        static Expression<Func<AlertEntity, bool>> AttendedExpression =
-           a => a.AttendedDate.HasValue;
-        [ExpressionField]
-        public bool Attended
-        {
-            get { return AttendedExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool Attended => As.Expression(() => AttendedDate.HasValue);
 
-        static Expression<Func<AlertEntity, bool>> NotAttendedExpression =
-           a => a.AttendedDate == null;
-        [ExpressionField]
-        public bool NotAttended
-        {
-            get { return NotAttendedExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool NotAttended => As.Expression(() => AttendedDate == null);
 
-        static Expression<Func<AlertEntity, bool>> AlertedExpression =
-            a => !a.AttendedDate.HasValue && a.AlertDate <= TimeZoneManager.Now;
-        [ExpressionField]
-        public bool Alerted
-        {
-            get { return AlertedExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool Alerted => As.Expression(() => !AttendedDate.HasValue && AlertDate <= TimeZoneManager.Now);
 
-        static Expression<Func<AlertEntity, bool>> FutureExpression =
-            a => !a.AttendedDate.HasValue && a.AlertDate > TimeZoneManager.Now;
-        [ExpressionField]
-        public bool Future
-        {
-            get { return FutureExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool Future => As.Expression(() => !AttendedDate.HasValue && AlertDate > TimeZoneManager.Now);
 
-        static Expression<Func<AlertEntity, AlertCurrentState>> CurrentStateExpression =
-            a => a.AttendedDate.HasValue ? AlertCurrentState.Attended :
-                a.AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted : AlertCurrentState.Future;
-        [ExpressionField]
-        public AlertCurrentState CurrentState
-        {
-            get { return CurrentStateExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public AlertCurrentState CurrentState => As.Expression(() =>
+            AttendedDate.HasValue ? AlertCurrentState.Attended :
+            AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted :
+            AlertCurrentState.Future);
     }
 
     public enum AlertState

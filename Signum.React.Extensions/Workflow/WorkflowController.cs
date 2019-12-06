@@ -61,7 +61,7 @@ namespace Signum.React.Workflow
             public Dictionary<string, string> canExecuteMainEntity { get; set; }
 
             [JsonExtensionData]
-            public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+            public Dictionary<string, object?> Extension { get; set; } = new Dictionary<string, object?>();
         }
 
         [HttpGet("api/workflow/starts")]
@@ -209,7 +209,7 @@ namespace Signum.React.Workflow
         [HttpGet("api/workflow/scriptRunner/view")]
         public WorkflowScriptRunnerState ViewScriptRunner()
         {
-            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
+            WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunnerState state = WorkflowScriptRunner.ExecutionState();
 
@@ -219,7 +219,7 @@ namespace Signum.React.Workflow
         [HttpPost("api/workflow/scriptRunner/start")]
         public void StartScriptRunner()
         {
-            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
+            WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunner.StartRunningScripts(0);
 
@@ -229,7 +229,7 @@ namespace Signum.React.Workflow
         [HttpPost("api/workflow/scriptRunner/stop")]
         public void StopScriptRunner()
         {
-            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
+            WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunner.Stop();
 
@@ -241,7 +241,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
 
-            return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
+            return CaseFlowLogic.GetCaseFlow(lite.RetrieveAndRemember());
         }
 
         [HttpPost("api/workflow/activityMonitor")]

@@ -10,59 +10,36 @@ export interface TextEllipsisProps extends React.SVGProps<SVGTextElement>{
   etcText?: string;
 }
 
-export default class TextEllipsis extends React.Component<TextEllipsisProps> {
+export default function TextEllipsis({ maxWidth, padding, children, etcText, ...atts } :  TextEllipsisProps) {
 
-  txt?: SVGTextElement | null;
+  const txt = React.useRef<SVGTextElement>(null);
 
-  render() {
+  React.useEffect(() => {
+    var width = maxWidth;
+    if (padding)
+      width -= padding * 2;
 
-    var { maxWidth, padding, children, etcText, ...atts } = this.props;
-
-    return (
-      <text ref={t => this.txt = t} {...atts} >
-        {children || ""}
-      </text>
-    );
-  }
-
-
-  componentDidMount() {
-    this.recalculate(this.props);
-  }
-
-
-
-  componentWillReceiveProps(nextProps: TextEllipsisProps) {
-    if (this.props.maxWidth != nextProps.maxWidth ||
-      this.props.padding != nextProps.padding ||
-      this.props.etcText != nextProps.etcText ||
-      getString(this.props) != getString(nextProps))
-      this.recalculate(nextProps);
-  }
-
-  recalculate(props: TextEllipsisProps) {
-    
-    var etcText = props.etcText == null ? "…" : props.etcText;
-
-    var width = props.maxWidth;
-    if (props.padding)
-      width -= props.padding * 2;
-
-    let txtElem = this.txt!;
-    txtElem.textContent = getString(this.props);
+    let txtElem = txt.current!;
+    txtElem.textContent = getString(children);
     let textLength = txtElem.getComputedTextLength();
     let text = txtElem.textContent!;
     while (textLength > width && text.length > 0) {
       text = text.slice(0, -1);
       while (text[text.length - 1] == ' ' && text.length > 0)
         text = text.slice(0, -1);
-      txtElem.textContent = text + etcText;
+      txtElem.textContent = text + (etcText ??  "…");
       textLength = txtElem.getComputedTextLength();
     }
-  }
+
+  }, [maxWidth, padding, etcText, getString(children)]);
+
+  return (
+    <text ref={txt} {...atts} >
+      {children ?? ""}
+    </text>
+  );
 }
 
-
-function getString(props: TextEllipsisProps) {
-  return React.Children.toArray(props.children)[0] as string;
+function getString(children: React.ReactNode) {
+  return React.Children.toArray(children)[0] as string;
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Entities.Files;
@@ -19,12 +19,8 @@ namespace Signum.Entities.Excel
         
         public FileEmbedded File { get; set; }
 
-        static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.DisplayName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => DisplayName);
     }
 
     [AutoInit]

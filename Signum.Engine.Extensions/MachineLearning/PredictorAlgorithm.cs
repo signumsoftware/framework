@@ -11,9 +11,7 @@ using System.Threading;
 
 namespace Signum.Engine.MachineLearning
 {
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class TrainingProgress
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public string? Message;
         public decimal? Progress;
@@ -24,9 +22,7 @@ namespace Signum.Engine.MachineLearning
         public List<object?[]>? EpochProgresses { get; set; }
     }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class EpochProgress
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public long Ellapsed;
         public int TrainingExamples;
@@ -36,7 +32,7 @@ namespace Signum.Engine.MachineLearning
         public double? LossValidation;
         public double? EvaluationValidation;
 
-        object?[] array;
+        object?[]? array;
         public object?[] ToObjectArray()
         {
             return array ?? (array = new object?[]
@@ -65,8 +61,6 @@ namespace Signum.Engine.MachineLearning
                 EvaluationValidation = EvaluationValidation?.CleanDouble(),
             }.Save();
         }
-
-
     }
 
     public class PredictorPredictContext
@@ -146,7 +140,7 @@ namespace Signum.Engine.MachineLearning
             this.CancellationToken = cancellationToken;
         }
 
-        public event Action<string, decimal?> OnReportProgres;
+        public event Action<string, decimal?>? OnReportProgres;
 
         public void ReportProgress(string message, decimal? progress = null)
         {
@@ -204,16 +198,15 @@ namespace Signum.Engine.MachineLearning
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MainQuery
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public QueryRequest QueryRequest { get; internal set; }
         public ResultTable ResultTable { get; internal set; }
         public Func<ResultRow, object?[]> GetParentKey { get; internal set; }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class SubQuery
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     {
         public PredictorSubQueryEntity SubQueryEntity;
         public QueryRequest QueryGroupRequest;
@@ -226,6 +219,7 @@ namespace Signum.Engine.MachineLearning
         //From ColumnIndex (i.e: [3->0, 4->1)
         public Dictionary<int, int> ColumnIndexToValueIndex { get; internal set; }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public interface IPredictorAlgorithm
     {

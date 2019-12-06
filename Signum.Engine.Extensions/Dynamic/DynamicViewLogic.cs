@@ -2,6 +2,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
@@ -15,9 +16,9 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicViewLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<string,  DynamicViewEntity>>> DynamicViews;
-        public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors;
-        public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides;
+        public static ResetLazy<Dictionary<Type, Dictionary<string,  DynamicViewEntity>>> DynamicViews = null!;
+        public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors = null!;
+        public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -35,10 +36,16 @@ namespace Signum.Engine.Dynamic
                         e.EntityType,
                     });
 
+                DynamicViewEntity.TryGetDynamicView = (type, name) => DynamicViews.Value.TryGetC(type)?.TryGetC(name);
 
                 new Graph<DynamicViewEntity>.Construct(DynamicViewOperation.Create)
                 {
-                    Construct = (_) => new DynamicViewEntity(),
+                    Construct = (_) => new DynamicViewEntity() {
+                        Locals = "{\r\n" +
+                        "  const forceUpdate = modules.Hooks.useForceUpdate(0);\r\n" +
+                        "  return { forceUpdate };\r\n" +
+                        "}",
+                    },
                 }.Register();
 
                 new Graph<DynamicViewEntity>.ConstructFrom<DynamicViewEntity>(DynamicViewOperation.Clone)
@@ -48,6 +55,8 @@ namespace Signum.Engine.Dynamic
                         ViewName = "",
                         EntityType = e.EntityType,
                         ViewContent = e.ViewContent,
+                        Props = e.Props.Select(a => new DynamicViewPropEmbedded() {  Name = a.Name, Type = a.Type } ).ToMList(),
+                        Locals = e.Locals,
                     },
                 }.Register();
 
@@ -67,7 +76,7 @@ namespace Signum.Engine.Dynamic
                     });
 
                 DynamicViewSelectors = sb.GlobalLazy(() =>
-                    Database.Query<DynamicViewSelectorEntity>().SelectCatch(dvs => KVP.Create(dvs.EntityType.ToType(), dvs)).ToDictionaryEx(),
+                    Database.Query<DynamicViewSelectorEntity>().SelectCatch(dvs => KeyValuePair.Create(dvs.EntityType.ToType(), dvs)).ToDictionaryEx(),
                     new InvalidateWith(typeof(DynamicViewSelectorEntity)));
 
                 sb.Include<DynamicViewOverrideEntity>()
@@ -82,7 +91,7 @@ namespace Signum.Engine.Dynamic
                    });
 
                 DynamicViewOverrides = sb.GlobalLazy(() =>
-                 Database.Query<DynamicViewOverrideEntity>().SelectCatch(dvo => KVP.Create(dvo.EntityType.ToType(), dvo)).GroupToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+                 Database.Query<DynamicViewOverrideEntity>().SelectCatch(dvo => KeyValuePair.Create(dvo.EntityType.ToType(), dvo)).GroupToDictionary(kvp => kvp.Key, kvp => kvp.Value),
                  new InvalidateWith(typeof(DynamicViewOverrideEntity)));
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewEntity>().Where(dv => dv.EntityType == type));

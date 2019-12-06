@@ -31,33 +31,33 @@ namespace Signum.Entities.Rest
         public Lite<IUserEntity>? User { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string UserHostAddress { get; set; }
+        public string? UserHostAddress { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string UserHostName { get; set; }
+        public string? UserHostName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Referrer { get; set; }
+        public string? Referrer { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string? Controller { get; set; }
+        public string Controller { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string ControllerName { get; set; }
+        public string? ControllerName { get; set; }
 
         [SqlDbType(Size = 100)]
         public string Action { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string MachineName { get; set; }
+        public string? MachineName { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string ApplicationName { get; set; }
+        public string? ApplicationName { get; set; }
 
         public Lite<ExceptionEntity>? Exception { get; set; }
 
         [SqlDbType(Size = MaxValue)]
-        public string ResponseBody { get; set; }
+        public string? ResponseBody { get; set; }
 
         public RestLogReplayState? ReplayState { get; set; }
 
@@ -90,7 +90,7 @@ namespace Signum.Entities.Rest
 
     public class RestDiffResult
     {
-        public string previous { get; set; }
+        public string? previous { get; set; }
         public string current { get; set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
     }

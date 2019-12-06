@@ -38,11 +38,10 @@ namespace Signum.Entities.Mailing
         public bool EditableMessage { get; set; } = true;
 
         public bool DisableAuthorization { get; set; }
-
         
         public QueryEntity Query { get; set; }
 
-        public SystemEmailEntity? SystemEmail { get; set; }
+        public EmailModelEntity? Model { get; set; }
 
         public bool SendDifferentMessages { get; set; }
 
@@ -80,12 +79,8 @@ namespace Signum.Entities.Mailing
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<EmailTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         internal void ParseData(QueryDescription queryDescription)
         {
@@ -125,7 +120,7 @@ namespace Signum.Entities.Mailing
                 new XAttribute("DisableAuthorization", DisableAuthorization),
                 new XAttribute("Query", Query.Key),
                 new XAttribute("EditableMessage", EditableMessage),
-                SystemEmail == null ? null : new XAttribute("SystemEmail", SystemEmail.FullClassName),
+                Model == null ? null : new XAttribute("SystemEmail", Model.FullClassName),
                 new XAttribute("SendDifferentMessages", SendDifferentMessages),
                 MasterTemplate == null ? null : new XAttribute("MasterTemplate", MasterTemplate.IdOrNull),
                 new XAttribute("IsBodyHtml", IsBodyHtml),
@@ -159,7 +154,7 @@ namespace Signum.Entities.Mailing
 
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             EditableMessage = bool.Parse(element.Attribute("EditableMessage").Value);
-            SystemEmail = ctx.GetSystemEmail(element.Attribute("SystemEmail").Value);
+            Model = ctx.GetEmailModel(element.Attribute("SystemEmail").Value);
             SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
 
             MasterTemplate = Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(element.Attribute("MasterTemplate").Value);
@@ -293,7 +288,7 @@ namespace Signum.Entities.Mailing
     [AutoInit]
     public static class EmailTemplateOperation
     {
-        public static ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail;
+        public static ConstructSymbol<EmailTemplateEntity>.From<EmailModelEntity> CreateEmailTemplateFromModel;
         public static ConstructSymbol<EmailTemplateEntity>.Simple Create;
         public static ExecuteSymbol<EmailTemplateEntity> Save;
         public static DeleteSymbol<EmailTemplateEntity> Delete;

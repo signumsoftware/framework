@@ -42,7 +42,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 255)]
         public string? ViewName { get; set; }
 
-        [PreserveOrder, NoRepeatValidator]
+        [PreserveOrder, NoRepeatValidator, NotifyChildProperty]
         public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
 
         [NotifyChildProperty]
@@ -57,12 +57,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(MultiLine = true)]
         public string? UserHelp { get; set; }
 
-        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
 
 
@@ -88,8 +84,22 @@ namespace Signum.Entities.Workflow
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
             }
 
+            if(pi.Name == nameof(ViewNameProps))
+            {
+                if (ViewNameProps.Count > 0 && !ViewName.HasText())
+                    return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+                if (ViewName.HasText())
+                {
+                    var dv = DynamicViewEntity.TryGetDynamicView(Lane.Pool.Workflow.MainEntityType.ToType(), ViewName);
+                    if(dv != null)
+                    return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
+                }
+            }
+
             return base.PropertyValidation(pi);
         }
+
 
         public ModelEntity GetModel()
         {
@@ -145,7 +155,18 @@ namespace Signum.Entities.Workflow
         public string Name { get; set; }
 
         [StringLengthValidator(Max = 100)]
-        public string Expression { get; set; }
+        public string? Expression { get; set; }
+
+        internal static string? ValidateViewNameProps(DynamicViewEntity dv, MList<ViewNamePropEmbedded> viewNameProps)
+        {
+            var extra = viewNameProps.Where(a => !dv.Props.Any(p => p.Name == a.Name)).CommaAnd(a => a.Name);
+            var missing = dv.Props.Where(p => !p.Type.EndsWith("?") && !viewNameProps.Any(a => a.Expression.HasText() && p.Name == a.Name)).CommaAnd(a => a.Name);
+
+            return " and ".Combine(
+                extra.HasText() ? "The ViewProps " + extra + " are not declared in " + dv.ViewName : null,
+                missing.HasText() ? "The ViewProps " + missing + " are mandatory in " + dv.ViewName : null
+                ).DefaultToNull();
+        }
     }
 
     public class WorkflowActivityInfo
@@ -309,6 +330,24 @@ namespace Signum.Entities.Workflow
         public string? UserHelp { get; set; }
 
         public SubWorkflowEmbedded? SubWorkflow { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(ViewNameProps))
+            {
+                if (ViewNameProps.Count > 0 && !ViewName.HasText())
+                    return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+                if (ViewName.HasText() && Workflow != null)
+                {
+                    var dv = DynamicViewEntity.TryGetDynamicView(Workflow.MainEntityType.ToType(), ViewName);
+                    if (dv != null)
+                        return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
+                }
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     public enum WorkflowActivityMessage

@@ -23,20 +23,11 @@ namespace Signum.Entities.Disconnected
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SeedMax { get; set; }
 
-        static Expression<Func<DisconnectedMachineEntity, Interval<int>>> SeedIntervalExpression =
-            entity => new Interval<int>(entity.SeedMin, entity.SeedMax);
-        [HiddenProperty, ExpressionField]
-        public Interval<int> SeedInterval
-        {
-            get { return SeedIntervalExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public Interval<int> SeedInterval => As.Expression(() => new Interval<int>(SeedMin, SeedMax));
 
-        static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.MachineName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => MachineName);
 
         public static readonly SessionVariable<Lite<DisconnectedMachineEntity>?> CurrentVariable =
             Statics.SessionVariable<Lite<DisconnectedMachineEntity>?>("disconectedMachine");

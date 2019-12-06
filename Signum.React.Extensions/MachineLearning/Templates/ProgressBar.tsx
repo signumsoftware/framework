@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { BsColor } from '@framework/Components/Basic';
 import { classes } from '@framework/Globals'
-import * as numbro from 'numbro';
+import numbro from 'numbro';
 
 interface ProgressBarProps {
   value?: number | null; /*0...1*/

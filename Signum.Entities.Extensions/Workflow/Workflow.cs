@@ -26,17 +26,14 @@ namespace Signum.Entities.Workflow
         [InTypeScript(false), AvoidDump]
         public WorkflowXmlEmbedded? FullDiagramXml { get; set; }
 
-        static Expression<Func<WorkflowEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
     public static class WorkflowOperation
     {
+        public static readonly ConstructSymbol<WorkflowEntity>.Simple Create;
         public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
         public static readonly DeleteSymbol<WorkflowEntity> Delete;
@@ -237,6 +234,8 @@ namespace Signum.Entities.Workflow
         BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2,
         [Description("Intermediate timer '{0}' should have one output of type '{1}'.")]
         IntermediateTimer0ShouldHaveOneOutputOfType1,
+        [Description("Intermediate timer '{0}' should have name.")]
+        IntermediateTimer0ShouldHaveName,
         [Description("Parallel Split '{0}' should have at least one connection.")]
         ParallelSplit0ShouldHaveAtLeastOneConnection,
         [Description("Parallel Split '{0}' should have only normal connections without conditions.")]
@@ -256,8 +255,9 @@ namespace Signum.Entities.Workflow
     }
 
     [AutoInit]
-    public static class WorkflowPanelPermission
+    public static class WorkflowPermission
     {
         public static PermissionSymbol ViewWorkflowPanel;
+        public static PermissionSymbol ViewCaseFlow;
     }
 }

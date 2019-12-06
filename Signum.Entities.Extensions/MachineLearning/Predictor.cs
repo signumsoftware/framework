@@ -63,12 +63,8 @@ namespace Signum.Entities.MachineLearning
         public PredictorRegressionMetricsEmbedded? RegressionValidation { get; set; }
 
 
-        static Expression<Func<PredictorEntity, string>> ToStringExpression = @this => @this.Name!;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name!);
     }
 
 
@@ -120,7 +116,7 @@ namespace Signum.Entities.MachineLearning
             return Columns.SingleEx(a => a.Token.Token.ContainsKey(part));
         }
 
-        public PredictorColumnEmbedded TryFindColumn(string part)
+        public PredictorColumnEmbedded? TryFindColumn(string part)
         {
             return Columns.SingleOrDefaultEx(a => a.Token.Token.ContainsKey(part));
         }
@@ -249,7 +245,7 @@ namespace Signum.Entities.MachineLearning
 
         public override string ToString() => $"{Usage} {Token} {Encoding}";
 
-        public override bool Equals(object obj) => obj is PredictorColumnEmbedded c && Equals(c);
+        public override bool Equals(object? obj) => obj is PredictorColumnEmbedded c && Equals(c);
         public bool Equals(PredictorColumnEmbedded other)
         {
             return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
@@ -352,12 +348,8 @@ namespace Signum.Entities.MachineLearning
             Columns = Columns.Select(f => f.Clone()).ToMList(),
         };
 
-        static Expression<Func<PredictorSubQueryEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public PredictorSubQueryColumnEmbedded FindColumn(string part)
         {
@@ -410,7 +402,7 @@ namespace Signum.Entities.MachineLearning
 
         public override string ToString() => $"{Usage} {Token} {Encoding}";
 
-        public override bool Equals(object obj) => obj is PredictorSubQueryColumnEmbedded c && Equals(c);
+        public override bool Equals(object? obj) => obj is PredictorSubQueryColumnEmbedded c && Equals(c);
         public bool Equals(PredictorSubQueryColumnEmbedded other)
         {
             return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;

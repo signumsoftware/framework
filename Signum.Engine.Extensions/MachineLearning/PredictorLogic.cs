@@ -48,29 +48,17 @@ namespace Signum.Engine.MachineLearning
 
     public static class PredictorLogic
     {
-        static Expression<Func<PredictorEntity, IQueryable<PredictSimpleResultEntity>>> SimpleResultsExpression =
-           e => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.Is(e));
-        [ExpressionField]
-        public static IQueryable<PredictSimpleResultEntity> SimpleResults(this PredictorEntity e)
-        {
-            return SimpleResultsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PredictSimpleResultEntity> SimpleResults(this PredictorEntity e) => 
+            As.Expression(() => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.Is(e)));
 
-        static Expression<Func<PredictorEntity, IQueryable<PredictorCodificationEntity>>> CodificationsExpression =
-        e => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.Is(e));
-        [ExpressionField]
-        public static IQueryable<PredictorCodificationEntity> Codifications(this PredictorEntity e)
-        {
-            return CodificationsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PredictorCodificationEntity> Codifications(this PredictorEntity e) => 
+            As.Expression(() => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.Is(e)));
         
-        static Expression<Func<PredictorEntity, IQueryable<PredictorEpochProgressEntity>>> ProgressesExpression =
-        e => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Is(e));
-        [ExpressionField]
-        public static IQueryable<PredictorEpochProgressEntity> EpochProgresses(this PredictorEntity e)
-        {
-            return ProgressesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PredictorEpochProgressEntity> EpochProgresses(this PredictorEntity e) => 
+            As.Expression(() => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Is(e)));
 
         public static Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm>();
 
@@ -374,7 +362,7 @@ namespace Signum.Engine.MachineLearning
             {
                 Task.Run(() =>
                 {
-                    var user = ExecutionMode.Global().Using(_ => p.User!.Retrieve());
+                    var user = ExecutionMode.Global().Using(_ => p.User!.RetrieveAndRemember());
                     using (UserHolder.UserSession(user))
                     {
                         try
@@ -623,8 +611,8 @@ namespace Signum.Engine.MachineLearning
                         ResultSaver = e.ResultSaver,
                         MainQuery = e.MainQuery.Clone(),
                         SubQueries = e.SubQueries.Select(a => a.Clone()).ToMList(),
-                        AlgorithmSettings = e.AlgorithmSettings?.Clone(),
-                        Settings = e.Settings?.Clone(),
+                        AlgorithmSettings = e.AlgorithmSettings.Clone(),
+                        Settings = e.Settings.Clone(),
                     },
                 }.Register();
             }

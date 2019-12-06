@@ -38,12 +38,12 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             if (!Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
             {
-                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin");
                 if (!Directory.Exists(dir) || !Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
-                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin")}");
+                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin")}");
             }
 
-            var oldPath = Environment.GetEnvironmentVariable("Path");
+            var oldPath = Environment.GetEnvironmentVariable("Path")!;
             if (!oldPath.Contains(dir + ";"))
                 Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
         }
@@ -153,7 +153,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     ctx.Progresses.Enqueue(ep);
 
                     if (ctx.StopTraining)
-                        p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
+                        p = ctx.Predictor = ctx.Predictor.ToLite().RetrieveAndRemember();
 
                     var isLast = numMinibatches - nn.BestResultFromLast <= i;
                     if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
@@ -216,12 +216,12 @@ namespace Signum.Engine.MachineLearning.CNTK
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class FinalCandidate
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             public byte[] Model;
             public PredictorMetricsEmbedded ResultTraining;
             public PredictorMetricsEmbedded ResultValidation;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn, DeviceDescriptor device)
         {

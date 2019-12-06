@@ -77,7 +77,7 @@ namespace Signum.Entities.Map
         public OmniboxMatch KeywordMatch { get; set; }
 
         [JsonIgnore]
-        public Type Type { get; set; }
+        public Type? Type { get; set; }
 
 
         public string? TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
@@ -87,7 +87,7 @@ namespace Signum.Entities.Map
         public override string ToString()
         {
             if (Type == null)
-                return KeywordMatch.Value.ToString();
+                return KeywordMatch.Value.ToString()!;
 
             return "{0} {1}".FormatWith(KeywordMatch.Value, Type.NicePluralName().ToOmniboxPascal());
         }

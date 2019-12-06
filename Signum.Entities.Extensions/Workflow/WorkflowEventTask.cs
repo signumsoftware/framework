@@ -37,12 +37,8 @@ namespace Signum.Entities.Workflow
         public WorkflowEventTaskActionEval? Action { get; set; }
 
 
-        static Expression<Func<WorkflowEventTaskEntity, string>> ToStringExpression = @this => @this.Workflow + " : " + @this.Event;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Workflow + " : " + Event);
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
@@ -106,11 +102,8 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = this.GetParentEntity<WorkflowEventTaskEntity>();
-
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
@@ -138,11 +131,8 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = this.GetParentEntity<WorkflowEventTaskEntity>();
-
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetCoreMetadataReferences()
                 .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
@@ -159,7 +149,7 @@ namespace Signum.Entities.Workflow
                                     " + script + @"
                                 }
 
-                                void CreateCase(" + WorkflowEntityTypeName + @" caseMainEntity)
+                                void CreateCase(ICaseMainEntity caseMainEntity)
                                 {
                                     cases.Add(caseMainEntity);
                                 }

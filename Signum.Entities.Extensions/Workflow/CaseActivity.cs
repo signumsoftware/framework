@@ -34,29 +34,14 @@ namespace Signum.Entities.Workflow
         [Unit("min")]
         public double? Duration { get; set; }
         
-        static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeExpression =
-        @this =>  @this.Duration ?? (double?)(TimeZoneManager.Now - @this.StartDate).TotalMinutes;
-        [ExpressionField]
-        public double? DurationRealTime
-        {
-            get { return DurationRealTimeExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public double? DurationRealTime => As.Expression(() => Duration ?? (double?)(TimeZoneManager.Now - StartDate).TotalMinutes);
 
-        static Expression<Func<CaseActivityEntity, double?>> DurationRatioExpression =
-        @this => @this.Duration / ((WorkflowActivityEntity)@this.WorkflowActivity).EstimatedDuration;
-        [ExpressionField]
-        public double? DurationRatio
-        {
-            get { return DurationRatioExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public double? DurationRatio => As.Expression(() => Duration / ((WorkflowActivityEntity)WorkflowActivity).EstimatedDuration);
 
-        static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeRatioExpression =
-            @this => @this.DurationRealTime / ((WorkflowActivityEntity)@this.WorkflowActivity).EstimatedDuration;
-        [ExpressionField]
-        public double? DurationRealTimeRatio
-        {
-            get { return DurationRealTimeRatioExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public double? DurationRealTimeRatio => As.Expression(() => DurationRealTime / ((WorkflowActivityEntity)WorkflowActivity).EstimatedDuration);
 
         public Lite<UserEntity>? DoneBy { get; set; }
         public DoneType? DoneType { get; set; }
@@ -70,7 +55,7 @@ namespace Signum.Entities.Workflow
         ((WorkflowActivityEntity)@this.WorkflowActivity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision :
         CaseActivityState.PendingNext;
         [ExpressionField("StateExpression")]
-        public CaseActivityState State
+        public CaseActivityState State 
         {
             get
             {
@@ -81,12 +66,8 @@ namespace Signum.Entities.Workflow
             }
         }
 
-        static Expression<Func<CaseActivityEntity, string>> ToStringExpression = @this => @this.WorkflowActivity + " " + @this.DoneBy;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => WorkflowActivity + " " + DoneBy);
 
         protected override void PreSaving(PreSavingContext ctx)
         { 
@@ -191,6 +172,7 @@ namespace Signum.Entities.Workflow
         CurrentUserHasNotification,
         NoNewOrOpenedOrInProgressNotificationsFound,
         NoActorsFoundToInsertCaseActivityNotifications,
+        ThereAreInprogressActivities,
     }
 
 

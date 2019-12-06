@@ -39,13 +39,13 @@ namespace Signum.Engine.Translation
                 var ltm = kvp.Value;
                 var ltt = target.Types.TryGetC(kvp.Key);
 
-                var count = (ltm.Description != null && ltt?.Description == null ? 1 : 0) +
-                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt.Members!.TryGetC(kvp2.Key) == null);
+                var count = ((ltm.IsTypeCompleted() && ltt?.IsTypeCompleted() != true) ? 1 : 0) +
+                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt?.Members!.TryGetC(kvp2.Key) == null);
 
                 return new { Type = kvp.Key, count };
             })
             .Where(a => a.count > 0)
-            .GroupBy(a => a.Type!.Namespace)
+            .GroupBy(a => a.Type!.Namespace!)
             .Select(gr => new NamespaceSyncStats
             {
                 @namespace = gr.Key,
@@ -65,7 +65,7 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)
             {
-                List<string> result = translator.TranslateBatch(gr.Select(a => a.Original.Description!).ToList(), gr.Key.Name, target.Culture.Name);
+                List<string?> result = translator.TranslateBatch(gr.Select(a => a.Original.Description!).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
@@ -107,7 +107,7 @@ namespace Signum.Engine.Translation
                 var memberConflicts = (from m in masterType.Members!.Keys
                                        let con = MemberConflicts(m, targetType, masterType, supportTypes)
                                        where con != null
-                                       select KVP.Create(m, con)).ToDictionary();
+                                       select KeyValuePair.Create(m, con)).ToDictionary();
 
                 if (memberConflicts.IsEmpty() && typeConflicts == null)
                     return null;
@@ -119,10 +119,10 @@ namespace Signum.Engine.Translation
 
         static Dictionary<CultureInfo, TypeNameConflict>? TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)
         {
-            if(master.Description == null)
+            if(!master.IsTypeCompleted())
                 return null;
 
-            if (target != null && target.Description != null)
+            if (target.IsTypeCompleted())
                 return null;
 
             var sentences = new Dictionary<CultureInfo, TypeNameConflict>
@@ -132,7 +132,7 @@ namespace Signum.Engine.Translation
 
             sentences.AddRange(from lt in support
                                where lt.Description != null
-                               select KVP.Create(lt.Assembly.Culture, new TypeNameConflict { Original = lt }));
+                               select KeyValuePair.Create(lt.Assembly.Culture, new TypeNameConflict { Original = lt }));
 
             return sentences;
         }
@@ -151,7 +151,7 @@ namespace Signum.Engine.Translation
             };
             sentences.AddRange(from lt in support
                                where lt.Members!.TryGetC(member).HasText()
-                               select KVP.Create(lt.Assembly.Culture, new MemberNameConflict { Original = lt.Members!.TryGetC(member) }));
+                               select KeyValuePair.Create(lt.Assembly.Culture, new MemberNameConflict { Original = lt.Members!.TryGetC(member) }));
 
             return sentences;
         }
@@ -195,7 +195,7 @@ namespace Signum.Engine.Translation
     public class TypeNameConflict
     {
         public LocalizedType Original;
-        public string Translated;
+        public string? Translated;
 
         public override string ToString()
         {
@@ -206,7 +206,7 @@ namespace Signum.Engine.Translation
     public class MemberNameConflict
     {
         public string? Original;
-        public string Translated;
+        public string? Translated;
 
         public override string ToString()
         {

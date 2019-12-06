@@ -14,7 +14,7 @@ import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 import { newMListElement } from '@framework/Signum.Entities';
 import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
 import { Dic } from '@framework/Globals';
@@ -123,18 +123,18 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     var conIcons = this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.action || undefined;
+      return mod?.action ?? undefined;
     };
 
     conIcons.hasCondition = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.condition || undefined;
+      return mod?.condition ?? undefined;
     };
 
     var cusRenderer = this.modeler.get<customRenderer.CustomRenderer>('customRenderer');
     cusRenderer.getConnectionType = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.type || undefined;
+      return mod?.type ?? undefined;
     }
 
     conIcons.show();
@@ -198,6 +198,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         name: elementName,
         type: "Start",
         mainEntityType: mainEntityType,
+        bpmnElementId: element.id,
       });
     }
 
@@ -327,7 +328,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         if (WorkflowConnectionModel.isInstance(me)) {
 
           if (newName)
-            newName = newName.tryBeforeLast(":") || newName;
+            newName = newName.tryBeforeLast(":") ?? newName;
 
           if (me.order)
             newName = newName + ": " + me.order;
@@ -365,7 +366,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
     else if (e.element.type == "bpmn:IntermediateCatchEvent") {
       var event = this.getModel(e.element) as WorkflowEventModel;
-      if (event && event.timer) {
+      if (event?.timer) {
         var shouldEvent = event.timer.condition ? "bpmn:ConditionalEventDefinition" : "bpmn:TimerEventDefinition";
         this.changeElementDefinition(e.element, shouldEvent);
       }
@@ -439,7 +440,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       }
       else {
         var model = this.props.entities[element.id];
-        if (model && model.isNew)
+        if (model?.isNew)
           delete this.props.entities[element.id];
       };
     });
@@ -506,8 +507,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
   render() {
     return (
       <div>
-        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
-        <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick}>
+        <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+        <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick}>
           <FontAwesomeIcon icon="image" />
         </Button>
         <div ref={this.setDiv} />

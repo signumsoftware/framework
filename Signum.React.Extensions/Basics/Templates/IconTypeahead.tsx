@@ -8,6 +8,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { useForceUpdate } from '@framework/Hooks'
+import { TypeaheadOptions } from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
 
 export interface IconTypeaheadLineProps {
   ctx: TypeContext<string | null | undefined>;
@@ -55,11 +56,11 @@ export function IconTypeahead(p: IconTypeaheadProps) {
   };
 
   var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${prefix} fa-${name}`));
-  var icons = ([] as string[]).concat(p.extraIcons || []).concat(fontAwesome);
+  var icons = ([] as string[]).concat(p.extraIcons ?? []).concat(fontAwesome);
 
   function handleGetItems(query: string) {
     if (!query)
-      return Promise.resolve(([] as string[]).concat(p.extraIcons || []).concat(["far fa-", "fas fa-"]));
+      return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []).concat(["far fa-", "fas fa-"]));
 
     const result = icons
       .filter(k => k.toLowerCase().contains(query.toLowerCase()))
@@ -81,22 +82,20 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     return (
       <span>
         {icon && <FontAwesomeIcon icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
-        {Typeahead.highlightedText(item as string, query)}
+        {TypeaheadOptions.highlightedText(item as string, query)}
       </span>
     );
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      <Typeahead
-        value={p.icon || ""}
-        inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
-        getItems={handleGetItems}
-        onSelect={handleSelect}
-        onChange={handleSelect}
-        renderItem={handleRenderItem}
-        minLength={0}
-      />
-    </div>
+    <Typeahead
+      value={(p.icon ?? "")}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+      getItems={handleGetItems}
+      onSelect={handleSelect}
+      onChange={handleSelect}
+      renderItem={handleRenderItem}
+      minLength={0}
+    />
   );
 }

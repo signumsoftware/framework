@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequestModel } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap'
 import * as Finder from '@framework//Finder';
 
 export interface ChartButtonProps {
@@ -20,7 +20,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
 
     Finder.getQueryDescription(sc.props.findOptions.queryKey).then(qd => {
 
-      const fo = Finder.toFindOptions(sc.props.findOptions, qd);
+      const fo = Finder.toFindOptions(sc.props.findOptions, qd, false);
 
       const path = ChartClient.Encoder.chartPath({
         queryName: fo.queryName,
@@ -38,7 +38,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
   render() {
     var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + ChartMessage.Chart.niceToString() : undefined;
     return (
-      <Button onMouseUp={this.handleOnMouseUp} color="light"><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>
+      <Button variant="light" onMouseUp={this.handleOnMouseUp}><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>
     );
   }
 

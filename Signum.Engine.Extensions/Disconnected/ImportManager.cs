@@ -342,7 +342,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static)!;
         static int UnlockTable<T>(Lite<DisconnectedMachineEntity> machine) where T : Entity
         {
             using (ExecutionMode.Global())
@@ -373,7 +373,7 @@ namespace Signum.Engine.Disconnected
         {
             DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
 
-            var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar();
+            var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar()!;
 
             if (count == 0)
                 return 0;

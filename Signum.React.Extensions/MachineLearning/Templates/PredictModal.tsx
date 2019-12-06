@@ -1,6 +1,7 @@
-﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+import { Modal } from "react-bootstrap";
 import * as React from "react";
-import * as numbro from "numbro";
+import numbro from "numbro";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
@@ -14,103 +15,87 @@ import { Dic } from "@framework/Globals";
 import { Binding } from "@framework/Reflection";
 import { is } from "@framework/Signum.Entities";
 import { isLite } from "@framework/Signum.Entities";
-import { Modal } from "@framework/Components";
-import { ModalHeaderButtons } from "@framework/Components/Modal";
-import { NumericTextBox } from "@framework/Lines/ValueLine";
+import {  } from "@framework/Components";
+import { ModalHeaderButtons } from "@framework/Components/ModalHeaderButtons";
+import { NumericTextBox, isNumber } from "@framework/Lines/ValueLine";
 import { AbortableRequest } from "@framework/Services";
 
-interface PredictModalProps extends IModalProps {
+interface PredictModalProps extends IModalProps<undefined> {
   initialPredict: PredictRequest;
   isClassification: boolean;
   entity?: Lite<Entity>;
 }
 
-interface PredictModalState {
-  show: boolean;
-  predict: PredictRequest;
-  hasChanged: boolean;
-}
+export function PredictModal(p: PredictModalProps) {
 
-export class PredictModal extends React.Component<PredictModalProps, PredictModalState> {
+  const [show, setShow] = React.useState<boolean>(true);
+  const [hasChanged, setHasChanged] = React.useState<boolean>(false);
+  const [predict, setPredict] = React.useState<PredictRequest>(p.initialPredict);
 
-  constructor(props: PredictModalProps) {
-    super(props);
-    this.state = { show: true, predict: props.initialPredict, hasChanged: false };
+  const abortableUpdateRequest = React.useMemo(() => new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request)), []);
+
+  function handleOnClose() {
+    setShow(false);
   }
 
-  handleOnClose = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(undefined);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(undefined);
-  }
-
-  abortableUpdateRequest = new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request));
-
-  hangleOnChange = () => {
-    this.setState({ hasChanged: true });
-    this.abortableUpdateRequest.getData(this.state.predict)
-      .then(predict => {
-        this.setState({ predict: predict });
-      })
+  
+  function hangleOnChange() {
+    setHasChanged(true);
+    abortableUpdateRequest.getData(predict)
+      .then(predict => setPredict(predict))
       .done();
   }
 
-  componentWillUnmount() {
-    this.abortableUpdateRequest.abort();
+  function componentWillUnmount() {
+    abortableUpdateRequest.abort();
   }
 
-  render() {
+  var e = p.entity;
 
-    const p = this.state.predict;
-    var e = this.props.entity;
+  var sctx = new StyleContext(undefined, {});
 
-    const hasChanged = this.state.hasChanged;
-
-    var sctx = new StyleContext(undefined, {});
-
-    return (
-      <Modal onHide={this.handleOnClose} onExited={this.handleOnExited} show={this.state.show} className="message-modal" size="lg">
-        <ModalHeaderButtons onClose={this.handleOnClose}>
-          {p.predictor.toStr}<br />
-          <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
-          {e && <span><br />{getTypeInfo(e.EntityType).niceName}: <a href={Navigator.navigateRoute(e)} target="_blank">{e.toStr}</a></span>}
-        </ModalHeaderButtons>
-        <div className="modal-body">
-          <div>
-            {p.columns.filter(c => c.usage == "Input").map((col, i) =>
-              <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
-          </div>
-          {p.subQueries.map((c, i) => <PredictTable key={i} sctx={sctx} table={c} onChange={this.hangleOnChange} hasChanged={hasChanged} hasOriginal={p.hasOriginal} />)}
-          <div>
-            {p.columns.filter(c => c.usage == "Output").map((col, i) =>
-              <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
-          </div>
-          {this.props.isClassification && <AlternativesCheckBox binding={Binding.create(p, p2 => p2.alternativesCount)} onChange={this.hangleOnChange} />}
+  return (
+    <Modal onHide={handleOnClose} onExited={handleOnExited} show={show} className="message-modal" size="lg">
+      <ModalHeaderButtons onClose={handleOnClose}>
+        {predict.predictor.toStr}<br />
+        <small>{PredictorEntity.niceName()}&nbsp;{predict.predictor.id} (<a href={Navigator.navigateRoute(predict.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
+        {e && <span><br />{getTypeInfo(e.EntityType).niceName}: <a href={Navigator.navigateRoute(e)} target="_blank">{e.toStr}</a></span>}
+      </ModalHeaderButtons>
+      <div className="modal-body">
+        <div>
+          {predict.columns.filter(c => c.usage == "Input").map((col, i) =>
+            <PredictLine key={i} sctx={sctx} hasOriginal={predict.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={hangleOnChange} />)}
         </div>
-      </Modal>
-    );
-  }
-
-  static show(predict: PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> {
-    return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
-  }
+        {predict.subQueries.map((c, i) => <PredictTable key={i} sctx={sctx} table={c} onChange={hangleOnChange} hasChanged={hasChanged} hasOriginal={predict.hasOriginal} />)}
+        <div>
+          {predict.columns.filter(c => c.usage == "Output").map((col, i) =>
+            <PredictLine key={i} sctx={sctx} hasOriginal={predict.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={hangleOnChange} />)}
+        </div>
+        {p.isClassification && <AlternativesCheckBox binding={Binding.create(predict, p2 => p2.alternativesCount)} onChange={hangleOnChange} />}
+      </div>
+    </Modal>
+  );
 }
 
 
-export class AlternativesCheckBox extends React.Component<{ binding: Binding<number | null>, onChange: () => void }> {
-  render() {
-    var val = this.props.binding.getValue();
-    return (
-      <label><input type="checkbox" checked={val != null} onChange={() => this.setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => this.setValue(n)} validateKey={ValueLine.isNumber} /> alternative predictions </label>
-    );
-  }
+PredictModal.show = (predict: PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> => {
+  return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
+}
 
-  setValue(val: number | null) {
-    this.props.binding.setValue(val);
-    this.props.onChange();
+export function AlternativesCheckBox(p : { binding: Binding<number | null>, onChange: () => void }){
+
+  function setValue(val: number | null) {
+    p.binding.setValue(val);
+    p.onChange();
   }
+  var val = p.binding.getValue();
+  return (
+    <label><input type="checkbox" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => setValue(n)} validateKey={isNumber} /> alternative predictions </label>
+  );
 }
 
 
@@ -125,57 +110,47 @@ interface PredictLineProps {
   onChange: () => void;
 }
 
-export default class PredictLine extends React.Component<PredictLineProps> {
+export default function PredictLine(p : PredictLineProps){
 
-  render() {
-    const p = this.props;
-    return (
-      <FormGroup ctx={this.props.sctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
-        {this.renderValue()}
-      </FormGroup>
-    );
-  }
-
-  renderValue() {
-    const p = this.props;
+  function renderValue() {
     if (p.usage == "Output") {
-      if (this.props.hasOriginal) {
+      if (p.hasOriginal) {
         var tuple = p.binding.getValue() as PredictOutputTuple;
 
-        const octx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
-        const pctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
+        const octx = new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
+        const pctx = new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
 
         return (
           <div>
-            <div style={{ opacity: this.props.hasChanged ? 0.5 : 1 }}>
+            <div style={{ opacity: p.hasChanged ? 0.5 : 1 }}>
               <PredictValue token={p.token} ctx={octx} label={<FontAwesomeIcon icon="bullseye" />} />
             </div>
-            {this.renderValueOrMultivalue(pctx, octx.value)}
+            {renderValueOrMultivalue(pctx, octx.value)}
           </div>
         );
       }
       else {
-        const ctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, p.binding);
-        return this.renderValueOrMultivalue(ctx, null);
+        const ctx = new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, p.binding);
+        return renderValueOrMultivalue(ctx, null);
 
       }
     } else if (p.usage == "Input") {
-      const ctx = new TypeContext<any>(this.props.sctx, undefined, undefined as any, p.binding);
-      return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange} />);
+      const ctx = new TypeContext<any>(p.sctx, undefined, undefined as any, p.binding);
+      return (<PredictValue token={p.token} ctx={ctx} onChange={p.onChange} />);
     } else throw new Error("unexpected Usage");
   }
 
-  renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
+  function renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
     if (!Array.isArray(pctx.value)) {
-      return <PredictValue token={this.props.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={this.getColor(pctx.value, originalValue)} />} />
+      return <PredictValue token={p.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={getColor(pctx.value, originalValue)} />} />
     } else {
       const predictions = pctx.value as AlternativePrediction[];
 
       return (
         <div>
-          {predictions.map((a, i) => <PredictValue key={i} token={this.props.token}
-            ctx={new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.value, this.props.sctx + "_" + i))}
-            label={<i style={{ color: this.getColor(a.value, originalValue) }}>{numbro(a.probability).format("0.00 %")}</i>}
+          {predictions.map((a, i) => <PredictValue key={i} token={p.token}
+            ctx={new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.value, p.sctx + "_" + i))}
+            label={<i style={{ color: getColor(a.value, originalValue) }}>{numbro(a.probability).format("0.00 %")}</i>}
             labelHtmlAttributes={{ style: { textAlign: "right", whiteSpace: "nowrap" } }}
           />)}
         </div>
@@ -183,10 +158,15 @@ export default class PredictLine extends React.Component<PredictLineProps> {
     }
   }
 
-  getColor(predicted: any, original: any) {
-    return !this.props.hasOriginal ? undefined :
+  function getColor(predicted: any, original: any) {
+    return !p.hasOriginal ? undefined :
       predicted == original || isLite(predicted) && isLite(original) && is(predicted, original) ? "green" : "red";
   }
+  return (
+    <FormGroup ctx={p.sctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
+      {renderValue()}
+    </FormGroup>
+  );
 }
 
 
@@ -198,48 +178,46 @@ interface PredictTableProps {
   onChange: () => void;
 }
 
-export class PredictTable extends React.Component<PredictTableProps> {
-  render() {
-    var p = this.props;
-    var { subQuery, columnHeaders, rows } = this.props.table;
-    var sctx = new StyleContext(this.props.sctx, { formGroupStyle: "SrOnly" });
-    return (
-      <div>
-        <h4>{subQuery.toStr}</h4>
-        <div style={{ maxHeight: "500px", overflowY: "scroll", marginBottom: "10px" }}>
-          <table className="table table-sm">
-            <thead>
-              <tr >
-                {
-                  columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()} title={fullNiceName(he.token)}>
-                    {he.headerType == "Key" && <FontAwesomeIcon icon="key" style={{ marginRight: "10px" }} />}
-                    {he.token.niceName}
-                  </th>)
-                }
-              </tr>
-            </thead>
-            <tbody>
+export function PredictTable(p : PredictTableProps){
+  var p = p;
+  var { subQuery, columnHeaders, rows } = p.table;
+  var sctx = new StyleContext(p.sctx, { formGroupStyle: "SrOnly" });
+  return (
+    <div>
+      <h4>{subQuery.toStr}</h4>
+      <div style={{ maxHeight: "500px", overflowY: "scroll", marginBottom: "10px" }}>
+        <table className="table table-sm">
+          <thead>
+            <tr >
               {
-                rows.map((row, j) => <tr key={j}>
-                  {
-                    row.map((v, i) => {
-                      var ch = columnHeaders[i];
-                      return (
-                        <td>
-                          <PredictLine sctx={sctx} token={ch.token} binding={new Binding(row, i)}
-                            usage={ch.headerType} hasChanged={p.hasChanged} hasOriginal={p.hasOriginal} onChange={this.props.onChange} />
-                        </td>
-                      );
-                    })
-                  }
-                </tr>)
+                columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()} title={fullNiceName(he.token)}>
+                  {he.headerType == "Key" && <FontAwesomeIcon icon="key" style={{ marginRight: "10px" }} />}
+                  {he.token.niceName}
+                </th>)
               }
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              rows.map((row, j) => <tr key={j}>
+                {
+                  row.map((v, i) => {
+                    var ch = columnHeaders[i];
+                    return (
+                      <td>
+                        <PredictLine sctx={sctx} token={ch.token} binding={new Binding(row, i)}
+                          usage={ch.headerType} hasChanged={p.hasChanged} hasOriginal={p.hasOriginal} onChange={p.onChange} />
+                      </td>
+                    );
+                  })
+                }
+              </tr>)
+            }
+          </tbody>
+        </table>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 
@@ -258,34 +236,30 @@ interface PredictValueProps {
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
 }
 
-export class PredictValue extends React.Component<PredictValueProps> {
-
-  handleValueChange = () => {
-    if (this.props.onChange)
-      this.props.onChange();
+export function PredictValue(p : PredictValueProps){
+  function handleValueChange() {
+    if (p.onChange)
+      p.onChange();
   }
 
-  render() {
+  const ctx = p.ctx.subCtx({ labelColumns: 1 });
+  const token = p.token;
+  const label = p.label;
+  const lha = p.labelHtmlAttributes;
 
-    const ctx = this.props.ctx.subCtx({ labelColumns: 1 });
-    const token = this.props.token;
-    const label = this.props.label;
-    const lha = this.props.labelHtmlAttributes;
-
-    switch (token.filterType) {
-      case "Lite":
-        if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
-          return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={this.handleValueChange} />;
-        else
-          return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={this.handleValueChange} />
-      case "Enum":
-        const ti = getTypeInfos(token.type).single();
-        if (!ti)
-          throw new Error(`EnumType ${token.type.name} not found`);
-        const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-        return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={this.handleValueChange} comboBoxItems={members} />;
-      default:
-        return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={this.handleValueChange} />;
-    }
+  switch (token.filterType) {
+    case "Lite":
+      if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
+        return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={handleValueChange} />;
+      else
+        return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={handleValueChange} />
+    case "Enum":
+      const ti = getTypeInfos(token.type).single();
+      if (!ti)
+        throw new Error(`EnumType ${token.type.name} not found`);
+      const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
+      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={handleValueChange} comboBoxItems={members} />;
+    default:
+      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={handleValueChange} />;
   }
 }

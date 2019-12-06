@@ -41,7 +41,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var colorInterpolate = parameters["ColorInterpolate"];
   var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
-  var color = (r: ChartRow) => colorInterpolation(scaleFunc(valueColumn.getValue(r)))
+  var color = (r: ChartRow) => colorInterpolation(scaleFunc(valueColumn.getValue(r)));
 
   var minDate = d3.min(data.rows, r => new Date(dateColumn.getValue(r)))!;
   var maxDate = d3.max(data.rows, r => new Date(dateColumn.getValue(r)))!;
@@ -77,7 +77,10 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var yearRange = d3.range(minDate.getFullYear(), maxDate.getFullYear() + 1);
 
-  var rowYByDate = data.rows.toObject(r => dateColumn.getValueKey(r));
+  var rowYByDate = data.rows.toObject(r => {
+    var date = dateColumn.getValueKey(r);
+    return date.tryBefore("+") ?? date;
+  });
 
 
   function monthPathH(t0: Date): string {

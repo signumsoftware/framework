@@ -71,6 +71,13 @@ namespace Signum.React.Selenium
               System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         }
 
+        public static string WaitNewWindow(this RemoteWebDriver selenium, Action action)
+        {
+            var old = selenium.WindowHandles.ToHashSet();
+            action();
+            return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)))!;
+        }
+
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
         {
             T lastValue = default(T)!;
@@ -243,8 +250,7 @@ namespace Signum.React.Selenium
 
             element.Click();
 
-            if (element.Selected != isChecked)
-                throw new InvalidOperationException();
+            element.GetDriver().Wait(() => element.Selected == isChecked, () => "Set Checkbox to " + isChecked);
         }
 
         //[DebuggerStepThrough]
@@ -325,6 +331,16 @@ namespace Signum.React.Selenium
             return e.FindElement(By.XPath(".."));
         }
 
+        public static IWebElement GetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        {
+            return e.Follow(a => a.GetParent()).FirstEx(predicate);
+        }
+
+        public static IWebElement TryGetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        {
+            return e.Follow(a => a.GetParent()).FirstOrDefault(predicate);
+        }
+
         public static void SelectByPredicate(this SelectElement element, Func<IWebElement, bool> predicate)
         {
             element.Options.SingleEx(predicate).Click();
@@ -335,19 +351,26 @@ namespace Signum.React.Selenium
             return button.GetDriver().CapturePopup(() => button.Click());
         }
 
+        public static IWebElement CaptureOnDoubleClick(this IWebElement button)
+        {
+            return button.GetDriver().CapturePopup(() => button.DoubleClick());
+        }
+
         public static IWebElement CapturePopup(this RemoteWebDriver selenium, Action clickToOpen)
         {
             var body = selenium.FindElement(By.TagName("body"));
-            var last = body.FindElement(By.XPath("./*[last()]"));
+            var oldDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
             clickToOpen();
             var result = selenium.Wait(() =>
             {
-                var newLast = body.FindElement(By.XPath("./*[last()]"));
-                
-                if (object.Equals(last, newLast))
+                var newDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+
+                var newTop = newDialogs.SingleOrDefaultEx(a => !oldDialogs.Contains(a));
+
+                if (newTop == null)
                     return null;
 
-                return newLast.TryFindElement(By.CssSelector(".modal.fade.show"));
+                return newTop;
             })!;
 
             return result;
@@ -367,6 +390,7 @@ namespace Signum.React.Selenium
 
         public static void SafeSendKeys(this IWebElement element, string? text)
         {
+            new Actions(element.GetDriver()).MoveToElement(element).Perform();
             while(element.GetAttribute("value").Length > 0)
                 element.SendKeys(Keys.Backspace);
             element.SendKeys(text);

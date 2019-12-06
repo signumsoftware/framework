@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
 import { QueryToken, FilterOperation, FindOptions } from '@framework/FindOptions'
@@ -40,7 +40,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
         if (last != undefined)
           array.push(<span>.</span>);
 
-        array.push(this.coloredSpan(f.queryTokenOmniboxPascal.tryAfterLast(".") || f.queryTokenOmniboxPascal, "gray"));
+        array.push(this.coloredSpan(f.queryTokenOmniboxPascal.tryAfterLast(".") ?? f.queryTokenOmniboxPascal, "gray"));
       }
 
       if (f.canFilter && f.canFilter.length)

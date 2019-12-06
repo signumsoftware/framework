@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Xml.Linq;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Entities.Toolbar
 {
@@ -55,18 +56,15 @@ namespace Signum.Entities.Toolbar
         }
 
 
-        static Expression<Func<ToolbarEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     public enum ToolbarLocation
     {
         Top,
         Side,
+        Main,
     }
 
     [AutoInit]
@@ -129,7 +127,7 @@ namespace Signum.Entities.Toolbar
 
             var content = x.Attribute("Content")?.Value;
 
-            Content = string.IsNullOrEmpty(content) ? null :
+            Content = !content.HasText() ? null :
                 Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLiteFat() :
                 (Lite<Entity>?)ctx.TryGetQuery(content)?.ToLite() ??
                 (Lite<Entity>?)ctx.TryPermission(content)?.ToLite() ??
@@ -165,6 +163,9 @@ namespace Signum.Entities.Toolbar
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => $"{Type}: {(Label ?? (Content == null ? "Null" : Content.ToString()))}");
     }
 
     public enum ToolbarElementType
@@ -208,12 +209,8 @@ namespace Signum.Entities.Toolbar
         }
 
 
-        static Expression<Func<ToolbarMenuEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

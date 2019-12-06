@@ -169,7 +169,7 @@ namespace Signum.Engine.Workflow
             return res;
         }
 
-        public void ApplyChanges(WorkflowModel model, WorkflowReplacementModel replacements)
+        public void ApplyChanges(WorkflowModel model, WorkflowReplacementModel? replacements)
         {
             var document =  WorkflowBuilder.ParseDocument(model.DiagramXml);
 
@@ -237,7 +237,7 @@ namespace Signum.Engine.Workflow
                 });
         }
 
-        internal IWorkflowNodeEntity FindEntity(string bpmElementId)
+        internal IWorkflowNodeEntity? FindEntity(string bpmElementId)
         {
             return this.pools.Values.Select(pb => pb.FindEntity(bpmElementId)).NotNull().SingleOrDefaultEx();
         }
@@ -278,7 +278,7 @@ namespace Signum.Engine.Workflow
                 NewTasks = newNodes.Select(kvp => new PreviewTask
                 {
                     BpmnId = kvp.Key,
-                    Name = kvp.Value.Attribute("name")?.Value,
+                    Name = kvp.Value.Attribute("name")?.Value!,
                     SubWorkflow = (entities.GetOrThrow(kvp.Key).Model as WorkflowActivityModel)?.SubWorkflow?.Workflow.ToLite()
                 }).ToList(),
             };
@@ -402,7 +402,7 @@ namespace Signum.Engine.Workflow
         Dictionary<string, XElement> diagramElements;
         Dictionary<string, ModelEntity> entitiesFromModel;
 
-        public Locator(WorkflowBuilder wb, Dictionary<string, XElement> diagramElements, WorkflowModel model, WorkflowReplacementModel replacements)
+        public Locator(WorkflowBuilder wb, Dictionary<string, XElement> diagramElements, WorkflowModel model, WorkflowReplacementModel? replacements)
         {
             this.wb = wb;
             this.diagramElements = diagramElements;
@@ -410,7 +410,7 @@ namespace Signum.Engine.Workflow
             this.entitiesFromModel = model.Entities.ToDictionary(a => a.BpmnElementId!, a => a.Model!);
         }
 
-        public IWorkflowNodeEntity FindEntity(string bpmElementId)
+        public IWorkflowNodeEntity? FindEntity(string bpmElementId)
         {
             return wb.FindEntity(bpmElementId);
         }
@@ -432,7 +432,7 @@ namespace Signum.Engine.Workflow
 
 
         public Dictionary<Lite<IWorkflowNodeEntity>, string> Replacements; 
-        public IWorkflowNodeEntity GetReplacement(Lite<IWorkflowNodeEntity> lite)
+        public IWorkflowNodeEntity? GetReplacement(Lite<IWorkflowNodeEntity> lite)
         {
             string bpmnElementId = Replacements.GetOrThrow(lite);
             return this.FindEntity(bpmnElementId);
@@ -568,8 +568,8 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowConnectionEntity ApplyXml(this WorkflowConnectionEntity wc, XElement flow, Locator locator)
         {
-            wc.From = locator.FindEntity(flow.Attribute("sourceRef").Value);
-            wc.To = locator.FindEntity(flow.Attribute("targetRef").Value);
+            wc.From = locator.FindEntity(flow.Attribute("sourceRef").Value)!;
+            wc.To = locator.FindEntity(flow.Attribute("targetRef").Value)!;
 
             var bpmnElementId = flow.Attribute("id").Value;
             var model = locator.GetModelEntity<WorkflowConnectionModel>(bpmnElementId);

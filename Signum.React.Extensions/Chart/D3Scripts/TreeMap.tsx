@@ -32,17 +32,17 @@ export default function renderTreeMap({ data, width, height, parameters, loading
   }
   else if (colorSchemeColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
-    color = r => colorSchemeColumn!.getColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
+    color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
   }
   else {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
-    color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
+    color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)));
-    folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
+    folderColor = folder => parentColumn!.getColor(folder) ?? categoryColor(parentColumn!.getKey(folder));
   }
 
   var root = stratifyTokens(data, keyColumn, parentColumn);
@@ -71,15 +71,29 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   const scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);
 
+  const getNodeKey = (n: d3.HierarchyRectangularNode<ChartRow | Folder | Root>): string => {
+
+    if (isRoot(n.data))
+      return "root";
+
+    var last = isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :
+      keyColumn!.getValueKey(n.data) + (colorSchemeColumn ? colorSchemeColumn.getValueKey(n.data) : "");
+
+    if (n.parent && !isRoot(n.parent.data))
+      return getNodeKey(n.parent) + " / " + last;
+
+    return last;
+  };
+
   return (
     <svg direction="ltr" width={width} height={height} >
       {nodes.map((d, i) =>
-        <g key={i} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
+        <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
           {isFolder(d.data) &&
             <rect className="folder sf-transition" shapeRendering="initial"
               width={nodeWidth(d)}
               height={nodeHeight(d)}
-              fill={parentColumn!.getColor((d.data as Folder).folder) || folderColor!((d.data as Folder).folder)}
+              fill={parentColumn!.getColor((d.data as Folder).folder) ?? folderColor!((d.data as Folder).folder)}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder })} cursor="pointer">
               <title>
                 {folderColor!(((d.data as Folder).folder))}
@@ -115,7 +129,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
           {!isFolder(d.data) && nodeWidth(d) > 10 && nodeHeight(d) > 25 && showNumber &&
             <TextEllipsis maxWidth={nodeWidth(d)} padding={1} etcText=""
-              fill={parameters["NumberColor"] || "#fff"}
+              fill={parameters["NumberColor"] ?? "#fff"}
               dominantBaseline="middle"
               opacity={parseFloat(parameters["NumberOpacity"])}
               textAnchor="middle"

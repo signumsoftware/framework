@@ -40,7 +40,7 @@ namespace Signum.React.UserAssets
             var qd = QueryLogic.Queries.QueryDescription(queryName);
             var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
 
-            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
+            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.RetrieveAndRemember()) : null)
             {
                 var result = ParseFilterInternal(request.filters, qd, options, 0).ToList();
 
@@ -75,7 +75,7 @@ namespace Signum.React.UserAssets
                 {
                     var group = gr.Key;
 
-                    var token = group.token == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
+                    var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
 
                     var value = FilterValueConverter.Parse(group.valueString, typeof(string), false);
 
@@ -197,11 +197,14 @@ namespace Signum.React.UserAssets
         }
         
         [HttpPost("api/userAssets/export")]
-        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
+        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity>[] lites)
         {
-            var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
+            var bytes = UserAssetsExporter.ToXml(lites.RetrieveFromListOfLite().ToArray());
 
-            return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
+            string typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().Name;
+            var fileName = "{0}{1}.xml".FormatWith(typeName, lites.ToString(a => a.Id.ToString(), "_"));
+
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), fileName);
         }
 
         [HttpPost("api/userAssets/importPreview")]

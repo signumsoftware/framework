@@ -25,13 +25,8 @@ namespace Signum.Entities.Tree
         }
 
 
-        static Expression<Func<TreeEntity, string>> RouteToStringExpression =
-        @this => @this.Route.ToString();
-        [ExpressionField]
-        public string RouteToString
-        {
-            get { return RouteToStringExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string RouteToString => As.Expression(() => Route.ToString());
 
         [NotNullValidator(Disabled = true)]
         [SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
@@ -70,12 +65,8 @@ namespace Signum.Entities.Tree
             this.FullName = newFullName;
         }
 
-        static Expression<Func<TreeEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

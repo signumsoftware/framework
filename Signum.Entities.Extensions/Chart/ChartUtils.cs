@@ -60,7 +60,7 @@ namespace Signum.Entities.Chart
                 var pp = Validator.TryGetPropertyValidator(route);
                 if (pp != null)
                 {
-                    DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                    DateTimePrecisionValidatorAttribute? datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
 
                     if (datetimePrecision != null && datetimePrecision.Precision == DateTimePrecision.Days)
                         return true;
@@ -74,12 +74,6 @@ namespace Signum.Entities.Chart
         public static bool SynchronizeColumns(this ChartScript chartScript, IChartBase chart)
         {
             bool result = false;
-
-            if (chartScript == null)
-            {
-                result = true;
-                chart.Columns.Clear();
-            }
 
             for (int i = 0; i < chartScript.Columns.Count; i++)
             {

@@ -23,65 +23,35 @@ namespace Signum.Engine.Processes
     {
         public static bool JustMyProcesses = true;
 
-        public static Func<ProcessEntity, IDisposable?> ApplySession;
+        public static Func<ProcessEntity, IDisposable?>? ApplySession;
 
-        static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessEntity>>> ProcessesFromAlgorithmExpression =
-            p => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p);
-        [ExpressionField]
-        public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p)
-        {
-            return ProcessesFromAlgorithmExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p) => 
+            As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p));
 
-        static Expression<Func<ProcessAlgorithmSymbol, ProcessEntity>> LastProcessFromAlgorithmExpression =
-            p => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
-        [ExpressionField]
-        public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p)
-        {
-            return LastProcessFromAlgorithmExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p) => 
+            As.Expression(() => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
-        static Expression<Func<ProcessEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesProcessExpression =
-            p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.Is(p));
-        [ExpressionField]
-        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p)
-        {
-            return ExceptionLinesProcessExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p) => 
+            As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.Is(p)));
 
+        [AutoExpressionField]
+        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl) => 
+            As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.Is(pl)));
 
-        static Expression<Func<IProcessLineDataEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesLineExpression =
-            p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.Is(p));
-        [ExpressionField]
-        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl)
-        {
-            return ExceptionLinesLineExpression.Evaluate(pl);
-        }
+        [AutoExpressionField]
+        public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p) =>
+            As.Expression(() => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl)).Exception.Entity);
 
-        static Expression<Func<IProcessLineDataEntity, ProcessEntity, ExceptionEntity>> ExceptionExpression =
-            (pl, p) => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl)).Exception.Entity;
-        [ExpressionField]
-        public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p)
-        {
-            return ExceptionExpression.Evaluate(pl, p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e) =>
+            As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Data == e));
 
-
-        static Expression<Func<IProcessDataEntity, IQueryable<ProcessEntity>>> ProcessesFromDataExpression =
-            e => Database.Query<ProcessEntity>().Where(a => a.Data == e);
-        [ExpressionField]
-        public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e)
-        {
-            return ProcessesFromDataExpression.Evaluate(e);
-        }
-
-        static Expression<Func<IProcessDataEntity, ProcessEntity>> LastProcessFromDataExpression =
-          e => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
-        [ExpressionField]
-        public static ProcessEntity LastProcess(this IProcessDataEntity e)
-        {
-            return LastProcessFromDataExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ProcessEntity LastProcess(this IProcessDataEntity e) => 
+            As.Expression(() => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
         static Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm> registeredProcesses = new Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm>();
 
@@ -126,8 +96,9 @@ namespace Signum.Engine.Processes
                     .WithQuery(() => p => new
                     {
                         Entity = p,
-                        p.Line,
                         p.Process,
+                        p.Line,
+                        p.ElementInfo,
                         p.Exception,
                     });
 
@@ -439,6 +410,7 @@ namespace Signum.Engine.Processes
             Action<K, N> createNew,
             Action<K, O> removeOld,
             Action<K, N, O> merge)
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -464,7 +436,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string? str)
+        public static void WriteLineColor(this ExecutingProcess? ep, ConsoleColor color, string? str)
         {
             if (ep != null)
             {
@@ -489,7 +461,7 @@ namespace Signum.Engine.Processes
             string? status = null)
             where O : class
             where N : class
-            where K : object
+            where K : notnull
         {
 
             if (ep == null)
@@ -502,7 +474,7 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEach(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);
@@ -532,7 +504,7 @@ namespace Signum.Engine.Processes
             Action<K, N, O> merge)
             where O : class
             where N : class
-            where K : object
+            where K : notnull
         {
 
             if (ep == null)
@@ -542,7 +514,7 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);

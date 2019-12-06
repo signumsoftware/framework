@@ -8,8 +8,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { DynamicViewTabs } from './DynamicViewTabs'
 import { CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
-import { DesignerNode, DesignerContext } from './NodeUtils'
-import * as NodeUtils from './NodeUtils'
+import { DesignerNode, DesignerContext, RenderWithViewOverrides } from './NodeUtils'
 import ShowCodeModal from './ShowCodeModal'
 import { ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import "./DynamicView.css"
@@ -86,6 +85,9 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
   }
 
   getZeroNode() {
+
+    var { ctx, children, ...extraProps } = this.props;
+
     const context: DesignerContext = {
       refreshView: () => {
         this.updateStateSelectedNode(this.state.selectedNode!.reCreateNode());
@@ -97,8 +99,10 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         this.props.ctx.value.modified = true;
       },
       onClose: () => { },
-      props: {},
-      propTypes: this.props.ctx.value.props.toObject(a => a.element.name, a => a.element.type)
+      props: extraProps,
+      propTypes: this.props.ctx.value.props.toObject(a => a.element.name, a => a.element.type),
+      locals: {},
+      localsCode: this.props.ctx.value.locals,
     };
 
     return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);
@@ -164,8 +168,9 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
           </div>
         </div>
         <div className="design-content open">
-          {this.state.exampleEntity && this.state.viewOverrides && NodeUtils.renderWithViewOverrides(root, exampleCtx as TypeContext<Entity>, this.state.viewOverrides.filter(a => a.viewName == ctx.value.viewName))}
+          {this.state.exampleEntity && this.state.viewOverrides && <RenderWithViewOverrides dn={root} parentCtx={exampleCtx as TypeContext<Entity>} vos={this.state.viewOverrides.filter(a => a.viewName == ctx.value.viewName)} />}
         </div>
-      </div>);
+      </div>
+    );
   }
 }

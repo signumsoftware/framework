@@ -8,7 +8,7 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class NamespaceHelpEntity : Entity
     {
-        [StringLengthValidator(Min = 3, Max = 300)]
+        [StringLengthValidator(Max = 300)]
         public string Name { get; set; }
         
         public CultureInfoEntity Culture { get; set; }
@@ -16,21 +16,18 @@ namespace Signum.Entities.Help
         [StringLengthValidator(Max = 200)]
         public string? Title { get; set; }
 
-		[StringLengthValidator(Min = 3, MultiLine = true)]
+		[StringLengthValidator(MultiLine = true)]
         public string? Description { get; set; }
 
-        static Expression<Func<NamespaceHelpEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
     public static class NamespaceHelpOperation
     {
         public static ExecuteSymbol<NamespaceHelpEntity> Save;
+        public static DeleteSymbol<NamespaceHelpEntity> Delete;
     }
 
 

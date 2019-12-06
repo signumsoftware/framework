@@ -10,12 +10,8 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 1, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string Name { get; set; }
 
-        static Expression<Func<DynamicTypeConditionSymbolEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

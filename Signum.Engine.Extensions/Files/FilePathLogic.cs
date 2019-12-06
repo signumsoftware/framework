@@ -16,22 +16,6 @@ namespace Signum.Engine.Files
 {
     public static class FilePathLogic
     {
-        static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
-            fp => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() };
-        [ExpressionField]
-        public static WebImage? WebImage(this FilePathEntity fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
-           fp => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName };
-        [ExpressionField]
-        public static WebDownload WebDownload(this FilePathEntity fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
-
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null!)));
@@ -65,7 +49,7 @@ namespace Signum.Engine.Files
                     {
                         if (!fp.IsNew)
                         {
-                            var ofp = fp.ToLite().Retrieve();
+                            var ofp = fp.ToLite().RetrieveAndRemember();
 
                             if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
                             {
@@ -83,9 +67,6 @@ namespace Signum.Engine.Files
                 }.Register();
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
-
-                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
 

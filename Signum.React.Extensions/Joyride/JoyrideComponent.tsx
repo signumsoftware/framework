@@ -1,4 +1,4 @@
-﻿/// <reference path="joyride.d.ts"/>
+/// <reference path="joyride.d.ts"/>
 import * as React from 'react'
 import Joyride, { Step, StepStyles } from 'react-joyride'
 import { JoyrideEntity, JoyrideStepPosition, JoyrideType, JoyrideStepType, JoyrideStepStyleEntity, JoyrideMessage } from './Signum.Entities.Joyride'
@@ -9,59 +9,30 @@ export interface JoyrideComponentProps {
   joyride: JoyrideEntity;
 }
 
-export interface JoyrideComponentState {
-
+export interface JoyrideComponentHandle {
+  joyride: Joyride | null;
 }
 
-export default class JoyrideComponent extends React.Component<JoyrideComponentProps, JoyrideComponentState> {
+export const JoyrideComponent = React.forwardRef(function JoyrideComponent(p: JoyrideComponentProps, ref: React.Ref<JoyrideComponentHandle>) {
 
-  joyride: Joyride | null | undefined;
+  const joyrideRef = React.useRef<Joyride>(null);
 
-  constructor(props: JoyrideComponentProps) {
-    super(props);
-    this.state = {};
-  }
+  React.useImperativeHandle(ref, () => ({ joyride: joyrideRef.current }));
 
-  render() {
-    const j = this.props.joyride;
-
-    return (
-      <Joyride
-        ref={c => this.joyride = c}
-        stepIndex={0}
-        type={this.toJoyrideType(j.type)}
-        showSkipButton={j.showSkipButton}
-        showStepsProgress={j.showStepsProgress}
-        keyboardNavigation={j.keyboardNavigation}
-        autoStart={true}
-        steps={this.toJoyrideSteps(j)}
-        run={false}
-        locale={{
-          back: JoyrideMessage.Back.niceToString(),
-          close: JoyrideMessage.Close.niceToString(),
-          last: JoyrideMessage.Last.niceToString(),
-          next: JoyrideMessage.Next.niceToString(),
-          skip: JoyrideMessage.Skip.niceToString()
-        }}
-        debug={j.debug}
-      />
-    );
-  }
-
-  toJoyrideSteps(joyrideEntity: JoyrideEntity): Step[] {
+  function toJoyrideSteps(joyrideEntity: JoyrideEntity): Step[] {
     return joyrideEntity.steps.map(s => ({
       title: s.element.title,
       text: s.element.text,
       selector: s.element.selector,
-      style: this.toJoyrideStepStyle(s.element.style),
-      position: this.toJoyridePosition(s.element.position),
-      type: this.toJoyrideStepType(s.element.type),
+      style: toJoyrideStepStyle(s.element.style),
+      position: toJoyridePosition(s.element.position),
+      type: toJoyrideStepType(s.element.type),
       allowClicksThruHole: s.element.allowClicksThruHole,
       isFixed: s.element.isFixed
     } as Step));
   }
 
-  toJoyrideStepStyle(joyrideStepStyle: JoyrideStepStyleEntity | null | undefined): StepStyles {
+  function toJoyrideStepStyle(joyrideStepStyle: JoyrideStepStyleEntity | null | undefined): StepStyles {
     if (joyrideStepStyle)
       return {
         backgroundColor: joyrideStepStyle.backgroundColor,
@@ -75,7 +46,7 @@ export default class JoyrideComponent extends React.Component<JoyrideComponentPr
     return {};
   }
 
-  toJoyridePosition(position: JoyrideStepPosition | undefined): "top" | "top-left" | "top-right" | "bottom" | "bottom-left" | "bottom-right" {
+  function toJoyridePosition(position: JoyrideStepPosition | undefined): "top" | "top-left" | "top-right" | "bottom" | "bottom-left" | "bottom-right" {
     switch (position) {
       case ("Top"):
         return "top";
@@ -94,7 +65,7 @@ export default class JoyrideComponent extends React.Component<JoyrideComponentPr
     }
   }
 
-  toJoyrideType(type: JoyrideType | undefined): "continuous" | "single" {
+  function toJoyrideType(type: JoyrideType | undefined): "continuous" | "single" {
     switch (type) {
       case ("Continuous"):
         return "continuous";
@@ -105,7 +76,7 @@ export default class JoyrideComponent extends React.Component<JoyrideComponentPr
     }
   }
 
-  toJoyrideStepType(type: JoyrideStepType | undefined): string {
+  function toJoyrideStepType(type: JoyrideStepType | undefined): string {
     switch (type) {
       case ("Click"):
         return "click";
@@ -115,4 +86,27 @@ export default class JoyrideComponent extends React.Component<JoyrideComponentPr
         throw new Error(`The joyride step type ${type} is not yet supported.`);
     }
   }
-}
+  const j = p.joyride;
+
+  return (
+    <Joyride
+      ref={joyrideRef}
+      stepIndex={0}
+      type={toJoyrideType(j.type)}
+      showSkipButton={j.showSkipButton}
+      showStepsProgress={j.showStepsProgress}
+      keyboardNavigation={j.keyboardNavigation}
+      autoStart={true}
+      steps={toJoyrideSteps(j)}
+      run={false}
+      locale={{
+        back: JoyrideMessage.Back.niceToString(),
+        close: JoyrideMessage.Close.niceToString(),
+        last: JoyrideMessage.Last.niceToString(),
+        next: JoyrideMessage.Next.niceToString(),
+        skip: JoyrideMessage.Skip.niceToString()
+      }}
+      debug={j.debug}
+    />
+  );
+});

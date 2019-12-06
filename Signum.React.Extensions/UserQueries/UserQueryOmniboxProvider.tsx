@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Lite, liteKey } from '@framework/Signum.Entities'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
 import * as Navigator from '@framework/Navigator'

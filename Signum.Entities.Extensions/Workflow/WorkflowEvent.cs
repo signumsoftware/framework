@@ -28,12 +28,8 @@ namespace Signum.Entities.Workflow
         [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
         public ModelEntity GetModel()
         {
@@ -76,6 +72,17 @@ namespace Signum.Entities.Workflow
                 return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(NicePropertyName(() => Condition), pi.NiceName());
 
             return base.PropertyValidation(pi);
+        }
+
+        public WorkflowTimerEmbedded Clone()
+        {
+            WorkflowTimerEmbedded result = new WorkflowTimerEmbedded
+            {
+                Condition = this.Condition,
+                Duration = this.Duration == null ? null : this.Duration.Clone(),
+            };
+
+            return result;
         }
     }
 

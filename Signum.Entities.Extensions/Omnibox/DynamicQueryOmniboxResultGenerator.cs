@@ -248,7 +248,7 @@ namespace Signum.Entities.Omnibox
 
                         var result = OmniboxParser.Manager.Autocomplete(queryToken.GetImplementations()!.Value, patten, AutoCompleteLimit);
 
-                        return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();
+                        return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString()!, patten) }).ToArray();
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Entity)
                     {
@@ -364,13 +364,13 @@ namespace Signum.Entities.Omnibox
             switch (QueryUtils.GetFilterType(p.GetType()))
             {
                 case FilterType.Integer:
-                case FilterType.Decimal: return p.ToString();
+                case FilterType.Decimal: return p.ToString()!;
 
                 case FilterType.String: return "\"" + p.ToString() + "\"";
                 case FilterType.DateTime: return "'" + p.ToString() + "'";
                 case FilterType.Lite: return ((Lite<Entity>)p).Key();
                 case FilterType.Embedded: throw new InvalidOperationException("Impossible to translate not null Embedded entity to string");
-                case FilterType.Boolean: return p.ToString();
+                case FilterType.Boolean: return p.ToString()!;
                 case FilterType.Enum: return ((Enum)p).NiceToString().SpacePascal();
                 case FilterType.Guid: return "\"" + p.ToString() + "\"";
             }
@@ -433,7 +433,7 @@ namespace Signum.Entities.Omnibox
 
         [JsonConverter(typeof(QueryTokenJsonConverter))]
         public QueryToken QueryToken { get; set; }
-        public string QueryTokenOmniboxPascal => QueryToken?.Follow(a => a.Parent).Reverse().ToString(a => a.ToString().ToOmniboxPascal(), ".");
+        public string? QueryTokenOmniboxPascal => QueryToken?.Follow(a => a.Parent).Reverse().ToString(a => a.ToString().ToOmniboxPascal(), ".");
 
         public OmniboxMatch[]? QueryTokenMatches { get; set; }
         public FilterOperation? Operation { get; set; }
@@ -493,13 +493,13 @@ namespace Signum.Entities.Omnibox
         }
 
         public override bool CanWrite => true;
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            writer.WriteValue(GetQueryKey(value));
+            writer.WriteValue(GetQueryKey(value!));
         }
 
         public override bool CanRead => false;
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
@@ -514,13 +514,13 @@ namespace Signum.Entities.Omnibox
         }
 
         public override bool CanWrite => true;
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, GetQueryTokenTS((QueryToken)value));
+            serializer.Serialize(writer, GetQueryTokenTS((QueryToken)value!));
         }
 
         public override bool CanRead => false;
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

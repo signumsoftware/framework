@@ -16,10 +16,9 @@ namespace Signum.Entities.Word
         [StringLengthValidator(Min = 3, Max = 200)]
         public string Name { get; set; }
 
-        
         public QueryEntity Query { get; set; }
 
-        public SystemWordTemplateEntity? SystemWordTemplate { get; set; }
+        public WordModelEntity? Model { get; set; }
         
         public CultureInfoEntity Culture { get; set; }
 
@@ -27,7 +26,6 @@ namespace Signum.Entities.Word
         public TemplateApplicableEval? Applicable { get; set; }
 
         public bool DisableAuthorization { get; set; }
-
 
         public Lite<FileEntity>? Template { get; set; }
 
@@ -38,12 +36,8 @@ namespace Signum.Entities.Word
 
         public WordConverterSymbol? WordConverter { get; set; }
 
-        static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public bool IsApplicable(Entity? entity)
         {
@@ -69,7 +63,7 @@ namespace Signum.Entities.Word
         public static DeleteSymbol<WordTemplateEntity> Delete;
         public static ExecuteSymbol<WordTemplateEntity> CreateWordReport;
 
-        public static ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate;
+        public static ConstructSymbol<WordTemplateEntity>.From<WordModelEntity> CreateWordTemplateFromWordModel;
     }
 
     public enum WordTemplateMessage

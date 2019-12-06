@@ -54,18 +54,12 @@ namespace Signum.Entities.Dashboard
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        public bool ForNavbar { get; set; }
-
         [StringLengthValidator(Max = 200)]
         public string? Key { get; set; }
 
-        static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
-            (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
-        [ExpressionField]
-        public bool ContainsContent(IPartEntity content)
-        {
-            return ContainsContentExpression.Evaluate(this, content);
-        }
+        [AutoExpressionField]
+        public bool ContainsContent(IPartEntity content) => 
+            As.Expression(() => Parts.Any(p => p.Content.Is(content)));
 
         protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
@@ -124,12 +118,8 @@ namespace Signum.Entities.Dashboard
             base.ChildPropertyChanged(sender, e);
         }
 
-        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.DisplayName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => DisplayName);
 
         public DashboardEntity Clone()
         {
@@ -142,7 +132,6 @@ namespace Signum.Entities.Dashboard
                 EntityType = this.EntityType,
                 EmbeddedInEntity = this.EmbeddedInEntity,
                 AutoRefreshPeriod = this.AutoRefreshPeriod,
-                ForNavbar = this.ForNavbar,
                 Key = this.Key
             };
         }

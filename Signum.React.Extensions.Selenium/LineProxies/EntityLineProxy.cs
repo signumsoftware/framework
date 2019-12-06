@@ -11,7 +11,7 @@ namespace Signum.React.Selenium
         {
         }
 
-        public void SetLite(Lite<IEntity> value)
+        public void SetLite(Lite<IEntity>? value)
         {
             if (this.EntityInfo() != null)
                 this.Remove();
@@ -39,12 +39,12 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), Element,  lite);
         }
 
         public void AutoCompleteBasic(Lite<IEntity> lite)
         {
-            AutoCompleteBasic(AutoCompleteElement.Find(), lite);
+            AutoCompleteBasic(AutoCompleteElement.Find(), Element, lite);
         }
 
         public FrameModalProxy<T> View<T>() where T : ModifiableEntity

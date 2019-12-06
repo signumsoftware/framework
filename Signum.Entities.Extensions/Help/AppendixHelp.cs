@@ -27,5 +27,6 @@ namespace Signum.Entities.Help
     public static class AppendixHelpOperation
     {
         public static ExecuteSymbol<AppendixHelpEntity> Save;
+        public static DeleteSymbol<AppendixHelpEntity> Delete;
     }
 }

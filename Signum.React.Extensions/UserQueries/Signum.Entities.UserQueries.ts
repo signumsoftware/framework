@@ -53,15 +53,14 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   groupResults: boolean;
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   hideQuickLink: boolean;
-  owner: Entities.Lite<Entities.Entity>;
+  includeDefaultFilters: boolean | null;
+  owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
   appendFilters: boolean;
   filters: Entities.MList<QueryFilterEmbedded>;
   orders: Entities.MList<QueryOrderEmbedded>;
   columnsMode: DynamicQuery.ColumnOptionsMode;
   columns: Entities.MList<QueryColumnEmbedded>;
-  searchOnLoad: boolean;
-  showFilterButton: boolean;
   paginationMode: DynamicQuery.PaginationMode | null;
   elementsPerPage: number | null;
   guid: string;
