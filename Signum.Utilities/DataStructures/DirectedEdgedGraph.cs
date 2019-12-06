@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace Signum.Utilities.DataStructures
 {
     public class DirectedEdgedGraph<T, E> : IEnumerable<T>
-        where T: object
+        where T: notnull
     {
         Dictionary<T, Dictionary<T, E>> adjacency;
         public IEqualityComparer<T> Comparer { get; private set; }
@@ -157,7 +157,7 @@ namespace Signum.Utilities.DataStructures
 
         Dictionary<T, E> TryGetOrAdd(T node)
         {
-            if (adjacency.TryGetValue(node, out Dictionary<T, E> result))
+            if (adjacency.TryGetValue(node, out var result))
                 return result;
 
             result = new Dictionary<T, E>(Comparer);
@@ -186,7 +186,7 @@ namespace Signum.Utilities.DataStructures
             foreach (var item in adjacency)
             {
                 if (item.Value.TryGetValue(node, out E edge))
-                    yield return KVP.Create(item.Key, edge);
+                    yield return KeyValuePair.Create(item.Key, edge);
             }
         }
 
@@ -361,12 +361,12 @@ namespace Signum.Utilities.DataStructures
 
         public string ToGraphviz()
         {
-            return ToGraphviz(typeof(E).Name, a => a.ToString(), e => e?.ToString());
+            return ToGraphviz(typeof(E).Name, a => a.ToString()!, e => e?.ToString());
         }
 
         public string ToGraphviz(string name)
         {
-            return ToGraphviz(name, a => a.ToString(), e => e?.ToString());
+            return ToGraphviz(name, a => a.ToString()!, e => e?.ToString());
         }
 
         public string ToGraphviz(string name, Func<T, string> getNodeLabel, Func<E, string?> getEdgeLabel)
@@ -385,7 +385,7 @@ namespace Signum.Utilities.DataStructures
         {
             return ToDGML(
                 a => a.ToString() ?? "[null]",
-                a => ColorExtensions.ToHtmlColor(a.GetType().FullName.GetHashCode()),
+                a => ColorExtensions.ToHtmlColor(a.GetType().FullName!.GetHashCode()),
                 e => e?.ToString() ?? "[null]");
         }
 
@@ -609,7 +609,7 @@ namespace Signum.Utilities.DataStructures
     public static class DirectedEdgedGraphExtensions
     {
         public static E GetOrCreate<T, E>(this DirectedEdgedGraph<T, E> graph, T from, T to)
-            where T : object
+            where T : notnull
             where E : new()
         {
             var dic = graph.TryRelatedTo(from);

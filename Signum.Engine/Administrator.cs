@@ -1,3 +1,4 @@
+using Signum.Engine;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
@@ -41,9 +42,9 @@ namespace Signum.Engine
                  select new DiffColumn
                  {
                      Name = c.name,
-                     SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type().name),
+                     SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type()!.name),
                      UserTypeName = null,
-                     Identity = c.is_identity,
+                     PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
                  }).ToList();
 
@@ -62,13 +63,11 @@ namespace Signum.Engine
         private static string GenerateColumnCode(DiffColumn c)
         {
             var type = CodeGeneration.CodeGenerator.Entities.GetValueType(c);
-            if (c.Nullable)
-                type = type.Nullify();
-
+           
             StringBuilder sb = new StringBuilder();
-            if (c.Identity)
+            if (c.PrimaryKey)
                 sb.AppendLine("[ViewPrimaryKey]");
-            sb.AppendLine($"public {type.TypeName()} {c.Name};");
+            sb.AppendLine($"public {type.TypeName()}{(c.Nullable ? "?" : "")} {c.Name};");
             return sb.ToString();
         }
 
@@ -106,6 +105,27 @@ namespace Signum.Engine
             SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
         }
 
+        public static IDisposable TemporaryTable<T>() where T : IView
+        {
+            CreateTemporaryTable<T>();
+
+            return new Disposable(() => DropTemporaryTable<T>());
+        }
+
+        public static void DropTemporaryTable<T>()
+            where T : IView
+        {
+            if (!Transaction.HasTransaction)
+                throw new InvalidOperationException("You need to be inside of a transaction to create a Temporary table");
+
+            var view = Schema.Current.View<T>();
+
+            if (!view.Name.IsTemporal)
+                throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
+
+            SqlBuilder.DropTable(view.Name).ExecuteNonQuery();
+        }
+
         public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields, bool unique = false)
              where T : IView
         {
@@ -114,18 +134,36 @@ namespace Signum.Engine
             IColumn[] columns = IndexKeyColumns.Split(view, fields);
 
             var index = unique ?
-                new UniqueIndex(view, columns) :
-                new Index(view, columns);
+                new UniqueTableIndex(view, columns) :
+                new TableIndex(view, columns);
 
             SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
 
-        internal static readonly ThreadVariable<DatabaseName?> sysViewDatabase = Statics.ThreadVariable<DatabaseName?>("viewDatabase");
+        internal static readonly ThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
+        public static IDisposable OverrideViewNameReplacer(Func<ObjectName, ObjectName> replacer)
+        {
+            var old = registeredViewNameReplacer.Value;
+            registeredViewNameReplacer.Value = old == null ? replacer : n =>
+            {
+                var rep = replacer(n);
+                if (rep != n)
+                    return rep;
+
+                return old!(n);
+            };
+            return new Disposable(() => registeredViewNameReplacer.Value = old);
+        }
+
+        public static ObjectName ReplaceViewName(ObjectName name)
+        {
+            var replacer = registeredViewNameReplacer.Value;
+            return replacer == null ? name : replacer(name);
+        }
+
         public static IDisposable OverrideDatabaseInSysViews(DatabaseName? database)
         {
-            var old = sysViewDatabase.Value;
-            sysViewDatabase.Value = database;
-            return new Disposable(() => sysViewDatabase.Value = old);
+            return OverrideViewNameReplacer(n => n.Schema.Name == "sys" ? n.OnDatabase(database) : n);
         }
 
         public static bool ExistsTable<T>()
@@ -430,15 +468,35 @@ namespace Signum.Engine
         public static void TruncateTable(Type type)
         {
             var table = Schema.Current.Table(type);
-            table.TablesMList().ToList().ForEach(mlist => {
-                SqlBuilder.TruncateTable(mlist.Name).ExecuteLeaves();
-            });
 
-            using (DropAndCreateForeignKeys(table))
-                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+            using (Transaction tr = new Transaction())
+            {
+                table.TablesMList().ToList().ForEach(mlist =>
+                {
+                    TruncateTableSystemVersioning(mlist);
+                });
+
+                using (DropAndCreateIncommingForeignKeys(table))
+                    TruncateTableSystemVersioning(table);
+
+                tr.Commit();
+            }
         }
 
-        private static IDisposable DropAndCreateForeignKeys(Table table)
+        public static void TruncateTableSystemVersioning(ITable table)
+        {
+            if(table.SystemVersioned == null)
+                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+            else
+            {
+                SqlBuilder.AlterTableDisableSystemVersioning(table.Name).ExecuteLeaves();
+                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+                SqlBuilder.TruncateTable(table.SystemVersioned.TableName).ExecuteLeaves();
+                SqlBuilder.AlterTableEnableSystemVersioning(table).ExecuteLeaves();
+            }
+        }
+
+        public static IDisposable DropAndCreateIncommingForeignKeys(Table table)
         {
             var foreignKeys = Administrator.OverrideDatabaseInSysViews(table.Name.Schema.Database).Using(_ =>
             (from targetTable in Database.View<SysTables>()
@@ -460,7 +518,7 @@ namespace Signum.Engine
             });
         }
 
-        public static IDisposable DisableUniqueIndex(UniqueIndex index)
+        public static IDisposable DisableUniqueIndex(UniqueTableIndex index)
         {
             SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
             SqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();

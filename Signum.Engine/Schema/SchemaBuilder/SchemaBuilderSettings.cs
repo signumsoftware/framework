@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -33,6 +34,8 @@ namespace Signum.Engine.Maps
 
         public ConcurrentDictionary<PropertyRoute, AttributeCollection?> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection?>();
         public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
+
+        public Dictionary<Type, LambdaExpression> CustomOrder = new Dictionary<Type, LambdaExpression>();
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
@@ -224,8 +227,8 @@ namespace Signum.Engine.Maps
             if (propertyRoute.Type.IsValueType)
                 return propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
 
-            var nullable = FieldAttribute<NullableAttribute>(propertyRoute);
-            if (nullable != null && nullable.IsNullableMain == true)
+            var nullable = propertyRoute.FieldInfo?.IsNullable();
+            if (nullable == true)
                 return IsNullable.Yes;
 
             return IsNullable.No;
@@ -296,7 +299,7 @@ namespace Signum.Engine.Maps
             return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(SqlDbTypeAttribute? att, SqlDbType sqlDbType)
+        internal int? GetSqlScale(SqlDbTypeAttribute? att, PropertyRoute? route, SqlDbType sqlDbType)
         {
             if (att != null && att.HasScale)
             {
@@ -304,6 +307,13 @@ namespace Signum.Engine.Maps
                     throw  new InvalidOperationException($"{sqlDbType} can not have Scale");
 
                 return att.Scale;
+            }
+
+            if(sqlDbType == SqlDbType.Decimal && route != null)
+            {
+                var dv = ValidatorAttribute<DecimalsValidatorAttribute>(route);
+                if (dv != null)
+                    return dv.DecimalPlaces;
             }
 
             return defaultScale.TryGetS(sqlDbType);
@@ -366,6 +376,10 @@ namespace Signum.Engine.Maps
             return type.IsEnum || TryGetSqlDbTypePair(type) != null;
         }
 
+        public void RegisterCustomOrder<T>(Expression<Func<T, string>> customOrder) where T : Entity
+        {
+            this.CustomOrder.Add(typeof(T), customOrder);
+        }
     }
 
     public class SqlDbTypePair
@@ -407,7 +421,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("IsCompatibleWith"))
             {
-                var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>());
+                var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>()!);
 
                 return au != null && (au.ValidOn & targets) != 0;
             }

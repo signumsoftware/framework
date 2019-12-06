@@ -3,6 +3,10 @@ declare global {
   function require<T>(path: string): T;
   function require<T>(paths: string[], callback: (...modules: any[]) => void): void;
 
+  interface RegExpConstructor {
+    escape(s: string): string;
+  }
+
   interface Promise<T> {
     done(this: Promise<T>): void;
   }
@@ -12,10 +16,14 @@ declare global {
     dataForChildWindow?: any;
   }
 
+  interface RegExpConstructor {
+    escape(str: string): string;
+  }
+
   interface Array<T> {
     groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
-    groupWhen(this: Array<T>, condition: (element: T) => boolean): { key: T, elements: T[] }[];
+    groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
 
     orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
@@ -61,6 +69,8 @@ declare global {
     singleOrNull(this: Array<T>, errorContext?: string): T | null;
     singleOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
 
+    onlyOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
+
     contains(this: Array<T>, element: T): boolean;
     remove(this: Array<T>, element: T): boolean;
     removeAt(this: Array<T>, index: number): void;
@@ -74,6 +84,12 @@ declare global {
     extract(this: Array<T>, filter: (element: T) => boolean): T[];
     findIndex(this: Array<T>, filter: (element: T, index: number, obj: Array<T>) => boolean): number;
     findLastIndex(this: Array<T>, filter: (element: T) => boolean): number;
+    toTree(this: Array<T>, getKey: (element: T) => string, getParentKey: (element: T) => string | null | undefined): TreeNode<T>[];
+  }
+
+  interface TreeNode<T> {
+    value: T;
+    children: TreeNode<T>[];
   }
 
   interface ArrayConstructor {
@@ -462,6 +478,20 @@ Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: 
   return array[0];
 };
 
+
+Array.prototype.onlyOrNull = function (this: any[], predicate : (element: any, index: number, array: any[]) => boolean) {
+
+  var array = predicate ? this.filter(predicate) : this;
+
+  if (array.length == 0)
+    return null;
+
+  if (array.length > 1)
+    return null;
+
+  return array[0];
+};
+
 Array.prototype.contains = function (this: any[], element: any) {
   return this.indexOf(element) !== -1;
 };
@@ -571,6 +601,33 @@ if (!Array.prototype.findLastIndex) {
 
     return -1;
   };
+}
+
+if (!Array.prototype.toTree) {
+  Array.prototype.toTree = function toTree(this: any[], getKey: (element: any) => string, getParentKey: (element: any) => string | null | undefined) {
+
+    var top: TreeNode<any> = { value: null, children: [] };
+
+    var dic: { [key: string]: TreeNode<any> } = {};
+
+    function createNode(item: any) {
+
+      var key = getKey(item);
+      if (dic[key])
+        return dic[key];
+
+      var itemNode: TreeNode<any> = { value: item, children: [] };
+
+      var parentKey = getParentKey(item);
+      var parent = parentKey ? dic[parentKey] : top;
+      parent.children.push(itemNode);
+      return dic[key] = itemNode;
+    }
+
+    this.forEach(n => createNode(n));
+
+    return top.children;
+  }
 }
 
 Array.range = function (min: number, maxNotIncluded: number) {
@@ -965,6 +1022,24 @@ export module Dic {
     }
     return result;
   }
+
+  export function deepFreeze<T extends object>(object: T): T {
+
+    // Abrufen der definierten Eigenschaftsnamen des Objekts
+    var propNames = Object.getOwnPropertyNames(object);
+
+    // Eigenschaften vor dem eigenen Einfrieren einfrieren
+    var result = {};
+
+    for (let name of propNames) {
+      let value = (object as any)[name];
+
+      (result as any)[name] = value && typeof value === "object" ?
+        deepFreeze(value) : value;
+    }
+
+    return Object.freeze(object);
+  }
 }
 
 export function coalesce<T>(value: T | undefined | null, defaultValue: T): T {
@@ -996,6 +1071,9 @@ export function combineFunction<F extends Function>(func1?: F | null, func2?: F 
   } as any;
 }
 
+RegExp.escape = function (s: string) {
+  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 
 
 export function areEqual<T>(a: T | undefined, b: T | undefined, field: (value: T) => any): boolean {

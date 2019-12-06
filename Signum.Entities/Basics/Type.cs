@@ -20,19 +20,18 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Max = 200)]
         public string ClassName { get; set; }
 
-        static Expression<Func<TypeEntity, string>> FullClassNameExpression =
-            t => t.Namespace + "." + t.ClassName;
-        [ExpressionField]
-        public string FullClassName
-        {
-            get { return FullClassNameExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FullClassName => As.Expression(() => Namespace + "." + ClassName);
 
-        static Expression<Func<TypeEntity, string>> ToStringExpression = e => e.CleanName;
-        [ExpressionField]
-        public override string ToString()
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => this.CleanName);
+
+        public string ToStringOriginal() => As.Expression(() => this.CleanName);
+
+        static Expression<Func<TypeEntity, string>> ToStringCorrect;
+        static void ToStringCorrectInit()
         {
-            return ToStringExpression.Evaluate(this);
+            ToStringCorrect = t => t.CleanName;
         }
 
         public bool IsType(Type type)

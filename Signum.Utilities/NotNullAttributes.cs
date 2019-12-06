@@ -6,57 +6,36 @@ using System.Text;
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    public class NullableContextAttribute : Attribute
+    {
+        //0 : Dont't know
+        //1 : Not nullable
+        //2 : nullable
+        public readonly byte[] NullableFlags;
+        public NullableContextAttribute(byte flag)
+        {
+            NullableFlags = new byte[] { flag };
+        }
+        public NullableContextAttribute(byte[] flags)
+        {
+            NullableFlags = flags;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class NullableAttribute : Attribute
     {
-        public NullableAttribute(byte b)
+        //0 : Dont't know
+        //1 : Not nullable
+        //2 : nullable
+        public readonly byte[] NullableFlags;
+        public NullableAttribute(byte flag)
         {
-            B = b;
+            NullableFlags = new byte[] { flag };
         }
-
-        public NullableAttribute(byte[] bs)
+        public NullableAttribute(byte[] flags)
         {
-            Bs = bs;
+            NullableFlags = flags;
         }
-
-        public bool? IsNullableMain
-        {
-            get
-            {
-                var first = B ?? Bs![0];
-
-                return first == 1 ? (bool?)false :
-                    first == 2 ? (bool?)true :
-                    null;
-            }
-        }
-
-        public byte? B { get; }
-        public byte[]? Bs { get; }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class AssertsTrueAttribute : Attribute
-    {
-        public AssertsTrueAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class AssertsFalseAttribute : Attribute
-    {
-        public AssertsFalseAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class EnsuresNotNullAttribute : Attribute
-    {
-        public EnsuresNotNullAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class NotNullWhenFalseAttribute : Attribute
-    {
-        public NotNullWhenFalseAttribute() { }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class NotNullWhenTrueAttribute : Attribute
-    {
-        public NotNullWhenTrueAttribute() { }
     }
 }

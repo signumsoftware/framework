@@ -9,13 +9,14 @@ import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoad
 import { ErrorBoundary } from '../Components';
 import { MaxHeightProperty } from 'csstype';
 import "./Search.css"
-import { ButtonBarElement } from '../TypeContext';
+import { ButtonBarElement, StyleContext } from '../TypeContext';
+import { useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
 }
 
-export interface SearchControlProps extends React.Props<SearchControl> {
+export interface SearchControlProps {
   findOptions: FindOptions;
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -29,6 +30,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
+  defaultIncludeDefaultFilters?: boolean;
   showHeader?: boolean | "PinnedFilters";
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -51,17 +53,19 @@ export interface SearchControlProps extends React.Props<SearchControl> {
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-  onSelectionChanged?: (entity: ResultRow[]) => void;
+  onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
-  onCreate?: () => void;
+  onCreate?: () => Promise<void | boolean>;
+  styleContext?: StyleContext;
 }
 
 export interface SearchControlState {
+  queryDescription: QueryDescription;
   findOptions?: FindOptionsParsed;
-  queryDescription?: QueryDescription;
+  message?: string;
 }
 
 function is_touch_device(): boolean {
@@ -69,162 +73,159 @@ function is_touch_device(): boolean {
     || Boolean(navigator.maxTouchPoints);       // works on IE10/11 and Surface
 }
 
+export interface SearchControlHandler {
+  findOptions: FindOptions;
+  state?: SearchControlState;
+  doSearch(): void;
+  doSearchPage1(): void;
+  searchControlLoaded: SearchControlLoaded | null;
+}
 
-export default class SearchControl extends React.Component<SearchControlProps, SearchControlState> {
+export namespace SearchControlOptions {
+  export let showSelectedButton = (sc: SearchControlHandler) => is_touch_device();
+  export let showSystemTimeButton = (sc: SearchControlHandler) => true;
+  export let showGroupButton = (sc: SearchControlHandler) => true;
+}
 
-  static showSelectedButton = (sc: SearchControl) => is_touch_device();
-  static showSystemTimeButton = (sc: SearchControl) => true;
-  static showGroupButton = (sc: SearchControl) => true;
-  
-  static defaultProps = {
-    allowSelection: true,
-    avoidFullScreenButton: false,
-    maxResultsHeight: "400px"
+const SearchControl = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
+
+  const [state, setState] = useStateWithPromise<SearchControlState | undefined>(undefined);
+  const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
+  const lastProps = usePrevious(p);
+
+  const handler: SearchControlHandler = {
+    findOptions: p.findOptions,
+    get searchControlLoaded() {
+      return searchControlLoaded.current;
+    },
+    state: state,
+    doSearch: () => searchControlLoaded.current && searchControlLoaded.current.doSearch(),
+    doSearchPage1: () => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(),
   };
+  React.useImperativeHandle(ref, () => handler, [p.findOptions, state, searchControlLoaded.current]);
 
-  constructor(props: SearchControlProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    this.initialLoad(this.props.findOptions);
-  }
-
-  componentWillReceiveProps(newProps: SearchControlProps) {
-    var path = Finder.findOptionsPath(newProps.findOptions);
-    if (path == Finder.findOptionsPath(this.props.findOptions))
+  React.useEffect(() => {
+    const path = Finder.findOptionsPath(p.findOptions);
+    if (path == (lastProps && Finder.findOptionsPath(lastProps.findOptions)))
       return;
 
-    if (this.state.findOptions && this.state.queryDescription) {
-      var fo = Finder.toFindOptions(this.state.findOptions, this.state.queryDescription);
+    if (state?.findOptions) {
+      const fo = Finder.toFindOptions(state.findOptions, state.queryDescription, p.defaultIncludeDefaultFilters!);
       if (path == Finder.findOptionsPath(fo))
         return;
     }
 
-    this.setState({ findOptions: undefined, queryDescription: undefined }, () => {
-      this.initialLoad(newProps.findOptions);
+    setState(undefined).then(() => {
+      const fo = p.findOptions;
+      if (!Finder.isFindable(fo.queryName, false)) {
+        if (p.throwIfNotFindable)
+          throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
+
+        return;
+      }
+
+      Finder.getQueryDescription(fo.queryName).then(qd => {
+        const message = Finder.validateNewEntities(fo);
+
+        if (message)
+          setState({ queryDescription: qd, message: message });
+        else
+          Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
+            setState({ findOptions: fop, queryDescription: qd });
+          }).done();
+      }).done();
     });
-  }
+  }, [p.findOptions]);
 
-  doSearch() {
-    this.searchControlLoaded && this.searchControlLoaded.doSearch();
-  }
-
-  doSearchPage1() {
-    this.searchControlLoaded && this.searchControlLoaded.doSearchPage1();
-  }
-
-  initialLoad(fo: FindOptions) {
-    if (!Finder.isFindable(fo.queryName, false)) {
-      if (this.props.throwIfNotFindable)
-        throw Error(`Query ${fo.queryName} not allowed`);
-
-      return;
-    }
-
-    Finder.getQueryDescription(fo.queryName).then(qd => {
-
-      this.setState({ queryDescription: qd });
-
-      if (Finder.validateNewEntities(fo))
-        this.setState({ findOptions: undefined });
-      else
-        Finder.parseFindOptions(fo, qd).then(fop => {
-          this.setState({ findOptions: fop, });
-        }).done();
-    }).done();
-  }
-
-  searchControlLoaded?: SearchControlLoaded;
-
-  handleFullScreenClick(ev: React.MouseEvent<any>) {
-    this.searchControlLoaded && this.searchControlLoaded.handleFullScreenClick(ev);
-  }
-
-  render() {
-    var errorMessage = Finder.validateNewEntities(this.props.findOptions);
-    if (errorMessage) {
-      return (
-        <div className="alert alert-danger" role="alert">
-          <strong>Error in SearchControl ({getQueryKey(this.props.findOptions.queryName)}): </strong>
-          {errorMessage}
-        </div>
-      );
-    }
-
-    const fo = this.state.findOptions;
-    if (!fo)
-      return null;
-
-    if (!Finder.isFindable(fo.queryKey, false))
-      return null;
-
-
-    const p = this.props;
-
-    const qs = Finder.getSettings(fo.queryKey);
-    const qd = this.state.queryDescription!;
-
-    const tis = getTypeInfos(qd.columns["Entity"].type);
-
+  if (state?.message) {
     return (
-      <ErrorBoundary>
-        <SearchControlLoaded ref={lo => this.searchControlLoaded = lo!}
-          findOptions={fo}
-          queryDescription={qd}
-          querySettings={qs}
-
-          formatters={p.formatters}
-          rowAttributes={p.rowAttributes}
-          entityFormatter={p.entityFormatter}
-          extraButtons={p.extraButtons}
-          getViewPromise={p.getViewPromise}
-          maxResultsHeight={p.maxResultsHeight}
-          tag={p.tag}
-
-          searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
-          showHeader={p.showHeader != null ? p.showHeader : true}
-          showFilters={p.showFilters != null ? p.showFilters : false}
-          showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
-          showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
-          showSystemTimeButton={SearchControl.showSystemTimeButton(this) && (p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true))}
-          showGroupButton={SearchControl.showGroupButton(this) && p.showGroupButton != null ? p.showGroupButton : false}
-          showSelectedButton={SearchControl.showSelectedButton(this)}
-          showFooter={p.showFooter != null ? p.showFooter : true}
-          allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
-          allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
-          create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
-          navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
-
-
-          allowSelection={p.allowSelection != null ? p.allowSelection : true}
-          showContextMenu={p.showContextMenu || qs && qs.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
-          hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
-          hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
-          showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
-          showBarExtensionOption={p.showBarExtensionOption}
-          largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-          avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
-          avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
-          refreshKey={p.refreshKey}
-
-          enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}
-          simpleFilterBuilder={p.simpleFilterBuilder}
-
-          onCreate={p.onCreate}
-          onNavigated={p.onNavigated}
-          onSearch={p.onSearch}
-          onDoubleClick={p.onDoubleClick}
-          onSelectionChanged={p.onSelectionChanged}
-          onFiltersChanged={p.onFiltersChanged}
-          onHeighChanged={p.onHeighChanged}
-          onResult={p.onResult}
-        />
-      </ErrorBoundary>
+      <div className="alert alert-danger" role="alert">
+        <strong>Error in SearchControl ({getQueryKey(p.findOptions.queryName)}): </strong>
+        {state.message}
+      </div>
     );
   }
-}
+
+  if (!state || !state.findOptions)
+    return null;
+
+  const fop = state.findOptions;
+  if (!Finder.isFindable(fop.queryKey, false))
+    return null;
+
+  const qs = Finder.getSettings(fop.queryKey);
+  const qd = state!.queryDescription!;
+
+  const tis = getTypeInfos(qd.columns["Entity"].type);
+
+  return (
+    <ErrorBoundary>
+      <SearchControlLoaded ref={searchControlLoaded}
+        findOptions={fop}
+        queryDescription={qd}
+        querySettings={qs}
+
+        formatters={p.formatters}
+        rowAttributes={p.rowAttributes}
+        entityFormatter={p.entityFormatter}
+        extraButtons={p.extraButtons}
+        getViewPromise={p.getViewPromise}
+        maxResultsHeight={p.maxResultsHeight}
+        tag={p.tag}
+
+        defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters!}
+        searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
+        showHeader={p.showHeader != null ? p.showHeader : true}
+        showFilters={p.showFilters != null ? p.showFilters : false}
+        showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
+        showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
+        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton != null ? p.showSystemTimeButton : qs?.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true))}
+        showGroupButton={SearchControlOptions.showGroupButton(handler) && p.showGroupButton != null ? p.showGroupButton : false}
+        showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
+        showFooter={p.showFooter != null ? p.showFooter : true}
+        allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
+        allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
+        create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
+        navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
+
+
+        allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
+        showContextMenu={p.showContextMenu || qs?.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
+        hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
+        hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
+        showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
+        showBarExtensionOption={p.showBarExtensionOption}
+        largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
+        avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+        avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
+        refreshKey={p.refreshKey}
+
+        enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}
+        simpleFilterBuilder={p.simpleFilterBuilder}
+
+        onCreate={p.onCreate}
+        onNavigated={p.onNavigated}
+        onSearch={p.onSearch}
+        onDoubleClick={p.onDoubleClick}
+        onSelectionChanged={p.onSelectionChanged}
+        onFiltersChanged={p.onFiltersChanged}
+        onHeighChanged={p.onHeighChanged}
+        onResult={p.onResult}
+
+        styleContext={p.styleContext}
+      />
+    </ErrorBoundary>
+  );
+});
+
+(SearchControl as any).defaultProps = {
+  allowSelection: true,
+  avoidFullScreenButton: false,
+  maxResultsHeight: "400px",
+  defaultIncludeDefaultFilters: false,
+};
+
+export default SearchControl;
 
 export interface ISimpleFilterBuilder {
   getFilters(): FilterOption[];

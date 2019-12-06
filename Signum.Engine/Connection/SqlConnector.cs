@@ -10,6 +10,7 @@ using System.Data.SqlTypes;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Signum.Engine.Connection;
 
 namespace Signum.Engine
 {
@@ -37,41 +38,44 @@ namespace Signum.Engine
 
         public static SqlServerVersion? Detect(string connectionString)
         {
-            using(SqlConnection con = new SqlConnection(connectionString))
+            return SqlServerRetry.Retry(() =>
             {
-                var sql =
-@"SELECT
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    var sql =
+    @"SELECT
     SERVERPROPERTY ('ProductVersion') as ProductVersion,
     SERVERPROPERTY('ProductLevel') as ProductLevel,
     SERVERPROPERTY('Edition') as Edition,
     SERVERPROPERTY('EngineEdition') as EngineEdition";
 
-                using (SqlCommand cmd = new SqlCommand(sql, con))
-                {
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-
-                    DataTable result = new DataTable();
-                    da.Fill(result);
-
-                    if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
-                        return SqlServerVersion.AzureSQL;
-
-                    var version = (string)result.Rows[0]["ProductVersion"];
-
-                    switch (version.Before("."))
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
                     {
-                        case "8": throw new InvalidOperationException("SQL Server 2000 is not supported");
-                        case "9": return SqlServerVersion.SqlServer2005;
-                        case "10": return SqlServerVersion.SqlServer2008;
-                        case "11": return SqlServerVersion.SqlServer2012;
-                        case "12": return SqlServerVersion.SqlServer2014;
-                        case "13": return SqlServerVersion.SqlServer2016;
-                        case "14": return SqlServerVersion.SqlServer2017;
-                        default: return null;
-                    }
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
 
+                        DataTable result = new DataTable();
+                        da.Fill(result);
+
+                        if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
+                            return SqlServerVersion.AzureSQL;
+
+                        var version = (string)result.Rows[0]["ProductVersion"];
+
+                        switch (version.Before("."))
+                        {
+                            case "8": throw new InvalidOperationException("SQL Server 2000 is not supported");
+                            case "9": return SqlServerVersion.SqlServer2005;
+                            case "10": return SqlServerVersion.SqlServer2008;
+                            case "11": return SqlServerVersion.SqlServer2012;
+                            case "12": return SqlServerVersion.SqlServer2014;
+                            case "13": return SqlServerVersion.SqlServer2016;
+                            case "14": return SqlServerVersion.SqlServer2017;
+                            default: return (SqlServerVersion?)null;
+                        }
+
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -112,14 +116,20 @@ namespace Signum.Engine
         public override bool SupportsScalarSubquery { get { return true; } }
         public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
-        SqlConnection? EnsureConnection()
+        T EnsureConnectionRetry<T>(Func<SqlConnection?, T> action)
         {
             if (Transaction.HasTransaction)
-                return null;
+                return action(null);
 
-            SqlConnection result = new SqlConnection(this.ConnectionString);
-            result.Open();
-            return result;
+            return SqlServerRetry.Retry(() =>
+            {
+                using (SqlConnection con = new SqlConnection(this.ConnectionString))
+                {
+                    con.Open();
+
+                    return action(con);
+                }
+            });
         }
 
         SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection? overridenConnection, CommandType commandType)
@@ -155,91 +165,19 @@ namespace Signum.Engine
 
         protected internal override object? ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection? con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+            return EnsureConnectionRetry(con =>
             {
-                try
-                {
-                    object result = cmd.ExecuteScalar();
-
-                    if (result == null || result == DBNull.Value)
-                        return null;
-
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    var nex = HandleException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
-
-                    throw nex;
-                }
-            }
-        }
-
-        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
-        {
-            using (SqlConnection? con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
-            {
-                try
-                {
-                    int result = cmd.ExecuteNonQuery();
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    var nex = HandleException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
-
-                    throw nex;
-                }
-            }
-        }
-
-        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach, CommandType commandType)
-        {
-            bool reconected = false;
-            retry:
-            try
-            {
-                using (SqlConnection? con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-                using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
                     try
                     {
-                        if (change != null)
-                        {
-                            SqlDependency dep = new SqlDependency(cmd);
-                            dep.OnChange += change;
-                        }
+                        object result = cmd.ExecuteScalar();
 
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            FieldReader fr = new FieldReader(reader);
-                            int row = -1;
-                            try
-                            {
-                                while (reader.Read())
-                                {
-                                    row++;
-                                    forEach(fr);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                                fieldEx.Command = preCommand;
-                                fieldEx.Row = row;
-                                throw fieldEx;
-                            }
-                        }
+                        if (result == null || result == DBNull.Value)
+                            return null;
+
+                        return result;
                     }
                     catch (Exception ex)
                     {
@@ -250,6 +188,86 @@ namespace Signum.Engine
                         throw nex;
                     }
                 }
+            });
+        }
+
+        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
+        {
+            return EnsureConnectionRetry(con =>
+            {
+                using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+                {
+                    try
+                    {
+                        int result = cmd.ExecuteNonQuery();
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        var nex = HandleException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
+
+                        throw nex;
+                    }
+                }
+            });
+        }
+
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach, CommandType commandType)
+        {
+            bool reconected = false;
+            retry:
+            try
+            {
+                EnsureConnectionRetry(con =>
+                {
+                    using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+                    using (HeavyProfiler.Log("SQL-Dependency"))
+                    using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+                    {
+                        try
+                        {
+                            if (change != null)
+                            {
+                                SqlDependency dep = new SqlDependency(cmd);
+                                dep.OnChange += change;
+                            }
+
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                FieldReader fr = new FieldReader(reader);
+                                int row = -1;
+                                try
+                                {
+                                    while (reader.Read())
+                                    {
+                                        row++;
+                                        forEach(fr);
+                                    }
+
+                                    return 0;
+                                }
+                                catch (Exception ex)
+                                {
+                                    FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
+                                    fieldEx.Command = preCommand;
+                                    fieldEx.Row = row;
+                                    throw fieldEx;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            var nex = HandleException(ex, preCommand);
+                            if (nex == ex)
+                                throw;
+
+                            throw nex;
+                        }
+                    }
+                });
             }
             catch (InvalidOperationException ioe)
             {
@@ -308,51 +326,55 @@ namespace Signum.Engine
 
         protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection? con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+            return EnsureConnectionRetry(con =>
             {
-                try
+                using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    try
+                    {
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
 
-                    DataTable result = new DataTable();
-                    da.Fill(result);
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    var nex = HandleException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
+                        DataTable result = new DataTable();
+                        da.Fill(result);
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        var nex = HandleException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
 
-                    throw nex;
+                        throw nex;
+                    }
                 }
-            }
+            });
         }
 
         protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand, CommandType commandType)
         {
-            using (SqlConnection? con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+            return EnsureConnectionRetry(con =>
             {
-                try
+                using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataSet result = new DataSet();
-                    da.Fill(result);
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    var nex = HandleException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
+                    try
+                    {
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataSet result = new DataSet();
+                        da.Fill(result);
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        var nex = HandleException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
 
-                    throw nex;
+                        throw nex;
+                    }
                 }
-            }
+            });
         }
 
         public Exception HandleException(Exception ex, SqlPreCommandSimple command)
@@ -392,21 +414,24 @@ namespace Signum.Engine
 
         protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
         {
-            using (SqlConnection? con = EnsureConnection())
-            using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
-                options,
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion!))
-            using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+            EnsureConnectionRetry(con =>
             {
-                bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
+                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
+                    options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
+                    options,
+                    options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion!))
+                using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+                {
+                    bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
 
-                foreach (DataColumn c in dt.Columns)
-                    bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
+                    foreach (var c in dt.Columns.Cast<DataColumn>())
+                        bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
 
-                bulkCopy.DestinationTableName = destinationTable.ToString();
-                bulkCopy.WriteToServer(dt);
-            }
+                    bulkCopy.DestinationTableName = destinationTable.ToString();
+                    bulkCopy.WriteToServer(dt);
+                    return 0;
+                }
+            });
         }
 
         public override string DatabaseName()
@@ -482,6 +507,8 @@ namespace Signum.Engine
             return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains);
         }
 
+        public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
+
         public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
 
         public override SqlPreCommand ShrinkDatabase(string databaseName)
@@ -529,6 +556,7 @@ namespace Signum.Engine
             get { return Version >= SqlServerVersion.SqlServer2016; }
         }
 
+        
         public override string ToString() => $"SqlConnector({Version})";
     }
 
@@ -694,15 +722,16 @@ deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
         {
-            var schemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
+            var systemSchemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
+            var systemSchemasExeptDbo = SqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
-                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript).FormatWith(schemas)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript).FormatWith(systemSchemasExeptDbo)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
                 Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
-                new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(schemas)))
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas)))
                 )!;
         }
 

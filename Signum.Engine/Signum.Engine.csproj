@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>    
     <Platforms>x64;x86;AnyCPU</Platforms>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.0.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.3" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
-  
 </Project>

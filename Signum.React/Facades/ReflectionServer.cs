@@ -35,7 +35,7 @@ namespace Signum.React.Facades
         public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
          new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
-        public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
+        public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = null!;
 
         public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
             () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t) ||
@@ -45,7 +45,7 @@ namespace Signum.React.Facades
         public static void RegisterLike(Type type)
         {
             TypesByName.Reset();
-            EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace);
+            EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace!);
         }
 
         internal static void Start()
@@ -55,16 +55,16 @@ namespace Signum.React.Facades
 
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));
-            var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType);
+            var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType!);
 
-            EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
-            EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
+            EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace!).ToHashSet());
+            EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace!);
         }
 
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        public static event Action<TypeInfoTS, Type> AddTypeExtension;
+        public static event Action<TypeInfoTS, Type>? AddTypeExtension;
         static TypeInfoTS OnAddTypeExtension(TypeInfoTS ti, Type t)
         {
             foreach (var a in AddTypeExtension.GetInvocationListTyped())
@@ -73,7 +73,7 @@ namespace Signum.React.Facades
             return ti;
         }
 
-        public static event Action<MemberInfoTS, PropertyRoute> AddPropertyRouteExtension;
+        public static event Action<MemberInfoTS, PropertyRoute>? AddPropertyRouteExtension;
         static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
             if (AddPropertyRouteExtension == null)
@@ -86,7 +86,7 @@ namespace Signum.React.Facades
         }
 
 
-        public static event Action<MemberInfoTS, FieldInfo> AddFieldInfoExtension;
+        public static event Action<MemberInfoTS, FieldInfo>? AddFieldInfoExtension;
         static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
         {
             if (AddFieldInfoExtension == null)
@@ -98,7 +98,7 @@ namespace Signum.React.Facades
             return mi;
         }
 
-        public static event Action<OperationInfoTS, OperationInfo, Type> AddOperationExtension;
+        public static event Action<OperationInfoTS, OperationInfo, Type>? AddOperationExtension;
         static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
         {
             if (AddOperationExtension == null)
@@ -135,7 +135,7 @@ namespace Signum.React.Facades
         {
             return EntityAssemblies.SelectMany(kvp =>
             {
-                var normalTypes = kvp.Key.GetTypes().Where(t => kvp.Value.Contains(t.Namespace));
+                var normalTypes = kvp.Key.GetTypes().Where(t => kvp.Value.Contains(t.Namespace!));
 
                 var usedEnums = (from type in normalTypes
                                  where typeof(ModifiableEntity).IsAssignableFrom(type)
@@ -167,10 +167,10 @@ namespace Signum.React.Facades
                           where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
-                              FullName = type.FullName,
+                              FullName = type.FullName!,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               NicePluralName = descOptions.HasFlag(DescriptionOptions.PluralDescription) ? type.NicePluralName() : null,
                               Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
@@ -184,17 +184,20 @@ namespace Signum.React.Facades
                                 .Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>
                                 {
+                                    var validators = Validator.TryGetPropertyValidator(p)?.Validators;
+
                                     var mi = new MemberInfoTS
                                     {
                                         NiceName = p.PropertyInfo!.NiceName(),
                                         TypeNiceName = GetTypeNiceName(p.PropertyInfo!.PropertyType),
                                         Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                         IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
-                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || (Validator.TryGetPropertyValidator(p)?.Validators.Any(v => (v is NotNullValidatorAttribute) && !v.DisabledInModelBinder)) == true),
+                                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!p.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo!.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
-                                        IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-                                        MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                                        IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+										IsVirtualMList = p.IsVirtualMList(),
+                                        MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                         PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     };
 
@@ -245,13 +248,13 @@ namespace Signum.React.Facades
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                                      type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
-                              FullName = type.FullName,
+                              FullName = type.FullName!,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
-                              .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)))
+                              .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)!))
                               .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
                                   NiceName = fi.NiceName(),
@@ -268,10 +271,10 @@ namespace Signum.React.Facades
 
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
-                              FullName = type.FullName,
+                              FullName = type.FullName!,
                               Members = type.GetFields(staticFlags)
                                   .Select(f => GetSymbolInfo(f))
                                   .Where(s =>
@@ -291,7 +294,7 @@ namespace Signum.React.Facades
 
         private static (FieldInfo FieldInfo, PrimaryKey? IdOrNull) GetSymbolInfo(FieldInfo m)
         {
-            object v = m.GetValue(null);
+            object? v = m.GetValue(null);
             if (v is IOperationSymbolContainer osc)
                 v = osc.Symbol;
 
@@ -370,6 +373,8 @@ namespace Signum.React.Facades
         public string? Format { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnoredEnum")]
         public bool IsIgnoredEnum { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isVirtualMList")]
+        public bool IsVirtualMList { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "maxLength")]
         public int? MaxLength { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isMultiline")]

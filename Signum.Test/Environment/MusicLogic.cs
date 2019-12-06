@@ -15,13 +15,9 @@ namespace Signum.Test.Environment
 {
     public static class MusicLogic
     {
-        static Expression<Func<IAuthorEntity, IQueryable<AlbumEntity>>> AlbumsExpression =
-        e => Database.Query<AlbumEntity>().Where(a => a.Author == e);
-        [ExpressionField]
-        public static IQueryable<AlbumEntity> Albums(this IAuthorEntity e)
-        {
-            return AlbumsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<AlbumEntity> Albums(this IAuthorEntity e) => 
+            As.Expression(() => Database.Query<AlbumEntity>().Where(a => a.Author == e));
 
         public static void Start(SchemaBuilder sb)
         {
@@ -237,7 +233,7 @@ namespace Signum.Test.Environment
             new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
             {
                 ToStates = { AlbumState.Saved },
-                Construct = (BandEntity band, object[]? args) =>
+                Construct = (BandEntity band, object?[]? args) =>
                     new AlbumEntity
                     {
                         Author = band,
@@ -270,7 +266,7 @@ namespace Signum.Test.Environment
                 ToStates = { AlbumState.New },
                 Construct = (albumLites, _) =>
                 {
-                    List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                    List<AlbumEntity> albums = albumLites.Select(a => a.RetrieveAndRemember()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
                         throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
 
@@ -289,7 +285,7 @@ namespace Signum.Test.Environment
                 ToStates = { AlbumState.New },
                 Construct = (albumLites, _) =>
                 {
-                    List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                    List<AlbumEntity> albums = albumLites.Select(a => a.RetrieveAndRemember()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
                         throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
 

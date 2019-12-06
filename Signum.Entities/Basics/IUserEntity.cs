@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 
 namespace Signum.Entities.Basics
@@ -10,7 +10,7 @@ namespace Signum.Entities.Basics
     public static class UserHolder
     {
         public static readonly string UserSessionKey = "user";
-        public static event Action CurrentUserChanged;
+        public static event Action? CurrentUserChanged;
 
         public static readonly SessionVariable<IUserEntity> CurrentUserVariable = Statics.SessionVariable<IUserEntity>(UserSessionKey);
         public static IUserEntity Current

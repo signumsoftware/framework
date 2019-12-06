@@ -121,7 +121,7 @@ namespace Signum.Utilities
 
         public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {
-            Type foo = mi.DeclaringType;
+            Type foo = mi.DeclaringType!;
             Type bar = typeof(Queryable);
             MethodInfo any = GetAny(mi).MakeGenericMethod(mi.GetGenericArguments());
             return Expression.Not(Expression.Call(any, arguments));

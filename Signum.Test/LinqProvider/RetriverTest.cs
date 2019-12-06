@@ -87,7 +87,7 @@ namespace Signum.Test.LinqProvider
         {
             var artist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).First();
 
-            Assert.Equal(artist.ToLite().Retrieve().Friends.Count, artist.Friends.Count);
+            Assert.Equal(artist.ToLite().RetrieveAndRemember().Friends.Count, artist.Friends.Count);
         }
     }
 }

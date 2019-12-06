@@ -30,6 +30,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V>? InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>?> currentValue, KeyValuePair<Type, Dictionary<K, V>?> baseValue, List<KeyValuePair<Type, Dictionary<K, V>?>> newInterfacesValues)
+            where K : notnull
         {
             if (currentValue.Value == null && baseValue.Value == null)
                 return null;
@@ -46,7 +47,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V>? InheritDictionaryInterfaces<K, V>(KeyValuePair<Type, Dictionary<K, V>?> currentValue, KeyValuePair<Type, Dictionary<K, V>?> baseValue, List<KeyValuePair<Type, Dictionary<K, V>?>> newInterfacesValues)
-            where K : Object
+            where K : notnull
         {
             if (currentValue.Value == null && baseValue.Value == null && newInterfacesValues.All(a => a.Value == null))
                 return null;
@@ -117,7 +118,7 @@ namespace Signum.Utilities
             if (!typeof(Delegate).IsAssignableFrom(type))
                 return null;
 
-            MethodInfo mi = type.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo mi = type.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance)!;
 
             var param = mi.GetParameters().FirstOrDefault();
 
@@ -161,14 +162,14 @@ namespace Signum.Utilities
             var currentValue = definitions.TryGetC(type);
 
             if (minimumType != null && !minimumType.IsInterface)
-                return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType!, baseValue), new List<KeyValuePair<Type, T?>>());
+                return merger(KeyValuePair.Create(type, currentValue), KeyValuePair.Create(type.BaseType!, baseValue), new List<KeyValuePair<Type, T?>>());
 
             IEnumerable<Type> interfaces = type.GetInterfaces().Where(IsAllowed);
 
             if (type.BaseType != null)
                 interfaces = interfaces.Except(type.BaseType.GetInterfaces());
 
-            return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType!, baseValue), interfaces.Select(inter => KVP.Create(inter, TryGetValue(inter))).ToList());
+            return merger(KeyValuePair.Create(type, currentValue), KeyValuePair.Create(type.BaseType!, baseValue), interfaces.Select(inter => KeyValuePair.Create(inter, TryGetValue(inter))).ToList());
         }
 
         public void SetDefinition(Type type, T value)
@@ -287,31 +288,31 @@ namespace Signum.Utilities
         }
 
 
-        public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance) where T : object
+        public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance) where T : notnull
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance);
         }
 
-        public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0) where T : object
+        public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0) where T : notnull
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0);
         }
 
-        public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1) where T : object
+        public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1) where T : notnull
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1);
         }
 
-        public static void Invoke<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2) where T : object
+        public static void Invoke<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2) where T : notnull
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1, p2);
         }
 
-        public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3) where T : object
+        public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3) where T : notnull
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1, p2, p3);
@@ -319,31 +320,31 @@ namespace Signum.Utilities
 
 
 
-        public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance) where T : object
+        public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance) where T : notnull
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance);
         }
 
-        public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0) where T : object
+        public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0) where T : notnull
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0);
         }
 
-        public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1) where T : object
+        public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1) where T : notnull
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0, p1);
         }
 
-        public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2) where T : object
+        public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2) where T : notnull
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0, p1, p2);
         }
 
-        public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3) where T : object
+        public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3) where T : notnull
         {
             var func = polymorphic.GetValue(instance.GetType());
             return func(instance, p0, p1, p2, p3);

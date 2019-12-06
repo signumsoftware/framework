@@ -28,11 +28,7 @@ namespace Signum.Entities.Basics
             return ToPropertyRouteFunc(this);
         }
 
-        static readonly Expression<Func<PropertyRouteEntity, string>> ToStringExpression = e => e.Path;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => this.Path);
     }
 }

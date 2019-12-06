@@ -1,8 +1,8 @@
 import * as Navigator from './Navigator';
-
+import * as History from 'history'
 import * as React from 'react'
 import { FunctionalAdapter } from './Frames/FrameModal';
-import { Modal } from 'react-overlays';
+import { useStateWithPromise, useHistoryListen } from './Hooks';
 
 declare global {
   interface KeyboardEvent {
@@ -10,77 +10,83 @@ declare global {
   }
 }
 
-export interface IModalProps {
-  onExited?: (val: any) => void;
+export interface IModalProps<T> {
+  onExited?: (val: T) => void;
 }
-
 
 export interface IHandleKeyboard {
   handleKeyDown?: (e: KeyboardEvent) => void;
 }
 
 export interface GlobalModalContainerState {
-  modals: React.ReactElement<IModalProps>[];
+  modals: React.ReactElement<IModalProps<any>>[];
   currentUrl: string;
 }
-
-let current: GlobalModalContainer;
+let current: GlobalModalContainerHandles;
   
-let modalInstances: (React.Component & IHandleKeyboard)[] = [];
+const modalInstances: (React.Component & IHandleKeyboard)[] = [];
 
-export class GlobalModalContainer extends React.Component<{}, GlobalModalContainerState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = { modals: [], currentUrl: Navigator.history.location.pathname };
-    current = this;
-  }
+interface GlobalModalContainerHandles {
+  pushModal(element: React.ReactElement<any>) : Promise<any>;
+  popModal(element: React.ReactElement<any>): Promise<any>;
+  getCount(): number;
+}
 
-  componentDidMount() {
-    window.addEventListener("keydown", this.hanldleKeyDown);
-  }
+export function GlobalModalContainer() {
+  React.useEffect(() => {
+    window.addEventListener("keydown", hanldleKeyDown);
+    return () => window.removeEventListener("keydown", hanldleKeyDown);
+  }, []);
 
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this.hanldleKeyDown);
-  }
+  var [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
 
-  hanldleKeyDown = (e: KeyboardEvent) => {
+  useHistoryListen(() => setModals([]), true);
+
+  React.useEffect(() => {
+    current = {
+      pushModal: e => setModals([...modals, e]),
+      popModal: e => setModals(modals.filter(a=>a != e)),
+      getCount: () => modals.length
+    };
+    return () => { current = null!; };
+  }, [modals.length]);
+
+  function hanldleKeyDown(e: KeyboardEvent){
     if (modalInstances.length) {
       e.openedModals = true;
       var topMost = modalInstances[modalInstances.length - 1];
-
-      if (topMost.handleKeyDown) {
+      topMost = FunctionalAdapter.innerRef(topMost);
+      if (topMost && topMost.handleKeyDown) {
         topMost.handleKeyDown(e);
       }
     }
   }
 
-  componentWillReceiveProps(nextProps: {}, nextContext: any): void {
-    var newUrl = Navigator.history.location.pathname;
 
-    if (newUrl != this.state.currentUrl)
-      this.setState({ modals: [], currentUrl: newUrl });
-  }
+  React.useEffect(() => {
+    setModals([]);
+  }, [Navigator.history.location.pathname])
 
-  render() {
-    return <div className="sf-modal-container">{this.state.modals}</div>
-  }
+
+  return React.createElement("div", { className: "sf-modal-container" }, ...modals);
 }
 
-export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {
+export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise<T> {
 
   return new Promise<T>((resolve) => {
-    let cloned: React.ReactElement<IModalProps>;
+    let cloned: React.ReactElement<IModalProps<T>>;
     const onExited = (val: T) => {
-      current.state.modals.remove(cloned);
-      current.forceUpdate();
-      resolve(val);
+      current.popModal(cloned)
+        .then(() => resolve(val))
+        .done();
     }
 
-    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.state.modals.length } as any),
-      c => c ? modalInstances.push(c) : modalInstances.pop());
+    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.getCount() } as any),
+      c => {
+        c ? modalInstances.push(c) : modalInstances.pop();
+      });
 
-    current.state.modals.push(cloned);
-    current.forceUpdate();
+    return current.pushModal(cloned);
   });
 }
 

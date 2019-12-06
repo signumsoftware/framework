@@ -36,7 +36,7 @@ namespace Signum.Engine.Maps
             set { this.version = value; }
         }
 
-        public event Action OnMetadataInvalidated;
+        public event Action? OnMetadataInvalidated;
         public void InvalidateMetadata()
         {
             this.OnMetadataInvalidated?.Invoke();
@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
 
         #region Events
 
-        public event Func<Type, bool, string?> IsAllowedCallback;
+        public event Func<Type, bool, string?>? IsAllowedCallback;
 
         public string? IsAllowed(Type type, bool inUserInterface)
         {
@@ -178,7 +178,7 @@ namespace Signum.Engine.Maps
             if (ee == null)
                 return null;
 
-            return ee.OnPreUnsafeDelete(entityQuery);
+            return Disposable.Combine(ee?.OnPreUnsafeDelete(entityQuery), entityEventsGlobal.OnPreUnsafeDelete(entityQuery));
         }
 
         internal IDisposable? OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
@@ -410,7 +410,7 @@ namespace Signum.Engine.Maps
                     {
                         try
                         {
-                            SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType.TypeName());
+                            SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
                             Console.Write(".");
                             SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
                             Console.Write("...");
@@ -426,9 +426,10 @@ namespace Signum.Engine.Maps
                         }
                         catch (Exception ex)
                         {
-                            SafeConsole.WriteLineColor(ConsoleColor.Red, "Error");
+                            SafeConsole.WriteColor(ConsoleColor.Red, "Error");
+                            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " (...it's probably ok, execute this script and try again)");
 
-                            return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType.Name, e.Method.Name, ex.Message.Indent(2, '-')));
+                            return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                         }
                     })
                     .Combine(Spacing.Triple);
@@ -526,7 +527,7 @@ namespace Signum.Engine.Maps
 
             using (ExecutionMode.Global())
                 foreach (var item in Initializing.GetInvocationListTyped())
-                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType.ToString()))
+                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType!.ToString()))
                         item();
 
             Initializing = null;
@@ -801,7 +802,7 @@ namespace Signum.Engine.Maps
         void Complete(Entity entity, IRetriever retriver);
 
         string GetToString(PrimaryKey id);
-        string? TryGetToString(PrimaryKey id);
+        string? TryGetToString(PrimaryKey?/*CSBUG*/ id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -823,11 +824,10 @@ namespace Signum.Engine.Maps
         public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(PrimaryKey id);
-        public abstract string? TryGetToString(PrimaryKey id);
+
+        public virtual string? TryGetToString(PrimaryKey?/*CSBUG*/ id) => null;
 
         public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             where R : Entity;
     }
-
-
 }

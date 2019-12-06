@@ -111,14 +111,14 @@ function getOrCreateToStringFunction(type: string) {
   return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null): string {
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null, toStringLite?: (e : Entity) => string): string {
   if (entityOrLite == null)
     return "";
 
   const lite = entityOrLite as Lite<Entity>;
   if (lite.EntityType) {
     if (lite.entity)
-      return getToString(lite.entity);
+      return (toStringLite || getToString)(lite.entity);
 
     if (Reflection.isLowPopulationSymbol(lite.EntityType))
       return Reflection.symbolNiceName(lite as Lite<Entity & Reflection.ISymbol>);
@@ -177,7 +177,7 @@ export function parseLite(lite: string): Lite<Entity> {
   };
 }
 
-export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false) {
+export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
 
   if (a == undefined && b == undefined)
     return true;
@@ -188,8 +188,12 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
   const aType = (a as T).Type || (a as Lite<T>).EntityType;
   const bType = (b as T).Type || (b as Lite<T>).EntityType;
 
-  if (!aType || !bType)
-    throw new Error("No Type found");
+  if (!aType || !bType) {
+    if (assertTypesFound)
+      throw new Error("No Type found");
+    else
+      return false;
+  }
 
   if (aType != bType)
     return false;
@@ -275,9 +279,9 @@ export module EntityControlMessage {
   export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
   export const Move = new MessageKey("EntityControlMessage", "Move");
   export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
-  export const NullValueNotAllowed = new MessageKey("EntityControlMessage", "NullValueNotAllowed");
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
+  export const Add = new MessageKey("EntityControlMessage", "Add");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -461,6 +465,8 @@ export module SearchMessage {
   export const PleaseSelectOneOrMore0_G = new MessageKey("SearchMessage", "PleaseSelectOneOrMore0_G");
   export const PleaseSelectAnEntity = new MessageKey("SearchMessage", "PleaseSelectAnEntity");
   export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
+  export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
+  export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
 }
 
 export module SelectorMessage {
@@ -473,6 +479,8 @@ export module SelectorMessage {
   export const ChooseAValue = new MessageKey("SelectorMessage", "ChooseAValue");
   export const SelectAnElement = new MessageKey("SelectorMessage", "SelectAnElement");
   export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
+  export const _0Selector = new MessageKey("SelectorMessage", "_0Selector");
+  export const PleaseChooseA0ToContinue = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
 }
 
 export interface Symbol extends Entity {
@@ -503,13 +511,13 @@ export module ValidationMessage {
   export const _0IsSet = new MessageKey("ValidationMessage", "_0IsSet");
   export const _0IsNotA1_G = new MessageKey("ValidationMessage", "_0IsNotA1_G");
   export const BeA0_G = new MessageKey("ValidationMessage", "BeA0_G");
-  export const Be = new MessageKey("ValidationMessage", "Be");
+  export const Be0 = new MessageKey("ValidationMessage", "Be0");
   export const BeBetween0And1 = new MessageKey("ValidationMessage", "BeBetween0And1");
   export const BeNotNull = new MessageKey("ValidationMessage", "BeNotNull");
   export const FileName = new MessageKey("ValidationMessage", "FileName");
   export const Have0Decimals = new MessageKey("ValidationMessage", "Have0Decimals");
   export const HaveANumberOfElements01 = new MessageKey("ValidationMessage", "HaveANumberOfElements01");
-  export const HaveAPrecisionOf = new MessageKey("ValidationMessage", "HaveAPrecisionOf");
+  export const HaveAPrecisionOf0 = new MessageKey("ValidationMessage", "HaveAPrecisionOf0");
   export const HaveBetween0And1Characters = new MessageKey("ValidationMessage", "HaveBetween0And1Characters");
   export const HaveMaximum0Characters = new MessageKey("ValidationMessage", "HaveMaximum0Characters");
   export const HaveMinimum0Characters = new MessageKey("ValidationMessage", "HaveMinimum0Characters");
@@ -557,6 +565,7 @@ export module ValidationMessage {
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
   export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
+  export const BeAMultilineString = new MessageKey("ValidationMessage", "BeAMultilineString");
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
 }
 

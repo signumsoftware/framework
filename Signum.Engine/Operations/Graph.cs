@@ -50,12 +50,12 @@ namespace Signum.Engine.Operations
                 return new Construct(symbol.Symbol);
             }
 
-            public void OverrideConstruct(Overrider<Func<object[]?, T>> overrider)
+            public void OverrideConstruct(Overrider<Func<object?[]?, T>> overrider)
             {
                 this.Construct = overrider(this.Construct);
             }
 
-            IEntity IConstructOperation.Construct(params object[]? args)
+            IEntity IConstructOperation.Construct(params object?[]? args)
             {
                 using (HeavyProfiler.Log("Construct", () => operationSymbol.Key))
                 {
@@ -65,7 +65,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current!.ToLite()
+                        User = UserHolder.Current?.ToLite()!,
                     };
 
                     try
@@ -170,9 +170,9 @@ namespace Signum.Engine.Operations
                 return this;
             }
 
-            public Func<F, object[]?, T> Construct { get; set; } = null!;
+            public Func<F, object?[]?, T> Construct { get; set; } = null!;
 
-            public void OverrideConstruct(Overrider<Func<F, object[]?, T>> overrider)
+            public void OverrideConstruct(Overrider<Func<F, object?[]?, T>> overrider)
             {
                 this.Construct = overrider(this.Construct);
             }
@@ -214,7 +214,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            IEntity IConstructorFromOperation.Construct(IEntity origin, params object[]? args)
+            IEntity IConstructorFromOperation.Construct(IEntity origin, params object?[]? args)
             {
                 using (HeavyProfiler.Log("ConstructFrom", () => operationSymbol.Key))
                 {
@@ -228,7 +228,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = operationSymbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current!.ToLite(),
+                        User = UserHolder.Current?.ToLite()!,
                         Origin = origin.ToLite(origin.IsNew),
                     };
 
@@ -324,9 +324,9 @@ namespace Signum.Engine.Operations
 
             public bool LogAlsoIfNotSaved { get; set; }
 
-            public Func<List<Lite<F>>, object[]?, T> Construct { get; set; } = null!;
+            public Func<List<Lite<F>>, object?[]?, T> Construct { get; set; } = null!;
 
-            public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object[]?, T>> overrider)
+            public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object?[]?, T>> overrider)
             {
                 this.Construct = overrider(this.Construct);
             }
@@ -354,7 +354,7 @@ namespace Signum.Engine.Operations
             }
 
 
-            IEntity IConstructorFromManyOperation.Construct(IEnumerable<Lite<IEntity>> lites, params object[]? args)
+            IEntity IConstructorFromManyOperation.Construct(IEnumerable<Lite<IEntity>> lites, params object?[]? args)
             {
                 using (HeavyProfiler.Log("ConstructFromMany", () => operationSymbol.Key))
                 {
@@ -427,7 +427,7 @@ namespace Signum.Engine.Operations
                 }
             }
 
-            protected virtual T OnConstruct(List<Lite<F>> lites, object[]? args)
+            protected virtual T OnConstruct(List<Lite<F>> lites, object?[]? args)
             {
                 return Construct(lites, args);
             }
@@ -476,7 +476,7 @@ namespace Signum.Engine.Operations
                 return this;
             }
 
-            public void OverrideExecute(Overrider<Action<T, object[]?>> overrider)
+            public void OverrideExecute(Overrider<Action<T, object?[]?>> overrider)
             {
                 this.Execute = overrider(this.Execute);
             }
@@ -502,7 +502,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IExecuteOperation.Execute(IEntity entity, params object[]? args)
+            void IExecuteOperation.Execute(IEntity entity, params object?[]? args)
             {
                 using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
                 {
@@ -516,7 +516,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current!.ToLite()
+                        User = UserHolder.Current?.ToLite()!
                     };
 
                     try
@@ -615,7 +615,7 @@ namespace Signum.Engine.Operations
                 return this;
             }
 
-            public void OverrideDelete(Overrider<Action<T, object[]?>> overrider)
+            public void OverrideDelete(Overrider<Action<T, object?[]?>> overrider)
             {
                 this.Delete = overrider(this.Delete);
             }
@@ -641,7 +641,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IDeleteOperation.Delete(IEntity entity, params object[]? args)
+            void IDeleteOperation.Delete(IEntity entity, params object?[]? args)
             {
                 using (HeavyProfiler.Log("Delete", () => Symbol.Symbol.Key))
                 {
@@ -655,7 +655,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current!.ToLite()
+                        User = UserHolder.Current?.ToLite()!,
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
@@ -700,7 +700,7 @@ namespace Signum.Engine.Operations
                 }
             }
 
-            protected virtual void OnDelete(T entity, object[]? args)
+            protected virtual void OnDelete(T entity, object?[]? args)
             {
                 Delete(entity, args);
             }

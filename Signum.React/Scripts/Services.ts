@@ -1,4 +1,4 @@
-import { ModelState } from './Signum.Entities'
+import { ModelState, isEntity } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
 
 export interface AjaxOptions {
@@ -16,9 +16,6 @@ export interface AjaxOptions {
   signal?: AbortSignal;
 }
 
-// use native browser implementation if it supports aborting
-const abortableFetch = ('signal' in new Request('')) ? window.fetch : fetch
-
 export function baseUrl(options: AjaxOptions): string {
   const baseUrl = window.__baseUrl;
 
@@ -35,18 +32,30 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
 }
 
 export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
-  return wrapRequest(options, () =>
-    abortableFetch(baseUrl(options), {
+
+  return wrapRequest(options, () => {
+
+    const cache = options.cache || "no-cache";
+    const isIE11 = !!window.MSInputMethodContext && !!(document as any).documentMode;
+
+    const headers = {
+      'Accept': 'application/json',
+      ...(cache == "no-cache" && isIE11 ? {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      } : undefined),
+      ...options.headers
+    } as any;
+
+    return fetch(baseUrl(options), {
       method: "GET",
-      headers: {
-        'Accept': 'application/json',
-        ...options.headers
-      } as any,
+      headers: headers,
       mode: options.mode,
       credentials: options.credentials || "same-origin",
       cache: options.cache || "no-cache",
       signal: options.signal
-    } as RequestInit));
+    } as RequestInit);
+  });
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
@@ -61,20 +70,24 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
     GraphExplorer.propagateAll(data);
   }
 
-  return wrapRequest(options, () =>
-    abortableFetch(baseUrl(options), {
+  return wrapRequest(options, () => {
+
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      ...options.headers
+    } as any;
+
+    return fetch(baseUrl(options), {
       method: "POST",
       credentials: options.credentials || "same-origin",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...options.headers
-      } as any,
+      headers: headers,
       mode: options.mode,
       cache: options.cache || "no-cache",
       body: JSON.stringify(data),
       signal: options.signal
-    } as RequestInit));
+    } as RequestInit);
+  });
 }
 
 
@@ -189,15 +202,29 @@ let a = document.createElement("a");
 document.body.appendChild(a);
 a.style.display = "none";
 
+export function saveFile(response: Response, overrideFileName?: string) {
 
-export function saveFile(response: Response) {
-  const contentDisposition = response.headers.get("Content-Disposition")!;
-  const fileNamePart = contentDisposition.split(";").filter(a => a.trim().startsWith("filename=")).singleOrNull();
-  const fileName = fileNamePart ? fileNamePart.trim().after("filename=").trimStart("\"").trimEnd("\"") : "file.dat";
+  var fileName = overrideFileName || getFileName(response);
 
   response.blob().then(blob => {
     saveFileBlob(blob, fileName);
   });
+}
+
+export function getFileName(response: Response) {
+  const contentDisposition = response.headers.get("Content-Disposition")!;
+  const parts = contentDisposition.split(";");
+
+  const fileNamePartUTF8 = parts.filter(a => a.trim().startsWith("filename*=")).singleOrNull();
+  const fileNamePartAscii = parts.filter(a => a.trim().startsWith("filename=")).singleOrNull();
+
+  if (fileNamePartUTF8)
+    return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''").trimEnd("\""));
+
+  if (fileNamePartAscii)
+    return fileNamePartAscii.trim().after("filename=").trimStart("\"").trimEnd("\"");
+  else
+    return "file.dat";
 }
 
 export function saveFileBlob(blob: Blob, fileName: string) {

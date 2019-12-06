@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as moment from 'moment'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
@@ -26,6 +26,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   customClass?: string;
   customStyle?: React.CSSProperties;
   format?: string;
+  throwIfNotFindable?: boolean;
   avoidNotifyPendingRequest?: boolean;
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
@@ -42,7 +43,7 @@ function getQueryRequest(fo: FindOptionsParsed, valueToken?: string | QueryToken
   return {
     queryKey: fo.queryKey,
     filters: toFilterRequests(fo.filterOptions),
-    valueToken: valueToken && valueToken.toString(),
+    valueToken: valueToken?.toString(),
     systemTime: fo.systemTime && { ...fo.systemTime }
   };
 }
@@ -59,8 +60,6 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     this.state = { value: props.initialValue };
   }
 
-  
-
   componentDidMount() {
     if (this.props.initialValue == undefined) {
       this.loadToken(this.props);
@@ -71,7 +70,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   componentWillReceiveProps(newProps: ValueSearchControlProps) {
 
     function toString(token: string | QueryTokenString<any> | undefined) {
-      return token && token.toString();
+      return token?.toString();
     }
 
     if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
@@ -110,7 +109,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, avoidNotify: boolean | undefined }, number>(
     (abortSignal, a) =>
       Finder.getQueryDescription(a.findOptions.queryName)
-        .then(qd => Finder.parseFindOptions(a.findOptions, qd))
+        .then(qd => Finder.parseFindOptions(a.findOptions, qd, false))
         .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken), a.avoidNotify, abortSignal)));
 
   refreshValue(props?: ValueSearchControlProps) {
@@ -119,16 +118,20 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     var fo = props.findOptions;
 
-    if (!Finder.isFindable(fo.queryName, false))
+    if (!Finder.isFindable(fo.queryName, false)) {
+      if (this.props.throwIfNotFindable)
+        throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
       return;
+    }
 
     if (Finder.validateNewEntities(fo))
       return;
 
     this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest })
       .then(value => {
-        this.setState({ value });
-        this.props.onValueChange && this.props.onValueChange(value);
+        const fixedValue = value === undefined ? null : value;
+        this.setState({ value: fixedValue });
+        this.props.onValueChange && this.props.onValueChange(fixedValue);
       })
       .done();
   }
@@ -174,7 +177,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     );
 
     if (p.formControlClass)
-      return <p className={className} style={p.customStyle}>{this.renderValue()}</p>
+      return <div className={className} style={p.customStyle}>{this.renderValue()}</div>
 
     if (p.isLink) {
       return (
@@ -207,10 +210,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     switch (token.filterType) {
       case "Integer":
       case "Decimal":
-        const numbroFormat = toNumbroFormat(this.props.format || token.format);
+        const numbroFormat = toNumbroFormat(this.props.format ?? token.format);
         return numbro(value).format(numbroFormat);
       case "DateTime":
-        const momentFormat = toMomentFormat(this.props.format || token.format);
+        const momentFormat = toMomentFormat(this.props.format ?? token.format);
         return moment(value).format(momentFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;

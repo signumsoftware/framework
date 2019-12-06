@@ -436,7 +436,8 @@ namespace Signum.Engine
 
             if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc)
                 return new DateTime(dt.Ticks, DateTimeKind.Utc);
-            return dt;
+
+            return new DateTime(dt.Ticks, DateTimeKind.Local);
         }
 
         public DateTime? GetNullableDateTime(int ordinal)
@@ -595,7 +596,7 @@ namespace Signum.Engine
             get
             {
                 string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".FormatWith(
-                    InnerException.Message, Ordinal, ColumnName, Row);
+                    InnerException!.Message, Ordinal, ColumnName, Row);
 
                 if (Projector != null)
                 {

@@ -73,9 +73,11 @@ namespace Signum.Engine.DynamicQuery
 
         private static void AssertExtensionMethod(MethodInfo mi)
         {
-            if (mi.DeclaringType.Assembly == typeof(Enumerable).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Csv).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Lite).Assembly)
+            var assembly = mi.DeclaringType!.Assembly;
+
+            if (assembly == typeof(Enumerable).Assembly ||
+                assembly == typeof(Csv).Assembly ||
+                assembly == typeof(Lite).Assembly)
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 
@@ -108,7 +110,7 @@ namespace Signum.Engine.DynamicQuery
             Expression<Func<KVP, V>> valueSelector,
             ResetLazy<HashSet<K>>? allKeys = null)
             where T : Entity
-            where K : object
+            where K : notnull
         {
             var mei = new ExtensionDictionaryInfo<T, KVP, K, V>(collectionSelector, keySelector, valueSelector,
                 allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector));
@@ -126,7 +128,7 @@ namespace Signum.Engine.DynamicQuery
                 ResetLazy<HashSet<K>>? allKeys = null)
             where T : Entity
             where M : ModifiableEntity
-            where K : object
+            where K : notnull
         {
             var mei = new ExtensionDictionaryInfo<M, KVP, K, V>(collectionSelector, keySelector, valueSelector,
                 allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector));
@@ -173,7 +175,7 @@ namespace Signum.Engine.DynamicQuery
     }
 
     public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
-        where K : object
+        where K : notnull
     {
         public ResetLazy<HashSet<K>> AllKeys;
 

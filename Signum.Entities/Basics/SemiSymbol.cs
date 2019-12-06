@@ -96,12 +96,8 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        static Expression<Func<SemiSymbol, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => this.Name);
 
         public static void SetFromDatabase<S>(Dictionary<string, S> fromDatabase)
             where S : SemiSymbol

@@ -259,7 +259,7 @@ namespace Signum.Engine.Operations
                 return base.OnCanDelete(entity);
             }
 
-            protected override void OnDelete(T entity, object[]? args)
+            protected override void OnDelete(T entity, object?[]? args)
             {
                 AssertGetState();
                 S oldState = Graph<T, S>.GetStateFunc(entity);
@@ -281,7 +281,7 @@ namespace Signum.Engine.Operations
             throw new InvalidOperationException("OperationGraphs should not be instantiated");
         }
 
-        static Expression<Func<T, S>> getState;
+        static Expression<Func<T, S>> getState = null!;
         public static Expression<Func<T, S>> GetState
         {
             get { return getState; }
@@ -292,11 +292,11 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static Func<T, S> GetStateFunc{get; private set;}
+        public static Func<T, S> GetStateFunc { get; private set; } = null!;
 
 
-        public static Action<T, S> EnterState { get; set; }
-        public static Action<T, S> ExitState { get; set; }
+        public static Action<T, S>? EnterState { get; set; }
+        public static Action<T, S>? ExitState { get; set; }
 
 
 
@@ -328,7 +328,7 @@ namespace Signum.Engine.Operations
 
                             foreach (var f in gOp.FromStates)
                                 foreach (var t in gOp.ToStates)
-                                    Add(f!.ToString(), t!.ToString(), item.OperationSymbol);
+                                    Add(f!.ToString()!, t!.ToString()!, item.OperationSymbol);
 
 
                         } break;
@@ -336,7 +336,7 @@ namespace Signum.Engine.Operations
                         {
                             Delete dOp = (Delete)item;
                             foreach (var f in dOp.FromStates)
-                                Add(f!.ToString(), "[Deleted]", item.OperationSymbol);
+                                Add(f!.ToString()!, "[Deleted]", item.OperationSymbol);
 
 
                         } break;
@@ -350,7 +350,7 @@ namespace Signum.Engine.Operations
 
                             var dtoState = (IGraphToStateOperation)item;
                             foreach (var t in dtoState.ToStates)
-                                Add(from, t!.ToString(), item.OperationSymbol);
+                                Add(from, t!.ToString()!, item.OperationSymbol);
 
                         } break;
                 }

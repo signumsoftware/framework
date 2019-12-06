@@ -24,13 +24,19 @@ namespace Signum.React.Filters
 {
     public class SignumExceptionFilterAttribute : IAsyncResourceFilter
     {
-       public static Func<Exception, bool> IncludeErrorDetails = ctx => true;
+        public static Func<Exception, bool> TranslateExceptionMessage = ex => ex is ApplicationException;
+
+        public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
         public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
 
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
+            //Eagerly reading the whole body just in case to avoid "Cannot access a disposed object" 
+            //TODO: Make it more eficiently when https://github.com/aspnet/AspNetCore/issues/14396
+            var body = ReadAllBody(precontext.HttpContext); 
+
             var context = await next();
 
             if (context.Exception != null)
@@ -52,21 +58,27 @@ namespace Signum.React.Filters
                         e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
                         e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress.ToString());
                         e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-                        e.User = UserHolder.Current?.ToLite();
+                        e.User = (UserHolder.Current ?? (IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
                         e.QueryString = Try(int.MaxValue, () => req.QueryString.ToString());
-                        e.Form = Try(int.MaxValue, () => ReadAllBody(context.HttpContext));
+                        e.Form = Try(int.MaxValue, () => Encoding.UTF8.GetString(body));
                         e.Session = null;
                     });
-
+                    
                     if (ExpectsJsonResult(context))
                     {
-                        var error = new HttpError(context.Exception,IncludeErrorDetails(context.Exception));
 
-                        var response = context.HttpContext.Response;
-                        response.StatusCode = (int)statusCode;
-                        response.ContentType = "application/json";
-                        await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
-                        context.ExceptionHandled = true;
+                        var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
+
+                        using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
+                        {
+                            var error = new HttpError(context.Exception, IncludeErrorDetails(context.Exception));
+
+                            var response = context.HttpContext.Response;
+                            response.StatusCode = (int)statusCode;
+                            response.ContentType = "application/json";
+                            await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                            context.ExceptionHandled = true;
+                        }
                     }
                 }
             }
@@ -95,10 +107,12 @@ namespace Signum.React.Filters
             return false;
         };
 
-        public string ReadAllBody(HttpContext httpContext)
+        public byte[] ReadAllBody(HttpContext httpContext)
         {
+            httpContext.Request.EnableBuffering();
+            var result = httpContext.Request.Body.ReadAllBytes();
             httpContext.Request.Body.Seek(0, System.IO.SeekOrigin.Begin);
-            return Encoding.UTF8.GetString(httpContext.Request.Body.ReadAllBytes());
+            return result;
         }
 
         private HttpStatusCode GetStatus(Type type)
@@ -107,7 +121,7 @@ namespace Signum.React.Filters
                 return HttpStatusCode.Forbidden;
 
             if (type == typeof(AuthenticationException))
-                return HttpStatusCode.Unauthorized;
+                return HttpStatusCode.Forbidden; // Unauthorized produces Login Password dialog in Mixed mode
 
             if (type == typeof(EntityNotFoundException))
                 return HttpStatusCode.NotFound;
@@ -126,7 +140,7 @@ namespace Signum.React.Filters
         public HttpError(Exception e, bool includeErrorDetails = true)
         {
             this.ExceptionMessage = e.Message;
-            this.ExceptionType = e.GetType().FullName;
+            this.ExceptionType = e.GetType().FullName!;
             if (includeErrorDetails)
             {
                 this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();

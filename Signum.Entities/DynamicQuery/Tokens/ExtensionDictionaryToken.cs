@@ -8,7 +8,7 @@ namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
     public class ExtensionDictionaryToken<T, K, V> : QueryToken
-        where K : object
+        where K : notnull
     {
         QueryToken parent;
         public override QueryToken? Parent => parent;
@@ -32,12 +32,12 @@ namespace Signum.Entities.DynamicQuery
         
         public override string ToString()
         {
-            return "[" + (((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
+            return "[" + (keyValue is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
         }
 
         public override string NiceName()
         {
-            return ((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString();
+            return keyValue is Enum e ? e.NiceToString() : keyValue.ToString()!;
         }
 
         public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); } }

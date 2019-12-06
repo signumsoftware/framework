@@ -4,11 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Signum.Analyzer</PackageId>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>2.5.0</PackageVersion>
     <Authors>Olmo del Corral</Authors>
     <PackageProjectUrl>http://www.signumframework.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/signumsoftware/framework</RepositoryUrl>
@@ -18,25 +19,20 @@
     <PackageTags>Signum.Analyzer, analyzers</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <Version>2.0.0</Version>
+    <Version>2.5.0</Version>
     <PackageIconUrl>https://raw.githubusercontent.com/signumsoftware/framework/master/SignumLogo.png</PackageIconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="bin\**" />
-    <EmbeddedResource Remove="bin\**" />
-    <None Remove="bin\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.3" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.1.0-beta1-19102-01" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.7" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.3.1" PrivateAssets="all" />
     <PackageReference Update="NETStandard.Library" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
 </Project>

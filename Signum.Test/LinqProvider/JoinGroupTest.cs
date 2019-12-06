@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
@@ -140,7 +140,7 @@ namespace Signum.Test.LinqProvider
                              join b in Database.View<MyTempView>() on a.ToLite() equals b.Artist into g
                              select a.ToLite()).ToList();
 
-                Assert.True(artists.All(a => a.ToString().StartsWith("M")));
+                Assert.True(artists.All(a => a.ToString()!.StartsWith("M")));
 
                 var list1 = Database.View<MyTempView>().ToList();
                 var list2 = Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).ToList();

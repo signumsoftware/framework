@@ -20,7 +20,7 @@ namespace Signum.Entities
         /// </summary>
         public Symbol(Type declaringType, string fieldName)
         {
-            this.fieldInfo = declaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            this.fieldInfo = declaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
             if (this.fieldInfo == null)
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
@@ -63,19 +63,15 @@ namespace Signum.Entities
         [StringLengthValidator(Min = 3, Max = 200)]
         public string Key { get; set; }
 
-        static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => this.Key);
 
         public bool BaseEquals(object obj)
         {
             return base.Equals(obj);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Symbol &&
                 obj.GetType() == this.GetType() &&

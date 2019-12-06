@@ -1,13 +1,15 @@
 import * as React from 'react'
-import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString, isEntity } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { TypeReference } from '../Reflection'
-import { EntityBase, EntityBaseProps } from './EntityBase'
+import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FormGroup } from './FormGroup'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
+import { useController } from './LineBase'
+import { useMounted } from '../Hooks'
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -19,81 +21,26 @@ export interface EntityComboProps extends EntityBaseProps {
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
 }
 
-export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
+export class EntityComboController extends EntityBaseController<EntityComboProps> {
 
-  calculateDefaultState(state: EntityComboProps) {
-    state.remove = false;
-    state.create = false;
-    state.view = false;
-    state.viewOnCreate = true;
-    state.find = false;
+  getDefaultProps(p: EntityComboProps) {
+    p.remove = false;
+    p.create = false;
+    p.view = false;
+    p.viewOnCreate = true;
+    p.find = false;
   }
 
-  componentDidMount() {
-    if (this.props.initiallyFocused)
-      setTimeout(() => {
-        let select = this.entityComboSelect && this.entityComboSelect.select;
-        if (select) {
-          select.focus();
-        }
-      }, 0);
-  }
-
-  entityComboSelect?: EntityComboSelect | null;
-
-  renderInternal() {
-    const s = this.state;
-
-    const hasValue = !!s.ctx.value;
-
-    const buttons = (
-      <span className="input-group-append">
-        {!hasValue && this.renderCreateButton(true)}
-        {!hasValue && this.renderFindButton(true)}
-        {hasValue && this.renderViewButton(true, this.state.ctx.value!)}
-        {hasValue && this.renderRemoveButton(true, this.state.ctx.value!)}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </span>
-    );
-
-    return (
-      <FormGroup ctx={s.ctx}
-        labelText={s.labelTextWithData == null ? s.labelText : s.labelTextWithData(this.props.data || this.entityComboSelect && this.entityComboSelect.state.data)}
-        helpText={s.helpText}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
-        labelHtmlAttributes={s.labelHtmlAttributes} >
-        <div className="SF-entity-combo">
-          <div className={EntityBase.hasChildrens(buttons) ? s.ctx.inputGroupClass : undefined}>
-            <EntityComboSelect
-              ref={ecs => this.entityComboSelect = ecs}
-              ctx={s.ctx}
-              onChange={this.handleOnChange}
-              type={s.type!}
-              data={s.data}
-              findOptions={s.findOptions}
-              onDataLoaded={s.labelTextWithData == null ? undefined : () => this.forceUpdate()}
-              mandatoryClass={this.mandatoryClass}
-              refreshKey={s.refreshKey}
-              selectHtmlAttributes={s.selectHtmlAttributes}
-            />
-            {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-          </div>
-        </div>
-      </FormGroup>
-    );
-  }
 
   doView(entity: ModifiableEntity | Lite<Entity>) {
-    var promise = super.doView(entity);
+    var promise = super.doView(entity) ?? Promise.resolve(undefined);
 
     if (this.props.refreshKey == null) {
-      if (promise == null)
-        this.setState({ refreshKey: new Date().getTime().toString() });
-      else
-        promise = promise.then(a => {
-          this.setState({ refreshKey: new Date().getTime().toString() });
-          return a;
-        });
+      promise = promise.then(a => {
+        this.props.refreshKey = new Date().getTime().toString();
+        this.forceUpdate();
+        return a;
+      });
     }
 
     return promise;
@@ -109,6 +56,64 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
   }
 }
 
+export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(props: EntityComboProps, ref: React.Ref<EntityComboController>) {
+
+  const c = useController(EntityComboController, props, ref);
+  const p = c.props;
+  const hasValue = !!c.props.ctx.value;
+  const comboRef = React.useRef<EntityComboHandle>(null);
+
+  React.useEffect(() => {
+    if (p.initiallyFocused)
+      setTimeout(() => {
+        let select = comboRef.current && comboRef.current.getSelect(); 
+        if (select) {
+          select.focus();
+        }
+      }, 0);
+  }, []);
+
+  if (c.isHidden)
+    return null;
+
+  const buttons = (
+    <span className="input-group-append">
+      {!hasValue && c.renderCreateButton(true)}
+      {!hasValue && c.renderFindButton(true)}
+      {hasValue && c.renderViewButton(true, c.props.ctx.value!)}
+      {hasValue && c.renderRemoveButton(true, c.props.ctx.value!)}
+      {c.props.extraButtons && c.props.extraButtons(c)}
+    </span>
+  );
+
+  return (
+    <FormGroup ctx={c.props.ctx}
+      labelText={p.labelTextWithData == null ? p.labelText : p.labelTextWithData(c.props.data || comboRef.current && comboRef.current.getData())}
+      helpText={p.helpText}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
+      labelHtmlAttributes={p.labelHtmlAttributes} >
+      <div className="sf-entity-combo">
+        <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
+          <EntityComboSelect
+            ref={comboRef}
+            ctx={p.ctx}
+            onChange={c.handleOnChange}
+            type={p.type!}
+            data={p.data}
+            findOptions={p.findOptions}
+            onDataLoaded={p.labelTextWithData == null ? undefined : () => c.forceUpdate()}
+            mandatoryClass={c.mandatoryClass}
+            refreshKey={p.refreshKey}
+            selectHtmlAttributes={p.selectHtmlAttributes}
+            liteToString={p.liteToString}
+          />
+          {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
+        </div>
+      </div>
+    </FormGroup>
+  );
+}), (prev, next) => EntityBaseController.propEquals(prev, next));
+
 export interface EntityComboSelectProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   onChange: (lite: Lite<Entity> | null) => void;
@@ -119,127 +124,122 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | undefined) => void;
   refreshKey?: string;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  liteToString?: (e: Entity) => string;
 }
 
+
+export interface  EntityComboHandle {
+  getSelect(): HTMLSelectElement | null;
+  getData(): Lite<Entity>[] | undefined;
+}
 //Extracted to another component
-class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?: Lite<Entity>[] }>{
+export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: EntityComboSelectProps, ref: React.Ref<EntityComboHandle>) {
 
-  constructor(props: EntityComboSelectProps) {
-    super(props);
-    this.state = { data: props.data };
-  }
+  const [data, _setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  const requestStarted = React.useRef(false);
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+  const mounted = useMounted();
 
-  componentWillMount() {
-    if (this.state.data == null)
-      this.reloadData(this.props);
-  }
+  React.useImperativeHandle(ref, () => ({
+    getData: () => data,
+    getSelect: () => selectRef.current
+  }));
 
-  componentWillReceiveProps(newProps: EntityComboSelectProps, newContext: any) {
-    if (newProps.data) {
-      if (this.props.data == null)
-        console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
-
-      this.setState({ data: newProps.data });
-    } else {
-      if (EntityComboSelect.getFindOptions(newProps.findOptions) != EntityComboSelect.getFindOptions(this.props.findOptions) ||
-        newProps.type.name != this.props.type.name ||
-        newProps.refreshKey != this.props.refreshKey)
-        this.reloadData(newProps);
+  function setData(data: Lite<Entity>[]) {
+    if (mounted.current) {
+      _setData(data);
+      if (p.onDataLoaded)
+        p.onDataLoaded(data);
     }
   }
 
-  static getFindOptions(fo: FindOptions | undefined) {
-    if (fo == undefined)
-      return undefined;
+  React.useEffect(() => {
+    if (p.data) {
+      if (requestStarted.current)
+        console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${p.type!.name}`);
+      setData(p.data);
+    } else {
+      requestStarted.current = true;
+      const fo = p.findOptions;
+      if (fo) {
+        Finder.expandParentColumn(fo);
+        var limit = fo?.pagination?.elementsPerPage ?? 999;
+        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
+          .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
+          .done();
+      }
+      else
+        Finder.API.fetchAllLites({ types: p.type!.name })
+          .then(data => setData(data.orderBy(a => a)))
+          .done();
+    }
+  }, [p.data, p.type.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
-    return Finder.findOptionsPath(fo);
-  }
+  const lite = getLite();
 
-  select?: HTMLSelectElement | null;
+  const ctx = p.ctx;
 
-  render() {
+  if (ctx.readOnly)
+    return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
 
-    const lite = this.getLite();
+  return (
+    <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
+      disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
+      {renderOptions()}
+    </select>
+  );
 
-    const ctx = this.props.ctx;
 
-    if (ctx.readOnly)
-      return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(ctx.value)}</FormControlReadonly>;
-
-    return (
-      <select className={classes(ctx.formControlClass, this.props.mandatoryClass)} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""}
-        disabled={ctx.readOnly} {...this.props.selectHtmlAttributes} ref={s => this.select = s} >
-        {this.renderOptions()}
-      </select>
-    );
-  }
-
-  handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  function handleOnChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const current = event.currentTarget as HTMLSelectElement;
 
-    if (current.value != this.getLiteKey()) {
-      if (!current.value) {
-        this.props.onChange(null);
-      } else {
-        const lite = this.state.data!.filter(a => liteKey(a) == current.value).single();
+    const lite = getLite();
 
-        this.props.onChange(lite);
+    if (current.value != (lite ? liteKey(lite) : undefined)) {
+      if (!current.value) {
+        p.onChange(null);
+      } else {
+        const liteFromData = data!.filter(a => liteKey(a) == current.value).single();
+        p.onChange(liteFromData);
       }
     }
   }
 
-  getLite() {
-    const v = this.props.ctx.value;
+  function getLite() {
+    const v = p.ctx.value;
     if (v == undefined)
       return undefined;
 
-    if ((v as Entity).Type)
-      return toLite(v as Entity);
+    if (isEntity(v))
+      return toLite(v, v.isNew, p.liteToString && p.liteToString(v));
 
     return v as Lite<Entity>;
   }
 
-  getLiteKey() {
-    const lite = this.getLite();
+  function renderOptions() {
 
-    return lite ? liteKey(lite) : undefined;
-  }
-
-  renderOptions() {
-
-    if (this.state.data == undefined)
+    if (data == undefined)
       return undefined;
 
-    const lite = this.getLite();
+    const lite = getLite();
 
-    const elements = [undefined, ...this.state.data];
-    if (lite && !elements.some(a => is(a, lite)))
-      elements.insertAt(1, lite);
+    const elements = [undefined, ...data];
+
+    if (lite) {
+      var index = elements.findIndex(a => is(a, lite));
+      if (index == -1)
+        elements.insertAt(1, lite);
+      else
+        elements[index] = lite;
+    }
 
     return (
-      elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e) : " - "}</option>)
+      elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, p.liteToString) : " - "}</option>)
     );
   }
+});
 
-  reloadData(props: EntityComboSelectProps) {
-    const fo = props.findOptions;
-    if (fo) {
-      Finder.expandParentColumn(fo);
-      var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
-      Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
-        .then(data => this.setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
-        .done();
-    }
-    else
-      Finder.API.fetchAllLites({ types: this.props.type!.name })
-        .then(data => this.setData(data.orderBy(a => a)))
-        .done();
-  }
 
-  setData(data: Lite<Entity>[]) {
-    this.setState({ data: data });
-    if (this.props.onDataLoaded)
-      this.props.onDataLoaded(data);
-  }
-}
+
+
 

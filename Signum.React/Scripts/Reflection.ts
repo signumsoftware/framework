@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import * as numbro from 'numbro';
+import numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -50,6 +50,7 @@ export interface MemberInfo {
   required?: boolean;
   maxLength?: number;
   isMultiline?: boolean;
+  isVirtualMList?: boolean;
   preserveOrder?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
@@ -59,10 +60,10 @@ export interface OperationInfo {
   key: string,
   niceName: string;
   operationType: OperationType;
-  canBeNew: boolean;
-  canBeModified: boolean;
-  hasCanExecute: boolean;
-  hasStates: boolean;
+  canBeNew?: boolean;
+  canBeModified?: boolean;
+  hasCanExecute?: boolean;
+  hasStates?: boolean;
 }
 
 export enum OperationType {
@@ -172,7 +173,7 @@ export function dateToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var m = moment(val, moment.ISO_8601);
+  var m = moment(val);
   return m.format(toMomentFormat(format));
 }
 
@@ -636,7 +637,10 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
     return new ReadonlyBinding<any>(parentValue, "");
   var suffix = "";
   let val = parentValue;
-  for (let i = 0; i < lambdaMembers.length - 1; i++) {
+
+  var lastIsIndex = lambdaMembers[lambdaMembers.length - 1].type == "Indexer";
+
+  for (let i = 0; i < lambdaMembers.length - (lastIsIndex ? 2 : 1); i++) {
     const member = lambdaMembers[i];
     switch (member.type) {
 
@@ -646,7 +650,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
         break;
       case "Mixin":
         val = val.mixins[member.name];
-        suffix += ".mixins[" + member.name + "].element";
+        suffix += ".mixins[" + member.name + "]";
+        break;
+      case "Indexer":
+        val = val[parseInt(member.name)];
+        suffix += "[" + member.name + "].element";
         break;
       default: throw new Error("Unexpected " + member.type);
 
@@ -657,7 +665,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
   switch (lastMember.type) {
 
     case "Member": return new Binding(val, lastMember.name, suffix + "." + lastMember.name);
-    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "].element");
+    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "]");
+    case "Indexer":
+      const preLastMember = lambdaMembers[lambdaMembers.length - 2];
+      var binding = new Binding<MList<any>>(val, preLastMember.name, suffix + "." + preLastMember.name)
+      return new MListElementBinding(binding, parseInt(lastMember.name));
     default: throw new Error("Unexpected " + lastMember.type);
   }
 }
@@ -845,6 +857,11 @@ function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MLis
 
   var elemPr = PropertyRoute.mlistItem(propertyRoute);
 
+  if (propertyRoute.member!.isVirtualMList) {
+    
+    return mlist.map(mle => ({ rowId: null, element: clone(mle.element as any as Entity, elemPr) as any as T }));
+  }
+
   return mlist.map(mle => ({ rowId: null, element: cloneIfNeeded(mle.element, elemPr) as T }));
 }
 
@@ -988,9 +1005,12 @@ export class Type<T extends ModifiableEntity> implements IType {
    * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc) but this method works in the common simple cases*/
   token(): QueryTokenString<T>;
   token<S>(lambdaToColumn: (v: T) => S) : QueryTokenString<S>;
-  token(lambdaToColumn?: Function): QueryTokenString<any> {
+  token<S>(columnName: string) : QueryTokenString<S>;
+  token(lambdaToColumn?: ((a: any) => any) | string): QueryTokenString<any> {
     if (lambdaToColumn == null)
       return new QueryTokenString("");
+    else if (typeof lambdaToColumn == "string")
+      return new QueryTokenString(lambdaToColumn);
     else
       return new QueryTokenString(tokenSequence(lambdaToColumn));
   }
@@ -1078,8 +1098,8 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
   }
 
-  count(): QueryTokenString<number> {
-    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count");
+  count(option?: "Distinct" | "Null" | "NotNull"): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count" + ((option == undefined) ? "" : option));
   }
 
   min(): QueryTokenString<T> {
@@ -1189,6 +1209,9 @@ let missingSymbols: ISymbol[] = [];
 
 function getMember(key: string): MemberInfo | undefined {
 
+  if (!key.contains("."))
+    return undefined;
+
   const type = _types[key.before(".").toLowerCase()];
 
   if (!type)
@@ -1199,11 +1222,16 @@ function getMember(key: string): MemberInfo | undefined {
   return member;
 }
 
-export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
+export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) : string {
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
-    return getMember((symbol as Entity & ISymbol).key)!.niceName;
-  else
-    return getMember(symbol.toStr!)!.niceName;
+  {
+    var m = getMember((symbol as Entity & ISymbol).key);
+    return m && m.niceName || symbol.toStr!;
+  }
+  else {
+    var m = getMember(symbol.toStr!);
+    return m && m.niceName || symbol.toStr!;
+  }
 }
 
 export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string) { //Unsafe Type!
@@ -1370,6 +1398,8 @@ export class PropertyRoute {
 
   addMember(memberType: MemberType, memberName: string): PropertyRoute {
 
+    var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
+
     if (memberType == "Member") {
 
       if (this.propertyRouteType == "Field" ||
@@ -1384,16 +1414,16 @@ export class PropertyRoute {
           return PropertyRoute.liteEntity(this);
         }
 
-        const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
+        const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
           const m = ti.members[memberName];
           if (!m)
-            throw new Error(`member '${memberName}' not found`);
+            throw new Error(`member '${memberName}' not found` + getErrorContext());
 
           return PropertyRoute.member(PropertyRoute.root(ti), m);
         } else if (this.propertyRouteType == "LiteEntity") {
-          throw Error("Unexpected lite case");
+          throw Error("Unexpected lite case" + getErrorContext());
         }
       }
 
@@ -1403,30 +1433,30 @@ export class PropertyRoute {
 
       const m = this.findRootType().members[fullMemberName];
       if (!m)
-        throw new Error(`member '${fullMemberName}' not found`)
+        throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
 
       return PropertyRoute.member(this, m);
     }
 
     if (memberType == "Mixin") {
       if (this.propertyRouteType != "Root")
-        throw new Error("invalid mixin at this stage");
+        throw new Error("invalid mixin at this stage" + getErrorContext());
 
       return PropertyRoute.mixin(this, memberName);
     }
 
     if (memberType == "Indexer") {
       if (this.propertyRouteType != "Field")
-        throw new Error("invalid indexer at this stage");
+        throw new Error("invalid indexer at this stage" + getErrorContext());
 
       const tr = this.typeReference();
       if (!tr.isCollection)
-        throw new Error(`${this.propertyPath()} is not a collection`);
+        throw new Error("${this.propertyPath()} is not a collection" + getErrorContext());
 
       return PropertyRoute.mlistItem(this);
     }
 
-    throw new Error("not implemented");
+    throw new Error("not implemented" + getErrorContext());
   }
 
   static generateAll(type: PseudoType): PropertyRoute[] {

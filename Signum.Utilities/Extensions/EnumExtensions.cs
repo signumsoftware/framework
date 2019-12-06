@@ -108,24 +108,24 @@ namespace Signum.Utilities
         public static T? GetByCode<T>(string code)
             where T: struct, Enum
         {
-            return (T?)(object)EnumFieldCache.Get(typeof(T))
-                .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code == code)
+            return (T?)(object?)EnumFieldCache.Get(typeof(T))
+                .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>()!.Code == code)
                 .Select(kvp => kvp.Key)
                 .SingleOrDefaultEx();
         }
 
-        public static string GetCode<T>(string key)
+        public static string? GetCode<T>(string key)
         {
             return (EnumFieldCache.Get(typeof(T))
                 .Where(kvp => kvp.Key.NiceToString() == key)
-                .Select(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code))
+                .Select(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>()!.Code))
                 .SingleOrDefaultEx();
         }
 
         public static IComparable GetUnderlyingValue(Enum value)
         {
             Type type = Enum.GetUnderlyingType(value.GetType());
-            return (IComparable)Convert.ChangeType(value, type);
+            return (IComparable)Convert.ChangeType(value, type)!;
         }
     }
 
@@ -160,7 +160,7 @@ namespace Signum.Utilities
             if (!type.IsEnum)
                 throw new ArgumentException("{0} is not an Enum".FormatWith(type));
 
-            return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionaryEx(fi => (Enum)fi.GetValue(null), fi => fi));
+            return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionaryEx(fi => (Enum)fi.GetValue(null)!, fi => fi));
         }
     }
 

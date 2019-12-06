@@ -53,14 +53,14 @@ namespace Signum.Entities
             this.VariableName = variableName;
         }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return Object.ToString();
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return obj is PrimaryKey && this.Equals((PrimaryKey)obj);
+            return obj is PrimaryKey pk && this.Equals(pk);
         }
 
         public override int GetHashCode()
@@ -76,9 +76,9 @@ namespace Signum.Entities
             return other.Object.Equals(this.Object);
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
-            return CompareTo((PrimaryKey)obj);
+            return CompareTo((PrimaryKey)obj!);
         }
 
         public int CompareTo(PrimaryKey other)
@@ -280,7 +280,7 @@ namespace Signum.Entities
             {
                 switch (item.Name)
                 {
-                    case "Object": this.Object = (IComparable)item.Value; break;
+                    case "Object": this.Object = (IComparable)item.Value!; break;
                 }
             }
 

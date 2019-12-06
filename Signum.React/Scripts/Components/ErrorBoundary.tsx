@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 
 interface ErrorBoundaryProps {
 }
@@ -30,6 +30,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         </div>
       );
     }
-    return this.props.children || null;
+    return this.props.children ?? null;
   }
 }

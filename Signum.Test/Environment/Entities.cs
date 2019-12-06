@@ -73,23 +73,14 @@ namespace Signum.Test.Environment
 
         public Status? Status { get; set; }
 
-        static Expression<Func<ArtistEntity, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
-        [ExpressionField]
-        public bool IsMale
-        {
-            get { return IsMaleExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool IsMale => As.Expression(() => Sex == Sex.Male);
 
         [ImplementedByAll]
         public AwardEntity? LastAward { get; set; }
 
-        static Expression<Func<ArtistEntity, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
-            a => a.Friends;
-        [ExpressionField]
-        public IEnumerable<Lite<Entity>> FriendsCovariant()
-        {
-            return FriendsCovariantExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IEnumerable<Lite<Entity>> FriendsCovariant() => As.Expression(() => (IEnumerable<Lite<Entity>>)Friends);
 
         public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
 
@@ -98,28 +89,14 @@ namespace Signum.Test.Environment
         public MList<AwardNominationEntity> Nominations { get; set; } = new MList<AwardNominationEntity>();
 
 
-        static Expression<Func<ArtistEntity, string>> FullNameExpression =
-             a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
-        [ExpressionField]
-        public string FullName
-        {
-            get { return FullNameExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FullName => As.Expression(() => Name + (Dead ? " Dead" : "") + (IsMale ? " Male" : " Female"));
 
-        static Expression<Func<ArtistEntity, bool>> LonelyExpression =
-            a => !a.Friends.Any();
-        [ExpressionField]
-        public bool Lonely()
-        {
-            return LonelyExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public bool Lonely() => As.Expression(() => !Friends.Any());
 
-        static Expression<Func<ArtistEntity, string>> ToStringExpression = a => a.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -139,13 +116,8 @@ namespace Signum.Test.Environment
 
     public static class SexExtensions
     {
-        public static Expression<Func<Sex, bool>> IsDefinedExpression = s => s == Sex.Male || s == Sex.Female;
-        [ExpressionField()]
-
-        public static bool IsDefined(this Sex s)
-        {
-            return IsDefinedExpression.Evaluate(s);
-        }
+        [AutoExpressionField]
+        public static bool IsDefined(this Sex s) => As.Expression(() => s == Sex.Male || s == Sex.Female);
     }
 
     public enum Status
@@ -169,28 +141,14 @@ namespace Signum.Test.Environment
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
         public MList<AwardEntity> OtherAwards { get; set; } = new MList<AwardEntity>();
 
-        static Expression<Func<BandEntity, string>> FullNameExpression =
-            b => b.Name + " (" + b.Members.Count + " members)";
-        [ExpressionField]
-        public string FullName
-        {
-            get { return FullNameExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FullName => As.Expression(() => Name + " (" + Members.Count + " members)");
 
-        static Expression<Func<BandEntity, bool>> LonelyExpression =
-            b => !b.Members.Any();
-        [ExpressionField]
-        public bool Lonely()
-        {
-            return LonelyExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public bool Lonely() => As.Expression(() => !Members.Any());
 
-        static Expression<Func<BandEntity, string>> ToStringExpression = a => a.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -252,12 +210,8 @@ namespace Signum.Test.Environment
         [UniqueIndex]
         public SqlHierarchyId Node { get; set; }
 
-        static Expression<Func<LabelEntity, string>> ToStringExpression = a => a.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -304,12 +258,8 @@ namespace Signum.Test.Environment
 
         string? ISecretContainer.Secret { get; set; }
 
-        static Expression<Func<AlbumEntity, string>> ToStringExpression = a => a.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     public interface ISecretContainer
@@ -357,12 +307,8 @@ namespace Signum.Test.Environment
 
         public int Index { get; set; }
 
-        static Expression<Func<SongEmbedded, string>> ToStringExpression = a => a.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
@@ -462,11 +408,7 @@ END");
 
         public Lite<FolderEntity>? Parent { get; set; }
 
-        static Expression<Func<FolderEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 }

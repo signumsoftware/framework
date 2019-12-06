@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine
 {
@@ -80,9 +81,7 @@ namespace Signum.Engine
                 get{return retriever != null; }
             }
 
-
-
-            internal bool TryGetValue((Type type, PrimaryKey id) tuple, out Entity result)
+            internal bool TryGetValue((Type type, PrimaryKey id) tuple, [NotNullWhen(true)]out Entity? result)
             {
                 return dic.TryGetValue(tuple, out result);
             }
@@ -195,16 +194,8 @@ namespace Signum.Engine
 
         static class Constructor<T> where T : Entity
         {
-            static Func<T> call;
-            public static Func<T> Call
-            {
-                get
-                {
-                    if (call == null)
-                        call = Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
-                    return call;
-                }
-            }
+            static Func<T>? call;
+            public static Func<T> Call => call ??= Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
         }
     }
 

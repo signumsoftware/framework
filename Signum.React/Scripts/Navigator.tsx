@@ -16,7 +16,7 @@ import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
-import ButtonBar from "./Frames/ButtonBar";
+import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 
@@ -131,7 +131,7 @@ export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: st
     throw new Error("No Id");
 
   const es = getSettings(typeName);
-  if (es && es.onNavigateRoute)
+  if (es?.onNavigateRoute)
     return es.onNavigateRoute(typeName, id!, viewName);
   else
     return navigateRouteDefault(typeName, id!, viewName);
@@ -152,7 +152,7 @@ export const clearSettingsActions: Array<() => void> = [
   clearEntitySettings,
   Finder.clearQuerySettings,
   Finder.ButtonBarQuery.clearButtonBarElements,
-  ButtonBar.clearButtonBarRenderer,
+  ButtonBarManager.clearButtonBarRenderer,
   Operations.clearOperationSettings,
   clearWidgets,
   clearContextualItems
@@ -201,17 +201,17 @@ export interface ViewDispatcher {
 export class BasicViewDispatcher implements ViewDispatcher {
   hasDefaultView(typeName: string) {
     const es = getSettings(typeName);
-    return (es && es.getViewPromise) != null;
+    return (es?.getViewPromise) != null;
   }
 
   getViewNames(typeName: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
+    return Promise.resolve((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
   }
 
   getViewOverrides(typeName: string, viewName?: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || []);
+    return Promise.resolve(es?.viewOverrides?.filter(a => a.viewName == viewName) ?? []);
   }
 
 
@@ -248,12 +248,12 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
 
   getViewNames(typeName: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.namedViews && Dic.getKeys(es.namedViews) || []);
+    return Promise.resolve((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
   }
 
   getViewOverrides(typeName: string, viewName?: string) {
     const es = getSettings(typeName);
-    return Promise.resolve(es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || []);
+    return Promise.resolve(es?.viewOverrides?.filter(a => a.viewName == viewName) ?? []);
   }
 
   getViewPromise(entity: ModifiableEntity, viewName?: string) {
@@ -261,7 +261,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
 
     if (viewName == undefined) {
 
-      if (!es || !es.getViewPromise)
+      if (es?.getViewPromise == null)
         return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
 
       return es.getViewPromise(entity).applyViewOverrides(entity.Type);
@@ -345,17 +345,16 @@ function typeIsCreable(typeName: string): EntityWhen {
 
 export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>) => boolean> = [];
 
-export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>) {
+export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, ignoreTypeIsReadonly: boolean = false) {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsReadOnly = typeIsReadOnly(typeName);
+  const baseIsReadOnly = ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName);
 
   return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
 }
-
 
 function typeIsReadOnly(typeName: string): boolean {
 
@@ -532,7 +531,7 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   if (types.length == 1) {
     var s = getSettings(types[0]);
 
-    if (s && s.findOptions) {
+    if (s?.findOptions) {
       return s.findOptions;
     }
   }
@@ -540,14 +539,16 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   return undefined;
 }
 
-export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutocompleteConfig<any> | null {
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType?: boolean): AutocompleteConfig<any> | null {
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
   var config: AutocompleteConfig<any> | null = null;
 
   if (findOptions)
-    config = new FindOptionsAutocompleteConfig(findOptions);
+    config = new FindOptionsAutocompleteConfig(findOptions, {
+      getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
+    });
 
   const types = getTypeInfos(type);
   var delay: number | undefined;
@@ -569,7 +570,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       types: type.name,
       subString: subStr,
       count: 5
-    }, signal), false, showType == null ? type.name.contains(",") : showType);
+    }, signal).then(lites => [...lites, ...(!create ? []: getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), false, showType == null ? type.name.contains(",") : showType);
   }
 
   if (!config.getItemsDelay) {
@@ -602,7 +603,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
   const es = getSettings(typeName);
 
-  if (es && es.onView)
+  if (es?.onView)
     return es.onView(entityOrPack, viewOptions);
   else
     return viewDefault(entityOrPack, viewOptions);
@@ -610,7 +611,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
   return NavigatorManager.getFrameModal()
-    .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
+    .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
 
 export interface NavigateOptions {
@@ -628,7 +629,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
   const es = getSettings(typeName);
 
-  if (es && es.onNavigate)
+  if (es?.onNavigate)
     return es.onNavigate(entityOrPack, navigateOptions);
   else
     return navigateDefault(entityOrPack, navigateOptions);
@@ -636,7 +637,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
   return NavigatorManager.getFrameModal()
-    .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
+    .then(NP => NP.FrameModalManager.openNavigate(entityOrPack, navigateOptions ?? {}));
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -645,16 +646,17 @@ export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var win = window.open(url);
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) {
+export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) : Promise<void> {
   if (!pack || !pack.entity)
-    return;
+    return Promise.resolve();
 
   const es = getSettings(pack.entity.Type);
-  if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
+  if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
     createInNewTab(pack);
+    return Promise.resolve();
   }
   else {
-    navigate(pack);
+    return navigate(pack);
   }
 }
 
@@ -711,7 +713,7 @@ export module API {
   }
 
   export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-    return ajaxGet<Array<T>>({ url: "~/api/fetchAll/" + type.typeName });
+    return ajaxGet({ url: "~/api/fetchAll/" + type.typeName });
   }
 
 
@@ -740,7 +742,7 @@ export module API {
     const typeName = getTypeName(type);
     let idVal = id;
 
-    return ajaxGet<Entity>({ url: "~/api/entity/" + typeName + "/" + id });
+    return ajaxGet({ url: "~/api/entity/" + typeName + "/" + id });
   }
 
 
@@ -749,25 +751,23 @@ export module API {
   export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
   export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
 
-    const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
+    const typeName = (typeOrLite as Lite<any>).EntityType ?? getTypeName(typeOrLite as PseudoType);
     let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
-    return ajaxGet<EntityPack<Entity>>({ url: "~/api/entityPack/" + typeName + "/" + idVal });
+    return ajaxGet({ url: "~/api/entityPack/" + typeName + "/" + idVal });
   }
 
-
   export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-
-    return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
+    return ajaxPost({ url: "~/api/entityPackEntity" }, entity);
   }
 
   export function validateEntity(entity: ModifiableEntity): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
+    return ajaxPost({ url: "~/api/validateEntity" }, entity);
   }
 
   export function getType(typeName: string): Promise<TypeEntity | null> {
 
-    return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
+    return ajaxGet({ url: `~/api/reflection/typeEntity/${typeName}` });
   }
 }
 
@@ -778,6 +778,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
+  modalSize?: BsSize;
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
   getViewPromise?: (entity: T) => ViewPromise<T>;
@@ -792,10 +793,23 @@ export interface ViewOverride<T extends ModifiableEntity> {
   override: (replacer: ViewReplacer<T>) => void;
 }
 
+export interface AutocompleteConstructor<T extends ModifiableEntity> {
+  type: PseudoType;
+  onClick: () => Promise<T | undefined>;
+}
+
+export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]): AutocompleteConstructor<ModifiableEntity>[]{
+  return getTypeInfos(tr.name).map(ti => {
+    var es = getSettings(ti);
+    return es?.autocompleteConstructor && es.autocompleteConstructor(str, ctx, foundLites);
+  }).notNull();
+}
+
 export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
   avoidPopup!: boolean;
+  modalSize?: BsSize;
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
 
@@ -808,6 +822,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
+  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
   findOptions?: FindOptions;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
@@ -822,9 +837,9 @@ export class EntitySettings<T extends ModifiableEntity> {
     this.viewOverrides.push({ override, viewName });
   }
 
-  constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
+  constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 
-    this.typeName = (type as Type<T>).typeName || type as string;
+    this.typeName = (type as Type<T>).typeName ?? type as string;
     this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
     if (options) {
@@ -858,7 +873,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
   constructor(type: Type<T>, viewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: NamedViewSettingsOptions<T>) {
     this.type = type;
     this.viewName = viewName;
-    var getViewPromise = (getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)))) || (options && options.getViewPromise);
+    var getViewPromise = (getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)))) || (options?.getViewPromise);
     if (!getViewPromise)
       throw new Error("setting getViewModule or options.getViewPromise arguments is mandatory");
     this.getViewPromise = getViewPromise;
@@ -947,7 +962,6 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
     if (view == null)
       return null;
 
-
     const replacer = new ViewReplacer<T>(view, ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
@@ -1028,11 +1042,11 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
-  if (appRelativeUrl && appRelativeUrl.startsWith("~/"))
+  if (appRelativeUrl?.startsWith("~/"))
     return window.__baseUrl + appRelativeUrl.after("~/");
 
   var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl && appRelativeUrl.startsWith(relativeCrappyUrl))
+  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
     return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
   if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
@@ -1059,7 +1073,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
 
   const ti = getTypeInfo(type.name);
 
-  if (ti && ti.kind == "Entity") {
+  if (ti?.kind == "Entity") {
 
     if (isLite(value))
       return API.fetchAndForget(value);
@@ -1070,7 +1084,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
     return undefined;
   }
 
-  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti && ti.kind == "Enum") {
+  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
     if (typeof value === "string")
       return Promise.resolve(value);
 

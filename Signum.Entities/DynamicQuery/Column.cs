@@ -35,7 +35,7 @@ namespace Signum.Entities.DynamicQuery
             return "{0} '{1}'".FormatWith(Token.FullKey(), DisplayName);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Column && base.Equals((Column)obj);
         }

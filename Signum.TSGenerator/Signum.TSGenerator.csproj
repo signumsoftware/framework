@@ -8,8 +8,8 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <LangVersion>latest</LangVersion>
-    <Platforms>x64</Platforms>
-    <Version>2.0.2</Version>
+    <Platforms>x64;AnyCPU</Platforms>
+    <Version>2.2.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

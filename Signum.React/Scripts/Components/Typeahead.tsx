@@ -1,7 +1,9 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes } from '../Globals'
-import { Popper, Manager, Target } from 'react-popper';
+import { Dropdown } from 'react-bootstrap';
+import DropdownMenu from 'react-bootstrap/DropdownMenu';
+import { useStateWithPromise } from '../Hooks';
 
 export interface TypeaheadProps {
   value?: string;
@@ -10,13 +12,14 @@ export interface TypeaheadProps {
   getItems: (query: string) => Promise<unknown[]>;
   getItemsDelay?: number;
   minLength?: number;
-  renderList?: (typeAhead: Typeahead) => React.ReactNode;
+  renderList?: (typeahead: TypeaheadHandle) => React.ReactNode;
   renderItem?: (item: unknown, query: string) => React.ReactNode;
   onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
   scrollHeight?: number;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
   noResultsMessage?: string;
+  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>
 }
 
 export interface TypeaheadState {
@@ -26,128 +29,124 @@ export interface TypeaheadState {
   selectedIndex?: number;
 }
 
-export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
-{
-  constructor(props: TypeaheadProps) {
-    super(props);
-    this.state = {
-      shown: false,
-      items: undefined,
-      selectedIndex: undefined,
+export interface TypeaheadHandle {
+  items: any[] | undefined;
+  selectedIndex: number | undefined;
+  blur(): void;
+  writeInInput(query: string): void;
+}
+
+export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadHandle>) {
+  const [query, setQuery] = React.useState<string | undefined>(undefined);
+  const [shown, setShown] = React.useState<boolean>(false);
+  const [items, setItem] = React.useState<any[] | undefined>(undefined);
+  const [selectedIndex, setSelectedIndex] = useStateWithPromise<number | undefined>(undefined);
+
+  const rtl = React.useMemo(() => document.body.classList.contains("rtl"), []);
+
+  const handle = React.useRef<number | undefined>(undefined);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const focused = React.useRef<boolean>(false);
+  const container = React.useRef<HTMLDivElement>(null);
+
+  React.useImperativeHandle(ref, () => {
+    return ({
+      items,
+      selectedIndex,
+      blur: blur,
+      writeInInput: writeInInput
+    } as TypeaheadHandle);
+  }, [items, selectedIndex]);
+
+
+  React.useEffect(() => {
+    return () => {
+      if (handle.current != undefined)
+        clearTimeout(handle.current);
     };
-  }
+  }, []);
 
-  rtl = document.body.classList.contains("rtl");
 
-  static highlightedText = (val: string, query?: string): React.ReactNode => {
-
-    if (query == undefined)
-      return val;
-
-    const index = val.toLowerCase().indexOf(query.toLowerCase());
-    if (index == -1)
-      return val;
-
-    return [
-      val.substr(0, index),
-      <strong key={0}>{val.substr(index, query.length)}</strong>,
-      val.substr(index + query.length)
-    ];
-  }
-
-  static defaultProps: TypeaheadProps = {
-    getItems: undefined as any,
-    getItemsDelay: 200,
-    minLength: 1,
-    renderItem: (item, query) => Typeahead.highlightedText(item as string, query),
-    onSelect: (elem, event) => (elem as string),
-    scrollHeight: 0,
-    noResultsMessage: " - No results -",
-  };
-
-  handle: number | undefined;
-
-  lookup() {
-    if (!this.props.getItemsDelay) {
-      this.populate();
+  function lookup() {
+    if (!p.getItemsDelay) {
+      populate();
     }
     else {
-      if (this.handle != undefined)
-        clearTimeout(this.handle);
+      if (handle.current != undefined)
+        clearTimeout(handle.current);
 
-      this.handle = setTimeout(() => this.populate(), this.props.getItemsDelay);
+      handle.current = setTimeout(() => populate(), p.getItemsDelay);
     }
   }
 
-  populate() {
 
-    if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
-      this.setState({ shown: false, items: undefined, selectedIndex: undefined });
+
+  function populate() {
+
+    if (p.minLength == null || inputRef.current!.value.length < p.minLength) {
+      setShown(false);
+      setItem(undefined);
+      setSelectedIndex(undefined);
       return;
     }
 
     //this.setState({ shown: true, items: undefined });
 
-    const query = Typeahead.normalizeString(this.input.value);
-    this.props.getItems(query).then(items => this.setState({
-      items: items,
-      shown: true,
-      query: query,
-      selectedIndex: 0,
-    })).done();
+    const query = TypeaheadOptions.normalizeString(inputRef.current!.value);
+    p.getItems(query).then(items => {
+      setItem(items);
+      setShown(true);
+      setQuery(query);
+      setSelectedIndex(0).done();
+    }).done();
   }
 
-  static normalizeString(str: string): string {
-    return str;
-  }
 
-  select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
-    if (this.state.items!.length == 0)
+
+  function select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
+    if (items!.length == 0)
       return false;
 
-    const val = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
+    const val = p.onSelect!(items![selectedIndex ?? 0], e);
 
-    this.input.value = val || "";
-    if (this.props.onChange)
-      this.props.onChange(this.input.value);
+    inputRef.current!.value = val ?? "";
+    if (p.onChange)
+      p.onChange(inputRef.current!.value);
 
-    this.setState({ shown: false });
+    setShown(false);
     return val != null;
   }
 
   //public
-  writeInInput(query: string) {
-    this.input.value = query;
-    this.input.focus();
-    this.lookup();
+  function writeInInput(query: string) {
+    inputRef.current!.value = query;
+    inputRef.current!.focus();
+    lookup();
   }
 
-  focused = false;
-  handleFocus = () => {
-    if (!this.focused) {
-      this.focused = true;
-      if (this.props.minLength == 0 && !this.input.value)
-        this.lookup();
+  function handleFocus() {
+    if (!focused.current) {
+      focused.current = true;
+      if (p.minLength == 0 && !inputRef.current!.value)
+        lookup();
     }
   }
 
-  handleBlur = () => {
-    this.focused = false;
+  function handleBlur() {
+    focused.current = false;
 
-    //if (!this.mouseover && this.state.shown)
-    //    this.setState({ shown: false });
-
-    if (this.props.onBlur)
-      this.props.onBlur();
+    if (p.onBlur)
+      p.onBlur();
   }
 
 
-  blur() {
-    this.input.blur();
+  function blur() {
+    inputRef.current!.blur();
   }
 
-  handleKeyDown = (e: React.KeyboardEvent<any>) => {
-    if (!this.state.shown)
+  function handleKeyDown(e: React.KeyboardEvent<any>) {
+    if (!shown)
       return;
 
     switch (e.keyCode) {
@@ -160,15 +159,15 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
       case 38: // up arrow
         {
           e.preventDefault();
-          const newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items!.length) % this.state.items!.length;
-          this.setState({ selectedIndex: newIndex });
+          const newIndex = ((selectedIndex ?? 0) - 1 + items!.length) % items!.length;
+          setSelectedIndex(newIndex).done();
           break;
         }
       case 40: // down arrow
         {
           e.preventDefault();
-          const newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items!.length;
-          this.setState({ selectedIndex: newIndex });
+          const newIndex = ((selectedIndex ?? 0) + 1) % items!.length;
+          setSelectedIndex(newIndex).done();
           break;
         }
     }
@@ -176,7 +175,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     e.stopPropagation();
   }
 
-  handleKeyUp = (e: React.KeyboardEvent<any>) => {
+  function handleKeyUp(e: React.KeyboardEvent<any>) {
     switch (e.keyCode) {
       case 40: // down arrow
       case 38: // up arrow
@@ -187,134 +186,180 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
       case 9: // tab
       case 13: // enter
-        if (this.state.selectedIndex == undefined || !this.state.shown)
+        if (selectedIndex == undefined || !shown)
           return;
 
-        if (this.state.query != this.input.value)
+        if (query != inputRef.current!.value)
           return;
 
-        this.select(e);
+        select(e);
         break;
 
       case 27: // escape
-        if (!this.state.shown)
+        if (!shown)
           return;
-        this.setState({ shown: false });
+        setShown(false);
         break;
 
       default:
-        this.lookup();
+        lookup();
     }
   }
 
 
-  handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
+  function handleMenuMouseUp(e: React.MouseEvent<any>, index: number) {
     e.preventDefault();
     e.persist();
-    this.setState({
-      selectedIndex: index
-    }, () => {
-      if (this.select(e))
-        this.input.focus()
-    });
+    setSelectedIndex(index).then(() => {
+      if (select(e))
+        inputRef.current!.focus()
+    }).done();
   }
 
-  mouseover = true;
-  handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
-    this.mouseover = true;
-    this.setState({
-      selectedIndex: index
-    });
+  function handleElementMouseEnter(event: React.MouseEvent<any>, index: number) {
+    setSelectedIndex(index);
   }
 
-  handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
-    this.mouseover = false;
-    this.setState({ selectedIndex: undefined });
-    if (!this.focused && this.state.shown)
-      this.setState({ shown: false });
+  function handleElementMouseLeave(event: React.MouseEvent<any>, index: number) {
+    setSelectedIndex(undefined);
+    if (!focused.current && shown)
+      setShown(false);
   }
 
-  input!: HTMLInputElement;
+  function handleOnChange() {
+    if (p.onChange)
+      p.onChange(inputRef.current!.value);
+  }
 
-  handleOnChange = () => {
-    if (this.props.onChange)
-      this.props.onChange(this.input.value);
+  const input =
+    <input ref={inputRef} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
+      value={p.value}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyUp={handleKeyUp}
+      onKeyDown={handleKeyDown}
+      onChange={handleOnChange}
+    />;
+
+
+  return (
+    <>
+      {p.renderInput ? p.renderInput(input) : input}
+      <Dropdown show={shown} onToggle={(isOpen: boolean) => setShown(isOpen)}>
+        <Dropdown.Toggle id="dropdown" as={CustomToggle}></Dropdown.Toggle>
+        {(p.renderList ? p.renderList({ blur, items, selectedIndex, writeInInput } as TypeaheadHandle) : renderDefaultList())}
+      </Dropdown>
+    </>
+  );
+
+  function renderDefaultList() {
+    return (
+      <Dropdown.Menu alignRight={rtl} className="typeahead">
+        {
+          !items ? null :
+            items.length == 0 ? <button className="no-results dropdown-item"><small>{p.noResultsMessage}</small></button> :
+              items!.map((item, i) => <button key={i}
+                className={classes("dropdown-item", i == selectedIndex ? "active" : undefined)}
+                onMouseEnter={e => handleElementMouseEnter(e, i)}
+                onMouseLeave={e => handleElementMouseLeave(e, i)}
+                onMouseUp={e => handleMenuMouseUp(e, i)}
+                {...p.itemAttrs && p.itemAttrs(item)}>
+                {p.renderItem!(item, query!)}
+              </button>)
+        }
+      </Dropdown.Menu>
+    );
+  }
+});
+
+interface CustomToggleProps {
+  onClick?: (e: React.MouseEvent<any>) => void;
+}
+
+class CustomToggle extends React.Component<CustomToggleProps> {
+  constructor(props: CustomToggleProps, context: any) {
+    super(props, context);
+  }
+
+  handleClick = (e: React.MouseEvent<any>) => {
+    e.preventDefault();
+    this.props.onClick!(e);
   }
 
   render() {
     return (
-      <Manager tag={false}>
-        <Target innerRef={inp => this.input = inp as HTMLInputElement}>
-          {({ targetProps }) => <input type="text" autoComplete="asdfsdf" {...this.props.inputAttrs} {...targetProps as any}
-            value={this.props.value}
-            onFocus={this.handleFocus}
-            onBlur={this.handleBlur}
-            onKeyUp={this.handleKeyUp}
-            onKeyDown={this.handleKeyDown}
-            onChange={this.handleOnChange}
-          />
-          }
-        </Target>
-        {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
-      </Manager>
+      <a href="" onClick={this.handleClick}>
+        {this.props.children}
+      </a>
     );
   }
+}
 
 
-  toggleEvents(isOpen: boolean | undefined) {
-    if (isOpen) {
-      document.addEventListener('click', this.handleDocumentClick, true);
-      document.addEventListener('touchstart', this.handleDocumentClick, true);
-    } else {
-      document.removeEventListener('click', this.handleDocumentClick, true);
-      document.removeEventListener('touchstart', this.handleDocumentClick, true);
-    }
-  }
+Typeahead.defaultProps = {
+  getItems: undefined as any,
+  getItemsDelay: 200,
+  minLength: 1,
+  renderItem: (item, query) => TypeaheadOptions.highlightedText(item as string, query),
+  onSelect: (elem, event) => (elem as string),
+  scrollHeight: 0,
 
-  componentDidMount() {
-    this.toggleEvents(this.state.shown);
-  }
+  noResultsMessage: " - No results -",
+} as TypeaheadProps;
 
-  componentWillUnmount() {
-    if (this.handle != undefined)
-      clearTimeout(this.handle);
 
-    this.toggleEvents(false);
-  }
+export namespace TypeaheadOptions {
+  export function highlightedText(val: string, query?: string): React.ReactNode {
 
-  componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
-    if (nextState.shown != this.state.shown)
-      this.toggleEvents(nextState.shown);
-  }
+    if (query == undefined)
+      return val;
 
-  handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-    if ((e as MouseEvent).which === 3)
-      return;
+    const index = val.toLowerCase().indexOf(query.toLowerCase());
+    if (index == -1)
+      return val;
 
-    const container = ReactDOM.findDOMNode(this) as HTMLElement;
-    if (container.contains(e.target as Node) &&
-      container !== e.target) {
-      return;
-    }
-
-    this.setState({ shown: false });
-  }
-
-  renderDefaultList() {
     return (
-      <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
-        {
-          !this.state.items!.length ? <button className="no-results dropdown-item"><small>{this.props.noResultsMessage}</small></button> :
-            this.state.items!.map((item, i) => <button key={i}
-              className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
-              onMouseEnter={e => this.handleElementMouseEnter(e, i)}
-              onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-              onMouseUp={e => this.handleMenuMouseUp(e, i)}
-              {...this.props.itemAttrs && this.props.itemAttrs(item)}>
-              {this.props.renderItem!(item, this.state.query!)}
-            </button>)
-        }
-      </div>
+      <>
+        {val.substr(0, index)}
+        <strong key={0}>{val.substr(index, query.length)}</strong>
+        {val.substr(index + query.length)}
+      </>
     );
+  }
+
+  export function highlightedTextAll(val: string, query?: string): React.ReactNode {
+    if (query == undefined)
+      return val;
+
+    const parts = query.toLocaleLowerCase().split(" ").filter(a => a.length > 0).orderByDescending(a => a.length);
+
+    function splitText(str: string, partIndex: number): React.ReactNode {
+
+      if (str.length == 0)
+        return str;
+
+      if (parts.length <= partIndex)
+        return str;
+
+      var part = parts[partIndex];
+
+      const index = str.toLowerCase().indexOf(part);
+      if (index == -1)
+        return splitText(str, partIndex + 1);
+
+      return (
+        <>
+          {splitText(str.substr(0, index), index + 1)}
+          <strong key={0}>{str.substr(index, part.length)}</strong>
+          {splitText(str.substr(index + part.length), index + 1)}
+        </>
+      );
+    }
+
+    return splitText(val, 0);
+  }
+
+  export function normalizeString(str: string): string {
+    return str;
   }
 }

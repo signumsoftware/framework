@@ -19,7 +19,7 @@ namespace Signum.Engine
         public Table? Table { get; private set; }
 
         public string? IndexName { get; private set; }
-        public UniqueIndex? Index { get; private set; }
+        public UniqueTableIndex? Index { get; private set; }
         public List<PropertyInfo>? Properties { get; private set; }
 
         public string? Values { get; private set; }
@@ -49,7 +49,7 @@ namespace Signum.Engine
                     {
                         var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup=>
                         {
-                            var index = tup.table.GeneratAllIndexes().OfType<UniqueIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
+                            var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
 
                             if(index == null)
                                 return null;
@@ -76,15 +76,15 @@ namespace Signum.Engine
         }
 
         static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
-        static ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?> cachedLookups =
-            new ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?>();
+        static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
+            new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
 
         public override string Message
         {
             get
             {
                 if (Table == null)
-                    return InnerException.Message;
+                    return InnerException!.Message;
 
                 return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
                     Table == null ? TableName : Table.Type.NiceName(),
@@ -101,7 +101,7 @@ namespace Signum.Engine
     public class ForeignKeyException : ApplicationException
     {
         public string? TableName { get; private set; }
-        public string? Field { get; private set; }
+        public string? ColumnName { get; private set; }
         public Type? TableType { get; private set; }
 
         public string? ReferedTableName { get; private set; }
@@ -109,7 +109,7 @@ namespace Signum.Engine
 
         public bool IsInsert { get; private set; }
 
-        static Regex indexRegex = new Regex(@"['""]FK_(?<table>[^_]+)_(?<field>[^_""]+)['""]");
+        static Regex indexRegex = new Regex(@"['""]FK_(?<parts>.+?)['""]");
 
         static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
 
@@ -118,15 +118,23 @@ namespace Signum.Engine
         public ForeignKeyException(Exception inner) : base(null, inner)
         {
             Match m = indexRegex.Match(inner.Message);
-
+            
             if (m.Success)
             {
-                TableName = m.Groups["table"].Value;
-                Field = m.Groups["field"].Value;
-                TableType = Schema.Current.Tables
-                    .Where(kvp => kvp.Value.Name.Name == TableName)
-                    .Select(p => p.Key)
-                    .SingleOrDefaultEx();
+                var parts = m.Groups["parts"].Value.Split("_");
+
+                for (int i = 1; i < parts.Length; i++)
+                {
+                    TableName = parts.Take(i).ToString("_");
+                    ColumnName = parts.Skip(i).ToString("_");
+                    TableType = Schema.Current.Tables
+                        .Where(kvp => kvp.Value.Name.Name == TableName)
+                        .Select(p => p.Key)
+                        .SingleOrDefaultEx();
+
+                    if (TableType != null)
+                        break;
+                }
             }
 
             if(inner.Message.Contains("INSERT"))
@@ -142,7 +150,7 @@ namespace Signum.Engine
                                     .Select(p => p.Key)
                                     .SingleOrDefaultEx();
 
-                    ReferedTableType = EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
+                    ReferedTableType = ReferedTableType == null ? null : EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
                 }
             }
         }
@@ -152,15 +160,15 @@ namespace Signum.Engine
             get
             {
                 if (TableName == null)
-                    return InnerException.Message;
+                    return InnerException!.Message;
 
                 if (IsInsert)
                     return (TableType == null || ReferedTableType == null) ?
-                        "The column {0} on table {1} does not reference {2}".FormatWith(Field, TableName, ReferedTableName) :
-                        "The column {0} of the {1} does not refer to a valid {2}".FormatWith(Field, TableType.NiceName(), ReferedTableType.NiceName());
+                        "The column {0} on table {1} does not reference {2}".FormatWith(ColumnName, TableName, ReferedTableName) :
+                        "The column {0} of the {1} does not refer to a valid {2}".FormatWith(ColumnName, TableType.NiceName(), ReferedTableType.NiceName());
                 else
                     return (TableType == null) ?
-                        EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().FormatWith(TableName, Field) :
+                        EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().FormatWith(TableName, ColumnName) :
                         EngineMessage.ThereAre0ThatReferThisEntity.NiceToString().FormatWith(TableType.NicePluralName());
             }
         }

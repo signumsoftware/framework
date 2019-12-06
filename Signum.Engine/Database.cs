@@ -88,7 +88,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-        public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
+        public static T RetrieveAndRemember<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
@@ -99,7 +99,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return lite.EntityOrNull!;
         }
 
-        public static async Task<T> RetrieveAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
+        public static async Task<T> RetrieveAndRememberAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
@@ -166,7 +166,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
                 }
 
-                T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+                T? retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
                 if (retrieved == null)
                     throw new EntityNotFoundException(typeof(T), id);
@@ -1459,6 +1459,30 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         #endregion
 
         #region UnsafeInsert
+
+        public static int UnsafeInsertDisableIdentity<E>(this IQueryable<E> query, string? message = null)
+            where E : Entity
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int result;
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                    result = query.UnsafeInsert(a => a, message);
+                return tr.Commit(result);
+            }
+        }
+
+        public static int UnsafeInsertDisableIdentity<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string? message = null)
+              where E : Entity
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int result;
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                    result = query.UnsafeInsert(constructor, message);
+                return tr.Commit(result);
+            }
+        }
 
         public static int UnsafeInsert<E>(this IQueryable<E> query, string? message = null)
               where E : Entity

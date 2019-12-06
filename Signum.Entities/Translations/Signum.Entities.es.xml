@@ -77,6 +77,7 @@
     <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="EntityControlMessage">
+    <Member Name="Add" Description="Añadir..." />
     <Member Name="Create" Description="Crear" />
     <Member Name="Detail" Description="Detalle" />
     <Member Name="Find" Description="Buscar" />
@@ -84,7 +85,6 @@
     <Member Name="MoveDown" Description="Mover abajo" />
     <Member Name="MoveUp" Description="Mover arriba" />
     <Member Name="Navigate" Description="Navegar" />
-    <Member Name="NullValueNotAllowed" Description="No se admite un valor nulo" />
     <Member Name="Remove" Description="Quitar" />
     <Member Name="View" Description="Ver" />
   </Type>
@@ -289,11 +289,12 @@
     <Member Name="And" Description=" y " />
     <Member Name="AnyEntity" Description="cualquier entidad" />
     <Member Name="As0" Description="As {0}" />
-    <Member Name="Check" Description="verificación" />
+    <Member Name="Check" Description="sí/no" />
     <Member Name="Column0NotFound" Description="La columna {0} no se ha encontrado" />
     <Member Name="Count" Description="[Num]" />
     <Member Name="Date" Description="Fecha" />
     <Member Name="DateTime" Description="fecha y hora" />
+    <Member Name="DateTimeOffset" Description="fecha y hora con zona horaria" />
     <Member Name="Day" Description="Dia" />
     <Member Name="DayOfWeek" Description="Día de la semana" />
     <Member Name="DayOfYear" Description="Día del año" />
@@ -339,6 +340,7 @@
   </Type>
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} de {2} resultado[s]." />
+    <Member Name="_0FiltersCollapsed" Description="{0} filtros colapsados" />
     <Member Name="_0Results_N" Description="{0} resultado[s]." />
     <Member Name="AddColumn" Description="Añadir columna" />
     <Member Name="AddFilter" Description="Añadir filtro" />
@@ -369,6 +371,10 @@
     <Member Name="Operations" Description="Operaciones" />
     <Member Name="ParentValue" Description="Valor padre" />
     <Member Name="PinnedFilter" Description="Filtro fijado" />
+    <Member Name="PleaseSelectA0_G" Description="Seleccione un {0}" />
+    <Member Name="PleaseSelectAnEntity" Description="Seleccione una Entidad" />
+    <Member Name="PleaseSelectOneOrMore0_G" Description="Seleccione uno o varios {0}" />
+    <Member Name="PleaseSelectOneOrSeveralEntities" Description="Seleccione una o varias Entidades" />
     <Member Name="Query0IsNotAllowed" Description="No se permite la consulta {0}" />
     <Member Name="Query0NotAllowed" Description="La query {0} no está permitida" />
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en QueryLogic.Queries" />
@@ -386,8 +392,10 @@
     <Member Name="WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull" Description="Cuando se presiona, el filtro no surte ningún efecto si el valor es nulo" />
   </Type>
   <Type Name="SelectorMessage">
+    <Member Name="_0Selector" Description="Selector de {0}" />
     <Member Name="ChooseAValue" Description="Elige un valor" />
     <Member Name="ConstructorSelector" Description="Selector de constructor" />
+    <Member Name="PleaseChooseA0ToContinue" Description="Por favor, elija un {0} para continuar:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Por favor, elige un valor para continuar:" />
     <Member Name="PleaseSelectAConstructor" Description="Por favor seleccione un Constructor" />
     <Member Name="PleaseSelectAnElement" Description="Por favor, seleccione un elemento" />
@@ -472,15 +480,17 @@
     <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} no debe tener espacios finales" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} no debe tener espacios iniciales" />
     <Member Name="_AtLeastOneValueIsNeeded" Description="Se necesita al menos un valor" />
-    <Member Name="Be" Description="ser " />
+    <Member Name="Be0" Description="ser {0}" />
     <Member Name="BeA0_G" Description="ser [m:un|f:una] {0}" />
+    <Member Name="BeAMultilineString" Description="ser una cadena multilínea" />
+    <Member Name="BeAString" Description="ser una cadena" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
     <Member Name="BeInThePast" Description="En el pasado" />
     <Member Name="BeNotNull" Description="ser no nulo" />
     <Member Name="FileName" Description="Nombre de archivo" />
     <Member Name="Have0Decimals" Description="tener {0} decimales" />
     <Member Name="HaveANumberOfElements01" Description="tiene un número de elementos {0} {1}" />
-    <Member Name="HaveAPrecisionOf" Description="tener una precisión de " />
+    <Member Name="HaveAPrecisionOf0" Description="tener una precisión de {0}" />
     <Member Name="HaveBetween0And1Characters" Description="tener entre {0} y {1} caracteres" />
     <Member Name="HaveMaximum0Characters" Description="tener máximo {0} caracteres" />
     <Member Name="HaveMinimum0Characters" Description="tener mínimo {0} caracteres" />
@@ -488,6 +498,7 @@
     <Member Name="HaveValid0Format" Description="debe tener un formato {0} válido" />
     <Member Name="InvalidDateFormat" Description="FormatWith de fecha incorrecto" />
     <Member Name="InvalidFormat" Description="FormatWith inválido" />
+    <Member Name="IsATimeOfTheDay" Description="Es una hora del día" />
     <Member Name="NotPossibleToaAssign0" Description="No es posible asignar {0}" />
     <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="o ser nulo" />

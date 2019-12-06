@@ -25,7 +25,7 @@ namespace Signum.Entities
             return new Disposable(() => inModelBinderVariable.Value = old);
         }
 
-        public static Func<ModifiableEntity, PropertyInfo, string?> GlobalValidation { get; set; }
+        public static Func<ModifiableEntity, PropertyInfo, string?>? GlobalValidation { get; set; }
 
         static readonly Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
@@ -44,11 +44,11 @@ namespace Signum.Entities
                 return;
 
             if(typeof(T) != typeof(ModifiableEntity))
-                GenerateType(typeof(T).BaseType);
+                GenerateType(typeof(T).BaseType!);
 
             var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                        where !pi.HasAttribute<HiddenPropertyAttribute>() && !pi.HasAttribute<ExpressionFieldAttribute>() 
-                       select KVP.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
+                       select KeyValuePair.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
 
             validators.SetDefinition(typeof(T), dic);
         }
@@ -164,8 +164,8 @@ namespace Signum.Entities
 
             this.Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
             
-            var nullable = pi.GetCustomAttribute<NullableAttribute>();
-            if (nullable != null && nullable.IsNullableMain == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
+            var nullable = pi.IsNullable();
+            if (nullable == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
                 this.Validators.Add(new NotNullValidatorAttribute());
 
             this.GetValue = ReflectionTools.CreateGetter<T>(pi)!;

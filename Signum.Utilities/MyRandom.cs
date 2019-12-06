@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,17 +7,9 @@ namespace Signum.Utilities
     public static class MyRandom
     {
         [ThreadStatic]
-        static Random random;
+        static Random? random;
 
-        public static Random Current
-        {
-            get
-            {
-                if (random == null)
-                    random = new Random();
-                return random;
-            }
-        }
+        public static Random Current => random ??= new Random();
     }
 
     public static class RandomExtensions

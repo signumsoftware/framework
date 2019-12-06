@@ -113,11 +113,11 @@ namespace Signum.React.ApiControllers
         {
             public string operationKey { get; set; }
 
-            public object[]? args { get; set; }
+            public object?[]? args { get; set; }
 
             public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType, this.args);
 
-            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object[]? args = null)
+            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object?[]? args = null)
             {
                 var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
@@ -217,10 +217,17 @@ namespace Signum.React.ApiControllers
                 .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
                 .ToList();
 
-            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols)!;
+            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols);
+            var anyReadonly = AnyReadonly.GetInvocationListTyped().Any(f => f(request.lites));
 
-            return new StateCanExecuteResponse(result.SelectDictionary(a => a.Key, v => v));
+            return new StateCanExecuteResponse(result.SelectDictionary(a => a.Key, v => v))
+            {
+                anyReadonly = anyReadonly
+            };
         }
+
+
+        public static Func<Lite<Entity>[], bool>? AnyReadonly; 
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class StateCanExecuteRequest
@@ -237,9 +244,8 @@ namespace Signum.React.ApiControllers
                 this.canExecutes = canExecutes;
             }
 
+            public bool anyReadonly;
             public Dictionary<string, string> canExecutes { get; set; }
         }
-
-
     }
 }

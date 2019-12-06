@@ -11,16 +11,21 @@ import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
-import ButtonBar from './Frames/ButtonBar';
+import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew } from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { bool } from "prop-types";
+
+export namespace Options {
+  export function maybeReadonly(ti: TypeInfo) {
+    return false;
+  }
+}
 
 export function start() {
-  ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
+  ButtonBarManager.onButtonBarRender.push(getEntityOperationButtons);
   ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
   ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
 
@@ -32,7 +37,8 @@ export function start() {
     {
       isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
       icon: "history",
-      iconColor: "green"
+      iconColor: "green",
+      isShy: true,
     }));
 }
 
@@ -43,7 +49,7 @@ export function clearOperationSettings() {
 }
 
 export function addSettings(...settings: OperationSettings[]) {
-  settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key!, s));
+  settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol, s));
 }
 
 
@@ -72,7 +78,7 @@ export function getOperationInfo(operation: OperationSymbol | string, type: Pseu
 
   let ti = getTypeInfo(type);
 
-  let oi = ti && ti.operations && ti.operations[operationKey];
+  let oi = ti?.operations && ti.operations[operationKey];
 
   if (oi == undefined)
     throw new Error(`Operation ${operationKey} not defined for ${ti.name}`);
@@ -101,10 +107,10 @@ export function operationInfos(ti: TypeInfo) {
 export abstract class OperationSettings {
 
   text?: () => string;
-  operationSymbol: OperationSymbol;
+  operationSymbol: string;
 
-  constructor(operationSymbol: OperationSymbol) {
-    this.operationSymbol = operationSymbol;
+  constructor(operationSymbol: OperationSymbol | string) {
+    this.operationSymbol = typeof operationSymbol == "string" ? operationSymbol : operationSymbol.key;
   }
 }
 
@@ -118,7 +124,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
   onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
-  constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
+  constructor(operationSymbol: ConstructSymbol_Simple<T> | string, options: ConstructorOperationOptions<T>) {
     super(operationSymbol);
 
     Dic.assign(this, options);
@@ -156,6 +162,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
@@ -163,7 +170,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   iconColor?: string;
   order?: number;
 
-  constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
+  constructor(operationSymbol: ConstructSymbol_FromMany<any, T> | string, options: ContextualOperationOptions<T>) {
     super(operationSymbol);
 
     Dic.assign(this, options);
@@ -174,6 +181,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   text?: () => string;
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
@@ -188,6 +196,7 @@ export class ContextualOperationContext<T extends Entity> {
   settings?: ContextualOperationSettings<T>;
   entityOperationSettings?: EntityOperationSettings<T>;
   canExecute?: string;
+  isReadonly?: boolean;
   event?: React.MouseEvent<any>;
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
@@ -216,13 +225,13 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string) {
-    var operationKey = (operation as OperationSymbol).key || operation as string;
+    const operationKey = (operation as OperationSymbol).key || operation as string;
 
-    var oi = getTypeInfo(pack.entity.Type).operations![operationKey];
+    const oi = getTypeInfo(pack.entity.Type).operations![operationKey];
 
-    var result = new EntityOperationContext<T>(frame, pack.entity, oi);
+    const result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
-    result.canExecute = pack && pack.canExecute && pack.canExecute[operationKey];
+    result.canExecute = pack?.canExecute && pack.canExecute[operationKey];
     result.complete();
     return result;
   }
@@ -251,11 +260,10 @@ export class EntityOperationContext<T extends Entity> {
 
   complete() {
     var s = this.settings;
-    this.color = s && s.color || Defaults.getColor(this.operationInfo);
-    this.group = s && s.group && s.group !== undefined ? (s.group || undefined) : Defaults.getGroup(this.operationInfo);
-    this.keyboardShortcut = s && s.keyboardShortcut !== undefined ? (s.keyboardShortcut || undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
-    this.alternatives = s && s.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
-
+    this.color = s?.color ?? Defaults.getColor(this.operationInfo);
+    this.group = s?.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
+    this.keyboardShortcut = s?.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
+    this.alternatives = s?.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
   }
 
   defaultClick(...args: any[]) {
@@ -274,7 +282,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   textOrNiceName() {
-    return this.settings && this.settings.text && this.settings.text() || this.operationInfo.niceName
+    return (this.settings && this.settings.text && this.settings.text()) ?? this.operationInfo.niceName
   }
 
   onKeyDown(e: KeyboardEvent): boolean {
@@ -326,6 +334,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
@@ -336,7 +345,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
   keyboardShortcut?: KeyboardShortcut | null;
 
-  constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
+  constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string, options: EntityOperationOptions<T>) {
     super(operationSymbol)
 
     Dic.assign(this, options);
@@ -355,6 +364,7 @@ export interface EntityOperationOptions<T extends Entity> {
   confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (ctx: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
+  showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
@@ -377,7 +387,7 @@ export interface KeyboardShortcut{
 export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
 
   function toLower(a: string | undefined) {
-    return a && a.toLowerCase();
+    return a?.toLowerCase();
   }
 
   return (toLower(e.key) == toLower(ks.key) || e.keyCode == ks.keyCode) &&
@@ -444,7 +454,7 @@ export namespace Defaults {
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
     return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s", keyCode: 83 }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
@@ -470,57 +480,57 @@ export function isEntityOperation(operationType: OperationType) {
 export namespace API {
 
   export function construct<T extends Entity>(type: string, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T>> {
-    return ajaxPost<EntityPack<T>>({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type });
+    return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type });
   }
 
   export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(entity, args);
-    return ajaxPost<EntityPack<T>>({ url: "~/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
+    return ajaxPost({ url: "~/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
   export function constructFromLite<T extends Entity, F extends Entity>(lite: Lite<F>, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(lite, args);
-    return ajaxPost<EntityPack<T>>({ url: "~/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
+    return ajaxPost({ url: "~/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
   export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost<ErrorReport>({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }
 
   export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost<EntityPack<T>>({ url: "~/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }
 
   export function executeEntity<T extends Entity>(entity: T, operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(entity, args);
-    return ajaxPost<EntityPack<T>>({ url: "~/api/operation/executeEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
+    return ajaxPost({ url: "~/api/operation/executeEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
   export function executeLite<T extends Entity>(lite: Lite<T>, operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(lite, args);
-    return ajaxPost<EntityPack<T>>({ url: "~/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
+    return ajaxPost({ url: "~/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
   export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost<ErrorReport>({ url: "~/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }
 
   export function deleteEntity<T extends Entity>(entity: T, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
     GraphExplorer.propagateAll(entity, args);
-    return ajaxPost<void>({ url: "~/api/operation/deleteEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
+    return ajaxPost({ url: "~/api/operation/deleteEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
   export function deleteLite<T extends Entity>(lite: Lite<T>, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
     GraphExplorer.propagateAll(lite, args);
-    return ajaxPost<void>({ url: "~/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
+    return ajaxPost({ url: "~/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
   export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost<ErrorReport>({ url: "~/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }
 
   export interface ErrorReport {
@@ -566,11 +576,12 @@ export namespace API {
 
 
   export function stateCanExecutes<T extends Entity>(lites: Lite<T>[], operationKeys: string[]): Promise<CanExecutesResponse> {
-    return ajaxPost<CanExecutesResponse>({ url: "~/api/operation/stateCanExecutes" }, { lites, operationKeys });
+    return ajaxPost({ url: "~/api/operation/stateCanExecutes" }, { lites, operationKeys });
   }
 
   export interface CanExecutesResponse {
     canExecutes: { [operationKey: string]: string };
+    isReadOnly?: boolean;
   }
 }
 

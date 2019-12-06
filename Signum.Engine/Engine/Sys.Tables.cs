@@ -70,13 +70,9 @@ namespace Signum.Engine.SchemaInfoTables
         public int schema_id;
         public string name;
 
-        static Expression<Func<SysSchemas, IQueryable<SysTables>>> TablesExpression =
-            s => Database.View<SysTables>().Where(t => t.schema_id == s.schema_id);
-        [ExpressionField]
-        public IQueryable<SysTables> Tables()
-        {
-            return TablesExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysTables> Tables() => 
+            As.Expression(() => Database.View<SysTables>().Where(t => t.schema_id == this.schema_id));
     }
 
     public enum SysTableTemporalType
@@ -110,87 +106,55 @@ namespace Signum.Engine.SchemaInfoTables
         public int? history_table_id;
 
 
-        static Expression<Func<SysTables, IQueryable<SysColumns>>> ColumnsExpression =
-            t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysColumns> Columns()
+        [AutoExpressionField]
+        public IQueryable<SysColumns> Columns() => 
+            As.Expression(() => Database.View<SysColumns>().Where(c => c.object_id == this.object_id));
+
+        public IQueryable<SysColumns> ColumnsOriginal() =>
+            As.Expression(() => Database.View<SysColumns>().Where(c => c.object_id == this.object_id));
+
+        static Expression<Func<SysTables, IQueryable<SysColumns>>> ColumnsGood;
+        static void ColumnsGoodInit()
         {
-            return ColumnsExpression.Evaluate(this);
+            ColumnsGood = @this => Database.View<SysColumns>().Where(c => c.object_id == @this.object_id);
         }
 
-        static Expression<Func<SysTables, IQueryable<SysForeignKeys>>> ForeignKeysExpression =
-            t => Database.View<SysForeignKeys>().Where(fk => fk.parent_object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysForeignKeys> ForeignKeys()
-        {
-            return ForeignKeysExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysForeignKeys> ForeignKeys() => 
+            As.Expression(() => Database.View<SysForeignKeys>().Where(fk => fk.parent_object_id == this.object_id));
 
-        static Expression<Func<SysTables, IQueryable<SysForeignKeys>>> IncommingForeignKeysExpression =
-        t => Database.View<SysForeignKeys>().Where(fk => fk.referenced_object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysForeignKeys> IncommingForeignKeys()
-        {
-            return IncommingForeignKeysExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysForeignKeys> IncommingForeignKeys() => 
+            As.Expression(() => Database.View<SysForeignKeys>().Where(fk => fk.referenced_object_id == this.object_id));
 
-        static Expression<Func<SysTables, IQueryable<SysKeyConstraints>>> KeyConstraintsExpression =
-            t => Database.View<SysKeyConstraints>().Where(fk => fk.parent_object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysKeyConstraints> KeyConstraints()
-        {
-            return KeyConstraintsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysKeyConstraints> KeyConstraints() => 
+            As.Expression(() => Database.View<SysKeyConstraints>().Where(fk => fk.parent_object_id == this.object_id));
 
 
-        static Expression<Func<SysTables, IQueryable<SysIndexes>>> IndicesExpression =
-            t => Database.View<SysIndexes>().Where(ix => ix.object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysIndexes> Indices()
-        {
-            return IndicesExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysIndexes> Indices() => 
+            As.Expression(() => Database.View<SysIndexes>().Where(ix => ix.object_id == this.object_id));
 
-        static Expression<Func<SysTables, IQueryable<SysStats>>> StatsExpression =
-            t => Database.View<SysStats>().Where(ix => ix.object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysStats> Stats()
-        {
-            return StatsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysStats> Stats() => 
+            As.Expression(() => Database.View<SysStats>().Where(ix => ix.object_id == this.object_id));
 
-        static Expression<Func<SysTables, IQueryable<SysExtendedProperties>>> ExtendedPropertiesExpression =
-            t => Database.View<SysExtendedProperties>().Where(ep => ep.major_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysExtendedProperties> ExtendedProperties()
-        {
-            return ExtendedPropertiesExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysExtendedProperties> ExtendedProperties() => 
+            As.Expression(() => Database.View<SysExtendedProperties>().Where(ep => ep.major_id == this.object_id));
 
-        static Expression<Func<SysTables, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
-            t => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.parent_object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
-        {
-            return ForeignKeyColumnsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysForeignKeyColumns> ForeignKeyColumns() => 
+            As.Expression(() => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.parent_object_id == this.object_id));
 
-        static Expression<Func<SysTables, IQueryable<SysPeriods>>> PeriodsExpression =
-            t => Database.View<SysPeriods>().Where(p => p.object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysPeriods> Periods()
-        {
-            return PeriodsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysPeriods> Periods() => 
+            As.Expression(() => Database.View<SysPeriods>().Where(p => p.object_id == this.object_id));
 
-        static Expression<Func<SysTables, SysSchemas>> SchemaExpression =
-            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
-
-        [ExpressionField]
-        public SysSchemas Schema()
-        {
-            return SchemaExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysSchemas Schema() => 
+            As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == this.schema_id));
     }
 
     [TableName("sys.views")]
@@ -202,21 +166,13 @@ namespace Signum.Engine.SchemaInfoTables
 
         public int schema_id;
 
-        static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
-            v => Database.View<SysIndexes>().Where(ix => ix.object_id == v.object_id);
-        [ExpressionField]
-        public IQueryable<SysIndexes> Indices()
-        {
-            return IndicesExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysIndexes> Indices() => 
+            As.Expression(() => Database.View<SysIndexes>().Where(ix => ix.object_id == this.object_id));
 
-        static Expression<Func<SysViews, IQueryable<SysColumns>>> ColumnsExpression =
-            t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
-        [ExpressionField]
-        public IQueryable<SysColumns> Columns()
-        {
-            return ColumnsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysColumns> Columns() => 
+            As.Expression(() => Database.View<SysColumns>().Where(c => c.object_id == this.object_id));
     }
 
     [TableName("sys.columns")]
@@ -239,13 +195,9 @@ namespace Signum.Engine.SchemaInfoTables
         [ColumnName("generated_always_type")]
         public GeneratedAlwaysType generated_always_type;
 
-        static Expression<Func<SysColumns, SysTypes>> TypeExpression =
-            c => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == c.system_type_id);
-        [ExpressionField]
-        public SysTypes Type()
-        {
-            return TypeExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysTypes? Type() => 
+            As.Expression(() => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == this.system_type_id && a.user_type_id == this.user_type_id));
     }
 
     [TableName("sys.default_constraints")]
@@ -278,13 +230,9 @@ namespace Signum.Engine.SchemaInfoTables
         public int parent_object_id;
         public string type;
 
-        static Expression<Func<SysKeyConstraints, SysSchemas>> SchemaExpression =
-            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
-        [ExpressionField]
-        public SysSchemas Schema()
-        {
-            return SchemaExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysSchemas Schema() => 
+            As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == this.schema_id));
     }
 
     [TableName("sys.foreign_keys")]
@@ -299,37 +247,21 @@ namespace Signum.Engine.SchemaInfoTables
         public bool is_disabled;
         public bool is_not_trusted;
 
-        static Expression<Func<SysForeignKeys, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
-            fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.constraint_object_id == fk.object_id);
-        [ExpressionField]
-        public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
-        {
-            return ForeignKeyColumnsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysForeignKeyColumns> ForeignKeyColumns() => 
+            As.Expression(() => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.constraint_object_id == this.object_id));
 
-        static Expression<Func<SysForeignKeys, SysSchemas>> SchemaExpression =
-            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
-        [ExpressionField]
-        public SysSchemas Schema()
-        {
-            return SchemaExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysSchemas Schema() => 
+            As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == this.schema_id));
 
-        static Expression<Func<SysForeignKeys, SysTables>> ParentTableExpression =
-            i => Database.View<SysTables>().Single(a => a.object_id == i.parent_object_id);
-        [ExpressionField]
-        public SysTables ParentTable()
-        {
-            return ParentTableExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysTables ParentTable() => 
+            As.Expression(() => Database.View<SysTables>().Single(a => a.object_id == this.parent_object_id));
 
-        static Expression<Func<SysForeignKeys, SysTables>> ReferencedTableExpression =
-            i => Database.View<SysTables>().Single(a => a.object_id == i.referenced_object_id);
-        [ExpressionField]
-        public SysTables ReferencedTable()
-        {
-            return ReferencedTableExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysTables ReferencedTable() => 
+            As.Expression(() => Database.View<SysTables>().Single(a => a.object_id == this.referenced_object_id));
     }
 
     [TableName("sys.foreign_key_columns")]
@@ -355,29 +287,17 @@ namespace Signum.Engine.SchemaInfoTables
         public int type;
         public string filter_definition;
 
-        static Expression<Func<SysIndexes, IQueryable<SysIndexColumn>>> IndexColumnsExpression =
-            ix => Database.View<SysIndexColumn>().Where(ixc => ixc.index_id == ix.index_id && ixc.object_id == ix.object_id);
-        [ExpressionField]
-        public IQueryable<SysIndexColumn> IndexColumns()
-        {
-            return IndexColumnsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysIndexColumn> IndexColumns() => 
+            As.Expression(() => Database.View<SysIndexColumn>().Where(ixc => ixc.index_id == this.index_id && ixc.object_id == this.object_id));
 
-        static Expression<Func<SysIndexes, SysTables>> TableExpression =
-            i => Database.View<SysTables>().Single(a => a.object_id == i.object_id);
-        [ExpressionField]
-        public SysTables Table()
-        {
-            return TableExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysTables Table() => 
+            As.Expression(() => Database.View<SysTables>().Single(a => a.object_id == this.object_id));
 
-        static Expression<Func<SysIndexes, SysPartitions>> PartitionExpression =
-        ix => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == ix.object_id && au.index_id == ix.index_id);
-        [ExpressionField]
-        public SysPartitions Partition()
-        {
-            return PartitionExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysPartitions Partition() => 
+            As.Expression(() => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == this.object_id && au.index_id == this.index_id));
     }
 
     [TableName("sys.index_columns")]
@@ -403,13 +323,9 @@ namespace Signum.Engine.SchemaInfoTables
         public bool user_created;
         public bool no_recompute;
 
-        static Expression<Func<SysStats, IQueryable<SysStatsColumn>>> StatsColumnsExpression =
-         ix => Database.View<SysStatsColumn>().Where(ixc => ixc.stats_id == ix.stats_id && ixc.object_id == ix.object_id);
-        [ExpressionField]
-        public IQueryable<SysStatsColumn> StatsColumns()
-        {
-            return StatsColumnsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysStatsColumn> StatsColumns() => 
+            As.Expression(() => Database.View<SysStatsColumn>().Where(ixc => ixc.stats_id == this.stats_id && ixc.object_id == this.object_id));
     }
 
     [TableName("sys.stats_columns")]
@@ -445,13 +361,9 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
 
 
-        static Expression<Func<SysProcedures, SysSchemas>> SchemaExpression =
-            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
-        [ExpressionField]
-        public SysSchemas Schema()
-        {
-            return SchemaExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysSchemas Schema() => 
+            As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == this.schema_id));
     }
 
     [TableName("sys.service_queues")]
@@ -463,13 +375,9 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
         public string activation_procedure;
 
-        static Expression<Func<SysServiceQueues, SysSchemas>> SchemaExpression =
-            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
-        [ExpressionField]
-        public SysSchemas Schema()
-        {
-            return SchemaExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public SysSchemas Schema() => 
+            As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == this.schema_id));
     }
 
     [TableName("sys.partitions")]
@@ -481,13 +389,9 @@ namespace Signum.Engine.SchemaInfoTables
         public int index_id;
         public int rows;
 
-        static Expression<Func<SysPartitions, IQueryable<SysAllocationUnits>>> AllocationUnitsExpression =
-        ix => Database.View<SysAllocationUnits>().Where(au => au.container_id == ix.partition_id);
-        [ExpressionField]
-        public IQueryable<SysAllocationUnits> AllocationUnits()
-        {
-            return AllocationUnitsExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public IQueryable<SysAllocationUnits> AllocationUnits() => 
+            As.Expression(() => Database.View<SysAllocationUnits>().Where(au => au.container_id == this.partition_id));
     }
 
     [TableName("sys.allocation_units")]

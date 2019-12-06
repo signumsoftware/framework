@@ -4,12 +4,13 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Signum.React.Filters;
 
 namespace Signum.React.ApiControllers
 {
     public class ReflectionController : ControllerBase
     {
-        [HttpGet("api/reflection/types"), AllowAnonymous]
+        [HttpGet("api/reflection/types"), SignumAllowAnonymous]
         public Dictionary<string, TypeInfoTS> Types()
         {
             return ReflectionServer.GetTypeInfoTS();

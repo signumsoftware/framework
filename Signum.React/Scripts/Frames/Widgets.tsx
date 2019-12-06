@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { EntityPack, ModifiableEntity } from '../Signum.Entities'
-import { TypeContext } from '../TypeContext'
+import { TypeContext, EntityFrame } from '../TypeContext'
 import "./Widgets.css"
 
 export interface WidgetContext<T extends ModifiableEntity> {
   ctx: TypeContext<T>;
-  pack: EntityPack<T>;
+  frame: EntityFrame;
 }
 
 export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any> | undefined> = [];

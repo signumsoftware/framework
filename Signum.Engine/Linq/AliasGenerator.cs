@@ -46,7 +46,7 @@ namespace Signum.Engine.Linq
             string? abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
                 tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_' ).Select(s => s[0]).ToArray()) : null;
 
-            if (string.IsNullOrEmpty(abv))
+            if (!abv.HasText())
                 abv = tableName.TryStart(3)!;
             else
                 abv = abv.ToLower();
@@ -86,7 +86,7 @@ namespace Signum.Engine.Linq
             return this.Name == other.Name && object.Equals(this.ObjectName, other.ObjectName);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Alias && base.Equals((Alias)obj);
         }

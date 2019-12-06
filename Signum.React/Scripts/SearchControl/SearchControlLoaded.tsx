@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as moment from 'moment'
-import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
@@ -24,14 +23,14 @@ import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
-import SystemTimeEditor from './SystemTimeEditor';
+import SystemTimeEditor, { asUTC } from './SystemTimeEditor';
 import { MaxHeightProperty } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
-import { TitleManager } from '../../Scripts/Lines/EntityBase';
 import { AutoFocus } from '../Components/AutoFocus';
-import { ButtonBarElement } from '../TypeContext';
+import { ButtonBarElement, StyleContext } from '../TypeContext';
+import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 export interface ShowBarExtensionOption { }
 
@@ -48,6 +47,7 @@ export interface SearchControlLoadedProps {
   maxResultsHeight?: MaxHeightProperty<string | number> | any;
   tag?: string | {};
 
+  defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
   allowSelection: boolean;
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
@@ -74,14 +74,15 @@ export interface SearchControlLoadedProps {
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
-  onCreate?: () => void;
-  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+  onCreate?: () => Promise<void | boolean>;
+  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
+  styleContext?: StyleContext;
 }
 
 export interface SearchControlLoadedState {
@@ -119,7 +120,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     };
   }
 
-  componentWillMount() {
+  extraParams: () => any = () => null;
+
+  componentDidMount() {
 
     const fo = this.props.findOptions;
     const qs = Finder.getSettings(fo.queryKey);
@@ -127,7 +130,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const sfb = this.props.showSimpleFilterBuilder == false ? undefined :
       this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
-        qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
+        qs?.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
           undefined;
 
     if (sfb) {
@@ -139,9 +142,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.searchOnLoad)
       this.doSearch().done();
+
+    this.containerDiv!.addEventListener("scroll", (e) => {
+
+      var table = this.thead!.parentElement!;
+      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
+      this.thead!.style.transform = translate;
+    });
   }
 
-  componentWillReceiveProps(props: SearchControlLoadedProps) {
+  componentDidUpdate(props: SearchControlLoadedProps) {
     if (this.props.refreshKey != props.refreshKey) {
       this.doSearchPage1();
     }
@@ -207,7 +217,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
-        this.props.onSearch(fop, dataChanged || false);
+        this.props.onSearch(fop, dataChanged ?? false);
 
       if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
         this.simpleFilterBuilderInstance.onDataChanged();
@@ -221,11 +231,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           selectedRows: [],
           currentMenuItems: undefined,
           markedRows: undefined,
-          searchCount: (this.state.searchCount || 0) + 1
+          searchCount: (this.state.searchCount ?? 0) + 1
         }, () => {
           this.fixScroll();
           if (this.props.onResult)
-            this.props.onResult(rt, dataChanged || false);
+            this.props.onResult(rt, dataChanged ?? false);
           this.notifySelectedRowsChanged();
         });
       });
@@ -354,14 +364,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
   }
 
-  componentDidMount() {
-    this.containerDiv!.addEventListener("scroll", (e) => {
-
-      var table = this.thead!.parentElement!;
-      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
-      this.thead!.style.transform = translate;
-    });
-  }
 
   fixScroll() {
     if (this.containerDiv) {
@@ -372,7 +374,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.containerDiv.scrollTop = 0;
         this.containerDiv.style.overflowY = "hidden";
         setTimeout(() => {
-          this.containerDiv!.style.overflowY = null;
+          this.containerDiv!.style.overflowY = "";
         }, 10);
 
       }
@@ -394,25 +396,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
 
     return (
-      <div className="sf-search-control SF-control-container" ref="container"
+      <div className="sf-search-control sf-control-container" ref="container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-            this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFilters={true}
+              this.state.showFilters ? <FilterBuilder
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFilters={true}
 
-            /> :
-              sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                <AutoFocus disabled={!this.props.enableAutoFocus}>
+              /> :
+                sfb ? <div className="simple-filter-builder">{sfb}</div> :
+                  <AutoFocus disabled={!this.props.enableAutoFocus}>
                     <PinnedFilterBuilder
                       filterOptions={fo.filterOptions}
                       onFiltersChanged={this.handlePinnedFilterChanged} />
@@ -477,7 +479,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
 
     if (fo.systemTime == null)
-      fo.systemTime = { mode: "AsOf", startDate: moment().format() };
+      fo.systemTime = { mode: "AsOf", startDate: asUTC(moment().format()) };
     else
       fo.systemTime = undefined;
 
@@ -530,11 +532,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const isSearch = isAll || this.state.showFilters ||
       this.state.resultTable == null && !this.props.searchOnLoad ||
-      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey));
+      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey)) ||
+      this.props.findOptions.systemTime != null;
 
     var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
     var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
 
+
+    const titleLabels = StyleContext.default.titleLabels;
 
     var leftButtons = ([
 
@@ -544,7 +549,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
           style={!s.showFilters && p.findOptions.filterOptions.length > 0 ? { border: "1px solid #b3b3b3" } : undefined}
           onClick={this.handleToggleFilters}
-          title={TitleManager.useTitle ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
+          title={titleLabels ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
           <FontAwesomeIcon icon="filter" />
         </button>
       },
@@ -554,7 +559,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         button: < button
           className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
           onClick={this.handleToggleGroupBy}
-          title={TitleManager.useTitle ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
+          title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
           Ʃ
             </button>
       },
@@ -564,7 +569,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         button: < button
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
           onClick={this.handleSystemTimeClick}
-          title={TitleManager.useTitle ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
+          title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
           <FontAwesomeIcon icon="history" />
         </button>
       },
@@ -580,11 +585,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: < button className="sf-query-button btn btn-light sf-create ml-2" title={TitleManager.useTitle ? this.createTitle() : undefined} onClick={this.handleCreate} >
+        button: <button className="sf-query-button btn btn-light sf-create ml-2" title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate} >
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
-      
+
       ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
       ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -594,10 +599,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var rightButtons = ([
       ...(this.props.hideButtonBar ? [] : buttonBarElements),
 
-      !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
-      <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
-        <FontAwesomeIcon icon="external-link-alt" />
-      </button>
+      !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
+        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
+          <FontAwesomeIcon icon="external-link-alt" />
+        </button>
+      }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
@@ -627,8 +633,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const onCreate = this.props.onCreate;
 
-    if (onCreate)
-      onCreate();
+    if (onCreate) {
+      onCreate()
+        .then(val => val == false || this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+        .done();
+    }
     else {
       const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
@@ -640,7 +649,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var qs = this.props.querySettings;
 
-        var getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
+        var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
         if (isWindowsOpen || (s != null && s.avoidPopup && this.props.navigate != "InPlace")) {
           var vp = getViewPromise && getViewPromise(null)
@@ -674,9 +683,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     ev.preventDefault();
 
-    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription);
+    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
 
-    const path = Finder.findOptionsPath(findOptions);
+    const path = Finder.findOptionsPath(findOptions, this.extraParams());
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
       window.open(path);
@@ -700,7 +709,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       throw new Error("Results are grouped")
 
     if (this.state.selectedRows == null)
-      return []; 
+      return [];
 
     return this.state.selectedRows.map(a => a.entity!);
   }
@@ -711,7 +720,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       throw new Error("Results are not grouped")
 
     if (this.state.selectedRows == null || this.state.resultFindOptions == null)
-      return Promise.resolve([]); 
+      return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
@@ -721,15 +730,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   // SELECT BUTTON
 
-  handleSelectedToggle = () => {
-    this.setState({ isSelectOpen: !this.state.isSelectOpen }, () => {
+  handleSelectedToggle = (isOpen: boolean) => {
+    this.setState({ isSelectOpen: isOpen }, () => {
       if (this.state.isSelectOpen && this.state.currentMenuItems == undefined)
         this.loadMenuItems();
     });
   }
 
   loadMenuItems() {
-    var cm = this.props.showContextMenu(this.state.resultFindOptions || this.props.findOptions);
+    var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
 
     if (cm == "Basic")
       this.setState({ currentMenuItems: [] });
@@ -743,6 +752,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           queryDescription: this.props.queryDescription,
           markRows: this.markRows,
           container: this,
+          styleContext: this.props.styleContext,
         }))
         .then(menuItems => this.setState({ currentMenuItems: menuItems }))
         .done();
@@ -767,16 +777,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return {
       order: -1,
       button:
-        <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected ml-2"
-          isOpen={this.state.isSelectOpen}
-          toggle={this.handleSelectedToggle}
-          disabled={this.state.selectedRows!.length == 0}>
-          <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
-          <DropdownMenu>
-            {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-              this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
+        <Dropdown
+          show={this.state.isSelectOpen}
+          onToggle={this.handleSelectedToggle}>
+          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ml-2" disabled={this.state.selectedRows!.length == 0}>
+            {title}
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
+              this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
                 this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-          </DropdownMenu>
+          </Dropdown.Menu>
         </Dropdown>
     };
   }
@@ -795,7 +806,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const token = fo.columnOptions[cm.columnIndex!].token;
 
     const op: FilterOperation | undefined =
-      token && token.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
+      token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
         token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
           undefined as FilterOperation | undefined;
 
@@ -809,7 +820,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
 
     if (!this.state.showFilters)
-      this.state.showFilters = true;
+      this.setState({ showFilters: true });
 
     this.handleFiltersChanged();
 
@@ -822,7 +833,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const newColumn: ColumnOptionParsed = {
       token: token,
-      displayName: token && token.niceName,
+      displayName: token?.niceName,
     };
 
     const cm = this.state.contextualMenu!;
@@ -854,40 +865,40 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  
+
 
   renderContextualMenu() {
 
     const cm = this.state.contextualMenu!;
     const p = this.props;
-    
+
     var fo = this.state.resultFindOptions;
     function isColumnFilterable(columnIndex: number) {
-      var token = fo && fo.columnOptions[columnIndex].token;
+      var token = fo?.columnOptions[columnIndex].token;
       return token && token.filterType != "Embedded" && token.filterType != undefined;
     }
 
     const menuItems: React.ReactElement<any>[] = [];
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex))
-      menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
+      menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</Dropdown.Item>);
 
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
       if (menuItems.length)
-        menuItems.push(<DropdownItem divider />);
+        menuItems.push(<Dropdown.Divider />);
 
-      menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
-      menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
-      menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
+      menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</Dropdown.Item>);
+      menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</Dropdown.Item>);
+      menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</Dropdown.Item>);
     }
 
     if (cm.rowIndex != undefined) {
 
       if (this.state.currentMenuItems == undefined) {
-        menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
+        menuItems.push(<Dropdown.Header>{JavascriptMessage.loading.niceToString()}</Dropdown.Header>);
       } else {
         if (menuItems.length && this.state.currentMenuItems.length)
-          menuItems.push(<DropdownItem divider />);
+          menuItems.push(<Dropdown.Divider />);
 
         menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
       }
@@ -1134,19 +1145,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.onDoubleClick) {
       e.preventDefault();
-      this.props.onDoubleClick(e, row);
+      this.props.onDoubleClick(e, row, this);
       return;
     }
 
     var qs = this.props.querySettings;
-    if (qs && qs.onDoubleClick) {
+    if (qs?.onDoubleClick) {
       e.preventDefault();
-      qs.onDoubleClick(e, row);
+      qs.onDoubleClick(e, row, this);
       return;
     }
 
     var resFo = this.state.resultFindOptions;
-    if (resFo && resFo.groupResults) {
+    if (resFo?.groupResults) {
 
       var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
         .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
@@ -1178,7 +1189,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const qs = this.props.querySettings;
 
-      const getViewPromise = this.props.getViewPromise || qs && qs.getViewPromise;
+      const getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
       const avoidPopup = s != undefined && s.avoidPopup;
 
@@ -1230,7 +1241,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       systemTime: this.props.findOptions.systemTime,
     };
 
-    const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
+    const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
     return this.state.resultTable.rows.map((row, i) => {
 
@@ -1238,16 +1249,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
-      const message = mark && mark.message;
 
-      const id = message && "result_row_" + i;
-
-      return (
+      var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row)}
-          id={id}
           {...ra}
-          className={classes(mark && mark.className, ra && ra.className)}>
+          className={classes(mark?.className, ra?.className)}>
           {this.props.allowSelection &&
             <td style={{ textAlign: "center" }}>
               <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
@@ -1256,7 +1263,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
           {this.props.navigate && !this.props.findOptions.groupResults &&
             <td>
-              {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
+              {(this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
             </td>
           }
 
@@ -1267,10 +1274,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               </td>)
           }
 
-          {message && id && <UncontrolledTooltip placement="bottom" target={id}>
-            {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
-          </UncontrolledTooltip>}
         </tr>
+      );
+
+      const message = mark?.message;
+      if (!message)
+        return tr;
+
+      return (
+        <OverlayTrigger
+          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+          {tr}
+        </OverlayTrigger>
       );
     });
   }

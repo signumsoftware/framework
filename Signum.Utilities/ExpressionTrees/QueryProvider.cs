@@ -25,13 +25,13 @@ namespace Signum.Utilities.ExpressionTrees
             Type elementType = expression.Type.ElementType() ?? expression.Type;
             try
             {
-                return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { this, expression });
+                return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { this, expression })!;
             }
             catch (TargetInvocationException e)
             {
-                e.InnerException.PreserveStackTrace();
+                e.InnerException!.PreserveStackTrace();
 
-                throw e.InnerException;
+                throw e.InnerException!;
             }
         }
 

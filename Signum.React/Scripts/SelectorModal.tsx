@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
-import { TypeInfo } from './Reflection'
-import { Modal, BsSize } from './Components';
+import { TypeInfo, EnumType } from './Reflection'
+import { BsSize } from './Components';
+import { Modal } from 'react-bootstrap';
 
-interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
+interface SelectorModalProps extends IModalProps<any> {
   options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
   title: React.ReactNode;
   message: React.ReactNode;
@@ -12,90 +13,96 @@ interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
   dialogClassName?: string;
 }
 
-export default class SelectorModal extends React.Component<SelectorModalProps, { show: boolean }>  {
-  constructor(props: SelectorModalProps) {
-    super(props);
+export default function SelectorModal(p: SelectorModalProps) {
 
-    this.state = { show: true };
+  const [show, setShow] = React.useState(true);
+  const selectedValue = React.useRef<any>(undefined);
+
+  function handleButtonClicked(val: any) {
+    selectedValue.current = val;
+    setShow(false);
   }
 
-  selectedValue: any;
-  handleButtonClicked = (val: any) => {
-    this.selectedValue = val;
-    this.setState({ show: false });
+  function handleCancelClicked() {
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(selectedValue.current);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.selectedValue);
-  }
-
-
-  render() {
-    return <Modal size={this.props.size || "sm"} show={this.state.show} onExited={this.handleOnExited}
-      className="sf-selector-modal" dialogClassName={this.props.dialogClassName} onHide={this.handleCancelClicked}>
+  return (
+    <Modal size={p.size || "sm" as any} show={show} onExited={handleOnExited}
+      className="sf-selector-modal" dialogClassName={p.dialogClassName} onHide={handleCancelClicked}>
       <div className="modal-header">
-        {this.props.title &&
+        {p.title &&
           <h4 className="modal-title">
-            {this.props.title}
+            {p.title}
           </h4>
         }
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
 
       <div className="modal-body">
         <div>
-          {this.props.message && (typeof this.props.message == "string" ? <p>{this.props.message}</p> : this.props.message)}
-          {this.props.options.map((o, i) =>
-            <button key={i} type="button" onClick={() => this.handleButtonClicked(o.value)} name={o.value}
+          {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
+          {p.options.map((o, i) =>
+            <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.value}
               className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>
               {o.displayName}
             </button>)}
         </div>
       </div>
-    </Modal>;
-  }
-
-  static chooseElement<T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
-
-    const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
-
-    if (!config || !config.forceShow) {
-      if (options.length == 1)
-        return Promise.resolve(options.single());
-
-      if (options.length == 0)
-        return Promise.resolve(undefined);
-    }
-
-    return openModal<T>(<SelectorModal
-      options={options.map(a => ({
-        value: a,
-        displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
-        name: buttonName ? buttonName(a) : a.toString(),
-        htmlAttributes: config && config.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
-      }))}
-      title={title || SelectorMessage.ChooseAValue.niceToString()}
-      message={message || SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
-      size={size}
-      dialogClassName={dialogClassName} />);
-  }
-
-  static chooseType(options: TypeInfo[]): Promise<TypeInfo | undefined> {
-    return SelectorModal.chooseElement(options,
-      {
-        buttonDisplay: a => a.niceName || "",
-        buttonName: a => a.name,
-        title: SelectorMessage.TypeSelector.niceToString(),
-        message: SelectorMessage.PleaseSelectAType.niceToString()
-      });
-  }
+    </Modal>
+  );
 }
+
+SelectorModal.chooseElement = <T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> => {
+  const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
+
+  if (!config || !config.forceShow) {
+    if (options.length == 1)
+      return Promise.resolve(options.single());
+
+    if (options.length == 0)
+      return Promise.resolve(undefined);
+  }
+
+  return openModal<T>(<SelectorModal
+    options={options.map(a => ({
+      value: a,
+      displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
+      name: buttonName ? buttonName(a) : a.toString(),
+      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
+    }))}
+    title={title || SelectorMessage.ChooseAValue.niceToString()}
+    message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
+    size={size}
+    dialogClassName={dialogClassName} />);
+};
+
+SelectorModal.chooseType = (options: TypeInfo[]): Promise<TypeInfo | undefined> => {
+  return SelectorModal.chooseElement(options,
+    {
+      buttonDisplay: a => a.niceName ?? "",
+      buttonName: a => a.name,
+      title: SelectorMessage.TypeSelector.niceToString(),
+      message: SelectorMessage.PleaseSelectAType.niceToString()
+    });
+};
+
+SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>): Promise<T | undefined> => {
+    return SelectorModal.chooseElement(enumType.values(),
+      {
+        buttonDisplay: a => enumType.niceToString(a),
+        buttonName: a => a,
+        title: SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
+        size: "md",
+      });
+};
 
 export interface SelectorConfig<T> {
   buttonName?: (val: T) => string; //For testing

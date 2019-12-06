@@ -3,14 +3,14 @@ import { classes, KeyGenerator } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
-import { TypeContext } from '../TypeContext'
-import { EntityBase, EntityBaseProps, TitleManager } from './EntityBase'
+import { TypeContext, mlistItemContext } from '../TypeContext'
+import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
   onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined;
-
+  filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[]; /*Not only filter, also order, skip, take is supported*/
   ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
 
@@ -19,10 +19,21 @@ export interface EntityListBaseState extends EntityListBaseProps {
   dropBorderIndex?: number,
 }
 
-export abstract class EntityListBase<T extends EntityListBaseProps, S extends EntityListBaseState> extends EntityBase<T, S>
+export abstract class EntityListBaseController<T extends EntityListBaseProps> extends EntityBaseController<T>
 {
+  dragIndex!: number | undefined;
+  setDragIndex!: React.Dispatch<number | undefined>;
+  dropBorderIndex!: number | undefined
+  setDropBorderIndex!: React.Dispatch<number | undefined>;
+
+  init(p: T) {
+    super.init(p);
+    [this.dragIndex, this.setDragIndex] = React.useState<number | undefined>(undefined);
+    [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<number | undefined>(undefined);
+  }
+
   keyGenerator = new KeyGenerator();
-  calculateDefaultState(state: S) {
+  getDefaultProps(state: T) {
 
     if (state.onFind)
       throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
@@ -30,11 +41,20 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     if (state.ctx.value == undefined)
       state.ctx.value = [];
 
-    super.calculateDefaultState(state);
+    super.getDefaultProps(state);
   }
 
   setValue(list: MList<Lite<Entity> | ModifiableEntity>) {
     super.setValue(list as any);
+  }
+
+  getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+    var rows = mlistItemContext(ctx);
+
+    if (this.props.filterRows)
+      return this.props.filterRows(rows);
+
+    return rows;
   }
 
   moveUp(index: number) {
@@ -42,21 +62,22 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     list.moveUp(index);
     this.setValue(list);
   }
+
   renderMoveUp(btn: boolean, index: number) {
-    if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
+    if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
-        title={TitleManager.useTitle ? EntityControlMessage.MoveUp.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-up" />
       </a>
     );
   }
 
   doView(entity: ModifiableEntity | Lite<Entity>) {
-    const pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
+    const pr = this.props.ctx.propertyRoute.addLambda(a => a[0]);
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
@@ -69,22 +90,23 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   }
 
   renderMoveDown(btn: boolean, index: number) {
-    if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
+    if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
-        title={TitleManager.useTitle ? EntityControlMessage.MoveUp.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-down" />
       </a>);
   }
+
 
   handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
     event.preventDefault();
     event.stopPropagation();
-    var pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
+    var pr = this.props.ctx.propertyRoute.addLambda(a => a[0]);
 
     const promise = this.props.onCreate ? this.props.onCreate(pr) : this.defaultCreate(pr);
 
@@ -97,7 +119,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         if (e == undefined)
           return undefined;
 
-        if (!this.state.viewOnCreate)
+        if (!this.props.viewOnCreate)
           return Promise.resolve(e);
 
         return this.doView(e);
@@ -115,17 +137,18 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
   defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
 
-    if (this.state.findOptions) {
-      return Finder.findMany(this.state.findOptions);
+    if (this.props.findOptions) {
+      return Finder.findMany(this.props.findOptions, { searchControlProps: { create: this.props.createOnFind } });
     }
 
     return this.chooseType(ti => Finder.isFindable(ti, false))
-      .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
+      .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined :
+        Finder.findMany({ queryName: qn } as FindOptions, { searchControlProps: { create: this.props.createOnFind } }));
   }
 
   addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
 
-    if (isLite(entityOrLite) != (this.state.type!.isLite || false))
+    if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
 
     const list = this.props.ctx.value!;
@@ -138,7 +161,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     event.preventDefault();
 
-    const promise = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
+    const promise = this.props.onFindMany ? this.props.onFindMany() : this.defaultFindMany();
 
     if (promise == null)
       return;
@@ -177,7 +200,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
   canMove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
 
-    const move = this.state.move;
+    const move = this.props.move;
 
     if (move == undefined)
       return undefined;
@@ -192,13 +215,12 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   handleDragStart = (de: React.DragEvent<any>, index: number) => {
     de.dataTransfer.setData('text', "start"); //cannot be empty string
     de.dataTransfer.effectAllowed = "move";
-    this.state.dragIndex = index;
-    this.forceUpdate();
+    this.setDragIndex(index);
   }
 
   handleDragEnd = (de: React.DragEvent<any>) => {
-    this.state.dragIndex = undefined;
-    this.state.dropBorderIndex = undefined;
+    this.setDragIndex(undefined);
+    this.setDropBorderIndex(undefined);
     this.forceUpdate();
   }
 
@@ -235,7 +257,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   }
 
   handlerDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v") => {
-    if (this.state.dragIndex == null)
+    if (this.dragIndex == null)
       return;
 
     de.preventDefault();
@@ -248,11 +270,11 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     let dropBorderIndex = offset == undefined ? undefined : index + offset;
 
-    if (dropBorderIndex == this.state.dragIndex || dropBorderIndex == this.state.dragIndex! + 1)
+    if (dropBorderIndex == this.dragIndex || dropBorderIndex == this.dragIndex! + 1)
       dropBorderIndex = undefined;
 
-    if (this.state.dropBorderIndex != dropBorderIndex) {
-      this.state.dropBorderIndex = dropBorderIndex;
+    if (this.dropBorderIndex != dropBorderIndex) {
+      this.setDropBorderIndex(dropBorderIndex);
       this.forceUpdate();
     }
   }
@@ -260,7 +282,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   getDragConfig(index: number, orientation: "h" | "v"): DragConfig {
     return {
       dropClass: classes(
-        index == this.state.dragIndex && "sf-dragging",
+        index == this.dragIndex && "sf-dragging",
         this.dropClass(index, orientation)),
       onDragStart: e => this.handleDragStart(e, index),
       onDragEnd: this.handleDragEnd,
@@ -270,7 +292,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   }
 
   dropClass(index: number, orientation: "h" | "v") {
-    const dropBorderIndex = this.state.dropBorderIndex;
+    const dropBorderIndex = this.dropBorderIndex;
 
     return dropBorderIndex != null && index == dropBorderIndex ? (orientation == "h" ? "drag-left" : "drag-top") :
       dropBorderIndex != null && index == dropBorderIndex - 1 ? (orientation == "h" ? "drag-right" : "drag-bottom") :
@@ -280,20 +302,20 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
   handleDrop = (de: React.DragEvent<any>) => {
 
     de.preventDefault();
-    const dropBorderIndex = this.state.dropBorderIndex!;
+    const dropBorderIndex = this.dropBorderIndex!;
     if (dropBorderIndex == null)
       return;
 
-    const dragIndex = this.state.dragIndex!;
+    const dragIndex = this.dragIndex!;
     const list = this.props.ctx.value!;
     const temp = list[dragIndex!];
     list.removeAt(dragIndex!);
     const rebasedDropIndex = dropBorderIndex > dragIndex ? dropBorderIndex - 1 : dropBorderIndex;
     list.insertAt(rebasedDropIndex, temp);
 
-
-    this.state.dropBorderIndex = undefined;
-    this.state.dragIndex = undefined;
+    this.setValue(list);
+    this.setDropBorderIndex(undefined);
+    this.setDragIndex(undefined);
     this.forceUpdate();
   }
 }

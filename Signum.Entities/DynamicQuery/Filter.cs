@@ -59,7 +59,7 @@ namespace Signum.Entities.DynamicQuery
                 Type elementType = collection.Type.ElementType()!;
 
                 var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-                ctx.Replacemens.Add(anyAll, p);
+                ctx.Replacemens.Add(anyAll, p.BuildLite().Nullify());
 
                 var body = this.GroupOperation == FilterGroupOperation.And ?
                     Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
@@ -135,7 +135,7 @@ namespace Signum.Entities.DynamicQuery
                 if (Value == null)
                     return Expression.Constant(false);
 
-                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value);
+                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value)!;
 
                 bool hasNull = false;
                 while (clone.Contains(null))

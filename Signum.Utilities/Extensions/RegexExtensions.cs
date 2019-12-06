@@ -44,13 +44,13 @@ namespace Signum.Utilities
             Func<T, string> outerKeySelector, 
             Func<S, string> innerKeySelector, 
             Func<T, S, int, R> resultSelector)
-            where T : object
-            where S : object
+            where T : notnull
+            where S : notnull
         {
             StringDistance sd = new StringDistance();
             Dictionary<Tuple<T, S>, int> distances = (from o in outer
                                                       from i in inner
-                                                      select KVP.Create(Tuple.Create(o, i),
+                                                      select KeyValuePair.Create(Tuple.Create(o, i),
                                                         sd.LevenshteinDistance(outerKeySelector(o), innerKeySelector(i)))).ToDictionary();
             while (distances.Count > 0)
             {

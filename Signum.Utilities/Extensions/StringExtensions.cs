@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Signum.Utilities
         static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("HasTextExpression")]
-        public static bool HasText([NotNullWhenTrue]this string? str)
+        public static bool HasText([NotNullWhen(true)]this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }
@@ -670,7 +671,7 @@ namespace Signum.Utilities
             StringBuilder sb = new StringBuilder();
             using (StringReader sr = new StringReader(str))
             {
-                for (string line = sr.ReadLine(); line != null; line = sr.ReadLine())
+                for (string? line = sr.ReadLine(); line != null; line = sr.ReadLine())
                 {
                     sb.Append(space);
                     sb.AppendLine(line);
@@ -742,6 +743,11 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(s))
                 return s;
 
+            var dr  = NaturalLanguageTools.DiacriticsRemover.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+
+            if (dr != null)
+                s = dr.RemoveDiacritics(s);
+
             string normalizedString = s.Normalize(NormalizationForm.FormD);
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -777,7 +783,7 @@ namespace Signum.Utilities
             StringBuilder? sb = null;
             foreach (var item in elements)
             {
-                string str;
+                string? str;
                 if (item != null && (str = item.ToString()).HasText())
                 {
                     if (sb == null)

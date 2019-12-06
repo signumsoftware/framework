@@ -10,9 +10,9 @@ import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/Contextu
 import {
   operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults
 } from '../Operations'
-import { DropdownItem } from "../Components/DropdownItem";
-import { UncontrolledTooltip } from "../Components/Tooltip";
+import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -43,7 +43,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
     .filter(coc => coc != undefined)
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order)
-    .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
+    .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
 
   if (!menuItems.length)
     return undefined;
@@ -63,7 +63,9 @@ function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, ...ar
       return;
 
     API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-      Navigator.createNavigateOrTab(pack, coc.event!);
+      Navigator.createNavigateOrTab(pack, coc.event!)
+        .then(() => coc.context.markRows({}))
+        .done();
     }).done();
   }).done();
 
@@ -79,7 +81,6 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     return undefined;
 
   const ti = getTypeInfo(types[0].key);
-
   const contexts = operationInfos(ti)
     .filter(oi => isEntityOperation(oi.operationType))
     .map(oi => {
@@ -107,27 +108,41 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     return undefined;
 
   let contextPromise: Promise<ContextualOperationContext<Entity>[]>;
-  if (ctx.lites.length == 1 && contexts.some(coc => coc.operationInfo.hasCanExecute)) {
-    contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
-      contexts.forEach(coc => coc.canExecute = ep.canExecute[coc.operationInfo.key]);
-      return contexts;
-    });
-  } else if (ctx.lites.length > 1 && contexts.some(coc => coc.operationInfo.hasStates)) {
-    contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates).map(a => a.operationInfo.key))
-      .then(response => {
-        contexts.forEach(coc => coc.canExecute = response.canExecutes[coc.operationInfo.key]);
+  if (contexts.some(coc => coc.operationInfo.hasCanExecute) || Operations.Options.maybeReadonly(ti)) {
+    if (ctx.lites.length == 1) {
+      contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
+        contexts.forEach(coc => {
+          coc.canExecute = ep.canExecute[coc.operationInfo.key];
+          coc.isReadonly = Navigator.isReadOnly(ep, true);
+        });
         return contexts;
       });
+    } else /*if (ctx.lites.length > 1)*/ {
+      contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates).map(a => a.operationInfo.key))
+        .then(response => {
+          contexts.forEach(coc => {
+            coc.canExecute = response.canExecutes[coc.operationInfo.key];
+            coc.isReadonly = response.isReadOnly;
+          });
+          return contexts;
+        });
+    }
   } else {
+
+    if (Navigator.isReadOnly(ti, true)) {
+      contexts.forEach(a => a.isReadonly = true);
+    }
+
     contextPromise = Promise.resolve(contexts);
   }
 
-
   return contextPromise.then(ctxs => {
-    const menuItems = ctxs.filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+    const menuItems = ctxs
+      .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+      .filter(coc => !coc.isReadonly || showOnReadonly(coc))
       .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
         coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-      .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
+      .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
 
     if (menuItems.length == 0)
       return undefined;
@@ -150,6 +165,16 @@ function hideOnCanExecute(coc: ContextualOperationContext<Entity>) {
   return false;
 }
 
+
+function showOnReadonly(coc: ContextualOperationContext<Entity>) {
+  if (coc.settings && coc.settings.showOnReadOnly != undefined)
+    return coc.settings.showOnReadOnly;
+
+  if (coc.entityOperationSettings && coc.entityOperationSettings.showOnReadOnly != undefined)
+    return coc.entityOperationSettings.showOnReadOnly;
+
+  return false;
+}
 
 
 export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Promise<boolean> {
@@ -187,17 +212,17 @@ export namespace MenuItemConstructor { //To allow monkey patching
 
   export function simplifyName(niceName: string) {
     const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
-    return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
+    return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
   }
   export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void) {
 
     const text = coc.settings && coc.settings.text ? coc.settings.text() :
-      coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
+      coc.entityOperationSettings?.text ? coc.entityOperationSettings.text() :
         simplifyName(coc.operationInfo.niceName);
 
-    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Defaults.getColor(coc.operationInfo);
-    const icon = coalesceIcon(coc.settings && coc.settings.icon, coc.entityOperationSettings && coc.entityOperationSettings.icon);
-    const iconColor = coc.settings && coc.settings.iconColor || coc.entityOperationSettings && coc.entityOperationSettings.iconColor;
+    const color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+    const icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
+    const iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
 
     const disabled = !!coc.canExecute;
 
@@ -206,27 +231,33 @@ export namespace MenuItemConstructor { //To allow monkey patching
       coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
     }
 
-    let innerRef: HTMLElement | null;
-
-    return [
-      <DropdownItem
-        innerRef={b => innerRef = b}
+    const item = (
+      <Dropdown.Item
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}>
         {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
           color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon  != null || color != null) && " "}
+        {(icon != null || color != null) && " "}
         {text}
-      </DropdownItem>,
-      coc.canExecute ? <UncontrolledTooltip placement="right" target={() => innerRef!}>{coc.canExecute}</UncontrolledTooltip> : undefined
-    ].filter(a => a != null);
+      </Dropdown.Item>
+    );
+
+    if (!coc.canExecute)
+      return item;
+
+    return (
+      <OverlayTrigger placement="right"
+        overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"}>{coc.canExecute}</Tooltip>} >
+        {item}
+      </OverlayTrigger >
+    );
   }
 }
 
 export function notifySuccess() {
-  Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+  Notify.singleton && Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
 export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
@@ -241,15 +272,16 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
       case OperationType.ConstructorFrom:
         if (coc.context.lites.length == 1) {
           API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
-            .then(coc.onConstructFromSuccess || (pack => {
+            .then(coc.onConstructFromSuccess ?? (pack => {
               notifySuccess();
-              coc.context.markRows({});
-              Navigator.createNavigateOrTab(pack, coc.event!);
+              Navigator.createNavigateOrTab(pack, coc.event!)
+                .then(() => coc.context.markRows({}))
+                .done();
             }))
             .done();
         } else {
           API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-            .then(coc.onContextualSuccess || (report => {
+            .then(coc.onContextualSuccess ?? (report => {
               notifySuccess();
               coc.context.markRows(report.errors);
             }))
@@ -258,7 +290,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         break;
       case OperationType.Execute:
         API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess || (report => {
+          .then(coc.onContextualSuccess ?? (report => {
             notifySuccess();
             coc.context.markRows(report.errors);
           }))
@@ -266,7 +298,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         break;
       case OperationType.Delete:
         API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess || (report => {
+          .then(coc.onContextualSuccess ?? (report => {
             notifySuccess();
             coc.context.markRows(report.errors);
           }))
@@ -281,9 +313,13 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
 
 
 export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
-  if (icon != null)
-    return icon;
 
-  return icon2;
+  if (icon === null)
+    return undefined;
+
+  if (icon === undefined)
+    return icon2
+
+  return icon;
 }
 

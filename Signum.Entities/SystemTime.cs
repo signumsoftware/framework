@@ -21,6 +21,14 @@ namespace Signum.Entities
             return new Disposable(() => currentVariable.Value = old);
         }
 
+        static DateTime ValidateUTC(DateTime dt)
+        {
+            if (dt.Kind != DateTimeKind.Utc)
+                throw new InvalidOperationException("Date should be in UTC");
+
+            return dt;
+        }
+
         public class HistoryTable : SystemTime
         {
             public override string ToString() => "HistoryTable";
@@ -32,7 +40,7 @@ namespace Signum.Entities
 
             public AsOf(DateTime dateTime)
             {
-                this.DateTime = dateTime;
+                this.DateTime = ValidateUTC(dateTime);
             }
 
             public override string ToString() => $"AS OF {DateTime:u}";
@@ -40,6 +48,7 @@ namespace Signum.Entities
 
         public abstract class Interval : SystemTime
         {
+          
 
         }
 
@@ -50,8 +59,8 @@ namespace Signum.Entities
 
             public FromTo(DateTime startDateTime, DateTime endDateTime)
             {
-                this.StartDateTime = startDateTime;
-                this.EndtDateTime = endDateTime;
+                this.StartDateTime = ValidateUTC(startDateTime);
+                this.EndtDateTime = ValidateUTC(endDateTime);
             }
 
             public override string ToString() => $"FROM {StartDateTime:u} TO {EndtDateTime:u}";
@@ -64,8 +73,8 @@ namespace Signum.Entities
 
             public Between(DateTime startDateTime, DateTime endDateTime)
             {
-                this.StartDateTime = startDateTime;
-                this.EndtDateTime = endDateTime;
+                this.StartDateTime = ValidateUTC(startDateTime);
+                this.EndtDateTime = ValidateUTC(endDateTime);
             }
 
             public override string ToString() => $"BETWEEN {StartDateTime:u} AND {EndtDateTime:u}";
@@ -78,8 +87,8 @@ namespace Signum.Entities
 
             public ContainedIn(DateTime startDateTime, DateTime endDateTime)
             {
-                this.StartDateTime = startDateTime;
-                this.EndtDateTime = endDateTime;
+                this.StartDateTime = ValidateUTC(startDateTime);
+                this.EndtDateTime = ValidateUTC(endDateTime);
             }
 
             public override string ToString() => $"CONTAINED IN ({StartDateTime:u}, {EndtDateTime:u})";

@@ -16,21 +16,16 @@ namespace Signum.Entities.DynamicQuery
     {
         public static string GetKey(object queryName)
         {
-            if (queryName is Type)
-                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
-
-            return (queryName is Type ? Reflector.CleanTypeName((Type) queryName) : queryName.ToString());
+            return queryName is Type t ? Reflector.CleanTypeName(EnumEntity.Extract(t) ?? t) : 
+                queryName.ToString()!;
         }
         
         public static string GetNiceName(object queryName)
         {
-            if (queryName is Type)
-                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
-
             return
-                queryName is Type ? ((Type)queryName).NicePluralName() :
-                queryName is Enum ? ((Enum)queryName).NiceToString() :
-                queryName.ToString();
+                queryName is Type t ? (EnumEntity.Extract(t) ?? t).NicePluralName() :
+                queryName is Enum e ? e.NiceToString() :
+                queryName.ToString()!;
         }
 
         public static FilterType GetFilterType(Type type)
@@ -496,9 +491,9 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
-        static readonly MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
-        static readonly MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
+        static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s, StringComparison.InvariantCultureIgnoreCase));
+        static readonly MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s, StringComparison.InvariantCultureIgnoreCase));
+        static readonly MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s, StringComparison.InvariantCultureIgnoreCase));
         static readonly MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
         static readonly MethodInfo miDistinctNullable = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<int>(null, null)).GetGenericMethodDefinition();
         static readonly MethodInfo miDistinct = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
@@ -518,9 +513,9 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(CastNumber(left), CastNumber(right));
                 case FilterOperation.LessThan: return Expression.LessThan(CastNumber(left), CastNumber(right));
                 case FilterOperation.LessThanOrEqual: return Expression.LessThanOrEqual(CastNumber(left), CastNumber(right));
-                case FilterOperation.Contains: return Expression.Call(Fix(left, inMemory), miContains, right);
-                case FilterOperation.StartsWith: return Expression.Call(Fix(left, inMemory), miStartsWith, right);
-                case FilterOperation.EndsWith: return Expression.Call(Fix(left, inMemory), miEndsWith, right);
+                case FilterOperation.Contains: return Expression.Call(Fix(left, inMemory), miContains, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
+                case FilterOperation.StartsWith: return Expression.Call(Fix(left, inMemory), miStartsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
+                case FilterOperation.EndsWith: return Expression.Call(Fix(left, inMemory), miEndsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 case FilterOperation.Like: return Expression.Call(miLike, Fix(left, inMemory), right);
                 case FilterOperation.NotContains: return Expression.Not(Expression.Call(Fix(left, inMemory), miContains, right));
                 case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miStartsWith, right));

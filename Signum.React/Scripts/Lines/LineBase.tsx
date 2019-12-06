@@ -3,6 +3,7 @@ import { Dic } from '../Globals'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities'
+import { useForceUpdate } from '../Hooks'
 
 export interface ChangeEvent {
   newValue: any;
@@ -23,66 +24,59 @@ export interface LineBaseProps extends StyleOptions {
   mandatory?: boolean;
 }
 
-export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
 
-  constructor(props: P) {
-    super(props);
+export function useController<C extends LineBaseController<P>, P extends LineBaseProps>(controllerType: new () => C, props: P, ref: React.Ref<C>) : C {
+  var controller = React.useMemo<C>(()=> new controllerType(), []);
+  controller.init(props);
+  React.useImperativeHandle(ref, () => controller, []);
+  return controller;
+}
 
-    this.state = this.calculateState(props);
+export class LineBaseController<P extends LineBaseProps> {
+
+  static propEquals(prevProps: LineBaseProps, nextProps: LineBaseProps) {
+    if (Dic.equals(prevProps, nextProps, true))
+      return true; //For Debugging
+
+    return false;
   }
 
-  shouldComponentUpdate(nextProps: LineBaseProps, nextState: LineBaseProps) {
-    if (Dic.equals(this.state, nextState, true))
-      return false; //For Debugging
+  props!: P;
+  forceUpdate!: () => void;
+  changes!: number;
+  setChanges!: (changes: React.SetStateAction<number>) => void;
 
-    return true;
+  init(p: P) {
+    this.props = this.expandProps(p);
+    this.forceUpdate = useForceUpdate();
+    [this.changes, this.setChanges] = React.useState(0);
   }
 
-  componentWillReceiveProps(nextProps: P, nextContext: any) {
-    const newState = this.calculateState(nextProps);
-
-    Dic.getKeys(this.state).forEach(k => {
-      if (!(newState as any).hasOwnProperty(k))
-        (newState as any)[k] = undefined;
-    });
-
-    this.setState(newState);
-  }
-
-  changes = 0;
   setValue(val: any) {
-    var oldValue = this.state.ctx.value;
-    this.state.ctx.value = val;
-    this.changes++;
+    var oldValue = this.props.ctx.value;
+    this.props.ctx.value = val;
+    this.setChanges(c => c + 1);
     this.validate();
     this.forceUpdate();
-    if (this.state.onChange)
-      this.state.onChange({ oldValue: oldValue, newValue: val });
+    if (this.props.onChange)
+      this.props.onChange({ oldValue: oldValue, newValue: val });
   }
 
   validate() {
-    const error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
-    this.state.ctx.error = error;
-    if (this.state.ctx.frame)
-      this.state.ctx.frame.revalidate();
+    const error = this.props.onValidate ? this.props.onValidate(this.props.ctx.value) : this.defaultValidate(this.props.ctx.value);
+    this.props.ctx.error = error;
+    if (this.props.ctx.frame)
+      this.props.ctx.frame.revalidate();
   }
 
   defaultValidate(val: any) {
-    if (this.state.type!.isNotNullable && val == undefined)
-      return ValidationMessage._0IsNotSet.niceToString(this.state.labelText);
+    if (this.props.type!.isNotNullable && val == undefined)
+      return ValidationMessage._0IsNotSet.niceToString(this.props.ctx.niceName());
 
     return undefined;
   }
 
-  render() {
-
-    if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
-      return null;
-
-    return this.renderInternal();
-  }
-
-  calculateState(props: P): S {
+  expandProps(props: P): P {
 
     const { type, ctx,
       readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns,
@@ -91,44 +85,51 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     const so: StyleOptions = { readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-    const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.typeReference()) } as LineBaseProps as S;
+    const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute.typeReference()) } as LineBaseProps as P;
 
-    this.calculateDefaultState(state);
-    runTasks(this as any as LineBase<LineBaseProps, LineBaseProps>, state);
+    this.getDefaultProps(p);
+    runTasks(this as any as LineBaseController<LineBaseProps>, p);
 
-    this.overrideProps(state, otherProps as S);
-    return state;
+    this.overrideProps(p, otherProps as P);
+    return p;
   }
 
-  overrideProps(state: S, overridenProps: S) {
-    const labelHtmlAttributes = { ...state.labelHtmlAttributes, ...Dic.simplify(overridenProps.labelHtmlAttributes) };
-    Dic.assign(state, Dic.simplify(overridenProps))
-    state.labelHtmlAttributes = labelHtmlAttributes;
+  overrideProps(p: P, overridenProps: P) {
+    const labelHtmlAttributes = { ...p.labelHtmlAttributes, ...Dic.simplify(overridenProps.labelHtmlAttributes) };
+    Dic.assign(p, Dic.simplify(overridenProps))
+    p.labelHtmlAttributes = labelHtmlAttributes;
   }
+
+  getDefaultProps(p: P) {
+  }
+
 
   baseHtmlAttributes(): React.HTMLAttributes<any> {
     return {
-      'data-property-path': this.state.ctx.propertyPath,
+      'data-property-path': this.props.ctx.propertyPath,
       'data-changes': this.changes
     } as any;
   }
 
-  calculateDefaultState(state: S) {
-  }
 
   get mandatoryClass() {
-    if (this.state.mandatory && !this.state.readOnly && (this.state.ctx.value == null || this.state.ctx.value === ""))
-      return "sf-mandatory"
+
+    if (this.props.mandatory && !this.props.readOnly) {
+      const val = this.props.ctx.value;
+      if (val == null || val === "" || Array.isArray(val) && val.length == 0)
+        return "sf-mandatory";
+    }
 
     return null;
   }
 
-  abstract renderInternal(): JSX.Element | null;
+  get isHidden() {
+    return this.props.visible == false || this.props.hideIfNull && this.props.ctx.value == undefined;
+  }
 }
 
+export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) => void)[] = [];
 
-export const tasks: ((lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) => void)[] = [];
-
-export function runTasks(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
+export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
   tasks.forEach(t => t(lineBase, state));
 }

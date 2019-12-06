@@ -5,20 +5,19 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { PropertyRoute, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage } from '../Signum.Entities'
-import { LineBase, LineBaseProps } from './LineBase'
+import { PropertyRoute, getTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite } from '../Signum.Entities'
+import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-export let TitleManager = { useTitle: true };
 
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
   viewOnCreate?: boolean;
   navigate?: boolean;
   create?: boolean;
+  createOnFind?: boolean;
   find?: boolean;
   remove?: boolean | ((item: any /*T*/) => boolean);
 
@@ -27,16 +26,18 @@ export interface EntityBaseProps extends LineBaseProps {
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
-  extraButtons?: (ec: EntityBase<EntityBaseProps, EntityBaseProps>) => React.ReactNode;
+  extraButtons?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
+  liteToString?: (e: any /*T*/) => string;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+
+  fatLite?: boolean;
 }
 
-export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseProps> extends LineBase<T, S>
-{
+export class EntityBaseController<P extends EntityBaseProps> extends LineBaseController<P>{
 
-  static createIcon = <FontAwesomeIcon icon="plus"  />;
+  static createIcon = <FontAwesomeIcon icon="plus" />;
   static findIcon = <FontAwesomeIcon icon="search" />;
   static removeIcon = <FontAwesomeIcon icon="times" />;
   static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
@@ -64,24 +65,25 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         getTypeInfos(type).some(ti => Navigator.isFindable(ti));
   }
 
-  shouldComponentUpdate(nextProps: T, nextState: S): boolean {
+  static propEquals(prevProps: EntityBaseProps, nextProps: EntityBaseProps): boolean {
     if (
-      nextState.getComponent || this.state.getComponent ||
-      nextState.extraButtons || this.state.extraButtons)
-      return true;
+      nextProps.getComponent || prevProps.getComponent ||
+      nextProps.extraButtons || prevProps.extraButtons)
+      return false;
 
-    return super.shouldComponentUpdate(nextProps, nextState);
+    return LineBaseController.propEquals(prevProps, nextProps);
   }
-  
-  calculateDefaultState(state: S) {
+
+  getDefaultProps(state: P) {
 
     const type = state.type!;
 
-    state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent || !!this.props.getViewPromise);
-    state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent || !!this.props.getViewPromise);
-    state.find = EntityBase.defaultIsFindable(type);
-    state.findOptions = Navigator.defaultFindOptions(type);
+    const customComponent = Boolean(state.getComponent || state.getViewPromise);
 
+    state.create = EntityBaseController.defaultIsCreable(type, customComponent);
+    state.view = EntityBaseController.defaultIsViewable(type, customComponent);
+    state.find = EntityBaseController.defaultIsFindable(type);
+    state.findOptions = Navigator.defaultFindOptions(type);
 
     state.viewOnCreate = true;
     state.remove = true;
@@ -89,18 +91,18 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
   convert(entityOrLite: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | Lite<Entity>> {
 
-    const type = this.state.type!;
+    const type = this.props.type!;
 
     const isLite = (entityOrLite as Lite<Entity>).EntityType != undefined;
-    const entityType = (entityOrLite as Lite<Entity>).EntityType || (entityOrLite as ModifiableEntity).Type;
-
+    const entityType = (entityOrLite as Lite<Entity>).EntityType ?? (entityOrLite as ModifiableEntity).Type;
 
     if (type.isEmbedded) {
       if (entityType != type.name || isLite)
         throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
       return Promise.resolve(entityOrLite as ModifiableEntity);
-    } else {
+    }
+    else {
       if (type.name != IsByAll && !type.name.split(',').map(a => a.trim()).contains(entityType))
         throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
@@ -109,17 +111,19 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
       if (isLite) {
         const lite = entityOrLite as Lite<Entity>;
-        return Navigator.API.fetchAndRemember(lite);
+        return Navigator.API.fetchAndForget(lite);
       }
 
       const entity = entityOrLite as Entity;
-
-      return Promise.resolve(toLiteFat(entity));
+      const ti = getTypeInfo(entity.Type);
+      const toStr = this.props.liteToString && this.props.liteToString(entity);
+      const fatLite = this.props.fatLite || this.props.fatLite == null && (ti.entityKind == "Part" || ti.entityKind == "SharedPart");
+      return Promise.resolve(toLite(entity, fatLite, toStr));
     }
   }
 
   doView(entity: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | undefined> | undefined {
-    const pr = this.state.ctx.propertyRoute;
+    const pr = this.props.ctx.propertyRoute;
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
@@ -149,10 +153,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     event.preventDefault();
 
-    const ctx = this.state.ctx;
+    const ctx = this.props.ctx;
     const entity = ctx.value;
 
-    const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
+    const openWindow = (event.button == 1 || event.ctrlKey) && !this.props.type!.isEmbedded;
     if (openWindow) {
       event.preventDefault();
       const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
@@ -171,7 +175,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         //Modifying the sub entity, saving and coming back should change the entity in the UI (ToString, or EntityDetails), 
         //the parent entity is not really modified, but I'm not sure it his is a real problem in practice, till then the line is commented out
         //if (e.modified || !is(e, entity)) 
-          this.convert(e).then(m => this.setValue(m)).done();
+        this.convert(e).then(m => this.setValue(m)).done();
       }).done();
     }
   }
@@ -184,20 +188,20 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     return (
       <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        title={TitleManager.useTitle ? EntityControlMessage.View.niceToString() : undefined}>
-        {EntityBase.viewIcon}
+        title={this.props.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+        {EntityBaseController.viewIcon}
       </a>
     );
   }
 
   chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string | undefined> {
-    const t = this.state.type!;
+    const t = this.props.type!;
 
     if (t.isEmbedded)
       return Promise.resolve(t.name);
 
     if (t.name == IsByAll)
-      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t && t.toStr /*CleanName*/);
+      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t?.toStr /*CleanName*/);
 
     const tis = getTypeInfos(t).filter(ti => predicate(ti));
 
@@ -212,7 +216,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         if (!typeName)
           return Promise.resolve(undefined);
 
-        var fo = this.state.findOptions;
+        var fo = this.props.findOptions;
 
         return Finder.getPropsFromFindOptions(typeName, fo)
           .then(props => Constructor.construct(typeName, props, pr));
@@ -223,7 +227,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     event.preventDefault();
 
-    var pr = this.state.ctx.propertyRoute;
+    var pr = this.props.ctx.propertyRoute;
     const promise = this.props.onCreate ?
       this.props.onCreate(pr) : this.defaultCreate(pr);
 
@@ -235,7 +239,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
       if (e == undefined)
         return undefined;
 
-      if (!this.state.viewOnCreate)
+      if (!this.props.viewOnCreate)
         return Promise.resolve(e);
 
       return this.doView(e);
@@ -250,14 +254,14 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
   };
 
   renderCreateButton(btn: boolean, createMessage?: string) {
-    if (!this.state.create || this.state.ctx.readOnly)
+    if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={TitleManager.useTitle ? createMessage || EntityControlMessage.Create.niceToString() : undefined}>
-        {EntityBase.createIcon}
+        title={this.props.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
+        {EntityBaseController.createIcon}
       </a>
     );
   }
@@ -271,13 +275,13 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
   defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
-    if (this.state.findOptions) {
-      return Finder.find(this.state.findOptions);
+    if (this.props.findOptions) {
+      return Finder.find(this.props.findOptions, { searchControlProps: { create: this.props.createOnFind } });
     }
 
     return this.chooseType(ti => Finder.isFindable(ti, false))
       .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
-        qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
+        qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions, { searchControlProps: { create: this.props.createOnFind } }));
   }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
@@ -297,14 +301,14 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }).done();
   };
   renderFindButton(btn: boolean) {
-    if (!this.state.find || this.state.ctx.readOnly)
+    if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        title={TitleManager.useTitle ? EntityControlMessage.Find.niceToString() : undefined}>
-        {EntityBase.findIcon}
+        title={this.props.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+        {EntityBaseController.findIcon}
       </a>
     );
   }
@@ -323,21 +327,21 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
   };
 
   renderRemoveButton(btn: boolean, item: ModifiableEntity | Lite<Entity>) {
-    if (!this.canRemove(item) || this.state.ctx.readOnly)
+    if (!this.canRemove(item) || this.props.ctx.readOnly)
       return undefined;
 
     return (
       <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-        {EntityBase.removeIcon}
+        title={this.props.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+        {EntityBaseController.removeIcon}
       </a>
     );
   }
 
   canRemove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
 
-    const remove = this.state.remove;
+    const remove = this.props.remove;
 
     if (remove == undefined)
       return undefined;
@@ -350,7 +354,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
   canView(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
 
-    const view = this.state.view;
+    const view = this.props.view;
 
     if (view == undefined)
       return undefined;
@@ -361,4 +365,3 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     return view;
   }
 }
-

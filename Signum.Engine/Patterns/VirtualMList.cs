@@ -1,3 +1,4 @@
+using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -84,13 +85,14 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
+            fi.SchemaBuilder.Include<L>();
+
             var mListPropertRoute = PropertyRoute.Construct(mListField);
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
             RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
 
-            
             var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
             var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
 
@@ -165,7 +167,13 @@ namespace Signum.Engine
                     GraphExplorer.PropagateModifications(graph.Inverse());
                     var errors = GraphExplorer.FullIntegrityCheck(graph);
                     if (errors != null)
+                    {
+#if DEBUG
+                        throw new IntegrityCheckException(errors.WithEntities(graph));
+#else
                         throw new IntegrityCheckException(errors);
+#endif
+                    }
                 }
 
                 if (mlist.IsGraphModified)
@@ -265,6 +273,8 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
+            fi.SchemaBuilder.Include<L>();
+
             Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>>? setter = null;
             var sb = fi.SchemaBuilder;

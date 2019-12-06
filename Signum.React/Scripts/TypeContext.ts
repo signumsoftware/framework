@@ -255,6 +255,9 @@ export class TypeContext<T> extends StyleContext {
     this.binding.setError(val);
   }
 
+  get index(): number | undefined {
+    return this.binding && (this.binding as MListElementBinding<any>).index;
+  }
 
   static root<T extends ModifiableEntity>(value: T, styleOptions?: StyleOptions, parent?: StyleContext): TypeContext<T> {
     return new TypeContext(parent, styleOptions, PropertyRoute.root(value.Type), new ReadonlyBinding<T>(value, ""));
@@ -404,8 +407,6 @@ export class TypeContext<T> extends StyleContext {
     if (!this.error)
       return undefined;
 
-    debugger;
-
     return {
       title: this.error,
       "data-error-path": this.prefix
@@ -435,17 +436,20 @@ export interface IOperationVisible {
 }
 
 export interface IHasChanges {
-  componentHasChanges?: () => boolean;
+  entityHasChanges?: () => boolean;
 }
 
 export interface EntityFrame {
-  frameComponent: React.Component<any, any>;
-  entityComponent: React.Component<any, any> | null | undefined;
-  pack: EntityPack<ModifiableEntity> | undefined;
-  onReload: (pack?: EntityPack<ModifiableEntity>) => void;
+  frameComponent: {
+    forceUpdate(): void,
+    createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
+  };
+  entityComponent: React.Component | null | undefined;
+  pack: EntityPack<ModifiableEntity>;
+  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
-  onClose: (ok?: boolean) => void;
+  onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowChangeEntity: boolean;
 }

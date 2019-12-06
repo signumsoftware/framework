@@ -1,15 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <TypeScriptToolsVersion>3.5</TypeScriptToolsVersion>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TypeScriptToolsVersion>3.7</TypeScriptToolsVersion>
+    <TypeScriptBuildMode>true</TypeScriptBuildMode>
+    <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
     <Platforms>x64;x86;win86;win64;AnyCPU;linux64</Platforms>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
 
@@ -32,21 +34,21 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.5.2">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="node_modules\**" />
     <None Remove="ts_out\**" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.0.0" />
-    <PackageReference Include="Signum.TSGenerator" Version="2.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.2.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,5 +66,16 @@
     <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
 
-  
+  <ItemGroup>
+    <Compile Remove="ts_out\**" />
+    <Content Remove="ts_out\**" />
+    <EmbeddedResource Remove="ts_out\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
+    <TypeScriptCompile Remove="ts_out\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Scripts\Components\ModalHeaderButtons.tsx" />
+    <None Remove="Scripts\Lines\Retrieve.tsx" />
+  </ItemGroup>
 </Project>

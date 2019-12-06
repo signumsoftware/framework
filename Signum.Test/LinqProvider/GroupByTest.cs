@@ -14,6 +14,8 @@ namespace Signum.Test.LinqProvider
     /// </summary>
     public class GroupByTest
     {
+        
+
         public GroupByTest()
         {
             MusicStarter.StartAndLoad();
@@ -518,6 +520,128 @@ namespace Signum.Test.LinqProvider
                             Count = g.Count()
                         }).Take(10).ToList();
         }
+
+        [Fact]
+        public void GroupByMaybeAuthorLite()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         let old = a.Year < 2000
+                         group a by old ? a.Author.ToLite() : null into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+            
+            query.ToList();
+        }
+
+
+        [Fact]
+        public void GroupByMaybeAuthor()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         let old = a.Year < 2000
+                         group a by old ? a.Author : null into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
+
+        [Fact]
+        public void GroupByMaybeLabel()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         let old = a.Year < 2000
+                         group a by old ? a.Label : null into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
+        [Fact]
+        public void GroupByMaybeLabelLite()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         let old = a.Year < 2000
+                         group a by old ? a.Label.ToLite() : null into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
+        [Fact]
+        public void GroupByCoallesceAuthorLite()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         group a by a.Author.ToLite() ?? a.Author.ToLite() into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
+
+        [Fact]
+        public void GroupByCoallesceAuthor()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         let old = a.Year < 2000
+                         group a by a.Author ?? a.Author into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
+
+        [Fact]
+        public void GroupByCoallesceLabel()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         group a by a.Label ?? a.Label into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
+        [Fact]
+        public void GroupByCoallesceLabelLite()
+        {
+            var query = (from a in Database.Query<AlbumEntity>()
+                         group a by a.Label.ToLite() ?? a.Label.ToLite() into g
+                         select new
+                         {
+                             Author = g.Key,
+                             Count = g.Count()
+                         }).Take(10);
+
+            query.ToList();
+        }
+
 
         [Fact]
         public void GroupByExpandGroupBy()

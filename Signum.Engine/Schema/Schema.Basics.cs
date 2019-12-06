@@ -28,13 +28,15 @@ namespace Signum.Engine.Maps
 
         Dictionary<string, IColumn> Columns { get; }
 
-        List<Index>? MultiColumnIndexes { get; set; }
+        List<TableIndex>? MultiColumnIndexes { get; set; }
 
-        List<Index> GeneratAllIndexes();
+        List<TableIndex> GeneratAllIndexes();
 
         void GenerateColumns();
 
         SystemVersionedInfo? SystemVersioned { get; }
+
+        FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
     }
 
     public class SystemVersionedInfo
@@ -116,7 +118,7 @@ namespace Signum.Engine.Maps
         public Dictionary<string, IColumn> Columns { get; set; }
 
 
-        public List<Index>? MultiColumnIndexes { get; set; }
+        public List<TableIndex>? MultiColumnIndexes { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public Table(Type type)
@@ -213,7 +215,7 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public List<Index> GeneratAllIndexes()
+        public List<TableIndex> GeneratAllIndexes()
         {
             IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
             if (Mixins != null)
@@ -224,22 +226,22 @@ namespace Signum.Engine.Maps
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
 
-            if (result.OfType<UniqueIndex>().Any())
+            if (result.OfType<UniqueTableIndex>().Any())
             {
                 var s = Schema.Current.Settings;
                 List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo)).OfType<AttachToUniqueIndexesAttribute>().Any())
-                   .SelectMany(f => Index.GetColumnsFromFields(f.Field))
+                   .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
                    .ToList();
 
                 if (attachedFields.Any())
                 {
                     result = result.Select(ix =>
                     {
-                        var ui = ix as UniqueIndex;
+                        var ui = ix as UniqueTableIndex;
                         if (ui == null || ui.AvoidAttachToUniqueIndexes)
                             return ix;
 
-                        return new UniqueIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
+                        return new UniqueTableIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
                         {
                             Where = ui.Where
                         };
@@ -249,7 +251,7 @@ namespace Signum.Engine.Maps
 
             if(this.SystemVersioned != null)
             {
-                result.Add(new Index(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
+                result.Add(new TableIndex(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
             }
 
             return result;
@@ -284,6 +286,11 @@ namespace Signum.Engine.Maps
                 this.Mixins == null ? Enumerable.Empty<EntityField>() :
                 this.Mixins.Values.SelectMany(fm => fm.Fields.Values));
         }
+
+        public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+        }
     }
 
     public class EntityField
@@ -312,7 +319,7 @@ namespace Signum.Engine.Maps
     {
         public Type FieldType { get; private set; }
         public PropertyRoute Route { get; private set; }
-        public UniqueIndex? UniqueIndex { get; set; }
+        public UniqueTableIndex? UniqueIndex { get; set; }
 
         public Field(PropertyRoute route, Type? fieldType = null)
         {
@@ -323,20 +330,20 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<IColumn> Columns();
 
-        public virtual IEnumerable<Index> GenerateIndexes(ITable table)
+        public virtual IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             if (UniqueIndex == null)
-                return Enumerable.Empty<Index>();
+                return Enumerable.Empty<TableIndex>();
 
             return new[] { UniqueIndex };
         }
 
-        public virtual UniqueIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
+        public virtual UniqueTableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
         {
             if (attribute == null)
                 return null;
 
-            var result = new UniqueIndex(table, Index.GetColumnsFromFields(this))
+            var result = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(this))
             {
                 AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
             };
@@ -471,7 +478,7 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             if (this.UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
@@ -634,7 +641,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table));
         }
@@ -653,6 +660,13 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<TableMList> TablesMList()
         {
             return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList());
+        }
+
+        internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            var subHasValue = this.EmbeddedFields.Select(a => a.Value).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+
+            return subHasValue ?? (this.Columns().Contains(column) ? this.HasValue : null);
         }
     }
 
@@ -709,7 +723,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             throw new InvalidOperationException();
         }
@@ -782,7 +796,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            yield return KVP.Create(ReferenceTable, new RelationInfo
+            yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                  IsLite = IsLite,
                  IsCollection = false,
@@ -790,10 +804,10 @@ namespace Signum.Engine.Maps
             });
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             if (UniqueIndex == null)
-                return new[] { new Index(table, (IColumn)this) };
+                return new[] { new TableIndex(table, (IColumn)this) };
 
             return base.GenerateIndexes(table);
         }
@@ -849,7 +863,7 @@ namespace Signum.Engine.Maps
         {
             if (ReferenceTable == null)
                 yield break;
-            yield return KVP.Create(ReferenceTable, new RelationInfo
+            yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
@@ -889,7 +903,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, new RelationInfo
+            return ImplementationColumns.Select(a => KeyValuePair.Create(a.Value.ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
@@ -897,9 +911,9 @@ namespace Signum.Engine.Maps
             }));
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
-            return this.Columns().Select(c => new Index(table, c)).Concat(base.GenerateIndexes(table));
+            return this.Columns().Select(c => new TableIndex(table, c)).Concat(base.GenerateIndexes(table));
         }
 
         bool clearEntityOnSaving;
@@ -945,7 +959,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            yield return KVP.Create(ColumnType.ReferenceTable, new RelationInfo
+            yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
             {
                  IsNullable = this.ColumnType.Nullable.ToBool(),
                  IsLite = this.IsLite,
@@ -968,10 +982,10 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             if (UniqueIndex == null)
-                return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
+                return new[] { new TableIndex(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
 
             return base.GenerateIndexes(table);
         }
@@ -1065,12 +1079,12 @@ namespace Signum.Engine.Maps
             return new IColumn[0];
         }
 
-        public override IEnumerable<Index> GenerateIndexes(ITable table)
+        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
             if (UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
 
-            return Enumerable.Empty<Index>();
+            return Enumerable.Empty<TableIndex>();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -1112,10 +1126,11 @@ namespace Signum.Engine.Maps
                 Type = type;
                 Name = name;
             }
+
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
-        public List<Index>? MultiColumnIndexes { get; set; }
+        public List<TableIndex>? MultiColumnIndexes { get; set; }
 
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
@@ -1151,7 +1166,7 @@ namespace Signum.Engine.Maps
         {
             List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference };
 
-            if(Order != null)
+            if (Order != null)
                 cols.Add(Order);
 
             cols.AddRange(Field.Columns());
@@ -1162,10 +1177,14 @@ namespace Signum.Engine.Maps
             Columns = cols.ToDictionary(a => a.Name);
         }
 
-        public List<Index> GeneratAllIndexes()
+        public List<TableIndex> GeneratAllIndexes()
         {
-            var result = BackReference.GenerateIndexes(this).ToList();
+            var result = new List<TableIndex>
+            {
+                new PrimaryClusteredIndex(this)
+            };
 
+            result.AddRange(BackReference.GenerateIndexes(this));
             result.AddRange(Field.GenerateIndexes(this));
 
             if (MultiColumnIndexes != null)
@@ -1178,7 +1197,7 @@ namespace Signum.Engine.Maps
         {
             Field? result = TryGetField(member);
 
-            if(result  == null)
+            if (result == null)
                 throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
 
             return result;
@@ -1219,6 +1238,14 @@ namespace Signum.Engine.Maps
         public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             return this.Field.GetTables();
+        }
+
+        public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            if (this.Field is FieldEmbedded f)
+                return f.GetHasValueColumn(column);
+
+            return null;
         }
     }
 }

@@ -2,7 +2,8 @@ import * as React from 'react'
 import { QueryDescription, } from '../FindOptions'
 import { Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
-import { DropdownItem } from '../Components';
+import { StyleContext } from '../TypeContext';
+import { Dropdown } from 'react-bootstrap';
 
 export interface MenuItemBlock {
   header: string;
@@ -14,6 +15,7 @@ export interface ContextualItemsContext<T extends Entity> {
   queryDescription: QueryDescription;
   markRows: (dictionary: MarkedRowsDictionary) => void;
   container?: SearchControlLoaded | React.Component<any, any>;
+  styleContext?: StyleContext;
 }
 
 export interface MarkedRowsDictionary {
@@ -44,10 +46,10 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
         return;
 
       if (result.length)
-        result.push(<DropdownItem divider />);
+        result.push(<Dropdown.Divider />);
 
       if (block.header)
-        result.push(<DropdownItem header>{block.header}</DropdownItem>);
+        result.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
 
       if (block.header)
         result.splice(result.length, 0, ...block.menuItems);

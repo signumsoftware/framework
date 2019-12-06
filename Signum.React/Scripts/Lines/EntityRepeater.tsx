@@ -1,96 +1,103 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
-import { TypeContext, mlistItemContext } from '../TypeContext'
+import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.Entities'
-import { EntityBase, TitleManager } from './EntityBase'
-import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityBaseController } from './EntityBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTypeInfos, getTypeInfo } from '../Reflection';
+import { useController } from './LineBase'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
-  createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
+  createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
   avoidFieldSet?: boolean;
   createMessage?: string;
 }
 
-export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRepeaterProps> {
+export class EntityRepeaterController extends EntityListBaseController<EntityRepeaterProps> {
 
-  calculateDefaultState(state: EntityRepeaterProps) {
-    super.calculateDefaultState(state);
-    state.viewOnCreate = false;
-    state.createAsLink = true;
+  getDefaultProps(p: EntityRepeaterProps) {
+    super.getDefaultProps(p);
+    p.viewOnCreate = false;
+    p.createAsLink = true;
   }
+}
 
-  renderInternal() {
 
-    let ctx = this.state.ctx;
+export const EntityRepeater = React.forwardRef(function EntityRepeater(props: EntityRepeaterProps, ref: React.Ref<EntityRepeaterController>) {
+  var c = useController(EntityRepeaterController, props, ref);
+  var p = c.props;
 
-    if (this.props.avoidFieldSet == true)
-      return (
-        <div className={classes("SF-repeater-field SF-control-container", ctx.errorClassBorder)}
-          {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
-          {this.renderButtons()}
-          {this.renderElements()}
-        </div>
-      );
+  if (c.isHidden)
+    return null;
 
+  let ctx = p.ctx;
+
+  if (p.avoidFieldSet == true)
     return (
-      <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
-        {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
-        <legend>
-          <div>
-            <span>{this.state.labelText}</span>
-            {this.renderButtons()}
-          </div>
-        </legend>
-        {this.renderElements()}
-      </fieldset>
+      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
+        {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
+        {renderButtons()}
+        {renderElements()}
+      </div>
     );
-  }
 
-  renderButtons() {
+  return (
+    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
+      {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
+      <legend>
+        <div>
+          <span>{p.labelText}</span>
+          {renderButtons()}
+        </div>
+      </legend>
+      {renderElements()}
+    </fieldset>
+  );
+
+
+  function renderButtons() {
     const buttons = (
       <span className="float-right">
-        {this.state.createAsLink == false && this.renderCreateButton(false, this.props.createMessage)}
-        {this.renderFindButton(false)}
-        {this.props.extraButtons && this.props.extraButtons(this)}
+        {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
+        {c.renderFindButton(false)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
 
-    return EntityBase.hasChildrens(buttons) ? buttons : undefined;
+    return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;
   }
 
-  renderElements() {
-    const ctx = this.state.ctx;
+  function renderElements() {
     const readOnly = ctx.readOnly;
     const showType = getTypeInfos(ctx.propertyRoute.typeReference().name).length > 1;
     return (
       <div className="sf-repater-elements">
         {
-          mlistItemContext(ctx).map((mlec, i) =>
-            (<EntityRepeaterElement key={this.keyGenerator.getKey(mlec.value)}
-              onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+          c.getMListItemContext(ctx).map(mlec =>
+            (<EntityRepeaterElement key={c.keyGenerator.getKey(mlec.value)}
+              onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
-              draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
-              getComponent={this.props.getComponent}
-              getViewPromise={this.props.getViewPromise}
-              title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type || mlec.value.EntityType).niceName}</span> : undefined} />))
-}
+              drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+              getComponent={p.getComponent}
+              getViewPromise={p.getViewPromise}
+              title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
+        }
         {
-          this.state.createAsLink && this.state.create && !readOnly &&
-          (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-            <a href="#" title={TitleManager.useTitle ? EntityControlMessage.Create.niceToString() : undefined}
+          p.createAsLink && p.create && !readOnly &&
+          (typeof p.createAsLink == "function" ? p.createAsLink(c) :
+            <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
-              onClick={this.handleCreateClick}>
-              {EntityBase.createIcon}&nbsp;{this.props.createMessage || EntityControlMessage.Create.niceToString()}
+              onClick={c.handleCreateClick}>
+              {EntityBaseController.createIcon}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
             </a>)
         }
       </div>
     );
   }
-}
+});
 
 
 export interface EntityRepeaterElementProps {
@@ -98,47 +105,44 @@ export interface EntityRepeaterElementProps {
   getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
-  draggable?: DragConfig;
+  drag?: DragConfig;
   title?: React.ReactElement<any>;
 }
 
-export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps>
+export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, drag, title }: EntityRepeaterElementProps)
 {
-  render() {
-    const drag = this.props.draggable;
 
-    return (
-      <div className={drag && drag.dropClass}
-        onDragEnter={drag && drag.onDragOver}
-        onDragOver={drag && drag.onDragOver}
-        onDrop={drag && drag.onDrop}>
-        <fieldset className="sf-repeater-element"
-          {...EntityListBase.entityHtmlAttributes(this.props.ctx.value)}>
-          <legend>
-            <div className="item-group">
-              {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
-                onClick={this.props.onRemove}
-                title={TitleManager.useTitle ? EntityControlMessage.Remove.niceToString() : undefined}>
-                {EntityBase.removeIcon}
-              </a>}
-              &nbsp;
+  return (
+    <div className={drag?.dropClass}
+      onDragEnter={drag?.onDragOver}
+      onDragOver={drag?.onDragOver}
+      onDrop={drag?.onDrop}>
+      <fieldset className="sf-repeater-element"
+        {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
+        <legend>
+          <div className="item-group">
+            {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
+              onClick={onRemove}
+              title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+              {EntityListBaseController.removeIcon}
+            </a>}
+            &nbsp;
             {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
-                draggable={true}
-                onDragStart={drag.onDragStart}
-                onDragEnd={drag.onDragEnd}
-                title={TitleManager.useTitle ? EntityControlMessage.Move.niceToString() : undefined}>
-                {EntityBase.moveIcon}
-              </a>}
-              {this.props.title && '\xa0'}
-              {this.props.title}
-            </div>
-          </legend>
-          <div className="sf-line-entity">
-            <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
+              draggable={true}
+              onDragStart={drag.onDragStart}
+              onDragEnd={drag.onDragEnd}
+              title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+              {EntityListBaseController.moveIcon}
+            </a>}
+            {title && '\xa0'}
+            {title}
           </div>
-        </fieldset>
-      </div>
-    );
-  }
+        </legend>
+        <div className="sf-line-entity">
+          <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />
+        </div>
+      </fieldset>
+    </div>
+  );
 }
 

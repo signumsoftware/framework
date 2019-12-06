@@ -33,12 +33,7 @@ namespace Signum.Engine
             get { return currentConnector.Value ?? Default; }
         }
 
-        static Connector @default;
-        public static Connector Default
-        {
-            get { return @default; }
-            set { @default = value; }
-        }
+        public static Connector Default { get; set; } = null!;
 
         static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout");
         public static int? ScopeTimeout { get { return scopeTimeout.Value; } }
@@ -157,6 +152,8 @@ namespace Signum.Engine
         public abstract bool SupportsFormat { get; }
 
         public abstract bool SupportsTemporalTables { get; }
+
+        public abstract bool RequiresRetry { get;  }
     }
 
     public abstract class ParameterBuilder
@@ -171,7 +168,7 @@ namespace Signum.Engine
             return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable.ToBool(), id == null ? null : id.Value.Object);
         }
 
-        public DbParameter CreateParameter(string parameterName, object value, Type type)
+        public DbParameter CreateParameter(string parameterName, object? value, Type type)
         {
             var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
 

@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
@@ -9,6 +14,7 @@ using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.React.Filters;
 using Signum.React.Json;
+using Signum.React.JsonModelValidators;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -19,9 +25,9 @@ namespace Signum.React.Facades
 {
     public static class SignumServer
     {
-        public static JsonSerializerSettings JsonSerializerSettings;
+        public static JsonSerializerSettings JsonSerializerSettings = null!;
 
-        public static MvcJsonOptions AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
+        public static MvcNewtonsoftJsonOptions AddSignumJsonConverters(this MvcNewtonsoftJsonOptions jsonOptions)
         {
             //Signum converters
             jsonOptions.SerializerSettings.Do(s =>
@@ -56,26 +62,27 @@ namespace Signum.React.Facades
             return options;
         }
 
-        public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
+        public static void AddSignumValidation(this IServiceCollection services)
+        {
+            services.AddSingleton<IModelMetadataProvider>(s =>
+            {
+                var modelMetadataProvider = s.GetRequiredService<ICompositeMetadataDetailsProvider>();
+                return new SignumModelMetadataProvider(modelMetadataProvider);
+            });
+            services.AddSingleton<IObjectModelValidator>(s =>
+            {
+                var options = s.GetRequiredService<IOptions<MvcOptions>>().Value;
+                var modelMetadataProvider = s.GetRequiredService<IModelMetadataProvider>();
+                return new SignumObjectModelValidator(modelMetadataProvider, options.ModelValidatorProviders);
+            });
+        }
+
+        public static void Start(IApplicationBuilder app, IWebHostEnvironment hostingEnvironment, Assembly mainAsembly)
         {
             Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
 
-            //app.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
-
             SignumControllerFactory.RegisterArea(typeof(EntitiesController));
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
-
-            //// Web API configuration and services
-            //var appXmlType = app.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
-            //app.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
-
-
-            //// Web API routes
-            //app.MapHttpAttributeRoutes();
-
-            //app.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
-
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
 
             ReflectionServer.Start();
         }
@@ -88,17 +95,18 @@ namespace Signum.React.Facades
                 canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
             );
 
-            foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
-            {
-                try
+            if (EntityPackTS.AddExtension != null)
+                foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
                 {
-                    action(result);
-                }
-                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
-                {
+                    try
+                    {
+                        action(result);
+                    }
+                    catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                    {
 
+                    }
                 }
-            }
 
             return result;
         }
@@ -110,9 +118,9 @@ namespace Signum.React.Facades
         public Dictionary<string, string> canExecute { get; set; }
 
         [JsonExtensionData]
-        public Dictionary<string, object> extension { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, object?> extension { get; set; } = new Dictionary<string, object?>();
 
-        public static Action<EntityPackTS> AddExtension;
+        public static Action<EntityPackTS>? AddExtension;
 
         public EntityPackTS(Entity entity, Dictionary<string, string> canExecute)
         {

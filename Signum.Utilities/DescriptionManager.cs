@@ -119,15 +119,15 @@ namespace Signum.Utilities
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityEntity
         public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
 
-        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
+        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase!).LocalPath)!, "Translations");
 
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.IsEnum && t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
-        public static event Action<CultureInfo, MemberInfo> NotLocalizedMember;
+        public static event Action<CultureInfo, MemberInfo>? NotLocalizedMember;
 
         public static Dictionary<Type, Func<MemberInfo, string>> ExternalEnums = new Dictionary<Type, Func<MemberInfo, string>>
         {
-            { typeof(DayOfWeek), m => CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)m).GetValue(null)] }
+            { typeof(DayOfWeek), m => CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)m).GetValue(null)!] }
         };
 
 
@@ -243,7 +243,7 @@ namespace Signum.Utilities
         static string GetMemberNiceName(MemberInfo memberInfo)
         {
             //var cc = CultureInfo.CurrentUICulture;
-            var type = memberInfo.DeclaringType;
+            var type = memberInfo.DeclaringType!;
 
             if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
             {
@@ -348,7 +348,7 @@ namespace Signum.Utilities
             return true;
         }
 
-        public static Action Invalidated;
+        public static Action? Invalidated;
         public static void Invalidate()
         {
             localizations.Clear();
@@ -465,7 +465,7 @@ namespace Signum.Utilities
         public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument? doc, Dictionary<string, string>? replacements /*new -> old*/)
         {
             Dictionary<string, XElement>? file = doc?.Element("Translations").Elements("Type")
-                .Select(x => KVP.Create(x.Attribute("Name").Value, x))
+                .Select(x => KeyValuePair.Create(x.Attribute("Name").Value, x))
                 .Distinct(x => x.Key)
                 .ToDictionary();
 
@@ -558,7 +558,7 @@ namespace Signum.Utilities
                 (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
 
             var xMembers = x?.Elements("Member")
-                .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
+                .Select(m => KeyValuePair.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
                 .Distinct(m => m.Key)
                 .ToDictionary();
 
@@ -584,7 +584,7 @@ namespace Signum.Utilities
                            where DescriptionManager.OnShouldLocalizeMember(m)
                            let value = xMembers?.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DescriptionManager.DefaultMemberDescription(m))
                            where value != null
-                           select KVP.Create(m.Name, value))
+                           select KeyValuePair.Create(m.Name, value))
                            .ToDictionary()
             };
 
@@ -607,6 +607,20 @@ namespace Signum.Utilities
             return this.Type.Name.Contains(text, StringComparison.InvariantCultureIgnoreCase) ||
                 this.Description?.Contains(text, StringComparison.InvariantCultureIgnoreCase) == true ||
                 this.PluralDescription?.Contains(text, StringComparison.InvariantCultureIgnoreCase) == true;
+        }
+
+        public bool IsTypeCompleted()
+        {
+            if ((Options & DescriptionOptions.Description) != 0 && !this.Description.HasText())
+                return false;
+
+            if ((Options & DescriptionOptions.PluralDescription) != 0 && !this.PluralDescription.HasText())
+                return false;
+
+            if ((Options & DescriptionOptions.Gender) != 0 && this.Gender == null && NaturalLanguageTools.HasGenders(this.Assembly.Culture))
+                return false;
+
+            return true;
         }
     }
 

@@ -7,6 +7,7 @@ using System.Collections;
 using Signum.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using Signum.Engine.Connection;
 
 namespace Signum.Engine.Linq
 {
@@ -108,6 +109,7 @@ namespace Signum.Engine.Linq
 
 
     class LazyChildProjection<K, V> : IChildProjection
+        where K : notnull
     {
         public LookupToken Token { get; }
 
@@ -230,96 +232,102 @@ namespace Signum.Engine.Linq
 
         public object? Execute()
         {
-            using (new EntityCache())
-            using (Transaction tr = new Transaction())
+            return SqlServerRetry.Retry(() =>
             {
-                object? result;
-                using (var retriever = EntityCache.NewRetriever())
+                using (new EntityCache())
+                using (Transaction tr = new Transaction())
                 {
-                    var lookups = new Dictionary<LookupToken, IEnumerable>();
-
-                    foreach (var child in EagerProjections)
-                        child.Fill(lookups, retriever);
-
-                    using (HeavyProfiler.Log("SQL", () => MainCommand.sp_executesql()))
-                    using (var reader = Executor.UnsafeExecuteDataReader(MainCommand))
+                    object? result;
+                    using (var retriever = EntityCache.NewRetriever())
                     {
-                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader.Reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
+                        var lookups = new Dictionary<LookupToken, IEnumerable>();
 
-                        IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+                        foreach (var child in EagerProjections)
+                            child.Fill(lookups, retriever);
 
-                        try
+                        using (HeavyProfiler.Log("SQL", () => MainCommand.sp_executesql()))
+                        using (var reader = Executor.UnsafeExecuteDataReader(MainCommand))
                         {
-                            if (Unique == null)
-                                result = enumerable.ToList();
-                            else
-                                result = UniqueMethod(enumerable, Unique.Value);
+                            ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader.Reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
+
+                            IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+
+                            try
+                            {
+                                if (Unique == null)
+                                    result = enumerable.ToList();
+                                else
+                                    result = UniqueMethod(enumerable, Unique.Value);
+                            }
+                            catch (Exception ex)
+                            {
+                                FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                                fieldEx.Command = MainCommand;
+                                fieldEx.Row = enumerator.Row;
+                                fieldEx.Projector = ProjectorExpression;
+                                throw fieldEx;
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                            fieldEx.Command = MainCommand;
-                            fieldEx.Row = enumerator.Row;
-                            fieldEx.Projector = ProjectorExpression;
-                            throw fieldEx;
-                        }
+
+                        foreach (var child in LazyChildProjections)
+                            child.Fill(lookups, retriever);
+
+                        retriever.CompleteAll();
                     }
 
-                    foreach (var child in LazyChildProjections)
-                        child.Fill(lookups, retriever);
-
-                    retriever.CompleteAll();
+                    return tr.Commit(result);
                 }
-
-                return tr.Commit(result);
-            }
+            });
         }
 
-        public async Task<object?> ExecuteAsync(CancellationToken token)
+        public Task<object?> ExecuteAsync(CancellationToken token)
         {
-            using (new EntityCache())
-            using (Transaction tr = new Transaction())
+            return SqlServerRetry.RetryAsync(async () =>
             {
-                object? result;
-                using (var retriever = EntityCache.NewRetriever())
+                using (new EntityCache())
+                using (Transaction tr = new Transaction())
                 {
-                    var lookups = new Dictionary<LookupToken, IEnumerable>();
-
-                    foreach (var child in EagerProjections)
-                        child.Fill(lookups, retriever);
-
-                    using (HeavyProfiler.Log("SQL", () => MainCommand.sp_executesql()))
-                    using (var reader = await Executor.UnsafeExecuteDataReaderAsync(MainCommand, token: token))
+                    object? result;
+                    using (var retriever = EntityCache.NewRetriever())
                     {
-                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader.Reader, ProjectorExpression, lookups, retriever, token);
+                        var lookups = new Dictionary<LookupToken, IEnumerable>();
 
-                        IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+                        foreach (var child in EagerProjections)
+                            await child.FillAsync(lookups, retriever, token);
 
-                        try
+                        using (HeavyProfiler.Log("SQL", () => MainCommand.sp_executesql()))
+                        using (var reader = await Executor.UnsafeExecuteDataReaderAsync(MainCommand, token: token))
                         {
-                            if (Unique == null)
-                                result = enumerable.ToList();
-                            else
-                                result = UniqueMethod(enumerable, Unique.Value);
+                            ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader.Reader, ProjectorExpression, lookups, retriever, token);
+
+                            IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+
+                            try
+                            {
+                                if (Unique == null)
+                                    result = enumerable.ToList();
+                                else
+                                    result = UniqueMethod(enumerable, Unique.Value);
+                            }
+                            catch (Exception ex) when (!(ex is OperationCanceledException))
+                            {
+                                FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                                fieldEx.Command = MainCommand;
+                                fieldEx.Row = enumerator.Row;
+                                fieldEx.Projector = ProjectorExpression;
+                                throw fieldEx;
+                            }
                         }
-                        catch (Exception ex) when (!(ex is OperationCanceledException))
-                        {
-                            FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                            fieldEx.Command = MainCommand;
-                            fieldEx.Row = enumerator.Row;
-                            fieldEx.Projector = ProjectorExpression;
-                            throw fieldEx;
-                        }
+
+                        foreach (var child in LazyChildProjections)
+                            await child.FillAsync(lookups, retriever, token);
+
+                        retriever.CompleteAll();
                     }
 
-                    foreach (var child in LazyChildProjections)
-                        child.Fill(lookups, retriever);
-
-                    retriever.CompleteAll();
+                    return tr.Commit(result);
                 }
-
-                return tr.Commit(result);
-            }
+            });
         }
 
         internal T UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)

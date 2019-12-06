@@ -80,7 +80,7 @@ namespace Signum.Entities.Reflection
             int result = obj.GetType().GetHashCode();
             foreach (var p in Properties.Values)
             {
-                result = result * 31 + p.Comparer.GetHashCode(p.Getter(obj));
+                result = result * 31 + p.Comparer.GetHashCode(p.Getter(obj)!);
             }
 
             if (Mixins != null)
@@ -97,7 +97,7 @@ namespace Signum.Entities.Reflection
     }
 
     public class ClassStructuralEqualityComparer<T> : EqualityComparer<T>, ICompletableComparer
-        where T: object
+        where T: notnull
     {
         public Dictionary<string, PropertyComparer<T>> Properties;
 
@@ -141,7 +141,7 @@ namespace Signum.Entities.Reflection
             int result = obj.GetType().GetHashCode();
             foreach (var p in Properties.Values)
             {
-                result = result * 31 + p.Comparer.GetHashCode(p.Getter(obj));
+                result = result * 31 + p.Comparer.GetHashCode(p.Getter(obj)!);
             }
 
             return result;
@@ -293,21 +293,21 @@ namespace Signum.Entities.Reflection
         {
             if (typeof(ModifiableEntity).IsAssignableFrom(type))
             {
-                return (IEqualityComparer)Activator.CreateInstance(typeof(EntityStructuralEqualityComparer<>).MakeGenericType(type));
+                return (IEqualityComparer)Activator.CreateInstance(typeof(EntityStructuralEqualityComparer<>).MakeGenericType(type))!;
             }
 
             if (typeof(IList).IsAssignableFrom(type))
             {
                 if (pi?.HasAttribute<PreserveOrderAttribute>() == true)
-                    return (IEqualityComparer)Activator.CreateInstance(typeof(SortedListEqualityComparer<>).MakeGenericType(type.ElementType()));
+                    return (IEqualityComparer)Activator.CreateInstance(typeof(SortedListEqualityComparer<>).MakeGenericType(type.ElementType()!))!;
                 else
-                    return (IEqualityComparer)Activator.CreateInstance(typeof(UnsortedListEqualityComparer<>).MakeGenericType(type.ElementType()));
+                    return (IEqualityComparer)Activator.CreateInstance(typeof(UnsortedListEqualityComparer<>).MakeGenericType(type.ElementType()!))!;
             }
 
             if (type.IsClass && type.GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly, null, new[] { typeof(object) }, null) == null)
-                return (IEqualityComparer)Activator.CreateInstance(typeof(ClassStructuralEqualityComparer<>).MakeGenericType(type));
+                return (IEqualityComparer)Activator.CreateInstance(typeof(ClassStructuralEqualityComparer<>).MakeGenericType(type))!;
 
-            return (IEqualityComparer)typeof(EqualityComparer<>).MakeGenericType(type).GetProperty("Default").GetValue(null);
+            return (IEqualityComparer)typeof(EqualityComparer<>).MakeGenericType(type).GetProperty("Default")!.GetValue(null)!;
         }
     }
 

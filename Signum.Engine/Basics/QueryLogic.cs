@@ -14,10 +14,10 @@ namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
-        static ResetLazy<Dictionary<string, object>> queryNamesLazy;
+        static ResetLazy<Dictionary<string, object>> queryNamesLazy = null!;
         public static Dictionary<string, object> QueryNames => queryNamesLazy.Value;
 
-        static ResetLazy<Dictionary<object, QueryEntity>> queryNameToEntityLazy;
+        static ResetLazy<Dictionary<object, QueryEntity>> queryNameToEntityLazy = null!;
         public static Dictionary<object, QueryEntity> QueryNameToEntity => queryNameToEntityLazy.Value;
 
         public static DynamicQueryContainer Queries { get; } = new DynamicQueryContainer();
@@ -86,7 +86,7 @@ namespace Signum.Engine.Basics
                         QueryNames,
                         q => q.Key,
                         kvp => kvp.Key,
-                        (q, kvp) => KVP.Create(kvp.Value, q),
+                        (q, kvp) => KeyValuePair.Create(kvp.Value, q),
                         "caching " + nameof(QueryEntity)).ToDictionary(),
                     new InvalidateWith(typeof(QueryEntity)),
                     Schema.Current.InvalidateMetadata);

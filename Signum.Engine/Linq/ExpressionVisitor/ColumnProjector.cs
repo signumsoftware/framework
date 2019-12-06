@@ -66,7 +66,7 @@ namespace Signum.Engine.Linq
                         return expression;
 
                     ColumnExpression column = (ColumnExpression)expression;
-                    if (this.map.TryGetValue(column, out ColumnExpression mapped))
+                    if (this.map.TryGetValue(column, out var mapped))
                     {
                         return mapped;
                     }
@@ -124,7 +124,7 @@ namespace Signum.Engine.Linq
             {
                 if (expression is ColumnExpression column)
                 {
-                    if (this.map.TryGetValue(column, out ColumnExpression mapped))
+                    if (this.map.TryGetValue(column, out var mapped))
                     {
                         return mapped;
                     }
