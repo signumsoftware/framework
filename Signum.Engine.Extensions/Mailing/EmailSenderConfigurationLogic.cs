@@ -37,7 +37,7 @@ namespace Signum.Engine.Mailing
                 SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
 
-                new Graph<EmailSenderConfigurationEntity>.Execute(SmtpConfigurationOperation.Save)
+                new Graph<EmailSenderConfigurationEntity>.Execute(EmailSenderConfigurationOperation.Save)
                 {
                     CanBeNew = true,
                     CanBeModified = true,
