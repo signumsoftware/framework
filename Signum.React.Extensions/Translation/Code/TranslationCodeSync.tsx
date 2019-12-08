@@ -21,10 +21,10 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
 
   const [result, reloadResult] = useAPIWithReload(() => API.sync(assembly, culture, namespace), [assembly, culture, namespace]);  
     
-  if (result && result.totalTypes == 0) {
+  if (result?.totalTypes == 0) {
     return (
       <div>
-        <h2>{TranslationMessage._0AlreadySynchronized.niceToString(namespace || assembly)}</h2>
+        <h2>{TranslationMessage._0AlreadySynchronized.niceToString(namespace ?? assembly)}</h2>
         <Link to={`~/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>
@@ -33,13 +33,13 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
   }
 
   function handleSave() {
-    API.save(assembly, culture || "", result!)
+    API.save(assembly, culture ?? "", result!)
       .then(() => notifySuccess())
       .then(() => reloadResult())
       .done();
   }
 
-  let message = TranslationMessage.Synchronize0In1.niceToString(namespace || assembly,
+  let message = TranslationMessage.Synchronize0In1.niceToString(namespace ?? assembly,
     cultures ? cultures[culture].toStr : culture);
 
   if (result) {

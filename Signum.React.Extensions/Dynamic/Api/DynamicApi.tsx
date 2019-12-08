@@ -84,7 +84,7 @@ public class PizzaDTO
           </div>
           <div className="code-container">
             <pre style={{ border: "0px", margin: "0px" }} />
-            <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={handleCodeChange} />
+            <CSharpCodeMirror script={ctx.value.eval.script ?? ""} onChange={handleCodeChange} />
             <pre style={{ border: "0px", margin: "0px" }} />
           </div>
         </div>

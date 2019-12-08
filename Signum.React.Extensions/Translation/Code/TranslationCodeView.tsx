@@ -22,7 +22,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
 
   const [filter, setFilter] = React.useState("");
 
-  const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture || "", filter), [assembly, culture, filter]);
+  const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture ?? "", filter), [assembly, culture, filter]);
 
   function renderTable() {
     if (result == undefined)
@@ -42,7 +42,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
     const params = p.match.params;
-    API.save(decodeDots(params.assembly), params.culture || "", result!).then(() => notifySuccess()).done();
+    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess()).done();
   }
 
   const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),

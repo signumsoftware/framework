@@ -65,7 +65,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
 
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + "Entity e) =>"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
               </div>
               {renderTest()}
             </div>

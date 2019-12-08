@@ -54,7 +54,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   function isNamedView(typeName: string, viewName: string) : boolean {
     const es = Navigator.getSettings(typeName);
-    return (es && es.namedViews && Dic.getKeys(es.namedViews) || []).contains(viewName);
+    return ((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []).contains(viewName);
   }
 
   function fillViewProps() {
@@ -167,7 +167,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   function getViewNamePropsExpressionHelpText(ctx: TypeContext<ViewNamePropEmbedded>) {
     const vp = viewProps;
-    const p = vp && vp.singleOrNull(a => a.name == ctx.value.name);
+    const p = vp?.singleOrNull(a => a.name == ctx.value.name);
 
     return !vp ? undefined :
       !p ? <div style={{ color: "#a94442" }}><strong>Property not found</strong></div> :
@@ -176,7 +176,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   function getViewNamePropsIsMandatory(ctx: TypeContext<ViewNamePropEmbedded>) {
     const vp = viewProps;
-    const p = vp && vp.singleOrNull(a => a.name == ctx.value.name);
+    const p = vp?.singleOrNull(a => a.name == ctx.value.name);
 
     return p != null && !p.type.endsWith("?");
   }
@@ -200,7 +200,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
                   <div className="col-sm-6">
                     <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control form-control-sm" onChange={handleViewNameChange}>
                       <option value="">{" - "}</option>
-                      {(viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
+                      {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
                     </select>
                   </div>
                   <div className="col-sm-6">
@@ -294,7 +294,7 @@ function DecompositionComponent(p : { ctx: TypeContext<SubWorkflowEmbedded>, mai
             <div className="col-sm-7">
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`IEnumerable<${ctx.value.workflow.mainEntityType!.cleanName}Entity> SubEntities(${mainEntityName}Entity e, WorkflowTransitionContext ctx)\n{`}</pre>
-                <CSharpCodeMirror script={ctx.value.subEntitiesEval!.script || ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.subEntitiesEval!.script ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
             </div>

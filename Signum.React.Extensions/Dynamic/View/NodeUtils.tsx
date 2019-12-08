@@ -108,7 +108,7 @@ export class CodeContext {
       .map(gr => gr.join(" "))
       .join("    \r\n");
 
-    if (children && children.length) {
+    if (children?.length) {
       var childrenString = children.join("\n").indent(4);
 
       return (`<${type}${propsStr ? " " : ""}${propsStr || ""}>
@@ -146,7 +146,7 @@ ${childrenString}
     var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "TypeScript", { stronglyTypedMixinTS: true });
     var optionsStr = options && this.stringifyObject(options);
 
-    return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr || "") + ")" };
+    return { __code__: this.ctxName + ".subCtx(" + (propStr ?? "") + (propStr && optionsStr ? ", " : "") + (optionsStr || "") + ")" };
   }
 
   getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, filterRows?: boolean }): any/*: EntityBaseProps Expr*/ {
@@ -420,7 +420,7 @@ function validatePropType(propName: string, value: any, typeScriptType: string |
     return null;
   }
 
-  var cleanType = typeScriptType.tryBeforeLast("?") || typeScriptType;
+  var cleanType = typeScriptType.tryBeforeLast("?") ?? typeScriptType;
 
   var isOk = cleanType == "string" ? typeof value == "string" :
     cleanType == "number" ? typeof value == "number" :
@@ -464,7 +464,7 @@ export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<Modifi
 
     const sn = dn.context.getSelectedNode();
 
-    if (sn && sn.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
+    if (sn?.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
       return (
         <div style={{ border: "1px solid #337ab7", borderRadius: "2px" }}>
           {registeredNodes[dn.node.kind].render(dn, parentCtx)}
@@ -679,12 +679,12 @@ export function mandatory<T extends BaseNode>(dn: DesignerNode<T>, fieldAccessor
 }
 
 export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>): string | undefined {
-  return mandatory(dn, n => n.field) || validateField(dn);
+  return mandatory(dn, n => n.field) ?? validateField(dn);
 }
 
 export function validateEntityBase(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined): string | undefined {
-  return validateFieldMandatory(dn) ||
-    (dn.node.findOptions && validateFindOptions(dn.node.findOptions, parentCtx)) ||
+  return validateFieldMandatory(dn) ??
+    (dn.node.findOptions && validateFindOptions(dn.node.findOptions, parentCtx)) ??
     viewNameOrChildrens(dn);
 }
 
@@ -803,7 +803,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       {options.isEntityLine && <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).itemHtmlAttributes)} />}

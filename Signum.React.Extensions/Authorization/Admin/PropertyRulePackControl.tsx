@@ -10,7 +10,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
 
-const PropertyRulesPackControl = React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx: TypeContext<PropertyRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx: TypeContext<PropertyRulePack> }, ref: React.Ref<IRenderButtons>) {
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
@@ -30,7 +30,7 @@ const PropertyRulesPackControl = React.forwardRef(function PropertyRulesPackCont
     ];
   }
 
-  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value]);
   const forceUpdate = useForceUpdate();
 
   function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
@@ -117,5 +117,3 @@ const PropertyRulesPackControl = React.forwardRef(function PropertyRulesPackCont
     />;
   }
 });
-
-export default PropertyRulesPackControl;

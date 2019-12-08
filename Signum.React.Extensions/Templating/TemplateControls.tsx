@@ -88,7 +88,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
   return (
     <div>
       <span className="rw-widget-sm">
-        <QueryTokenBuilder queryToken={ct} queryKey={p.queryKey} onTokenChange={t => setCurrentToken(t || undefined)} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
+        <QueryTokenBuilder queryToken={ct} queryKey={p.queryKey} onTokenChange={t => setCurrentToken(t ?? undefined)} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
       </span>
       <div className="btn-group" style={{ marginLeft: "10px" }}>
         {renderButton(TemplateTokenMessage.Insert.niceToString(), canElement(), token => `@[${token}]`)}

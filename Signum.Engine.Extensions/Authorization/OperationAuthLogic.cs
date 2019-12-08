@@ -18,6 +18,8 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed> cache = null!;
 
+        public static HashSet<OperationSymbol> AvoidCoerce = new HashSet<OperationSymbol>();
+
         public static IManualAuth<(OperationSymbol operation, Type type), OperationAllowed> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
@@ -194,6 +196,17 @@ namespace Signum.Engine.Authorization
             return ta.Contains(operationKey);
         }
 
+        public static void RegisterAvoidCoerce(this IOperation operation)
+        {
+            SetAvoidCoerce(operation.OperationSymbol);
+            operation.Register();
+        }
+
+        private static void SetAvoidCoerce(OperationSymbol operationSymbol)
+        {
+            AvoidCoerce.Add(operationSymbol);
+        }
+
         public static OperationAllowed MaxTypePermission((OperationSymbol operation, Type type) operationType, TypeAllowedBasic checkFor, Func<Type, TypeAllowedAndConditions> allowed)
         {
             Func<Type, OperationAllowed> operationAllowed = t =>
@@ -312,7 +325,7 @@ namespace Signum.Engine.Authorization
 
     }
 
-    class OperationCoercer : Coercer<OperationAllowed, ValueTuple<OperationSymbol, Type>>
+    class OperationCoercer : Coercer<OperationAllowed, (OperationSymbol symbol, Type type)>
     {
         public static readonly OperationCoercer Instance = new OperationCoercer();
 
@@ -320,20 +333,26 @@ namespace Signum.Engine.Authorization
         {
         }
 
-        public override Func<ValueTuple<OperationSymbol, Type>, OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleEntity> role)
+        public override Func<(OperationSymbol symbol, Type type), OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleEntity> role)
         {
             return (operationType, allowed) =>
             {
+                if (OperationAuthLogic.AvoidCoerce.Contains(operationType.symbol))
+                    return allowed;
+
                 var required = OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Read, t => TypeAuthLogic.GetAllowed(role, t));
 
                 return allowed < required ? allowed : required;
             };
         }
 
-        public override Func<Lite<RoleEntity>, OperationAllowed, OperationAllowed> GetCoerceValueManual(ValueTuple<OperationSymbol, Type> operationType)
+        public override Func<Lite<RoleEntity>, OperationAllowed, OperationAllowed> GetCoerceValueManual((OperationSymbol symbol, Type type) operationType)
         {
             return (role, allowed) =>
             {
+                if (OperationAuthLogic.AvoidCoerce.Contains(operationType.symbol))
+                    return allowed;
+
                 var required = OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Read, t => TypeAuthLogic.Manual.GetAllowed(role, t));
 
                 return allowed < required ? allowed : required;

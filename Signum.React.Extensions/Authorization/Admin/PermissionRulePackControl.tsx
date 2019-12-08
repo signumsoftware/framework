@@ -10,7 +10,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export const PermissionRulesPackControl = React.forwardRef(function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack> }, ref: React.Ref<IRenderButtons>) {
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = p.ctx.value;
@@ -90,5 +90,3 @@ export const PermissionRulesPackControl = React.forwardRef(function PermissionRu
     return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
 });
-
-export default PermissionRulesPackControl;

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <TypeScriptToolsVersion>3.6</TypeScriptToolsVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TypeScriptToolsVersion>3.7</TypeScriptToolsVersion>
     <TypeScriptBuildMode>true</TypeScriptBuildMode>
     <LangVersion>preview</LangVersion>
     <OutputType>Library</OutputType>
@@ -39,7 +39,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.6.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.6.0" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.6.3">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.TSGenerator" Version="2.0.5" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.2.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
   </ItemGroup>
 
@@ -77,6 +77,12 @@
     <Compile Remove="ts_out\**" />
     <EmbeddedResource Remove="ts_out\**" />
     <None Remove="ts_out\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
     <TypeScriptCompile Remove="ts_out\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Files\ImageModal.tsx" />
+    <None Remove="Files\MultiFileImageLine.tsx" />
   </ItemGroup>
 </Project>

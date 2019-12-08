@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
+import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -30,7 +30,7 @@ import "./Mailing.css";
 export var allTypes: string[] = [];
 
 export function start(options: {
-  routes: JSX.Element[], smtpConfig: boolean,
+  routes: JSX.Element[],
   newsletter: boolean,
   pop3Config: boolean,
   sendEmailTask: boolean,
@@ -79,9 +79,7 @@ export function start(options: {
     contextualFromMany: { isVisible: em => true }
   }));
 
-  if (options.smtpConfig) {
-    Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => import('./Templates/SmtpConfiguration')));
-  }
+  Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
 
   if (options.newsletter) {
     Navigator.addSettings(new EntitySettings(NewsletterEntity, e => import('./Newsletters/Newsletter')));

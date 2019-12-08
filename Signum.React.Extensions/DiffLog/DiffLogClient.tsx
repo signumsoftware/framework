@@ -111,7 +111,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
   const { lite, inSearch, children, ...htmlAtts } = p;
 
   if (!Navigator.isNavigable(lite.EntityType, undefined, p.inSearch || false))
-    return <span data-entity={liteKey(lite)}>{p.children || lite.toStr}</span>;
+    return <span data-entity={liteKey(lite)}>{p.children ?? lite.toStr}</span>;
 
 
   return (
@@ -121,7 +121,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
       onClick={handleClick}
       data-entity={liteKey(lite)}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
-      {children || lite.toStr}
+      {children ?? lite.toStr}
     </Link>
   );
 }

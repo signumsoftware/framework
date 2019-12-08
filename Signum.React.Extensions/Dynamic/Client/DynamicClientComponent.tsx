@@ -35,7 +35,7 @@ export default function DynamicClientComponent(p: { ctx: TypeContext<DynamicClie
                 <ModulesHelp cleanName="YourType" clientCode />{") =>"}
               </div>
             </pre>
-            <JavascriptCodeMirror code={ctx.value.code || ""} onChange={handleCodeChange} />
+            <JavascriptCodeMirror code={ctx.value.code ?? ""} onChange={handleCodeChange} />
           </div>
         </div>
         <div className="col-sm-5">

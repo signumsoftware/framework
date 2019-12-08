@@ -31,7 +31,7 @@ export default function Legend(p: LegendProps) {
         {pivot.columns.map((s, i) => <rect key={s.key} className="color-rect" transform={translate(legendScale(i.toString())!, 0)}
           width={yRule.size('legend')}
           height={yRule.size('legend')}
-          fill={s.color || color(s.key)} />)}
+          fill={s.color ?? color(s.key)} />)}
       </g>
 
       <g className="color-legend" transform={translate(xRule.start('content') + legendMargin, yRule.middle('legend') + 1)}>

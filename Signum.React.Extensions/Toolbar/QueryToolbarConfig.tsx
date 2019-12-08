@@ -17,13 +17,13 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   }
 
   getLabel(res: ToolbarResponse<QueryEntity>) {
-    return res.label || getQueryNiceName(res.content!.toStr!);
+    return res.label ?? getQueryNiceName(res.content!.toStr!);
   }
 
   getIcon(element: ToolbarResponse<QueryEntity>) {
 
     if (element.iconName == "count")
-      return <CountIcon findOptions={{ queryName: element.content!.toStr! }} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+      return <CountIcon findOptions={{ queryName: element.content!.toStr! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
     return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName) , ["far", "list-alt"]), element.iconColor || "dodgerblue");
   }

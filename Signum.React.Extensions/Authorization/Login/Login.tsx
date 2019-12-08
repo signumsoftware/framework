@@ -31,9 +31,9 @@ export default function Login() {
     };
 
     AuthClient.API.login(request)
-      .then(response => {
-        AuthClient.setAuthToken(response.token);
-        AuthClient.setCurrentUser(response.userEntity);
+      .then(lr => {
+        AuthClient.setAuthToken(lr.token, lr.authenticationType);
+        AuthClient.setCurrentUser(lr.userEntity);
         AuthClient.Options.onLogin();
       })
       .catch((e: ValidationError) => {
@@ -123,12 +123,12 @@ export function LoginWithWindowsButton() {
 
   function onClick() {
     return AuthClient.API.loginWindowsAuthentication(true)
-      .then(r => {
-        if (r == null) {
+      .then(lr => {
+        if (lr == null) {
           MessageModal.showError(AuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), AuthMessage.NoWindowsUserFound.niceToString()).done();
         } else {
-          AuthClient.setAuthToken(r.token);
-          AuthClient.setCurrentUser(r.userEntity);
+          AuthClient.setAuthToken(lr.token, lr.authenticationType);
+          AuthClient.setCurrentUser(lr.userEntity);
           AuthClient.Options.onLogin();
         }
       }).done();

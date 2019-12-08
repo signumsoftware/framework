@@ -134,7 +134,7 @@ export function FileUploader(p: FileUploaderProps) {
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>
-          &nbsp;{p.dragAndDropMessage || FileMessage.OrDragAFileHere.niceToString()}
+          &nbsp;{p.dragAndDropMessage ?? FileMessage.OrDragAFileHere.niceToString()}
         </div> :
           <div className={classes("sf-upload btn btn-light", p.buttonCss)}>
             <FontAwesomeIcon icon="upload" className="mr-1" />

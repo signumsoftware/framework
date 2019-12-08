@@ -116,11 +116,11 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.frame.pack.dashboards || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.dashboards ?? []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(das =>
-      das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
+      das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr ?? "", e => {
         Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
       }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
   });

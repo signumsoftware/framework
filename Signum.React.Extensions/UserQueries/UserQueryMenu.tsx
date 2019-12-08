@@ -38,7 +38,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   React.useEffect(() => {
     const userQuery = window.location.search.tryAfter("userQuery=");
     if (userQuery) {
-      const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
+      const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") ?? userQuery)) as Lite<UserQueryEntity>;
       setCurrentUserQuery(uq);
       Navigator.API.fillToStrings(uq)
         .done();
@@ -124,7 +124,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
       queryKey: getQueryKey(fo.queryName),
-      filters: (fo.filterOptions || []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
+      filters: (fo.filterOptions ?? []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
@@ -135,12 +135,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
-      columns: (fo.columnOptions || []).map(c => newMListElement(QueryColumnEmbedded.New({
+      columns: (fo.columnOptions ?? []).map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
         displayName: c.displayName
       }))),
       columnsMode: fo.columnOptionsMode,
-      orders: (fo.orderOptions || []).map(c => newMListElement(QueryOrderEmbedded.New({
+      orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({
         orderType: c.orderType,
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() })
       }))),
@@ -148,7 +148,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage
     }));
 
-    if (uq && uq.id) {
+    if (uq?.id) {
       await reloadList();
 
       setCurrentUserQuery(toLite(uq));
@@ -169,14 +169,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       </Dropdown.Toggle>
       <Dropdown.Menu>
           {
-            userQueries && userQueries.map((uq, i) =>
+            userQueries?.map((uq, i) =>
             <Dropdown.Item key={i}
               className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
               onClick={() => handleOnClick(uq)}>
                 {uq.toStr}
             </Dropdown.Item>)
           }
-        {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
+          {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
         <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
         {currentUserQuery && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
         {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}

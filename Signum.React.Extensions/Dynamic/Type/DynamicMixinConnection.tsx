@@ -47,7 +47,7 @@ export function MixinCombo(p : MixinComboProps){
         { token: DynamicTypeEntity.token().entity(e => e.baseType), operation: "EqualTo", value: "MixinEntity" },
         { token: DynamicTypeEntity.token().entity(e => e.typeName), operation: "StartsWith", value: query },
       ], [], 5)
-      .then(lites => lites && lites.map(a => a.toStr));
+      .then(lites => lites?.map(a => a.toStr));
   }
 
   function handleOnChange(newValue: string) {
@@ -68,7 +68,7 @@ export function MixinCombo(p : MixinComboProps){
         <Typeahead
           inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
           getItems={handleGetItems}
-          value={p.binding.getValue() || ""}
+          value={p.binding.getValue() ?? ""}
           onChange={handleOnChange} />
       </div>
     </div>

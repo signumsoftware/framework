@@ -39,7 +39,7 @@ export default function HeatmapChart({ data, parameters }: ChartClient.ChartComp
           longitudeColumn.getValue(r) != null) {
           var position = new google.maps.LatLng(latitudeColumn.getValue(r), longitudeColumn.getValue(r));
           bounds.extend(position);
-          coords.push(weightColumn && weightColumn.getValue(r) != null ? { location: position, weight: weightColumn.getValue(r) } : position);
+          coords.push(weightColumn?.getValue(r) != null ? { location: position, weight: weightColumn.getValue(r) } : position);
         }
       });
     }

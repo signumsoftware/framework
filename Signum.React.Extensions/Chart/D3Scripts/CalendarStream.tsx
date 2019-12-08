@@ -79,7 +79,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var rowYByDate = data.rows.toObject(r => {
     var date = dateColumn.getValueKey(r);
-    return date.tryBefore("+") || date;
+    return date.tryBefore("+") ?? date;
   });
 
 

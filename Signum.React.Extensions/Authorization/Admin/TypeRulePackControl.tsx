@@ -27,7 +27,7 @@ import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
 import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
   const [filter, setFilter] = React.useState("");
 
@@ -189,7 +189,7 @@ export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackCon
 
 
   function handleAddConditionClick(remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
-    SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") || a.toStr })
+    SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") ?? a.toStr })
       .then(tc => {
         if (!tc)
           return;
@@ -278,7 +278,7 @@ export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackCon
             {"\u00A0 \u00A0".repeat(i + 1)}
             <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
-            <small>{c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr}</small>
+            <small>{c.typeCondition.toStr.tryAfter(".") ?? c.typeCondition.toStr}</small>
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
             {colorRadio(b, "Write", "green")}
@@ -362,8 +362,6 @@ export const TypesRulesPackControl = React.forwardRef(function TypesRulesPackCon
     );
   }
 });
-
-export default TypesRulesPackControl;
 
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
   return allowed.fallback == allowedBase.fallback

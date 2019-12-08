@@ -12,6 +12,7 @@ import { MultiFileLine } from './MultiFileLine';
 import { FileDownloader } from './FileDownloader';
 import { FetchInState } from '@framework/Lines/Retrieve';
 import { FileImage } from './FileImage';
+import { ImageModal } from './ImageModal'
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -21,24 +22,10 @@ export function start(options: { routes: JSX.Element[] }) {
   registerAutoFileLine(FilePathEntity);
   registerAutoFileLine(FilePathEmbedded);
 
-  registerToString(FileEntity, f => f.toStr || f.fileName);
-  registerToString(FileEmbedded, f => f.toStr || f.fileName);
-  registerToString(FilePathEntity, f => f.toStr || f.fileName);
-  registerToString(FilePathEmbedded, f => f.toStr || f.fileName);
-  
-  Finder.formatRules.push({
-    name: "WebDownload",
-    isApplicable: col => col.token!.type.name === "WebDownload",
-    formatter: col => new CellFormatter((cell: WebDownload) =>
-      !cell ? undefined : <a href={Navigator.toAbsoluteUrl(cell.fullWebPath)} download={cell.fileName}>{cell.fileName}</a>)
-  });
-
-  Finder.formatRules.push({
-    name: "WebImage",
-    isApplicable: col => col.token!.type.name === "WebImage",
-    formatter: col => new CellFormatter((cell: WebImage) =>
-      !cell ? undefined : <img src={Navigator.toAbsoluteUrl(cell.fullWebPath)} />)
-  });
+  registerToString(FileEntity, f => f.toStr ?? f.fileName);
+  registerToString(FileEmbedded, f => f.toStr ?? f.fileName);
+  registerToString(FilePathEntity, f => f.toStr ?? f.fileName);
+  registerToString(FilePathEmbedded, f => f.toStr ?? f.fileName);
 }
 
 
@@ -49,12 +36,11 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
       return <MultiFileLine ctx={ctx} />;
 
     var m = ctx.propertyRoute.member;
-    if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
+    if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
       return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
 
     return <FileLine ctx={ctx} />;
   };
-
 
   Finder.formatRules.push({
     name: type.typeName + "_Download",
@@ -66,32 +52,35 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     name: type.typeName + "_Image",
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
-      isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileImage file={e} />}</FetchInState> :
-        <FileImage file={cell as IFile & ModifiableEntity} />)
+      isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
+        <FileThumbnail file={cell as IFile & ModifiableEntity } />)
   });
 }
+
+interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  file: IFile & ModifiableEntity;
+}
+
+function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
+  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs}/>
+}
+
+FileThumbnail.defaultProps = {
+  style: { maxWidth: "150px" }
+} as Partial<FileThumbnailProps>;
 
 function isImage(propertyRoute: string | undefined) {
 
   if (propertyRoute == null)
     return false;
 
-  const pr = PropertyRoute.parseFull(propertyRoute)
+  let pr = PropertyRoute.parseFull(propertyRoute);
 
-  return Boolean(pr && pr.member && pr.member.defaultFileTypeInfo && pr.member.defaultFileTypeInfo.onlyImages);
+  if (pr.propertyRouteType == "MListItem")
+    pr = pr.parent!;
 
+  return Boolean(pr?.member?.defaultFileTypeInfo?.onlyImages);
 }
-  
-  
-export interface WebDownload {
-  fileName: string;
-  fullWebPath: string;
-}
-
-export interface WebImage {
-  fullWebPath: string;
-}
-
 
 declare module '@framework/Reflection' {
 

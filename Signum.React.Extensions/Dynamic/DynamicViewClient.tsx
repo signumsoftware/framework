@@ -114,7 +114,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewNames(typeName: string): Promise<string[]> {
     const es = Navigator.getSettings(typeName);
-    var staticViewNames = es && es.namedViews && Dic.getKeys(es.namedViews) || [];
+    var staticViewNames = es?.namedViews && Dic.getKeys(es.namedViews) || [];
 
     if (!isTypeEntity(typeName))
       return Promise.resolve(staticViewNames);
@@ -128,7 +128,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewOverrides(typeName: string, viewName?: string): Promise<Navigator.ViewOverride<ModifiableEntity>[]> {
     const es = Navigator.getSettings(typeName);
-    var staticViewOverrides = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || [];
+    var staticViewOverrides = es?.viewOverrides?.filter(a => a.viewName == viewName) || [];
 
     if (!isTypeEntity(typeName))
       return Promise.resolve(staticViewOverrides);
@@ -179,7 +179,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewPromiseWithName(entity: ModifiableEntity, viewName: string) {
     const es = Navigator.getSettings(entity.Type);
-    var namedView = es && es.namedViews && es.namedViews[viewName];
+    var namedView = es?.namedViews && es.namedViews[viewName];
 
     if (namedView)
       return namedView.getViewPromise(entity).applyViewOverrides(entity.Type, viewName);
@@ -196,7 +196,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
     const settings = Navigator.getSettings(entity.Type);
 
-    if (!settings || !settings.getViewPromise) {
+    if (settings?.getViewPromise == null) {
 
       if (!isTypeEntity(entity.Type))
         return new ViewPromise(import('@framework/Lines/DynamicComponent'));
@@ -263,7 +263,7 @@ export function patchComponent(component: React.ComponentClass<{ ctx: TypeContex
       viewOverride(replacer);
       return replacer.result;
     } catch (error) {
-      return <div className="alert alert-danger">ERROR: {error && error.message}</div>;
+      return <div className="alert alert-danger">ERROR: {error?.message}</div>;
     }
   };
 

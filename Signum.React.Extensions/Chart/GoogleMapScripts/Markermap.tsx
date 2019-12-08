@@ -32,12 +32,12 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
 
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
-    var latitudeColumn = data && data.columns.c0! as ChartClient.ChartColumn<number> | undefined;
-    var longitudeColumn = data && data.columns.c1! as ChartClient.ChartColumn<number> | undefined;
+    var latitudeColumn = data?.columns.c0! as ChartClient.ChartColumn<number> | undefined;
+    var longitudeColumn = data?.columns.c1! as ChartClient.ChartColumn<number> | undefined;
 
     var centerMap = new google.maps.LatLng(
-      data && data.rows.length > 0 ? latitudeColumn!.getValue(data.rows[0]) : 0,
-      data && data.rows.length > 0 ? longitudeColumn!.getValue(data.rows[0]) : 0);
+      data?.rows.length ? latitudeColumn!.getValue(data.rows[0]) : 0,
+      data?.rows.length ? longitudeColumn!.getValue(data.rows[0]) : 0);
 
     var mapOptions = {
       center: centerMap,
@@ -95,7 +95,7 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
       else if (colorSchemeColumn != null) {
         var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"])!;
         var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorSchemeColumn.getValueKey));
-        color = r => colorSchemeColumn!.getValueColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
+        color = r => colorSchemeColumn!.getValueColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
       }
 
       data.rows.forEach(r => {
@@ -104,7 +104,7 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
           bounds.extend(position);
           var marker = new google.maps.Marker({
             position: position,
-            label: labelColumn && labelColumn.getValueNiceName(r),
+            label: labelColumn?.getValueNiceName(r),
             icon: iconColumn ? iconColumn.getValue(r) : color ?
               {
                 anchor: new google.maps.Point(16, 16),
@@ -113,7 +113,7 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
     																<circle cx="8" cy="8" r="8" fill="'  + color(r) + '" /> \
     																</svg>'
               } : undefined,
-            title: titleColumn && titleColumn.getValueNiceName(r)
+            title: titleColumn?.getValueNiceName(r)
           });
 
           if (infoColumn) {

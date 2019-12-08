@@ -116,12 +116,12 @@ catch (Exception e)
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public static void ScriptCode(${ctx.value.mainEntityType.cleanName}Entity e, WorkflowScriptContext ctx)\n{`}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={handleScriptChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleScriptChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`namespace MyCustomTypes {`}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.customTypes || ""} onChange={handleCustomTypesChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.customTypes ?? ""} onChange={handleCustomTypesChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
             </div>

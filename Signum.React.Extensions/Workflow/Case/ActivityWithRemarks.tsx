@@ -30,7 +30,7 @@ function useStateFromProps<T>(propsValue: T, deps?: any[]): [T, (newValue: T) =>
 
   React.useEffect(() => {
     setVal(propsValue);
-  }, deps || [propsValue]);
+  }, deps ?? [propsValue]);
 
   return [val, setVal];
 }

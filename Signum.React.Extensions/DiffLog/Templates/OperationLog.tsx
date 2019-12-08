@@ -163,12 +163,12 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   const target = p.ctx.value.target;
   return (
     <Tabs id="diffTabs" defaultActiveKey="diff">
-      {result && result.prev && renderPrev(result.prev)}
-      {result && result.diffPrev && renderPrevDiff(result.diffPrev)}
+      {result?.prev && renderPrev(result.prev)}
+      {result?.diffPrev && renderPrevDiff(result.diffPrev)}
       {renderInitialState()}
       {renderDiff()}
       {renderFinalState()}
-      {result && result.diffNext && renderNextDiff(result.diffNext)}
+      {result?.diffNext && renderNextDiff(result.diffNext)}
       {result && (result.next ? renderNext(result.next) : target && renderCurrentEntity(target))}
     </Tabs>
   );

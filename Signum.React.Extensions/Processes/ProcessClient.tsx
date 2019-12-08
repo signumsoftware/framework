@@ -83,8 +83,8 @@ function monkeyPatchCreateContextualMenuItem() {
       coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
         coc.operationInfo.niceName;
 
-    const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Operations.Defaults.getColor(coc.operationInfo);
-    const icon = coc.settings && coc.settings.icon;
+    const color = coc.settings?.color || coc.entityOperationSettings?.color || Operations.Defaults.getColor(coc.operationInfo);
+    const icon = coc.settings?.icon;
 
     const disabled = !!coc.canExecute;
 
@@ -95,7 +95,7 @@ function monkeyPatchCreateContextualMenuItem() {
 
     const processOnClick = (me: React.MouseEvent<any>) => {
       coc.event = me;
-      processSettings && processSettings.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
+      processSettings?.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
     }
 
 
@@ -138,7 +138,7 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
         return;
 
       const es = Navigator.getSettings(pack.entity.Type);
-      if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
+      if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
         Navigator.history.push('~/create/', pack);
         return;
       }
