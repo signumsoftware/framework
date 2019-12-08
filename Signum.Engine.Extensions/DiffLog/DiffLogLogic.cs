@@ -32,7 +32,7 @@ namespace Signum.Engine.DiffLog
                 if (registerAll)
                     RegisterShouldLog<Entity>((entity, oper) => true);
 
-                ExceptionLogic.DeleteLogs += DiffLogic_CleanLogs;
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
 
@@ -83,16 +83,17 @@ namespace Signum.Engine.DiffLog
                  log.Mixin<DiffLogMixin>().FinalState == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
         }
 
-        public static void DiffLogic_CleanLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitClean(typeof(OperationLogEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
 
-            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
             Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit && !o.Mixin<DiffLogMixin>().Cleaned).UnsafeUpdate()
-                .Set(a => a.Mixin<DiffLogMixin>().InitialState, a => null)
-                .Set(a => a.Mixin<DiffLogMixin>().FinalState, a => null)
-                .Set(a => a.Mixin<DiffLogMixin>().Cleaned, a => true)
-                .ExecuteChunksLog(parameters, sb, token);
+            .Set(a => a.Mixin<DiffLogMixin>().InitialState, a => null)
+            .Set(a => a.Mixin<DiffLogMixin>().FinalState, a => null)
+            .Set(a => a.Mixin<DiffLogMixin>().Cleaned, a => true)
+            .ExecuteChunksLog(parameters, sb, token);
         }
     }
 }

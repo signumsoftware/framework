@@ -16,6 +16,9 @@ using Signum.Utilities.Reflection;
 using System.IO;
 using Signum.Engine.Files;
 using Microsoft.AspNetCore.StaticFiles;
+using Signum.Entities.Basics;
+using System.Text;
+using System.Threading;
 
 namespace Signum.Engine.Mailing
 {
@@ -77,7 +80,26 @@ namespace Signum.Engine.Mailing
                 SenderManager = new EmailSenderManager();
 
                 EmailGraph.Register();
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            var dateLimit = parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity());
+
+            if (dateLimit != null)
+                Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+
+            dateLimit = parameters.GetDateLimitClean(typeof(EmailMessageEntity).ToTypeEntity());
+
+            if (dateLimit == null)
+                return;
+
+            Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit!.Value && o.Exception != null)
+                .UnsafeUpdate()
+                .Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
         }
 
         public static HashSet<Type> GetAllTypes()
