@@ -40,7 +40,7 @@ namespace Signum.Engine.Files
                 FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
-                
+
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
                 {
                     CanBeNew = true,
@@ -61,20 +61,13 @@ namespace Signum.Engine.Files
                                     fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
                                     tr.Commit();
                                 }
-                            }  
+                            }
                         }
                     }
                 }.Register();
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
             }
-        }
-
-
-
-        static void FilePathLogic_Retrieved(FilePathEntity fp)
-        {
-            fp.GetPrefixPair();
         }
 
         static PrefixPair CalculatePrefixPair(FilePathEntity fp)
