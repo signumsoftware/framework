@@ -900,14 +900,14 @@ export class ViewPromise<T extends ModifiableEntity> {
     return result;
   }
 
-  withProps(props: {}): ViewPromise<T> {
+  withProps<P>(props: Partial<P>): ViewPromise<T> {
 
     var result = new ViewPromise<T>();
 
     result.promise = this.promise.then(func => {
       return (ctx: TypeContext<T>): React.ReactElement<any> => {
         var result = func(ctx);
-        return React.cloneElement(result, props);
+        return React.cloneElement(result, { ...props });
       };
     });
 
@@ -944,7 +944,7 @@ export class ViewPromise<T extends ModifiableEntity> {
   }
 }
 
-function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+export function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
 
   if (!component.prototype.render)
     throw new Error("render function not defined in " + component);
