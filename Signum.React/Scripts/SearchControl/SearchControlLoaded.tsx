@@ -1138,8 +1138,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return [...originalFilters, ...keyFilters];
   }
 
-  handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
-
+  handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow, columns: string[]) => {
     if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
       return;
 
@@ -1152,7 +1151,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var qs = this.props.querySettings;
     if (qs?.onDoubleClick) {
       e.preventDefault();
-      qs.onDoubleClick(e, row, this);
+      qs.onDoubleClick(e, row, columns, this);
       return;
     }
 
@@ -1252,7 +1251,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
-          onDoubleClick={e => this.handleDoubleClick(e, row)}
+          onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
           {...ra}
           className={classes(mark?.className, ra?.className)}>
           {this.props.allowSelection &&
