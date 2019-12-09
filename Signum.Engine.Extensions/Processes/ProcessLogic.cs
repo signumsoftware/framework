@@ -127,23 +127,28 @@ namespace Signum.Engine.Processes
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            void Remove(ProcessState processState)
+            void Remove(ProcessState processState, DateTime dateLimit, bool withExceptions)
             {
-                var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
-
-                if (dateLimit == null)
-                    return;
-
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit.Value);
-
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit && (!withExceptions || p.Exception != null));
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-
                 query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
-            Remove(ProcessState.Canceled);
-            Remove(ProcessState.Finished);
-            Remove(ProcessState.Error);
+            var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
+            if (dateLimit != null)
+            {
+                Remove(ProcessState.Canceled, dateLimit.Value, false);
+                Remove(ProcessState.Finished, dateLimit.Value, false);
+                Remove(ProcessState.Error, dateLimit.Value, false);
+            }
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ProcessEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
+
+            Remove(ProcessState.Canceled, dateLimit.Value, true);
+            Remove(ProcessState.Finished, dateLimit.Value, true);
+            Remove(ProcessState.Error, dateLimit.Value, true);
         }
 
         public static IDisposable? OnApplySession(ProcessEntity process)

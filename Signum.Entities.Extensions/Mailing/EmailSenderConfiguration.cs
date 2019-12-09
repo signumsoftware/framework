@@ -57,7 +57,7 @@ namespace Signum.Entities.Mailing
 
 
     [AutoInit]
-    public static class SmtpConfigurationOperation
+    public static class EmailSenderConfigurationOperation
     {
         public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
     }

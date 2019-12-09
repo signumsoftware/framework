@@ -204,12 +204,23 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity());
+            Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog == null).UnsafeDeleteChunksLog(parameters, sb, token);
 
+            var dateLimit = parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+            {
+                var query = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value);
+                query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ScheduledTaskLogEntity).ToTypeEntity());
             if (dateLimit == null)
                 return;
 
-            Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            var queryWithExceptions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value && a.Exception != null);
+            queryWithExceptions.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
+            queryWithExceptions.UnsafeUpdate().Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
         }
 
         static void ScheduledTasksLazy_OnReset(object? sender, EventArgs e)
