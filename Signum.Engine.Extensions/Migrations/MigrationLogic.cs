@@ -8,9 +8,6 @@ using Signum.Entities.Migrations;
 using Signum.Utilities;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
-using Signum.Entities.Basics;
-using System.Text;
-using System.Threading;
 
 namespace Signum.Engine.Migrations
 {
@@ -48,26 +45,7 @@ namespace Signum.Engine.Migrations
                         e.MethodName,
                         e.Description,
                     });
-
-                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
-        }
-
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
-        {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(LoadMethodLogEntity).ToTypeEntity());
-
-            if (dateLimit != null)
-                Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
-
-            dateLimit = parameters.GetDateLimitClean(typeof(LoadMethodLogEntity).ToTypeEntity());
-
-            if (dateLimit == null)
-                return;
-
-            Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value && o.Exception != null)
-                .UnsafeUpdate()
-                .Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
         }
 
         public static void EnsureMigrationTable<T>() where T : Entity

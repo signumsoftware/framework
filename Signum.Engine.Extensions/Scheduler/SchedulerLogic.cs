@@ -206,23 +206,10 @@ namespace Signum.Engine.Scheduler
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity());
 
-            if (dateLimit != null)
-            {
-                var query = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value);
-
-                query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-
-                query.UnsafeDeleteChunksLog(parameters, sb, token);
-            }
-
-            dateLimit = parameters.GetDateLimitClean(typeof(ScheduledTaskLogEntity).ToTypeEntity());
-
             if (dateLimit == null)
                 return;
 
-            var queryClean = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value && a.Exception != null);
-            queryClean.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-            queryClean.UnsafeUpdate().Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
+            Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void ScheduledTasksLazy_OnReset(object? sender, EventArgs e)

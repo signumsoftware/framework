@@ -16,10 +16,6 @@ using Signum.Utilities.Reflection;
 using System.IO;
 using Signum.Engine.Files;
 using Microsoft.AspNetCore.StaticFiles;
-using Signum.Entities.Basics;
-using System.Text;
-using System.Threading;
-using Microsoft.Exchange.WebServices.Data;
 
 namespace Signum.Engine.Mailing
 {
@@ -35,22 +31,28 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null!, null!, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null!, null!, null, null)));
         }
 
+        public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient = null!;
+        
         public static void Start(
             SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,  
+            Func<EmailTemplateEntity?, Lite<Entity>?, SmtpConfigurationEntity> getSmtpConfiguration,  
+            Func<EmailMessageEntity, SmtpClient>? getSmtpClient = null, 
             IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
+                if (getSmtpClient == null && getSmtpConfiguration != null)
+                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(a => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(a)), message.Target).GenerateSmtpClient();
+
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
-                EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
-                EmailSenderConfigurationLogic.Start(sb);
+                EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException(nameof(getSmtpClient));
+                EmailTemplateLogic.Start(sb, getSmtpConfiguration);
                 if (attachment != null)
                     FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
@@ -72,29 +74,10 @@ namespace Signum.Engine.Mailing
 
                 PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
                 
-                SenderManager = new EmailSenderManager(getEmailSenderConfiguration);
+                SenderManager = new EmailSenderManager();
 
                 EmailGraph.Register();
-
-                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
-        }
-
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
-        {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity());
-
-            if (dateLimit != null)
-                Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
-
-            dateLimit = parameters.GetDateLimitClean(typeof(EmailMessageEntity).ToTypeEntity());
-
-            if (dateLimit == null)
-                return;
-
-            Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit!.Value && o.Exception != null)
-                .UnsafeUpdate()
-                .Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
         }
 
         public static HashSet<Type> GetAllTypes()
@@ -182,7 +165,7 @@ namespace Signum.Engine.Mailing
 
         public static MailAddress ToMailAddress(this EmailAddressEmbedded address)
         {
-            if (address.DisplayName.HasText())
+            if (address.DisplayName != null)
                 return new MailAddress(address.EmailAddress, address.DisplayName);
 
             return new MailAddress(address.EmailAddress);
@@ -193,29 +176,10 @@ namespace Signum.Engine.Mailing
             if (!Configuration.SendEmails)
                 throw new InvalidOperationException("EmailConfigurationEmbedded.SendEmails is set to false");
 
-            if (recipient.DisplayName.HasText())
+            if (recipient.DisplayName != null)
                 return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress), recipient.DisplayName);
 
             return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
-        }
-
-        public static EmailAddress ToEmailAddress(this EmailAddressEmbedded address)
-        {
-            if (address.DisplayName.HasText())
-                return new EmailAddress(address.DisplayName, address.EmailAddress);
-
-            return new EmailAddress(address.EmailAddress);
-        }
-
-        public static EmailAddress ToEmailAddress(this EmailRecipientEmbedded recipient)
-        {
-            if (!Configuration.SendEmails)
-                throw new InvalidOperationException("EmailConfigurationEmbedded.SendEmails is set to false");
-
-            if (recipient.DisplayName.HasText())
-                return new EmailAddress(recipient.DisplayName, Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
-
-            return new EmailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
         }
 
         public static void SendAllAsync<T>(List<T> emails)
@@ -334,12 +298,13 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
-
-        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
+        public EmailSenderManager()
         {
-            this.getEmailSenderConfiguration = getEmailSenderConfiguration;
+
         }
+
+        public static Func<EmailMessageEntity, MailMessage>? CustomCreateMailMessage;
+
 
         public virtual void Send(EmailMessageEntity email)
         {
@@ -387,99 +352,45 @@ namespace Signum.Engine.Mailing
 
         protected virtual void SendInternal(EmailMessageEntity email)
         {
-            var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
-
-            var config = getEmailSenderConfiguration(template, email.Target);
-
-            if (config.SMTP != null)
-            {
-                SentSMTP(email, config.SMTP);
-            }
-            else
-            {
-                SentExchangeWebService(email, config.Exchange!);
-            }
-        }
-
-
-        protected virtual void SentSMTP(EmailMessageEntity email, SmtpEmbedded smtp)
-        {
-            System.Net.Mail.MailMessage message = CreateMailMessage(email);
+            MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
 
             using (HeavyProfiler.Log("SMTP-Send"))
-                smtp.GenerateSmtpClient().Send(message);
+                EmailLogic.GetSmtpClient(email).Send(message);
         }
+
 
         protected virtual MailMessage CreateMailMessage(EmailMessageEntity email)
         {
-            System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage()
+            MailMessage message = new MailMessage()
             {
                 From = email.From.ToMailAddress(),
                 Subject = email.Subject,
                 IsBodyHtml = email.IsBodyHtml,
             };
-
-            System.Net.Mail.AlternateView view = System.Net.Mail.AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
+            
+            AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
-                .Select(a => new System.Net.Mail.LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
+                .Select(a => new LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                 }));
-            message.AlternateViews.Add(view);
 
             message.Attachments.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.Attachment)
-                .Select(a => new System.Net.Mail.Attachment(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
+                .Select(a => new Attachment(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                     Name = a.File.FileName,
                 }));
 
+            message.AlternateViews.Add(view);
 
             message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
             message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToMailAddress()).ToList());
             message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
 
             return message;
-        }
-
-        private void SentExchangeWebService(EmailMessageEntity email, ExchangeWebServiceEmbedded exchange)
-        {
-            ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2007_SP1);
-            service.UseDefaultCredentials = exchange.UseDefaultCredentials;
-            service.Credentials = exchange.Username.HasText() ? new WebCredentials(exchange.Username, exchange.Password) : null;
-            //service.TraceEnabled = true;
-            //service.TraceFlags = TraceFlags.All;
-
-            if (exchange.Url.HasText())
-                service.Url = new Uri(exchange.Url);
-            else
-                service.AutodiscoverUrl(email.From.EmailAddress, RedirectionUrlValidationCallback);
-
-            EmailMessage message = new EmailMessage(service);
-
-            foreach (var a in email.Attachments.Where(a => a.Type == EmailAttachmentType.Attachment))
-            {
-                var fa = message.Attachments.AddFileAttachment(a.File.FileName, a.File.GetByteArray());
-                fa.ContentId = a.ContentId;
-            }
-            message.ToRecipients.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToEmailAddress()).ToList());
-            message.CcRecipients.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToEmailAddress()).ToList());
-            message.BccRecipients.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToEmailAddress()).ToList());
-            message.Subject = email.Subject;
-            message.Body = new MessageBody(email.IsBodyHtml ? BodyType.HTML : BodyType.Text, email.Body);
-            message.Send();
-        }
-
-        protected virtual bool RedirectionUrlValidationCallback(string redirectionUrl)
-        {
-            // The default for the validation callback is to reject the URL.
-            Uri redirectionUri = new Uri(redirectionUrl);
-            // Validate the contents of the redirection URL. In this simple validation
-            // callback, the redirection URL is considered valid if it is using HTTPS
-            // to encrypt the authentication credentials. 
-            return redirectionUri.Scheme == "https";
         }
     }
 
