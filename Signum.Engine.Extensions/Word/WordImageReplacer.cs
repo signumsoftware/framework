@@ -32,40 +32,6 @@ namespace Signum.Engine.Word
             doc.ReplaceBlipContent(blip, bitmap, newImagePartId, imagePartType);
         }
         
-        /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
-        public static void ReplaceMultipleImages(WordprocessingDocument doc, string titleOrDescription, Bitmap[] bitmaps, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
-        {
-            Blip[] blips = FindAllBlips(doc, titleOrDescription);
-
-            if (blips.Count() != bitmaps.Length)
-                throw new ApplicationException("Images count does not match the images count in word");
-
-            if (adaptSize && !AvoidAdaptSize)
-            {
-                bitmaps = bitmaps.Select(bitmap =>
-                {
-                    var part = doc.MainDocumentPart.GetPartById(blips.First().Embed);
-
-                    using (var stream = part.GetStream())
-                    {
-                        Bitmap oldBmp = (Bitmap)Bitmap.FromStream(stream);
-                        return ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
-                    }
-                }).ToArray();
-            }
-
-            doc.MainDocumentPart.DeletePart(blips.First().Embed);
-
-            var i = 0;
-            var bitmapStack = new Stack<Bitmap>(bitmaps.Reverse());
-            foreach (var blip in blips)
-            {
-                ImagePart img = CreateImagePart(doc, bitmapStack.Pop(), newImagePartId + i, imagePartType);
-                blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
-                i++;
-            }
-        }
-
         public static Size GetBlipBitmapSize(this WordprocessingDocument doc, Blip blip)
         {
             var part = doc.MainDocumentPart.GetPartById(blip.Embed);
