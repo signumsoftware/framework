@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Files;
+using Signum.Entities.Files;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -32,24 +32,6 @@ namespace Signum.Engine.Files
               "{0}({1}){2}".FormatWith(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
 
         
-        public string? ConfigErrors()
-        {
-            string? error = null;
-            if (GetPrefixPair == null)
-                error = "GetPrefixPair";
-
-            if (!WeakFileReference && CalculateSuffix == null)
-                error = ", ".Combine(error, "CalculateSufix");
-
-            if (RenameOnCollision && RenameAlgorithm == null)
-                error = ", ".Combine(error, "RenameAlgorithm");
-
-            if (error.HasText())
-                error += " not set";
-
-            return error;
-        }
-
         public virtual void SaveFile(IFilePath fp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
@@ -57,17 +39,17 @@ namespace Signum.Engine.Files
                 if (WeakFileReference)
                     return;
 
-                string sufix = CalculateSuffix(fp);
-                if (!sufix.HasText())
-                    throw new InvalidOperationException("Sufix not set");
+                string suffix = CalculateSuffix(fp);
+                if (!suffix.HasText())
+                    throw new InvalidOperationException("Suffix not set");
 
                 fp.SetPrefixPair(GetPrefixPair(fp));
 
                 int i = 2;
-                fp.Suffix = sufix;
+                fp.Suffix = suffix;
                 while (RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
                 {
-                    fp.Suffix = RenameAlgorithm(sufix, i);
+                    fp.Suffix = RenameAlgorithm(suffix, i);
                     i++;
                 }
 

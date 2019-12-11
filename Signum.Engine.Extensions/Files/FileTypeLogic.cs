@@ -39,26 +39,12 @@ namespace Signum.Engine.Files
                         Entity = f,
                         f.Key
                     });
-
-                sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
             }
         }
 
         public static IFileTypeAlgorithm GetAlgorithm(this FileTypeSymbol fileType)
         {
             return FileTypes.GetOrThrow(fileType);
-        }
-
-        static void Schema_SchemaCompleted()
-        {
-            var errors = (from kvp in FileTypes
-                          let error = kvp.Value.ConfigErrors()
-                          where error.HasText()
-                          select kvp.Key + ": " + error.Indent(4)).ToList();
-
-            if (errors.Any())
-                throw new InvalidOperationException("Errors in the following FileType algorithms: \r\n" +
-                    errors.ToString("\r\n").Indent(4));
         }
     }
 
@@ -72,7 +58,6 @@ namespace Signum.Engine.Files
         byte[] ReadAllBytes(IFilePath fp);
         Stream OpenRead(IFilePath fp);
         void MoveFile(IFilePath ofp, IFilePath nfp);
-        string? ConfigErrors();
         PrefixPair GetPrefixPair(IFilePath efp);
     }
 
