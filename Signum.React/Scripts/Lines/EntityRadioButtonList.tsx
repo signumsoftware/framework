@@ -1,252 +1,196 @@
-﻿import * as React from 'react'
-import { classes, Dic } from '../Globals'
-import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
+import * as React from 'react'
+import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, MemberType, TypeReference } from '../Reflection'
-import { LineBase, LineBaseProps, runTasks, } from './LineBase'
-import { FormGroup } from './FormGroup'
-import { FormControlReadonly } from './FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
-import { EntityListBase, EntityListBaseProps } from './EntityListBase'
-import { EntityBase, EntityBaseProps } from './EntityBase'
+import { TypeContext } from '../TypeContext'
+import { TypeReference } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
+import { EntityBaseController, EntityBaseProps } from './EntityBase'
+import { useController } from './LineBase'
 
-export interface EntityRadioButtonListProps extends EntityBaseProps {
-    data?: Lite<Entity>[];
-    columnCount?: number;
-    columnWidth?: number;
-    avoidFieldSet?: boolean;
-    ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
-    groupKey: string;
+export interface EntityRadioButtonListProps extends EntityBaseProps{
+  data?: Lite<Entity>[];
+  columnCount?: number;
+  columnWidth?: number;
+  avoidFieldSet?: boolean;
+  refreshKey?: string;
+  renderRadio?: (lite: Lite<Entity>, index: number, checked: boolean, controller: EntityRadioButtonListController) => React.ReactElement;
+  groupKey: string;
 }
 
-export class EntityRadioButtonList extends EntityBase<EntityRadioButtonListProps, EntityRadioButtonListProps> {
+export class EntityRadioButtonListController extends EntityBaseController<EntityRadioButtonListProps> {
 
-    calculateDefaultState(state: EntityRadioButtonListProps) {
-        super.calculateDefaultState(state);
+  getDefaultProps(state: EntityRadioButtonListProps) {
+    super.getDefaultProps(state);
 
-        state.remove = false;
-        state.create = false;
-        state.view = false;
-        state.find = false;
-        state.columnWidth = 200;
-    }
+    if (state.ctx.value == null)
+      state.ctx.value = [];
 
-    renderInternal() {
-        const s = this.state;
+    state.remove = false;
+    state.create = false;
+    state.view = false;
+    state.find = false;
+    state.columnWidth = 200;
+  }
 
-        if (this.props.avoidFieldSet == true)
-            return (
-                <div className={classes("SF-RadioButton-list", s.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
-                    {this.renderButtons()}
-                    {this.renderRadioButtonList()}
-                </div>
-            );
+  handleOnChange = (lite: Lite<Entity>) => {
+    if (lite == null)
+      this.setValue(lite);
+    else
+      this.convert(lite)
+        .then(v => this.setValue(v))
+        .done();
+  }
 
-        return (
-            <fieldset className={classes("SF-RadioButton-list", s.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
-                <legend>
-                    <div>
-                        <span>{this.state.labelText}</span>
-                        {this.renderButtons()}
-                    </div>
-                </legend>
-                {this.renderRadioButtonList()}
-            </fieldset>
-        );
-    }
-
-    renderButtons() {
-        return (
-            <span className="float-right">
-                {this.renderCreateButton(false)}
-                {this.renderFindButton(false)}
-            </span>
-        );
-    }
-
-    renderRadioButtonList() {
-        const s = this.state;
-        return (
-            <EntityRadioButtonListSelect
-                ctx={s.ctx}
-                onChange={this.handleOnChange}
-                type={s.type!}
-                data={s.data}
-                findOptions={s.findOptions}
-                columnCount={s.columnCount}
-                columnWidth={s.columnWidth}
-                groupKey={s.groupKey} />
-        );
-    }
-
-    handleOnChange = (lite: Lite<Entity> | null) => {
-
-        if (lite == null)
-            this.setValue(lite);
-        else
-            this.convert(lite)
-                .then(v => this.setValue(v))
-                .done();
-    }
 }
+
+export const EntityRadioButtonList = React.forwardRef(function EntityRadioButtonList(props: EntityRadioButtonListProps, ref: React.Ref<EntityRadioButtonListController>) {
+  const c = useController(EntityRadioButtonListController, props, ref);
+  const p = c.props;
+
+  if (c.isHidden)
+    return null;
+
+  if (p.avoidFieldSet == true)
+    return (
+      <div className={classes("SF-RadioButton-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+        {renderButtons()}
+        {renderRadioList()}
+      </div>
+    );
+
+  return (
+    <fieldset className={classes("SF-RadioButton-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      <legend>
+        <div>
+          <span>{p.labelText}</span>
+          {renderButtons()}
+        </div>
+      </legend>
+      {renderRadioList()}
+    </fieldset>
+  );
+
+  function renderButtons() {
+    return (
+      <span className="float-right">
+        {c.renderCreateButton(false)}
+        {c.renderFindButton(false)}
+      </span>
+    );
+  }
+
+  function renderRadioList() {
+    return (
+      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} groupKey={p.groupKey} />
+    );
+  }
+});
+
 
 interface EntityRadioButtonListSelectProps {
-    ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
-    onChange: (lite: Lite<Entity> | null) => void;
-    type: TypeReference;
-    findOptions?: FindOptions;
-    data?: Lite<Entity>[];
-    columnCount?: number;
-    columnWidth?: number;
-    groupKey: string;
+  ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+  controller: EntityRadioButtonListController;
+  groupKey: string;
 }
 
-interface EntityRadioButtonSelectState {
-    data?: Lite<Entity>[]
+export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectProps) {
+
+  const c = props.controller;
+  const p = c.props;
+
+  var [data, setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  var requestStarted = React.useRef(false);
+
+  React.useEffect(() => {
+    if (p.data) {
+      if (requestStarted.current)
+        console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityRadioButtonList: ${p.type!.name}`);
+      setData(p.data);
+    } else {
+      requestStarted.current = true;
+      const fo = p.findOptions;
+      if (fo) {
+        Finder.expandParentColumn(fo);
+        var limit = fo?.pagination?.elementsPerPage ?? 999;
+        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
+          .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
+          .done();
+      }
+      else
+        Finder.API.fetchAllLites({ types: p.type!.name })
+          .then(data => setData(data.orderBy(a => a.toStr)))
+          .done();
+    }
+  }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+
+  return (
+    <div className="sf-radiobutton-elements switch-field" style={getColumnStyle()}>
+      {renderContent()}
+    </div>
+  );
+
+  function getColumnStyle(): React.CSSProperties | undefined {
+    if (p.columnCount && p.columnWidth)
+      return {
+        columns: `${p.columnCount} ${p.columnWidth}px`,
+        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
+        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
+      };
+
+    if (p.columnCount)
+      return {
+        columnCount: p.columnCount,
+        MozColumnCount: p.columnCount,
+        WebkitColumnCount: p.columnCount,
+      };
+
+    if (p.columnWidth)
+      return {
+        columnWidth: p.columnWidth,
+        MozColumnWidth: p.columnWidth,
+        WebkitColumnWidth: p.columnWidth,
+      };
+
+    return undefined;
+  }
+
+  function maybeToLite(entityOrLite: Entity | Lite<Entity>): Lite<Entity> {
+    const entity = entityOrLite as Entity;
+
+    if (entity.Type)
+      return toLite(entity, entity.isNew);
+
+    return entityOrLite as Lite<Entity>;
+  }
+
+  function renderContent() {
+    if (data == undefined)
+      return undefined;
+
+    const fixedData = [...data];
+
+    const list = p.ctx.value!;
+
+
+
+    list.forEach((mle: Entity | Lite<Entity>) => {
+      if (!fixedData.some(d => is(d, mle as Entity | Lite<Entity>)))
+        fixedData.insertAt(0, maybeToLite(mle as Entity | Lite<Entity>))
+    });
+
+    if (p.renderRadio)
+      return fixedData.map((lite, i) => p.renderRadio!(lite, i, list.some((mle: Entity | Lite<Entity>) => is(mle as Entity | Lite<Entity>, lite)), c));
+
+    return fixedData.map((lite, i) =>
+      <label className="sf-radiobutton-element" key={i}>
+        <input type="radio"
+          checked={list.some((mle: Entity | Lite<Entity>) => is(mle as Entity | Lite<Entity>, lite))}
+          disabled={p.ctx.readOnly}
+          name={liteKey(lite) + props.groupKey}
+          onChange={e => c.handleOnChange(lite)} />
+        &nbsp;
+        <span className="sf-entitStrip-link">{lite.toStr}</span>
+      </label>);
+  }
 }
-
-export default class EntityRadioButtonListSelect extends React.Component<EntityRadioButtonListSelectProps, EntityRadioButtonSelectState> {
-
-    constructor(props: EntityRadioButtonListSelectProps) {
-        super(props);
-        this.state = { data: props.data };
-    }
-
-    componentWillMount() {
-        if (this.props.data == null)
-            this.reloadData(this.props);
-    }
-
-    componentWillReceiveProps(newProps: EntityRadioButtonListSelectProps, newContext: any) {
-        if (newProps.data) {
-            if (this.props.data == null)
-                console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
-
-            this.setState({ data: newProps.data });
-        } else {
-            if (EntityRadioButtonListSelect.getFindOptions(newProps.findOptions) != EntityRadioButtonListSelect.getFindOptions(this.props.findOptions) ||
-                newProps.type.name != this.props.type.name)
-                this.reloadData(newProps);
-        }
-    }
-
-    static getFindOptions(fo: FindOptions | undefined) {
-        if (fo == undefined)
-            return undefined;
-
-        return Finder.findOptionsPath(fo);
-    }
-
-    render() {
-        return (
-            <div className="sf-radiobutton-elements switch-field" style={this.getColumnStyle()}>
-                {this.renderContent()}
-            </div>
-        );
-    }
-
-
-    getColumnStyle(): React.CSSProperties | undefined {
-        const p = this.props;
-
-        if (p.columnCount && p.columnWidth)
-            return {
-                columns: `${p.columnCount} ${p.columnWidth}px`,
-                MozColumns: `${p.columnCount} ${p.columnWidth}px`,
-                WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
-            };
-
-        if (p.columnCount)
-            return {
-                columnCount: p.columnCount,
-                MozColumnCount: p.columnCount,
-                WebkitColumnCount: p.columnCount,
-            };
-
-        if (p.columnWidth)
-            return {
-                columnWidth: p.columnWidth,
-                MozColumnWidth: p.columnWidth,
-                WebkitColumnWidth: p.columnWidth,
-            };
-
-        return undefined;
-    }
-
-
-    maybeToLite(entityOrLite: Entity | Lite<Entity>) {
-        const entity = entityOrLite as Entity;
-
-        if (entity.Type)
-            return toLite(entity, entity.isNew);
-
-        return entityOrLite as Lite<Entity>;
-    }
-
-    getLite() {
-        const v = this.props.ctx.value;
-        if (v == undefined)
-            return undefined;
-
-        if ((v as Entity).Type)
-            return toLite(v as Entity);
-
-        return v as Lite<Entity>;
-    }
-
-    getLiteKey() {
-        const lite = this.getLite();
-
-        return lite ? liteKey(lite) : undefined;
-    }
-
-    renderContent() {
-        if (this.state.data == undefined)
-            return undefined;
-
-        const data = [...this.state.data];
-
-        const lite = this.getLite();
-
-        const elements = [undefined, ...this.state.data];
-        if (lite && !elements.some(a => is(a, lite)))
-            elements.insertAt(1, lite);
-
-        return data.map((litem, i) =>
-            <label className="sf-radiobutton-element" key={this.props.groupKey + i}>
-                <input type="radio"
-                    radioGroup={this.props.groupKey}
-                    checked={is(lite, litem)}
-                    disabled={this.props.ctx.readOnly}
-                    name={liteKey(litem) + this.props.groupKey}
-                    onChange={e => this.props.onChange(litem)} />
-                &nbsp;
-                <span className="sf-entitStrip-link">{litem.toStr}</span>
-            </label>);
-
-    }
-
-    reloadData(props: EntityRadioButtonListSelectProps) {
-        const fo = props.findOptions;
-        if (fo) {
-            Finder.expandParentColumn(fo);
-            var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
-            Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
-                .then(data => this.setState({ data: fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr) } as any))
-                .done();
-        }
-        else
-            Finder.API.fetchAllLites({ types: this.props.type!.name })
-                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
-                .done();
-
-    }
-
-
-}
-
-
-

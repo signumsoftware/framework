@@ -555,20 +555,20 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     }
 }
 
-ValueLine.renderers["NumberSpinner" as ValueLineType] = (vl) => {
-    return numericSpinnerTextBox(vl, ValueLine.isNumber);
+ValueLineRenderers.renderers["NumberSpinner" as ValueLineType] = (vl) => {
+    return numericSpinnerTextBox(vl, isNumber);
 };
 
 function numericSpinnerTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
-    const s = vl.state
+    const s = vl.props
 
     const numbroFormat = toNumbroFormat(s.formatText);
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-                {ValueLine.withItemGroup(vl,
-                    <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className="numeric">
+          <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+            {vl.withItemGroup(
+              <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric">
                         {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
                     </FormControlReadonly>)}
             </FormGroup>
@@ -579,7 +579,7 @@ function numericSpinnerTextBox(vl: ValueLineController, validateKey: (e: React.K
     };
 
     const htmlAttributes = {
-        placeholder: getPlaceholder(vl),
+        placeholder: vl.getPlaceholder(),
         ...vl.props.valueHtmlAttributes
     } as React.AllHTMLAttributes<any>;
 
@@ -603,7 +603,7 @@ function numericSpinnerTextBox(vl: ValueLineController, validateKey: (e: React.K
                         <FontAwesomeIcon icon="minus" />
                     </button>
                 </span>
-                {ValueLine.withItemGroup(vl,
+                {vl.withItemGroup(
                     <NumericTextBox
                         htmlAttributes={htmlAttributes}
                         value={s.ctx.value}
