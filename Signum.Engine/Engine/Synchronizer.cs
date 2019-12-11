@@ -157,7 +157,7 @@ namespace Signum.Engine
             return SynchronizeScript(spacing, newDictionary, repOldDictionary, createNew, removeOld, mergeBoth);
         }
 
-        public static IDisposable? RenameTable(Table table, Replacements replacements)
+        public static IDisposable? UseOldTableName(Table table, Replacements replacements)
         {
             string? fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
             if (fullName == null)
@@ -165,7 +165,7 @@ namespace Signum.Engine
 
             ObjectName realName = table.Name;
 
-            table.Name = ObjectName.Parse(fullName);
+            table.Name = ObjectName.Parse(fullName, Schema.Current.Settings.IsPostgres);
 
             return new Disposable(() => table.Name = realName);
         }

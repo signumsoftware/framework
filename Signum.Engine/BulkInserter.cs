@@ -158,7 +158,7 @@ namespace Signum.Engine
                 bool oldIdentityBehaviour = t.IdentityBehaviour;
 
                 DataTable dt = new DataTable();
-                foreach (var c in t.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && (disableIdentityBehaviour || !c.IdentityBehaviour)))
+                foreach (var c in t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)))
                     dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
                 if (disableIdentityBehaviour) t.IdentityBehaviour = false;
@@ -275,7 +275,7 @@ namespace Signum.Engine
 
                 DataTable dt = new DataTable();
 
-                foreach (var c in mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && !c.IdentityBehaviour))
+                foreach (var c in mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && !c.IdentityBehaviour))
                     dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
                 var list = mlistElements.ToList();

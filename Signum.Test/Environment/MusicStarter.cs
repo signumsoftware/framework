@@ -47,11 +47,11 @@ namespace Signum.Test.Environment
         {
             SchemaBuilder sb = new SchemaBuilder(true);
 
-            //Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema);
+            var postgreeVersion = PostgresVersionDetector.Detect(connectionString);
+            Connector.Default = new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion);
 
-            var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
-
-            Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
+            //var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
+            //Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
 
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version!;
 
@@ -69,7 +69,7 @@ namespace Signum.Test.Environment
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack!.Duration).Add(new Signum.Entities.IgnoreAttribute());
             }
 
-            if(sqlVersion > SqlServerVersion.SqlServer2008)
+            if(Connector.Default is SqlConnector c && c.Version > SqlServerVersion.SqlServer2008)
             {
                 sb.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
             }

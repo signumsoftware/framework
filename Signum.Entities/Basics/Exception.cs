@@ -28,10 +28,10 @@ namespace Signum.Entities.Basics
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [ForceNotNullable, SqlDbType(Size = 100)]
+        [ForceNotNullable, DbType(Size = 100)]
         public string? ExceptionType { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string exceptionMessage;
         public string ExceptionMessage
         {
@@ -45,7 +45,7 @@ namespace Signum.Entities.Basics
 
         public int ExceptionMessageHash { get; private set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string stackTrace;
         public string StackTrace
         {
@@ -63,49 +63,49 @@ namespace Signum.Entities.Basics
 
         public Lite<IUserEntity>? User { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? Environment { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? Version { get; set; }
 
-        [SqlDbType(Size = 300)]
+        [DbType(Size = 300)]
         public string? UserAgent { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? RequestUrl { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ControllerName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ActionName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? UrlReferer { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? MachineName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ApplicationName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? UserHostAddress { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? UserHostName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? Form { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? QueryString { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? Session { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? Data { get; set; }
 
         public int HResult { get; internal set; }

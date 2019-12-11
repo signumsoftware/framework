@@ -11,6 +11,7 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Engine.Linq;
 using System.Globalization;
+using NpgsqlTypes;
 
 namespace Signum.Engine.Maps
 {
@@ -42,8 +43,9 @@ namespace Signum.Engine.Maps
     public class SystemVersionedInfo
     {
         public ObjectName TableName;
-        public string StartColumnName;
-        public string EndColumnName;
+        public string? StartColumnName;
+        public string? EndColumnName;
+        public string? PostgreeSysPeriodColumnName;
 
         public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
         {
@@ -52,13 +54,25 @@ namespace Signum.Engine.Maps
             EndColumnName = endColumnName;
         }
 
+        public SystemVersionedInfo(ObjectName tableName, string postgreeSysPeriodColumnName)
+        {
+            TableName = tableName;
+            PostgreeSysPeriodColumnName = postgreeSysPeriodColumnName;
+        }
+
         internal IEnumerable<IColumn> Columns()
         {
-            return new[]
-            {
-                new Column(this.StartColumnName, ColumnType.Start),
-                new Column(this.EndColumnName, ColumnType.End)
-            };
+            if (PostgreeSysPeriodColumnName != null)
+                return new[]
+                {
+                    new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
+                };
+            else
+                return new[]
+                {
+                    new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
+                    new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
+                };
         }
 
         public enum ColumnType
@@ -67,9 +81,9 @@ namespace Signum.Engine.Maps
             End,
         }
 
-        public class Column : IColumn
+        public class SqlServerPeriodColumn : IColumn
         {
-            public Column(string name, ColumnType systemVersionColumnType)
+            public SqlServerPeriodColumn(string name, ColumnType systemVersionColumnType)
             {
                 this.Name = name;
                 this.SystemVersionColumnType = systemVersionColumnType;
@@ -79,7 +93,31 @@ namespace Signum.Engine.Maps
             public ColumnType SystemVersionColumnType { get; private set; }
 
             public IsNullable Nullable => IsNullable.No;
-            public SqlDbType SqlDbType => SqlDbType.DateTime2;
+            public AbstractDbType DbType => new AbstractDbType(SqlDbType.DateTime2);
+            public Type Type => typeof(DateTime);
+            public string? UserDefinedTypeName => null;
+            public bool PrimaryKey => false;
+            public bool IdentityBehaviour => false;
+            public bool Identity => false;
+            public string? Default { get; set; }
+            public int? Size => null;
+            public int? Scale => null;
+            public string? Collation => null;
+            public Table? ReferenceTable => null;
+            public bool AvoidForeignKey => false;
+        }
+
+        public class PostgreePeriodColumn : IColumn
+        {
+            public PostgreePeriodColumn(string name)
+            {
+                this.Name = name;
+            }
+
+            public string Name { get; private set; }
+
+            public IsNullable Nullable => IsNullable.No;
+            public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
             public Type Type => typeof(DateTime);
             public string? UserDefinedTypeName => null;
             public bool PrimaryKey => false;
@@ -103,6 +141,7 @@ namespace Signum.Engine.Maps
     public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
+        public Schema Schema { get; private set; }
 
         public ObjectName Name { get; set; }
 
@@ -349,7 +388,7 @@ namespace Signum.Engine.Maps
             };
 
             if(attribute.AllowMultipleNulls)
-                result.Where = IndexWhereExpressionVisitor.IsNull(this, false);
+                result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
 
             return result;
         }
@@ -391,7 +430,7 @@ namespace Signum.Engine.Maps
     {
         string Name { get; }
         IsNullable Nullable { get; }
-        SqlDbType SqlDbType { get; }
+        AbstractDbType DbType { get; }
         Type Type { get; }
         string? UserDefinedTypeName { get; }
         bool PrimaryKey { get; }
@@ -420,14 +459,14 @@ namespace Signum.Engine.Maps
             return isNullable != IsNullable.No;
         }
 
-        public static string GetSqlDbTypeString(this IColumn column)
-        {
-            return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
-        }
+        //public static string GetSqlDbTypeString(this IColumn column)
+        //{
+        //    return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+        //}
 
         public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
         {
-            if (column is SystemVersionedInfo.Column svc)
+            if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
                 return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
 
             return GeneratedAlwaysType.None;
@@ -446,7 +485,7 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         IsNullable IColumn.Nullable { get { return IsNullable.No; } }
-        public SqlDbType SqlDbType { get; set; }
+        public AbstractDbType DbType { get; set; }
         public string? UserDefinedTypeName { get; set; }
         bool IColumn.PrimaryKey { get { return true; } }
         public bool Identity { get; set; }
@@ -501,7 +540,7 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public IsNullable Nullable { get; set; }
-        public SqlDbType SqlDbType { get; set; }
+        public AbstractDbType DbType { get; set; }
         public string? UserDefinedTypeName { get; set; }
         public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
@@ -523,7 +562,7 @@ namespace Signum.Engine.Maps
         {
             return "{0} {1} ({2},{3},{4})".FormatWith(
                 Name,
-                SqlDbType,
+                DbType,
                 Nullable.ToBool() ? "Nullable" : "",
                 Size,
                 Scale);
@@ -567,7 +606,7 @@ namespace Signum.Engine.Maps
         {
             public string Name { get; set; }
             public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
-            public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
+            public AbstractDbType DbType => new AbstractDbType(SqlDbType.Bit, NpgsqlDbType.Boolean);
             string? IColumn.UserDefinedTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
@@ -763,7 +802,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         Table? IColumn.ReferenceTable => ReferenceTable;
-        public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
         public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
@@ -1007,7 +1046,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; private set; }
         Table? IColumn.ReferenceTable => ReferenceTable;
-        public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
         public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
@@ -1033,7 +1072,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public string? Collation { get; set; }
         public Table? ReferenceTable { get { return null; } }
-        public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
+        public AbstractDbType DbType => new AbstractDbType(SqlDbType.NVarChar, NpgsqlDbType.Varchar);
         public Type Type { get { return typeof(string); } }
         public bool AvoidForeignKey { get { return false; } }
         public string? Default { get; set; }
@@ -1108,7 +1147,7 @@ namespace Signum.Engine.Maps
         {
             public string Name { get; set; }
             IsNullable IColumn.Nullable { get { return IsNullable.No; } }
-            public SqlDbType SqlDbType { get; set; }
+            public AbstractDbType DbType { get; set; }
             public string? Collation { get; set; }
             public string? UserDefinedTypeName { get; set; }
             bool IColumn.PrimaryKey { get { return true; } }
@@ -1248,4 +1287,200 @@ namespace Signum.Engine.Maps
             return null;
         }
     }
+
+    public struct AbstractDbType
+    {
+        SqlDbType? sqlServer;
+        public SqlDbType SqlServer => sqlServer ?? throw new InvalidOperationException("No SqlDbType type defined");
+
+        NpgsqlDbType? posrtgreSql;
+        public NpgsqlDbType PostgreSql => posrtgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
+
+        public AbstractDbType(SqlDbType sqlDbType)
+        {
+            this.sqlServer = sqlDbType;
+            this.posrtgreSql = null;
+        }
+
+        public AbstractDbType(NpgsqlDbType npgsqlDbType)
+        { 
+            this.sqlServer = null;
+            this.posrtgreSql = npgsqlDbType;
+        }
+
+        public AbstractDbType(SqlDbType sqlDbType, NpgsqlDbType npgsqlDbType)
+        {
+            this.sqlServer = sqlDbType;
+            this.posrtgreSql = npgsqlDbType;
+        }
+
+        public bool IsDate()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Date:
+                    case SqlDbType.DateTime:
+                    case SqlDbType.DateTime2:
+                    case SqlDbType.SmallDateTime: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            if (posrtgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Date:
+                    case NpgsqlDbType.Timestamp: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsNumber()
+        {
+            if(sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.BigInt:
+                    case SqlDbType.Float:
+                    case SqlDbType.Decimal:
+                    case SqlDbType.Int:
+                    case SqlDbType.Bit:
+                    case SqlDbType.Money:
+                    case SqlDbType.Real:
+                    case SqlDbType.TinyInt:
+                    case SqlDbType.SmallInt:
+                    case SqlDbType.SmallMoney: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            if (posrtgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Smallint:
+                    case NpgsqlDbType.Integer:
+                    case NpgsqlDbType.Bigint:
+                    case NpgsqlDbType.Numeric:
+                    case NpgsqlDbType.Money:
+                    case NpgsqlDbType.Real:
+                    case NpgsqlDbType.Double: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsString()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.NText:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.Text:
+                    case SqlDbType.VarChar: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+
+            if (posrtgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Char:
+                    case NpgsqlDbType.Varchar:
+                    case NpgsqlDbType.Text: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+
+        public override string? ToString() => throw new InvalidOperationException("use ToString(isPostgress)");
+        public string ToString(bool isPostgres)
+        {
+            if (!isPostgres)
+                sqlServer.ToString()!.ToUpperInvariant();
+
+            var pg = posrtgreSql!.Value;
+            if ((pg & NpgsqlDbType.Array) != 0)
+                return (pg & ~NpgsqlDbType.Range).ToString() + "[]";
+
+            if ((pg & NpgsqlDbType.Range) != 0)
+                switch (pg & ~NpgsqlDbType.Range)
+                {
+                    case NpgsqlDbType.Integer: return "int4range";
+                    case NpgsqlDbType.Bigint : return "int8range";
+                    case NpgsqlDbType.Numeric: return "numrange";
+                    case NpgsqlDbType.TimestampTz: return "tstzrange";
+                    case NpgsqlDbType.Date: return "daterange";
+                    throw new InvalidOperationException("");
+                }
+
+            return pg.ToString()!;
+        }
+
+        public bool IsGuid()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.UniqueIdentifier:
+                        return true;
+                    default:
+                        return false;
+                }
+
+
+            if (posrtgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Uuid:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        internal bool IsDecimal()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Decimal:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            if (posrtgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Numeric:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+    }
 }
+
+
+

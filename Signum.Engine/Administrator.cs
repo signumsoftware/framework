@@ -31,7 +31,7 @@ namespace Signum.Engine
 
         public static string GenerateViewCodes(params string[] tableNames) => tableNames.ToString(tn => GenerateViewCode(tn), "\r\n\r\n");
 
-        public static string GenerateViewCode(string tableName) => GenerateViewCode(ObjectName.Parse(tableName));
+        public static string GenerateViewCode(string tableName) => GenerateViewCode(ObjectName.Parse(tableName, Schema.Current.Settings.IsPostgres));
 
         public static string GenerateViewCode(ObjectName tableName)
         {
@@ -42,7 +42,7 @@ namespace Signum.Engine
                  select new DiffColumn
                  {
                      Name = c.name,
-                     SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type()!.name),
+                     DbType = new AbstractDbType(SchemaSynchronizer.ToSqlDbType(c.Type()!.name)),
                      UserTypeName = null,
                      PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
@@ -102,7 +102,7 @@ namespace Signum.Engine
             if (!view.Name.IsTemporal)
                 throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
 
-            SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
+            Connector.Current.SqlBuilder.CreateTableSql(view).ExecuteLeaves();
         }
 
         public static IDisposable TemporaryTable<T>() where T : IView
@@ -123,7 +123,7 @@ namespace Signum.Engine
             if (!view.Name.IsTemporal)
                 throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
 
-            SqlBuilder.DropTable(view.Name).ExecuteNonQuery();
+            Connector.Current.SqlBuilder.DropTable(view.Name).ExecuteNonQuery();
         }
 
         public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields, bool unique = false)
@@ -137,7 +137,7 @@ namespace Signum.Engine
                 new UniqueTableIndex(view, columns) :
                 new TableIndex(view, columns);
 
-            SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
+            Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
 
         internal static readonly ThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
@@ -208,7 +208,7 @@ namespace Signum.Engine
         {
             Table table = Schema.Current.Table(type);
 
-            using (Synchronizer.RenameTable(table, replacements))
+            using (Synchronizer.UseOldTableName(table, replacements))
             using (ExecutionMode.DisableCache())
             {
                 if (ExistsTable(table))
@@ -238,24 +238,24 @@ namespace Signum.Engine
 
             table.IdentityBehaviour = false;
             if (table.PrimaryKey.Default == null)
-                SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
+                Connector.Current.SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
                 table.IdentityBehaviour = true;
 
                 if (table.PrimaryKey.Default == null)
-                    SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
+                    Connector.Current.SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
             });
         }
 
         public static IDisposable DisableIdentity(ObjectName tableName)
         {
-            SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
+            Connector.Current.SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
-                SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
+                Connector.Current.SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
             });
         }
 
@@ -409,6 +409,7 @@ namespace Signum.Engine
 
         public static IDisposable PrepareTableForBatchLoadScope(ITable table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
         {
+            var sqlBuilder = Connector.Current.SqlBuilder;
             SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
             Action onDispose = () => SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
 
@@ -431,13 +432,13 @@ namespace Signum.Engine
                 if (multiIndexes.Any())
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
-                    multiIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
+                    multiIndexes.Select(i => sqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(i, table.Name), "\r\n"));
 
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
-                        multiIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
+                        multiIndexes.Select(i => sqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     };
                 }
             }
@@ -449,11 +450,11 @@ namespace Signum.Engine
                 if (uniqueIndexes.Any())
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
-                    uniqueIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
+                    uniqueIndexes.Select(i => sqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
-                        uniqueIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
+                        uniqueIndexes.Select(i => sqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
                     };
                 }
             }
@@ -485,19 +486,24 @@ namespace Signum.Engine
 
         public static void TruncateTableSystemVersioning(ITable table)
         {
+            var sqlBuilder = Connector.Current.SqlBuilder;
+
             if(table.SystemVersioned == null)
-                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+                sqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
             else
             {
-                SqlBuilder.AlterTableDisableSystemVersioning(table.Name).ExecuteLeaves();
-                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
-                SqlBuilder.TruncateTable(table.SystemVersioned.TableName).ExecuteLeaves();
-                SqlBuilder.AlterTableEnableSystemVersioning(table).ExecuteLeaves();
+                sqlBuilder.AlterTableDisableSystemVersioning(table.Name).ExecuteLeaves();
+                sqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+                sqlBuilder.TruncateTable(table.SystemVersioned.TableName).ExecuteLeaves();
+                sqlBuilder.AlterTableEnableSystemVersioning(table).ExecuteLeaves();
             }
         }
 
         public static IDisposable DropAndCreateIncommingForeignKeys(Table table)
         {
+            var sqlBuilder = Connector.Current.SqlBuilder;
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+
             var foreignKeys = Administrator.OverrideDatabaseInSysViews(table.Name.Schema.Database).Using(_ =>
             (from targetTable in Database.View<SysTables>()
              where targetTable.name == table.Name.Name && targetTable.Schema().name == table.Name.Schema.Name
@@ -506,26 +512,27 @@ namespace Signum.Engine
              select new
              {
                  Name = ifk.name,
-                 ParentTable = new ObjectName(new SchemaName(table.Name.Schema.Database, parentTable.Schema().name), parentTable.name),
+                 ParentTable = new ObjectName(new SchemaName(table.Name.Schema.Database, parentTable.Schema().name, isPostgres), parentTable.name, isPostgres),
                  ParentColumn = parentTable.Columns().SingleEx(c => c.column_id == ifk.ForeignKeyColumns().SingleEx().parent_column_id).name,
              }).ToList());
 
-            foreignKeys.ForEach(fk => SqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name! /*CSBUG*/).ExecuteLeaves());
+            foreignKeys.ForEach(fk => sqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name! /*CSBUG*/).ExecuteLeaves());
 
             return new Disposable(() =>
             {
-                foreignKeys.ToList().ForEach(fk => SqlBuilder.AlterTableAddConstraintForeignKey(fk.ParentTable!, fk.ParentColumn!, table.Name, table.PrimaryKey.Name)!.ExecuteLeaves());
+                foreignKeys.ToList().ForEach(fk => sqlBuilder.AlterTableAddConstraintForeignKey(fk.ParentTable!, fk.ParentColumn!, table.Name, table.PrimaryKey.Name)!.ExecuteLeaves());
             });
         }
 
         public static IDisposable DisableUniqueIndex(UniqueTableIndex index)
         {
+            var sqlBuilder = Connector.Current.SqlBuilder;
             SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
-            SqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
+            sqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
             return new Disposable(() =>
             {
                 SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " REBUILD Unique Index " + index.IndexName);
-                SqlBuilder.RebuildIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
+                sqlBuilder.RebuildIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
             });
         }
 
@@ -545,11 +552,12 @@ namespace Signum.Engine
 
         public static void DropUniqueIndexes<T>() where T : Entity
         {
+            var sqlBuilder = Connector.Current.SqlBuilder;
             var table = Schema.Current.Table<T>();
             var indexesNames = Administrator.GetIndixesNames(table, unique: true);
 
             if (indexesNames.HasItems())
-                indexesNames.Select(n => SqlBuilder.DropIndex(table.Name, n)).Combine(Spacing.Simple)!.ExecuteLeaves();
+                indexesNames.Select(n => sqlBuilder.DropIndex(table.Name, n)).Combine(Spacing.Simple)!.ExecuteLeaves();
         }
 
 
@@ -608,12 +616,13 @@ namespace Signum.Engine
             if (shouldMove != null)
                 columns = columns.Where(p => shouldMove!(p.Table, p.Column)).ToList();
 
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var pb = Connector.Current.ParameterBuilder;
-            return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
-                {
-                    pb.CreateReferenceParameter("@fromEntity", fromEntity.Id, ct.Column),
-                    pb.CreateReferenceParameter("@toEntity", toEntity.Id, ct.Column),
-                }))).ToList();
+            return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape(isPostgres)), new List<DbParameter>
+            {
+                pb.CreateReferenceParameter("@fromEntity", fromEntity.Id, ct.Column),
+                pb.CreateReferenceParameter("@toEntity", toEntity.Id, ct.Column),
+            }))).ToList();
         }
 
         class ColumnTable

@@ -4,6 +4,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
+using System.IO;
 
 namespace Signum.Engine
 {
@@ -12,32 +13,35 @@ namespace Signum.Engine
         public static SqlPreCommand? CreateSchemasScript()
         {
             Schema s = Schema.Current;
+            var sqlBuilder = Connector.Current.SqlBuilder;
+            var defaultSchema = SchemaName.Default(s.Settings.IsPostgres);
 
             return s.GetDatabaseTables()
                 .Select(a => a.Name.Schema)
-                .Where(sn => sn.Name != "dbo" && !s.IsExternalDatabase(sn.Database))
+                .Where(sn => sn != defaultSchema && !s.IsExternalDatabase(sn.Database))
                 .Distinct()
-                .Select(SqlBuilder.CreateSchema)
+                .Select(sqlBuilder.CreateSchema)
                 .Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand? CreateTablesScript()
         {
+            var sqlBuilder = Connector.Current.SqlBuilder;
             Schema s = Schema.Current;
             List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
 
-            SqlPreCommand? createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double)?.PlainSqlCommand();
+            SqlPreCommand? createTables = tables.Select(sqlBuilder.CreateTableSql).Combine(Spacing.Double)?.PlainSqlCommand();
 
-            SqlPreCommand? foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double)?.PlainSqlCommand();
+            SqlPreCommand? foreignKeys = tables.Select(sqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double)?.PlainSqlCommand();
 
             SqlPreCommand? indices = tables.Select(t =>
             {
                 var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)); ;
 
-                var mainIndices = allIndexes.Select(ix => SqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
+                var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
                 var historyIndices = t.SystemVersioned == null ? null :
-                         allIndexes.Where(a => a.GetType() == typeof(TableIndex)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
+                         allIndexes.Where(a => a.GetType() == typeof(TableIndex)).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
 
                 return SqlPreCommand.Combine(Spacing.Double, mainIndices, historyIndices);
 
@@ -56,28 +60,56 @@ namespace Signum.Engine
                     ).Combine(Spacing.Double)?.PlainSqlCommand();
         }
 
+        public static SqlPreCommand? PostgreeExtensions()
+        {
+            if (!Schema.Current.Settings.IsPostgres)
+                return null;
+
+            return Schema.Current.PostgreeExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
+        }
+
+        public static SqlPreCommand? PostgreeTemporalTableScript()
+        {
+            if (!Schema.Current.Settings.IsPostgres)
+                return null;
+
+            if (!Schema.Current.Tables.Any(t => t.Value.SystemVersioned != null))
+                return null;
+
+            var file = Schema.Current.Settings.PostresVersioningFunctionNoChecks ?
+                "versioning_function_nochecks.sql" :
+                "versioning_function.sql";
+
+            var text = new StreamReader(typeof(Schema).Assembly.GetManifestResourceStream($"Signum.Engine.Engine.Scripts.{file}")!).Using(a => a.ReadToEnd());
+
+            return new SqlPreCommandSimple(text);
+        }
 
         public static SqlPreCommand? SnapshotIsolation()
         {
-            if (!Connector.Current.AllowsSetSnapshotIsolation)
+            var connector = Connector.Current;
+
+            if (!connector.AllowsSetSnapshotIsolation)
                 return null;
 
 
-            var list = Schema.Current.DatabaseNames().Select(a => a?.ToString()).ToList();
+            var list = connector.Schema.DatabaseNames().Select(a => a?.ToString()).ToList();
 
             if (list.Contains(null))
             {
                 list.Remove(null);
-                list.Add(Connector.Current.DatabaseName());
+                list.Add(connector.DatabaseName());
             }
+
+            var sqlBuilder = connector.SqlBuilder;
 
             var cmd = list.NotNull()
                 .Where(db => !SnapshotIsolationEnabled(db))
                 .Select(db => SqlPreCommand.Combine(Spacing.Simple,
-                    SqlBuilder.SetSingleUser(db),
-                    SqlBuilder.SetSnapshotIsolation(db, true),
-                    SqlBuilder.MakeSnapshotIsolationDefault(db, true),
-                    SqlBuilder.SetMultiUser(db))
+                    sqlBuilder.SetSingleUser(db),
+                    sqlBuilder.SetSnapshotIsolation(db, true),
+                    sqlBuilder.MakeSnapshotIsolationDefault(db, true),
+                    sqlBuilder.SetMultiUser(db))
                 ).Combine(Spacing.Double);
 
             return cmd;

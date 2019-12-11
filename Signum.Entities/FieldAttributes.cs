@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Basics;
+using NpgsqlTypes;
 
 namespace Signum.Entities
 {
@@ -242,44 +243,41 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class SqlDbTypeAttribute : Attribute
-    {
+    public class DbTypeAttribute : Attribute
+    {   
         SqlDbType? sqlDbType;
-        int? size;
-        int? scale;
-
+        public bool HasSqlDbType => sqlDbType.HasValue;
         public SqlDbType SqlDbType
         {
             get { return sqlDbType!.Value; }
             set { sqlDbType = value; }
         }
 
-        public bool HasSqlDbType
+        NpgsqlDbType? npgsqlDbType;
+        public bool HasNpgsqlDbType => npgsqlDbType.HasValue;
+        public NpgsqlDbType NpgsqlDbType
         {
-            get { return sqlDbType.HasValue; }
+            get { return npgsqlDbType!.Value; }
+            set { npgsqlDbType = value; }
         }
 
+        int? size;
+        public bool HasSize => size.HasValue;
         public int Size
         {
             get { return size!.Value; }
             set { size = value; }
         }
 
-        public bool HasSize
-        {
-            get { return size.HasValue; }
-        }
 
+        int? scale;
+        public bool HasScale => scale.HasValue;
         public int Scale
         {
             get { return scale!.Value; }
             set { scale = value; }
         }
 
-        public bool HasScale
-        {
-            get { return scale.HasValue; }
-        }
 
         public string? UserDefinedTypeName { get; set; }
 
@@ -292,7 +290,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
-    public sealed class PrimaryKeyAttribute : SqlDbTypeAttribute
+    public sealed class PrimaryKeyAttribute : DbTypeAttribute
     {
         public Type Type { get; set; }
 
@@ -371,7 +369,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public sealed class TicksColumnAttribute : SqlDbTypeAttribute
+    public sealed class TicksColumnAttribute : DbTypeAttribute
     {
         public bool HasTicks { get; private set; }
 
@@ -394,6 +392,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         public string? TemporalTableName { get; set; }
         public string StartDateColumnName { get; set; } = "SysStartDate";
         public string EndDateColumnName { get; set; } = "SysEndDate";
+        public string PostgreeSysPeriodColumname { get; set; } = "sys_period";
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]

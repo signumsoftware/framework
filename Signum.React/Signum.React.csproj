@@ -12,6 +12,7 @@
     <StartupObject></StartupObject>
     <Platforms>x64;x86;win86;win64;AnyCPU;linux64</Platforms>
     <NoWarn>NU1605</NoWarn>
+    <UserSecretsId>7b3bfbd4-af24-4a37-a213-f5f281fa39f5</UserSecretsId>
   </PropertyGroup>
 
 
@@ -41,16 +42,15 @@
     </PackageReference>
   </ItemGroup>
 
+
   <ItemGroup>
-    <None Remove="ts_out\**" />
-  </ItemGroup>
-  
-  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="4.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
     <PackageReference Include="Signum.TSGenerator" Version="2.2.2" />
   </ItemGroup>
 
+  
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup>
@@ -67,6 +67,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ts_out\**" />
     <Compile Remove="ts_out\**" />
     <Content Remove="ts_out\**" />
     <EmbeddedResource Remove="ts_out\**" />

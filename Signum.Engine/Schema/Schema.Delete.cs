@@ -18,14 +18,14 @@ namespace Signum.Engine.Maps
             var declaration = where != null ? DeclarePrimaryKeyVariable(entity, where) : null;
 
             var variableOrId = entity.Id.VariableName ?? entity.Id.Object;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var pre = OnPreDeleteSqlSync(entity);
             var collections = (from tml in this.TablesMList()
                                select new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                                   .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
+                                   .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
 
             var main = new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                    .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(), variableOrId, comment ?? entity.ToString()));
+                    .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
 
             return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, main)!;
         }
@@ -40,7 +40,7 @@ namespace Signum.Engine.Maps
 
             string queryString = query.PlainSql().Lines().ToString(" ");
 
-            var result = new SqlPreCommandSimple($"DECLARE {variableName} {SqlBuilder.GetColumnType(this.PrimaryKey)}; SET {variableName} = COALESCE(({queryString}), 1 / 0)");
+            var result = new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)}; SET {variableName} = COALESCE(({queryString}), 1 / 0)");
 
             return result;
         }

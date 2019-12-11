@@ -684,7 +684,7 @@ namespace Signum.Engine.Linq
 
     internal class SqlCastExpression : DbExpression
     {
-        public readonly SqlDbType SqlDbType;
+        public readonly AbstractDbType DbType;
         public readonly Expression Expression;
 
         public SqlCastExpression(Type type, Expression expression)
@@ -692,16 +692,16 @@ namespace Signum.Engine.Linq
         {
         }
 
-        public SqlCastExpression(Type type, Expression expression, SqlDbType sqlDbType)
+        public SqlCastExpression(Type type, Expression expression, AbstractDbType dbType)
             : base(DbExpressionType.SqlCast, type)
         {
             this.Expression = expression;
-            this.SqlDbType = sqlDbType;
+            this.DbType = dbType;
         }
 
         public override string ToString()
         {
-            return "Cast({0} as {1})".FormatWith(Expression.ToString(), SqlDbType.ToString().ToUpper());
+            return "Cast({0} as {1})".FormatWith(Expression.ToString(), DbType.ToString(Schema.Current.Settings.IsPostgres));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)

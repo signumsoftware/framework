@@ -19,6 +19,8 @@ namespace Signum.Engine
     {
         static readonly Variable<Connector> currentConnector = Statics.ThreadVariable<Connector>("connection");
 
+        public SqlBuilder SqlBuilder;
+
         public static IDisposable Override(Connector connector)
         {
             Connector oldConnection = currentConnector.Value;
@@ -48,6 +50,7 @@ namespace Signum.Engine
         {
             this.Schema = schema;
             this.IsolationLevel = IsolationLevel.Unspecified;
+            this.SqlBuilder = new SqlBuilder(this);
         }
 
         public Schema Schema { get; private set; }
@@ -75,14 +78,13 @@ namespace Signum.Engine
             }
         }
 
-        public abstract SqlDbType GetSqlDbType(DbParameter p);
+        public abstract string GetSqlDbType(DbParameter p);
 
         protected internal abstract object? ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType);
-        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
-        protected internal abstract DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
+        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType);
+        protected internal abstract DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token);
-        protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
         protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout);
 
         public abstract string DatabaseName();
@@ -141,8 +143,6 @@ namespace Signum.Engine
 
         public abstract bool AllowsIndexWithWhere(string where);
 
-        public abstract SqlPreCommand ShrinkDatabase(string databaseName);
-
         public abstract bool AllowsConvertToDate { get; }
 
         public abstract bool AllowsConvertToTime { get; }
@@ -165,24 +165,18 @@ namespace Signum.Engine
 
         public DbParameter CreateReferenceParameter(string parameterName, PrimaryKey? id, IColumn column)
         {
-            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable.ToBool(), id == null ? null : id.Value.Object);
+            return CreateParameter(parameterName, column.DbType, null, column.Nullable.ToBool(), id == null ? null : id.Value.Object);
         }
 
         public DbParameter CreateParameter(string parameterName, object? value, Type type)
         {
             var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
 
-            return CreateParameter(parameterName, pair.SqlDbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), value);
+            return CreateParameter(parameterName, pair.DbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), value);
         }
 
-        public abstract DbParameter CreateParameter(string parameterName, SqlDbType type, string? udtTypeName, bool nullable, object? value);
-        public abstract MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType type, string? udtTypeName, bool nullable, Expression value);
-
-        protected static bool IsDate(SqlDbType type)
-        {
-            return type == SqlDbType.Date || type == SqlDbType.DateTime || type == SqlDbType.DateTime2 || type == SqlDbType.SmallDateTime;
-        }
-
+        public abstract DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value);
+        public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value);
 
 
         protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));

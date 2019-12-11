@@ -160,7 +160,7 @@ namespace Signum.Engine.Linq
         {
             var expression = MakeSqlValue(Visit(castExpr.Expression));
             if (expression != castExpr.Expression)
-                return new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+                return new SqlCastExpression(castExpr.Type, expression, castExpr.DbType);
             return castExpr;
         }
 

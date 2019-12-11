@@ -19,6 +19,9 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class QueryFormatter : DbExpressionVisitor
     {
+        Schema schema = Schema.Current;
+        bool isPostgres = Schema.Current.Settings.IsPostgres;
+
         StringBuilder sb = new StringBuilder();
         int indent = 2;
         int depth;
@@ -48,8 +51,6 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        MethodInfo miCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.CreateParameter(null!, SqlDbType.BigInt, null, false, null));
-
         DbParameterPair CreateParameter(ConstantExpression value)
         {
             string name = GetNextParamAlias();
@@ -63,13 +64,12 @@ namespace Signum.Engine.Linq
 
             var pb = Connector.Current.ParameterBuilder;
 
-            var param = pb.CreateParameter(name, typePair.SqlDbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value);
+            var param = pb.CreateParameter(name, typePair.DbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value);
 
             return new DbParameterPair(param, name);
         }
 
         ObjectNameOptions objectNameOptions;
-
         private QueryFormatter()
         {
             objectNameOptions = ObjectName.CurrentOptions;
@@ -344,8 +344,8 @@ namespace Signum.Engine.Linq
             sb.Append("CAST(");
             Visit(castExpr.Expression);
             sb.Append(" as ");
-            sb.Append(castExpr.SqlDbType.ToString().ToUpperInvariant());
-            if (castExpr.SqlDbType == SqlDbType.NVarChar || castExpr.SqlDbType == SqlDbType.VarChar)
+            sb.Append(castExpr.DbType.ToString(schema.Settings.IsPostgres));
+            if (!schema.Settings.IsPostgres && (castExpr.DbType.SqlServer == SqlDbType.NVarChar || castExpr.DbType.SqlServer == SqlDbType.VarChar))
                 sb.Append("(MAX)");
             sb.Append(")");
             return castExpr;
@@ -357,7 +357,7 @@ namespace Signum.Engine.Linq
                 sb.Append("NULL");
             else
             {
-                if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
+                if (!schema.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 var pi = parameterExpressions.GetOrCreate(c, () => this.CreateParameter(c));
@@ -373,7 +373,7 @@ namespace Signum.Engine.Linq
                 sb.Append("NULL");
             else
             {
-                if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
+                if (!schema.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 if (c.Value.Equals(true))
@@ -400,7 +400,7 @@ namespace Signum.Engine.Linq
         {
             sb.Append(column.Alias.ToString());
             sb.Append(".");
-            sb.Append(column.Name.SqlEscape());
+            sb.Append(column.Name.SqlEscape(isPostgres));
 
             return column;
         }
@@ -577,7 +577,7 @@ namespace Signum.Engine.Linq
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
 
-                sb.Append(column.Name.SqlEscape());
+                sb.Append(column.Name.SqlEscape(isPostgres));
                 sb.Append(" = ");
                 this.Visit(column.Expression);
             }
@@ -793,7 +793,7 @@ namespace Signum.Engine.Linq
                     sb.Append(",");
                     this.AppendNewLine(Indentation.Same);
                 }
-                sb.Append(assignment.Column.SqlEscape());
+                sb.Append(assignment.Column.SqlEscape(isPostgres));
                 sb.Append(" = ");
                 this.Visit(assignment.Expression);
             }
@@ -824,7 +824,7 @@ namespace Signum.Engine.Linq
                     if (i % 4 == 0)
                         this.AppendNewLine(Indentation.Same);
                 }
-                sb.Append(assignment.Column.SqlEscape());
+                sb.Append(assignment.Column.SqlEscape(isPostgres));
             }
             sb.Append(")");
             this.AppendNewLine(Indentation.Same);

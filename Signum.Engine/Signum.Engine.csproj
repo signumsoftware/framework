@@ -11,11 +11,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
+    <None Remove="Engine\Scripts\versioning_function.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Engine\Scripts\versioning_function.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="4.1.2" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
   </ItemGroup>
 

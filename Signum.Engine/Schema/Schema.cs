@@ -61,8 +61,10 @@ namespace Signum.Engine.Maps
             get { return tables; }
         }
 
-        const string errorType = "TypeEntity table not cached. Remember to call Schema.Current.Initialize";
-
+        public List<string> PostgreeExtensions = new List<string>()
+        {
+            "uuid-ossp"
+        };
 
         #region Events
 
@@ -541,6 +543,8 @@ namespace Signum.Engine.Maps
             ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
         }
 
+
+
         internal Schema(SchemaSettings settings)
         {
             this.typeCachesLazy = null!;
@@ -549,6 +553,8 @@ namespace Signum.Engine.Maps
             this.ViewBuilder = new Maps.ViewBuilder(this);
 
             Generating += SchemaGenerator.SnapshotIsolation;
+            Generating += SchemaGenerator.PostgreeExtensions;
+            Generating += SchemaGenerator.PostgreeTemporalTableScript;
             Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;

@@ -81,14 +81,11 @@ namespace Signum.Engine
 
     public class SqlConnector : Connector
     {
-        int? commandTimeout = null;
-        string connectionString;
-
         public SqlServerVersion Version { get; set; }
 
         public SqlConnector(string connectionString, Schema schema, SqlServerVersion version) : base(schema)
         {
-            this.connectionString = connectionString;
+            this.ConnectionString = connectionString;
             this.ParameterBuilder = new SqlParameterBuilder();
 
             this.Version = version;
@@ -97,21 +94,13 @@ namespace Signum.Engine
                 var s = schema.Settings;
 
                 if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
-                    schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+                    schema.Settings.TypeValues.Add(typeof(TimeSpan), new AbstractDbType(SqlDbType.Time));
             }
         }
 
-        public int? CommandTimeout
-        {
-            get { return commandTimeout; }
-            set { commandTimeout = value; }
-        }
+        public int? CommandTimeout { get; set; } = null;
 
-        public string ConnectionString
-        {
-            get { return connectionString; }
-            set { connectionString = value; }
-        }
+        public string ConnectionString { get; set; }
 
         public override bool SupportsScalarSubquery { get { return true; } }
         public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
@@ -351,32 +340,6 @@ namespace Signum.Engine
             });
         }
 
-        protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand, CommandType commandType)
-        {
-            return EnsureConnectionRetry(con =>
-            {
-                using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
-                {
-                    try
-                    {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataSet result = new DataSet();
-                        da.Fill(result);
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        var nex = HandleException(ex, preCommand);
-                        if (nex == ex)
-                            throw;
-
-                        throw nex;
-                    }
-                }
-            });
-        }
-
         public Exception HandleException(Exception ex, SqlPreCommandSimple command)
         {
             var nex = ReplaceException(ex, command);
@@ -436,12 +399,12 @@ namespace Signum.Engine
 
         public override string DatabaseName()
         {
-            return new SqlConnection(connectionString).Database;
+            return new SqlConnection(ConnectionString).Database;
         }
 
         public override string DataSourceName()
         {
-            return new SqlConnection(connectionString).DataSource;
+            return new SqlConnection(ConnectionString).DataSource;
         }
 
         public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)
@@ -454,9 +417,9 @@ namespace Signum.Engine
             ((SqlTransaction)transaction).Rollback(savePointName);
         }
 
-        public override SqlDbType GetSqlDbType(DbParameter p)
+        public override string GetSqlDbType(DbParameter p)
         {
-            return ((SqlParameter)p).SqlDbType;
+            return ((SqlParameter)p).SqlDbType.ToString().ToUpperInvariant();
         }
 
         public override DbParameter CloneParameter(DbParameter p)
@@ -472,10 +435,10 @@ namespace Signum.Engine
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public override void CleanDatabase(DatabaseName? databaseName)
+        public override void CleanDatabase(DatabaseName? database)
         {
-            SqlConnectorScripts.RemoveAllScript(databaseName).ExecuteLeaves();
-            SqlConnectorScripts.ShrinkDatabase(DatabaseName());
+            SqlConnectorScripts.RemoveAllScript(database).ExecuteLeaves();
+            ShrinkDatabase(database?.ToString() ?? DatabaseName());
         }
 
         public override bool AllowsMultipleQueries
@@ -488,7 +451,7 @@ namespace Signum.Engine
             if (database == null)
                 return this;
 
-            return new SqlConnector(Replace(connectionString, database), this.Schema, this.Version);
+            return new SqlConnector(Replace(ConnectionString, database), this.Schema, this.Version);
         }
 
         private static string Replace(string connectionString, DatabaseName item)
@@ -511,7 +474,7 @@ namespace Signum.Engine
 
         public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
 
-        public override SqlPreCommand ShrinkDatabase(string databaseName)
+        public SqlPreCommand ShrinkDatabase(string databaseName)
         {
             return new[]
             {
@@ -562,9 +525,9 @@ namespace Signum.Engine
 
     public class SqlParameterBuilder : ParameterBuilder
     {
-        public override DbParameter CreateParameter(string parameterName, SqlDbType sqlType, string? udtTypeName, bool nullable, object? value)
+        public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
         {
-            if (IsDate(sqlType))
+            if (dbType.IsDate())
                 AssertDateTime((DateTime?)value);
 
             var result = new SqlParameter(parameterName, value ?? DBNull.Value)
@@ -572,18 +535,16 @@ namespace Signum.Engine
                 IsNullable = nullable
             };
 
-            result.SqlDbType = sqlType;
-
-            if (sqlType == SqlDbType.Udt)
+            result.SqlDbType = dbType.SqlServer;
+            if (udtTypeName != null)
                 result.UdtTypeName = udtTypeName;
-
 
             return result;
         }
 
-        public override MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType sqlType, string? udtTypeName, bool nullable, Expression value)
+        public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
         {
-            Expression valueExpr = Expression.Convert(IsDate(sqlType) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) : value, typeof(object));
+            Expression valueExpr = Expression.Convert(dbType.IsDate() ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) : value, typeof(object));
 
             if (nullable)
                 valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),
@@ -596,10 +557,10 @@ namespace Signum.Engine
             List<MemberBinding> mb = new List<MemberBinding>()
             {
                 Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable"), Expression.Constant(nullable)),
-                Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType"), Expression.Constant(sqlType)),
+                Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType"), Expression.Constant(dbType.SqlServer)),
             };
 
-            if (sqlType == SqlDbType.Udt)
+            if (udtTypeName != null)
                 mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty("UdtTypeName"), Expression.Constant(udtTypeName)));
 
             return Expression.MemberInit(newExpr, mb);
@@ -722,8 +683,9 @@ deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
         {
-            var systemSchemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
-            var systemSchemasExeptDbo = SqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
+            var sqlBuilder = Connector.Current.SqlBuilder;
+            var systemSchemas = sqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
+            var systemSchemasExeptDbo = sqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
@@ -741,12 +703,6 @@ deallocate cur";
                 return script;
 
             return "use " + databaseName + "\r\n" + script;
-        }
-
-        internal static SqlPreCommand ShrinkDatabase(string databaseName)
-        {
-            return Connector.Current.ShrinkDatabase(databaseName);
-
         }
     }
 }

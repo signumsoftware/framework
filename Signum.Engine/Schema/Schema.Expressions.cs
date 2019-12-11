@@ -47,8 +47,8 @@ namespace Signum.Engine.Maps
         internal NewExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
             return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? Expression.New(intervalConstructor,
-                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName),
-                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName)
+                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName!),
+                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName!)
             ) : null;
         }
 
@@ -173,8 +173,8 @@ namespace Signum.Engine.Maps
         internal NewExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
             return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? Expression.New(Table.intervalConstructor,
-                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName),
-                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName)
+                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName!),
+                new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName!)
             ) : null;
         }
 

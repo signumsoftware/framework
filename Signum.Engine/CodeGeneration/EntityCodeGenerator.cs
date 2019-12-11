@@ -26,7 +26,7 @@ namespace Signum.Engine.CodeGeneration
 
         public virtual void GenerateEntitiesFromDatabaseTables()
         {
-            CurrentSchema = Schema.Current;
+            CurrentSchema = Schema.Current; 
 
             var tables =  GetTables();
 
@@ -538,7 +538,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("TableName(\"" + objectName.Name + "\"");
-            if (objectName.Schema != SchemaName.Default)
+            if (objectName.Schema != SchemaName.Default(CurrentSchema.Settings.IsPostgres))
                 sb.Append(", SchemaName = \"" + objectName.Schema.Name + "\"");
 
             if (objectName.Schema.Database != null)
@@ -636,7 +636,7 @@ namespace Signum.Engine.CodeGeneration
                 parts.Add("Min = " + min);
 
             if (col.Length != -1)
-                parts.Add("Max = " + col.Length / DiffColumn.BytesPerChar(col.SqlDbType));
+                parts.Add("Max = " + col.Length / DiffColumn.BytesPerChar(col.DbType.SqlServer));
 
             return "StringLengthValidator(" + parts.ToString(", ") + ")";
         }
@@ -743,19 +743,19 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> parts = new List<string>();
             var pair = CurrentSchema.Settings.GetSqlDbTypePair(type);
-            if (pair.SqlDbType != col.SqlDbType)
-                parts.Add("SqlDbType = SqlDbType." + col.SqlDbType);
+            if (pair.DbType.SqlServer != col.DbType.SqlServer)
+                parts.Add("SqlDbType = SqlDbType." + col.DbType.SqlServer);
 
-            var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.SqlDbType);
+            var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.DbType);
             if (defaultSize != null)
             {
-                if (!(defaultSize == col.Precision || defaultSize == col.Length / DiffColumn.BytesPerChar(col.SqlDbType) || defaultSize == int.MaxValue && col.Length == -1))
+                if (!(defaultSize == col.Precision || defaultSize == col.Length / DiffColumn.BytesPerChar(col.DbType.SqlServer) || defaultSize == int.MaxValue && col.Length == -1))
                     parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
-                                        col.Length != 0 ? (col.Length / DiffColumn.BytesPerChar(col.SqlDbType)).ToString() :
+                                        col.Length != 0 ? (col.Length / DiffColumn.BytesPerChar(col.DbType.SqlServer)).ToString() :
                                         col.Precision != 0 ? col.Precision.ToString() : "0"));
             }
 
-            var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.SqlDbType);
+            var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.DbType);
             if (defaultScale != null)
             {
                 if (!(col.Scale == defaultScale))
@@ -801,7 +801,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected internal virtual Type GetValueType(DiffColumn col)
         {
-            switch (col.SqlDbType)
+            switch (col.DbType.SqlServer)
             {
                 case SqlDbType.BigInt: return typeof(long);
                 case SqlDbType.Binary: return typeof(byte[]);
@@ -834,7 +834,7 @@ namespace Signum.Engine.CodeGeneration
                 case SqlDbType.Udt: return Schema.Current.Settings.UdtSqlName
                     .SingleOrDefaultEx(kvp => StringComparer.InvariantCultureIgnoreCase.Equals(kvp.Value, col.UserTypeName))
                     .Key;
-                default: throw new NotImplementedException("Unknown translation for " + col.SqlDbType);
+                default: throw new NotImplementedException("Unknown translation for " + col.DbType.SqlServer);
             }
         }
 

@@ -6,10 +6,12 @@ namespace Signum.Test
 {
     public class ObjectNameTest
     {
+        bool isPostgree = Signum.Engine.Connector.Current.Schema.Settings.IsPostgres;
+
         [Fact]
         public void ParseDbo()
         {
-            var simple = ObjectName.Parse("MyTable");
+            var simple = ObjectName.Parse("MyTable", isPostgree);
             Assert.Equal("MyTable", simple.Name);
             Assert.Equal("dbo", simple.Schema.ToString());
         }
@@ -17,7 +19,7 @@ namespace Signum.Test
         [Fact]
         public void ParseSchema()
         {
-            var simple = ObjectName.Parse("MySchema.MyTable");
+            var simple = ObjectName.Parse("MySchema.MyTable", isPostgree);
             Assert.Equal("MyTable", simple.Name);
             Assert.Equal("MySchema", simple.Schema.ToString());
         }
@@ -25,7 +27,7 @@ namespace Signum.Test
         [Fact]
         public void ParseNameEscaped()
         {
-            var simple = ObjectName.Parse("MySchema.[Select]");
+            var simple = ObjectName.Parse("MySchema.[Select]", isPostgree);
             Assert.Equal("Select", simple.Name);
             Assert.Equal("MySchema", simple.Schema.ToString());
             Assert.Equal("MySchema.[Select]", simple.ToString());
@@ -34,7 +36,7 @@ namespace Signum.Test
         [Fact]
         public void ParseSchemaNameEscaped()
         {
-            var simple = ObjectName.Parse("[Select].MyTable");
+            var simple = ObjectName.Parse("[Select].MyTable", isPostgree);
             Assert.Equal("MyTable", simple.Name);
             Assert.Equal("Select", simple.Schema.Name);
             Assert.Equal("[Select].MyTable", simple.ToString());
@@ -43,7 +45,7 @@ namespace Signum.Test
         [Fact]
         public void ParseServerName()
         {
-            var simple = ObjectName.Parse("[FROM].[SELECT].[WHERE].[TOP]");
+            var simple = ObjectName.Parse("[FROM].[SELECT].[WHERE].[TOP]", isPostgree);
             Assert.Equal("TOP", simple.Name);
             Assert.Equal("WHERE", simple.Schema.Name);
             Assert.Equal("SELECT", simple.Schema.Database!.Name);
@@ -54,7 +56,7 @@ namespace Signum.Test
         [Fact]
         public void ParseServerNameSuperComplex()
         {
-            var simple = ObjectName.Parse("[FROM].[SELECT].[WHERE].[TOP.DISTINCT]");
+            var simple = ObjectName.Parse("[FROM].[SELECT].[WHERE].[TOP.DISTINCT]", isPostgree);
             Assert.Equal("TOP.DISTINCT", simple.Name);
             Assert.Equal("WHERE", simple.Schema.Name);
             Assert.Equal("SELECT", simple.Schema.Database!.Name);

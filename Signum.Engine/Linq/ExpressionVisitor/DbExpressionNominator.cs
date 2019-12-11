@@ -299,7 +299,7 @@ namespace Signum.Engine.Linq
         {
             var expression = Visit(castExpr.Expression);
             if (expression != castExpr.Expression)
-                castExpr = new SqlCastExpression(castExpr.Type, expression!, castExpr.SqlDbType);
+                castExpr = new SqlCastExpression(castExpr.Type, expression!, castExpr.DbType);
             return Add(castExpr);
         }
 
@@ -534,8 +534,8 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(exprDate) || !Has(exprTime))
                 return null;
 
-            var castDate = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
-            var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, SqlDbType.DateTime); //Just in case is a Date
+            var castDate = new SqlCastExpression(typeof(DateTime), exprDate, new AbstractDbType(SqlDbType.DateTime)); //Just in case is a Date
+            var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, new AbstractDbType(SqlDbType.DateTime)); //Just in case is a Date
 
             var result = add ? Expression.Add(castDate, castTime) :
                 Expression.Subtract(castDate, castTime);

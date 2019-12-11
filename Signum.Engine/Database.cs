@@ -74,10 +74,11 @@ namespace Signum.Engine
 
         public static int InsertView<T>(this T viewObject) where T : IView
         {
-            var view = Schema.Current.View<T>();
+            var schema = Schema.Current;
+            var view = schema.View<T>();
             var parameters = view.GetInsertParameters(viewObject);
 
-            var sql = $@"INSERT {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(), ", ")})
+            var sql = $@"INSERT {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(schema.Settings.IsPostgres), ", ")})
 VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             return Executor.ExecuteNonQuery(sql, parameters);

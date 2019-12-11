@@ -304,7 +304,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareSqlCast(SqlCastExpression a, SqlCastExpression b)
         {
-            return a.SqlDbType == b.SqlDbType
+            return a.DbType.Equals(b.DbType)
                 && Compare(a.Expression, b.Expression);
         }
 

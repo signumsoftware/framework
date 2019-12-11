@@ -61,17 +61,6 @@ namespace Signum.Engine
             return Connector.Current.ExecuteDataTable(preCommand, commandType);
         }
 
-
-        public static DataSet ExecuteDataSet(string sql, List<DbParameter>? parameters = null, CommandType commandType = CommandType.Text)
-        {
-            return Connector.Current.ExecuteDataSet(new SqlPreCommandSimple(sql, parameters), commandType);
-        }
-
-        public static DataSet ExecuteDataSet(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
-        {
-            return Connector.Current.ExecuteDataSet(preCommand, commandType);
-        }
-
         public static void ExecuteLeaves(this SqlPreCommand preCommand, CommandType commandType = CommandType.Text)
         {
             foreach (var simple in preCommand.Leaves())

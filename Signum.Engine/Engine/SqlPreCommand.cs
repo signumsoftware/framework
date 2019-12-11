@@ -206,8 +206,9 @@ namespace Signum.Engine
         public string sp_executesql()
         {
             var pars = this.Parameters.EmptyIfNull();
+            var sqlBuilder = Connector.Current.SqlBuilder;
 
-            var parameterVars = pars.ToString(p => $"{p.ParameterName} {((SqlParameter)p).SqlDbType.ToString()}{SqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
+            var parameterVars = pars.ToString(p => $"{p.ParameterName} {((SqlParameter)p).SqlDbType.ToString()}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
             var parameterValues = pars.ToString(p => Encode(p.Value), ",");
 
             return $"EXEC sp_executesql N'{this.Sql}', N'{parameterVars}', {parameterValues}";

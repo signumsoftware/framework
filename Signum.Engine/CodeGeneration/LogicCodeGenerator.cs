@@ -426,7 +426,7 @@ public static IQueryable<{to}> {Method}(this {from} {f}) => As.Expression(() => 
         {
             var t = CurrentSchema.Settings.TryGetSqlDbTypePair(type.UnNullify());
 
-            return t != null && t.UserDefinedTypeName == null && t.SqlDbType != SqlDbType.Image && t.SqlDbType != SqlDbType.VarBinary;
+            return t != null && t.UserDefinedTypeName == null && (t.DbType.IsNumber() || t.DbType.IsString() || t.DbType.IsDate());
         }
 
         protected virtual string WriteOperations(Type type)
