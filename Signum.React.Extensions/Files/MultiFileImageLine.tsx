@@ -106,7 +106,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
         <div>
           {p.ctx.readOnly ? undefined :
             <FileUploader
-              accept={p.accept}
+              accept={p.accept || "image/*"}
               multiple={true}
               maxSizeInBytes={p.maxSizeInBytes}
               dragAndDrop={p.dragAndDrop}
