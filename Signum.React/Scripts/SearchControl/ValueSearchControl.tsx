@@ -16,7 +16,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   findOptions: FindOptions;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
-  badgeColor?: BsColor;
+  badgeColor?: BsColor | ((value: any | undefined) => BsColor);
   formControlClass?: string;
   avoidAutoRefresh?: boolean;
   onValueChange?: (value: any) => void;
@@ -164,15 +164,19 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (this.props.onRender)
       return this.props.onRender(this.state.value, this);
 
+    const badgeColor = this.props.badgeColor;
+
     let className = classes(
       p.valueToken == undefined && "count-search",
       p.valueToken == undefined && (this.state.value > 0 ? "count-with-results" : "count-no-results"),
       s.token && (s.token.type.isLite || s.token!.type.isEmbedded) && "sf-entity-line-entity",
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
-      
-      p.isBadge == false ? "" :
-        "badge badge-pill " + (this.props.badgeColor ? ("badge-" + this.props.badgeColor) : (p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted")),
+
+      p.isBadge == false ? "" : "badge badge-pill " +
+        (badgeColor && typeof badgeColor == "function" ? "badge-" + badgeColor(this.state.value) :
+          badgeColor ? "badge-" + badgeColor :
+            p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted"),
       p.customClass
     );
 
@@ -191,7 +195,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   }
 
   renderValue() {
-
+    debugger;
     let value = this.state.value;
 
     if (value === undefined)

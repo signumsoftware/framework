@@ -155,7 +155,17 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
+  replaceAttributes<P>(propertyRoute: (entity: T) => any, newAttrs: Partial<P>): this {
 
+    var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
+
+    this.result = new ReplaceVisitor(
+      e => hasPropertyRoute(e, pr),
+      e => React.cloneElement(e, { ...newAttrs })
+    ).visit(this.result);
+
+    return this;
+  }
 
   insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
