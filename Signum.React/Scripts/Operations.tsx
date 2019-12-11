@@ -151,6 +151,13 @@ export class ConstructorOperationContext<T extends Entity> {
   defaultConstruct(...args: any[]): Promise<EntityPack<T> | undefined> {
     return API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
   }
+
+  assignProps(pack: EntityPack<T> | undefined, props?: Partial<T>) {
+    if (pack && props)
+      Dic.assign(pack.entity, props);
+
+    return pack;
+  }
 }
 
 
