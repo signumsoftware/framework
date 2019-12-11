@@ -559,7 +559,7 @@ ValueLine.renderers["NumberSpinner" as ValueLineType] = (vl) => {
     return numericSpinnerTextBox(vl, ValueLine.isNumber);
 };
 
-function numericSpinnerTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+function numericSpinnerTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
     const s = vl.state
 
     const numbroFormat = toNumbroFormat(s.formatText);
