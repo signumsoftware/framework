@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Signum.Engine.Files
 {
@@ -82,17 +83,17 @@ namespace Signum.Engine.Files
                 var client = GetClient();
 
                 int i = 2;
-                fp.Suffix = suffix;
+                fp.Suffix = suffix.Replace("\\", "/");
 
-                while (RenameOnCollision && client.GetBlobClient(suffix.Replace("\\", "/").AfterLast("/")).Exists())
+                while (RenameOnCollision && client.ExistsBlob(fp.Suffix))
                 {
-                    fp.Suffix = RenameAlgorithm(suffix, i);
+                    fp.Suffix = RenameAlgorithm(suffix, i).Replace("\\", "/");
                     i++;
                 }
 
                 try
                 {
-                    client.GetBlobClient(suffix.Replace("\\", "/").AfterLast("/")).Upload(new MemoryStream(fp.BinaryFile));
+                    client.GetBlobClient(fp.Suffix).Upload(new MemoryStream(fp.BinaryFile));
                 }
                 catch (Exception ex)
                 {
@@ -126,17 +127,9 @@ namespace Signum.Engine.Files
 
     public static class BlobExtensions
     {
-        public static bool Exists(this BlobClient blob)
+        public static bool ExistsBlob(this BlobContainerClient client, string blobName)
         {
-            try
-            {
-                blob.GetProperties();
-                return true;
-            }
-            catch (RequestFailedException e) when (e.ErrorCode == "403")
-            {
-                return false;
-            }
+            return client.GetBlobs(prefix: blobName.BeforeLast("/") ?? "").Any(b => b.Name == blobName);
         }
     }
 
