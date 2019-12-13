@@ -15,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.0" />
@@ -29,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Business\Microsoft.SqlServer.Types\Microsoft.SqlServer.Types.csproj" />
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />

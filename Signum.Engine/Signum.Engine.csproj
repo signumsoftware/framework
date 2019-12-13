@@ -16,10 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\Business\Microsoft.SqlServer.Types\Microsoft.SqlServer.Types.csproj" />
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
