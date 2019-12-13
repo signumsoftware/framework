@@ -231,7 +231,7 @@ namespace Signum.Entities
             return (T)(IModifiableEntity)parentEntity;
         }
 
-        private void SetParentEntity(ModifiableEntity? p)
+        public void SetParentEntity(ModifiableEntity? p)
         {
             if (p != null && this.parentEntity != null && this.parentEntity != p)
                 throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
