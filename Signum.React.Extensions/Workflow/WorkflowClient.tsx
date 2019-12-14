@@ -158,7 +158,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />),
       "MainEntity": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
       "Actor": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
-      "Sender": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
+      "Sender": new Finder.CellFormatter(cell => cell && <span>{cell.toStr}</span>),
       "Workflow": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
     },
     defaultOrderColumn: "StartDate",
