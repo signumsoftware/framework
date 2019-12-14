@@ -220,7 +220,7 @@ namespace Signum.Engine.Maps
                     var isPostgres = Schema.Current.Settings.IsPostgres;
 
                     Func<string[], string> insertPattern = (suffixes) =>
-                        "INSERT INTO {0} ({1}) VALUES \r\n{2};".FormatWith(table.Name,
+                        "INSERT INTO {0}\r\n  ({1})\r\nVALUES\r\n{2};".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
                         suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", "\r\n"));
 
@@ -317,12 +317,12 @@ namespace Signum.Engine.Maps
                     var isPostgres = Schema.Current.Settings.IsPostgres;
                     var newIds = Var(isPostgres, "newIDs");
                     Func<string[], bool, string> sqlInsertPattern = (suffixes, output) =>
-                    "INSERT INTO {0} ({1})\r\n{2}VALUES \r\n{3};".FormatWith(
+                    "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
                     table.Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    output && !isPostgres ?  $"OUTPUT INSERTED.Id\r\n" : null,
-                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", "\r\n"),
-                    output && isPostgres ? $"\r\nRETURNING Id" : null);
+                    output && !isPostgres ?  $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}\r\n" : null,
+                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
+                    output && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
 
 
                     var expr = Expression.Lambda<Action<Entity, Forbidden, string, List<DbParameter>>>(
@@ -397,12 +397,12 @@ namespace Signum.Engine.Maps
             internal Table table;
 
             public Func<string, bool, string> SqlUpdatePattern;
-            public Func<Entity, long, Forbidden, string, List<DbParameter>> UpdateParameters;
+            public Action<Entity, long, Forbidden, string, List<DbParameter>> UpdateParameters;
 
             ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>> updateCache =
                 new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>>();
 
-            public UpdateCache(Table table, Func<string, bool, string> sqlUpdatePattern, Func<Entity, long, Forbidden, string, List<DbParameter>> updateParameters)
+            public UpdateCache(Table table, Func<string, bool, string> sqlUpdatePattern, Action<Entity, long, Forbidden, string, List<DbParameter>> updateParameters)
             {
                 this.table = table;
                 SqlUpdatePattern = sqlUpdatePattern;
@@ -432,7 +432,7 @@ namespace Signum.Engine.Maps
 
                         var forbidden = new Forbidden(graph, ident);
 
-                        int num = (int)new SqlPreCommandSimple(sqlUpdate, UpdateParameters(ident, oldTicks, forbidden, "")).ExecuteNonQuery();
+                        int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(ident, oldTicks, forbidden, "", ps))).ExecuteNonQuery();
                         if (num != 1)
                             throw new ConcurrencyException(ident.GetType(), ident.Id);
 
@@ -450,7 +450,7 @@ namespace Signum.Engine.Maps
 
                         var forbidden = new Forbidden(graph, ident);
 
-                        int num = (int)new SqlPreCommandSimple(sqlUpdate, UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
+                        int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(ident, -1, forbidden, "", ps))).ExecuteNonQuery();
                         if (num != 1)
                             throw new EntityNotFoundException(ident.GetType(), ident.Id);
                     };
@@ -460,11 +460,13 @@ namespace Signum.Engine.Maps
             Action<List<Entity>, DirectedGraph<Entity>?> GetUpdateMultiple(int num)
             {
                 var isPostgres = Schema.Current.Settings.IsPostgres;
-                var notFound = Table.Var(isPostgres, "notFound");
-                string sqlMulti = new StringBuilder()
-                      .AppendLine(Table.DeclareTempTable(isPostgres, notFound, this.table.PrimaryKey.DbType.ToString(isPostgres)))
+                var updated = Table.Var(isPostgres, "updated");
+                var id = this.table.PrimaryKey.Name.SqlEscape(isPostgres);
+                string sqlMulti = num == 1 ? SqlUpdatePattern("", true):    
+                    new StringBuilder()
+                      .AppendLine(Table.DeclareTempTable(isPostgres, updated, this.table.PrimaryKey.DbType.ToString(isPostgres)))
                       .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
-                      .AppendLine($"SELECT Id from {notFound}").ToString();
+                      .AppendLine($"SELECT Id from {updated}").ToString();
 
                 if (table.Ticks != null)
                 {
@@ -478,13 +480,17 @@ namespace Signum.Engine.Maps
                             long oldTicks = entity.Ticks;
                             entity.Ticks = TimeZoneManager.Now.Ticks;
 
-                            parameters.AddRange(UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString()));
+                            UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString(), parameters);
                         }
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
-                        if (dt.Rows.Count > 0)
-                            throw new ConcurrencyException(table.Type, dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToArray());
+                        if (dt.Rows.Count == idents.Count)
+                        {
+                            var updated = dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToList();
+
+                            throw new ConcurrencyException(table.Type, idents.Select(a => a.Id).Except(updated).ToArray());
+                        }
 
                         if (table.saveCollections.Value != null)
                             table.saveCollections.Value.UpdateCollections(idents.Select(e => new EntityForbidden(e, new Forbidden(graph, e))).ToList());
@@ -498,7 +504,7 @@ namespace Signum.Engine.Maps
                         for (int i = 0; i < num; i++)
                         {
                             var ident = idents[i];
-                            parameters.AddRange(UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString()));
+                            UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString(), parameters);
                         }
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
@@ -546,22 +552,26 @@ namespace Signum.Engine.Maps
                     string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
 
                     var isPostgres = Schema.Current.Settings.IsPostgres;
-                    var notFound = Table.Var(isPostgres, "notFound");
+
+                    var id = table.PrimaryKey.Name.SqlEscape(isPostgres);
+                    var updated = Table.Var(isPostgres, "updated");
 
                     Func<string, bool, string> sqlUpdatePattern = (suffix, output) =>
                     {
-                        string update = "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3}{4};".FormatWith(
-                            table.Name,
-                            trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n"),
-                            table.PrimaryKey.Name.SqlEscape(isPostgres),
-                            idParamName + suffix,
-                            table.Ticks != null ? " AND {0} = {1}".FormatWith(table.Ticks.Name.SqlEscape(isPostgres), oldTicksParamName + suffix) : null
-                            );
+                        var result = $"UPDATE {table.Name} SET\r\n" +
+trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n") + "\r\n" +
+(output && !isPostgres ? $"OUTPUT INSERTED.{id} INTO {updated}\r\n" : null) +
+$"WHERE {id} = {idParamName + suffix}" + (table.Ticks != null ? $" AND {table.Ticks.Name.SqlEscape(isPostgres)} = {oldTicksParamName + suffix}" : null) + "\r\n" +
+(output && isPostgres ? $"RETURNING ({id})" : null);
 
-                        if (!output)
-                            return update;
-                        else
-                            return update + $"\r\nIF @@ROWCOUNT = 0 INSERT INTO {notFound} (id) VALUES ({idParamName + suffix});";
+                        if (!(isPostgres && output))
+                            return result;
+
+                        return $@"WITH rows AS (
+{result.Indent(4)}
+)
+INSERT INTO {updated}({id})
+SELECT {id} FROM rows";
                     };
 
                     List<Expression> parameters = new List<Expression>
@@ -577,7 +587,7 @@ namespace Signum.Engine.Maps
 
                     parameters.AddRange(trios.Select(a => (Expression)a.ParameterBuilder));
 
-                    var expr = Expression.Lambda<Func<Entity, long, Forbidden, string, List<DbParameter>>>(
+                    var expr = Expression.Lambda<Action<Entity, long, Forbidden, string, List<DbParameter>>>(
                         CreateBlock(parameters, assigments, paramList), paramIdent, paramOldTicks, paramForbidden, paramSuffix, paramList);
 
                     
@@ -712,7 +722,7 @@ namespace Signum.Engine.Maps
 
             var uc = updater.Value;
             var sql = uc.SqlUpdatePattern(suffix, false);
-            var parameters = uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix);
+            var parameters = new List<DbParameter>().Do(ps => uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix, ps));
 
             SqlPreCommand? update;
             if (where != null)
@@ -903,8 +913,8 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            internal Func<string, bool, string> sqlInsert = null!;
-            public Func<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters = null!;
+            internal Func<string[], bool, string> sqlInsert = null!;
+            public Action<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters = null!;
             public ConcurrentDictionary<int, Action<List<MListInsert>>> insertCache =
                 new ConcurrentDictionary<int, Action<List<MListInsert>>>();
 
@@ -915,10 +925,7 @@ namespace Signum.Engine.Maps
                     bool isPostgres = Schema.Current.Settings.IsPostgres;
                     var newIds = Table.Var(isPostgres, "newIDs");
 
-                    string sqlMulti = new StringBuilder()
-                          .AppendLine(Table.DeclareTempTable(isPostgres, newIds, this.table.PrimaryKey.DbType.ToString(isPostgres)))
-                          .AppendLines(Enumerable.Range(0, num).Select(i => sqlInsert(i.ToString(), true)))
-                          .AppendLine($"SELECT Id from {newIds}").ToString();
+                    string sqlMulti = sqlInsert(Enumerable.Range(0, num).Select(i => i.ToString()).ToArray(), true);
 
                     return (List<MListInsert> list) =>
                     {
@@ -926,7 +933,7 @@ namespace Signum.Engine.Maps
                         for (int i = 0; i < num; i++)
                         {
                             var pair = list[i];
-                            result.AddRange(InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString()));
+                            InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString(), result);
                         }
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
@@ -962,7 +969,9 @@ namespace Signum.Engine.Maps
 
             public object[] BulkInsertDataRow(Entity entity, object value, int order)
             {
-                return InsertParameters(entity, (T)value, order, new Forbidden(null), "").Select(a => a.Value).ToArray();
+                List<DbParameter> paramList = new List<DbParameter>();
+                InsertParameters(entity, (T)value, order, new Forbidden(null), "", paramList);
+                return paramList.Select(a => a.Value).ToArray();
             }
 
             public Func<Entity, MList<T>> Getter = null!;
@@ -1073,13 +1082,16 @@ namespace Signum.Engine.Maps
 
                 if (parent.IsNew)
                 {
+                    var isPostgres = Schema.Current.Settings.IsPostgres;
+                    var parentIdVar = Table.Var(isPostgres, "parentId");
                     return collection.Select((e, i) =>
                     {
-                        var parameters = InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i);
+                        var parameters = new List<DbParameter>();
+                        InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i, parameters);
                         var parentId = parameters.First(); // wont be replaced, generating @parentId
                         parameters.RemoveAt(0);
-                        string script = sqlInsert(suffix + "_" + i, false);
-                        script = script.Replace(parentId.ParameterName, "@parentId");
+                        string script = sqlInsert(new[] { suffix + "_" + i }, false);
+                        script = script.Replace(parentId.ParameterName, parentIdVar);
                         return new SqlPreCommandSimple(script, parameters).AddComment(e?.ToString());
                     }).Combine(Spacing.Simple);
                 }
@@ -1087,7 +1099,7 @@ namespace Signum.Engine.Maps
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
                         new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }).ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null),
-                        collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(suffix + "_" + i, false), InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i))
+                        collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(new[] { suffix + "_" + i }, false), new List<DbParameter>().Do(ps => InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i, ps)))
                             .AddComment(e?.ToString())
                             .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null)
                         ).Combine(Spacing.Simple));
@@ -1110,12 +1122,12 @@ namespace Signum.Engine.Maps
                 table = this,
                 Getter = entity => (MList<T>)Getter(entity),
 
-                sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
+                sqlDelete = suffix => "DELETE FROM {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
                 DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),
 
                 sqlDeleteExcept = num =>
                 {
-                    var sql = "DELETE {0} WHERE {1} = {2}"
+                    var sql = "DELETE FROM {0} WHERE {1} = {2}"
                         .FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name));
 
                     sql += " AND {0} NOT IN ({1})"
@@ -1153,12 +1165,13 @@ namespace Signum.Engine.Maps
 
                 var newIds = Table.Var(isPostgres, "newIDs");
 
-                result.sqlInsert = (suffix, output) => $"INSERT INTO {Name} ({1})\r\n{2} VALUES ({3});".FormatWith(Name,
+                result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    output ? $"OUTPUT INSERTED.Id into {newIds} \r\n" : null,
-                    trios.ToString(p => p.ParameterName + suffix, ", "));
+                    output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\r\n" : null,
+                    suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
+                    output && isPostgres ? $"\r\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
 
-                var expr = Expression.Lambda<Func<Entity, T, int, Forbidden, string, List<DbParameter>>>(
+                var expr = Expression.Lambda<Action<Entity, T, int, Forbidden, string, List<DbParameter>>>(
                     Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
 
                 result.InsertParameters = expr.Compile();

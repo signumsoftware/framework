@@ -159,8 +159,10 @@ namespace Signum.Engine
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
 
-        internal static string Encode(object value)
+        internal static string Encode(DbParameter param)
         {
+            var value = param.Value;
+
             if (value == null || value == DBNull.Value)
                 return "NULL";
 
@@ -177,7 +179,12 @@ namespace Signum.Engine
                 return "convert(time, '{0:g}')".FormatWith(ts.ToString("g", CultureInfo.InvariantCulture));
 
             if (value is bool b)
+            {
+                if (param is Npgsql.NpgsqlParameter p && p.NpgsqlDbType == NpgsqlTypes.NpgsqlDbType.Boolean)
+                    return b.ToString();
+
                 return (b ? 1 : 0).ToString();
+            }
 
             if (Schema.Current.Settings.UdtSqlName.TryGetValue(value.GetType(), out var name))
                 return "CAST('{0}' AS {1})".FormatWith(value, name);
@@ -197,7 +204,7 @@ namespace Signum.Engine
                 sb.Append(Sql);
             else
             {
-                var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a.Value));
+                var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a));
 
                 sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
             }
