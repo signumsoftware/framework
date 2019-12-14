@@ -263,7 +263,10 @@ namespace Signum.Engine.Cache
 
             lock (startKeyLock)
             {
+                
+
                 SqlConnector connector = (SqlConnector)Connector.Current;
+                bool isPostgree = false;
 
                 if (DropStaleServices)
                 {
@@ -271,7 +274,7 @@ namespace Signum.Engine.Cache
                     //http://rusanu.com/2007/11/10/when-it-rains-it-pours/
                     var staleServices = (from s in Database.View<SysServiceQueues>()
                                          where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
-                                         select new ObjectName(new SchemaName(null, s.Schema().name), s.name)).ToList();
+                                         select new ObjectName(new SchemaName(null, s.Schema().name, isPostgree), s.name, isPostgree)).ToList();
 
                     foreach (var s in staleServices)
                     {
@@ -281,7 +284,7 @@ namespace Signum.Engine.Cache
 
                     var oldProcedures = (from p in Database.View<SysProcedures>()
                                          where p.name.Contains("SqlQueryNotificationStoredProcedure-") && !Database.View<SysServiceQueues>().Any(s => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
-                                         select new ObjectName(new SchemaName(null, p.Schema().name), p.name)).ToList();
+                                         select new ObjectName(new SchemaName(null, p.Schema().name, isPostgree), p.name, isPostgree)).ToList();
 
                     foreach (var item in oldProcedures)
                     {
@@ -430,11 +433,6 @@ namespace Signum.Engine.Cache
                 SqlDependency.Stop(sub.ConnectionString);
             }
 
-        }
-
-        static SqlPreCommandSimple GetDependencyQuery(ITable table)
-        {
-            return new SqlPreCommandSimple("SELECT {0} FROM {1}".FormatWith(table.Columns.Keys.ToString(c => c.SqlEscape(), ", "), table.Name));
         }
 
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController

@@ -269,7 +269,8 @@ namespace Signum.Engine.Disconnected
 
         private void DropDatabase(SqlConnector newDatabase)
         {
-            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName(), isPostgres));
         }
 
         protected virtual void EnableForeignKeys(Table table)
@@ -315,7 +316,8 @@ namespace Signum.Engine.Disconnected
 
         protected virtual DatabaseName DatabaseName(DisconnectedMachineEntity machine)
         {
-            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Import_" + DisconnectedTools.CleanMachineName(machine.MachineName));
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Import_" + DisconnectedTools.CleanMachineName(machine.MachineName), isPostgres);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineEntity machine, Lite<DisconnectedImportEntity> import)
@@ -371,7 +373,8 @@ namespace Signum.Engine.Disconnected
 
         protected virtual int Insert(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
         {
-            DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName(), isPostgres);
 
             var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar()!;
 
@@ -414,6 +417,7 @@ namespace Signum.Engine.Disconnected
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
             var created = table.Mixins![typeof(DisconnectedCreatedMixin)].Columns().Single();
+            var isPostgres = Schema.Current.Settings.IsPostgres;
 
             string command = @"INSERT INTO {0} ({1})
 SELECT {2}
@@ -421,13 +425,13 @@ FROM {3} as [relationalTable]
 JOIN {4} [table] on [relationalTable].{5} = [table].{6}
 WHERE [table].{7} = 1".FormatWith(
 rt.Name,
-rt.Columns.Values.ToString(c => c.Name.SqlEscape(), ", "),
-rt.Columns.Values.ToString(c => "[relationalTable]." + c.Name.SqlEscape(), ", "),
+rt.Columns.Values.ToString(c => c.Name.SqlEscape(isPostgres), ", "),
+rt.Columns.Values.ToString(c => "[relationalTable]." + c.Name.SqlEscape(isPostgres), ", "),
 rt.Name.OnDatabase(newDatabaseName),
 table.Name.OnDatabase(newDatabaseName),
-rt.BackReference.Name.SqlEscape(),
-table.PrimaryKey.Name.SqlEscape(),
-created.Name.SqlEscape());
+rt.BackReference.Name.SqlEscape(isPostgres),
+table.PrimaryKey.Name.SqlEscape(isPostgres),
+created.Name.SqlEscape(isPostgres));
 
             var sql = new SqlPreCommandSimple(command);
             return sql;
@@ -435,6 +439,7 @@ created.Name.SqlEscape());
 
         protected virtual SqlPreCommandSimple InsertTableScript(Table table, DatabaseName newDatabaseName)
         {
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var created = table.Mixins![typeof(DisconnectedCreatedMixin)].Columns().Single();
 
             string command = @"INSERT INTO {0} ({1})
@@ -442,23 +447,24 @@ SELECT {2}
 FROM {3} as [table]
 WHERE [table].{4} = 1".FormatWith(
 table.Name,
-table.Columns.Values.ToString(c => c.Name.SqlEscape(), ", "),
-table.Columns.Values.ToString(c => created == c ? "0" : "[table]." + c.Name.SqlEscape(), ", "),
+table.Columns.Values.ToString(c => c.Name.SqlEscape(isPostgres), ", "),
+table.Columns.Values.ToString(c => created == c ? "0" : "[table]." + c.Name.SqlEscape(isPostgres), ", "),
 table.Name.OnDatabase(newDatabaseName),
-created.Name.SqlEscape());
+created.Name.SqlEscape(isPostgres));
 
             return new SqlPreCommandSimple(command);
         }
 
         protected virtual SqlPreCommandSimple CountNewItems(Table table, DatabaseName newDatabaseName)
         {
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             string command = @"SELECT COUNT(*)
 FROM {1} as [table]
 LEFT OUTER JOIN {0} as [current_table] ON [table].{2} = [current_table].{2}
 WHERE [current_table].{2} IS NULL".FormatWith(
 table.Name,
 table.Name.OnDatabase(newDatabaseName),
-table.PrimaryKey.Name.SqlEscape());
+table.PrimaryKey.Name.SqlEscape(isPostgres));
 
             return new SqlPreCommandSimple(command);
         }
@@ -468,7 +474,8 @@ table.PrimaryKey.Name.SqlEscape());
     {
         public override ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
         {
-            int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, new DatabaseName(null, newDatabase.DatabaseName())) : 0;
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, new DatabaseName(null, newDatabase.DatabaseName(), isPostgres)) : 0;
 
             int inserts = Insert(machine, table, strategy, newDatabase);
 
@@ -504,32 +511,32 @@ table.PrimaryKey.Name.SqlEscape());
         protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(DisconnectedMachineEntity machine, Table table, TableMList rt, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var insert = new SqlPreCommandSimple(@"INSERT INTO {0} ({1})
 SELECT {2}
 FROM {3} as [relationalTable]
 INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].{6}".FormatWith(
             rt.Name,
-            rt.Columns.Values.ToString(c => c.Name.SqlEscape(), ", "),
-            rt.Columns.Values.ToString(c => "[relationalTable]." + c.Name.SqlEscape(), ", "),
+            rt.Columns.Values.ToString(c => c.Name.SqlEscape(isPostgres), ", "),
+            rt.Columns.Values.ToString(c => "[relationalTable]." + c.Name.SqlEscape(isPostgres), ", "),
             rt.Name.OnDatabase(newDatabaseName),
             table.Name.OnDatabase(newDatabaseName),
-            rt.BackReference.Name.SqlEscape(),
-            table.PrimaryKey.Name.SqlEscape()) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
+            rt.BackReference.Name.SqlEscape(isPostgres),
+            table.PrimaryKey.Name.SqlEscape(isPostgres)) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
             return insert;
         }
 
         protected virtual SqlPreCommandSimple DeleteUpdatedRelationalTableScript(DisconnectedMachineEntity machine, Table table, TableMList rt, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var delete = new SqlPreCommandSimple(@"DELETE {0}
 FROM {0}
 INNER JOIN {1} as [table] ON {0}.{2} = [table].{3}".FormatWith(
                 rt.Name,
                 table.Name.OnDatabase(newDatabaseName),
-                rt.BackReference.Name.SqlEscape(),
-                table.PrimaryKey.Name.SqlEscape()) + 
+                rt.BackReference.Name.SqlEscape(isPostgres),
+                table.PrimaryKey.Name.SqlEscape(isPostgres)) + 
                 GetUpdateWhere(table),
                 new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
             return delete;
@@ -538,15 +545,15 @@ INNER JOIN {1} as [table] ON {0}.{2} = [table].{3}".FormatWith(
         protected virtual SqlPreCommandSimple UpdateTableScript(DisconnectedMachineEntity machine, Table table, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var command = new SqlPreCommandSimple(@"UPDATE {0} SET
 {2}
 FROM {0}
 INNER JOIN {1} as [table] ON {0}.{3} = [table].{3}".FormatWith(
  table.Name,
  table.Name.OnDatabase(newDatabaseName),
- table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0} = [table].{0}".FormatWith(c.Name.SqlEscape()), ",\r\n"),
- table.PrimaryKey.Name.SqlEscape())
+ table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0} = [table].{0}".FormatWith(c.Name.SqlEscape(isPostgres)), ",\r\n"),
+ table.PrimaryKey.Name.SqlEscape(isPostgres))
  + GetUpdateWhere(table),
  new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
             return command;
@@ -554,12 +561,13 @@ INNER JOIN {1} as [table] ON {0}.{3} = [table].{3}".FormatWith(
 
         protected virtual string GetUpdateWhere(Table table)
         {
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var s = Schema.Current;
 
             var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".FormatWith(
-                ((FieldReference)s.Field((T t) => t.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine)).Name.SqlEscape(),
-                ((FieldValue)s.Field((T t) => t.Ticks)).Name.SqlEscape(),
-                ((FieldValue)s.Field((T t) => t.Mixin<DisconnectedSubsetMixin>().LastOnlineTicks)).Name.SqlEscape());
+                ((FieldReference)s.Field((T t) => t.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine)).Name.SqlEscape(isPostgres),
+                ((FieldValue)s.Field((T t) => t.Ticks)).Name.SqlEscape(isPostgres),
+                ((FieldValue)s.Field((T t) => t.Mixin<DisconnectedSubsetMixin>().LastOnlineTicks)).Name.SqlEscape(isPostgres));
             return where;
         }
     }

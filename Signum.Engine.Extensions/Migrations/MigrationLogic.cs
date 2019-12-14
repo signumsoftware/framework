@@ -56,15 +56,16 @@ namespace Signum.Engine.Migrations
                     return;
 
                 var table = Schema.Current.Table<T>();
+                var sqlBuilder = Connector.Current.SqlBuilder;
 
                 if (!table.Name.Schema.IsDefault() && !Database.View<SysSchemas>().Any(s => s.name == table.Name.Schema.Name))
-                    SqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
+                    sqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
 
-                SqlBuilder.CreateTableSql(table).ExecuteNonQuery();
+                sqlBuilder.CreateTableSql(table).ExecuteLeaves();
 
                 foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryClusteredIndex)))
                 {
-                    SqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
+                    sqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
                 }
 
                 SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");

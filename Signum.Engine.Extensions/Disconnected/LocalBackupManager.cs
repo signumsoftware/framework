@@ -12,8 +12,8 @@ namespace Signum.Engine.Disconnected
             FileTools.CreateParentDirectory(databaseFile);
 
             var csb = new SqlConnectionStringBuilder(connectionString);
-
-            DatabaseName databaseName = new DatabaseName(null, csb.InitialCatalog);
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            DatabaseName databaseName = new DatabaseName(null, csb.InitialCatalog, isPostgres);
 
             csb.InitialCatalog = "";
 

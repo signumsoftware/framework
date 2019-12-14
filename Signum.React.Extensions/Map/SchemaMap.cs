@@ -116,13 +116,14 @@ namespace Signum.React.Maps
 
         static Dictionary<ObjectName, RuntimeStats> GetRuntimeStats()
         {
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             Dictionary<ObjectName, RuntimeStats> result = new Dictionary<ObjectName, RuntimeStats>();
             foreach (var dbName in Schema.Current.DatabaseNames())
             {
                 using (Administrator.OverrideDatabaseInSysViews(dbName))
                 {
                     var dic = Database.View<SysTables>().Select(t => KeyValuePair.Create(
-                        new ObjectName(new SchemaName(dbName, t.Schema().name), t.name),
+                        new ObjectName(new SchemaName(dbName, t.Schema().name, isPostgres), t.name, isPostgres),
                         new RuntimeStats
                         {
                             rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered).Partition().rows) ?? 0,

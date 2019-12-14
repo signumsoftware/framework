@@ -170,12 +170,12 @@ namespace Signum.Engine.Cache
             this.table = Schema.Current.Table(typeof(T));
 
             CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator);
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
+                    Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
                     table.Name.ToString(),
                     ctr.currentAlias!.ToString());
 
@@ -428,18 +428,18 @@ namespace Signum.Engine.Cache
             : base(controller)
         {
             this.table = table;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             CachedTableConstructor ctr = this.Constructor= new CachedTableConstructor(this, aliasGenerator);
 
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
+                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
                     table.Name.ToString(),
                     ctr.currentAlias!.ToString());
 
-                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
+                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape(isPostgres) + "\r\n" + remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
@@ -614,16 +614,16 @@ namespace Signum.Engine.Cache
             ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
             var expression = ToStringExpressionVisitor.GetToString(table, reader, columns);
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT {0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    columns.ToString(c => currentAlias + "." + c.Name.SqlEscape(), ", "),
+                    columns.ToString(c => currentAlias + "." + c.Name.SqlEscape(isPostgres), ", "),
                     table.Name.ToString(),
                     currentAlias.ToString());
 
-                select += this.lastPartialJoin + currentAlias + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + this.remainingJoins;
+                select += this.lastPartialJoin + currentAlias + "." + table.PrimaryKey.Name.SqlEscape(isPostgres) + "\r\n" + this.remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
