@@ -118,6 +118,5 @@ namespace SearchPage {
     return !(allFilters.length == 0 || anyPinned(allFilters));
   }
 }
-}
 
 export default SearchPage;
