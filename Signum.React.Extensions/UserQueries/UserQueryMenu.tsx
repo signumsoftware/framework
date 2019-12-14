@@ -13,6 +13,8 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { FilterOptionParsed } from '../../../Framework/Signum.React/Scripts/Search'
+import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -79,7 +81,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.groupResults = nfo.groupResults;
         ofo.pagination = nfo.pagination;
         ofo.systemTime = nfo.systemTime;
-        sc.setState({ showFilters: false });
+        sc.setState({ showFilters: !(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions)) });
         setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -93,8 +95,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       const sc = p.searchControl
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
-        .then(newFindOptions => {
-          sc.setState({ showFilters: true });
+        .then(nfo => {
+          sc.setState({ showFilters: !(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions)) });
           setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -183,7 +185,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       </Dropdown.Menu>
       </Dropdown>
     );
-  }
+}
+
+function anyPinned(filterOptions?: FilterOptionParsed[]): boolean {
+  if (filterOptions == null)
+    return false;
+
+  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOptionParsed(a) && anyPinned(a.filters));
+}
 
 
 
