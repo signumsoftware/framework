@@ -815,8 +815,11 @@ namespace Signum.Entities
 
             var prec = (TimeSpan)value;
             if (prec.Days > 0)
-                return "Days not allowed in {0}";
+                return ValidationMessage._0ShouldBeLessThan1.NiceToString("{0}", "24h");
 
+            if (prec < TimeSpan.Zero)
+                return ValidationMessage._0ShouldBeGreaterThanOrEqual1.NiceToString("{0}", "0");
+            
             return null;
         }
 

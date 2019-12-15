@@ -195,7 +195,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (IsCollection(type))
             {
-                return CollectionProperties(this, options);
+                return CollectionProperties(this, options).AndHasValue(this); ;
             }
 
             return new List<QueryToken>();

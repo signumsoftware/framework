@@ -1264,7 +1264,7 @@ export module Decoder {
           }) as FilterConditionOption
         } else {
           return ({
-            token: parts[0] ?? null,
+            token: parts[0] == null || parts[0].length == 0 ? null : parts[0],
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
             value: ignoreValues ? null : unscapeTildes(parts[2]),
             pinned: pinned,
