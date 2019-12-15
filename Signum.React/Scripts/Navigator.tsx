@@ -944,7 +944,7 @@ export class ViewPromise<T extends ModifiableEntity> {
   }
 }
 
-export function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
 
   if (!component.prototype.render)
     throw new Error("render function not defined in " + component);
