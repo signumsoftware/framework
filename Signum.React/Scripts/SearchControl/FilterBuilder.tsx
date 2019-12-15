@@ -9,11 +9,12 @@ import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FilterGroupOperation } from '../Signum.Entities.DynamicQuery';
+import { FilterGroupOperation, PinnedFilterActive } from '../Signum.Entities.DynamicQuery';
 import "./FilterBuilder.css"
 import { NumericTextBox } from '../Lines/ValueLine';
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
+import { Dropdown } from 'react-bootstrap'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -540,8 +541,8 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
       </td>
       <td colSpan={2}>
         <div className="btn-group btn-group-xs" role="group" aria-label="Basic example" style={{ verticalAlign: "unset" }}>
+          {renderActiveDropdown(Binding.create(p.pinned, a => a.active), "Select when the filter will take effect")}
           {renderButton(Binding.create(p.pinned, a => a.splitText), "SplitText", "To enable google-like search")}
-          {renderButton(Binding.create(p.pinned, a => a.disableOnNull), "DisableNull", "Disables the filter when no value is selected")}
         </div>
       </td>
     </tr>
@@ -561,11 +562,31 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
 
   function renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
     return (
-      <button type="button" className={classes("btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
-        onClick={e => { binding.setValue(!binding.getValue()); p.onChange(); }}
+      <button type="button" className={classes("px-1 btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
+        onClick={e => { binding.setValue(binding.getValue() ? undefined : true); p.onChange(); }}
         title={StyleContext.default.titleLabels ? title : undefined}>
         {label}
       </button>
+    );
+  }
+
+  function renderActiveDropdown(binding: Binding<PinnedFilterActive | undefined>, title: string) {
+    var value = binding.getValue() ?? "Always";
+    return (
+      <Dropdown>
+        <Dropdown.Toggle variant="light" id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className="px-1"
+          title={StyleContext.default.titleLabels ? title : undefined}>
+          Active: {PinnedFilterActive.niceToString(value)}
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          {PinnedFilterActive.values().map(v =>
+            <Dropdown.Item key={v} active={v == value} onClick={() => { binding.setValue(v == "Always" ? undefined : v); p.onChange(); }}>
+              {PinnedFilterActive.niceToString(v)}
+            </Dropdown.Item>)
+          }
+        </Dropdown.Menu>
+      </Dropdown>
     );
   }
 }
