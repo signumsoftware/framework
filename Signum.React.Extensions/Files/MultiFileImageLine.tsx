@@ -70,7 +70,7 @@ export class MultiFileImageLineController extends EntityListBaseController<Multi
   defaultCreate() {
     return Constructor.construct(this.props.type!.name);
   }
- }
+}
 
 export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props: MultiFileImageLineProps, ref: React.Ref<MultiFileImageLineController>) {
 
@@ -80,74 +80,56 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
   if (c.isHidden)
     return null;
 
-    return (
+  return (
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-        <table className="sf-multi-value" >
-          <tbody>
-            <tr>
-              {
-                c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec => 
-                  <>
-                  <td style={{ width: "100px", verticalAlign: "center", paddingLeft: "10px" }}>
-                    {p.getComponent ? p.getComponent(mlec) :
-                      p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
-                        renderImage(mlec)}
-                  </td>
-                    <td style={{ width: "10px"}}>
-                    {!p.ctx.readOnly &&
-                      <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-                      className="sf-line-button sf-remove"
-                      onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                        <FontAwesomeIcon icon="times" />
-                      </a>}
-                      </td>
-                </>
-              )
-              }
-              <td >
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={p.ctx.value.length*2 + 1}>
-                {p.ctx.readOnly ? undefined :
-                  <FileUploader
-                  accept={p.accept}
-                  multiple={true}
-                  maxSizeInBytes={p.maxSizeInBytes}
-                  dragAndDrop={p.dragAndDrop}
-                  dragAndDropMessage={p.dragAndDropMessage}
-                  fileType={p.fileType}
-                  onFileLoaded={c.handleFileLoaded}
-                  typeName={p.ctx.propertyRoute.typeReference().name}
-                  buttonCss={p.ctx.buttonClass}
-                    divHtmlAttributes={{ className: "sf-file-line-new" }} />}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </FormGroup>
+      <div>
+        <div className="d-flex">
+          {
+            c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
+              <div className="sf-file-image-container m-2" key={mlec.index}>
+                {p.getComponent ? p.getComponent(mlec) :
+                  p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
+                    renderImage(mlec)}
+                {!p.ctx.readOnly &&
+                  <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+                    className="sf-line-button sf-remove"
+                    onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
+                    <FontAwesomeIcon icon="times" />
+                  </a>}
+              </div>
+            )
+          }
+        </div>
+        <div>
+          {p.ctx.readOnly ? undefined :
+            <FileUploader
+              accept={p.accept || "image/*"}
+              multiple={true}
+              maxSizeInBytes={p.maxSizeInBytes}
+              dragAndDrop={p.dragAndDrop}
+              dragAndDropMessage={p.dragAndDropMessage}
+              fileType={p.fileType}
+              onFileLoaded={c.handleFileLoaded}
+              typeName={p.ctx.propertyRoute.typeReference().name}
+              buttonCss={p.ctx.buttonClass}
+              divHtmlAttributes={{ className: "sf-file-line-new" }} />}
+        </div>
+      </div>
+    </FormGroup >
   );
 
 
-  function renderImage(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>)
-  {
+  function renderImage(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>) {
     const val = ctx.value!;
 
-    var content = ctx.propertyRoute.typeReference().isLite ?
+    return ctx.propertyRoute.typeReference().isLite ?
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)}/>;
+      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} />;
+  }
 
-
-    return (
-      <div className="sf-file-image-container" style={{ maxWidth: "100px" }}>
-        {content}
-      </div>
-    );
- }
-                        
 });
 
 (MultiFileImageLine as any).defaultProps = {

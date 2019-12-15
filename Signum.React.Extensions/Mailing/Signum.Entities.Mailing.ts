@@ -207,6 +207,10 @@ export interface EmailSenderConfigurationEntity extends Entities.Entity {
   exchange: ExchangeWebServiceEmbedded | null;
 }
 
+export module EmailSenderConfigurationOperation {
+  export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
+}
+
 export const EmailTemplateContactEmbedded = new Type<EmailTemplateContactEmbedded>("EmailTemplateContactEmbedded");
 export interface EmailTemplateContactEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailTemplateContactEmbedded";
@@ -398,10 +402,6 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
 
 export module SendEmailTaskOperation {
   export const Save : Entities.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol("Operation", "SendEmailTaskOperation.Save");
-}
-
-export module SmtpConfigurationOperation {
-  export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "SmtpConfigurationOperation.Save");
 }
 
 export const SmtpEmbedded = new Type<SmtpEmbedded>("SmtpEmbedded");
