@@ -73,8 +73,6 @@ namespace Signum.React.Filters
 
                         using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                         {
-                            var error = new HttpError(context.Exception, IncludeErrorDetails(context.Exception));
-
                             var response = context.HttpContext.Response;
                             response.StatusCode = (int)statusCode;
                             response.ContentType = "application/json";
