@@ -46,7 +46,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
       return (
-        <div className="checkbox">
+        <div className="checkbox mt-4">
           <label><input type="checkbox" className="mr-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onClick={() => {
             f.pinned!.active = f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" : "Checkbox_StartChecked";
             p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
