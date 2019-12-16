@@ -375,7 +375,7 @@ namespace Signum.Engine.Linq
                 return c;
             });
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments, update.ReturnRowCount);
             return update;
         }
 

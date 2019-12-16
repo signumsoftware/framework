@@ -83,6 +83,8 @@ namespace Signum.Engine.Linq
 
         internal static Expression Optimize(Expression binded, QueryBinder binder, AliasGenerator aliasGenerator, HeavyProfiler.Tracer? log)
         {
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+
             log.Switch("Aggregate");
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             log.Switch("EntityCompleter");
@@ -98,7 +100,7 @@ namespace Signum.Engine.Linq
             log.Switch("Redundant");
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
             log.Switch("Condition");
-            Expression rewriteConditions = ConditionsRewriter.Rewrite(subqueryCleaned);
+            Expression rewriteConditions = isPostgres ? subqueryCleaned : ConditionsRewriter.Rewrite(subqueryCleaned);
             log.Switch("Scalar");
             Expression scalar = ScalarSubqueryRewriter.Rewrite(rewriteConditions);
             return scalar;

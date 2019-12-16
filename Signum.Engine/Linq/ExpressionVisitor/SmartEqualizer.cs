@@ -597,7 +597,12 @@ namespace Signum.Engine.Linq
             if (cleanElement == NewId)
                 return False;
 
-            return InExpression.FromValues(DbExpressionNominator.FullNominate(cleanElement)!, cleanValues);
+            cleanElement = DbExpressionNominator.FullNominate(cleanElement)!;
+
+            if (cleanElement.Type == typeof(string))
+                return InExpression.FromValues(cleanElement, cleanValues.Select(a => (object)a.ToString()!).ToArray());
+            else
+                return InExpression.FromValues(cleanElement, cleanValues);
         }
 
         private static Expression DispachConditionalTypesIn(ConditionalExpression ce, IEnumerable<Type> collection)

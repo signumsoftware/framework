@@ -68,7 +68,7 @@ namespace Signum.Engine
                 new SqlPreCommandSimple(@$"CREATE TRIGGER versioning_trigger
 BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
 FOR EACH ROW EXECUTE PROCEDURE versioning(
-  'sys_period', '{t.Name.Name}', true
+  'sys_period', '{t.SystemVersioned.TableName}', true
 );")
             }.Combine(Spacing.Simple)!;
 

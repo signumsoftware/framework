@@ -70,12 +70,12 @@ namespace Signum.Engine.Maps
                 return "@" + varName;
         }
 
-        internal static string DeclareTempTable(bool isPostgres, string variableName, string primaryKeyType)
+        internal static string DeclareTempTable(string variableName, FieldPrimaryKey id, bool isPostgres)
         {
             if (isPostgres)
-                return $"CREATE TEMP TABLE {variableName} (Id {primaryKeyType});";
+                return $"CREATE TEMP TABLE {variableName} ({id.Name.SqlEscape(isPostgres)} {id.DbType.ToString(isPostgres)});";
             else
-                return $"DECLARE {variableName} TABLE(Id {primaryKeyType});";
+                return $"DECLARE {variableName} TABLE({id.Name.SqlEscape(isPostgres)} {id.DbType.ToString(isPostgres)});";
         }
 
         ResetLazy<InsertCacheIdentity> inserterIdentity;
@@ -462,11 +462,14 @@ namespace Signum.Engine.Maps
                 var isPostgres = Schema.Current.Settings.IsPostgres;
                 var updated = Table.Var(isPostgres, "updated");
                 var id = this.table.PrimaryKey.Name.SqlEscape(isPostgres);
-                string sqlMulti = num == 1 ? SqlUpdatePattern("", true):    
+                string sqlMulti = num == 1 ? SqlUpdatePattern("", true) :
                     new StringBuilder()
-                      .AppendLine(Table.DeclareTempTable(isPostgres, updated, this.table.PrimaryKey.DbType.ToString(isPostgres)))
-                      .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
-                      .AppendLine($"SELECT Id from {updated}").ToString();
+                      .AppendLine(Table.DeclareTempTable(updated, this.table.PrimaryKey, isPostgres))
+                      .AppendLine()
+                      .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true) + "\r\n"))
+                      .AppendLine()
+                      .AppendLine($"SELECT {id} from {updated}")
+                      .ToString();
 
                 if (table.Ticks != null)
                 {
@@ -485,11 +488,13 @@ namespace Signum.Engine.Maps
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
-                        if (dt.Rows.Count == idents.Count)
+                        if (dt.Rows.Count != idents.Count)
                         {
                             var updated = dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToList();
 
-                            throw new ConcurrencyException(table.Type, idents.Select(a => a.Id).Except(updated).ToArray());
+                            var missing = idents.Select(a => a.Id).Except(updated).ToArray();
+
+                            throw new ConcurrencyException(table.Type, missing);
                         }
 
                         if (table.saveCollections.Value != null)
@@ -571,7 +576,7 @@ $"WHERE {id} = {idParamName + suffix}" + (table.Ticks != null ? $" AND {table.Ti
 {result.Indent(4)}
 )
 INSERT INTO {updated}({id})
-SELECT {id} FROM rows";
+SELECT {id} FROM rows;";
                     };
 
                     List<Expression> parameters = new List<Expression>
@@ -871,7 +876,7 @@ SELECT {id} FROM rows";
             internal bool hasOrder = false;
             internal bool isEmbeddedEntity = false;
             internal Func<string, string> sqlUpdate = null!;
-            public Func<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>> UpdateParameters = null!;
+            public Action<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>> UpdateParameters = null!;
             public ConcurrentDictionary<int, Action<List<MListUpdate>>> updateCache =
                 new ConcurrentDictionary<int, Action<List<MListUpdate>>>();
 
@@ -890,7 +895,7 @@ SELECT {id} FROM rows";
 
                             var row = pair.MList.InnerList[pair.Index];
 
-                            parameters.AddRange(UpdateParameters(pair.Entity, row.RowId!.Value, row.Element, pair.Index, pair.Forbidden, i.ToString()));
+                            UpdateParameters(pair.Entity, row.RowId!.Value, row.Element, pair.Index, pair.Forbidden, i.ToString(), parameters);
                         }
                         new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
                     };
@@ -1207,7 +1212,7 @@ SELECT {id} FROM rows";
                 parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, false,
                     Expression.Field(paramRowId, "Object")));
 
-                var expr = Expression.Lambda<Func<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
+                var expr = Expression.Lambda<Action<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
                     Table.CreateBlock(parameters, assigments, paramList), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
                 result.UpdateParameters = expr.Compile();
             }

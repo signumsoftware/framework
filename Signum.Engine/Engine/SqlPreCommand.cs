@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Maps;
+using Npgsql;
 
 namespace Signum.Engine
 {
@@ -159,10 +160,8 @@ namespace Signum.Engine
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
 
-        internal static string Encode(DbParameter param)
+        internal static string Encode(object? value)
         {
-            var value = param.Value;
-
             if (value == null || value == DBNull.Value)
                 return "NULL";
 
@@ -180,7 +179,7 @@ namespace Signum.Engine
 
             if (value is bool b)
             {
-                if (param is Npgsql.NpgsqlParameter p && p.NpgsqlDbType == NpgsqlTypes.NpgsqlDbType.Boolean)
+                if (Schema.Current.Settings.IsPostgres)
                     return b.ToString();
 
                 return (b ? 1 : 0).ToString();
@@ -204,7 +203,7 @@ namespace Signum.Engine
                 sb.Append(Sql);
             else
             {
-                var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a));
+                var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a.Value));
 
                 sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
             }
@@ -215,7 +214,7 @@ namespace Signum.Engine
             var pars = this.Parameters.EmptyIfNull();
             var sqlBuilder = Connector.Current.SqlBuilder;
 
-            var parameterVars = pars.ToString(p => $"{p.ParameterName} {((SqlParameter)p).SqlDbType.ToString()}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
+            var parameterVars = pars.ToString(p => $"{p.ParameterName} {(p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString())}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
             var parameterValues = pars.ToString(p => Encode(p.Value), ",");
 
             return $"EXEC sp_executesql N'{this.Sql}', N'{parameterVars}', {parameterValues}";

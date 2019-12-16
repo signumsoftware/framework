@@ -50,7 +50,6 @@ namespace Signum.Engine.Linq
         Delete,
         InsertSelect,
         CommandAggregate,
-        SelectRowCount,
         Entity = 2000,
         EmbeddedInit,
         MixinInit,
@@ -606,6 +605,14 @@ namespace Signum.Engine.Linq
         STUFF,
     }
 
+    internal enum PostgresFunction
+    {
+        strpos,
+        starts_with,
+        length,
+        EXTRACT,
+    }
+
     internal enum SqlEnums
     {
         year,
@@ -613,13 +620,14 @@ namespace Signum.Engine.Linq
         quarter,
         day,
         week,
-        weekday,
+        weekday, //Sql Server
+        dow,     //Postgres
         hour,
         minute,
         second,
         millisecond,
-        dayofyear,
-        iso_week
+        dayofyear, //SQL Server
+        doy       //Postgres
     }
 
 
@@ -665,7 +673,7 @@ namespace Signum.Engine.Linq
             return visitor.VisitToDayOfWeek(this);
         }
 
-        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
+        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create(Schema.Current.Settings.IsPostgres ? (byte)1 /*no idea :D*/ : (byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
 
         internal static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
         public static DayOfWeek? ToDayOfWeek(int? sqlServerWeekDay, byte dateFirst)
@@ -1192,22 +1200,25 @@ namespace Signum.Engine.Linq
 
         public readonly SourceWithAliasExpression Source;
         public readonly Expression? Where;
+        public readonly bool ReturnRowCount;
 
-        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression? where)
+        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression? where, bool returnRowCount)
             : base(DbExpressionType.Delete)
         {
             this.Table = table;
             this.UseHistoryTable = useHistoryTable;
             this.Source = source;
             this.Where = where;
+            this.ReturnRowCount = returnRowCount;
         }
 
         public override string ToString()
         {
-            return "DELETE {0}\r\nFROM {1}\r\n{2}".FormatWith(
+            return "DELETE FROM {0}\r\nFROM {1}\r\n{2}".FormatWith(
                 Table.Name,
                 Source.ToString(),
-                Where?.Let(w => "WHERE " + w.ToString()));
+                Where?.Let(w => "WHERE " + w.ToString())) + 
+                (ReturnRowCount ? "\r\nSELECT @@rowcount" : "");
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1225,8 +1236,9 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
+        public readonly bool ReturnRowCount;
 
-        public UpdateExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments, bool returnRowCount)
             : base(DbExpressionType.Update)
         {
             this.Table = table;
@@ -1234,6 +1246,7 @@ namespace Signum.Engine.Linq
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
             this.Where = where;
+            this.ReturnRowCount = returnRowCount;
         }
 
         public override string ToString()
@@ -1258,14 +1271,16 @@ namespace Signum.Engine.Linq
         public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
+        public readonly bool ReturnRowCount;
 
-        public InsertSelectExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
+        public InsertSelectExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments, bool returnRowCount)
             : base(DbExpressionType.InsertSelect)
         {
             this.Table = table;
             this.UseHistoryTable = useHistoryTable;
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
+            this.ReturnRowCount = returnRowCount;
         }
 
         public override string ToString()
@@ -1318,24 +1333,6 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitCommandAggregate(this);
-        }
-    }
-
-    internal class SelectRowCountExpression : CommandExpression
-    {
-        public SelectRowCountExpression()
-            : base(DbExpressionType.SelectRowCount)
-        {
-        }
-
-        public override string ToString()
-        {
-            return "SELECT @@rowcount";
-        }
-
-        protected override Expression Accept(DbExpressionVisitor visitor)
-        {
-            return visitor.VisitSelectRowCount(this);
         }
     }
 }

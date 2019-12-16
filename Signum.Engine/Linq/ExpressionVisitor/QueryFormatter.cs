@@ -56,15 +56,19 @@ namespace Signum.Engine.Linq
             string name = GetNextParamAlias();
 
             bool nullable = value.Type.IsClass || value.Type.IsNullable();
+            object? val = value.Value;
             Type clrType = value.Type.UnNullify();
             if (clrType.IsEnum)
+            {
                 clrType = typeof(int);
+                val = val == null ? (int?)null : Convert.ToInt32(val);
+            }
 
             var typePair = Schema.Current.Settings.GetSqlDbTypePair(clrType);
 
             var pb = Connector.Current.ParameterBuilder;
 
-            var param = pb.CreateParameter(name, typePair.DbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value);
+            var param = pb.CreateParameter(name, typePair.DbType, typePair.UserDefinedTypeName, nullable, val ?? DBNull.Value);
 
             return new DbParameterPair(param, name);
         }
@@ -201,6 +205,8 @@ namespace Signum.Engine.Linq
 
                     case ExpressionType.Add:
                     case ExpressionType.AddChecked:
+                        if(this.isPostgres && (b.Left.Type == typeof(string) || b.Right.Type == typeof(string)))
+                            sb.Append(" || ");
                         sb.Append(" + ");
                         break;
                     case ExpressionType.Subtract:
@@ -576,10 +582,9 @@ namespace Signum.Engine.Linq
 
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
-
-                sb.Append(column.Name.SqlEscape(isPostgres));
-                sb.Append(" = ");
                 this.Visit(column.Expression);
+                sb.Append(" as ");
+                sb.Append(column.Name.SqlEscape(isPostgres));
             }
             else
             {
@@ -700,10 +705,10 @@ namespace Signum.Engine.Linq
                     sb.Append("FULL OUTER JOIN ");
                     break;
                 case JoinType.CrossApply:
-                    sb.Append("CROSS APPLY ");
+                    sb.Append(isPostgres ? "JOIN LATERAL " : "CROSS APPLY ");
                     break;
                 case JoinType.OuterApply:
-                    sb.Append("OUTER APPLY ");
+                    sb.Append(isPostgres ? "LEFT JOIN LATERAL " : "OUTER APPLY ");
                     break;
             }
 
@@ -722,6 +727,12 @@ namespace Signum.Engine.Linq
                 this.AppendNewLine(Indentation.Inner);
                 sb.Append("ON ");
                 this.Visit(join.Condition);
+                this.Indent(Indentation.Outer);
+            }
+            else if (isPostgres)
+            {
+                this.AppendNewLine(Indentation.Inner);
+                sb.Append("ON true");
                 this.Indent(Indentation.Outer);
             }
             return join;
@@ -764,92 +775,128 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
         {
-            sb.Append("DELETE ");
-            sb.Append(delete.Name.ToString());
-            this.AppendNewLine(Indentation.Same);
-            sb.Append("FROM ");
-            VisitSource(delete.Source);
-            if (delete.Where != null)
+            using (this.PrintSelectRowCount(delete.ReturnRowCount))
             {
+                sb.Append("DELETE FROM ");
+                sb.Append(delete.Name.ToString());
                 this.AppendNewLine(Indentation.Same);
-                sb.Append("WHERE ");
-                Visit(delete.Where);
+
+                if (isPostgres)
+                    sb.Append("USING ");
+                else
+                    sb.Append("FROM ");
+
+                VisitSource(delete.Source);
+                if (delete.Where != null)
+                {
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("WHERE ");
+                    Visit(delete.Where);
+                }
+                return delete;
             }
-            return delete;
         }
 
         protected internal override Expression VisitUpdate(UpdateExpression update)
         {
-            sb.Append("UPDATE ");
-            sb.Append(update.Name.ToString());
-            sb.Append(" SET");
-            this.AppendNewLine(Indentation.Inner);
-
-            for (int i = 0, n = update.Assigments.Count; i < n; i++)
+            using (this.PrintSelectRowCount(update.ReturnRowCount))
             {
-                ColumnAssignment assignment = update.Assigments[i];
-                if (i > 0)
+                sb.Append("UPDATE ");
+                sb.Append(update.Name.ToString());
+                sb.Append(" SET");
+                this.AppendNewLine(Indentation.Inner);
+
+                for (int i = 0, n = update.Assigments.Count; i < n; i++)
                 {
-                    sb.Append(",");
-                    this.AppendNewLine(Indentation.Same);
+                    ColumnAssignment assignment = update.Assigments[i];
+                    if (i > 0)
+                    {
+                        sb.Append(",");
+                        this.AppendNewLine(Indentation.Same);
+                    }
+                    sb.Append(assignment.Column.SqlEscape(isPostgres));
+                    sb.Append(" = ");
+                    this.Visit(assignment.Expression);
                 }
-                sb.Append(assignment.Column.SqlEscape(isPostgres));
-                sb.Append(" = ");
-                this.Visit(assignment.Expression);
+                this.AppendNewLine(Indentation.Outer);
+                sb.Append("FROM ");
+                VisitSource(update.Source);
+                if (update.Where != null)
+                {
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("WHERE ");
+                    Visit(update.Where);
+                }
+                return update;
             }
-            this.AppendNewLine(Indentation.Outer);
-            sb.Append("FROM ");
-            VisitSource(update.Source);
-            if (update.Where != null)
-            {
-                this.AppendNewLine(Indentation.Same);
-                sb.Append("WHERE ");
-                Visit(update.Where);
-            }
-            return update;
-
         }
 
         protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
-            sb.Append("INSERT INTO ");
-            sb.Append(insertSelect.Name.ToString());
-            sb.Append("(");
-            for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
+            using (this.PrintSelectRowCount(insertSelect.ReturnRowCount))
             {
-                ColumnAssignment assignment = insertSelect.Assigments[i];
-                if (i > 0)
+                sb.Append("INSERT INTO ");
+                sb.Append(insertSelect.Name.ToString());
+                sb.Append("(");
+                for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
                 {
-                    sb.Append(", ");
-                    if (i % 4 == 0)
-                        this.AppendNewLine(Indentation.Same);
+                    ColumnAssignment assignment = insertSelect.Assigments[i];
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                        if (i % 4 == 0)
+                            this.AppendNewLine(Indentation.Same);
+                    }
+                    sb.Append(assignment.Column.SqlEscape(isPostgres));
                 }
-                sb.Append(assignment.Column.SqlEscape(isPostgres));
-            }
-            sb.Append(")");
-            this.AppendNewLine(Indentation.Same);
-            sb.Append("SELECT ");
-            for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
-            {
-                ColumnAssignment assignment = insertSelect.Assigments[i];
-                if (i > 0)
+                sb.Append(")");
+                this.AppendNewLine(Indentation.Same);
+                sb.Append("SELECT ");
+                for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
                 {
-                    sb.Append(", ");
-                    if (i % 4 == 0)
-                        this.AppendNewLine(Indentation.Same);
+                    ColumnAssignment assignment = insertSelect.Assigments[i];
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                        if (i % 4 == 0)
+                            this.AppendNewLine(Indentation.Same);
+                    }
+                    this.Visit(assignment.Expression);
                 }
-                this.Visit(assignment.Expression);
-            }
-            sb.Append(" FROM ");
-            VisitSource(insertSelect.Source);
-            return insertSelect;
+                sb.Append(" FROM ");
+                VisitSource(insertSelect.Source);
 
+                sb.Append(";");
+                return insertSelect;
+            }
         }
 
-        protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
+        protected internal IDisposable? PrintSelectRowCount(bool returnRowCount)
         {
-            sb.Append("SELECT @@rowcount");
-            return src;
+            if (returnRowCount == false)
+                return null;
+
+            if (!this.isPostgres)
+            {
+                return new Disposable(() =>
+                {
+                    sb.Append("SELECT @@rowcount");
+                });
+            }
+            else
+            {
+                sb.Append("WITH rows AS (");
+                this.AppendNewLine(Indentation.Inner);
+
+                return new Disposable(() =>
+                {
+                    sb.Append("RETURNING 1");
+                    this.AppendNewLine(Indentation.Outer);
+                    sb.Append(")");
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("SELECT CAST(COUNT(*) AS INTEGER) FROM rows");
+                });
+            }
         }
 
         protected internal override Expression VisitCommandAggregate(CommandAggregateExpression cea)

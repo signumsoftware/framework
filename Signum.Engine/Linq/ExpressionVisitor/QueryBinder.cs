@@ -2223,16 +2223,16 @@ namespace Signum.Engine.Linq
                 commands.AddRange(ee.Table.TablesMList().Select(t =>
                 {
                     Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.GetName(isHistory)));
-                    return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId));
+                    return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId), returnRowCount: false);
                 }));
 
-                commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId)));
+                commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId), returnRowCount: true));
             }
             else if (pr.Projector is MListElementExpression mlee)
             {
                 Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
-                commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
+                commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId), returnRowCount: true));
             }
             else if (pr.Projector is EmbeddedEntityExpression eee)
             {
@@ -2240,12 +2240,10 @@ namespace Signum.Engine.Linq
 
                 Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name)).ThrowIfNull(() => $"{vn.Name} has no primary name");
 
-                commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
+                commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId()), returnRowCount: true));
             }
             else
                 throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));
-
-            commands.Add(new SelectRowCountExpression());
 
             return new CommandAggregateExpression(commands);
         }
@@ -2334,8 +2332,7 @@ namespace Signum.Engine.Linq
 
             var result = new CommandAggregateExpression(new CommandExpression[]
             {
-                new UpdateExpression(table, isHistory && table.SystemVersioned != null, pr.Select, condition, assignments),
-                new SelectRowCountExpression()
+                new UpdateExpression(table, isHistory && table.SystemVersioned != null, pr.Select, condition, assignments, returnRowCount: true),
             });
 
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
@@ -2379,8 +2376,7 @@ namespace Signum.Engine.Linq
 
             var result = new CommandAggregateExpression(new CommandExpression[]
             {
-                new InsertSelectExpression(table, isHistory && table.SystemVersioned != null, pr.Select, assignments),
-                new SelectRowCountExpression()
+                new InsertSelectExpression(table, isHistory && table.SystemVersioned != null, pr.Select, assignments, returnRowCount: true),
             });
 
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
@@ -3276,7 +3272,7 @@ namespace Signum.Engine.Linq
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
             {
                 var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
-                return new UpdateExpression(update.Table, update.UseHistoryTable, select, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, select, where, assigments, update.ReturnRowCount);
             }
             return update;
         }
@@ -3288,7 +3284,7 @@ namespace Signum.Engine.Linq
             if (source != insertSelect.Source || assigments != insertSelect.Assigments)
             {
                 var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
-                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, select, assigments);
+                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, select, assigments, insertSelect.ReturnRowCount);
             }
             return insertSelect;
         }
