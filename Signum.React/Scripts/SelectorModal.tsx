@@ -49,7 +49,7 @@ export default function SelectorModal(p: SelectorModalProps) {
         <div>
           {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
           {p.options.map((o, i) =>
-            <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.value}
+            <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
               className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>
               {o.displayName}
             </button>)}
