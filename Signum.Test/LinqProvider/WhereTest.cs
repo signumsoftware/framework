@@ -250,8 +250,8 @@ namespace Signum.Test.LinqProvider
             list = Database.Query<ArtistEntity>().Where(a => a.Dead == false).Select(a => a.Name).ToList();
             list = Database.Query<ArtistEntity>().Where(a => a.Dead != true).Select(a => a.Name).ToList();
             list = Database.Query<ArtistEntity>().Where(a => a.Dead != false).Select(a => a.Name).ToList();
-            list = Database.Query<ArtistEntity>().Where(a => true ? a.Dead : false).Select(a => a.Name).ToList();
-            list = Database.Query<ArtistEntity>().Where(a => false ? false : a.Dead).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistEntity>().Where(a => a.Dead).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistEntity>().Where(a => a.Dead).Select(a => a.Name).ToList();
 
             list = Database.Query<ArtistEntity>().Where(a => true).Select(a => a.Name).ToList();
             list = Database.Query<ArtistEntity>().Where(a => !false).Select(a => a.Name).ToList();

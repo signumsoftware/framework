@@ -434,7 +434,7 @@ WHERE {primaryKey.Name} NOT IN
 
         internal static SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
         {
-            return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1})".FormatWith(tab.Name, tabCol.Name));;
+            return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1})".FormatWith(tab.Name, tabCol.Name));
         }
 
         public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName) =>

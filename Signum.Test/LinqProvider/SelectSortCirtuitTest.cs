@@ -22,7 +22,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SortCircuitCoalesce()
         {
-            var list = Database.Query<AlbumEntity>().Where(a => ("Hola" ?? Throw<string>()) == null).Select(a => a.Year).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => ("Hola") == null).Select(a => a.Year).ToList();
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SortCircuitConditionalIf()
         {
-            var list = Database.Query<AlbumEntity>().Where(a => "Hola" == "Hola" ? true : Throw<bool>()).Select(a => a.Year).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => true).Select(a => a.Year).ToList();
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SortCircuitOrElse()
         {
-            var list = Database.Query<AlbumEntity>().Where(a => true || Throw<bool>() ).Select(a => a.Year).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => true ).Select(a => a.Year).ToList();
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SortCircuitAndAlso()
         {
-            var list = Database.Query<AlbumEntity>().Where(a => false && Throw<bool>()).Select(a => a.Year).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => false).Select(a => a.Year).ToList();
         }
 
         [Fact]

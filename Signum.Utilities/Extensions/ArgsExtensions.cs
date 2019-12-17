@@ -12,7 +12,7 @@ namespace Signum.Utilities
     {
         public static T GetArg<T>(this IEnumerable<object?>? args)
         {
-            return args!.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
+            return args!.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T)));
         }
 
         [return: MaybeNull]

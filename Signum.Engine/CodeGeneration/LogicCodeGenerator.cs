@@ -514,7 +514,7 @@ public static IQueryable<{to}> {Method}(this {from} {f}) => As.Expression(() => 
 
         protected virtual bool IsSave(IOperationSymbolContainer oper)
         {
-            return oper.ToString()!.Contains("Save"); ;
+            return oper.ToString()!.Contains("Save");
         }
 
         protected virtual string? WriteDeleteOperation(IOperationSymbolContainer oper)

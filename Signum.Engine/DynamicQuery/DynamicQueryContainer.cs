@@ -225,7 +225,7 @@ namespace Signum.Engine.DynamicQuery
                 if (r is UniqueEntityRequest)
                     return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object?)a.Result);
 
-                throw new InvalidOperationException("Unexpected QueryRequest type"); ;
+                throw new InvalidOperationException("Unexpected QueryRequest type");
             }));
         }
     }
