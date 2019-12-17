@@ -296,6 +296,9 @@ namespace Signum.Engine.Word
                         case "foreach":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
+                                if (vp is TokenValueProvider tvp && tvp.ParsedToken.QueryToken != null && QueryToken.IsCollection(tvp.ParsedToken.QueryToken.Type))
+                                    AddError(false, $"@foreach[{expr}] is a collection, missing 'Element' token at the end");
+
                                 var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
                                 PushBlock(fn);
 
