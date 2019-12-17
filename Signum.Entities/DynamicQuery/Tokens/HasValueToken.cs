@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Linq;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -54,9 +57,19 @@ namespace Signum.Entities.DynamicQuery
             get { return "HasValue"; }
         }
 
+
+        static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any()).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any()).GetGenericMethodDefinition();
+
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             Expression baseExpression = parent.BuildExpression(context);
+
+            if (IsCollection(this.Parent!.Type))
+            {
+                var miGen = baseExpression.Type.IsInstantiationOf(typeof(IQueryable<>)) ? miAnyQ : miAnyE;
+                return Expression.Call(miGen.MakeGenericMethod(baseExpression.Type.ElementType()!), baseExpression);
+            }
 
             var result = Expression.NotEqual(baseExpression, Expression.Constant(null, baseExpression.Type.Nullify()));
 

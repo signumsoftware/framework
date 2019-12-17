@@ -83,7 +83,7 @@ function SearchPage(p: SearchPageProps) {
         allowSelection={qs && qs.allowSelection}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
-        showFilters={SearchPage.showFilters(fo)}
+        showFilters={SearchPage.showFilters(fo, qs)}
         showGroupButton={true}
         avoidChangeUrl={false}
         navigate={qs?.inPlaceNavigation ? "InPlace" : undefined}
@@ -109,7 +109,14 @@ function anyPinned(filterOptions?: FilterOption[]): boolean {
 namespace SearchPage {
   export let marginDown = 130;
   export let minHeight = 600;
-  export let showFilters = (fo: FindOptions) => !(fo.filterOptions == undefined || fo.filterOptions.length == 0 || anyPinned(fo.filterOptions));
+  export let showFilters = (fo: FindOptions, qs: Finder.QuerySettings | undefined) => {
+    var allFilters = [
+      ...fo.filterOptions ?? [],
+      ... (fo.includeDefaultFilters ?? true) ? qs?.defaultFilters ?? [] : []
+    ];
+
+    return !(allFilters.length == 0 || anyPinned(allFilters));
+  }
 }
 
 export default SearchPage;

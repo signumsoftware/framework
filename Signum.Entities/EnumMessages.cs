@@ -190,7 +190,6 @@ Lose changes?")]
         Label,
         Column,
         Row,
-        DisableOnNull,
         SplitText,
         [Description("When pressed, the filter wil take no effect if the value is null")]
         WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull,
