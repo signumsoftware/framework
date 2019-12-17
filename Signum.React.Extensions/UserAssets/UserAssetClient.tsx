@@ -120,7 +120,7 @@ export module Converter {
         label: e.label,
         column: e.column,
         row: e.row,
-        disableOnNull: e.disableOnNull,
+        active: e.active,
         splitText: e.splitText
       });
     }
@@ -146,7 +146,7 @@ export module Converter {
         label: e.label == null ? undefined : e.label,
         column: e.column == null ? undefined : e.column,
         row: e.row == null ? undefined : e.row,
-        disableOnNull: e.disableOnNull,
+        active: e.active,
         splitText: e.splitText
       })
     }

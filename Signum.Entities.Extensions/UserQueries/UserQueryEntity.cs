@@ -414,7 +414,7 @@ namespace Signum.Entities.UserQueries
 
         public int? Row { get; set; }
 
-        public bool DisableOnNull { get; set; }
+        public PinnedFilterActive Active { get; set; }
 
         public bool SplitText { get; set; }
 
@@ -423,7 +423,7 @@ namespace Signum.Entities.UserQueries
             Label = Label,
             Column = Column,
             Row = Row,
-            DisableOnNull = DisableOnNull,
+            Active = Active,
             SplitText = SplitText,
         };
 
@@ -432,7 +432,7 @@ namespace Signum.Entities.UserQueries
             Label = p.Attribute("Label")?.Value;
             Column = p.Attribute("Column")?.Value.ToInt();
             Row = p.Attribute("Row")?.Value.ToInt();
-            DisableOnNull = p.Attribute("DisableOnNull")?.Value.ToBool() ?? false;
+            Active = p.Attribute("Active")?.Value.ToEnum<PinnedFilterActive>() ?? (p.Attribute("DisableOnNull")?.Value.ToBool() == true ? PinnedFilterActive.WhenHasValue : PinnedFilterActive.Always);
             SplitText = p.Attribute("SplitText")?.Value.ToBool() ?? false;
             return this;
         }
@@ -443,7 +443,7 @@ namespace Signum.Entities.UserQueries
                 Label.DefaultToNull()?.Let(l => new XAttribute("Label", l)),
                 Column?.Let(l => new XAttribute("Column", l)),
                 Row?.Let(l => new XAttribute("Row", l)),
-                DisableOnNull == false ? null : new XAttribute("DisableOnNull", DisableOnNull),
+                Active == PinnedFilterActive.Always ? null : new XAttribute("Active", Active.ToString()),
                 SplitText == false ? null : new XAttribute("SplitText", SplitText)
             );
         }
