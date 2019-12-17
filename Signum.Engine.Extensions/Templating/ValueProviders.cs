@@ -224,16 +224,14 @@ namespace Signum.Engine.Templating
             if (p.Rows.IsEmpty())
                 return null;
 
-            return  p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
+            return p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
         }
 
         public override void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken!]], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
-            if (groups.Count == 1 && groups[0].Key == null)
-                return;
+            var col = p.Columns[ParsedToken.QueryToken!];
 
-            foreach (var group in groups)
+            foreach (var group in p.Rows.GroupByColumn(col))
             {
                 using (p.OverrideRows(group))
                     forEachElement();
@@ -246,7 +244,7 @@ namespace Signum.Engine.Templating
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
-        {
+        {  
             list.Add(ParsedToken.QueryToken!);
         }
 

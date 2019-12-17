@@ -105,6 +105,15 @@ namespace Signum.Engine.Templating
                 () => "Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
         }
 
+        public static IEnumerable<IEnumerable<ResultRow>> GroupByColumn(this IEnumerable<ResultRow> rows, ResultColumn keyColumn)
+        {
+            var groups = rows.GroupBy(r => r[keyColumn], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
+            if (groups.Count == 1 && groups[0].Key == null)
+                return Enumerable.Empty<IEnumerable<ResultRow>>();
+
+            return groups;
+        }
+
         internal class SemiStructuralEqualityComparer : IEqualityComparer<object?>
         {
             public static readonly SemiStructuralEqualityComparer Comparer = new SemiStructuralEqualityComparer();
