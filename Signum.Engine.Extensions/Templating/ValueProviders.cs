@@ -476,7 +476,7 @@ namespace Signum.Engine.Templating
             object? value = p.GetModel();
             foreach (var m in Members!)
             {
-                value = Getter(m, value);
+                value = Getter(m, value, p);
                 if (value == null)
                     break;
             }
@@ -484,12 +484,15 @@ namespace Signum.Engine.Templating
             return value;
         }
 
-        internal static object? Getter(MemberInfo member, object model)
+        internal static object? Getter(MemberInfo member, object model, TemplateParameters p)
         {
             try
             {
                 if (member is PropertyInfo pi)
                     return pi.GetValue(model, null);
+
+                if (member is MethodInfo mi)
+                    return mi.Invoke(model, new object[] { p });
 
                 return ((FieldInfo)member).GetValue(model);
             }
@@ -591,7 +594,7 @@ namespace Signum.Engine.Templating
             {
                 foreach (var m in Members)
                 {
-                    value = ModelValueProvider.Getter(m, value);
+                    value = ModelValueProvider.Getter(m, value, p);
                     if (value == null)
                         break;
                 }
@@ -732,7 +735,7 @@ namespace Signum.Engine.Templating
 
             foreach (var m in Members!)
             {
-                value = Getter(m, value);
+                value = Getter(m, value, p);
                 if (value == null)
                     break;
             }
@@ -740,12 +743,15 @@ namespace Signum.Engine.Templating
             return value;
         }
 
-        internal static object? Getter(MemberInfo member, object value)
+        internal static object? Getter(MemberInfo member, object value, TemplateParameters p)
         {
             try
             {
                 if (member is PropertyInfo pi)
                     return pi.GetValue(value, null);
+
+                if (member is MethodInfo mi)
+                    return mi.Invoke(value, new object[] { p });
 
                 return ((FieldInfo)member).GetValue(value);
             }

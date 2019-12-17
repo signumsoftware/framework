@@ -207,11 +207,12 @@ namespace Signum.Engine.Templating
             foreach (var field in (fieldOrPropertyChain ?? "").Trim().Split('.'))
             {
                 var info = (MemberInfo?)type.GetField(field, Flags) ??
-                           (MemberInfo?)type.GetProperty(field, Flags);
+                           (MemberInfo?)type.GetProperty(field, Flags) ??
+                           (MemberInfo?)type.GetMethod(field, Flags, null, new[] { typeof(TemplateParameters) }, null);
 
                 if (info == null)
                 {
-                    addError(false, "Type {0} does not have a property with name {1}".FormatWith(type.Name, field));
+                    addError(false, "Type {0} does not have a property/field with name {1}, or a method that takes a TemplateParameters as an argument".FormatWith(type.Name, field));
                     return null;
                 }
 
