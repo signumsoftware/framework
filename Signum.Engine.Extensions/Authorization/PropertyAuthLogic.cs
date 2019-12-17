@@ -304,7 +304,7 @@ namespace Signum.Engine.Authorization
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
-                return a < pa ? a : pa; ;
+                return a < pa ? a : pa;
             };
         }
 
@@ -321,7 +321,7 @@ namespace Signum.Engine.Authorization
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
-                return a < pa ? a : pa; ;
+                return a < pa ? a : pa;
             };
         }
     }
