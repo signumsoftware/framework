@@ -9,7 +9,8 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 
 namespace Signum.Engine.Linq
-{    /// <summary>
+{    
+    /// <summary>
     /// An extended expression comparer including custom DbExpression nodes
     /// </summary>
     internal class DbExpressionComparer : ExpressionComparer
@@ -39,7 +40,7 @@ namespace Signum.Engine.Linq
             bool result = ComparePrivate(a, b);
 
             if (result == false)
-                result = !!result;
+                result = !!result; //Breakpoint here to check the first offender
 
             return result;
         }
@@ -181,14 +182,14 @@ namespace Signum.Engine.Linq
 
             using (AliasScope())
             {
-                MapAliases(a.From!, b.From!);
+            MapAliases(a.From!, b.From!);
 
-                return Compare(a.Where, b.Where)
-                    && CompareList(a.OrderBy, b.OrderBy, CompareOrder)
-                    && CompareList(a.GroupBy, b.GroupBy, Compare)
-                    && a.IsDistinct == b.IsDistinct
-                    && CompareColumnDeclarations(a.Columns, b.Columns);
-            }
+            return Compare(a.Where, b.Where)
+                && CompareList(a.OrderBy, b.OrderBy, CompareOrder)
+                && CompareList(a.GroupBy, b.GroupBy, Compare)
+                && a.IsDistinct == b.IsDistinct
+                && CompareColumnDeclarations(a.Columns, b.Columns);
+        }
         }
 
         protected virtual void MapAliases(SourceExpression sourceA, SourceExpression sourceB)
@@ -230,8 +231,8 @@ namespace Signum.Engine.Linq
             if (a.JoinType != b.JoinType)
                 return false;
 
-            if (!Compare(a.Left, b.Left))
-                return false;
+                if (!Compare(a.Left, b.Left))
+                    return false;
 
             if (a.JoinType == JoinType.CrossApply || a.JoinType == JoinType.OuterApply)
             {
@@ -245,8 +246,19 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                return Compare(a.Right, b.Right)
-                    && Compare(a.Condition, b.Condition);
+                if (!Compare(a.Left, b.Left))
+                    return false;
+
+                if (!Compare(a.Right, b.Right))
+                    return false;
+
+                using (AliasScope())
+                {
+                    MapAliases(a.Left, b.Left);
+                    MapAliases(a.Right, b.Right);
+
+                    return Compare(a.Condition, b.Condition);
+                }
             }
         }
 
@@ -370,19 +382,19 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareScalar(ScalarExpression a, ScalarExpression b)
         {
-            return Compare(a.Select, b.Select);
+                return Compare(a.Select, b.Select);
         }
 
         protected virtual bool CompareExists(ExistsExpression a, ExistsExpression b)
         {
-            return Compare(a.Select, b.Select);
+                return Compare(a.Select, b.Select);
         }
 
         protected virtual bool CompareIn(InExpression a, InExpression b)
         {
             return Compare(a.Expression, b.Expression)
                 && Compare(a.Select, b.Select)
-                && CompareValues(a.Values , b.Values);
+                && CompareValues(a.Values, b.Values);
         }
 
         protected virtual bool CompareValues(object[]? a, object[]? b)
