@@ -169,6 +169,21 @@ namespace Signum.Entities
                         ((ModifiableEntity)item).SetParentEntity(this);
                 }
             }
+
+
+            foreach (object? field in AttributeManager<QueryablePropertyAttribute>.FieldsWithAttribute(this))
+            {
+                if (field == null)
+                    continue;
+
+                if (field is ModifiableEntity entity)
+                    entity.SetParentEntity(this);
+                else
+                {
+                    foreach (var item in (IEnumerable<IModifiableEntity>)field!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
+                }
+            }
         }
 
         //[OnDeserialized]
@@ -231,7 +246,7 @@ namespace Signum.Entities
             return (T)(IModifiableEntity)parentEntity;
         }
 
-        public void SetParentEntity(ModifiableEntity? p)
+        private void SetParentEntity(ModifiableEntity? p)
         {
             if (p != null && this.parentEntity != null && this.parentEntity != p)
                 throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
