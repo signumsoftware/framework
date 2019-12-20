@@ -35,7 +35,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
 
   function handlePlainExcel() {
-    ExcelClient.API.generatePlanExcel(p.searchControl.getQueryRequest());
+    ExcelClient.API.generatePlainExcel(p.searchControl.getQueryRequest());
   }
 
 
