@@ -22,6 +22,8 @@ namespace Signum.Engine
         SqlServer2014,
         SqlServer2016,
         SqlServer2017,
+        SqlServer2019,
+
         AzureSQL,
     }
 
@@ -70,6 +72,7 @@ namespace Signum.Engine
                             case "12": return SqlServerVersion.SqlServer2014;
                             case "13": return SqlServerVersion.SqlServer2016;
                             case "14": return SqlServerVersion.SqlServer2017;
+                            case "15": return SqlServerVersion.SqlServer2019;
                             default: return (SqlServerVersion?)null;
                         }
 
