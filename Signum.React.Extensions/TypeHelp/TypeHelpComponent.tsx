@@ -51,7 +51,10 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
   const [selected, setSelected] = React.useState<PropertyRoute | undefined>(undefined)
 
   function renderContextualMenu() {
-    let menu = p.renderContextMenu && p.renderContextMenu!(selected!);
+    if (!p.renderContextMenu || !selected)
+      return null;
+
+    let menu = p.renderContextMenu(selected);
     return (menu && <ContextMenu position={contextMenuPosition!} onHide={handleContextOnHide}>
       {menu.props.children}
     </ContextMenu>)

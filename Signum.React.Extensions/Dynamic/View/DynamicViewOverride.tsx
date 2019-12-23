@@ -24,9 +24,9 @@ interface DynamicViewOverrideComponentProps {
 
 export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps) {
 
-  const typeName = p.ctx.value.entityType.cleanName;
-  const typeHelp = useAPI(() => TypeHelpClient.API.typeHelp(typeName, "CSharp"), [typeName]);
-  const viewNames = useAPI(() => Navigator.viewDispatcher.getViewNames(typeName), [typeName]);
+  const typeName: string | null = p.ctx.value.entityType?.cleanName;
+  const typeHelp = useAPI(() => typeName ? TypeHelpClient.API.typeHelp(typeName, "CSharp") : Promise.resolve(undefined), [typeName]);
+  const viewNames = useAPI(() => typeName ? Navigator.viewDispatcher.getViewNames(typeName) : Promise.resolve(undefined), [typeName]);
 
   const scriptChangedRef = React.useRef(false);
 

@@ -23,7 +23,7 @@ export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
   }
 
   function handleOnExited() {
-    p.onExited!(selectedValue);
+    p.onExited!(selectedValue!.current);
   }
 
   const columnWidth = "200px";
