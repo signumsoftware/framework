@@ -148,7 +148,6 @@ export function EmailTemplateMessageComponent(p : EmailTemplateMessageComponentP
   }
 
   function handleOnInsert(newCode: string) {
-    debugger;
     ValueLineModal.show({
       type: { name: "string" },
       initialValue: newCode,

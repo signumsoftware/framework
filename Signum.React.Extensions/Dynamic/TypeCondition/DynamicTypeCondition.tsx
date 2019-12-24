@@ -23,9 +23,9 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
   const forceUpdate = useForceUpdate();
 
   function handleEntityTypeChange() {
-    p.ctx.value.eval!.script = "";
     exampleEntityRef.current = undefined;
     setResponse(undefined);
+    handleCodeChange("");
   }
 
   function handleCodeChange(newScript: string) {

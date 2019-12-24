@@ -19,7 +19,7 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
   const handleChange = () => rootNode.context.refreshView();
 
   return (
-    <Tabs id="dynamicView_dropdown">
+    <Tabs id="dynamicView_dropdown" mountOnEnter={true}>
       <Tab eventKey="render" title="Render">
         <DynamicViewTree rootNode={rootNode} />
         <DynamicViewInspector selectedNode={rootNode.context.getSelectedNode()} />
