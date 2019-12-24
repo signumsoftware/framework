@@ -17,6 +17,8 @@ import * as Nodes from '../../Dynamic/View/Nodes';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { ModulesHelp } from "./ModulesHelp";
+import { EntityFrame } from '@framework/TypeContext'
+import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components'
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
@@ -33,10 +35,15 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
   const forceUpdate = useForceUpdate();
 
   const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
-  const [componentType, setComponentType] = React.useState<React.ComponentType<{ ctx: TypeContext<Entity> }> | null>(null);
+  const componentTypeRef = React.useRef<React.ComponentType<{ ctx: TypeContext<Entity> }> | null>(null);
+  function setComponentType(ct: React.ComponentType<{ ctx: TypeContext<Entity> }> | null) {
+    componentTypeRef.current = ct;
+    forceUpdate();
+  }
+
 
   const [syntaxError, setSyntaxError] = React.useState<string | undefined>(undefined);
-  const [viewOverride, setViewOverride] = React.useState<((vr: ViewReplacer<Entity>) => void) | undefined>(undefined);
+  const [viewOverride, setViewOverride] = React.useState<{ func: (vr: ViewReplacer<Entity>) => void } | undefined>(undefined);
 
 
   function handleTypeRemove() {
@@ -109,10 +116,13 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     const ctx = p.ctx;
     return (
       <div>
-        {exampleEntityRef.current && componentType &&
+        {exampleEntityRef.current && componentTypeRef.current &&
+          <ErrorBoundary>
           <RenderWithReplacements entity={exampleEntityRef.current}
-            componentType={componentType}
-            viewOverride={viewOverride} />}
+            componentType={componentTypeRef.current}
+            viewOverride={viewOverride && viewOverride.func} />
+          </ErrorBoundary>
+          }
       </div>
     );
   }
@@ -173,7 +183,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     let func: (rep: ViewReplacer<Entity>) => void;
     try {
       func = DynamicViewClient.asOverrideFunction(dvo);
-      setViewOverride(func);
+      setViewOverride({ func });
     } catch (e) {
       setSyntaxError((e as Error).message);
       return;
@@ -257,9 +267,9 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
               <option value="">{" - "}</option>
               {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
             </select>
-}
+          }
         </FormGroup>
-}
+      }
 
       {ctx.value.entityType &&
         <div>
@@ -281,17 +291,17 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
           <hr />
           {renderTest()}
         </div>
-  }
+      }
     </div>
   );
-  }
+}
 
 
 interface RenderWithReplacementsProps {
   entity: Entity;
   componentType: React.ComponentType<{ ctx: TypeContext<Entity> }>;
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
-  }
+}
 
 export function RenderWithReplacements(p: RenderWithReplacementsProps) {
 
@@ -319,9 +329,9 @@ export function RenderWithReplacements(p: RenderWithReplacementsProps) {
       return Navigator.surroundFunctionComponent((p.componentType as React.FunctionComponent<{ ctx: TypeContext<Entity> }>), [{ override: vo }]);
   }
 
-  var ctx = new TypeContext(undefined, undefined, PropertyRoute.root(p.entity.Type), new ReadonlyBinding(p.entity, "example"));
+  var frame = { refreshCount: 0 } as EntityFrame;
+  
+  var ctx = new TypeContext(undefined, { frame: frame }, PropertyRoute.root(p.entity.Type), new ReadonlyBinding(p.entity, "example"));
 
   return React.createElement(applyViewOverrides(p.viewOverride), { ctx: ctx });
 }
-
-

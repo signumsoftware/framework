@@ -29,6 +29,7 @@ interface FindOptionsLineProps {
   binding: Binding<FindOptionsExpr | undefined>;
   dn: DesignerNode<BaseNode>;
   avoidSuggestion?: boolean;
+  onQueryChanged?: () => void;
 }
 
 export function FindOptionsLine(p : FindOptionsLineProps){
@@ -74,8 +75,14 @@ export function FindOptionsLine(p : FindOptionsLineProps){
 
   function modifyFindOptions(fo: FindOptionsExpr) {
     DesignerModal.show("FindOptions", () => <FindOptionsComponent findOptions={fo} dn={p.dn} />).then(result => {
-      if (result)
+      if (result) {
+        var oldFo = p.binding.getValue();
         p.binding.setValue(clean(fo));
+        if (oldFo?.queryName != p.binding.getValue()?.queryName) {
+          if (p.onQueryChanged)
+            p.onQueryChanged();
+        }
+      }
 
       p.dn.context.refreshView();
     }).done();
@@ -147,19 +154,15 @@ export function QueryTokenLine(p: QueryTokenLineProps) {
 
   function handleChange(qt: QueryToken | undefined) {
     setParsedToken(qt);
-    if (qt)
-      p.binding.setValue(qt.fullKey);
-    else
-      p.binding.deleteValue();
+    if (qt?.fullKey != p.binding.getValue()) {
+      if (qt)
+        p.binding.setValue(qt.fullKey);
+      else
+        p.binding.deleteValue();
 
-    p.dn.context.refreshView();
+      p.dn.context.refreshView();
+    }
   }
-
-  function componentWillReceiveProps(newProps: QueryTokenLineProps) {
-    if (p.queryKey != null && p.queryKey != newProps.queryKey)
-      handleChange(undefined);
-  }
-
 
   function getDescription(fo: FindOptionsExpr) {
     var filters = [
@@ -343,21 +346,18 @@ interface QueryTokenBuilderStringProps {
   hideLabel?: boolean;
 }
 
-function QueryTokenBuilderString(p : QueryTokenBuilderStringProps){
-
-  function loadInitialToken(props: QueryTokenBuilderStringProps) {
-    if (props.token == undefined) {
-      if (p.token != props.token)
-        props.onChange(undefined);
-    }
-    else if (!props.parsedToken || p.queryKey != props.queryKey || props.parsedToken.fullKey != props.token)
-      return Finder.parseSingleToken(props.queryKey, props.token, props.subTokenOptions)
-        .then(t => p.onChange(t))
-        .done();
-  }
+function QueryTokenBuilderString(p: QueryTokenBuilderStringProps) {
 
   React.useEffect(() => {
-    loadInitialToken(p);
+
+    if (p.parsedToken?.fullKey != p.token) {
+      var promise = p.token == null ? Promise.resolve<QueryToken | undefined>(undefined) :
+        Finder.parseSingleToken(p.queryKey, p.token, p.subTokenOptions);
+
+      promise
+        .then(t => p.onChange(t))
+        .done();
+    }
   }, [p.queryKey, p.token]);
 
   var qt = <QueryTokenBuilder
@@ -368,18 +368,18 @@ function QueryTokenBuilderString(p : QueryTokenBuilderStringProps){
     subTokenOptions={p.subTokenOptions} />;
 
   if (p.hideLabel)
-      return qt;
+    return qt;
 
-    return (
-      <div className="form-group">
-        <label className="control-label">
+  return (
+    <div className="form-group">
+      <label className="control-label">
         {p.label}
-        </label>
-        <div>
-          {qt}
-        </div>
+      </label>
+      <div>
+        {qt}
       </div>
-    );
+    </div>
+  );
 }
 
 interface BaseOptionsComponentProps<T> {

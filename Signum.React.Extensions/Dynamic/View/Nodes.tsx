@@ -1421,7 +1421,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
       <QueryTokenLine dn={dn} binding={Binding.create(dn.node, a => a.valueToken)} queryKey={dn.node.findOptions && dn.node.findOptions.queryName ||
         (isTypeEntity(dn.route!.typeReference().name) ? dn.route!.typeReference().name : dn.route!.findRootType().name)}
         subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement} />
-      <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
+      <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} onQueryChanged={() => dn.node.valueToken = undefined} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isBadge)} type="boolean" defaultValue={null} />
