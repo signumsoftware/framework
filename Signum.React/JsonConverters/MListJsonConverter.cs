@@ -75,64 +75,68 @@ namespace Signum.React.Json
             var rowIdType = GetRowIdTypeFromAttribute(pr);
 
 
-            reader.Assert(JsonToken.StartArray);
-
-            reader.Read();
-
-            using (JsonSerializerExtensions.SetCurrentPropertyRoute(elementPr))
+            if (reader.TokenType == JsonToken.StartArray)
             {
-                while (reader.TokenType == JsonToken.StartObject)
+
+                reader.Read();
+
+                using (JsonSerializerExtensions.SetCurrentPropertyRoute(elementPr))
                 {
-                    reader.Read();
-                    reader.Assert(JsonToken.PropertyName);
-                    if (((string)reader.Value!) != "rowId")
-                        throw new JsonSerializationException($"member 'rowId' expected in {reader.Path}");
-
-                    reader.Read();
-                    var rowIdValue = reader.Value;
-
-                    reader.Read();
-                    reader.Assert(JsonToken.PropertyName);
-                    if (((string)reader.Value!) != "element")
-                        throw new JsonSerializationException($"member 'element' expected in {reader.Path}");
-
-                    reader.Read();
-                    if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
+                    while (reader.TokenType == JsonToken.StartObject)
                     {
-                        var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
+                        reader.Read();
+                        reader.Assert(JsonToken.PropertyName);
+                        if (((string) reader.Value!) != "rowId")
+                            throw new JsonSerializationException($"member 'rowId' expected in {reader.Path}");
 
-                        var oldValue = dic.TryGetS(rowId);
+                        reader.Read();
+                        var rowIdValue = reader.Value;
 
-                        if (oldValue == null)
+                        reader.Read();
+                        reader.Assert(JsonToken.PropertyName);
+                        if (((string) reader.Value!) != "element")
+                            throw new JsonSerializationException($"member 'element' expected in {reader.Path}");
+
+                        reader.Read();
+                        if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
                         {
-                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), null)!;
+                            var rowId = new PrimaryKey(
+                                (IComparable) ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
 
-                            newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
+                            var oldValue = dic.TryGetS(rowId);
+
+                            if (oldValue == null)
+                            {
+                                T newValue = (T) serializer.DeserializeValue(reader, typeof(T), null)!;
+
+                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
+                            }
+                            else
+                            {
+                                T newValue =
+                                    (T) serializer.DeserializeValue(reader, typeof(T), oldValue.Value.Element)!;
+
+                                if (oldValue.Value.Element!.Equals(newValue))
+                                    newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
+                                else
+                                    newList.Add(new MList<T>.RowIdElement(newValue));
+                            }
                         }
                         else
                         {
-                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), oldValue.Value.Element)!;
-
-                            if (oldValue.Value.Element!.Equals(newValue))
-                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
-                            else
-                                newList.Add(new MList<T>.RowIdElement(newValue));
+                            var newValue = (T) serializer.DeserializeValue(reader, typeof(T), null)!;
+                            newList.Add(new MList<T>.RowIdElement(newValue));
                         }
-                    }
-                    else
-                    {
-                        var newValue = (T)serializer.DeserializeValue(reader, typeof(T), null)!;
-                        newList.Add(new MList<T>.RowIdElement(newValue));
-                    }
 
-                    reader.Read();
+                        reader.Read();
 
-                    reader.Assert(JsonToken.EndObject);
-                    reader.Read();
+                        reader.Assert(JsonToken.EndObject);
+                        reader.Read();
+                    }
                 }
-            }
 
-            reader.Assert(JsonToken.EndArray);
+                reader.Assert(JsonToken.EndArray);
+            }
 
             if (existingValue == null) //Strange case...
             {

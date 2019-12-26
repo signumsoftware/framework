@@ -798,7 +798,7 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
 
 function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
-    .filter(t => t.memberInfo.type.isCollection)
+    .filter(t => t.memberInfo.type.isCollection && !t.key.startsWith("["))
     .forEach(t => (m as any)[t.key.firstLower()] = []);
 }
 
