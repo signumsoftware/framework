@@ -11,12 +11,12 @@ export interface ModifiableEntity {
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  mixins?: { [name: string]: MixinEntity }
 }
 
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value
-  mixins?: { [name: string]: MixinEntity }
 }
 
 export interface EnumEntity<T> extends Entity {
