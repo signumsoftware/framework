@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.Basics
 {
@@ -6,7 +6,7 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DisabledMixin : MixinEntity
     {
-        DisabledMixin(Entity mainEntity, MixinEntity next)
+        DisabledMixin(ModifiableEntity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
         }

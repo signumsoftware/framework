@@ -294,7 +294,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("{");
 
             if (this.BaseType == DynamicBaseType.MixinEntity)
-                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(Entity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
+                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(ModifiableEntity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
 
             foreach (var prop in Def.Properties)
             {
