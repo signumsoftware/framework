@@ -110,7 +110,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailReceptionMixin : MixinEntity
     {
-        protected EmailReceptionMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
+        protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 

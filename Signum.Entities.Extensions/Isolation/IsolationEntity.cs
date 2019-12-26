@@ -91,7 +91,7 @@ namespace Signum.Entities.Isolation
     [Serializable]
     public class IsolationMixin : MixinEntity
     {
-        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
+        IsolationMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 

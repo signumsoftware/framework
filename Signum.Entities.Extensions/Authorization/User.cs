@@ -121,7 +121,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class UserOIDMixin : MixinEntity
     {
-        UserOIDMixin(Entity mainEntity, MixinEntity? next)
+        UserOIDMixin(ModifiableEntity mainEntity, MixinEntity? next)
             : base(mainEntity, next)
         {
         }
