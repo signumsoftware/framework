@@ -14,7 +14,9 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        
+        public static Action<WorkflowActivityEntity, ModelEntity> OnGetModel;
+        public static Action<ModelEntity, WorkflowActivityEntity> OnSetModel;
+
         public WorkflowLaneEntity Lane { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -127,6 +129,9 @@ namespace Signum.Entities.Workflow
             model.UserHelp = this.UserHelp;
             model.SubWorkflow = this.SubWorkflow;
             model.Comments = this.Comments;
+
+            WorkflowActivityEntity.OnGetModel?.Invoke(this, model);
+
             return model;
         }
 
@@ -145,6 +150,8 @@ namespace Signum.Entities.Workflow
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
             this.SubWorkflow = wModel.SubWorkflow;
+
+            WorkflowActivityEntity.OnSetModel?.Invoke(model, this);
         }
     }
 
