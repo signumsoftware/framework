@@ -40,6 +40,7 @@ export { EntityTabRepeater } from './Lines/EntityTabRepeater'
 export { EntityStrip } from './Lines/EntityStrip'
 
 export { EntityCheckboxList } from './Lines/EntityCheckboxList'
+export { EntityRadioButtonList } from './Lines/EntityRadioButtonList'
 
 export { EnumCheckboxList } from './Lines/EnumCheckboxList'
 export { MultiValueLine } from './Lines/MultiValueLine'
