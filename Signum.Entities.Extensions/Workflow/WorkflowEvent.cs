@@ -42,6 +42,7 @@ namespace Signum.Entities.Workflow
                 Timer = this.Timer,
                 BpmnElementId = this.BpmnElementId,
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -52,6 +53,7 @@ namespace Signum.Entities.Workflow
             this.Type = wModel.Type;
             this.Timer = wModel.Timer;
             this.BpmnElementId = wModel.BpmnElementId;
+            this.CopyMixinsFrom(wModel);
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
         }
     }
