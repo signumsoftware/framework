@@ -46,6 +46,7 @@ namespace Signum.Entities.Workflow
             model.Actors.AssignMList(this.Actors);
             model.ActorsEval = this.ActorsEval;
             model.Name = this.Name;
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -55,6 +56,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.ActorsEval = wModel.ActorsEval;
             this.Actors.AssignMList(wModel.Actors);
+            this.CopyMixinsFrom(wModel);
         }
     }
 
