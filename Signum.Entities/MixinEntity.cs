@@ -147,10 +147,10 @@ namespace Signum.Entities
         }
 
         public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinProperty, V value)
-            where T : IEntity
+            where T : IModifiableEntity
             where M : MixinEntity
         {
-            M mixin = ((Entity)(IEntity)entity).Mixin<M>();
+            M mixin = ((ModifiableEntity)(IModifiableEntity)entity).Mixin<M>();
 
             var pi = ReflectionTools.BasePropertyInfo(mixinProperty);
 
@@ -171,11 +171,11 @@ namespace Signum.Entities
             }
         }
 
-        public static T CopyMixinsFrom<T>(this T newEntity, IEntity original, params object[] args)
-            where T: IEntity
+        public static T CopyMixinsFrom<T>(this T newEntity, IModifiableEntity original, params object[] args)
+            where T: IModifiableEntity
         {
-            var list = (from nm in ((Entity)(IEntity)newEntity).Mixins
-                        join om in ((Entity)(IEntity)original).Mixins
+            var list = (from nm in ((ModifiableEntity)(IModifiableEntity)newEntity).Mixins
+                        join om in ((ModifiableEntity)(IModifiableEntity)original).Mixins
                         on nm.GetType() equals om.GetType()
                         select new { nm, om });
 
