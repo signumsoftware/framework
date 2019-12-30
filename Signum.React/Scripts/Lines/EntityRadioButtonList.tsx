@@ -1,14 +1,12 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { useController } from './LineBase'
 
-export interface EntityRadioButtonListProps extends EntityBaseProps{
+export interface EntityRadioButtonListProps extends EntityBaseProps {
   data?: Lite<Entity>[];
   columnCount?: number;
   columnWidth?: number;
@@ -24,7 +22,7 @@ export class EntityRadioButtonListController extends EntityBaseController<Entity
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
-      state.ctx.value = [];
+      state.ctx.value = null;
 
     state.remove = false;
     state.create = false;
@@ -170,27 +168,18 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
 
     const fixedData = [...data];
 
-    const list = p.ctx.value!;
+    const value = p.ctx.value!;
 
-
-
-    list.forEach((mle: Entity | Lite<Entity>) => {
-      if (!fixedData.some(d => is(d, mle as Entity | Lite<Entity>)))
-        fixedData.insertAt(0, maybeToLite(mle as Entity | Lite<Entity>))
-    });
-
-    if (p.renderRadio)
-      return fixedData.map((lite, i) => p.renderRadio!(lite, i, list.some((mle: Entity | Lite<Entity>) => is(mle as Entity | Lite<Entity>, lite)), c));
-
+    var groupString = new Date().getTime().toString();
     return fixedData.map((lite, i) =>
       <label className="sf-radiobutton-element" key={i}>
-        <input type="radio"
-          checked={list.some((mle: Entity | Lite<Entity>) => is(mle as Entity | Lite<Entity>, lite))}
-          disabled={p.ctx.readOnly}
-          name={liteKey(lite) + props.groupKey}
-          onChange={e => c.handleOnChange(lite)} />
-        &nbsp;
-        <span className="sf-entitStrip-link">{lite.toStr}</span>
+        <div className={"buttonRadioItem" + (value && is(value as Lite<Entity>, lite) ? " buttonRadioItemChecked" : "")} onClick={e => c.handleOnChange(lite)}>
+          <input type="radio" style={{ display: "none" }}
+            checked={value && is(value as Lite<Entity>, lite)}
+            disabled={p.ctx.readOnly}
+            name={"RadioGroup" + groupString} />
+          <span className="sf-entitStrip-link">{lite.toStr}</span>
+        </div>
       </label>);
   }
 }
