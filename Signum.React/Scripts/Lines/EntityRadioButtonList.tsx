@@ -123,35 +123,10 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
   }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
-    <div className="sf-radiobutton-elements switch-field" style={getColumnStyle()}>
+    <div className="sf-radiobutton-elements switch-field">
       {renderContent()}
     </div>
   );
-
-  function getColumnStyle(): React.CSSProperties | undefined {
-    if (p.columnCount && p.columnWidth)
-      return {
-        columns: `${p.columnCount} ${p.columnWidth}px`,
-        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
-        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
-      };
-
-    if (p.columnCount)
-      return {
-        columnCount: p.columnCount,
-        MozColumnCount: p.columnCount,
-        WebkitColumnCount: p.columnCount,
-      };
-
-    if (p.columnWidth)
-      return {
-        columnWidth: p.columnWidth,
-        MozColumnWidth: p.columnWidth,
-        WebkitColumnWidth: p.columnWidth,
-      };
-
-    return undefined;
-  }
 
   function maybeToLite(entityOrLite: Entity | Lite<Entity>): Lite<Entity> {
     const entity = entityOrLite as Entity;
