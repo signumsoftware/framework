@@ -92,7 +92,7 @@ namespace Signum.Entities
                 var constructors = me.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
                 if (constructors.Length != 1)
-                    throw new InvalidOperationException("{0} should have just one non-public construtor with parameters (Entity mainEntity, MixinEntity next)"
+                    throw new InvalidOperationException($"{me.Name} should have just one non-public construtor with parameters (ModifiableEntity mainEntity, MixinEntity next)"
                         .FormatWith(me.Name));
 
                 var ci = constructors.Single();
@@ -100,7 +100,9 @@ namespace Signum.Entities
                 var pi = ci.GetParameters();
 
                 if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(ModifiableEntity) || pi[1].ParameterType != typeof(MixinEntity))
-                    throw new InvalidOperationException("{0} does not have a non-public construtor with parameters (Entity mainEntity, MixinEntity next)");
+                    throw new InvalidOperationException($"{me.Name} does not have a non-public construtor with parameters (ModifiableEntity mainEntity, MixinEntity next)." +
+                        (pi[0].ParameterType == typeof(Entity) ? "\r\nBREAKING CHANGE: The first parameter has changed from Entity -> ModifiableEntity" : null)
+                        );
 
                 return (Func<ModifiableEntity, MixinEntity?, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
             });
