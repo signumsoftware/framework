@@ -141,8 +141,7 @@ namespace Signum.React.Json
 
                 writer.WriteStartObject();
 
-                var entity = mod as Entity;
-                if (entity != null)
+                if (mod is Entity entity)
                 {
                     writer.WritePropertyName("Type");
                     writer.WriteValue(TypeLogic.TryGetCleanName(mod.GetType()));
@@ -182,12 +181,12 @@ namespace Signum.React.Json
                     WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
                 }
 
-                if (entity != null && entity.Mixins.Any())
+                if (mod.Mixins.Any())
                 {
                     writer.WritePropertyName("mixins");
                     writer.WriteStartObject();
 
-                    foreach (var m in entity.Mixins)
+                    foreach (var m in mod.Mixins)
                     {
                         var prm = pr.Add(m.GetType());
 
@@ -289,14 +288,13 @@ namespace Signum.React.Json
                         {
                             if ((string)reader.Value! == "mixins")
                             {
-                                var entity = (Entity)mod;
                                 reader.Read();
                                 reader.Assert(JsonToken.StartObject);
 
                                 reader.Read();
                                 while (reader.TokenType == JsonToken.PropertyName)
                                 {
-                                    var mixin = entity[(string)reader.Value!];
+                                    var mixin = mod[(string)reader.Value!];
 
                                     reader.Read();
 
