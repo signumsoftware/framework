@@ -98,6 +98,9 @@ function assertCorrect(m: ModifiableEntity) {
     throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | undefined>) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | undefined>, options?: { override?: boolean }) {
+  if (customConstructors[type.typeName] && !(options?.override))
+    throw new Error(`Constructor for ${type.typeName} already registered`);
+
   customConstructors[type.typeName] = constructor;
 }
