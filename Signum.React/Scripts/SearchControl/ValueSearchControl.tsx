@@ -195,7 +195,6 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   }
 
   renderValue() {
-    debugger;
     let value = this.state.value;
 
     if (value === undefined)
