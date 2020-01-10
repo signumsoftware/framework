@@ -169,7 +169,7 @@ namespace Signum.Engine.Cache
             Table table = Schema.Current.Table(type);
             DatabaseName? db = table.Name.Schema?.Database;
 
-            SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
+            SqlConnector subConnector = (SqlConnector)Connector.Current.ForDatabase(db);
 
             if (CacheLogic.LogWriter != null)
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
@@ -191,11 +191,11 @@ namespace Signum.Engine.Cache
             return list;
         }
 
-        public static void ExecuteDataReaderOptionalDependency(this SqlConnector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
+        public static void ExecuteDataReaderOptionalDependency(this Connector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
         {
             if (WithSqlDependency)
             {
-                connector.ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
+                ((SqlConnector)connector).ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
             }
             else
             {
@@ -263,8 +263,6 @@ namespace Signum.Engine.Cache
 
             lock (startKeyLock)
             {
-                
-
                 SqlConnector connector = (SqlConnector)Connector.Current;
                 bool isPostgree = false;
 
@@ -304,7 +302,7 @@ namespace Signum.Engine.Cache
 
                 foreach (var database in Schema.Current.DatabaseNames())
                 {
-                    SqlConnector sub = connector.ForDatabase(database);
+                    SqlConnector sub = (SqlConnector)connector.ForDatabase(database);
 
                     try
                     {
@@ -422,13 +420,13 @@ namespace Signum.Engine.Cache
 
         public static void Shutdown()
         {
-            if (GloballyDisabled)
+            if (GloballyDisabled || !WithSqlDependency)
                 return;
 
             var connector = ((SqlConnector)Connector.Current);
             foreach (var database in Schema.Current.DatabaseNames())
             {
-                SqlConnector sub = connector.ForDatabase(database);
+                SqlConnector sub = (SqlConnector)connector.ForDatabase(database);
 
                 SqlDependency.Stop(sub.ConnectionString);
             }

@@ -410,7 +410,7 @@ namespace Signum.Engine.Disconnected
             if (!table.PrimaryKey.Identity)
                 return null;
 
-            return Administrator.DisableIdentity(table.Name);
+            return Administrator.DisableIdentity(table);
         }
 
         protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, DatabaseName newDatabaseName, TableMList rt)

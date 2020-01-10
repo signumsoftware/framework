@@ -212,20 +212,17 @@ namespace Signum.Engine.Cache
                 {
                     CacheLogic.AssertSqlDependencyStarted();
 
-                    var connector = (SqlConnector)Connector.Current;
-                    Table table = connector.Schema.Table(typeof(T));
-
-                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+                    Table table = Connector.Current.Schema.Table(typeof(T));
 
                     Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
                     using (MeasureLoad())
-                    using (Connector.Override(subConnector))
+                    using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
                     using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        Connector.Current.ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
                         {
                             object obj = rowReader(fr);
                             result[idGetter(obj)] = obj; //Could be repeated joins
@@ -478,21 +475,17 @@ namespace Signum.Engine.Cache
                 return SqlServerRetry.Retry(() =>
                 {
                     CacheLogic.AssertSqlDependencyStarted();
-
-                    var connector = (SqlConnector)Connector.Current;
-
-                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
+                    
                     Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
 
                     using (MeasureLoad())
-                    using (Connector.Override(subConnector))
+                    using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
                     using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        Connector.Current.ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
                         {
                             object obj = rowReader(fr);
                             PrimaryKey parentId = parentIdGetter(obj);
@@ -643,20 +636,16 @@ namespace Signum.Engine.Cache
                 {
                     CacheLogic.AssertSqlDependencyStarted();
 
-                    var connector = (SqlConnector)Connector.Current;
-
-                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
                     Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
 
                     using (MeasureLoad())
-                    using (Connector.Override(subConnector))
+                    using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
                     using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        Connector.Current.ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
                         {
                             var kvp = rowReader(fr);
                             result[kvp.Key] = kvp.Value;
