@@ -1,4 +1,5 @@
 using Npgsql;
+using NpgsqlTypes;
 using Signum.Engine.Connection;
 using Signum.Engine.Maps;
 using Signum.Utilities;
@@ -56,6 +57,8 @@ namespace Signum.Engine
             this.PostgresVersion = postgresVersion;
         }
 
+        public override int MaxNameLength => 63;
+
         public int? CommandTimeout { get; set; } = null;
         public string ConnectionString { get; set; }
 
@@ -71,7 +74,7 @@ namespace Signum.Engine
 
         public override bool AllowsConvertToTime => true;
 
-        public override bool SupportsSqlDependency => true;
+        public override bool SupportsSqlDependency => false;
 
         public override bool SupportsFormat => true;
 
@@ -80,6 +83,14 @@ namespace Signum.Engine
         public override bool RequiresRetry => false;
 
         public override bool AllowsIndexWithWhere(string where) => true;
+
+        public override Connector ForDatabase(Maps.DatabaseName? database)
+        {
+            if (database == null)
+                return this;
+
+            throw new NotImplementedException("ForDatabase " + database);
+        }
 
         public override void CleanDatabase(DatabaseName? database)
         {
@@ -166,22 +177,25 @@ namespace Signum.Engine
             return cmd;
         }
 
-        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
+        protected internal override void BulkCopy(DataTable dt, List<IColumn> columns, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
         {
             EnsureConnectionRetry(con =>
             {
                 con = con ?? (NpgsqlConnection)Transaction.CurrentConnection!;
 
-                using (var writer = con.BeginBinaryImport($"COPY {destinationTable} ({dt.Columns.Cast<DataColumn>().ToString(a => a.ColumnName, ", ")}) FROM STDIN (FORMAT BINARY)"))
+                bool isPostgres = true;
+
+                var columnsSql = dt.Columns.Cast<DataColumn>().ToString(a => a.ColumnName.SqlEscape(isPostgres), ", ");
+                using (var writer = con.BeginBinaryImport($"COPY {destinationTable} ({columnsSql}) FROM STDIN (FORMAT BINARY)"))
                 {
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         var row = dt.Rows[i];
-
+                        writer.StartRow();
                         for (int j = 0; j < dt.Columns.Count; j++)
                         {
                             var col = dt.Columns[j];
-                            writer.Write(row[col]);
+                            writer.Write(row[col], columns[j].DbType.PostgreSql);
                         }
                     }
 

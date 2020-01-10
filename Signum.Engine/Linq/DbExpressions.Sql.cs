@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
         SqlTableValuedFunction,
         SqlConstant,
         SqlVariable,
-        SqlEnum,
+        SqlLiteral,
         SqlCast,
         Case,
         RowNumber,
@@ -132,20 +132,25 @@ namespace Signum.Engine.Linq
 
     internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
     {
-        public readonly Table Table;
+        public readonly Table? ViewTable;
+        public readonly Type? SingleColumnType; 
         public readonly ReadOnlyCollection<Expression> Arguments;
-        public readonly string SqlFunction;
+        public readonly ObjectName SqlFunction;
 
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        public SqlTableValuedFunctionExpression(string sqlFunction, Table table, Alias alias, IEnumerable<Expression> arguments)
+        public SqlTableValuedFunctionExpression(ObjectName sqlFunction, Table? viewTable, Type? singleColumnType, Alias alias, IEnumerable<Expression> arguments)
             : base(DbExpressionType.SqlTableValuedFunction, alias)
         {
+            if ((viewTable == null) == (singleColumnType == null))
+                throw new ArgumentException("Either viewTable or singleColumn should be set");
+
             this.SqlFunction = sqlFunction;
-            this.Table = table;
+            this.ViewTable = viewTable;
+            this.SingleColumnType = singleColumnType;
             this.Arguments = arguments.ToReadOnly();
         }
 
@@ -158,12 +163,20 @@ namespace Signum.Engine.Linq
 
         internal ColumnExpression GetIdExpression()
         {
-            var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
+            if (ViewTable != null)
+            {
 
-            if (expression == null)
-                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".FormatWith(Table.Name));
+                var expression = ((ITablePrivate)ViewTable).GetPrimaryOrder(Alias);
 
-            return expression;
+                if (expression == null)
+                    throw new InvalidOperationException("Impossible to determine Primary Key for {0}".FormatWith(ViewTable.Name));
+
+                return expression;
+            }
+            else
+            {
+                return new ColumnExpression(this.SingleColumnType!, Alias, null);
+            }
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -221,16 +234,16 @@ namespace Signum.Engine.Linq
     internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
         public readonly Alias Alias;
-        public readonly string Name;
+        public readonly string? Name;
 
-        internal ColumnExpression(Type type, Alias alias, string name)
+        internal ColumnExpression(Type type, Alias alias, string? name)
             : base(DbExpressionType.Column, type)
         {
             if (type.UnNullify() == typeof(PrimaryKey))
                 throw new ArgumentException("type should not be PrimaryKey");
 
             this.Alias = alias ?? throw new ArgumentNullException(nameof(alias));
-            this.Name = name ?? throw new ArgumentNullException(nameof(name));
+            this.Name = name ?? (Schema.Current.Settings.IsPostgres ? (string?)null : throw new ArgumentNullException(nameof(name)));
         }
 
         public override string ToString()
@@ -246,7 +259,7 @@ namespace Signum.Engine.Linq
 
         public override int GetHashCode()
         {
-            return Alias.GetHashCode() ^ Name.GetHashCode();
+            return Alias.GetHashCode() ^ (Name?.GetHashCode() ?? -1);
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -285,33 +298,54 @@ namespace Signum.Engine.Linq
         StdDev,
         StdDevP,
         Count,
+        CountDistinct,
         Min,
         Max,
         Sum,
+
+        string_agg,
+    }
+
+    static class AggregateSqlFunctionExtensions
+    {
+        public static bool OrderMatters(this AggregateSqlFunction aggregateFunction)
+        {
+            switch (aggregateFunction)
+            {
+                case AggregateSqlFunction.Average:
+                case AggregateSqlFunction.StdDev:
+                case AggregateSqlFunction.StdDevP:
+                case AggregateSqlFunction.Count:
+                case AggregateSqlFunction.CountDistinct:
+                case AggregateSqlFunction.Min:
+                case AggregateSqlFunction.Max:
+                case AggregateSqlFunction.Sum:
+                    return false;
+                case AggregateSqlFunction.string_agg:
+                    return true;
+                default:
+                    throw new UnexpectedValueException(aggregateFunction);
+            }
+        }
     }
 
     internal class AggregateExpression : DbExpression
     {
-        public readonly Expression Expression;
-        public readonly bool Distinct;
         public readonly AggregateSqlFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction, bool distinct)
+        public readonly ReadOnlyCollection<Expression> Arguments;
+        public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (aggregateFunction != AggregateSqlFunction.Count && expression == null )
-                throw new ArgumentNullException(nameof(expression));
-
-            if (distinct && (aggregateFunction != AggregateSqlFunction.Count || expression == null))
-                throw new ArgumentException("Distinct only allowed for Count with expression");
-
-            this.Distinct = distinct;
-            this.Expression = expression;
+            if (arguments == null)
+                throw new ArgumentNullException(nameof(arguments));
+            
             this.AggregateFunction = aggregateFunction;
+            this.Arguments = arguments.ToReadOnly();
         }
 
         public override string ToString()
         {
-            return $"{AggregateFunction}({(Distinct ? "Distinct " : "")}{Expression?.ToString() ?? "*"})";
+            return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments?.ToString(", ") ?? "*"})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -420,7 +454,7 @@ namespace Signum.Engine.Linq
 
                 if (GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
-                else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
+                else if (AggregateFinder.GetAggregates(Columns) != null)
                     roles |= SelectRoles.Aggregate;
 
                 if (OrderBy.Count > 0)
@@ -439,7 +473,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public bool IsAllAggregates  => Columns.Any() && Columns.All(a => a.Expression is AggregateExpression);
+        public bool IsAllAggregates  => Columns.Any() && Columns.All(a => a.Expression is AggregateExpression ag && !ag.AggregateFunction.OrderMatters());
 
         public override string ToString()
         {
@@ -601,7 +635,6 @@ namespace Signum.Engine.Linq
 
         COALESCE,
         CONVERT,
-        ISNULL,
         STUFF,
     }
 
@@ -611,6 +644,9 @@ namespace Signum.Engine.Linq
         starts_with,
         length,
         EXTRACT,
+        trunc,
+        substr,
+        repeat,
     }
 
     internal enum SqlEnums
@@ -627,16 +663,16 @@ namespace Signum.Engine.Linq
         second,
         millisecond,
         dayofyear, //SQL Server
-        doy       //Postgres
+        doy,       //Postgres
+        epoch
     }
 
-
-
-    internal class SqlEnumExpression : DbExpression
+    internal class SqlLiteralExpression : DbExpression
     {
-        public readonly SqlEnums Value;
-        public SqlEnumExpression(SqlEnums value)
-            : base(DbExpressionType.SqlEnum, typeof(object))
+        public readonly string Value;
+        public SqlLiteralExpression(SqlEnums value) : this(typeof(object), value.ToString()) { }
+        public SqlLiteralExpression(Type type, string value)
+            : base(DbExpressionType.SqlLiteral, type)
         {
             this.Value = value;
         }
@@ -648,7 +684,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
-            return visitor.VisitSqlEnum(this);
+            return visitor.VisitSqlLiteral(this);
         }
     }
 

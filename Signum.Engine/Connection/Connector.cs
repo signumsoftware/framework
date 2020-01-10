@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace Signum.Engine
 {
@@ -85,13 +86,15 @@ namespace Signum.Engine
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token);
-        protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout);
+        protected internal abstract void BulkCopy(DataTable dt, List<IColumn> columns, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout);
+
+        public abstract Connector ForDatabase(Maps.DatabaseName? database);
 
         public abstract string DatabaseName();
 
         public abstract string DataSourceName();
 
-        public virtual int MaxNameLength { get { return 128; } }
+        public abstract int MaxNameLength { get; }
 
         public abstract void SaveTransactionPoint(DbTransaction transaction, string savePointName);
 

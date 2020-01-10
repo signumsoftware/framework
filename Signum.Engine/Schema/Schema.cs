@@ -61,7 +61,7 @@ namespace Signum.Engine.Maps
             get { return tables; }
         }
 
-        public List<string> PostgreeExtensions = new List<string>()
+        public List<string> PostgresExtensions = new List<string>()
         {
             "uuid-ossp"
         };
@@ -553,7 +553,7 @@ namespace Signum.Engine.Maps
             this.ViewBuilder = new Maps.ViewBuilder(this);
 
             Generating += SchemaGenerator.SnapshotIsolation;
-            Generating += SchemaGenerator.PostgreeExtensions;
+            Generating += SchemaGenerator.PostgresExtensions;
             Generating += SchemaGenerator.PostgreeTemporalTableScript;
             Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;

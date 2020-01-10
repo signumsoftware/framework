@@ -85,7 +85,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("InsertMany", () => this.Type.TypeName()))
             {
-                if (IdentityBehaviour)
+                if (IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this))
                 {
                     InsertCacheIdentity ic = inserterIdentity.Value;
                     list.SplitStatements(this.Columns.Count, ls => ic.GetInserter(ls.Count)(ls, backEdges));
@@ -108,7 +108,7 @@ namespace Signum.Engine.Maps
         internal List<DbParameter> GetInsertParameters(object entity)
         {
             List<DbParameter> parameters = new List<DbParameter>();
-            if (IdentityBehaviour)
+            if (IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this))
                 inserterIdentity.Value.InsertParameters((Entity)entity, new Forbidden(), "", parameters);
             else
                 inserterDisableIdentity.Value.InsertParameters(entity, new Forbidden(), "", parameters);
@@ -497,6 +497,11 @@ namespace Signum.Engine.Maps
                             throw new ConcurrencyException(table.Type, missing);
                         }
 
+                        if (isPostgres && num > 1)
+                        {
+                            new SqlPreCommandSimple($"DROP TABLE {updated}").ExecuteNonQuery();
+                        }
+
                         if (table.saveCollections.Value != null)
                             table.saveCollections.Value.UpdateCollections(idents.Select(e => new EntityForbidden(e, new Forbidden(graph, e))).ToList());
                     };
@@ -676,7 +681,7 @@ SELECT {id} FROM rows;";
 
             SqlPreCommand? collections = GetInsertCollectionSync(ident, includeCollections, suffix);
 
-            SqlPreCommandSimple insert = IdentityBehaviour ?
+            SqlPreCommandSimple insert = IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this) ?
                 new SqlPreCommandSimple(
                     inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, isGuid && collections != null),
                     new List<DbParameter>().Do(dbParams => inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment) :
@@ -775,7 +780,7 @@ SELECT {id} FROM rows;";
             public Trio(IColumn column, Expression value, Expression suffix)
             {
                 this.SourceColumn = column.Name;
-                this.ParameterName = Engine.ParameterBuilder.GetParameterName(column.Name);
+                this.ParameterName = Signum.Engine.ParameterBuilder.GetParameterName(column.Name);
                 this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, suffix), column.DbType, column.UserDefinedTypeName, column.Nullable.ToBool(), value);
             }
 

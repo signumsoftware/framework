@@ -177,7 +177,7 @@ namespace Signum.Engine.Linq
             return ml;
         }
 
-        protected internal virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
+        protected internal virtual Expression VisitSqlLiteral(SqlLiteralExpression sqlEnum)
         {
             return sqlEnum;
         }
@@ -334,9 +334,9 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = Visit(aggregate.Expression);
-            if (source != aggregate.Expression)
-                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction, aggregate.Distinct);
+            var expressions = Visit(aggregate.Arguments);
+            if (expressions != aggregate.Arguments)
+                return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, expressions);
             return aggregate;
         }
 
@@ -428,7 +428,7 @@ namespace Signum.Engine.Linq
         {
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments)
-                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
             return sqlFunction;
         }
 

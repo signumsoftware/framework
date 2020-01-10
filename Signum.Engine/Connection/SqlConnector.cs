@@ -89,13 +89,6 @@ namespace Signum.Engine
             this.ParameterBuilder = new SqlParameterBuilder();
 
             this.Version = version;
-            if (version >= SqlServerVersion.SqlServer2008 && schema != null)
-            {
-                var s = schema.Settings;
-
-                if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
-                    schema.Settings.TypeValues.Add(typeof(TimeSpan), new AbstractDbType(SqlDbType.Time));
-            }
         }
 
         public int? CommandTimeout { get; set; } = null;
@@ -375,7 +368,7 @@ namespace Signum.Engine
             return ex;
         }
 
-        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
+        protected internal override void BulkCopy(DataTable dt, List<IColumn> columns, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
         {
             EnsureConnectionRetry(con =>
             {
@@ -446,7 +439,7 @@ namespace Signum.Engine
             get { return true; }
         }
 
-        public SqlConnector ForDatabase(Maps.DatabaseName? database)
+        public override Connector ForDatabase(Maps.DatabaseName? database)
         {
             if (database == null)
                 return this;
@@ -519,7 +512,8 @@ namespace Signum.Engine
             get { return Version >= SqlServerVersion.SqlServer2016; }
         }
 
-        
+        public override int MaxNameLength => 128;
+
         public override string ToString() => $"SqlConnector({Version})";
     }
 

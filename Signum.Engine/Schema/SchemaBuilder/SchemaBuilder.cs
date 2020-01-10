@@ -440,7 +440,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("GenerateField", () => route.ToString()))
             {
-                KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".FormatWith(route, route.Type.Name));
+                KindOfField kof = GetKindOfField(route);
 
                 if (kof == KindOfField.MList && inMList)
                     throw new InvalidOperationException("Field {0} of type {1} can not be nested in another MList".FormatWith(route, route.Type.TypeName(), kof));
@@ -498,7 +498,7 @@ namespace Signum.Engine.Maps
             MList,
         }
 
-        protected virtual KindOfField? GetKindOfField(PropertyRoute route)
+        protected virtual KindOfField GetKindOfField(PropertyRoute route)
         {
             if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiId))
                 return KindOfField.PrimaryKey;
@@ -521,7 +521,13 @@ namespace Signum.Engine.Maps
             if (Reflector.IsMList(route.Type))
                 return KindOfField.MList;
 
-            return null;
+            if (Settings.IsPostgres && route.Type.IsArray)
+            {
+                if (Settings.TryGetSqlDbType(Settings.FieldAttribute<DbTypeAttribute>(route), route.Type.ElementType()!) != null)
+                    return KindOfField.Value;
+            }
+
+            throw new InvalidOperationException($"Field {route} of type {route.Type.Name} has no database representation");
         }
 
         protected virtual Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
@@ -584,7 +590,9 @@ namespace Signum.Engine.Maps
         {
             var att = Settings.FieldAttribute<DbTypeAttribute>(route);
 
-            DbTypePair pair = Settings.GetSqlDbType(att, route.Type);
+            DbTypePair pair = Settings.IsPostgres && route.Type.IsArray ?
+               Settings.GetSqlDbType(att, route.Type.ElementType()!) :
+               Settings.GetSqlDbType(att, route.Type);
 
             return new FieldValue(route, null, name.ToString())
             {
@@ -835,7 +843,7 @@ namespace Signum.Engine.Maps
             {
                 case KindOfField.Value:
                 case KindOfField.Embedded:
-                    return type.Name.FirstUpper();
+                    return type.Name;
                 case KindOfField.Enum:
                 case KindOfField.Reference:
                     return (EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type)) + "ID";
@@ -847,7 +855,7 @@ namespace Signum.Engine.Maps
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
             string name = route.PropertyInfo != null ? (route.PropertyInfo.Name.TryAfterLast('.') ?? route.PropertyInfo.Name)
-                : route.FieldInfo!.Name.FirstUpper();
+                : route.FieldInfo!.Name;
 
             switch (kindOfField)
             {

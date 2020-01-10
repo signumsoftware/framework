@@ -291,7 +291,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareAggregate(AggregateExpression a, AggregateExpression b)
         {
-            return a.AggregateFunction == b.AggregateFunction && Compare(a.Expression, b.Expression);
+            return a.AggregateFunction == b.AggregateFunction && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
         protected virtual bool CompareAggregateSubquery(AggregateRequestsExpression a, AggregateRequestsExpression b)
@@ -316,7 +316,7 @@ namespace Signum.Engine.Linq
 
         private bool CompareTableValuedSqlFunction(SqlTableValuedFunctionExpression a, SqlTableValuedFunctionExpression b)
         {
-            return a.Table == b.Table
+            return a.ViewTable == b.ViewTable
               && CompareAlias(a.Alias, b.Alias)
               && CompareList(a.Arguments, b.Arguments, Compare);
         }

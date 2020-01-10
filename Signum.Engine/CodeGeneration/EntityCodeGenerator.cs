@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Signum.Engine.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -70,7 +71,9 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual List<DiffTable> GetTables()
         {
-            return SchemaSynchronizer.DefaultGetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList();
+            return Schema.Current.Settings.IsPostgres ?
+                PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList() :
+                SysTablesSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList();
         }
 
         protected virtual void GetSolutionInfo(out string solutionFolder, out string solutionName)

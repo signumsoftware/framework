@@ -4,6 +4,7 @@ using System.Linq;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine
 {
@@ -42,8 +43,8 @@ namespace Signum.Engine
         {
             var primaryKeyConstraint = t.PrimaryKey == null ? null : 
                 isPostgres ? 
-                "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape(isPostgres)) : 
-                "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape(isPostgres));
+                "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) : 
+                "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
 
             var systemPeriod = t.SystemVersioned == null || IsPostgres ? null : Period(t.SystemVersioned);
 
@@ -353,9 +354,9 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
             return (int)Executor.ExecuteScalar(
 $@"SELECT Count(*) FROM {oldTableName}
-WHERE {oldPrimaryKey} NOT IN
+WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 (
-    SELECT MIN({oldPrimaryKey})
+    SELECT MIN({oldPrimaryKey.SqlEscape(IsPostgres)})
     FROM {oldTableName}
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
@@ -427,14 +428,29 @@ WHERE {primaryKey.Name} NOT IN
             return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1});".FormatWith(tab.Name, tabCol.Name));;
         }
 
-        public SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName) =>
-            AlterTableDropConstraint(tableName, constraintName.Name);
+        public SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName foreignKeyName) =>
+            AlterTableDropConstraint(tableName, foreignKeyName.Name);
 
         public SqlPreCommand AlterTableDropConstraint(ObjectName tableName, string constraintName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1};".FormatWith(
                 tableName,
                 constraintName.SqlEscape(isPostgres)));
+        }
+
+        public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, DiffColumn column)
+        {
+            if (isPostgres)
+                return AlterTableAlterColumnDropDefault(tableName, column.Name);
+            else
+                return AlterTableDropConstraint(tableName, column.DefaultConstraint!.Name!);
+        }
+
+        public SqlPreCommand AlterTableAlterColumnDropDefault(ObjectName tableName, string columnName)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT;".FormatWith(
+                tableName,
+                columnName.SqlEscape(isPostgres)));
         }
 
         public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint constraint)
@@ -462,7 +478,9 @@ WHERE {primaryKey.Name} NOT IN
 
         public string ForeignKeyName(string table, string fieldName)
         {
-            return "FK_{0}_{1}".FormatWith(table, fieldName).SqlEscape(isPostgres);
+            var result = "FK_{0}_{1}".FormatWith(table, fieldName);
+
+            return StringHashEncoder.ChopHash(result, this.connector.MaxNameLength).SqlEscape(isPostgres);
         }
 
         public SqlPreCommand RenameForeignKey(ObjectName foreignKeyName, string newName)

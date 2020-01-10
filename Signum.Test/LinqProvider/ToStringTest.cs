@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -65,7 +65,7 @@ namespace Signum.Test.LinqProvider
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Name, " | "),
+                               AlbumnsToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Name, " | "),
                            }).ToList();
 
             var result2 = (from b in Database.Query<BandEntity>()
@@ -73,10 +73,10 @@ namespace Signum.Test.LinqProvider
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Name).ToList().ToString(" | "),
+                               AlbumnsToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Name).ToList().ToString(" | "),
                            }).ToList();
 
-            Assert.True(Enumerable.SequenceEqual(result1, result2));
+            Assert.Equal(result1, result2);
         }
 
 
@@ -88,7 +88,7 @@ namespace Signum.Test.LinqProvider
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Id.ToString(), " | "),
+                               AlbumnsToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Id.ToString(), " | "),
                            }).ToList();
 
             var result2 = (from b in Database.Query<BandEntity>()
@@ -96,7 +96,7 @@ namespace Signum.Test.LinqProvider
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToString(" | "),
+                               AlbumnsToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToString(" | "),
                            }).ToList();
 
             Func<List<PrimaryKey>, string> toString = list => list.ToString(" | ");
@@ -106,7 +106,7 @@ namespace Signum.Test.LinqProvider
                            select new
                            {
                                b.Name,
-                               MembersToString = toString(Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToList()),
+                               AlbumnsToString = toString(Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToList()),
                            }).ToList();
 
 

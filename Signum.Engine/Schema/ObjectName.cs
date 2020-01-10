@@ -8,7 +8,12 @@ namespace Signum.Engine.Maps
         internal static string UnScapeSql(this string name, bool isPostgres)
         {
             if (isPostgres)
-                name.Trim('\"');
+            {
+                if (name.StartsWith('\"'))
+                    return name.Trim('\"');
+
+                return name.ToLower();
+            }
 
             return name.Trim('[', ']');
         }
@@ -183,6 +188,8 @@ namespace Signum.Engine.Maps
 
     public class ObjectName : IEquatable<ObjectName>
     {
+        public static int MaxPostgreeSize = 63; 
+
         public string Name { get; private set; }
         public bool IsPostgres { get; private set; }
 
@@ -191,6 +198,9 @@ namespace Signum.Engine.Maps
         public ObjectName(SchemaName schema, string name, bool isPostgres)
         {
             this.Name = name.HasText() ? name : throw new ArgumentNullException(nameof(name));
+            if (isPostgres && this.Name.Length > MaxPostgreeSize)
+                throw new InvalidOperationException($"The name '{name}' is too long, consider using TableNameAttribute/ColumnNameAttribute");
+
             this.Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             this.IsPostgres = isPostgres;
         }
@@ -228,9 +238,18 @@ namespace Signum.Engine.Maps
         {
             if (isPostgres)
             {
+                if (!str.EndsWith('\"'))
+                {
+                    return (
+                        prefix: str.TryBeforeLast('.'),
+                        name: str.TryAfterLast('.') ?? str
+                        );
+                }
+
+                var index = str.LastIndexOf('\"', str.Length - 2);
                 return (
-                    prefix: str.TryBeforeLast("."),
-                    name: (str.TryAfterLast(".") ?? str).UnScapeSql(isPostgres)
+                    prefix: index == 0 ? null : str.Substring(0, index - 1),
+                    name: str.Substring(index).UnScapeSql(isPostgres)
                 );
             }
             else

@@ -203,7 +203,7 @@ namespace Signum.Engine.Linq
                 if (u.NodeType == ExpressionType.Convert && u.Operand is ColumnExpression && DiffersInNullability(u.Type, u.Operand.Type))
                 {
                     ColumnExpression column = (ColumnExpression)u.Operand;
-                    return scope.GetColumnExpression(row, column.Alias, column.Name, u.Type);
+                    return scope.GetColumnExpression(row, column.Alias, column.Name!, u.Type);
                 }
 
                 return base.VisitUnary(u);
@@ -219,7 +219,7 @@ namespace Signum.Engine.Linq
 
             protected internal override Expression VisitColumn(ColumnExpression column)
             {
-                return scope.GetColumnExpression(row, column.Alias, column.Name, column.Type);
+                return scope.GetColumnExpression(row, column.Alias, column.Name!, column.Type);
             }
 
             protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
@@ -551,7 +551,7 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitNew(NewExpression node)
             {
-                var expressions =  this.Visit(node.Arguments);
+                var expressions = this.Visit(node.Arguments);
 
                 if (node.Members != null)
                 {
@@ -561,7 +561,7 @@ namespace Signum.Engine.Linq
                         var e = expressions[i];
                         if (m is PropertyInfo pi && !pi.PropertyType.IsAssignableFrom(e.Type))
                         {
-                            throw  new InvalidOperationException(
+                            throw new InvalidOperationException(
                                 $"Impossible to assign a '{e.Type.TypeName()}' to the member '{m.Name}' of type '{pi.PropertyType.TypeName()}'." +
                                 (e.Type.IsInstantiationOf(typeof(IEnumerable<>)) ? "\nConsider adding '.ToList()' at the end of your sub-query" : null)
                             );
@@ -569,7 +569,7 @@ namespace Signum.Engine.Linq
                     }
                 }
 
-                    return (Expression) node.Update(expressions);
+                return (Expression)node.Update(expressions);
             }
         }
     }

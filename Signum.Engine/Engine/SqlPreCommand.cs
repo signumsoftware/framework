@@ -168,6 +168,9 @@ namespace Signum.Engine
             if (value is string s)
                 return "\'" + s.Replace("'", "''") + "'";
 
+            if (value is char c)
+                return "\'" + c.ToString().Replace("'", "''") + "'";
+
             if (value is Guid g)
                 return "\'" + g.ToString() + "'";
 
@@ -193,6 +196,9 @@ namespace Signum.Engine
 
             if (value is byte[] bytes)
                 return "0x" + BitConverter.ToString(bytes).Replace("-", "");
+
+            if (value is IFormattable f)
+                return f.ToString(null, CultureInfo.InvariantCulture);
 
             return value.ToString()!;
         }

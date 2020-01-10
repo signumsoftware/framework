@@ -1,6 +1,8 @@
 using Signum.Engine;
+using Signum.Engine.Engine;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
+using Signum.Engine.PostgresCatalog;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Utilities;
@@ -8,6 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
@@ -42,7 +45,7 @@ namespace Signum.Engine
                  select new DiffColumn
                  {
                      Name = c.name,
-                     DbType = new AbstractDbType(SchemaSynchronizer.ToSqlDbType(c.Type()!.name)),
+                     DbType = new AbstractDbType(SysTablesSchema.ToSqlDbType(c.Type()!.name)),
                      UserTypeName = null,
                      PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
@@ -180,6 +183,13 @@ namespace Signum.Engine
         public static bool ExistsTable(ITable table)
         {
             SchemaName schema = table.Name.Schema;
+            if (Schema.Current.Settings.IsPostgres)
+            {
+                return (from t in Database.View<PgClass>()
+                        join ns in Database.View<PgNamespace>() on t.relnamespace equals ns.oid
+                        where t.relname == table.Name.Name && ns.nspname == schema.Name
+                        select t).Any();
+            }
 
             if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database!.Server!.Name))
                 return false;
@@ -217,6 +227,8 @@ namespace Signum.Engine
             }
         }
 
+
+
         public static IDisposable DisableIdentity<T>()
             where T : Entity
         {
@@ -224,38 +236,37 @@ namespace Signum.Engine
             return DisableIdentity(table);
         }
 
-        public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
+        public static IDisposable? DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
           where T : Entity
         {
             TableMList table = ((FieldMList)Schema.Current.Field(mListField)).TableMList;
-            return DisableIdentity(table.Name);
+            return DisableIdentity(table);
         }
 
-        public static IDisposable DisableIdentity(Table table)
+        public static bool IsIdentityBehaviourDisabled(ITable table)
+        {
+            return identityBehaviourDisabled.Value?.Contains(table) == true;
+        }
+
+        static ThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
+        public static IDisposable DisableIdentity(ITable table, bool behaviourOnly = false)
         {
             if (!table.IdentityBehaviour)
                 throw new InvalidOperationException("Identity is false already");
 
-            table.IdentityBehaviour = false;
-            if (table.PrimaryKey.Default == null)
-                Connector.Current.SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
+            var sqlBuilder = Connector.Current.SqlBuilder;
+            var oldValue = identityBehaviourDisabled.Value ?? ImmutableStack<ITable>.Empty;
+
+            identityBehaviourDisabled.Value = oldValue.Push(table);
+            if (table.PrimaryKey.Default == null && !sqlBuilder.IsPostgres && !behaviourOnly)
+                sqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
-                table.IdentityBehaviour = true;
+                identityBehaviourDisabled.Value = oldValue.IsEmpty ? null : oldValue;
 
-                if (table.PrimaryKey.Default == null)
-                    Connector.Current.SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
-            });
-        }
-
-        public static IDisposable DisableIdentity(ObjectName tableName)
-        {
-            Connector.Current.SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
-
-            return new Disposable(() =>
-            {
-                Connector.Current.SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
+                if (table.PrimaryKey.Default == null && !sqlBuilder.IsPostgres && !behaviourOnly)
+                    sqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
             });
         }
 
@@ -269,7 +280,6 @@ namespace Signum.Engine
                 tr.Commit();
             }
         }
-
 
         public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
             where T : Entity

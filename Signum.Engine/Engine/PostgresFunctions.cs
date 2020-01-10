@@ -1,0 +1,36 @@
+using Microsoft.SqlServer.Server;
+using System;
+using System.Linq;
+
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+namespace Signum.Engine.PostgresCatalog
+{
+    public class PostgresFunctions
+    {
+        [SqlMethod(Name = "pg_catalog.string_to_array")]
+        public static string[] string_to_array(string str, string separator) => throw new NotImplementedException();
+
+        [SqlMethod(Name = "pg_catalog.encode")]
+        public static string encode(byte[] bytea, string format) => throw new NotImplementedException();
+
+        [SqlMethod(Name = "pg_catalog.pg_get_expr")]
+        public static string pg_get_expr(string adbin, int adrelid) => throw new NotImplementedException();
+
+        [SqlMethod(Name = "pg_catalog.unnest")]
+        public static IQueryable<T> unnest<T>(T[] array) => throw new NotImplementedException();
+
+        [SqlMethod(Name = "pg_catalog.generate_series")]
+        public static IQueryable<int> generate_series(int start, int stopIncluded) => throw new NotImplementedException();
+        
+        [SqlMethod(Name = "pg_catalog.generate_series")]
+        public static IQueryable<int> generate_series(int start, int stopIncluded, int step) => throw new NotImplementedException();
+
+        [SqlMethod(Name = "pg_catalog.generate_subscripts")]
+        public static IQueryable<int> generate_subscripts(Array array, int dimension) => throw new NotImplementedException();
+
+        [SqlMethod(Name = "pg_catalog.generate_subscripts")]
+        public static IQueryable<int> generate_subscripts(Array array, int dimension, bool reverse) => throw new NotImplementedException();
+    }
+
+}
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.

@@ -16,10 +16,12 @@ namespace Signum.Engine
             var sqlBuilder = Connector.Current.SqlBuilder;
             var defaultSchema = SchemaName.Default(s.Settings.IsPostgres);
 
-            return s.GetDatabaseTables()
+            var schemas = s.GetDatabaseTables()
                 .Select(a => a.Name.Schema)
-                .Where(sn => sn != defaultSchema && !s.IsExternalDatabase(sn.Database))
-                .Distinct()
+                .Where(sn => !sn.Equals(defaultSchema) && !s.IsExternalDatabase(sn.Database))
+                .Distinct();
+
+            return schemas
                 .Select(sqlBuilder.CreateSchema)
                 .Combine(Spacing.Simple);
         }
@@ -60,12 +62,12 @@ namespace Signum.Engine
                     ).Combine(Spacing.Double)?.PlainSqlCommand();
         }
 
-        public static SqlPreCommand? PostgreeExtensions()
+        public static SqlPreCommand? PostgresExtensions()
         {
             if (!Schema.Current.Settings.IsPostgres)
                 return null;
 
-            return Schema.Current.PostgreeExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
+            return Schema.Current.PostgresExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand? PostgreeTemporalTableScript()

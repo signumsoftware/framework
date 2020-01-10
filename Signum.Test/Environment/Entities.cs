@@ -361,14 +361,14 @@ namespace Signum.Test.Environment
 
     public static class MinimumExtensions
     {
-        [SqlMethod(Name = "dbo.MinimumTableValued")]
+        [SqlMethod(Name = "MinimumTableValued")]
         public static IQueryable<IntValue> MinimumTableValued(int? a, int? b)
         {
             throw new InvalidOperationException("sql only");
         }
 
 
-        [SqlMethod(Name = "dbo.MinimumScalar")]
+        [SqlMethod(Name = "MinimumScalar")]
         public static int? MinimumScalar(int? a, int? b)
         {
             throw new InvalidOperationException("sql only");

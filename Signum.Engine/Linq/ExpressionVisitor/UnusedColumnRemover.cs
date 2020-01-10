@@ -9,7 +9,7 @@ namespace Signum.Engine.Linq
 {
     internal class UnusedColumnRemover : DbExpressionVisitor
     {
-        Dictionary<Alias, HashSet<string>> allColumnsUsed = new Dictionary<Alias, HashSet<string>>();
+        Dictionary<Alias, HashSet<string?>> allColumnsUsed = new Dictionary<Alias, HashSet<string?>>();
 
         private UnusedColumnRemover() { }
 
@@ -32,7 +32,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSelect(SelectExpression select)
         {
             // visit column projection first
-            HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(select.Alias); // a veces no se usa
+            HashSet<string?> columnsUsed = allColumnsUsed.GetOrCreate(select.Alias); // a veces no se usa
 
             ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.Select(c =>
             {
@@ -81,7 +81,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSetOperator(SetOperatorExpression set)
         {
-            HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
+            HashSet<string?> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
 
             allColumnsUsed.GetOrCreate(set.Left.Alias).AddRange(columnsUsed);
             allColumnsUsed.GetOrCreate(set.Right.Alias).AddRange(columnsUsed);

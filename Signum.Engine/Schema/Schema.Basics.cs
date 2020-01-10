@@ -37,6 +37,8 @@ namespace Signum.Engine.Maps
 
         SystemVersionedInfo? SystemVersioned { get; }
 
+        bool IdentityBehaviour { get; }
+
         FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
     }
 
@@ -145,7 +147,7 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        public bool IdentityBehaviour { get; set; }
+        public bool IdentityBehaviour { get; internal set; }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -1269,6 +1271,8 @@ namespace Signum.Engine.Maps
             get { return PrimaryKey; }
         }
 
+        public bool IdentityBehaviour => true; //For now
+
         internal object[] BulkInsertDataRow(Entity entity, object value, int order)
         {
             return this.cache.Value.BulkInsertDataRow(entity, value, order);
@@ -1288,31 +1292,35 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public struct AbstractDbType
+    public struct AbstractDbType : IEquatable<AbstractDbType>
     {
         SqlDbType? sqlServer;
         public SqlDbType SqlServer => sqlServer ?? throw new InvalidOperationException("No SqlDbType type defined");
 
-        NpgsqlDbType? posrtgreSql;
-        public NpgsqlDbType PostgreSql => posrtgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
+        NpgsqlDbType? postgreSql;
+        public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
 
         public AbstractDbType(SqlDbType sqlDbType)
         {
             this.sqlServer = sqlDbType;
-            this.posrtgreSql = null;
+            this.postgreSql = null;
         }
 
         public AbstractDbType(NpgsqlDbType npgsqlDbType)
         { 
             this.sqlServer = null;
-            this.posrtgreSql = npgsqlDbType;
+            this.postgreSql = npgsqlDbType;
         }
 
         public AbstractDbType(SqlDbType sqlDbType, NpgsqlDbType npgsqlDbType)
         {
             this.sqlServer = sqlDbType;
-            this.posrtgreSql = npgsqlDbType;
+            this.postgreSql = npgsqlDbType;
         }
+
+        public override bool Equals(object? obj) => obj is AbstractDbType adt && Equals(adt);
+        public bool Equals(AbstractDbType adt) => this.postgreSql == adt.postgreSql && this.sqlServer == adt.sqlServer;
+        public override int GetHashCode() => this.postgreSql.GetHashCode() ^ this.sqlServer.GetHashCode();
 
         public bool IsDate()
         {
@@ -1328,7 +1336,7 @@ namespace Signum.Engine.Maps
                         return false;
                 }
 
-            if (posrtgreSql is NpgsqlDbType p)
+            if (postgreSql is NpgsqlDbType p)
                 switch (p)
                 {
                     case NpgsqlDbType.Date:
@@ -1361,7 +1369,7 @@ namespace Signum.Engine.Maps
                         return false;
                 }
 
-            if (posrtgreSql is NpgsqlDbType p)
+            if (postgreSql is NpgsqlDbType p)
                 switch (p)
                 {
                     case NpgsqlDbType.Smallint:
@@ -1394,7 +1402,7 @@ namespace Signum.Engine.Maps
                 }
 
 
-            if (posrtgreSql is NpgsqlDbType p)
+            if (postgreSql is NpgsqlDbType p)
                 switch (p)
                 {
                     case NpgsqlDbType.Char:
@@ -1409,13 +1417,13 @@ namespace Signum.Engine.Maps
         }
 
 
-        public override string? ToString() => throw new InvalidOperationException("use ToString(isPostgress)");
+        public override string? ToString() => ToString(Schema.Current.Settings.IsPostgres);
         public string ToString(bool isPostgres)
         {
             if (!isPostgres)
-                sqlServer.ToString()!.ToUpperInvariant();
+                return sqlServer.ToString()!.ToUpperInvariant();
 
-            var pg = posrtgreSql!.Value;
+            var pg = postgreSql!.Value;
             if ((pg & NpgsqlDbType.Array) != 0)
                 return (pg & ~NpgsqlDbType.Range).ToString() + "[]";
 
@@ -1429,6 +1437,9 @@ namespace Signum.Engine.Maps
                     case NpgsqlDbType.Date: return "daterange";
                     throw new InvalidOperationException("");
                 }
+
+            if (pg == NpgsqlDbType.Double)
+                return "double precision";
 
             return pg.ToString()!;
         }
@@ -1445,7 +1456,7 @@ namespace Signum.Engine.Maps
                 }
 
 
-            if (posrtgreSql is NpgsqlDbType p)
+            if (postgreSql is NpgsqlDbType p)
                 switch (p)
                 {
                     case NpgsqlDbType.Uuid:
@@ -1468,7 +1479,7 @@ namespace Signum.Engine.Maps
                         return false;
                 }
 
-            if (posrtgreSql is NpgsqlDbType p)
+            if (postgreSql is NpgsqlDbType p)
                 switch (p)
                 {
                     case NpgsqlDbType.Numeric:

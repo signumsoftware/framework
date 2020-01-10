@@ -73,8 +73,9 @@ namespace Signum.Engine.Maps
             {typeof(string),         new AbstractDbType(SqlDbType.NVarChar,         NpgsqlDbType.Varchar)},
             {typeof(Date),           new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
             {typeof(DateTime),       new AbstractDbType(SqlDbType.DateTime2,        NpgsqlDbType.Timestamp)},
-            {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset,   NpgsqlDbType.TimestampTz)},
-                                                                                    
+            {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset/*, NpgsqlDbType.TimestampTz*/)},
+            {typeof(TimeSpan),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
+
             {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},
 
             {typeof(Guid),           new AbstractDbType(SqlDbType.UniqueIdentifier, NpgsqlDbType.Uuid)},
@@ -93,7 +94,6 @@ namespace Signum.Engine.Maps
 
         readonly Dictionary<NpgsqlDbType, int> defaultSizePostgreSql = new Dictionary<NpgsqlDbType, int>()
         {
-            {NpgsqlDbType.Bytea, int.MaxValue},
             {NpgsqlDbType.Varbit, 200},
             {NpgsqlDbType.Varchar, 200},
             {NpgsqlDbType.Char, 1},
@@ -326,6 +326,9 @@ namespace Signum.Engine.Maps
 
         internal int? GetSqlSize(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
         {
+            if (this.IsPostgres && dbType.PostgreSql == NpgsqlDbType.Bytea)
+                return null;
+
             if (att != null && att.HasSize)
                 return att.Size;
 
@@ -336,7 +339,7 @@ namespace Signum.Engine.Maps
                     return sla.Max == -1 ? int.MaxValue : sla.Max;
             }
 
-            if (this.IsPostgres)
+            if (!this.IsPostgres)
                 return defaultSizeSqlServer.TryGetS(dbType.SqlServer);
             else
                 return defaultSizePostgreSql.TryGetS(dbType.PostgreSql);
@@ -358,7 +361,7 @@ namespace Signum.Engine.Maps
                     return dv.DecimalPlaces;
             }
 
-            if (this.IsPostgres)
+            if (!this.IsPostgres)
                 return defaultScaleSqlServer.TryGetS(dbType.SqlServer);
             else
                 return defaultScalePostgreSql.TryGetS(dbType.PostgreSql);

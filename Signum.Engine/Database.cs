@@ -1467,7 +1467,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (Transaction tr = new Transaction())
             {
                 int result;
-                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E))))
                     result = query.UnsafeInsert(a => a, message);
                 return tr.Commit(result);
             }
@@ -1479,7 +1479,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (Transaction tr = new Transaction())
             {
                 int result;
-                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E))))
                     result = query.UnsafeInsert(constructor, message);
                 return tr.Commit(result);
             }

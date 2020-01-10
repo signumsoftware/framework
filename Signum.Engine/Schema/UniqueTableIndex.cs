@@ -45,20 +45,31 @@ namespace Signum.Engine.Maps
 
         public virtual string GetIndexName(ObjectName tableName)
         {
-            return "IX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
+            int maxLength = MaxNameLength();
+
+            return StringHashEncoder.ChopHash("IX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        }
+
+        protected static int MaxNameLength()
+        {
+            return Connector.Current.MaxNameLength - StringHashEncoder.HashSize - 1;
         }
 
         public string IndexName => GetIndexName(Table.Name);
 
         protected string ColumnSignature()
         {
-            string columns = Columns.ToString(c => c.Name, "_");
+            return Columns.ToString(c => c.Name, "_");
+        }
+
+        protected string? WhereSignature()
+        {
             var includeColumns = IncludeColumns.HasItems() ? IncludeColumns.ToString(c => c.Name, "_") : null;
 
-            if (string.IsNullOrEmpty(Where)  && includeColumns == null)
-                return columns;
+            if (string.IsNullOrEmpty(Where) && includeColumns == null)
+                return null;
 
-            return columns + "__" + StringHashEncoder.Codify(Where + includeColumns);
+            return "__" + StringHashEncoder.Codify(Where + includeColumns);
         }
 
         public override string ToString()
@@ -97,7 +108,9 @@ namespace Signum.Engine.Maps
 
         public override string GetIndexName(ObjectName tableName)
         {
-            return "UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
+            var maxSize = MaxNameLength();
+
+            return StringHashEncoder.ChopHash("UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxSize) + WhereSignature();
         }
 
         public string? ViewName
@@ -110,7 +123,9 @@ namespace Signum.Engine.Maps
                 if (Connector.Current.AllowsIndexWithWhere(Where))
                     return null;
 
-                return "VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
+                var maxSize = MaxNameLength();
+
+                return StringHashEncoder.ChopHash("VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
             }
         }
 

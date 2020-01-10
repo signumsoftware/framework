@@ -100,7 +100,7 @@ namespace Signum.Engine.Linq
             log.Switch("Redundant");
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
             log.Switch("Condition");
-            Expression rewriteConditions = isPostgres ? subqueryCleaned : ConditionsRewriter.Rewrite(subqueryCleaned);
+            Expression rewriteConditions = isPostgres ? ConditionsRewriterPostgres.Rewrite(subqueryCleaned) : ConditionsRewriter.Rewrite(subqueryCleaned);
             log.Switch("Scalar");
             Expression scalar = ScalarSubqueryRewriter.Rewrite(rewriteConditions);
             return scalar;

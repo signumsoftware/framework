@@ -14,6 +14,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlClient;
 using Microsoft.SqlServer.Server;
 using System.IO;
+using Npgsql;
 
 namespace Signum.Engine
 {
@@ -46,8 +47,11 @@ namespace Signum.Engine
             return tc;
         }
 
+        bool isPostgres;
+
         public FieldReader(DbDataReader reader)
         {
+            this.isPostgres = Schema.Current.Settings.IsPostgres;
             this.reader = reader;
 
             this.typeCodes = new TypeCode[reader.FieldCount];
@@ -457,6 +461,9 @@ namespace Signum.Engine
             switch (typeCodes[ordinal])
             {
                 case tcDateTimeOffset:
+                    if (isPostgres)
+                        throw new InvalidOperationException("DateTimeOffset not supported in Postgres");
+                        
                     return ((SqlDataReader)reader).GetDateTimeOffset(ordinal);
                 default:
                     return ReflectionTools.ChangeType<DateTimeOffset>(reader.GetValue(ordinal));
@@ -480,7 +487,10 @@ namespace Signum.Engine
             switch (typeCodes[ordinal])
             {
                 case tcTimeSpan:
-                    return ((SqlDataReader)reader).GetTimeSpan(ordinal);
+                    if (isPostgres)
+                        return ((NpgsqlDataReader)reader).GetTimeSpan(ordinal);
+                    else
+                        return ((SqlDataReader)reader).GetTimeSpan(ordinal);
                 default:
                     return ReflectionTools.ChangeType<TimeSpan>(reader.GetValue(ordinal));
             }
@@ -535,6 +545,19 @@ namespace Signum.Engine
             return udt;
         }
 
+        static MethodInfo miGetArray = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetArray<int>(0)).GetGenericMethodDefinition();
+
+        public T[] GetArray<T>(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            if (reader.IsDBNull(ordinal))
+            {
+                return (T[])(object)null!;
+            }
+
+            return (T[])this.reader[ordinal]; 
+        }
+
         static Dictionary<Type, MethodInfo> methods =
             typeof(FieldReader).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Where(m => m.Name != "GetExpression" && m.Name != "IsNull")
@@ -553,6 +576,11 @@ namespace Signum.Engine
                     return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal)).Nullify();
                 else
                     return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+            }
+
+            if (type.IsArray)
+            {
+                return Expression.Call(reader, miGetArray.MakeGenericMethod(type.ElementType()!), Expression.Constant(ordinal));
             }
 
             throw new InvalidOperationException("Type {0} not supported".FormatWith(type));
@@ -576,7 +604,7 @@ namespace Signum.Engine
     }
 
     [Serializable]
-    public class FieldReaderException : SqlTypeException
+    public class FieldReaderException : DbException
     {
         public FieldReaderException(Exception inner, int ordinal, string columnName, Type columnType) : base(null, inner)
         {

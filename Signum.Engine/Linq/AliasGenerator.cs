@@ -48,7 +48,7 @@ namespace Signum.Engine.Linq
                 tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_' ).Select(s => s[0]).ToArray()) : null;
 
             if (!abv.HasText())
-                abv = tableName.TryStart(3)!;
+                abv = tableName.TryStart(3).ToLower();
             else
                 abv = abv.ToLower();
 

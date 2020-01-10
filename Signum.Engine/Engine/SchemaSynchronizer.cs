@@ -1,4 +1,5 @@
 using NpgsqlTypes;
+using Signum.Engine.Engine;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
@@ -29,9 +30,14 @@ namespace Signum.Engine
             var modelTablesHistory = modelTables.Values.Where(a => a.SystemVersioned != null).ToDictionaryEx(a => a.SystemVersioned!.TableName.ToString(), "history schema tables");
             HashSet<SchemaName> modelSchemas = modelTables.Values.Select(a => a.Name.Schema).Where(a => !sqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
 
-            Dictionary<string, DiffTable> databaseTables = DefaultGetDatabaseDescription(s.DatabaseNames());
+            Dictionary<string, DiffTable> databaseTables = Schema.Current.Settings.IsPostgres ?
+                PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()) :
+                SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
+            
             var databaseTablesHistory = databaseTables.Extract((key, val) => val.TemporalType == SysTableTemporalType.HistoryTable);
-            HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(s.DatabaseNames());
+            HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
+                PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()): 
+                SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
             SimplifyDiffTables?.Invoke(databaseTables);
 
@@ -190,7 +196,7 @@ namespace Signum.Engine
                          createNew: null,
                          removeOld: (cn, colDb) => colDb.ForeignKey != null ? sqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) : null,
                          mergeBoth: (cn, colModel, colDb) => colDb.ForeignKey == null ? null :
-                             colModel.ReferenceTable == null || colModel.AvoidForeignKey || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) || DifferentDatabase(tab.Name, colModel.ReferenceTable.Name) || colDb.DbType.SqlServer != colModel.DbType.SqlServer ?
+                             colModel.ReferenceTable == null || colModel.AvoidForeignKey || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) || DifferentDatabase(tab.Name, colModel.ReferenceTable.Name) || !colDb.DbType.Equals(colModel.DbType) ?
                              sqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) :
                              null),
                         dif.MultiForeignKeys.Select(fk => sqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple))
@@ -224,7 +230,7 @@ namespace Signum.Engine
                             sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : 
                             null;
 
-                            var dropPeriod = (dif.Period != null &&
+                            var dropPeriod = (!sqlBuilder.IsPostgres && dif.Period != null &&
                                 (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?
                                 sqlBuilder.AlterTableDropPeriod(tab) : null);
 
@@ -245,7 +251,7 @@ namespace Signum.Engine
                                             hasValueFalse: hasValueFalse)),
 
                                     removeOld: (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
-                                         difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
+                                         difCol.DefaultConstraint != null && difCol.DefaultConstraint.Name != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint!.Name) : null,
                                         sqlBuilder.AlterTableDropColumn(tab, cn)),
 
                                     mergeBoth: (cn, tabCol, difCol) =>
@@ -261,12 +267,14 @@ namespace Signum.Engine
                                                     SqlPreCommand.Combine(Spacing.Simple,
                                                         tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? sqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
                                                         UpdateCompatible(sqlBuilder, replacements, tab, dif, tabCol, difCol),
-                                                        tabCol.DbType.SqlServer == SqlDbType.NVarChar && difCol.DbType.SqlServer == SqlDbType.NChar ? sqlBuilder.UpdateTrim(tab, tabCol) : null),
+                                                        (sqlBuilder.IsPostgres ?
+                                                        tabCol.DbType.PostgreSql == NpgsqlDbType.Varchar && difCol.DbType.PostgreSql == NpgsqlDbType.Char :
+                                                        tabCol.DbType.SqlServer == SqlDbType.NVarChar && difCol.DbType.SqlServer == SqlDbType.NChar)? sqlBuilder.UpdateTrim(tab, tabCol) : null),
 
                                                 UpdateByFkChange(tn, difCol, tabCol, ChangeName),
 
                                                 difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
-                                                    difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
+                                                    difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
                                                     tabCol.Default != null ? sqlBuilder.AlterTableAddDefaultConstraint(tab.Name, sqlBuilder.GetDefaultConstaint(tab, tabCol)!) : null)
                                             );
                                         }
@@ -277,7 +285,7 @@ namespace Signum.Engine
 
                                             delayedUpdates.Add(update);
                                             delayedDrops.Add(SqlPreCommand.Combine(Spacing.Simple,
-                                                difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
+                                                difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
                                                 drop
                                             ));
 
@@ -299,7 +307,7 @@ namespace Signum.Engine
 
                             var columnsHistory = columns != null && disableEnableSystemVersioning ? ForHistoryTable(columns, tab).Replace(new Regex(" IDENTITY "), m => " ") : null;/*HACK*/
 
-                            var addPeriod = ((tab.SystemVersioned != null &&
+                            var addPeriod = ((!sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
                                 (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)sqlBuilder.AlterTableAddPeriod(tab) : null);
 
@@ -372,7 +380,7 @@ namespace Signum.Engine
                              if (tabCol.ReferenceTable == null || tabCol.AvoidForeignKey || DifferentDatabase(tab.Name, tabCol.ReferenceTable.Name))
                                  return null;
 
-                             if (difCol.ForeignKey == null || !tabCol.ReferenceTable.Name.Equals(ChangeName(difCol.ForeignKey.TargetTable)) || difCol.DbType.SqlServer != tabCol.DbType.SqlServer)
+                             if (difCol.ForeignKey == null || !tabCol.ReferenceTable.Name.Equals(ChangeName(difCol.ForeignKey.TargetTable)) || !difCol.DbType.Equals(tabCol.DbType))
                                  return sqlBuilder.AlterTableAddConstraintForeignKey(tab, tabCol.Name, tabCol.ReferenceTable);
 
                              var name = sqlBuilder.ForeignKeyName(tab.Name.Name, tabCol.Name);
@@ -542,23 +550,6 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 
         public static Func<SchemaName, bool> IgnoreSchema = s => s.Name.Contains("\\");
 
-        private static HashSet<SchemaName> DefaultGetSchemas(List<DatabaseName?> list)
-        {
-            var sqlBuilder = Connector.Current.SqlBuilder;
-            var isPostgres = false;
-            HashSet<SchemaName> result = new HashSet<SchemaName>();
-            foreach (var db in list)
-            {
-                using (Administrator.OverrideDatabaseInSysViews(db))
-                {
-                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemas);
-
-                    result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !IgnoreSchema(a)));
-                }
-            }
-            return result;
-        }
-
         private static SqlPreCommand AlterTableAddColumnDefault(SqlBuilder sqlBuilder, ITable table, IColumn column, Replacements rep, string? forceDefaultValue, HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse)
         {
             if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
@@ -600,6 +591,8 @@ WHERE {where}"))!;
 
                 return SqlPreCommand.Combine(Spacing.Simple,
                     sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                    sqlBuilder.IsPostgres ?
+                    sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name):
                     sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
             }
         }
@@ -737,158 +730,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
         public static Func<DiffTable, bool>? IgnoreTable = null;
 
-        public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(List<DatabaseName?> databases)
-        {
-            List<DiffTable> allTables = new List<DiffTable>();
-
-            var isPostgres = false;
-
-            foreach (var db in databases)
-            {
-                SafeConsole.WriteColor(ConsoleColor.Cyan, '.');
-
-                using (Administrator.OverrideDatabaseInSysViews(db))
-                {
-                    var databaseName = db == null ? Connector.Current.DatabaseName() : db.Name;
-
-                    var sysDb = Database.View<SysDatabases>().Single(a => a.name == databaseName);
-
-                    var con = Connector.Current;
-
-                    var tables =
-                        (from s in Database.View<SysSchemas>()
-                         from t in s.Tables().Where(t => !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
-                         select new DiffTable
-                         {
-                             Name = new ObjectName(new SchemaName(db, s.name, isPostgres), t.name, isPostgres),
-
-                             TemporalType = !con.SupportsTemporalTables ? SysTableTemporalType.None: t.temporal_type,
-
-                             Period = !con.SupportsTemporalTables ? null :
-                             (from p in t.Periods()
-                              join sc in t.Columns() on p.start_column_id equals sc.column_id
-                              join ec in t.Columns() on p.end_column_id equals ec.column_id
-#pragma warning disable CS0472
-                              select (int?)p.object_id == null ? null : new DiffPeriod
-#pragma warning restore CS0472
-                              {
-                                  StartColumnName = sc.name,
-                                  EndColumnName = ec.name,
-                              }).SingleOrDefaultEx(),
-
-                             TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null :
-                                 Database.View<SysTables>()
-                                 .Where(ht => ht.object_id == t.history_table_id)
-                                 .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name, isPostgres), ht.name, isPostgres))
-                                 .SingleOrDefault(),
-
-                             PrimaryKeyName = (from k in t.KeyConstraints()
-                                               where k.type == "PK"
-                                               select k.name == null ? null : new ObjectName(new SchemaName(db, k.Schema().name, isPostgres), k.name, isPostgres))
-                                               .SingleOrDefaultEx(),
-
-                             Columns = (from c in t.Columns()
-                                        join userType in Database.View<SysTypes>().DefaultIfEmpty() on c.user_type_id equals userType.user_type_id
-                                        join sysType in Database.View<SysTypes>().DefaultIfEmpty() on c.system_type_id equals sysType.user_type_id
-                                        join ctr in Database.View<SysDefaultConstraints>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
-                                        select new DiffColumn
-                                        {
-                                            Name = c.name,
-                                            DbType = new AbstractDbType(sysType == null ? SqlDbType.Udt : ToSqlDbType(sysType.name)),
-                                            UserTypeName = sysType == null ? userType.name : null,
-                                            Nullable = c.is_nullable,
-                                            Collation = c.collation_name == sysDb.collation_name ? null : c.collation_name,
-                                            Length = c.max_length,
-                                            Precision = c.precision,
-                                            Scale = c.scale,
-                                            Identity = c.is_identity,
-                                            GeneratedAlwaysType = con.SupportsTemporalTables ? c.generated_always_type : GeneratedAlwaysType.None,
-                                            DefaultConstraint = ctr.name == null ? null : new DiffDefaultConstraint
-                                            {
-                                                Name = ctr.name,
-                                                Definition = ctr.definition
-                                            },
-                                            PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
-                                        }).ToDictionaryEx(a => a.Name, "columns"),
-
-                             MultiForeignKeys = (from fk in t.ForeignKeys()
-                                                 join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
-                                                 select new DiffForeignKey
-                                                 {
-                                                     Name = new ObjectName(new SchemaName(db, fk.Schema().name, isPostgres), fk.name, isPostgres),
-                                                     IsDisabled = fk.is_disabled,
-                                                     TargetTable = new ObjectName(new SchemaName(db, rt.Schema().name, isPostgres), rt.name, isPostgres),
-                                                     Columns = fk.ForeignKeyColumns().Select(fkc => new DiffForeignKeyColumn
-                                                     {
-                                                         Parent = t.Columns().Single(c => c.column_id == fkc.parent_column_id).name,
-                                                         Referenced = rt.Columns().Single(c => c.column_id == fkc.referenced_column_id).name
-                                                     }).ToList(),
-                                                 }).ToList(),
-
-                             SimpleIndices = (from i in t.Indices()
-                                              where /*!i.is_primary_key && */i.type != 0  /*heap indexes*/
-                                              select new DiffIndex
-                                              {
-                                                  IsUnique = i.is_unique,
-                                                  IsPrimary = i.is_primary_key,
-                                                  IndexName = i.name,
-                                                  FilterDefinition = i.filter_definition,
-                                                  Type = (DiffIndexType)i.type,
-                                                  Columns = (from ic in i.IndexColumns()
-                                                             join c in t.Columns() on ic.column_id equals c.column_id
-                                                             orderby ic.index_column_id
-                                                             select new DiffIndexColumn { ColumnName =  c.name, IsIncluded = ic.is_included_column  }).ToList()
-                                              }).ToList(),
-
-                             ViewIndices = (from v in Database.View<SysViews>()
-                                            where v.name.StartsWith("VIX_" + t.name + "_")
-                                            from i in v.Indices()
-                                            select new DiffIndex
-                                            {
-                                                IsUnique = i.is_unique,
-                                                ViewName = v.name,
-                                                IndexName = i.name,
-                                                Columns = (from ic in i.IndexColumns()
-                                                           join c in v.Columns() on ic.column_id equals c.column_id
-                                                           orderby ic.index_column_id
-                                                           select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column }).ToList()
-
-                                            }).ToList(),
-
-                             Stats = (from st in t.Stats()
-                                      where st.user_created
-                                      select new DiffStats
-                                      {
-                                          StatsName = st.name,
-                                          Columns = (from ic in st.StatsColumns()
-                                                     join c in t.Columns() on ic.column_id equals c.column_id
-                                                     select c.name).ToList()
-                                      }).ToList(),
-
-                         }).ToList();
-
-                    if (IgnoreTable != null)
-                        tables.RemoveAll(IgnoreTable);
-
-                    tables.ForEach(t => t.ForeignKeysToColumns());
-
-                    allTables.AddRange(tables);
-                }
-            }
-
-            var database = allTables.ToDictionary(t => t.Name.ToString());
-
-            return database;
-        }
+      
 
 
-        public static SqlDbType ToSqlDbType(string str)
-        {
-            if (str == "numeric")
-                return SqlDbType.Decimal;
-
-            return str.ToEnum<SqlDbType>(true);
-        }
 
 
         static SqlPreCommand? SynchronizeEnumsScript(Replacements replacements)
@@ -1006,7 +850,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
         public static SqlPreCommand? SnapshotIsolation(Replacements replacements)
         {
-            if (replacements.SchemaOnly)
+            if (replacements.SchemaOnly || Schema.Current.Settings.IsPostgres)
                 return null;
 
             var list = Schema.Current.DatabaseNames().Select(a => a?.ToString()).ToList();
@@ -1103,6 +947,14 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         }
     }
 
+
+    public enum SysTableTemporalType
+    {
+        None = 0,
+        HistoryTable = 1,
+        SystemVersionTemporalTable = 2
+    }
+
     public class DiffStats
     {
         public string StatsName;
@@ -1122,7 +974,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public bool IsPrimary;
         public string IndexName;
         public string ViewName;
-        public string FilterDefinition;
+        public string? FilterDefinition;
         public DiffIndexType? Type;
 
         public List<DiffIndexColumn> Columns;
@@ -1212,7 +1064,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
     public class DiffDefaultConstraint
     {
-        public string Name;
+        public string? Name;
         public string Definition;
     }
 
@@ -1314,7 +1166,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
         private bool CompatibleTypes_Postgres(NpgsqlDbType fromType, NpgsqlDbType toType)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         private bool CompatibleTypes_SqlServer(SqlDbType fromType, SqlDbType toType)
