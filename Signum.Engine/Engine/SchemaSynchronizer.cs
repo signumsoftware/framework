@@ -150,7 +150,7 @@ namespace Signum.Engine
                         var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
 
                         var changes = Synchronizer.SynchronizeScript(Spacing.Simple, 
-                            modelIxs.Where(kvp => !(kvp.Value is PrimaryClusteredIndex)).ToDictionary(), 
+                            modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(), 
                             dif.Indices.Where(kvp =>!kvp.Value.IsPrimary).ToDictionary(),
                             createNew: null,
                             removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
@@ -163,7 +163,7 @@ namespace Signum.Engine
                 SqlPreCommand? dropIndicesHistory =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                     createNew: null,
-                    removeOld: (tn, dif) => dif.Indices.Values.Where(ix => ix.Type != DiffIndexType.Clustered).Select(ix => sqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
+                    removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !ix.IsPrimary).Select(ix => sqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                     mergeBoth: (tn, tab, dif) =>
                     {
                         Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
@@ -172,7 +172,7 @@ namespace Signum.Engine
 
                         var changes = Synchronizer.SynchronizeScript(Spacing.Simple, 
                             modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(), 
-                            dif.Indices.Where(kvp => kvp.Value.Type != DiffIndexType.Clustered).ToDictionary(),
+                            dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                             createNew: null,
                             removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
@@ -223,19 +223,19 @@ namespace Signum.Engine
 
                             bool disableEnableSystemVersioning = false;
 
-                            var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && 
+                            var disableSystemVersioning = !sqlBuilder.IsPostgres && dif.TemporalType != SysTableTemporalType.None && 
                             (tab.SystemVersioned == null || 
                             !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) || 
-                            (disableEnableSystemVersioning = StrongColumnChanges(tab, dif)))) ? 
+                            (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) ? 
                             sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : 
                             null;
 
-                            var dropPeriod = (!sqlBuilder.IsPostgres && dif.Period != null &&
+                            var dropPeriod = !sqlBuilder.IsPostgres && dif.Period != null &&
                                 (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?
-                                sqlBuilder.AlterTableDropPeriod(tab) : null);
+                                sqlBuilder.AlterTableDropPeriod(tab) : null;
 
-                            var modelPK = modelIndices[tab].Values.OfType<PrimaryClusteredIndex>().SingleOrDefaultEx();
-                            var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.Type == DiffIndexType.Clustered);
+                            var modelPK = modelIndices[tab].Values.OfType<PrimaryKeyIndex>().SingleOrDefaultEx();
+                            var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
                             var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) : null; 
 
@@ -307,11 +307,11 @@ namespace Signum.Engine
 
                             var columnsHistory = columns != null && disableEnableSystemVersioning ? ForHistoryTable(columns, tab).Replace(new Regex(" IDENTITY "), m => " ") : null;/*HACK*/
 
-                            var addPeriod = ((!sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
+                            var addPeriod = (!sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
                                 (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
-                                (SqlPreCommandSimple)sqlBuilder.AlterTableAddPeriod(tab) : null);
+                                (SqlPreCommandSimple)sqlBuilder.AlterTableAddPeriod(tab) : null;
 
-                            var addSystemVersioning = (tab.SystemVersioned != null &&
+                            var addSystemVersioning = (!sqlBuilder.IsPostgres && tab.SystemVersioned != null && 
                                 (dif.Period == null || dif.TemporalTableName == null || 
                                 !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
                                 disableEnableSystemVersioning) ?
@@ -393,7 +393,7 @@ namespace Signum.Engine
 
                 SqlPreCommand? addIndices =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
-                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(index => sqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
+                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryKeyIndex)).Select(index => sqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
                     removeOld: null,
                     mergeBoth: (tn, tab, dif) =>
                     {
@@ -404,7 +404,7 @@ namespace Signum.Engine
                         Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
-                            modelIxs.Where(kvp => !(kvp.Value is PrimaryClusteredIndex)).ToDictionary(),
+                            modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(),
                             dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                             createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                             removeOld: null,
@@ -428,11 +428,11 @@ namespace Signum.Engine
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                             modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
-                            dif.Indices.Where(kvp => kvp.Value.Type != DiffIndexType.Clustered).ToDictionary(),
+                            dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                             createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
-                                mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.IndexName) : null);
+                                mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
 
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                     });
@@ -666,10 +666,10 @@ WHERE {where}"))!;
                 var nIx = newOnly.FirstOrDefault(n =>
                 {
                     var newIx = dictionary[n];
-                    if (oldIx.IsPrimary && newIx is PrimaryClusteredIndex)
+                    if (oldIx.IsPrimary && newIx is PrimaryKeyIndex)
                         return true;
 
-                    if (oldIx.IsPrimary || newIx is PrimaryClusteredIndex)
+                    if (oldIx.IsPrimary || newIx is PrimaryKeyIndex)
                         return false;
 
                     if (oldIx.IsUnique != (newIx is UniqueTableIndex))
@@ -945,6 +945,16 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         {
             return Name.ToString();
         }
+
+        internal void FixSqlColumnLengthSqlServer()
+        {
+            foreach (var c in Columns.Values.Where(c => c.Length != -1))
+            {
+                var sqlDbType = c.DbType.SqlServer;
+                if (sqlDbType == SqlDbType.NChar || sqlDbType == SqlDbType.NText || sqlDbType == SqlDbType.NVarChar)
+                    c.Length /= 2;
+            }
+        }
     }
 
 
@@ -992,7 +1002,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             if (this.ColumnsChanged(dif, mix))
                 return false;
 
-            if (this.IsPrimary != mix is PrimaryClusteredIndex)
+            if (this.IsPrimary != mix is PrimaryKeyIndex)
                 return false;
 
             if (this.Type != GetIndexType(mix))
@@ -1006,8 +1016,8 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             if (mix is UniqueTableIndex && ((UniqueTableIndex)mix).ViewName != null)
                 return null;
 
-            if (mix is PrimaryClusteredIndex)
-                return DiffIndexType.Clustered;
+            if (mix is PrimaryKeyIndex)
+                return Schema.Current.Settings.IsPostgres ? DiffIndexType.NonClustered : DiffIndexType.Clustered;
 
             return DiffIndexType.NonClustered;
         }
@@ -1093,21 +1103,16 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == (other.Nullable.ToBool())
-                && (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length / BytesPerChar(other.DbType.SqlServer) || other.Size.Value == int.MaxValue && Length == -1)
+                && (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && (ignoreIdentity || Identity == other.Identity)
                 && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
                 && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
 
+            if (!result)
+                return false;
+
             return result;
-        }
-
-        public static int BytesPerChar(System.Data.SqlDbType sqlDbType)
-        {
-            if (sqlDbType == System.Data.SqlDbType.NChar || sqlDbType == System.Data.SqlDbType.NText || sqlDbType == System.Data.SqlDbType.NVarChar)
-                return 2;
-
-            return 1;
         }
 
         public bool DefaultEquals(IColumn other)

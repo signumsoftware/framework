@@ -142,6 +142,7 @@ namespace Signum.Engine.Engine
                     if (SchemaSynchronizer.IgnoreTable != null)
                         tables.RemoveAll(SchemaSynchronizer.IgnoreTable);
 
+                    tables.ForEach(t => t.FixSqlColumnLengthSqlServer());
                     tables.ForEach(t => t.ForeignKeysToColumns());
 
                     allTables.AddRange(tables);

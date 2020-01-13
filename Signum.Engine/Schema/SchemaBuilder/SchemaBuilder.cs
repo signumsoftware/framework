@@ -543,7 +543,7 @@ namespace Signum.Engine.Maps
                 DbType = pair.DbType,
                 Collation = Settings.GetCollate(attr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
-                Default = attr.Default,
+                Default = attr.GetDefault(Settings.IsPostgres),
                 Identity = attr.Identity,
             };
         }
@@ -582,7 +582,7 @@ namespace Signum.Engine.Maps
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(ticksAttr, null, pair.DbType),
                 Scale = Settings.GetSqlScale(ticksAttr, null, pair.DbType),
-                Default = ticksAttr?.Default,
+                Default = ticksAttr?.GetDefault(Settings.IsPostgres),
             };
         }
 
@@ -590,7 +590,7 @@ namespace Signum.Engine.Maps
         {
             var att = Settings.FieldAttribute<DbTypeAttribute>(route);
 
-            DbTypePair pair = Settings.IsPostgres && route.Type.IsArray ?
+            DbTypePair pair = Settings.IsPostgres && route.Type.IsArray && route.Type != typeof(byte[]) ?
                Settings.GetSqlDbType(att, route.Type.ElementType()!) :
                Settings.GetSqlDbType(att, route.Type);
 
@@ -602,7 +602,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.GetIsNullable(route, forceNull),
                 Size = Settings.GetSqlSize(att, route, pair.DbType),
                 Scale = Settings.GetSqlScale(att, route, pair.DbType),
-                Default = att?.Default,
+                Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -619,7 +619,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.GetIsNullable(route, forceNull),
                 IsLite = false,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
-                Default = att?.Default,
+                Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -635,7 +635,7 @@ namespace Signum.Engine.Maps
                 IsLite = route.Type.IsLite(),
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
                 AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null,
-                Default = Settings.FieldAttribute<DbTypeAttribute>(route)?.Default
+                Default = Settings.FieldAttribute<DbTypeAttribute>(route)?.GetDefault(Settings.IsPostgres)
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -733,7 +733,7 @@ namespace Signum.Engine.Maps
                     DbType = pair.DbType,
                     Collation = Settings.GetCollate(orderAttr),
                     UserDefinedTypeName = pair.UserDefinedTypeName,
-                    Default = keyAttr.Default,
+                    Default = keyAttr.GetDefault(Settings.IsPostgres),
                     Identity = keyAttr.Identity,
                 };
             }
@@ -1052,7 +1052,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.GetIsNullable(route, forceNull),
                 IsLite = false,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
-                Default = att?.Default,
+                Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
     }

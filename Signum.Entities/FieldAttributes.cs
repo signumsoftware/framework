@@ -283,10 +283,19 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public string? Default { get; set; }
 
+        public string? DefaultSqlServer { get; set; }
+        public string? DefaultPostgres { get; set; }
+
+        public string? GetDefault(bool isPostgres)
+        {
+            return (isPostgres ? DefaultPostgres : DefaultSqlServer) ?? Default;
+        }
+
         public string? Collation { get; set; }
 
-        public const string NewId = "NEWID()";
-        public const string NewSequentialId = "NEWSEQUENTIALID()";
+        public const string SqlServer_NewId = "NEWID()";
+        public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";
+        public const string Postgres_UuidGenerateV1= "uuid_generate_v1()";
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
@@ -307,9 +316,10 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             set
             {
                 identityBehaviour = value;
-                if (Type == typeof(Guid))
+                if (Type == typeof(Guid) && identityBehaviour)
                 {
-                    this.Default = identityBehaviour ? NewId : null;
+                    this.DefaultSqlServer = SqlServer_NewId;
+                    this.DefaultPostgres = Postgres_UuidGenerateV1;
                 }
             }
         }

@@ -43,8 +43,8 @@ namespace Signum.Engine
         {
             var primaryKeyConstraint = t.PrimaryKey == null ? null : 
                 isPostgres ? 
-                "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) : 
-                "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
+                "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) : 
+                "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
 
             var systemPeriod = t.SystemVersioned == null || IsPostgres ? null : Period(t.SystemVersioned);
 
@@ -248,9 +248,6 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             if (type.IsString() && !(@default.StartsWith("'") && @default.StartsWith("'")))
                 return "'" + @default + "'";
 
-            if (@default == "NEWID()" && IsPostgres) //hacky
-                return "uuid_generate_v1()";
-
             return @default;
         }
 
@@ -299,7 +296,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public SqlPreCommand CreateIndex(TableIndex index, Replacements? checkUnique)
         {
-            if (index is PrimaryClusteredIndex)
+            if (index is PrimaryKeyIndex)
             {
                 var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
@@ -352,7 +349,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
             var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
 
-            return (int)Executor.ExecuteScalar(
+            return Convert.ToInt32(Executor.ExecuteScalar(
 $@"SELECT Count(*) FROM {oldTableName}
 WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 (
@@ -360,7 +357,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
     FROM {oldTableName}
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
+){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!);
         }
 
         public SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)
@@ -470,7 +467,7 @@ WHERE {primaryKey.Name} NOT IN
 
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4});".FormatWith(
                parentTable,
-               ForeignKeyName(parentTable.Name, parentColumn),
+               ForeignKeyName(parentTable.Name, parentColumn).SqlEscape(isPostgres),
                parentColumn.SqlEscape(isPostgres),
                targetTable,
                targetPrimaryKey.SqlEscape(isPostgres)));
@@ -480,7 +477,7 @@ WHERE {primaryKey.Name} NOT IN
         {
             var result = "FK_{0}_{1}".FormatWith(table, fieldName);
 
-            return StringHashEncoder.ChopHash(result, this.connector.MaxNameLength).SqlEscape(isPostgres);
+            return StringHashEncoder.ChopHash(result, this.connector.MaxNameLength);
         }
 
         public SqlPreCommand RenameForeignKey(ObjectName foreignKeyName, string newName)

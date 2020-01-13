@@ -83,9 +83,9 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public class PrimaryClusteredIndex : TableIndex
+    public class PrimaryKeyIndex : TableIndex
     {
-        public PrimaryClusteredIndex(ITable table) : base(table, new[] { table.PrimaryKey })
+        public PrimaryKeyIndex(ITable table) : base(table, new[] { table.PrimaryKey })
         {
 
         }

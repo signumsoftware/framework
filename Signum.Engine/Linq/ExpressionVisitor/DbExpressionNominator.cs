@@ -1281,16 +1281,18 @@ namespace Signum.Engine.Linq
             SqlMethodAttribute? sma = m.Method.GetCustomAttribute<SqlMethodAttribute>();
             if (sma != null)
             {
-                if (m.Method.IsExtensionMethod())
-                    using (ForceFullNominate())
-                        return TrySqlFunction(m.Arguments[0], m.Method.Name, m.Type, m.Arguments.Skip(1).ToArray());
+                using (ForceFullNominate())
+                {
+                    if (m.Method.IsExtensionMethod())
+                        using (ForceFullNominate())
+                            return TrySqlFunction(m.Arguments[0], m.Method.Name, m.Type, m.Arguments.Skip(1).ToArray());
 
-                if (m.Object != null)
-                    using (ForceFullNominate())
-                        return TrySqlFunction(m.Object, sma.Name ?? m.Method.Name, m.Type, m.Arguments.ToArray());
+                    if (m.Object != null)
+                        using (ForceFullNominate())
+                            return TrySqlFunction(m.Object, sma.Name ?? m.Method.Name, m.Type, m.Arguments.ToArray());
 
-                return TrySqlFunction(m.Object, ObjectName.Parse(sma.Name ?? m.Method.Name, isPostgres).ToString(), m.Type, m.Arguments.ToArray());
-
+                    return TrySqlFunction(m.Object, ObjectName.Parse(sma.Name ?? m.Method.Name, isPostgres).ToString(), m.Type, m.Arguments.ToArray());
+                }
             }
 
             return base.VisitMethodCall(m);

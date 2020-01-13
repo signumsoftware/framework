@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
 using Signum.Engine.SchemaInfoTables;
+using System;
+using Signum.Engine.PostgresCatalog;
+using Signum.Engine.Engine;
 
 namespace Signum.Engine.Maps
 {
@@ -73,12 +76,27 @@ namespace Signum.Engine.Maps
             var isPostgres = Schema.Current.Settings.IsPostgres;
             var oldView = Schema.Current.DatabaseNames().SelectMany(db =>
             {
-                using (Administrator.OverrideDatabaseInSysViews(db))
+                if (isPostgres)
                 {
-                    return (from v in Database.View<SysViews>()
-                            join s in Database.View<SysSchemas>() on v.schema_id equals s.schema_id
-                            join m in Database.View<SysSqlModules>() on v.object_id equals m.object_id
-                            select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name, isPostgres), v.name, isPostgres), m.definition)).ToList();
+                    if (db != null)
+                        throw new InvalidOperationException("Multi-database not supported in postgress");
+
+                    return (from p in Database.View<PgClass>()
+                            where p.relkind == RelKind.View
+                            let ns = p.Namespace()
+                            where !PostgresCatalogSchema.systemSchemas.Contains(ns.nspname)
+                            let definition = PostgresFunctions.pg_get_viewdef(p.oid)
+                            select KeyValuePair.Create(new ObjectName(new SchemaName(db, ns.nspname, isPostgres), p.relname, isPostgres), definition)).ToList();
+                }
+                else
+                {
+                    using (Administrator.OverrideDatabaseInSysViews(db))
+                    {
+                        return (from v in Database.View<SysViews>()
+                                join s in Database.View<SysSchemas>() on v.schema_id equals s.schema_id
+                                join m in Database.View<SysSqlModules>() on v.object_id equals m.object_id
+                                select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name, isPostgres), v.name, isPostgres), m.definition)).ToList();
+                    }
                 }
             }).ToDictionary();
 
@@ -127,13 +145,27 @@ namespace Signum.Engine.Maps
             var isPostgres = Schema.Current.Settings.IsPostgres;
             var oldProcedures = Schema.Current.DatabaseNames().SelectMany(db =>
             {
-                using (Administrator.OverrideDatabaseInSysViews(db))
+                if (isPostgres)
                 {
-                    return (from p in Database.View<SysObjects>()
-                            join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id
-                            where p.type == "P" || p.type == "IF" || p.type == "FN"
-                            join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
-                            select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name, isPostgres), p.name, isPostgres), m.definition)).ToList();
+                    if (db != null)
+                        throw new InvalidOperationException("Multi-database not supported in postgress");
+
+                    return (from v in Database.View<PgProc>()
+                            let ns = v.Namespace()
+                            where !PostgresCatalogSchema.systemSchemas.Contains(ns.nspname)
+                            let definition = PostgresFunctions.pg_get_viewdef(v.oid)
+                            select KeyValuePair.Create(new ObjectName(new SchemaName(db, ns.nspname, isPostgres), v.proname, isPostgres), definition)).ToList();
+                }
+                else
+                {
+                    using (Administrator.OverrideDatabaseInSysViews(db))
+                    {
+                        return (from p in Database.View<SysObjects>()
+                                join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id
+                                where p.type == "P" || p.type == "IF" || p.type == "FN"
+                                join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
+                                select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name, isPostgres), p.name, isPostgres), m.definition)).ToList();
+                    }
                 }
             }).ToDictionary();
 

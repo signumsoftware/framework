@@ -12,7 +12,7 @@ namespace Signum.Engine.Engine
 {
     public static class PostgresCatalogSchema
     {
-        static string[] systemSchemas = new[] { "pg_catalog", "pg_toast", "information_schema" };
+        public static string[] systemSchemas = new[] { "pg_catalog", "pg_toast", "information_schema" };
 
         public static Dictionary<string, DiffTable> GetDatabaseDescription(List<DatabaseName?> databases)
         {
@@ -40,7 +40,7 @@ namespace Signum.Engine.Engine
                          {
                              Name = new ObjectName(new SchemaName(db, s.nspname, isPostgres), t.relname, isPostgres),
 
-                             TemporalType = !con.SupportsTemporalTables ? Signum.Engine.SysTableTemporalType.None : t.Triggers().Any(t => t.Proc().proname.StartsWith("versioning_function")) ? Signum.Engine.SysTableTemporalType.SystemVersionTemporalTable : SysTableTemporalType.None,
+                             TemporalType = t.Triggers().Any(t => t.Proc().proname == "versioning") ? Signum.Engine.SysTableTemporalType.SystemVersionTemporalTable : SysTableTemporalType.None,
 
                              //Period = !con.SupportsTemporalTables ? null :
 
@@ -53,23 +53,24 @@ namespace Signum.Engine.Engine
                              //     EndColumnName = ec.name,
                              // }).SingleOrDefaultEx(),
 
+                             TemporalTableName = t.Triggers()
+                                 .Where(t => t.Proc().proname == "versioning")
+                                 .Select(t => ParseVersionFunctionParam(t.tgargs))
+                                 .SingleOrDefaultEx(),
+
                              //TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null :
                              //    Database.View<SysTables>()
                              //    .Where(ht => ht.object_id == t.history_table_id)
                              //    .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name, isPostgres), ht.name, isPostgres))
                              //    .SingleOrDefault(),
 
-                             PrimaryKeyName = (from ind in t.Indices()
-                                               where ind.indisprimary == true
-#pragma warning disable CS0472
-                                               select ((int?)ind.indexrelid) == null ? null : new ObjectName(new SchemaName(db, ind.Class().Namespace().nspname, isPostgres), ind.Class().relname, isPostgres))
-#pragma warning restore CS0472
+                             PrimaryKeyName = (from c in t.Constraints()
+                                               where c.contype == ConstraintType.PrimaryKey
+                                               select c.conname == null ? null : new ObjectName(new SchemaName(db, c.Namespace().nspname, isPostgres), c.conname, isPostgres))
                                                .SingleOrDefaultEx(),
 
                              Columns = (from c in t.Attributes()
-                                            //join userType in Database.View<SysTypes>().DefaultIfEmpty() on c.user_type_id equals userType.user_type_id
-                                            //join sysType in Database.View<SysTypes>().DefaultIfEmpty() on c.system_type_id equals sysType.user_type_id
-                                            //join ctr in Database.View<SysDefaultConstraints>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
+                                        let def = c.Default()
                                         select new DiffColumn
                                         {
                                             Name = c.attname,
@@ -77,14 +78,14 @@ namespace Signum.Engine.Engine
                                             UserTypeName = null,
                                             Nullable = !c.attnotnull,
                                             Collation = null,
-                                            Length = c.attlen,
+                                            Length = PostgresFunctions._pg_char_max_length(c.atttypid, c.atttypmod) ?? -1,
                                             Precision = c.atttypid == 1700  /*numeric*/ ? ((c.atttypmod - 4) >> 16) & 65535 : 0,
                                             Scale = c.atttypid == 1700  /*numeric*/ ? (c.atttypmod - 4) & 65535 : 0,
                                             Identity = c.attidentity == 'a',
                                             GeneratedAlwaysType = GeneratedAlwaysType.None,
-                                            DefaultConstraint = c.Default() == null ? null : new DiffDefaultConstraint
+                                            DefaultConstraint = def == null ? null : new DiffDefaultConstraint
                                             {
-                                                Definition = pg_get_expr(c.Default()!.adbin, c.Default()!.adrelid),
+                                                Definition = pg_get_expr(def.adbin, def.adrelid),
                                             },
                                             PrimaryKey = t.Indices().Any(i => i.indisprimary && i.indkey.Contains(c.attnum)),
                                         }).ToDictionaryEx(a => a.Name, "columns"),
@@ -96,7 +97,7 @@ namespace Signum.Engine.Engine
                                                      Name = new ObjectName(new SchemaName(db, fk.Namespace().nspname, isPostgres), fk.conname, isPostgres),
                                                      IsDisabled = false,
                                                      TargetTable = new ObjectName(new SchemaName(db, fk.TargetTable().Namespace().nspname, isPostgres), fk.TargetTable().relname, isPostgres),
-                                                     Columns = PostgresFunctions.generate_subscripts(fk.conkey, 0).Select(i => new DiffForeignKeyColumn
+                                                     Columns = PostgresFunctions.generate_subscripts(fk.conkey, 1).Select(i => new DiffForeignKeyColumn
                                                      {
                                                          Parent = t.Attributes().Single(c => c.attnum == fk.conkey[i]).attname,
                                                          Referenced = fk.TargetTable().Attributes().Single(c => c.attnum == fk.confkey[i]).attname,
@@ -104,7 +105,6 @@ namespace Signum.Engine.Engine
                                                  }).ToList(),
 
                              SimpleIndices = (from i in t.Indices()
-                                              where !i.indisprimary
                                               select new DiffIndex
                                               {
                                                   IsUnique = i.indisunique,
@@ -114,7 +114,7 @@ namespace Signum.Engine.Engine
                                                   Type = DiffIndexType.NonClustered,
                                                   Columns = (from at in i.Class().Attributes()
                                                              orderby at.attnum
-                                                             select new DiffIndexColumn { ColumnName = at.attname, IsIncluded = !i.indkey.Contains(at.attnum) }).ToList()
+                                                             select new DiffIndexColumn { ColumnName = at.attname, IsIncluded = at.attnum > i.indnkeyatts }).ToList()
                                               }).ToList(),
 
                              ViewIndices = new List<DiffIndex>(),
@@ -137,9 +137,29 @@ namespace Signum.Engine.Engine
 
             var database = allTables.ToDictionary(t => t.Name.ToString());
 
+            var historyTables = database.Values.Select(a => a.TemporalTableName).NotNull().ToList();
+
+            historyTables.ForEach(h =>
+            {
+                var t = database.TryGetC(h.ToString());
+                if (t != null)
+                    t.TemporalType = SysTableTemporalType.HistoryTable;
+            });
+
             return database;
         }
 
+        private static ObjectName? ParseVersionFunctionParam(byte[]? tgargs)
+        {
+            if (tgargs == null)
+                return null;
+
+            var str = Encoding.UTF8.GetString(tgargs!);
+
+            var args = str.Split("\0");
+
+            return ObjectName.Parse(args[1], isPostgres: true);
+        }
 
         public static NpgsqlDbType ToNpgsqlDbType(string str)
         {
@@ -210,7 +230,7 @@ namespace Signum.Engine.Engine
                 {
                     var schemaNames = Database.View<PgNamespace>().Select(s => s.nspname).ToList();
 
-                    result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
+                    result.AddRange(schemaNames.Except(systemSchemas).Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
                 }
             }
             return result;

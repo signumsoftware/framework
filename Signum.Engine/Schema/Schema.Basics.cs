@@ -524,7 +524,7 @@ namespace Signum.Engine.Maps
             if (this.UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-            return new[] { new PrimaryClusteredIndex(table) };
+            return new[] { new PrimaryKeyIndex(table) };
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -1222,7 +1222,7 @@ namespace Signum.Engine.Maps
         {
             var result = new List<TableIndex>
             {
-                new PrimaryClusteredIndex(this)
+                new PrimaryKeyIndex(this)
             };
 
             result.AddRange(BackReference.GenerateIndexes(this));
@@ -1300,6 +1300,8 @@ namespace Signum.Engine.Maps
         NpgsqlDbType? postgreSql;
         public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
 
+        public bool IsPostgres => postgreSql.HasValue;
+
         public AbstractDbType(SqlDbType sqlDbType)
         {
             this.sqlServer = sqlDbType;
@@ -1319,7 +1321,10 @@ namespace Signum.Engine.Maps
         }
 
         public override bool Equals(object? obj) => obj is AbstractDbType adt && Equals(adt);
-        public bool Equals(AbstractDbType adt) => this.postgreSql == adt.postgreSql && this.sqlServer == adt.sqlServer;
+        public bool Equals(AbstractDbType adt) =>
+            Schema.Current.Settings.IsPostgres ?
+            this.postgreSql == adt.postgreSql :
+            this.sqlServer == adt.sqlServer;
         public override int GetHashCode() => this.postgreSql.GetHashCode() ^ this.sqlServer.GetHashCode();
 
         public bool IsDate()

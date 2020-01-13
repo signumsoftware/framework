@@ -33,7 +33,7 @@ namespace Signum.Engine.PostgresCatalog
 
         [AutoExpressionField]
         public IQueryable<PgTrigger> Triggers() =>
-            As.Expression(() => Database.View<PgTrigger>().Where(t => t.tgfoid == this.oid));
+            As.Expression(() => Database.View<PgTrigger>().Where(t => t.tgrelid == this.oid));
 
         [AutoExpressionField]
         public IQueryable<PgIndex> Indices() =>
@@ -88,7 +88,7 @@ namespace Signum.Engine.PostgresCatalog
         public PgType Type() => As.Expression(() => Database.View<PgType>().SingleOrDefault(t => t.oid == this.atttypid));
 
         [AutoExpressionField]
-        public PgAttributeDef? Default() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(t => t.oid == this.attrelid && t.adnum == this.attnum));
+        public PgAttributeDef? Default() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(d => d.adrelid == this.attrelid && d.adnum == this.attnum));
     }
 
     [TableName("pg_catalog.pg_attrdef")]
@@ -139,6 +139,12 @@ namespace Signum.Engine.PostgresCatalog
         [ViewPrimaryKey]
         public int oid;
 
+        public int pronamespace;
+
+        [AutoExpressionField]
+        public PgNamespace Namespace() =>
+            As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == this.pronamespace));
+
         public string proname;
     }
 
@@ -150,6 +156,10 @@ namespace Signum.Engine.PostgresCatalog
 
         public int indrelid;
 
+        public short indnatts;
+       
+        public short indnkeyatts;
+        
         public bool indisunique;
 
         public bool indisprimary;
@@ -186,7 +196,7 @@ namespace Signum.Engine.PostgresCatalog
 
         [AutoExpressionField]
         public PgClass TargetTable() =>
-   As.Expression(() => Database.View<PgClass>().Single(t => t.oid == this.confrelid));
+            As.Expression(() => Database.View<PgClass>().Single(t => t.oid == this.confrelid));
 
         [AutoExpressionField]
         public PgNamespace Namespace() =>

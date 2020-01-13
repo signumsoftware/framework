@@ -639,7 +639,7 @@ namespace Signum.Engine.CodeGeneration
                 parts.Add("Min = " + min);
 
             if (col.Length != -1)
-                parts.Add("Max = " + col.Length / DiffColumn.BytesPerChar(col.DbType.SqlServer));
+                parts.Add("Max = " + col.Length);
 
             return "StringLengthValidator(" + parts.ToString(", ") + ")";
         }
@@ -709,7 +709,7 @@ namespace Signum.Engine.CodeGeneration
                 ix.FilterDefinition == null &&
                 ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.IsIncluded == false) == true &&
                 ix.IsUnique &&
-                ix.Type == DiffIndexType.NonClustered);
+                ix.IsPrimary);
         }
 
         protected virtual string DefaultColumnName(DiffTable table, DiffColumn col)
@@ -752,9 +752,9 @@ namespace Signum.Engine.CodeGeneration
             var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.DbType);
             if (defaultSize != null)
             {
-                if (!(defaultSize == col.Precision || defaultSize == col.Length / DiffColumn.BytesPerChar(col.DbType.SqlServer) || defaultSize == int.MaxValue && col.Length == -1))
+                if (!(defaultSize == col.Precision || defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
                     parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
-                                        col.Length != 0 ? (col.Length / DiffColumn.BytesPerChar(col.DbType.SqlServer)).ToString() :
+                                        col.Length != 0 ? col.Length.ToString() :
                                         col.Precision != 0 ? col.Precision.ToString() : "0"));
             }
 
