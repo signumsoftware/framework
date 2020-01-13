@@ -151,6 +151,8 @@
   <Type Name="EmailReceptionMixin" />
   <Type Name="EmailRecipientEmbedded" />
   <Type Name="EmailRecipientKind" />
+  <Type Name="EmailSenderConfigurationEntity" />
+  <Type Name="EmailSenderConfigurationOperation" />
   <Type Name="EmailTemplateContactEmbedded" />
   <Type Name="EmailTemplateEntity" />
   <Type Name="EmailTemplateMessage" />
@@ -164,6 +166,7 @@
   <Type Name="ExcelMessage" />
   <Type Name="ExcelReportEntity" />
   <Type Name="ExcelReportOperation" />
+  <Type Name="ExchangeWebServiceEmbedded" />
   <Type Name="FileEmbedded" />
   <Type Name="FileEntity" />
   <Type Name="FileMessage" />
@@ -376,8 +379,7 @@
   <Type Name="SMSTemplateMessageEmbedded" />
   <Type Name="SMSTemplateOperation" />
   <Type Name="SMSUpdatePackageEntity" />
-  <Type Name="SmtpConfigurationEntity" />
-  <Type Name="SmtpConfigurationOperation" />
+  <Type Name="SmtpEmbedded" />
   <Type Name="SmtpNetworkDeliveryEmbedded" />
   <Type Name="SqlMigrationEntity" />
   <Type Name="SubEntitiesEval" />
@@ -439,8 +441,6 @@
   <Type Name="ViewLogEntity" />
   <Type Name="ViewLogMessage" />
   <Type Name="ViewNamePropEmbedded" />
-  <Type Name="WebDownload" />
-  <Type Name="WebImage" />
   <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
   <Type Name="WordModelEntity" />
