@@ -81,7 +81,7 @@ namespace Signum.Engine.Migrations
 
                 sqlBuilder.CreateTableSql(table).ExecuteLeaves();
 
-                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryClusteredIndex)))
+                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryKeyIndex)))
                 {
                     sqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
                 }
