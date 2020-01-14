@@ -356,7 +356,7 @@ namespace Signum.Utilities.DataStructures
         {
             return adjacency.ToString(kvp => "{0}=>{1};".FormatWith(kvp.Key,
                  kvp.Value.ToString(kvp2 => "[{0}->{1}]".FormatWith(kvp2.Value, kvp2.Key), ",")),
-                "\r\n"); ;
+                "\r\n");
         }
 
         public string ToGraphviz()

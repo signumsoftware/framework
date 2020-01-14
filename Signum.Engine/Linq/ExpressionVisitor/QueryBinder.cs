@@ -478,9 +478,9 @@ namespace Signum.Engine.Linq
         public Dictionary<ProjectionExpression, Expression> uniqueFunctionReplacements = new Dictionary<ProjectionExpression, Expression>(DbExpressionComparer.GetComparer<ProjectionExpression>(false));
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression? predicate, bool isRoot)
         {
-            ProjectionExpression rawProjector = this.VisitCastProjection(source);
+            ProjectionExpression rawProjection = this.VisitCastProjection(source);
 
-            var expandedProjector = QueryJoinExpander.ExpandJoins(rawProjector, this, cleanRequests: false);
+            var expandedProjector = QueryJoinExpander.ExpandJoins(rawProjection, this, cleanRequests: false);
 
             ProjectionExpression projection = (ProjectionExpression)AliasReplacer.Replace(expandedProjector, this.aliasGenerator);
 
@@ -495,20 +495,18 @@ namespace Signum.Engine.Linq
                 return new ScalarExpression(pc.Projector.Type,
                     new SelectExpression(alias, false, top, new[] { new ColumnDeclaration("val", pc.Projector) }, projection.Select, where, null, null, 0));
 
-            var newProjector = new ProjectionExpression(
+            var newProjection = new ProjectionExpression(
                 new SelectExpression(alias, false, top, pc.Columns, projection.Select, where, null, null, 0),
                 pc.Projector, function, resultType);
 
             if (isRoot)
-                return newProjector;
+                return newProjection;
 
-            var proj = uniqueFunctionReplacements.GetOrCreate(newProjector, () =>
+            var proj = uniqueFunctionReplacements.GetOrCreate(newProjection, () =>
             {
+                AddRequest(new UniqueRequest(newProjection.Select, outerApply: function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault));
 
-
-                AddRequest(new UniqueRequest(newProjector.Select, outerApply: function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault));
-
-                return newProjector.Projector;
+                return newProjection.Projector;
             });
 
             return proj;

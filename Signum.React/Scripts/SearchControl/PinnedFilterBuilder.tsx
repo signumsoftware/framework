@@ -42,9 +42,21 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const f = filter;
     const readOnly = f.frozen;
+    var labelText = f.pinned!.label ?? f.token?.niceName;
+
+    if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
+      return (
+        <div className="checkbox mt-4">
+          <label><input type="checkbox" className="mr-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onClick={() => {
+            f.pinned!.active = f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" : "Checkbox_StartChecked";
+            p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
+          }} />{labelText}</label>
+        </div>
+      );
+    }
+
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "ExtraSmall" : "Small" }, undefined as any, Binding.create(f, a => a.value));
 
-    var labelText = f.pinned!.label ?? f.token?.niceName;
 
     if (isFilterGroupOptionParsed(f)) {
       return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} labelText={labelText || SearchMessage.Search.niceToString()} />
@@ -58,7 +70,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.disableOnNull);
+    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue");
   }
 
 

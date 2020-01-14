@@ -368,6 +368,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
             </a>}
             &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
+              onClick={e => e.preventDefault()}
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}

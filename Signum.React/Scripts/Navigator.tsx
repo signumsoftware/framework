@@ -19,6 +19,7 @@ import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
+import { clearCustomConstructors } from "./Constructor";
 
 Dic.skipClasses.push(React.Component);
 
@@ -155,7 +156,8 @@ export const clearSettingsActions: Array<() => void> = [
   ButtonBarManager.clearButtonBarRenderer,
   Operations.clearOperationSettings,
   clearWidgets,
-  clearContextualItems
+  clearContextualItems,
+  clearCustomConstructors
 ];
 
 export function clearAllSettings() {
@@ -944,7 +946,7 @@ export class ViewPromise<T extends ModifiableEntity> {
   }
 }
 
-export function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
 
   if (!component.prototype.render)
     throw new Error("render function not defined in " + component);

@@ -11,12 +11,12 @@ export interface ModifiableEntity {
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  mixins?: { [name: string]: MixinEntity }
 }
 
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value
-  mixins?: { [name: string]: MixinEntity }
 }
 
 export interface EnumEntity<T> extends Entity {
@@ -456,7 +456,6 @@ export module SearchMessage {
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");
   export const Row = new MessageKey("SearchMessage", "Row");
-  export const DisableOnNull = new MessageKey("SearchMessage", "DisableOnNull");
   export const SplitText = new MessageKey("SearchMessage", "SplitText");
   export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
   export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");

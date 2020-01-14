@@ -37,7 +37,7 @@ namespace Signum.Test.Environment
     [Serializable] // Just a pattern
     public class ColaboratorsMixin : MixinEntity
     {
-        ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        ColaboratorsMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         [NoRepeatValidator]
         public MList<ArtistEntity> Colaborators { get; set; } = new MList<ArtistEntity>();

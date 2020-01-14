@@ -66,7 +66,6 @@ namespace Signum.Engine.Linq
                     case true: return new SqlConstantExpression(1, exp.Type);
                     case null: return new SqlConstantExpression(null, exp.Type);
                 }
-                throw new InvalidOperationException("Entity");
             }
 
             if (!IsSqlCondition(exp))

@@ -25,6 +25,8 @@ export interface ValueLineProps extends LineBaseProps {
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
   initiallyFocused?: boolean;
   incrementWithArrow?: boolean | number;
+  columnCount?: number;
+  columnWidth?: number;
 }
 
 export interface OptionItem {
@@ -41,7 +43,9 @@ export type ValueLineType =
   "Number" |
   "Decimal" |
   "Color" |
-  "TimeSpan";
+  "TimeSpan" |
+  "RadioGroup" |
+  "Password";
 
 export class ValueLineController extends LineBaseController<ValueLineProps>{
 
@@ -321,6 +325,14 @@ function internalComboBox(vl: ValueLineController) {
 }
 
 ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
+  return internalTextBox(vl, false);
+};
+
+ValueLineRenderers.renderers["Password" as ValueLineType] = (vl) => {
+  return internalTextBox(vl, true);
+}
+
+function internalTextBox(vl: ValueLineController, password: boolean) {
 
   const s = vl.props;
 
@@ -353,11 +365,10 @@ ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
     };
   }
 
-
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <input type="text"
+        <input type={password ? "password" : "text"}
           autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
           {...vl.props.valueHtmlAttributes}
           className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
@@ -370,9 +381,7 @@ ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
       }
     </FormGroup>
   );
-};
-
-
+}
 
 function isIE11(): boolean {
   return (!!(window as any).MSInputMethodContext && !!(document as any).documentMode);
@@ -726,3 +735,61 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 DurationTextBox.defaultProps = {
   format: "hh:mm:ss"
 };
+
+ValueLineRenderers.renderers["RadioGroup" as ValueLineType] = (vl) => {
+  return internalRadioGroup(vl);
+};
+
+function internalRadioGroup(vl: ValueLineController) {
+
+  var optionItems = getOptionsItems(vl);
+
+  const s = vl.props;
+
+  const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const option = optionItems.filter(a => a.value == input.value).single();
+    vl.setValue(option.value);
+  };
+
+  return (
+    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <div style={getColumnStyle()}>
+        {optionItems.map((oi, i) =>
+          <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.error)}>
+            <input type="radio" key={i} value={oi.value} checked={s.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={s.ctx.readOnly} />
+            {" " + oi.label}
+          </label>)}
+      </div>
+    </FormGroup>
+  );
+
+  function getColumnStyle(): React.CSSProperties | undefined {
+
+    const p = vl.props;
+
+    if (p.columnCount && p.columnWidth)
+      return {
+        columns: `${p.columnCount} ${p.columnWidth}px`,
+        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
+        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
+      };
+
+    if (p.columnCount)
+      return {
+        columnCount: p.columnCount,
+        MozColumnCount: p.columnCount,
+        WebkitColumnCount: p.columnCount,
+      };
+
+    if (p.columnWidth)
+      return {
+        columnWidth: p.columnWidth,
+        MozColumnWidth: p.columnWidth,
+        WebkitColumnWidth: p.columnWidth,
+      };
+
+    return undefined;
+  }
+}
+

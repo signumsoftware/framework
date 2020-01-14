@@ -159,7 +159,7 @@ namespace Signum.Entities
                 PropertyInfo = (PropertyInfo)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.LiteEntity;
             }
-            else if (typeof(Entity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
+            else if (typeof(ModifiableEntity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
             {
                 MixinDeclarations.AssertDeclared(parent.type!, (Type)fieldOrProperty);
 
@@ -396,17 +396,20 @@ namespace Signum.Entities
 
             foreach (PropertyInfo pi in Reflector.PublicInstancePropertiesInOrder(type))
             {
-                PropertyRoute route = root.Add(pi);
-                result.Add(route);
-
-                if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                    result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
-
-                if (Reflector.IsMList(pi.PropertyType))
+                if (includeIgnored || !pi.HasAttribute<IgnoreAttribute>())
                 {
-                    Type colType = pi.PropertyType.ElementType()!;
-                    if (Reflector.IsEmbeddedEntity(colType))
-                        result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                    PropertyRoute route = root.Add(pi);
+                    result.Add(route);
+
+                    if (Reflector.IsEmbeddedEntity(pi.PropertyType))
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
+
+                    if (Reflector.IsMList(pi.PropertyType))
+                    {
+                        Type colType = pi.PropertyType.ElementType()!;
+                        if (Reflector.IsEmbeddedEntity(colType))
+                            result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                    }
                 }
             }
 
