@@ -102,8 +102,8 @@ export function operationInfos(ti: TypeInfo) {
   return Dic.getValues(ti.operations!).filter(isOperationInfoAllowed);
 }
 
-export function notifySuccess(message?: string) {
-  Notify.singleton && Notify.singleton.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 });
+export function notifySuccess(message?: string, timeout?: number) {
+  Notify.singleton && Notify.singleton.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 }, timeout);
 }
 
 /**
