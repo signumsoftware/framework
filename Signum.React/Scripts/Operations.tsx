@@ -3,7 +3,7 @@ import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol
+  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer } from './Reflection';
