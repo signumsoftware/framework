@@ -8,7 +8,7 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 export default function TextArea(p: TextAreaProps) {
 
-  handleResize = (ta: HTMLTextAreaElement) => {
+  const handleResize = (ta: HTMLTextAreaElement) => {
     if (ta.style.height == ta.scrollHeight + 'px') { // do not move to a variable
       return;
     }
