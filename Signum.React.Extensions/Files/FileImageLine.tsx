@@ -12,6 +12,7 @@ import "./Files.css"
 import { useFetchInState, useFetchAndRemember } from '../../../Framework/Signum.React/Scripts/Hooks'
 import { FetchAndRemember } from '../../../Framework/Signum.React/Scripts/Lines'
 import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };
 
@@ -91,8 +92,8 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
     const val = ctx.value!;
 
     var content = ctx.propertyRoute.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} />;
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
+      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />;
 
     const removeButton = c.renderRemoveButton(true, val);
 
