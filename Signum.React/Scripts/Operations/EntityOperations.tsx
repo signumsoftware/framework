@@ -158,7 +158,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
     return null;
 
   if (canExecute === undefined)
-    canExecute = eoc.canExecute;
+    canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
 
   const disabled = !!canExecute;
 

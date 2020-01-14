@@ -339,6 +339,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
@@ -368,6 +369,7 @@ export interface EntityOperationOptions<T extends Entity> {
 
   text?: () => string;
   isVisible?: (ctx: EntityOperationContext<T>) => boolean;
+  overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (ctx: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
