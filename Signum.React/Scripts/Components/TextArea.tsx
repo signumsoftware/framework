@@ -10,11 +10,14 @@ export default class TextArea extends React.Component<TextAreaProps> {
   static defaultProps = { autoResize: true };
 
   handleResize = (ta: HTMLTextAreaElement) => {
+    if (ta.style.height == ta.scrollHeight + 'px') { // do not move to a variable
+      return;
+    }
+
     ta.style.height = "0";
     ta.style.height = ta.scrollHeight + 'px';
     ta.style.minHeight = "50px";
     ta.scrollTop = ta.scrollHeight;
-    //window.scrollTo(window.scrollX, (ta.scrollTop + ta.scrollHeight));
   }
 
   render() {
