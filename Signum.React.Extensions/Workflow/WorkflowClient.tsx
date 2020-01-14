@@ -16,7 +16,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext, assertOperationInfoAllowed } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { confirmInNecessary, notifySuccess } from '@framework/Operations/EntityOperations'
+import { confirmInNecessary } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
 import { CodeContext } from '../Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
@@ -444,7 +444,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
       .then(packWithIssues => {
         eoc.frame.onReload(packWithIssues.entityPack);
         wf.setIssues(packWithIssues.issues);
-        notifySuccess();
+        Operations.notifySuccess();
       })
       .catch(ifError(ValidationError, e => {
 
@@ -502,7 +502,7 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
   eoc.onExecuteSuccess = pack => {
-    notifySuccess();
+    Operations.notifySuccess();
     eoc.frame.onClose(pack);
   }
 
@@ -529,7 +529,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
       return;
 
     Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-      .then(pack => { eoc.frame.onClose(); return notifySuccess(); })
+      .then(pack => { eoc.frame.onClose(); return Operations.notifySuccess(); })
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
   });

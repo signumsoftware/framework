@@ -13,7 +13,7 @@ import { JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
 import { EditableComponent, MarkdownText } from './EditableText';
 import { classes } from '@framework/Globals';
-import { notifySuccess } from '@framework/Operations/EntityOperations';
+import { notifySuccess } from '@framework/Operations';
 import * as Operations from '@framework/Operations';
 import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';

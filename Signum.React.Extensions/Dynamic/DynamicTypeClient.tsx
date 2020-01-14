@@ -10,7 +10,6 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { NormalControlMessage } from '@framework/Signum.Entities'
 import * as QuickLink from '@framework/QuickLinks'
 import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Entities.Dynamic'
@@ -33,7 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
       (eoc.frame.entityComponent as DynamicTypeComponent).beforeSave();
 
       Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-        .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); Operations.notifySuccess(); })
         .then(() => {
           if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
             MessageModal.show({

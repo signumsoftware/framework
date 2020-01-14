@@ -8,7 +8,6 @@ import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { TypeContext } from '@framework/TypeContext'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { BaseNode } from './Nodes'
 import { DesignerContext, DesignerNode, RenderWithViewOverrides } from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
@@ -155,7 +154,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
       .then(pack => {
         reload(pack.entity);
         DynamicViewClient.cleanCaches();
-        return EntityOperations.notifySuccess();
+        return Operations.notifySuccess();
       })
       .done();
   }
@@ -166,7 +165,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       DynamicViewClient.createDefaultDynamicView(p.typeName)
-        .then(entity => { reload(entity); return EntityOperations.notifySuccess(); })
+        .then(entity => { reload(entity); return Operations.notifySuccess(); })
         .done();
 
     }).done();
@@ -178,7 +177,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       Operations.API.constructFromEntity(p.dynamicView, DynamicViewOperation.Clone)
-        .then(pack => { reload(pack.entity); return EntityOperations.notifySuccess(); })
+        .then(pack => { reload(pack.entity); return Operations.notifySuccess(); })
         .done();
     }).done();
   }

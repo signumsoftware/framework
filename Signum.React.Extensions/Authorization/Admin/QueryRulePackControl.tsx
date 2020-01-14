@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { QueryEntity } from '@framework/Signum.Entities.Basics';
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'
