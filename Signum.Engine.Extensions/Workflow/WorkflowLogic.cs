@@ -197,8 +197,6 @@ namespace Signum.Engine.Workflow
                 index = newIndex;
                 line++;
             }
-
-            throw new InvalidOperationException("Line not found");
         }
 
         public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)

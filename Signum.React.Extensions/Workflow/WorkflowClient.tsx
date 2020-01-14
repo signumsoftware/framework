@@ -16,7 +16,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext, assertOperationInfoAllowed } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { confirmInNecessary, notifySuccess } from '@framework/Operations/EntityOperations'
+import { confirmInNecessary } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
 import { CodeContext } from '../Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
@@ -120,10 +120,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Finder.addSettings({
     queryName: CaseActivityEntity,
     defaultFilters: [
-      { token: CaseActivityEntity.token(a => a.doneDate).expression("HasValue"), value: null, pinned: { disableOnNull: true, column: 1, label: "Is Done" } },
-      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { disableOnNull: true, column: 2, label: WorkflowActivityEntity.niceName() } },
-      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(w => w.lane.pool.workflow), pinned: { disableOnNull: true, column: 3 } },
-      { token: CaseActivityEntity.token(a => a.case), pinned: { disableOnNull: true, column: 4 } },
+      { token: CaseActivityEntity.token(a => a.doneDate).expression("HasValue"), value: null, pinned: { active: "WhenHasValue", column: 1, label: "Is Done" } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { active: "WhenHasValue", column: 2, label: WorkflowActivityEntity.niceName() } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(w => w.lane.pool.workflow), pinned: { active: "WhenHasValue", column: 3 } },
+      { token: CaseActivityEntity.token(a => a.case), pinned: { active: "WhenHasValue", column: 4 } },
     ]
   })
 
@@ -155,7 +155,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       };
     },
     formatters: {
-      "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />)
+      "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />),
+      "MainEntity": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
+      "Actor": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
+      "Sender": new Finder.CellFormatter(cell => cell && <span>{cell.toStr}</span>),
+      "Workflow": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
     },
     defaultOrderColumn: "StartDate",
     simpleFilterBuilder: sfbc => {
@@ -440,7 +444,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
       .then(packWithIssues => {
         eoc.frame.onReload(packWithIssues.entityPack);
         wf.setIssues(packWithIssues.issues);
-        notifySuccess();
+        Operations.notifySuccess();
       })
       .catch(ifError(ValidationError, e => {
 
@@ -498,7 +502,7 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
   eoc.onExecuteSuccess = pack => {
-    notifySuccess();
+    Operations.notifySuccess();
     eoc.frame.onClose(pack);
   }
 
@@ -525,7 +529,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
       return;
 
     Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-      .then(pack => { eoc.frame.onClose(); return notifySuccess(); })
+      .then(pack => { eoc.frame.onClose(); return Operations.notifySuccess(); })
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
   });

@@ -87,14 +87,17 @@ namespace Signum.Entities.Mailing
         public MList<EmailAttachmentEmbedded> Attachments { get; set; } = new MList<EmailAttachmentEmbedded>();
 
         static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
-            m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
+            m => m.State,       m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
             {
-{EmailMessageState.Created,      false,         false,         false,                    null },
-{EmailMessageState.Draft,        false,         false,         false,                    null },
-{EmailMessageState.Sent,         false,         true,          false,                    null },
-{EmailMessageState.SentException,true,          true,          false,                    null },
-{EmailMessageState.ReceptionNotified,true,      true,          true,                     null },
-{EmailMessageState.Received,     false,         false,         false,                    false },
+{EmailMessageState.Created,             false,         false,         false,                    null },
+{EmailMessageState.Draft,               false,         false,         false,                    null },
+{EmailMessageState.ReadyToSend,         false,         false,         false,                    null },
+{EmailMessageState.RecruitedForSending, false,         false,         false,                    null },
+{EmailMessageState.Sent,                false,         true,          false,                    null },
+{EmailMessageState.SentException,       true,          true,          false,                    null },
+{EmailMessageState.ReceptionNotified,   true,          true,          true,                     null },
+{EmailMessageState.Received,            false,         false,         false,                    false },
+{EmailMessageState.Outdated,            false,         false,         false,                    null },
             };
 
         [AutoExpressionField]
@@ -110,7 +113,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailReceptionMixin : MixinEntity
     {
-        protected EmailReceptionMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
+        protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 

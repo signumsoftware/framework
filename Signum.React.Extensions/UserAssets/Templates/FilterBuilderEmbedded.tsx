@@ -57,7 +57,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
             fo.token!.filterType == "Embedded" || fo.token!.filterType == "Lite" ? liteKey(v) :
               toStringValue(v, fo.token!.filterType))
             .join("|");
-        } 
+        }
 
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
           token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
@@ -69,14 +69,14 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       }
 
       function toPinnedQueryFilterEmbedded(pinned: PinnedFilter): PinnedQueryFilterEmbedded {
-            return PinnedQueryFilterEmbedded.New({
-                label: pinned.label,
-                column: pinned.column,
-                row: pinned.row,
-                disableOnNull: pinned.disableOnNull,
-                splitText: pinned.splitText,
-            });
-        }
+        return PinnedQueryFilterEmbedded.New({
+          label: pinned.label,
+          column: pinned.column,
+          row: pinned.row,
+          active: pinned.active,
+          splitText: pinned.splitText,
+        });
+      }
     }
 
     filterOptions!.forEach(fo => pushFilter(fo, 0))
@@ -191,7 +191,7 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
         label: pinned.label ?? undefined,
         column: pinned.column ?? undefined,
         row: pinned.row ?? undefined,
-        disableOnNull: pinned.disableOnNull || undefined,
+        active: pinned.active || undefined,
         splitText: pinned.splitText || undefined,
       };
     }

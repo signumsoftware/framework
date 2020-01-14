@@ -9,7 +9,7 @@ import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflectio
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
-import { notifySuccess, confirmInNecessary } from '@framework/Operations/EntityOperations';
+import { notifySuccess } from '@framework/Operations';
 import { getOperationInfo } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';

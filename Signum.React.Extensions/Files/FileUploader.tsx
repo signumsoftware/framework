@@ -10,7 +10,7 @@ import { New } from '@framework/Reflection';
 export { FileTypeSymbol };
 
 export interface FileUploaderProps {
-  onFileLoaded: (file: IFile & ModifiableEntity, index: number, count: number) => void;
+  onFileLoaded: (file: IFile & ModifiableEntity, index: number, count: number, htmlFile: File) => void;
   typeName: string;
   fileType?: FileTypeSymbol;
   dragAndDrop?: boolean;
@@ -113,7 +113,7 @@ export function FileUploader(p: FileUploaderProps) {
           (fileEntity as any as IFilePath).fileType = p.fileType;
 
 
-        p.onFileLoaded(fileEntity, index, count);
+        p.onFileLoaded(fileEntity, index, count, file);
         resolve();
       };
       fileReader.readAsDataURL(file);

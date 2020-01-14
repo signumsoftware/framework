@@ -158,9 +158,9 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
         <div className="col-sm-7">
           {exampleEntity && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
           <div className="code-container">
-            <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
-              {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {renderInput(ctx.subCtx(dt => dt.name))}({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
-                          </pre>
+            <pre style={{ border: "0px", margin: "0px", display: "flex", overflow: "visible" }}>
+              {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))}&nbsp;{renderInput(ctx.subCtx(dt => dt.name))}&nbsp;({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
+            </pre>
             <CSharpCodeMirror script={ctx.value.body ?? ""} onChange={handleCodeChange} />
           </div>
           {ctx.value.body && cleanFromType && renderTest(cleanFromType)}

@@ -137,7 +137,7 @@ namespace Signum.Entities.Files
         string? physicalPrefix;
         public string PhysicalPrefix => physicalPrefix ?? throw new InvalidOperationException("No PhysicalPrefix defined");
 
-        public string WebPrefix { get;  set; }
+        public string WebPrefix { get; set; }
 
         private PrefixPair()
         {

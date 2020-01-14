@@ -66,7 +66,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedCreatedMixin : MixinEntity
     {
-        DisconnectedCreatedMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        DisconnectedCreatedMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         public bool DisconnectedCreated { get; set; }
     }
@@ -74,7 +74,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedSubsetMixin : MixinEntity
     {
-        DisconnectedSubsetMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        DisconnectedSubsetMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         public long? LastOnlineTicks { get; set; }
 

@@ -53,7 +53,7 @@ namespace Signum.Engine.Rest
             Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit.Value && a.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string oldRequestBody, string? oldResponseBody)
+        public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string? oldRequestBody, string? oldResponseBody)
         {
             var result = new RestDiffResult { previous = oldResponseBody };
 

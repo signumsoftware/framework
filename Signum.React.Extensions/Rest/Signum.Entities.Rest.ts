@@ -35,7 +35,7 @@ export interface RestLogEntity extends Entities.Entity {
   startDate: string;
   endDate: string;
   replayDate: string | null;
-  requestBody: string;
+  requestBody: string | null;
   queryString: Entities.MList<QueryStringValueEmbedded>;
   user: Entities.Lite<Basics.IUserEntity> | null;
   userHostAddress: string | null;

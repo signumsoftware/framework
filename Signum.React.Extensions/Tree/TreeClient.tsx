@@ -6,7 +6,6 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { Type } from '@framework/Reflection'
 import { Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
@@ -36,14 +35,14 @@ export function start(options: { routes: JSX.Element[] }) {
     new EntityOperationSettings(TreeOperation.Copy, {
       onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
         if (m) {
-          ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+          ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
           ctx.defaultClick(m);
         }
       }),
       contextual: {
         onClick: ctx => copyModal(ctx.context.lites[0]).then(m => {
           if (m) {
-            ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+            ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
             ctx.defaultContextualClick(m);
           }
         })

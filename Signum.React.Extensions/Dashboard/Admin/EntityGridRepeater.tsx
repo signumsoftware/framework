@@ -40,6 +40,41 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
     state.remove = true;
   }
 
+  handleCreateClick = (event: React.SyntheticEvent<any>) => {
+
+    event.preventDefault();
+
+    const p = this.props;
+    const pr = p.ctx.propertyRoute.addLambda(a => a[0]);
+    const promise = p.onCreate ?
+      p.onCreate(pr) : this.defaultCreate(pr);
+
+    if (!promise)
+      return;
+
+    promise
+      .then(e => {
+
+        if (!e)
+          return;
+
+        if (!isModifiableEntity(e))
+          throw new Error("Should be an entity");
+
+        let ge = e as ModifiableEntity & IGridEntity;
+
+        const list = p.ctx.value!;
+        if (ge.row == undefined)
+          ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max()! + 1;
+        if (ge.startColumn == undefined)
+          ge.startColumn = 0;
+        if (ge.columns == undefined)
+          ge.columns = 12;
+
+        list.push({ rowId: null, element: e });
+        this.setValue(list);
+      }).done();
+  };
 }
 
 
@@ -146,42 +181,6 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
 
     setDrag(undefined);
   }
-
-
-  function handleCreateClick(e: React.SyntheticEvent<any>) {
-
-    e.preventDefault();
-
-    const pr = p.ctx.propertyRoute.addLambda(a => a[0]);
-    const promise = p.onCreate ?
-      p.onCreate(pr) : c.defaultCreate(pr);
-
-    if (!promise)
-      return;
-
-    promise
-      .then(e => {
-
-        if (!e)
-          return;
-
-        if (!isModifiableEntity(e))
-          throw new Error("Should be an entity");
-
-        let ge = e as ModifiableEntity & IGridEntity;
-
-        const list = p.ctx.value!;
-        if (ge.row == undefined)
-          ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max()! + 1;
-        if (ge.startColumn == undefined)
-          ge.startColumn = 0;
-        if (ge.columns == undefined)
-          ge.columns = 12;
-
-        list.push({ rowId: null, element: e });
-        c.setValue(list);
-      }).done();
-  };
 
   function handleOnDrop(event: React.SyntheticEvent<any>) {
     setDrag(undefined);

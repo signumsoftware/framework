@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { OperationSymbol } from '@framework/Signum.Entities'

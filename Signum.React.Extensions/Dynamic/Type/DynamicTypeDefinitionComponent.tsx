@@ -207,7 +207,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
           </div>
         }
 
-      <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={handleTabSelect}>
+        <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={handleTabSelect} mountOnEnter={true}>
           <Tab eventKey="properties" title="Properties">
           <PropertyRepeaterComponent dc={p.dc} properties={def.properties} onRemove={handlePropertyRemoved} showDatabaseMapping={p.showDatabaseMapping} />
             <br />

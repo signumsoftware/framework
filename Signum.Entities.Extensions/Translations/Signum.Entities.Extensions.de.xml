@@ -965,6 +965,16 @@
     <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="An" />
   </Type>
+  <Type Name="EmailSenderConfigurationEntity" Description="Konfiguration E-Mail-Absender" PluralDescription="Konfigurationen E-Mail-Absender" Gender="m">
+    <Member Name="AdditionalRecipients" Description="Zusätzliche Empfänger" />
+    <Member Name="DefaultFrom" Description="Standard von" />
+    <Member Name="Exchange" Description="Exchange" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="SMTP" Description="SMTP" />
+  </Type>
+  <Type Name="EmailSenderConfigurationOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="EmailTemplateContactEmbedded" Description="Kontakt E-Mail-Vorlage">
     <Member Name="DisplayName" Description="Namen" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
@@ -1054,6 +1064,13 @@
   <Type Name="ExcelReportOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ExchangeWebServiceEmbedded" Description="Exchange web service">
+    <Member Name="ExchangeVersion" Description="Exchange version" />
+    <Member Name="Password" Description="Passwort" />
+    <Member Name="Url" Description="URL" />
+    <Member Name="UseDefaultCredentials" Description="Use default credentials" />
+    <Member Name="Username" Description="Benutzername" />
   </Type>
   <Type Name="FileEmbedded" Description="Eingebettete Datei">
     <Member Name="BinaryFile" Description="Binärdatei" />
@@ -1570,8 +1587,8 @@
   <Type Name="PermissionRulePack" Description="Berechtigungregelpack" />
   <Type Name="PermissionSymbol" Description="Berechtigung" />
   <Type Name="PinnedQueryFilterEmbedded" Description="Vorgewahlter Abfragefilter">
+    <Member Name="Active" Description="Aktiv" />
     <Member Name="Column" Description="Spalte" />
-    <Member Name="DisableOnNull" Description="Deaktivieren bei Null" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="SplitText" Description="Text aufteilen" />
@@ -2109,17 +2126,11 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SMSUpdatePackageEntity" Description="SMS-Updatepaket" PluralDescription="SMS-Updatepakete" Gender="n" />
-  <Type Name="SmtpConfigurationEntity" Description="Smtp-Konfiguration">
-    <Member Name="AdditionalRecipients" Description="Zusätzlicher Empfänger" />
-    <Member Name="DefaultFrom" Description="Standard von" />
-    <Member Name="DeliveryFormat" Description="Lieferformat" />
-    <Member Name="DeliveryMethod" Description="Übermittlungsmethode" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="Network" Description="Netzwerk" />
-    <Member Name="PickupDirectoryLocation" Description="Pickup-Verzeichnis Lage" />
-  </Type>
-  <Type Name="SmtpConfigurationOperation">
-    <Member Name="Save" Description="Speichern" />
+  <Type Name="SmtpEmbedded" Description="Smtp">
+    <Member Name="DeliveryFormat" Description="Delivery format" />
+    <Member Name="DeliveryMethod" Description="Delivery method" />
+    <Member Name="Network" Description="Network" />
+    <Member Name="PickupDirectoryLocation" Description="Pickup directory location" />
   </Type>
   <Type Name="SmtpNetworkDeliveryEmbedded" Description="SMTP-Netzwerk-Zustellung">
     <Member Name="ClientCertificationFiles" Description="Klientzertfikatsdateien" />
@@ -2506,13 +2517,6 @@
     <Member Name="ViewLogMyLast" Description="Zeige mein letztes log" />
   </Type>
   <Type Name="ViewNamePropEmbedded" />
-  <Type Name="WebDownload" Description="Webdownload">
-    <Member Name="FileName" Description="Dateiname" />
-    <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
-  </Type>
-  <Type Name="WebImage" Description="Webbild">
-    <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
-  </Type>
   <Type Name="WordAttachmentEntity" Description="Word-Anhang" PluralDescription="Word-Anhänge" Gender="m">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="ModelConverter" Description="Modell-Konverter" />

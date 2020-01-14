@@ -22,8 +22,8 @@ namespace Signum.Entities.Rest
 
         public DateTime? ReplayDate { get; set; }
 
-        [ForceNotNullable, SqlDbType(Size = MaxValue)]
-        public string RequestBody { get; set; }
+        [SqlDbType(Size = MaxValue)]
+        public string? RequestBody { get; set; }
 
         [PreserveOrder]
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();

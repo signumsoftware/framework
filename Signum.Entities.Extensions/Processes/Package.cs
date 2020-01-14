@@ -32,7 +32,7 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package {0} {1}".FormatWith(Operation, Name); ;
+            return "Package {0} {1}".FormatWith(Operation, Name);
         }
     }
 
