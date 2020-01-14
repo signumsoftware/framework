@@ -17,6 +17,7 @@ import { getConstructFromManyContextualItems, getEntityOperationsContextualItems
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import Notify from './Frames/Notify';
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -99,6 +100,10 @@ export function assertOperationAllowed(operation: OperationSymbol | string, type
 
 export function operationInfos(ti: TypeInfo) {
   return Dic.getValues(ti.operations!).filter(isOperationInfoAllowed);
+}
+
+export function notifySuccess(message?: string) {
+  Notify.singleton && Notify.singleton.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 });
 }
 
 /**

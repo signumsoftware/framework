@@ -4,7 +4,6 @@ import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
 import * as Navigator from '../Navigator';
-import Notify from '../Frames/Notify';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
@@ -18,6 +17,7 @@ import { func } from "prop-types";
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
 import { FunctionalAdapter } from "../Frames/FrameModal";
+import { notifySuccess } from "../Operations";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -314,10 +314,6 @@ export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>,
   }
 
   throw new Error("Unexpected OperationType");
-}
-
-export function notifySuccess() {
-  Notify.singleton && Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
 export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
