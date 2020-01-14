@@ -87,38 +87,40 @@ export default function ChangePassword() {
   }
 
   return (
-    <form onSubmit={(e) => handleSubmit(e)}>
+    <form onSubmit={(e) => handleSubmit(e)} className="w-100">
       <div className="row">
-        <div className="offset-sm-2 col-sm-6">
+        <div className="col-md-6 offset-md-3">
           <h2 className="sf-entity-title">{AuthMessage.ChangePasswordAspx_ChangePassword.niceToString()}</h2>
           <p>{AuthMessage.ChangePasswordAspx_EnterActualPasswordAndNewOne.niceToString()}</p>
         </div>
       </div>
-      <div>
-        <div className={classes("form-group row", error("oldPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString()}</label>
-          <div className="col-sm-4">
+      <div className="row">
+      <div className="col-md-6 offset-md-3">
+        <div className={classes("form-group", error("oldPassword") && "has-error")}>
+          <label className="col-form-label">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString()}</label>
+          <div>
             <input type="password" className="form-control" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} />
             {error("oldPassword") && <span className="help-block">{error("oldPassword")}</span>}
           </div>
         </div>
-        <div className={classes("form-group row", error("newPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{AuthMessage.EnterTheNewPassword.niceToString()}</label>
-          <div className="col-sm-4">
+        <div className={classes("form-group", error("newPassword") && "has-error")}>
+          <label className="col-form-label">{AuthMessage.EnterTheNewPassword.niceToString()}</label>
+          <div>
             <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
           </div>
         </div>
-        <div className={classes("form-group row", error("newPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}</label>
-          <div className="col-sm-4">
+        <div className={classes("form-group", error("newPassword") && "has-error")}>
+          <label className="col-form-label">{AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}</label>
+          <div>
             <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
           </div>
         </div>
       </div>
+      </div>
       <div className="row">
-        <div className="offset-sm-2 col-sm-6">
+        <div className="col-md-6 offset-md-3">
           <button type="submit" className="btn btn-primary" id="changePassword">{AuthMessage.ChangePassword.niceToString()}</button>
         </div>
       </div>
