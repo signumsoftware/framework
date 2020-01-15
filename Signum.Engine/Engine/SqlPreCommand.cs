@@ -84,27 +84,112 @@ namespace Signum.Engine
                 .Combine(Spacing.Simple)!;
         }
 
-        public static bool AvoidOpenOpenSqlFileRetry = true;
-
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
-            string file = command.OpenSqlFile();
-            if (!AvoidOpenOpenSqlFileRetry && SafeConsole.Ask("Open again?"))
-                Process.Start(file);
-        }
+            var fileName = "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".FormatWith(DateTime.Now);
 
-        public static string OpenSqlFile(this SqlPreCommand command)
-        {
-            return OpenSqlFile(command, "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".FormatWith(DateTime.Now));
-        }
-
-        public static string OpenSqlFile(this SqlPreCommand command, string fileName)
-        {
             Save(command, fileName);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
 
-            Thread.Sleep(1000);
+            Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+            var answer = SafeConsole.AskRetry("Open or run?", "open", "run", "exit");
 
+            if(answer == "open")
+            {
+                Thread.Sleep(1000);
+                Open(fileName);
+                if (SafeConsole.Ask("run now?"))
+                    ExecuteRetry(fileName);
+            }
+            else if(answer == "run")
+            {
+                ExecuteRetry(fileName);   
+            }
+        }
+
+        static void ExecuteRetry(string fileName)
+        {
+            retry:
+            try
+            {
+                var script = File.ReadAllText(fileName);
+                ExecuteScript("script", script);
+            }
+            catch (ExecuteSqlScriptException)
+            {
+                Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+                if (SafeConsole.Ask("retry?"))
+                    goto retry;
+
+            }
+        }
+
+        public static int Timeout = 20 * 60;
+
+        public static void ExecuteScript(string title, string script)
+        {
+            using (Connector.CommandTimeoutScope(Timeout))
+            {
+                var regex = new Regex(@" *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase);
+
+                var parts = regex.Split(script);
+
+                var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
+
+                int pos = 0;
+
+                try
+                {
+                    for (pos = 0; pos < realParts.Length; pos++)
+                    {
+                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length), () => Executor.ExecuteNonQuery(realParts[pos]));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
+                    var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
+                    if (sqlE == null && pgE == null)
+                        throw;
+
+                    Console.WriteLine();
+                    Console.WriteLine();
+
+                    var list = script.Lines();
+
+                    var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber - 1) + pos + parts.Take(parts.IndexOf(realParts[pos])).Sum(a => a.Lines().Length);
+
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
+
+                    var min = Math.Max(0, lineNumer - 20);
+                    var max = Math.Min(list.Length - 1, lineNumer + 20);
+
+                    if (min > 0)
+                        Console.WriteLine("...");
+
+                    for (int i = min; i <= max; i++)
+                    {
+                        Console.Write(i + ": ");
+                        SafeConsole.WriteLineColor(i == lineNumer ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
+                    }
+
+                    if (max < list.Length - 1)
+                        Console.WriteLine("...");
+
+                    Console.WriteLine();
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, ex.GetType().Name + " (Number {0}): ".FormatWith(pgE?.SqlState ?? sqlE?.Number.ToString()));
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
+
+                    Console.WriteLine();
+
+                    throw new ExecuteSqlScriptException(ex.Message, ex);
+                }
+            }
+        }
+
+        private static void Open(string fileName)
+        {
             new Process
             {
                 StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), fileName))
@@ -112,9 +197,8 @@ namespace Signum.Engine
                     UseShellExecute = true
                 }
             }.Start();
-
-            return fileName;
         }
+
 
         public static void Save(this SqlPreCommand command, string fileName)
         {
@@ -122,6 +206,18 @@ namespace Signum.Engine
 
             File.WriteAllText(fileName, content, Encoding.Unicode);
         }
+    }
+
+
+    [Serializable]
+    public class ExecuteSqlScriptException : Exception
+    {
+        public ExecuteSqlScriptException() { }
+        public ExecuteSqlScriptException(string message) : base(message) { }
+        public ExecuteSqlScriptException(string message, Exception inner) : base(message, inner) { }
+        protected ExecuteSqlScriptException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
     public class SqlPreCommandSimple : SqlPreCommand
