@@ -575,7 +575,7 @@ $"WHERE {id} = {idParamName + suffix}" + (table.Ticks != null ? $" AND {table.Ti
 (output && isPostgres ? $"RETURNING ({id})" : null);
 
                         if (!(isPostgres && output))
-                            return result;
+                            return result.Trim() + ";";
 
                         return $@"WITH rows AS (
 {result.Indent(4)}
@@ -707,7 +707,6 @@ SELECT {id} FROM rows;";
             }
             else
             {
-
                 return SqlPreCommand.Combine(Spacing.Simple, 
                     new SqlPreCommandSimple($"DECLARE {parentId} {pkType};") { GoBefore = true }, 
                     insert, 
@@ -737,9 +736,14 @@ SELECT {id} FROM rows;";
             SqlPreCommand? update;
             if (where != null)
             {
-                update = SqlPreCommand.Combine(Spacing.Simple,
-                    DeclarePrimaryKeyVariable(entity, where),
-                    new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName));
+                bool isPostgres = Schema.Current.Settings.IsPostgres;
+
+                var declare = DeclarePrimaryKeyVariable(entity, where);
+                var updateSql = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName);
+
+                update = isPostgres ?
+                    PostgresDoBlock(entity.Id.VariableName!, declare, updateSql) :
+                    SqlPreCommand.Combine(Spacing.Simple, declare, updateSql);;
             }
             else
             {

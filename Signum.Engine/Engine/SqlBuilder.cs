@@ -480,8 +480,11 @@ WHERE {primaryKey.Name} NOT IN
             return StringHashEncoder.ChopHash(result, this.connector.MaxNameLength);
         }
 
-        public SqlPreCommand RenameForeignKey(ObjectName foreignKeyName, string newName)
+        public SqlPreCommand RenameForeignKey(ObjectName tn, ObjectName foreignKeyName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {tn} RENAME CONSTRAINT {foreignKeyName.Name.SqlEscape(IsPostgres)} TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(foreignKeyName.Schema.Database, foreignKeyName.OnDatabase(null).ToString(), newName, "OBJECT");
         }
 
@@ -540,21 +543,33 @@ FROM {1} as [table]".FormatWith(
 
         public SqlPreCommand RenameTable(ObjectName oldName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {oldName} RENAME TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(oldName.Schema.Database, oldName.OnDatabase(null).ToString(), newName, null);
         }
 
         public SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {oldName} SET SCHEMA{schemaName.Name.SqlEscape(IsPostgres)};");
+
             return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".FormatWith(schemaName.Name.SqlEscape(isPostgres), oldName));
         }
 
         public SqlPreCommand RenameColumn(ObjectName tableName, string oldName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {tableName} RENAME COLUMN {oldName.SqlEscape(IsPostgres)} TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "COLUMN");
         }
 
         public SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER INDEX {oldName.SqlEscape(IsPostgres)} RENAME TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "INDEX");
         }
         #endregion

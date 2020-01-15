@@ -104,17 +104,18 @@ namespace Signum.Engine.Engine
                                                      }).ToList(),
                                                  }).ToList(),
 
-                             SimpleIndices = (from i in t.Indices()
+                             SimpleIndices = (from ix in t.Indices()
                                               select new DiffIndex
                                               {
-                                                  IsUnique = i.indisunique,
-                                                  IsPrimary = i.indisprimary,
-                                                  IndexName = i.Class().relname,
-                                                  FilterDefinition = PostgresFunctions.pg_get_expr(i.indpred!, i.indrelid),
+                                                  IsUnique = ix.indisunique,
+                                                  IsPrimary = ix.indisprimary,
+                                                  IndexName = ix.Class().relname,
+                                                  FilterDefinition = PostgresFunctions.pg_get_expr(ix.indpred!, ix.indrelid),
                                                   Type = DiffIndexType.NonClustered,
-                                                  Columns = (from at in i.Class().Attributes()
-                                                             orderby at.attnum
-                                                             select new DiffIndexColumn { ColumnName = at.attname, IsIncluded = at.attnum > i.indnkeyatts }).ToList()
+                                                  Columns = (from  i in PostgresFunctions.generate_subscripts(ix.indkey, 1)
+                                                             let at = t.Attributes().Single(a => a.attnum == ix.indkey[i])
+                                                             orderby i
+                                                             select new DiffIndexColumn { ColumnName = at.attname, IsIncluded = i >= ix.indnkeyatts }).ToList()
                                               }).ToList(),
 
                              ViewIndices = new List<DiffIndex>(),

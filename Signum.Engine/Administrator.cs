@@ -673,10 +673,10 @@ namespace Signum.Engine
                 throw new InvalidOperationException($"DeleteWhereScript can not be used for {table.Type.Name} because contains MLists");
 
             if(id.VariableName.HasText())
-                return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, id.VariableName));
+                return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2};".FormatWith(table.Name, column.Name, id.VariableName));
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}:".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
         }
 
 

@@ -385,7 +385,7 @@ namespace Signum.Engine
 
                              var name = sqlBuilder.ForeignKeyName(tab.Name.Name, tabCol.Name);
                              return SqlPreCommand.Combine(Spacing.Simple,
-                                name != difCol.ForeignKey.Name.Name ? sqlBuilder.RenameForeignKey(difCol.ForeignKey.Name.OnSchema(tab.Name.Schema), name) : null,
+                                name != difCol.ForeignKey.Name.Name ? sqlBuilder.RenameForeignKey(tab.Name, difCol.ForeignKey.Name.OnSchema(tab.Name.Schema), name) : null,
                                 (difCol.ForeignKey.IsDisabled || difCol.ForeignKey.IsNotTrusted) && !replacements.SchemaOnly ? sqlBuilder.EnableForeignKey(tab.Name, name) : null);
                          })
                      );
