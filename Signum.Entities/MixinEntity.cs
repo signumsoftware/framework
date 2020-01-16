@@ -92,7 +92,7 @@ namespace Signum.Entities
                 var constructors = me.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
                 if (constructors.Length != 1)
-                    throw new InvalidOperationException("{0} should have just one non-public construtor with parameters (Entity mainEntity, MixinEntity next)"
+                    throw new InvalidOperationException($"{me.Name} should have just one non-public construtor with parameters (ModifiableEntity mainEntity, MixinEntity next)"
                         .FormatWith(me.Name));
 
                 var ci = constructors.Single();
@@ -100,7 +100,9 @@ namespace Signum.Entities
                 var pi = ci.GetParameters();
 
                 if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(ModifiableEntity) || pi[1].ParameterType != typeof(MixinEntity))
-                    throw new InvalidOperationException("{0} does not have a non-public construtor with parameters (Entity mainEntity, MixinEntity next)");
+                    throw new InvalidOperationException($"{me.Name} does not have a non-public construtor with parameters (ModifiableEntity mainEntity, MixinEntity next)." +
+                        (pi[0].ParameterType == typeof(Entity) ? "\r\nBREAKING CHANGE: The first parameter has changed from Entity -> ModifiableEntity" : null)
+                        );
 
                 return (Func<ModifiableEntity, MixinEntity?, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
             });
@@ -147,10 +149,10 @@ namespace Signum.Entities
         }
 
         public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinProperty, V value)
-            where T : IEntity
+            where T : IModifiableEntity
             where M : MixinEntity
         {
-            M mixin = ((Entity)(IEntity)entity).Mixin<M>();
+            M mixin = ((ModifiableEntity)(IModifiableEntity)entity).Mixin<M>();
 
             var pi = ReflectionTools.BasePropertyInfo(mixinProperty);
 
@@ -171,11 +173,11 @@ namespace Signum.Entities
             }
         }
 
-        public static T CopyMixinsFrom<T>(this T newEntity, IEntity original, params object[] args)
-            where T: IEntity
+        public static T CopyMixinsFrom<T>(this T newEntity, IModifiableEntity original, params object[] args)
+            where T: IModifiableEntity
         {
-            var list = (from nm in ((Entity)(IEntity)newEntity).Mixins
-                        join om in ((Entity)(IEntity)original).Mixins
+            var list = (from nm in ((ModifiableEntity)(IModifiableEntity)newEntity).Mixins
+                        join om in ((ModifiableEntity)(IModifiableEntity)original).Mixins
                         on nm.GetType() equals om.GetType()
                         select new { nm, om });
 

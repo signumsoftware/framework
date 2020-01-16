@@ -220,6 +220,10 @@ label.sf-checkbox-element {
     display: block;
 }
 
+label.sf-radio-element {
+    display: block;
+}
+
 /*Tabs*/
 ul.nav-tabs {
     margin-bottom: 10px;
