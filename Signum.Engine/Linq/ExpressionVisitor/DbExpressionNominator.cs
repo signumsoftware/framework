@@ -1316,6 +1316,8 @@ namespace Signum.Engine.Linq
                     return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
                 case "StringExtensions.Etc":
                     return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
+                case "LinqHints.Collate":
+                    return TryCollate(m.GetArgument("str"), m.GetArgument("collation"));
 
                 case "DateTime.Add":
                 case "DateTime.Subtract":
@@ -1455,6 +1457,19 @@ namespace Signum.Engine.Linq
             return etcString == null ?
                 Expression.Call(miEtc2, newStr, max) :
                 Expression.Call(miEtc3, newStr, max, etcString);
+        }
+
+        private Expression? TryCollate(Expression str, Expression collation)
+        {
+            var newStr = Visit(str);
+            if (!Has(newStr))
+                return null;
+
+            var colStr = collation is ConstantExpression col ? (string)col.Value : null;
+            if (colStr == null)
+                return null;
+
+            return Add(new SqlFunctionExpression(typeof(string), newStr, SqlFunction.COLLATE.ToString(), new[] { newStr, new SqlConstantExpression(colStr) }));
         }
 
         static readonly MethodInfo miEtc2 = ReflectionTools.GetMethodInfo(() => "".Etc(2));
