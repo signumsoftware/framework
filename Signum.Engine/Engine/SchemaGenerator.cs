@@ -26,7 +26,7 @@ namespace Signum.Engine
             Schema s = Schema.Current;
             List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
 
-            SqlPreCommand? createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double)?.PlainSqlCommand();
+            SqlPreCommand? createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double)?.PlainSqlCommand();
 
             SqlPreCommand? foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double)?.PlainSqlCommand();
 

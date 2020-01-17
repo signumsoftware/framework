@@ -27,22 +27,23 @@ namespace Signum.Engine
         };
 
         #region Create Tables
-        public static SqlPreCommandSimple CreateTableSql(ITable t)
+        public static SqlPreCommandSimple CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
         {
-            var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
+            var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? 
+                null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
-            var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
+            var systemPeriod = t.SystemVersioned == null || avoidSystemVersioning ? null : Period(t.SystemVersioned);
 
-            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, GetDefaultConstaint(t, c), isChange: false))
+            var columns = t.Columns.Values.Select(c => SqlBuilder.ColumnLine(c, GetDefaultConstaint(t, c), isChange: false, forHistoryTable: avoidSystemVersioning))
                 .And(primaryKeyConstraint)
                 .And(systemPeriod)
                 .NotNull()
                 .ToString(",\r\n");
 
-            var systemVersioning = t.SystemVersioned == null ? null :
-                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName}))";
+            var systemVersioning = t.SystemVersioned == null || avoidSystemVersioning ? null :
+                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName.OnDatabase(null)}))";
 
-            return new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning);
+            return new SqlPreCommandSimple($"CREATE TABLE {tableName ?? t.Name}(\r\n{columns}\r\n)" + systemVersioning);
         }
 
         public static SqlPreCommand DropTable(DiffTable diffTable)
@@ -53,7 +54,6 @@ namespace Signum.Engine
             return SqlPreCommandConcat.Combine(Spacing.Simple,
                 AlterTableDisableSystemVersioning(diffTable.Name),
                 DropTable(diffTable.Name)
-                //DropTable(diffTable.TemporalTableName)
             )!;
         }
 
@@ -95,7 +95,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName.OnDatabase(null)}))");
         }
 
         public static SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
@@ -110,7 +110,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint? tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, ColumnLine(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
         }
 
         public static SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
@@ -167,7 +167,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null, isChange: true)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, ColumnLine(column, null, isChange: true)));
 
             if (column.Default == null)
                 return alterColumn;
@@ -224,11 +224,11 @@ namespace Signum.Engine
                 );
         }
 
-        public static string CreateColumn(IColumn c, DefaultConstraint? constraint, bool isChange)
+        public static string ColumnLine(IColumn c, DefaultConstraint? constraint, bool isChange, bool forHistoryTable = false)
         {
             string fullType = GetColumnType(c);
 
-            var generatedAlways = c is SystemVersionedInfo.Column svc ?
+            var generatedAlways = c is SystemVersionedInfo.Column svc && !forHistoryTable ?
                 $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
                 null;
 
@@ -237,7 +237,7 @@ namespace Signum.Engine
             return $" ".Combine(
                 c.Name.SqlEscape(),
                 fullType,
-                c.Identity && !isChange ? "IDENTITY " : null, 
+                c.Identity && !isChange && !forHistoryTable ? "IDENTITY " : null, 
                 generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
                 c.Nullable.ToBool() ? "NULL" : "NOT NULL",
@@ -505,18 +505,18 @@ WHERE {primaryKey.Name} NOT IN
                 oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name))!;
         }
 
-        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
+        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable, ObjectName newTableName)
         {
-            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
-                return RenameOrChangeSchema(oldTable.Name, newTable.Name);
+            if (object.Equals(oldTable.Name.Schema.Database, newTableName.Schema.Database))
+                return RenameOrChangeSchema(oldTable.Name, newTableName);
             
             return SqlPreCommand.Combine(Spacing.Simple,
-              CreateTableSql(newTable),
-              MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
+              CreateTableSql(newTable, newTableName, avoidSystemVersioning: true),
+              MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, avoidIdentityInsert: newTable.SystemVersioned != null && newTable.SystemVersioned.Equals(newTable)),
               DropTable(oldTable))!;
         }
 
-        public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)
+        public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames, bool avoidIdentityInsert = false)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(
 @"INSERT INTO {0} ({2})
@@ -526,6 +526,9 @@ FROM {1} as [table]".FormatWith(
                    oldTable,
                    columnNames.ToString(a => a.SqlEscape(), ", "),
                    columnNames.ToString(a => "[table]." + a.SqlEscape(), ", ")));
+
+            if (avoidIdentityInsert)
+                return command;
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".FormatWith(newTable)) { GoBefore = true },
