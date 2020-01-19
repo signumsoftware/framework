@@ -1,6 +1,8 @@
 using Signum.Engine;
 using Signum.Engine.Basics;
+using Signum.Engine.Engine;
 using Signum.Engine.Maps;
+using Signum.Engine.PostgresCatalog;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -122,15 +124,32 @@ namespace Signum.React.Maps
             {
                 using (Administrator.OverrideDatabaseInSysViews(dbName))
                 {
-                    var dic = Database.View<SysTables>().Select(t => KeyValuePair.Create(
-                        new ObjectName(new SchemaName(dbName, t.Schema().name, isPostgres), t.name, isPostgres),
-                        new RuntimeStats
-                        {
-                            rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered).Partition().rows) ?? 0,
-                            total_size_kb = t.Indices().SelectMany(i => i.Partition().AllocationUnits()).Sum(a => a.total_pages) * 8
-                        })).ToDictionary();
+                    if (isPostgres)
+                    {
+                        var dic = (from ns in Database.View<PgNamespace>()
+                                   where !PostgresCatalogSchema.systemSchemas.Contains(ns.nspname)
+                                   from t in ns.Tables()
+                                   select KeyValuePair.Create(new ObjectName(new SchemaName(dbName, ns.nspname, isPostgres), t.relname, isPostgres),
+                                   new RuntimeStats
+                                   {
+                                       rows = t.reltuples,
+                                       total_size_kb = PostgresFunctions.pg_total_relation_size(t.oid) / 1024
+                                   })).ToDictionary();
 
-                    result.AddRange(dic);
+                        result.AddRange(dic);
+                    }
+                    else
+                    {
+                        var dic = Database.View<SysTables>().Select(t => KeyValuePair.Create(
+                            new ObjectName(new SchemaName(dbName, t.Schema().name, isPostgres), t.name, isPostgres),
+                            new RuntimeStats
+                            {
+                                rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered).Partition().rows) ?? 0,
+                                total_size_kb = t.Indices().SelectMany(i => i.Partition().AllocationUnits()).Sum(a => a.total_pages) * 8
+                            })).ToDictionary();
+
+                        result.AddRange(dic);
+                    }
                 }
             }
             return result;
