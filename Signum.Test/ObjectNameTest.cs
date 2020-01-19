@@ -66,7 +66,7 @@ namespace Signum.Test
         {
             if (isPostgres)
             {
-                var simple = ObjectName.Parse("\"Select\".MyTable", isPostgres);
+                var simple = ObjectName.Parse("\"Select\".mytable", isPostgres);
                 Assert.Equal("mytable", simple.Name);
                 Assert.Equal("Select", simple.Schema.Name);
                 Assert.Equal("\"Select\".mytable", simple.ToString());

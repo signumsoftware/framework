@@ -271,10 +271,17 @@ namespace Signum.Engine
                 return "\'" + g.ToString() + "'";
 
             if (value is DateTime dt)
-                return "convert(datetime, '{0}', 126)".FormatWith(dt.ToString("yyyy-MM-ddThh:mm:ss.fff", CultureInfo.InvariantCulture));
+            {
+                return Schema.Current.Settings.IsPostgres ?
+                    "'{0}'".FormatWith(dt.ToString("yyyy-MM-dd hh:mm:ss.fff", CultureInfo.InvariantCulture)) :
+                    "convert(datetime, '{0}', 126)".FormatWith(dt.ToString("yyyy-MM-ddThh:mm:ss.fff", CultureInfo.InvariantCulture));
+            }
 
             if (value is TimeSpan ts)
-                return "convert(time, '{0:g}')".FormatWith(ts.ToString("g", CultureInfo.InvariantCulture));
+            {
+                var str = ts.ToString("g", CultureInfo.InvariantCulture);
+                return Schema.Current.Settings.IsPostgres ? str : "convert(time, '{0}')".FormatWith(str);
+            }
 
             if (value is bool b)
             {

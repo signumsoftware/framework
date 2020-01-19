@@ -345,7 +345,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments?.ToString(", ") ?? "*"})";
+            return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -647,6 +647,8 @@ namespace Signum.Engine.Linq
         trunc,
         substr,
         repeat,
+        date_trunc,
+        age,
     }
 
     internal enum SqlEnums
@@ -709,10 +711,18 @@ namespace Signum.Engine.Linq
             return visitor.VisitToDayOfWeek(this);
         }
 
-        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create(Schema.Current.Settings.IsPostgres ? (byte)1 /*no idea :D*/ : (byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
+        internal static MethodInfo miToDayOfWeekPostgres = ReflectionTools.GetMethodInfo(() => ToDayOfWeekPostgres(1));
+        public static DayOfWeek? ToDayOfWeekPostgres(int? postgressWeekDay)
+        {
+            if (postgressWeekDay == null)
+                return null;
 
-        internal static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
-        public static DayOfWeek? ToDayOfWeek(int? sqlServerWeekDay, byte dateFirst)
+            return (DayOfWeek)(postgressWeekDay);
+        }
+
+
+        internal static MethodInfo miToDayOfWeekSql = ReflectionTools.GetMethodInfo(() => ToDayOfWeekSql(1, 1));
+        public static DayOfWeek? ToDayOfWeekSql(int? sqlServerWeekDay, byte dateFirst)
         {
             if (sqlServerWeekDay == null)
                 return null;

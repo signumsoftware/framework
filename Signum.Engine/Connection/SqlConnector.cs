@@ -81,6 +81,9 @@ namespace Signum.Engine
 
     public class SqlConnector : Connector
     {
+        public static ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
+        public byte DateFirst => DateFirstLazy.Value.Item1;
+
         public SqlServerVersion Version { get; set; }
 
         public SqlConnector(string connectionString, Schema schema, SqlServerVersion version) : base(schema)

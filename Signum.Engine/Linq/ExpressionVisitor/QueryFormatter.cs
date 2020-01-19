@@ -554,12 +554,19 @@ namespace Signum.Engine.Linq
             if (aggregate.AggregateFunction == AggregateSqlFunction.CountDistinct)
                 sb.Append("DISTINCT ");
 
-            for (int i = 0, n = aggregate.Arguments.Count; i < n; i++)
+            if (aggregate.Arguments.Count == 1 && aggregate.Arguments[0] == null && aggregate.AggregateFunction == AggregateSqlFunction.Count)
             {
-                Expression exp = aggregate.Arguments[i];
-                if (i > 0)
-                    sb.Append(", ");
-                this.Visit(exp);
+                sb.Append("*");
+            }
+            else
+            {
+                for (int i = 0, n = aggregate.Arguments.Count; i < n; i++)
+                {
+                    Expression exp = aggregate.Arguments[i];
+                    if (i > 0)
+                        sb.Append(", ");
+                    this.Visit(exp);
+                }
             }
             sb.Append(")");
 
@@ -765,7 +772,7 @@ namespace Signum.Engine.Linq
                 this.Visit(join.Condition);
                 this.Indent(Indentation.Outer);
             }
-            else if (isPostgres)
+            else if (isPostgres && join.JoinType != JoinType.CrossJoin)
             {
                 this.AppendNewLine(Indentation.Inner);
                 sb.Append("ON true");

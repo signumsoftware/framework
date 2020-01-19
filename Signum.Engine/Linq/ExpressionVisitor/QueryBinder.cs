@@ -963,7 +963,7 @@ namespace Signum.Engine.Linq
                 if (newItem.Type.UnNullify() == typeof(PrimaryKey))
                     return SmartEqualizer.InPrimaryKey(newItem, col.Cast<PrimaryKey>().ToArray());
 
-                return SmartEqualizer.In(newItem, col.Cast<object>().ToArray());
+                return SmartEqualizer.In(newItem, col.Cast<object>().ToArray(), isPostgres);
             }
             else
             {

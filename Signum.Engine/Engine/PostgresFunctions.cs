@@ -40,7 +40,8 @@ namespace Signum.Engine.PostgresCatalog
         [SqlMethod(Name = "pg_catalog.generate_subscripts")]
         public static IQueryable<int> generate_subscripts(Array array, int dimension, bool reverse) => throw new NotImplementedException();
 
-        
+        [SqlMethod(Name = "pg_catalog.pg_total_relation_size")]
+        public static int pg_total_relation_size(int oid) => throw new NotImplementedException();
     }
 
 }

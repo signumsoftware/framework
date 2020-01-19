@@ -822,7 +822,7 @@ namespace Signum.Engine.Maps
 
             ServerName? server = tn.ServerName == null ? null : new ServerName(tn.ServerName, isPostgres);
             DatabaseName? dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.DatabaseName!, isPostgres);
-            SchemaName schema = tn.SchemaName == null && dataBase == null ? SchemaName.Default(isPostgres) : new SchemaName(dataBase, tn.SchemaName!, isPostgres);
+            SchemaName schema = tn.SchemaName == null && dataBase == null ? (tn.Name.StartsWith("#") && isPostgres ? null! : SchemaName.Default(isPostgres)) : new SchemaName(dataBase, tn.SchemaName!, isPostgres);
             return schema;
         }
 

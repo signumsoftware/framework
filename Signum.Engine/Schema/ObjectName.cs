@@ -193,7 +193,7 @@ namespace Signum.Engine.Maps
         public string Name { get; private set; }
         public bool IsPostgres { get; private set; }
 
-        public SchemaName Schema { get; private set; }
+        public SchemaName Schema { get; private set; } // null only for postgres temporary
 
         public ObjectName(SchemaName schema, string name, bool isPostgres)
         {
@@ -201,12 +201,15 @@ namespace Signum.Engine.Maps
             if (isPostgres && this.Name.Length > MaxPostgreeSize)
                 throw new InvalidOperationException($"The name '{name}' is too long, consider using TableNameAttribute/ColumnNameAttribute");
 
-            this.Schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            this.Schema = schema ?? (isPostgres && name.StartsWith("#") ? (SchemaName)null! : throw new ArgumentNullException(nameof(schema)));
             this.IsPostgres = isPostgres;
         }
 
         public override string ToString()
         {
+            if (Schema == null)
+                return Name.SqlEscape(IsPostgres);
+
             return Schema.ToString() + "." + Name.SqlEscape(IsPostgres);
         }
 
@@ -219,7 +222,7 @@ namespace Signum.Engine.Maps
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ Schema.GetHashCode();
+            return Name.GetHashCode() ^ Schema?.GetHashCode() ?? 0;
         }
 
         public static ObjectName Parse(string? name, bool isPostgres)
@@ -276,7 +279,7 @@ namespace Signum.Engine.Maps
             if (databaseName != null && databaseName.IsPostgres != this.IsPostgres)
                 throw new Exception("Inconsitent IsPostgres");
 
-            return new ObjectName(new SchemaName(databaseName, Schema.Name, IsPostgres), Name, IsPostgres);
+            return new ObjectName(new SchemaName(databaseName, Schema!.Name, IsPostgres), Name, IsPostgres);
         }
 
         public ObjectName OnSchema(SchemaName schemaName)

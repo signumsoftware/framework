@@ -29,7 +29,7 @@ namespace Signum.Engine.PostgresCatalog
         public string relname;
         public int relnamespace;
         public char relkind;
-
+        public int reltuples;
 
         [AutoExpressionField]
         public IQueryable<PgTrigger> Triggers() =>
@@ -53,7 +53,7 @@ namespace Signum.Engine.PostgresCatalog
             As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == this.relnamespace));
     }
 
-    static class RelKind
+    public static class RelKind
     {
         public const char Table = 'r';
         public const char Index = 'i';

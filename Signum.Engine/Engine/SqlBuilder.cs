@@ -57,7 +57,7 @@ namespace Signum.Engine
             var systemVersioning = t.SystemVersioned == null || IsPostgres ? null :
                 $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName}))";
 
-            var result = new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning + ";");
+            var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning + ";");
 
             if (!(IsPostgres && t.SystemVersioned != null))
                 return result;
@@ -112,7 +112,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public SqlPreCommand AlterTableAddPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)}");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)};");
         }
 
         string? Period(SystemVersionedInfo sv) {
@@ -125,37 +125,37 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public SqlPreCommand AlterTableDropPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} DROP PERIOD FOR SYSTEM_TIME");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} DROP PERIOD FOR SYSTEM_TIME;");
         }
 
         public SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}));");
         }
 
         public SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF)");
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF);");
         }
 
         public SqlPreCommand AlterTableDropColumn(ITable table, string columnName)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".FormatWith(table.Name, columnName.SqlEscape(isPostgres)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1};".FormatWith(table.Name, columnName.SqlEscape(isPostgres)));
         }
 
         public SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint? tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
         }
 
         public SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateOldColumn(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, CreateOldColumn(column)));
         }
 
         public SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null, isChange: true)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null, isChange: true)));
 
             if (column.Default == null)
                 return alterColumn;
@@ -357,7 +357,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
     FROM {oldTableName}
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!);
+){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))};")!);
         }
 
         public SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)
@@ -529,16 +529,16 @@ WHERE {primaryKey.Name} NOT IN
             SqlPreCommandSimple command = new SqlPreCommandSimple(
 @"INSERT INTO {0} ({2})
 SELECT {3}
-FROM {1} as [table]".FormatWith(
+FROM {1} as [table];".FormatWith(
                    newTable,
                    oldTable,
                    columnNames.ToString(a => a.SqlEscape(isPostgres), ", "),
                    columnNames.ToString(a => "[table]." + a.SqlEscape(isPostgres), ", ")));
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".FormatWith(newTable)) { GoBefore = true },
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON;".FormatWith(newTable)) { GoBefore = true },
                 command,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".FormatWith(newTable)) { GoAfter = true })!;
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF;".FormatWith(newTable)) { GoAfter = true })!;
         }
 
         public SqlPreCommand RenameTable(ObjectName oldName, string newName)
@@ -592,12 +592,12 @@ FROM {1} as [table]".FormatWith(
 
         public SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1}".FormatWith(databaseName, value ? "ON" : "OFF"));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
         }
 
         public SqlPreCommandSimple MakeSnapshotIsolationDefault(string databaseName, bool value)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1}".FormatWith(databaseName, value ? "ON" : "OFF"));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
         }
 
         public SqlPreCommandSimple SelectRowCount()
@@ -615,27 +615,27 @@ FROM {1} as [table]".FormatWith(
 
         public SqlPreCommand DropSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("DROP SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
+            return new SqlPreCommandSimple("DROP SCHEMA {0};".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
         }
 
         public SqlPreCommandSimple DisableForeignKey(ObjectName tableName, string foreignKey)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} NOCHECK CONSTRAINT {1}".FormatWith(tableName, foreignKey));
+            return new SqlPreCommandSimple("ALTER TABLE {0} NOCHECK CONSTRAINT {1};".FormatWith(tableName, foreignKey));
         }
 
         public SqlPreCommandSimple EnableForeignKey(ObjectName tableName, string foreignKey)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT {1}".FormatWith(tableName, foreignKey));
+            return new SqlPreCommandSimple("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT {1};".FormatWith(tableName, foreignKey));
         }
 
         public SqlPreCommandSimple DisableIndex(ObjectName tableName, string indexName)
         {
-            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(indexName, tableName));
+            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE;".FormatWith(indexName, tableName));
         }
 
         public SqlPreCommandSimple RebuildIndex(ObjectName tableName, string indexName)
         {
-            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".FormatWith(indexName, tableName));
+            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD;".FormatWith(indexName, tableName));
         }
 
         public SqlPreCommandSimple DropPrimaryKeyConstraint(ObjectName tableName)
@@ -660,16 +660,14 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple(command);
         }
 
-
         internal SqlPreCommand? DropStatistics(string tn, List<DiffStats> list)
         {
             if (list.IsEmpty())
                 return null;
 
-            return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape(isPostgres) + "." + s.StatsName.SqlEscape(isPostgres), ",\r\n"));
+            return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape(isPostgres) + "." + s.StatsName.SqlEscape(isPostgres), ",\r\n") + ";");
         }
 
-
-        public SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName}");
+        public SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName};");
     }
 }

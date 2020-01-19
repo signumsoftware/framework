@@ -220,9 +220,10 @@ namespace Signum.Engine.Maps
                     var isPostgres = Schema.Current.Settings.IsPostgres;
 
                     Func<string[], string> insertPattern = (suffixes) =>
-                        "INSERT INTO {0}\r\n  ({1})\r\nVALUES\r\n{2};".FormatWith(table.Name,
+                        "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3};".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", "\r\n"));
+                        isPostgres? "OVERRIDING SYSTEM VALUE\r\n" : null,
+                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"));
 
                     var expr = Expression.Lambda<Action<object, Forbidden, string, List<DbParameter>>>(
                         CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramForbidden, paramSuffix, paramList);

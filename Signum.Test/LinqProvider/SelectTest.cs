@@ -636,7 +636,14 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectView()
         {
-            var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            if (Schema.Current.Settings.IsPostgres)
+            {
+                var list = Database.View<Signum.Engine.PostgresCatalog.PgClass>().ToList();
+            }
+            else
+            {
+                var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            }
         }
 
         [Fact]

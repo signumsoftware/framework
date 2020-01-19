@@ -546,7 +546,15 @@ namespace Signum.Engine.Linq
             {
                 var result = this.Visit(toDayOfWeek.Expression);
 
-                return Expression.Call(ToDayOfWeekExpression.miToDayOfWeek, result, Expression.Constant(ToDayOfWeekExpression.DateFirst.Value.Item1, typeof(byte)));
+                if (Schema.Current.Settings.IsPostgres)
+                {
+                    return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekPostgres, result);
+                }
+                else
+                {
+                    var dateFirst = ((SqlConnector)Connector.Current).DateFirst;
+                    return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekSql, result, Expression.Constant(dateFirst, typeof(byte)));
+                }
             }
 
             protected override Expression VisitNew(NewExpression node)
