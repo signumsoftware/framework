@@ -604,6 +604,7 @@ namespace Signum.Engine.Linq
         CONVERT,
         ISNULL,
         STUFF,
+        COLLATE,
     }
 
     internal enum SqlEnums
