@@ -104,3 +104,7 @@ export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, c
 
   customConstructors[type.typeName] = constructor;
 }
+
+export function clearCustomConstructors() {
+  Dic.clear(customConstructors);
+}

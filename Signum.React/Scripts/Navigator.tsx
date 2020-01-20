@@ -19,6 +19,7 @@ import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
+import { clearCustomConstructors } from "./Constructor";
 
 Dic.skipClasses.push(React.Component);
 
@@ -155,7 +156,8 @@ export const clearSettingsActions: Array<() => void> = [
   ButtonBarManager.clearButtonBarRenderer,
   Operations.clearOperationSettings,
   clearWidgets,
-  clearContextualItems
+  clearContextualItems,
+  clearCustomConstructors
 ];
 
 export function clearAllSettings() {
