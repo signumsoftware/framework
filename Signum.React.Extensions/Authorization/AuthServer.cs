@@ -105,7 +105,7 @@ namespace Signum.React.Authorization
             {
                 ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
                 {
-                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? PropertyAllowed.None : pr.GetPropertyAllowed());
+                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed());
                 };
 
             }
