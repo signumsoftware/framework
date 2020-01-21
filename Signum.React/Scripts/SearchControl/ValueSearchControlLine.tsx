@@ -26,7 +26,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
   badgeColor?: BsColor;
-  customClass?: string;
+  customClass?: string | ((value: any | undefined) => (string | undefined ));
   customStyle?: React.CSSProperties;
   isFormControl?: boolean;
   findButton?: boolean;

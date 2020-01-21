@@ -23,7 +23,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   onExplored?: () => void;
   onTokenLoaded?: () => void;
   initialValue?: any;
-  customClass?: string;
+  customClass?: string | ((value: any | undefined) => (string | undefined));
   customStyle?: React.CSSProperties;
   format?: string;
   throwIfNotFindable?: boolean;
@@ -164,7 +164,6 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (this.props.onRender)
       return this.props.onRender(this.state.value, this);
 
-    const badgeColor = this.props.badgeColor;
 
     let className = classes(
       p.valueToken == undefined && "count-search",
@@ -174,10 +173,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       p.formControlClass && this.isNumeric() && "numeric",
 
       p.isBadge == false ? "" : "badge badge-pill " +
-        (badgeColor && typeof badgeColor == "function" ? "badge-" + badgeColor(this.state.value) :
-          badgeColor ? "badge-" + badgeColor :
+        (p.badgeColor && typeof p.badgeColor == "function" ? "badge-" + p.badgeColor(this.state.value) :
+          p.badgeColor ? "badge-" + p.badgeColor :
             p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted"),
-      p.customClass
+      p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass
     );
 
     if (p.formControlClass)
