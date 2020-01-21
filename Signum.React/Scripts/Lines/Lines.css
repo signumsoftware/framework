@@ -462,35 +462,3 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     width: 100%;
     padding: 0.25rem 0.5rem;
 }
-
-.sf-radiobutton-element .buttonRadioItem {
-    background-color: white;
-    border: 1px solid #169db2;
-    margin-left: 10px;
-    color: #169db2;
-    font-weight: bold;
-    padding: 8px 20px;
-    border-radius: 5px;
-    box-shadow: 5px 5px 5px #a7a7a7;
-    transition-duration: 150ms;
-    transition-property: all;
-}
-
-.sf-radiobutton-element .buttonRadioItemChecked {
-    background-color: #00ff06;
-    border: 1px solid #169400;
-    color: #ffffff;
-    box-shadow: 5px 5px 5px #a7a7a7;
-}
-
-.sf-radiobutton-element .buttonRadioItem:hover {
-    transform: scale(1.1)
-}
-
-.sf-radiobutton-element .buttonRadioItem:active {
-    background-color: white;
-    border: 1px solid #169db2;
-    color: #169db2;
-    transform: scale(0.9);
-    box-shadow: 2px 2px 2px #a7a7a7;
-}
