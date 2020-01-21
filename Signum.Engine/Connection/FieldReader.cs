@@ -558,6 +558,19 @@ namespace Signum.Engine
             return (T[])this.reader[ordinal]; 
         }
 
+        static MethodInfo miGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetRange<int>(0)).GetGenericMethodDefinition();
+
+        public NpgsqlTypes.NpgsqlRange<T>? GetRange<T>(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            if (reader.IsDBNull(ordinal))
+            {
+                return (NpgsqlTypes.NpgsqlRange<T>)(object)null!;
+            }
+
+            return (NpgsqlTypes.NpgsqlRange<T>)this.reader[ordinal];
+        }
+
         static Dictionary<Type, MethodInfo> methods =
             typeof(FieldReader).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Where(m => m.Name != "GetExpression" && m.Name != "IsNull")
@@ -581,6 +594,11 @@ namespace Signum.Engine
             if (type.IsArray)
             {
                 return Expression.Call(reader, miGetArray.MakeGenericMethod(type.ElementType()!), Expression.Constant(ordinal));
+            }
+
+            if (type.IsInstantiationOf(typeof(NpgsqlTypes.NpgsqlRange<>)))
+            {
+                return Expression.Call(reader, miGetRange.MakeGenericMethod(type.GetGenericArguments()[0]!), Expression.Constant(ordinal));
             }
 
             throw new InvalidOperationException("Type {0} not supported".FormatWith(type));

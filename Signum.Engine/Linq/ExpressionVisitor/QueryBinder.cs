@@ -2733,7 +2733,6 @@ namespace Signum.Engine.Linq
                 var newAlias = NextTableAlias(table.Name);
                 var id = table.GetIdExpression(newAlias)!;
                 var period = table.GenerateSystemPeriod(newAlias, this);
-                var intersect = period.Intesection(entity.ExternalPeriod); //TODO intersect not used! 
                 var bindings = table.GenerateBindings(newAlias, this, id, period);
                 var mixins = table.GenerateMixins(newAlias, this, id, period);
 

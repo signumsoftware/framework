@@ -952,6 +952,73 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal class IntervalExpression : DbExpression
+    {
+        public readonly Expression? Min;
+        public readonly Expression? Max;
+        public readonly Expression? PostgresRange;
+
+        public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange)
+            :base(DbExpressionType.Interval, type)
+
+        {
+            this.Min = min ?? (postgresRange == null ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+            this.Max = max ?? (postgresRange == null ? throw new ArgumentException(nameof(max)) : (Expression?)null);
+            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+        }
+
+        public override string ToString()
+        {
+            var type = this.Type.GetGenericArguments()[0].TypeName();
+
+            if (PostgresRange != null)
+                return $"new Interval<{type}({this.PostgresRange})";
+            else
+                return $"new Interval<{type}({this.Min}, {this.Max})";
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitLike(this);
+        }
+    }
+
+    public static class SystemTimeExpressions
+    {
+        static MethodInfo miOverlaps = ReflectionTools.GetMethodInfo((Interval<DateTime> pair) => pair.Overlaps(new Interval<DateTime>()));
+        internal static Expression? Overlaps(this IntervalExpression? interval1, IntervalExpression? interval2)
+        {
+            if (interval1 == null)
+                return null;
+
+            if (interval2 == null)
+                return null;
+
+            if(interval1.PostgresRange != null)
+            {
+                return new SqlFunctionExpression(typeof(bool), null, "&&", new Expression[] { interval1.PostgresRange!, interval2.PostgresRange! });
+            }
+
+            var min1 = interval1.Min;
+            var max1 = interval1.Max;
+            var min2 = interval2.Min;
+            var max2 = interval2.Max;
+
+            return Expression.And(
+                 Expression.GreaterThan(max1, min2),
+                 Expression.GreaterThan(max2, min1)
+                 );
+        }
+
+        public static Expression And(this Expression expression, Expression? other)
+        {
+            if (other == null)
+                return expression;
+
+            return Expression.And(expression, other);
+        }
+    }
+
     internal class LikeExpression : DbExpression
     {
         public readonly Expression Expression;

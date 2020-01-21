@@ -85,10 +85,13 @@ namespace Signum.Engine.Linq
         {
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
+
             log.Switch("Aggregate");
-            Expression rewrited = AggregateRewriter.Rewrite(binded);
+            Expression rewriten = AggregateRewriter.Rewrite(binded);
+            log.Switch("DupHistory");
+            Expression dupHistory = DuplicateHistory.Rewrite(rewriten, aliasGenerator);
             log.Switch("EntityCompleter");
-            Expression completed = EntityCompleter.Complete(rewrited, binder);
+            Expression completed = EntityCompleter.Complete(dupHistory, binder);
             log.Switch("AliasReplacer");
             Expression replaced = AliasProjectionReplacer.Replace(completed, aliasGenerator);
             log.Switch("OrderBy");

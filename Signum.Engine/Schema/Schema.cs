@@ -243,7 +243,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, NewExpression? period)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, IntervalExpression? period)
         {
             //AssertAllowed(parent.RootType, inUserInterface: false);
 
