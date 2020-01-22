@@ -513,7 +513,7 @@ namespace Signum.Engine.Linq
             Expression max = Visit(interval.Max);
             Expression postgresRange = Visit(interval.PostgresRange);
             if (min != interval.Min || max != interval.Max || postgresRange != interval.PostgresRange)
-                return new IntervalExpression(interval.Type, min, max, postgresRange);
+                return new IntervalExpression(interval.Type, min, max, postgresRange, interval.AsUtc);
             return interval;
         }
     }

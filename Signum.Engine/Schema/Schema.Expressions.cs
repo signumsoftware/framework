@@ -50,7 +50,8 @@ namespace Signum.Engine.Maps
             return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? new IntervalExpression(typeof(Interval<DateTime>),
                 this.SystemVersioned.StartColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
                 this.SystemVersioned.EndColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
-                this.SystemVersioned.PostgreeSysPeriodColumnName?.Let(c => new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, c))
+                this.SystemVersioned.PostgreeSysPeriodColumnName?.Let(c => new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, c)),
+                asUtc: true
             ) : null;
         }
 
@@ -177,7 +178,8 @@ namespace Signum.Engine.Maps
             return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? new IntervalExpression(typeof(Interval<DateTime>),
                 this.SystemVersioned.StartColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
                 this.SystemVersioned.EndColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
-                this.SystemVersioned.PostgreeSysPeriodColumnName?.Let(c => new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, c))
+                this.SystemVersioned.PostgreeSysPeriodColumnName?.Let(c => new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, c)),
+                asUtc: true
             ) : null;
         }
 

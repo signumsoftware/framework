@@ -73,7 +73,7 @@ namespace Signum.Engine.Maps
             {typeof(string),         new AbstractDbType(SqlDbType.NVarChar,         NpgsqlDbType.Varchar)},
             {typeof(Date),           new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
             {typeof(DateTime),       new AbstractDbType(SqlDbType.DateTime2,        NpgsqlDbType.Timestamp)},
-            {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset/*, NpgsqlDbType.TimestampTz*/)},
+            {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset,   NpgsqlDbType.TimestampTz)},
             {typeof(TimeSpan),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
             {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},

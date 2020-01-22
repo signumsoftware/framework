@@ -52,20 +52,6 @@ namespace Signum.Entities
 
         }
 
-        public class FromTo : Interval
-        {
-            public DateTime StartDateTime { get; private set; }
-            public DateTime EndtDateTime { get; private set; }
-
-            public FromTo(DateTime startDateTime, DateTime endDateTime)
-            {
-                this.StartDateTime = ValidateUTC(startDateTime);
-                this.EndtDateTime = ValidateUTC(endDateTime);
-            }
-
-            public override string ToString() => $"FROM {StartDateTime:u} TO {EndtDateTime:u}";
-        }
-
         public class Between : Interval
         {
             public DateTime StartDateTime { get; private set; }

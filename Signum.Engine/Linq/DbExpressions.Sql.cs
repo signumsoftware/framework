@@ -3,6 +3,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
@@ -67,6 +68,7 @@ namespace Signum.Engine.Linq
         PrimaryKey,
         PrimaryKeyString,
         ToDayOfWeek,
+        Interval,
     }
 
 
@@ -210,7 +212,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            var st = SystemTime != null && SystemTime is SystemTime.HistoryTable ? "FOR SYSTEM_TIME " + SystemTime.ToString() : null;
+            var st = SystemTime != null && !(SystemTime is SystemTime.HistoryTable) ? " FOR SYSTEM_TIME " + SystemTime.ToString() : null;
 
             return $"{Name}{st} as {Alias}";
         }
@@ -574,8 +576,19 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.SetOperator, alias)
         {
             this.Operator = @operator;
-            this.Left = left ?? throw new ArgumentNullException(nameof(left));
-            this.Right = right ?? throw new ArgumentNullException(nameof(right));
+            this.Left = Validate(left, nameof(left));
+            this.Right = Validate(right, nameof(right));
+        }
+
+        static SourceWithAliasExpression Validate(SourceWithAliasExpression exp, string name)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(name);
+
+            if (exp is TableExpression || exp is SqlTableValuedFunctionExpression)
+                throw new ArgumentException($"{name} should not be a {exp.GetType().Name}");
+
+            return exp;
         }
 
         public override string ToString()
@@ -649,6 +662,16 @@ namespace Signum.Engine.Linq
         repeat,
         date_trunc,
         age,
+        tstzrange,
+    }
+
+    public static class PostgressOperator
+    {
+        public static string Overlap = "&&";
+        public static string Contains = "@>";
+
+        public static string[] All = new[] { Overlap, Contains };
+
     }
 
     internal enum SqlEnums
@@ -957,14 +980,16 @@ namespace Signum.Engine.Linq
         public readonly Expression? Min;
         public readonly Expression? Max;
         public readonly Expression? PostgresRange;
+        public readonly bool AsUtc;
 
-        public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange)
+        public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange, bool asUtc)
             :base(DbExpressionType.Interval, type)
 
         {
             this.Min = min ?? (postgresRange == null ? throw new ArgumentException(nameof(min)) : (Expression?)null);
             this.Max = max ?? (postgresRange == null ? throw new ArgumentException(nameof(max)) : (Expression?)null);
             this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+            this.AsUtc = asUtc;
         }
 
         public override string ToString()
@@ -972,14 +997,14 @@ namespace Signum.Engine.Linq
             var type = this.Type.GetGenericArguments()[0].TypeName();
 
             if (PostgresRange != null)
-                return $"new Interval<{type}({this.PostgresRange})";
+                return $"new Interval<{type}>({this.PostgresRange})";
             else
-                return $"new Interval<{type}({this.Min}, {this.Max})";
+                return $"new Interval<{type}>({this.Min}, {this.Max})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
-            return visitor.VisitLike(this);
+            return visitor.VisitInterval(this);
         }
     }
 

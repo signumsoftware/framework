@@ -148,6 +148,22 @@ namespace Signum.Engine.Linq
                 return result;
             }
 
+            protected internal override Expression VisitSetOperator(SetOperatorExpression set)
+            {
+                var result = (SetOperatorExpression)base.VisitSetOperator(set);
+
+                if(this.redundant != null)
+                {
+                    if (result.Left is SelectExpression l)
+                        this.redundant.Remove(l);
+
+                    if (result.Right is SelectExpression r)
+                        this.redundant.Remove(r);
+                }
+
+                return result;
+            }
+
             static bool HasJoins(SelectExpression s)
             {
                 return s.From is JoinExpression || s.From is SelectExpression s2 && HasJoins(s2);

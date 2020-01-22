@@ -575,21 +575,32 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
-            if (sqlFunction.Object != null)
-            {
-                Visit(sqlFunction.Object);
-                sb.Append(".");
-            }
-            sb.Append(sqlFunction.SqlFunction);
-            sb.Append("(");
             if (isPostgres && sqlFunction.SqlFunction == PostgresFunction.EXTRACT.ToString())
             {
+                sb.Append(sqlFunction.SqlFunction);
+                sb.Append("(");
                 this.Visit(sqlFunction.Arguments[0]);
                 sb.Append(" from ");
                 this.Visit(sqlFunction.Arguments[1]);
+                sb.Append(")");
+            }
+            else if(isPostgres && PostgressOperator.All.Contains(sqlFunction.SqlFunction))
+            {
+                sb.Append("(");
+                this.Visit(sqlFunction.Arguments[0]);
+                sb.Append(" " + sqlFunction.SqlFunction + " ");
+                this.Visit(sqlFunction.Arguments[1]);
+                sb.Append(")");
             }
             else
             {
+                if (sqlFunction.Object != null)
+                {
+                    Visit(sqlFunction.Object);
+                    sb.Append(".");
+                }
+                sb.Append(sqlFunction.SqlFunction);
+                sb.Append("(");
                 for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
                 {
                     Expression exp = sqlFunction.Arguments[i];
@@ -597,8 +608,8 @@ namespace Signum.Engine.Linq
                         sb.Append(", ");
                     this.Visit(exp);
                 }
+                sb.Append(")");
             }
-            sb.Append(")");
 
             return sqlFunction;
         }
@@ -655,14 +666,6 @@ namespace Signum.Engine.Linq
             {
                 sb.Append("AS OF ");
                 this.VisitSystemTimeConstant(asOf.DateTime);
-            }
-            else if (st is SystemTime.FromTo fromTo)
-            {
-                sb.Append("FROM ");
-                this.VisitSystemTimeConstant(fromTo.StartDateTime);
-
-                sb.Append(" TO ");
-                this.VisitSystemTimeConstant(fromTo.EndtDateTime);
             }
             else if (st is SystemTime.Between between)
             {

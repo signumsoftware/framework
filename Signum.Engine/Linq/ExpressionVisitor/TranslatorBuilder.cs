@@ -11,6 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Entities.Internal;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Linq
 {
@@ -554,6 +555,23 @@ namespace Signum.Engine.Linq
                 {
                     var dateFirst = ((SqlConnector)Connector.Current).DateFirst;
                     return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekSql, result, Expression.Constant(dateFirst, typeof(byte)));
+                }
+            }
+
+            static MethodInfo miToInterval = ReflectionTools.GetMethodInfo(() => ToInterval<int>(new NpgsqlTypes.NpgsqlRange<int>())).GetGenericMethodDefinition();
+            static Interval<T> ToInterval<T>(NpgsqlTypes.NpgsqlRange<T> range) where T : struct, IComparable<T>, IEquatable<T>
+                => new Interval<T>(range.LowerBound, range.UpperBound);
+
+            protected internal override Expression VisitInterval(IntervalExpression interval)
+            {
+                var intervalType = interval.Type.GetGenericArguments()[0];
+                if (Schema.Current.Settings.IsPostgres)
+                {
+                    return Expression.Call(miToInterval.MakeGenericMethod(intervalType), Visit(interval.PostgresRange));
+                }
+                else
+                {
+                    return Expression.New(typeof(Interval<>).MakeGenericType(intervalType).GetConstructor(new[] { intervalType, intervalType })!, Visit(interval.Min), Visit(interval.Max));
                 }
             }
 

@@ -558,9 +558,8 @@ namespace Signum.Engine
             return (T[])this.reader[ordinal]; 
         }
 
-        static MethodInfo miGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetRange<int>(0)).GetGenericMethodDefinition();
-
-        public NpgsqlTypes.NpgsqlRange<T>? GetRange<T>(int ordinal)
+        static MethodInfo miNullableGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableRange<int>(0)).GetGenericMethodDefinition();
+        public NpgsqlTypes.NpgsqlRange<T>? GetNullableRange<T>(int ordinal)
         {
             LastOrdinal = ordinal;
             if (reader.IsDBNull(ordinal))
@@ -568,6 +567,13 @@ namespace Signum.Engine
                 return (NpgsqlTypes.NpgsqlRange<T>)(object)null!;
             }
 
+            return (NpgsqlTypes.NpgsqlRange<T>)this.reader[ordinal];
+        }
+
+        static MethodInfo miGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetRange<int>(0)).GetGenericMethodDefinition();
+        public NpgsqlTypes.NpgsqlRange<T> GetRange<T>(int ordinal)
+        {
+            LastOrdinal = ordinal;
             return (NpgsqlTypes.NpgsqlRange<T>)this.reader[ordinal];
         }
 
@@ -599,6 +605,11 @@ namespace Signum.Engine
             if (type.IsInstantiationOf(typeof(NpgsqlTypes.NpgsqlRange<>)))
             {
                 return Expression.Call(reader, miGetRange.MakeGenericMethod(type.GetGenericArguments()[0]!), Expression.Constant(ordinal));
+            }
+
+            if (type.IsNullable() && type.UnNullify().IsInstantiationOf(typeof(NpgsqlTypes.NpgsqlRange<>)))
+            {
+                return Expression.Call(reader, miGetRange.MakeGenericMethod(type.UnNullify().GetGenericArguments()[0]!), Expression.Constant(ordinal));
             }
 
             throw new InvalidOperationException("Type {0} not supported".FormatWith(type));
