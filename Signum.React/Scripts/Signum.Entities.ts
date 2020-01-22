@@ -212,11 +212,11 @@ export function isLite(obj: any): obj is Lite<Entity> {
 }
 
 export function isModifiableEntity(obj: any): obj is ModifiableEntity {
-  return obj != null && (obj as ModifiableEntity).Type != undefined;
+ return obj != null && (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-  return obj != null && (obj as Entity).ticks != undefined && (obj as Entity).Type != undefined; //check 'ticks' better than 'id'
+   return obj != null && (obj as Entity).Type != undefined;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {
