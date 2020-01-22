@@ -552,7 +552,7 @@ FROM {1} as [table];".FormatWith(
         public SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
         {
             if (IsPostgres)
-                return new SqlPreCommandSimple($"ALTER TABLE {oldName} SET SCHEMA{schemaName.Name.SqlEscape(IsPostgres)};");
+                return new SqlPreCommandSimple($"ALTER TABLE {oldName} SET SCHEMA {schemaName.Name.SqlEscape(IsPostgres)};");
 
             return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".FormatWith(schemaName.Name.SqlEscape(isPostgres), oldName));
         }
