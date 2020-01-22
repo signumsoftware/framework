@@ -211,7 +211,7 @@ return obj != null && (obj as ModifiableEntity).Type != undefined;
 export function isEntity(obj: any): obj is Entity {
 if(!isModifiableEntity(obj))
 return false;
-const ti = getTypeInfo(obj.Type);
+const ti = Reflection.getTypeInfo(obj.Type);
 return ti != null && ti.entityKind != null;
 }
 
