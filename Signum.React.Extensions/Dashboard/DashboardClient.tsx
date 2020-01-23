@@ -17,6 +17,7 @@ import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, Lin
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
+import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -75,7 +76,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
       },
-    handleTitleClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
         ev.persist();
@@ -95,7 +96,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
       },
-    handleTitleClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+    handleTitleClick:
       (p, e, ev) => {
         ev.preventDefault();
         ev.persist();
