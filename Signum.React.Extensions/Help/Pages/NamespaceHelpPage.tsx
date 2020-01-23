@@ -9,7 +9,7 @@ import { JavascriptMessage, Entity } from '@framework/Signum.Entities';
 import * as Operations from '@framework/Operations';
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
-import { notifySuccess } from '@framework/Operations/EntityOperations';
+import { notifySuccess } from '@framework/Operations';
 import { getOperationInfo } from '../../../../Framework/Signum.React/Scripts/Operations';
 
 

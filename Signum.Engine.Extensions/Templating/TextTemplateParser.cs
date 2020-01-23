@@ -195,6 +195,9 @@ namespace Signum.Engine.Templating
                             case "foreach":
                                 {
                                     ValueProviderBase? vp = ValueProviderBase.TryParse(expr, variable, this);
+                                    if (vp is TokenValueProvider tvp && tvp.ParsedToken.QueryToken != null && QueryToken.IsCollection(tvp.ParsedToken.QueryToken.Type))
+                                        AddError(false, $"@foreach[{expr}] is a collection, missing 'Element' token at the end");
+
                                     var fn = new ForeachNode(vp);
                                     stack.Peek().Nodes.Add(fn);
                                     PushBlock(fn.Block);

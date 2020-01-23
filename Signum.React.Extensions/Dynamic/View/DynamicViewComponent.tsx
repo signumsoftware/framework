@@ -8,7 +8,6 @@ import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { TypeContext } from '@framework/TypeContext'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { BaseNode } from './Nodes'
 import { DesignerContext, DesignerNode, RenderWithViewOverrides } from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
@@ -19,7 +18,7 @@ import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicVie
 import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useUpdatedRef } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
@@ -42,7 +41,8 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
   const rootNodeMemo = React.useMemo(() => JSON.parse(p.initialDynamicView.viewContent!) as BaseNode, []);
 
   const [rootNode, setRootNode] = React.useState<BaseNode>(() => rootNodeMemo);
-  const [selectedNode, setSelectedNode] = React.useState<DesignerNode<BaseNode>>(() => getZeroNode().createChild(rootNodeMemo))
+  const [selectedNode, setSelectedNode] = React.useState<DesignerNode<BaseNode>>(() => getZeroNode().createChild(rootNodeMemo));
+  const selectedNodeRef = useUpdatedRef(selectedNode);
   const [dynamicView, setDynamicView] = React.useState<DynamicViewEntity>(p.initialDynamicView);
 
   const viewOverrides = useAPI(() => Navigator.viewDispatcher.getViewOverrides(p.ctx.value.Type), []);
@@ -52,8 +52,8 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
 
     var context: DesignerContext = {
       onClose: handleClose,
-      refreshView: () => { setSelectedNode(selectedNode.reCreateNode()); },
-      getSelectedNode: () => isDesignerOpen ? selectedNode : undefined,
+      refreshView: () => { setSelectedNode(selectedNodeRef.current.reCreateNode()); },
+      getSelectedNode: () => isDesignerOpen ? selectedNodeRef.current : undefined,
       setSelectedNode: (newNode) => setSelectedNode(newNode),
       props: extraProps,
       propTypes: initialDynamicView.props.toObject(mle => mle.element.name, mle => mle.element.type),
@@ -100,8 +100,6 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
   if (viewOverrides == null)
     return null;
 
-  var topMostEntity = ctx.frame && ctx.frame.pack && ctx.frame.pack.entity;
-  
   var vos = viewOverrides.filter(a => a.viewName == dynamicView.viewName);
 
   if (!Navigator.isViewable(DynamicViewEntity)) {
@@ -124,9 +122,7 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
       }
     </div>
     <div className={classes("design-content", isDesignerOpen && "open")}>
-      <AutoFocus disabled={topMostEntity != ctx.value}>
         <RenderWithViewOverrides dn={desRootNode} parentCtx={ctx} vos={vos} />
-      </AutoFocus>
     </div>
   </div>);
 }
@@ -158,7 +154,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
       .then(pack => {
         reload(pack.entity);
         DynamicViewClient.cleanCaches();
-        return EntityOperations.notifySuccess();
+        return Operations.notifySuccess();
       })
       .done();
   }
@@ -169,7 +165,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       DynamicViewClient.createDefaultDynamicView(p.typeName)
-        .then(entity => { reload(entity); return EntityOperations.notifySuccess(); })
+        .then(entity => { reload(entity); return Operations.notifySuccess(); })
         .done();
 
     }).done();
@@ -181,7 +177,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       Operations.API.constructFromEntity(p.dynamicView, DynamicViewOperation.Clone)
-        .then(pack => { reload(pack.entity); return EntityOperations.notifySuccess(); })
+        .then(pack => { reload(pack.entity); return Operations.notifySuccess(); })
         .done();
     }).done();
   }

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap';
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'

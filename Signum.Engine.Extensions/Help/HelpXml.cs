@@ -211,9 +211,11 @@ namespace Signum.Engine.Help
             static readonly XName _Property = "Property";
             static readonly XName _Operations = "Operations";
             static readonly XName _Operation = "Operation";
+#pragma warning disable 414
             static readonly XName _Queries = "Queries";
             static readonly XName _Query = "Query";
             static readonly XName _Language = "Language";
+#pragma warning restore 414
 
             public static XDocument ToXDocument(TypeHelpEntity entity)
             {

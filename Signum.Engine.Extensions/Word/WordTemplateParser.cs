@@ -296,6 +296,9 @@ namespace Signum.Engine.Word
                         case "foreach":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
+                                if (vp is TokenValueProvider tvp && tvp.ParsedToken.QueryToken != null && QueryToken.IsCollection(tvp.ParsedToken.QueryToken.Type))
+                                    AddError(false, $"@foreach[{expr}] is a collection, missing 'Element' token at the end");
+
                                 var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
                                 PushBlock(fn);
 
@@ -397,8 +400,27 @@ namespace Signum.Engine.Word
                 var list = root.Descendants<MatchNode>().ToList();
 
                 if (list.Any())
-                    throw new InvalidOperationException("{0} unexpected MatchNode instances found: \r\n{1}".FormatWith(list.Count, list.ToString("\r\n").Indent(4)));
+                    throw new InvalidOperationException("{0} unexpected MatchNode instances found: \r\n{1}".FormatWith(list.Count, 
+                        list.ToString(d => 
+@$"{d.Before()?.InnerText ?? "- None - "}
+{d.InnerText} <-- Unexpected
+{d.After()?.InnerText ?? "-- None --"}", "\r\n\r\n").Indent(2)));
             }
+        }
+
+       
+    }
+
+    static class OpenXmlExtensions
+    {
+        public static OpenXmlElement? Before(this OpenXmlElement element)
+        {
+            return element.Follow(a => a.Parent).Select(p => p.PreviousSibling()).FirstOrDefault(e => e != null && e.InnerText.HasText());
+        }
+
+        public static OpenXmlElement? After(this OpenXmlElement element)
+        {
+            return element.Follow(a => a.Parent).Select(p => p.NextSibling()).FirstOrDefault(e => e != null && e.InnerText.HasText());
         }
     }
 }

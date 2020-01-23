@@ -105,6 +105,15 @@ namespace Signum.Engine.Templating
                 () => "Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
         }
 
+        public static IEnumerable<IEnumerable<ResultRow>> GroupByColumn(this IEnumerable<ResultRow> rows, ResultColumn keyColumn)
+        {
+            var groups = rows.GroupBy(r => r[keyColumn], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
+            if (groups.Count == 1 && groups[0].Key == null)
+                return Enumerable.Empty<IEnumerable<ResultRow>>();
+
+            return groups;
+        }
+
         internal class SemiStructuralEqualityComparer : IEqualityComparer<object?>
         {
             public static readonly SemiStructuralEqualityComparer Comparer = new SemiStructuralEqualityComparer();
@@ -198,11 +207,12 @@ namespace Signum.Engine.Templating
             foreach (var field in (fieldOrPropertyChain ?? "").Trim().Split('.'))
             {
                 var info = (MemberInfo?)type.GetField(field, Flags) ??
-                           (MemberInfo?)type.GetProperty(field, Flags);
+                           (MemberInfo?)type.GetProperty(field, Flags) ??
+                           (MemberInfo?)type.GetMethod(field, Flags, null, new[] { typeof(TemplateParameters) }, null);
 
                 if (info == null)
                 {
-                    addError(false, "Type {0} does not have a property with name {1}".FormatWith(type.Name, field));
+                    addError(false, "Type {0} does not have a property/field with name {1}, or a method that takes a TemplateParameters as an argument".FormatWith(type.Name, field));
                     return null;
                 }
 

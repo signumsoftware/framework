@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'

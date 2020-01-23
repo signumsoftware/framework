@@ -76,11 +76,10 @@ function isImage(propertyRoute: string | undefined) {
 
   let pr = PropertyRoute.parseFull(propertyRoute);
 
-  return Boolean(pr?.member && pr.member.defaultFileTypeInfo && pr.member.defaultFileTypeInfo.onlyImages);
   if (pr.propertyRouteType == "MListItem")
     pr = pr.parent!;
 
-
+  return Boolean(pr?.member?.defaultFileTypeInfo?.onlyImages);
 }
 
 declare module '@framework/Reflection' {
