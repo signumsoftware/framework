@@ -174,9 +174,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   canFilter() {
     const p = this.props;
-    return p.showHeader && (p.showFilterButton || p.showFilters)
+    return p.showHeader == true && (p.showFilterButton || p.showFilters);
   }
-
 
   getQueryRequest(): QueryRequest {
     const fo = this.props.findOptions;
