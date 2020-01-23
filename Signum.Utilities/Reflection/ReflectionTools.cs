@@ -6,6 +6,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities.Reflection
 {
@@ -825,9 +826,11 @@ namespace Signum.Utilities.Reflection
                         return col;
                     }
 
-                    return Convert.ChangeType(value, utype);
-                }
-                  
+                    if (value is IConvertible c)
+                        return Convert.ChangeType(c, utype);
+
+                    throw new InvalidOperationException($"Unable to convert '{value}' (of type {value.GetType().TypeName()}) to type {utype.TypeName()}");
+                } 
             }
         }
 
