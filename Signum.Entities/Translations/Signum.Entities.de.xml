@@ -58,8 +58,8 @@
     <Member Name="PauseTime" Description="Pausenzeit" />
   </Type>
   <Type Name="DeleteLogsTypeOverridesEmbedded" Description="Lösche Log Typen overrides">
-    <Member Name="CleanLogsWithMoreThan" Description="Lösche Protokolle mit mehr als" />
-    <Member Name="DeleteLogsWithMoreThan" Description="Löschen Sie Protokolle mit mehr als" />
+    <Member Name="DeleteLogsOlderThan" Description="Löschen von Protokollen, die älter als" />
+    <Member Name="DeleteLogsWithExceptionsOlderThan" Description="Löschen von Protokollen mit Ausnahmen, die älter als" />
     <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
@@ -274,6 +274,12 @@
     <Member Name="Firsts" Description="Erste" />
     <Member Name="Paginate" Description="Paginieren" />
   </Type>
+  <Type Name="PinnedFilterActive" Description="Vorgewahlter Filter aktiv">
+    <Member Name="Always" Description="Immer" />
+    <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
+    <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
+    <Member Name="WhenHasValue" Description="Wann hat Wert" />
+  </Type>
   <Type Name="PropertyRouteEntity" Description="Eigenschaftsroute">
     <Member Name="Path" Description="Pfad" />
     <Member Name="RootType" Description="Stammtyp" />
@@ -352,7 +358,7 @@
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
-    <Member Name="DisableOnNull" Description="Deaktivieren bei Null" />
+    <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
     <Member Name="Filters" Description="Filter" />

@@ -240,8 +240,6 @@ namespace Signum.Engine
                 catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
                 {
                     throw new InvalidOperationException($"{nameof(BulkInsertMListTable)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
-
-                    throw;
                 }
             }
         }

@@ -5,15 +5,16 @@ import { Transition } from 'react-transition-group'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import "./Notify.css"
-import { namespace } from 'd3';
+import { useForceUpdate } from '../Hooks';
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 
 interface NotifyOptions {
   text: React.ReactChild;
   type: NotifyType;
+  priority?: number; 
+  timeoutHandler?: number;
 }
-
 
 interface NotifyHandle {
   notify(options: NotifyOptions) : void;
@@ -21,39 +22,46 @@ interface NotifyHandle {
   notifyPendingRequest(pending: number): void;
 }
 
-
 export default function Notify() {
 
-  const [options, setOptions] = React.useState<NotifyOptions | undefined>(undefined);
+  const forceUpdate = useForceUpdate();
 
-  const handler = React.useRef<number | undefined>(undefined);
+  const optionsStack = React.useRef<NotifyOptions[]>([]);
 
   function notify(options: NotifyOptions) {
-    if (handler.current != undefined) {
-      clearTimeout(handler.current);
-      handler.current = undefined;
-    }
-    setOptions(options);
+
+    if (options.priority == null)
+      options.priority = 10;
+
+    if (options.timeoutHandler)
+      clearTimeout(options.timeoutHandler);
+
+    optionsStack.current.extract(a => a == options);
+    optionsStack.current.push(options);
+    forceUpdate();
   }
 
   function notifyTimeout(options: NotifyOptions, timeout: number = 2000) {
     notify(options);
-    handler.current = setTimeout(() => clear(), timeout);
+
+    options.timeoutHandler = setTimeout(() => remove(options), timeout);
   }
+
+  const loadingRef = React.useRef<NotifyOptions>({ text: JavascriptMessage.loading.niceToString(), type: "loading", priority: 0 });
 
   function notifyPendingRequest(pending: number) {
     if (pending)
-      notify({ text: JavascriptMessage.loading.niceToString(), type: "loading" });
+      notify(loadingRef.current);
     else
-      clear();
+      remove(loadingRef.current);
   }
 
-  function clear() {
-    if (handler.current != undefined) {
-      clearTimeout(handler.current);
-      handler.current = undefined;
-    }
-    setOptions(undefined);
+  function remove(options: NotifyOptions) {
+    if (options.timeoutHandler)
+      clearTimeout(options.timeoutHandler);
+
+    optionsStack.current.extract(a => a == options);
+    forceUpdate();
   }
 
   React.useEffect(() => {
@@ -65,17 +73,17 @@ export default function Notify() {
     };
 
     return () => Notify.singleton = undefined;
-  }, [options, handler]);
+  }, []);
 
-
+  var opt = optionsStack.current.orderByDescending(a => a.priority).firstOrNull();
 
   function getIcon() {
-    if (!options) {
+    if (!opt) {
       return undefined;
     }
 
     var icon: IconProp | undefined;
-    switch (options.type) {
+    switch (opt.type) {
       case "loading":
         icon = "cog";
         break;
@@ -91,21 +99,21 @@ export default function Notify() {
     }
 
     if (icon) {
-      return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={options.type === "loading"} />
+      return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={opt.type === "loading"} />
     }
     else {
       return undefined;
     }
   }
 
-  const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnNotify && options?.type === "loading") ?
-    { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined;
+  const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnLoading && optionsStack.current.some(o => o.type == "loading") ?
+    { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined);
 
   return (
     <div style={styleLock}>
       <div id="sfNotify" >
-        <Transition in={options != undefined} timeout={200}>
-          {(state: string) => <span className={classes(options?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{getIcon()}&nbsp;{options?.text}</span>}
+        <Transition in={opt != undefined} timeout={200}>
+          {(state: string) => <span className={classes(opt?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{getIcon()}&nbsp;{opt?.text}</span>}
         </Transition>
       </div>
     </div>
@@ -114,4 +122,4 @@ export default function Notify() {
 
 
 Notify.singleton = undefined as (NotifyHandle | undefined);
-Notify.lockScreenOnNotify = false;
+Notify.lockScreenOnLoading = false;

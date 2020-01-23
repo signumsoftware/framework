@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
@@ -5,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.React.Facades;
+using Signum.React.Filters;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
@@ -124,8 +127,6 @@ namespace Signum.React.Json
 
     public class EntityJsonConverter : JsonConverter
     {
-        public static Dictionary<Type, PropertyRoute> DefaultPropertyRoutes = new Dictionary<Type, PropertyRoute>();
-
         public override bool CanConvert(Type objectType)
         {
             return typeof(ModifiableEntity).IsAssignableFrom(objectType) || typeof(IEntity).IsAssignableFrom(objectType);
@@ -141,8 +142,7 @@ namespace Signum.React.Json
 
                 writer.WriteStartObject();
 
-                var entity = mod as Entity;
-                if (entity != null)
+                if (mod is Entity entity)
                 {
                     writer.WritePropertyName("Type");
                     writer.WriteValue(TypeLogic.TryGetCleanName(mod.GetType()));
@@ -182,12 +182,12 @@ namespace Signum.React.Json
                     WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
                 }
 
-                if (entity != null && entity.Mixins.Any())
+                if (mod.Mixins.Any())
                 {
                     writer.WritePropertyName("mixins");
                     writer.WriteStartObject();
 
-                    foreach (var m in entity.Mixins)
+                    foreach (var m in mod.Mixins)
                     {
                         var prm = pr.Add(m.GetType());
 
@@ -213,9 +213,18 @@ namespace Signum.React.Json
                 pr = PropertyRoute.Root(value.GetType());
             if (pr == null)
             {
+                var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
+
                 var embedded = (EmbeddedEntity)value;
-                pr = DefaultPropertyRoutes.TryGetC(embedded.GetType()) ??
-                    throw new InvalidOperationException($"Impossible to determine PropertyRoute for {value.GetType().Name}. Consider adding a new value to {nameof(EntityJsonConverter)}.{nameof(EntityJsonConverter.DefaultPropertyRoutes)}.");
+                var att =  
+                    controller.MethodInfo.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+                    controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+                    throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {value.GetType().Name}. 
+Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().Name}), typeof(SomeEntity), nameof(SomeEntity.SomeProperty))] to your action or controller.
+Current action: {controller.MethodInfo.MethodSignature()}
+Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
+
+                pr = att.PropertyRoute;
             }
             else if (pr.Type.ElementType() == value.GetType())
                 pr = pr.Add("Item"); //We habe a custom MListConverter but not for other simple collections
@@ -289,14 +298,13 @@ namespace Signum.React.Json
                         {
                             if ((string)reader.Value! == "mixins")
                             {
-                                var entity = (Entity)mod;
                                 reader.Read();
                                 reader.Assert(JsonToken.StartObject);
 
                                 reader.Read();
                                 while (reader.TokenType == JsonToken.PropertyName)
                                 {
-                                    var mixin = entity[(string)reader.Value!];
+                                    var mixin = mod[(string)reader.Value!];
 
                                     reader.Read();
 
@@ -543,5 +551,17 @@ namespace Signum.React.Json
     }
 
 
-   
+    [System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public class EmbeddedPropertyRouteAttribute : Attribute
+    {
+
+        public Type EmbeddedType { get; private set; }
+        public PropertyRoute PropertyRoute { get; private set; }
+        // This is a positional argument
+        public EmbeddedPropertyRouteAttribute(Type embeddedType, Type propertyRouteRoot, string propertyRouteText )
+        {
+            this.EmbeddedType = embeddedType;
+            this.PropertyRoute = PropertyRoute.Parse(propertyRouteRoot, propertyRouteText);
+        }
+    }
 }

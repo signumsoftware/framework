@@ -933,7 +933,7 @@ namespace Signum.Engine.DynamicQuery
 
             var body = at.Parent!.BuildExpression(context);
 
-            var type = at.Type;
+            var type = at.AggregateFunction == AggregateFunction.Sum ? at.Type.UnNullify() : at.Type;
 
             if (body.Type != type)
                 body = body.TryConvert(type);

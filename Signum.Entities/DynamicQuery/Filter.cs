@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -246,5 +247,16 @@ namespace Signum.Entities.DynamicQuery
         SingleOrDefault,
         SingleOrMany,
         Only
+    }
+
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    public enum PinnedFilterActive
+    {
+        Always,
+        WhenHasValue,
+        [Description("Checkbox (start checked)")]
+        Checkbox_StartChecked,
+        [Description("Checkbox (start unchecked)")]
+        Checkbox_StartUnchecked,
     }
 }

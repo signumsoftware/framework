@@ -3,7 +3,7 @@ import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol
+  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer } from './Reflection';
@@ -17,6 +17,7 @@ import { getConstructFromManyContextualItems, getEntityOperationsContextualItems
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import Notify from './Frames/Notify';
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -101,6 +102,10 @@ export function operationInfos(ti: TypeInfo) {
   return Dic.getValues(ti.operations!).filter(isOperationInfoAllowed);
 }
 
+export function notifySuccess(message?: string, timeout?: number) {
+  Notify.singleton && Notify.singleton.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 }, timeout);
+}
+
 /**
  * Operation Settings
  */
@@ -150,6 +155,13 @@ export class ConstructorOperationContext<T extends Entity> {
 
   defaultConstruct(...args: any[]): Promise<EntityPack<T> | undefined> {
     return API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
+  }
+
+  assignProps(pack: EntityPack<T> | undefined, props?: Partial<T>) {
+    if (pack && props)
+      Dic.assign(pack.entity, props);
+
+    return pack;
   }
 }
 
@@ -332,6 +344,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
@@ -361,6 +374,7 @@ export interface EntityOperationOptions<T extends Entity> {
 
   text?: () => string;
   isVisible?: (ctx: EntityOperationContext<T>) => boolean;
+  overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (ctx: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;

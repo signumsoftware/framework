@@ -19,6 +19,7 @@ import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
+import { clearCustomConstructors } from "./Constructor";
 
 Dic.skipClasses.push(React.Component);
 
@@ -155,7 +156,8 @@ export const clearSettingsActions: Array<() => void> = [
   ButtonBarManager.clearButtonBarRenderer,
   Operations.clearOperationSettings,
   clearWidgets,
-  clearContextualItems
+  clearContextualItems,
+  clearCustomConstructors
 ];
 
 export function clearAllSettings() {
@@ -900,14 +902,14 @@ export class ViewPromise<T extends ModifiableEntity> {
     return result;
   }
 
-  withProps(props: {}): ViewPromise<T> {
+  withProps<P>(props: Partial<P>): ViewPromise<T> {
 
     var result = new ViewPromise<T>();
 
     result.promise = this.promise.then(func => {
       return (ctx: TypeContext<T>): React.ReactElement<any> => {
         var result = func(ctx);
-        return React.cloneElement(result, props);
+        return React.cloneElement(result, { ...props });
       };
     });
 

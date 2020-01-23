@@ -664,7 +664,7 @@ namespace Signum.Engine.Maps
 
         internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
         {
-            var subHasValue = this.EmbeddedFields.Select(a => a.Value).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            var subHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
 
             return subHasValue ?? (this.Columns().Contains(column) ? this.HasValue : null);
         }

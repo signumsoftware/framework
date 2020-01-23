@@ -5,10 +5,9 @@ import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
-import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import {
-  operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults
+  operationInfos, getSettings, notifySuccess, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults
 } from '../Operations'
 import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -256,9 +255,6 @@ export namespace MenuItemConstructor { //To allow monkey patching
   }
 }
 
-export function notifySuccess() {
-  Notify.singleton && Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
-}
 
 export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
 

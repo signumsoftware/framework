@@ -114,7 +114,7 @@ namespace Signum.Engine.Linq
         {
             ColumnUnionProjector cp = new ColumnUnionProjector(candidates, request, implementation);
 
-            return cp.Visit(projector);;
+            return cp.Visit(projector);
         }
 
 

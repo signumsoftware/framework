@@ -53,5 +53,23 @@ namespace Signum.Engine.Linq
 
             return select;
         }
+
+        protected internal override Expression VisitEntity(EntityExpression ee)
+        {
+            var bindings = Visit(ee.Bindings, VisitFieldBinding);
+            var mixins = Visit(ee.Mixins, VisitMixinEntity);
+
+            var externalId = (PrimaryKeyExpression)Visit(ee.ExternalId);
+            var externalPeriod = (NewExpression)Visit(ee.ExternalPeriod);
+
+            var period = (NewExpression)Visit(ee.TablePeriod);
+
+            Alias? newAlias = ee.TableAlias == null ? null : aliasMap.TryGetC(ee.TableAlias) ?? ee.TableAlias;
+
+            if (ee.Bindings != bindings || ee.ExternalId != externalId || ee.ExternalPeriod != externalPeriod || ee.Mixins != mixins || ee.TablePeriod != period)
+                return new EntityExpression(ee.Type, externalId, externalPeriod, newAlias, bindings, mixins, period, ee.AvoidExpandOnRetrieving);
+
+            return ee;
+        }
     }
 }

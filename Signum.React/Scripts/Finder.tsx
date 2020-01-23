@@ -14,7 +14,7 @@ import {
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
 import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
@@ -522,7 +522,7 @@ export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySett
     return [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true },
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.ToString", operation: "Contains" },
           { token: "Entity.Id", operation: "EqualTo" },
@@ -716,6 +716,10 @@ interface OverridenValue {
 }
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
+
+  if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
+    return undefined;
+
   if (fop.pinned && overridenValue == null) {
     if (fop.pinned.splitText) {
 
@@ -735,7 +739,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     }
     else if (isFilterGroupOptionParsed(fop)) {
 
-      if (fop.pinned!.disableOnNull && fop.value == null) {
+      if (fop.pinned!.active == "WhenHasValue" && fop.value == null) {
         return undefined;
       }
 
@@ -753,9 +757,8 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (fop.token == null || fop.token.filterType == null || fop.operation == null)
       return undefined;
 
-    if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value === "")) {
+    if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
       return undefined;
-    }
 
     if (overridenValue && fop.token && typeof overridenValue.value == "string") {
       if (fop.token.type.name == "number") {
@@ -1153,7 +1156,8 @@ export module Encoder {
         query["filterPinned" + index + identSuffix] = scapeTilde(p.label ?? "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
-          "~" + ((p.splitText ? 2 : 0) | (p.disableOnNull ? 1 : 0)).toString();
+          "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
+          "~" + (p.splitText ? 1 : 0);
       }
 
 
@@ -1230,13 +1234,12 @@ export module Decoder {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
-      var flags = parseInt(parts[3]);
       return ({
         label: unscapeTildes(parts[0]),
         column: parts[1].length ? parseInt(parts[1]) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
-        splitText: Boolean(flags & 2),
-        disableOnNull: Boolean(flags & 1),
+        active: parseInt(parts[3]) == 0 ? undefined : PinnedFilterActive.values()[parseInt(parts[3])],
+        splitText: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
       });
     }
 
@@ -1264,7 +1267,7 @@ export module Decoder {
           }) as FilterConditionOption
         } else {
           return ({
-            token: parts[0] ?? null,
+            token: parts[0] == null || parts[0].length == 0 ? null : parts[0],
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
             value: ignoreValues ? null : unscapeTildes(parts[2]),
             pinned: pinned,
