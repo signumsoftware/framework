@@ -311,7 +311,7 @@ Consider the following options:
                 CanBeModified = (oper as IEntityOperation)?.CanBeModified,
                 Returns = oper.Returns,
                 ReturnType = oper.ReturnType,
-                HasStates = (oper as IGraphHasFromStatesOperation)?.HasFromStates,
+                HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
                 HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
                 CanBeNew = (oper as IEntityOperation)?.CanBeNew,
                 BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
