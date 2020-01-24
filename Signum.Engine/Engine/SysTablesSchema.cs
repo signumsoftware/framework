@@ -42,8 +42,10 @@ namespace Signum.Engine.Engine
                              (from p in t.Periods()
                               join sc in t.Columns() on p.start_column_id equals sc.column_id
                               join ec in t.Columns() on p.end_column_id equals ec.column_id
-                              select new DiffPeriod
-                              {
+#pragma warning disable CS0472
+                              select (int?)p.object_id == null ? null : new DiffPeriod
+#pragma warning restore CS0472
+                                                  {
                                   StartColumnName = sc.name,
                                   EndColumnName = ec.name,
                               }).SingleOrDefaultEx(),

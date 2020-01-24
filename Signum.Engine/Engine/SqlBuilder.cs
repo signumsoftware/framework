@@ -39,7 +39,7 @@ namespace Signum.Engine
         };
 
         #region Create Tables
-        public SqlPreCommandSimple CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
+        public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
         {
             var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? null : 
                 isPostgres ? 
@@ -154,7 +154,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null, isChange: true)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(forceTableName ?? table.Name, this.ColumnLine(column, null, isChange: true)));
 
             if (column.Default == null)
                 return alterColumn;
