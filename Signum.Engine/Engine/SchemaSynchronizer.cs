@@ -210,7 +210,7 @@ namespace Signum.Engine
                         removeOld: (tn, dif) => SqlBuilder.DropTable(dif),
                         mergeBoth: (tn, tab, dif) =>
                         {
-                            var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
+                            var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab, tab.Name) : null;
 
                             bool disableEnableSystemVersioning = false;
 
@@ -253,7 +253,7 @@ namespace Signum.Engine
 
                                                 difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab.Name, difCol.Name, tabCol.Name),
 
-                                                difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: false) ?
+                                                difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true) ?
                                                     null :
                                                     SqlPreCommand.Combine(Spacing.Simple,
                                                         tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
@@ -342,7 +342,7 @@ namespace Signum.Engine
                 SqlPreCommand? historyTables = Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                     createNew: null,
                     removeOld: (tn, dif) => SqlBuilder.DropTable(dif.Name),
-                    mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? SqlBuilder.RenameOrChangeSchema(dif.Name, tab.SystemVersioned!.TableName) : null);
+                    mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? SqlBuilder.RenameOrMove(dif, tab, tab.SystemVersioned!.TableName) : null);
 
                 SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 

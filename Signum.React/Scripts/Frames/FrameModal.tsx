@@ -45,7 +45,7 @@ interface PackAndComponent {
   lastEntity: string;
   refreshCount: number;
   getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  }
+}
 
 export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
@@ -188,7 +188,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
-      frameComponent: { forceUpdate },
+      frameComponent: { forceUpdate, createNew: p.createNew },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;

@@ -535,22 +535,31 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
-            if (sqlFunction.Object != null)
+            if (sqlFunction.SqlFunction == SqlFunction.COLLATE.ToString())
             {
-                Visit(sqlFunction.Object);
-                sb.Append(".");
+                this.Visit(sqlFunction.Arguments[0]);
+                sb.Append(" COLLATE ");
+                if (sqlFunction.Arguments[1] is SqlConstantExpression ce)
+                    sb.Append((string)ce.Value!);
             }
-            sb.Append(sqlFunction.SqlFunction);
-            sb.Append("(");
-            for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
+            else
             {
-                Expression exp = sqlFunction.Arguments[i];
-                if (i > 0)
-                    sb.Append(", ");
-                this.Visit(exp);
+                if (sqlFunction.Object != null)
+                {
+                    Visit(sqlFunction.Object);
+                    sb.Append(".");
+                }
+                sb.Append(sqlFunction.SqlFunction);
+                sb.Append("(");
+                for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
+                {
+                    Expression exp = sqlFunction.Arguments[i];
+                    if (i > 0)
+                        sb.Append(", ");
+                    this.Visit(exp);
+                }
+                sb.Append(")");
             }
-            sb.Append(")");
-
             return sqlFunction;
         }
 

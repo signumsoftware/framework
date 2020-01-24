@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine.Operations
 {
-    public interface IGraphHasFromStatesOperation
+    public interface IGraphHasStatesOperation
     {
         bool HasFromStates { get; }
     }
@@ -27,7 +27,7 @@ namespace Signum.Engine.Operations
             List<S> ToStates { get; }
         }
 
-        public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasFromStatesOperation
+        public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasStatesOperation
         {
             List<S> FromStates { get; }
         }
@@ -186,7 +186,7 @@ namespace Signum.Engine.Operations
             IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
             Type? IOperation.StateType { get { return typeof(S); } }
 
-            bool IGraphHasFromStatesOperation.HasFromStates
+            bool IGraphHasStatesOperation.HasFromStates
             {
                 get { return !FromStates.IsNullOrEmpty(); }
             }
@@ -236,7 +236,7 @@ namespace Signum.Engine.Operations
             IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
             Type? IOperation.StateType { get { return typeof(S); } }
 
-            bool IGraphHasFromStatesOperation.HasFromStates
+            bool IGraphHasStatesOperation.HasFromStates
             {
                 get { return !FromStates.IsNullOrEmpty(); }
             }
