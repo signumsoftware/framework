@@ -38,7 +38,6 @@ namespace Signum.Engine.Migrations
         private static void SetExecuted(List<MigrationInfo> migrations)
         {
             MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
-            AddCommentColumnIfNecessary();
 
             var first = migrations.FirstOrDefault();
 
@@ -67,23 +66,6 @@ namespace Signum.Engine.Migrations
             }
 
             migrations.Sort(a => a.Version);
-        }
-
-        private static void AddCommentColumnIfNecessary()
-        {
-            var table = Schema.Current.Table<SqlMigrationEntity>();
-            var col = table.Columns[nameof(SqlMigrationEntity.Comment)];
-
-            var hasComment = Database.View<SysTables>()
-                .Where(a => a.Schema().name == table.Name.Schema.Name && a.name == table.Name.Name)
-                .SelectMany(t => t.Columns())
-                .Any(c => c.name == col.Name);
-                
-            if (!hasComment)
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.White, "Column " + col.Name + " created in " + table.Name + "...");
-                Executor.ExecuteNonQuery($"ALTER TABLE {table.Name} ADD {col.Name} NVARCHAR({col.Size}) NULL");
-            }
         }
 
         public static List<MigrationInfo> ReadMigrationsDirectory()
@@ -204,7 +186,7 @@ namespace Signum.Engine.Migrations
 
                     return true;
                 }
-                catch (MigrationException)
+                catch (ExecuteSqlScriptException)
                 {
                     if (autoRun)
                         throw;
@@ -215,8 +197,6 @@ namespace Signum.Engine.Migrations
 
         }
 
-        public static int Timeout = 20 * 60; 
-
         private static void Execute(MigrationInfo mi)
         {
             string title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
@@ -224,7 +204,11 @@ namespace Signum.Engine.Migrations
             
             using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
-                ExecuteScript(title, text);
+                string databaseName = Connector.Current.DatabaseName();
+
+                var script = text.Replace(DatabaseNameReplacement, databaseName);
+
+                SqlPreCommandExtensions.ExecuteScript(title, text);
 
                 SqlMigrationEntity m = new SqlMigrationEntity
                 {
@@ -238,65 +222,6 @@ namespace Signum.Engine.Migrations
             }
         }
 
-        public static void ExecuteScript(string title, string script)
-        {
-            using (Connector.CommandTimeoutScope(Timeout))
-            {
-                string databaseName = Connector.Current.DatabaseName();
-
-                script = script.Replace(DatabaseNameReplacement, databaseName);
-
-                var parts = Regex.Split(script, " *GO *(\r?\n|$)", RegexOptions.IgnoreCase).Where(a => !string.IsNullOrWhiteSpace(a)).ToArray();
-
-                int pos = 0;
-
-                try
-                {
-                    for (pos = 0; pos < parts.Length; pos++)
-                    {
-                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var e = ex as SqlException ?? ex.InnerException as SqlException;
-                    if (e == null)
-                        throw;
-
-                    Console.WriteLine();
-                    Console.WriteLine();
-
-                    var list = script.Lines();
-
-                    var lineNumer = (e.LineNumber - 1) + pos + parts.Take(pos).Sum(a => a.Lines().Length);
-
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
-
-                    var min = Math.Max(0, lineNumer - 20);
-                    var max = Math.Min(list.Length - 1, lineNumer + 20);
-
-                    if (min > 0)
-                        Console.WriteLine("...");
-
-                    for (int i = min; i <= max; i++)
-                    {
-                        Console.Write(i + ": ");
-                        SafeConsole.WriteLineColor(i == lineNumer ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
-                    }
-
-                    if (max < list.Length - 1)
-                        Console.WriteLine("...");
-
-                    Console.WriteLine();
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.GetType().Name + (e is SqlException ? " (Number {0}): ".FormatWith(((SqlException)e).Number) : ": "));
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
-
-                    Console.WriteLine();
-
-                    throw new MigrationException(ex.Message, ex);
-                }
-            }
-        }
 
         private static void Draw(List<MigrationInfo> migrationsInOrder, MigrationInfo? current)
         {

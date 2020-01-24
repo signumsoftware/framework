@@ -169,7 +169,7 @@ namespace Signum.Engine.Cache
             Table table = Schema.Current.Table(type);
             DatabaseName? db = table.Name.Schema?.Database;
 
-            SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
+            SqlConnector subConnector = (SqlConnector)Connector.Current.ForDatabase(db);
 
             if (CacheLogic.LogWriter != null)
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
@@ -191,11 +191,11 @@ namespace Signum.Engine.Cache
             return list;
         }
 
-        public static void ExecuteDataReaderOptionalDependency(this SqlConnector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
+        public static void ExecuteDataReaderOptionalDependency(this Connector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
         {
             if (WithSqlDependency)
             {
-                connector.ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
+                ((SqlConnector)connector).ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
             }
             else
             {
@@ -264,6 +264,7 @@ namespace Signum.Engine.Cache
             lock (startKeyLock)
             {
                 SqlConnector connector = (SqlConnector)Connector.Current;
+                bool isPostgree = false;
 
                 if (DropStaleServices)
                 {
@@ -271,7 +272,7 @@ namespace Signum.Engine.Cache
                     //http://rusanu.com/2007/11/10/when-it-rains-it-pours/
                     var staleServices = (from s in Database.View<SysServiceQueues>()
                                          where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
-                                         select new ObjectName(new SchemaName(null, s.Schema().name), s.name)).ToList();
+                                         select new ObjectName(new SchemaName(null, s.Schema().name, isPostgree), s.name, isPostgree)).ToList();
 
                     foreach (var s in staleServices)
                     {
@@ -281,7 +282,7 @@ namespace Signum.Engine.Cache
 
                     var oldProcedures = (from p in Database.View<SysProcedures>()
                                          where p.name.Contains("SqlQueryNotificationStoredProcedure-") && !Database.View<SysServiceQueues>().Any(s => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
-                                         select new ObjectName(new SchemaName(null, p.Schema().name), p.name)).ToList();
+                                         select new ObjectName(new SchemaName(null, p.Schema().name, isPostgree), p.name, isPostgree)).ToList();
 
                     foreach (var item in oldProcedures)
                     {
@@ -301,7 +302,7 @@ namespace Signum.Engine.Cache
 
                 foreach (var database in Schema.Current.DatabaseNames())
                 {
-                    SqlConnector sub = connector.ForDatabase(database);
+                    SqlConnector sub = (SqlConnector)connector.ForDatabase(database);
 
                     try
                     {
@@ -419,22 +420,17 @@ namespace Signum.Engine.Cache
 
         public static void Shutdown()
         {
-            if (GloballyDisabled)
+            if (GloballyDisabled || !WithSqlDependency)
                 return;
 
             var connector = ((SqlConnector)Connector.Current);
             foreach (var database in Schema.Current.DatabaseNames())
             {
-                SqlConnector sub = connector.ForDatabase(database);
+                SqlConnector sub = (SqlConnector)connector.ForDatabase(database);
 
                 SqlDependency.Stop(sub.ConnectionString);
             }
 
-        }
-
-        static SqlPreCommandSimple GetDependencyQuery(ITable table)
-        {
-            return new SqlPreCommandSimple("SELECT {0} FROM {1}".FormatWith(table.Columns.Keys.ToString(c => c.SqlEscape(), ", "), table.Name));
         }
 
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
