@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <TypeScriptToolsVersion>3.7</TypeScriptToolsVersion>
     <TypeScriptBuildMode>true</TypeScriptBuildMode>
-    <LangVersion>preview</LangVersion>
     <OutputType>Library</OutputType>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <StartupObject></StartupObject>
@@ -39,7 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.6.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.6.0" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.3">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -47,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.TSGenerator" Version="2.2.2" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.2.5" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
   </ItemGroup>
 
