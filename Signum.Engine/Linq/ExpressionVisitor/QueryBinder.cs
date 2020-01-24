@@ -1,6 +1,7 @@
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
+using Signum.Engine.PostgresCatalog;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
@@ -33,11 +34,12 @@ namespace Signum.Engine.Linq
 
         internal SystemTime? systemTime;
 
-        internal Schema schema; 
-
+        internal Schema schema;
+        bool isPostgres;
         public QueryBinder(AliasGenerator aliasGenerator)
         {
             this.schema = Schema.Current;
+            this.isPostgres = this.schema.Settings.IsPostgres;
             this.systemTime = SystemTime.Current;
             this.aliasGenerator = aliasGenerator;
             this.root = null!;
@@ -413,16 +415,20 @@ namespace Signum.Engine.Linq
 
         private ProjectionExpression VisitCastProjection(Expression source)
         {
-            if (source is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)source))
+            if (isPostgres && source is MemberExpression m && m.Type.IsArray)
             {
-                var oldInTVF = inTableValuedFunction;
-                inTableValuedFunction = true;
+                var miUnnest = ReflectionTools.GetMethodInfo(() => PostgresFunctions.unnest<int>(null!)).GetGenericMethodDefinition();
 
-                var visit = Visit(source);
+                var eType = m.Type.ElementType()!;
 
-                inTableValuedFunction = oldInTVF;
+                var newSource = Expression.Call(null, miUnnest.MakeGenericMethod(eType), m);
 
-                return GetTableValuedFunctionProjection((MethodCallExpression)visit);
+                return BindTableValueFunction(newSource);
+            }
+
+            if (source is MethodCallExpression mc && IsTableValuedFunction(mc))
+            {
+                return BindTableValueFunction(mc);
             }
             else
             {
@@ -432,15 +438,27 @@ namespace Signum.Engine.Linq
             }
         }
 
+        private ProjectionExpression BindTableValueFunction(MethodCallExpression mc)
+        {
+            var oldInTVF = inTableValuedFunction;
+            inTableValuedFunction = true;
+
+            var visit = (MethodCallExpression)Visit(mc);
+
+            inTableValuedFunction = oldInTVF;
+
+            return GetTableValuedFunctionProjection(visit);
+        }
+
         private ProjectionExpression AsProjection(Expression expression)
         {
-            if (expression is ProjectionExpression)
-                return (ProjectionExpression)expression;
+            if (expression is ProjectionExpression pe)
+                return pe;
 
             expression = RemoveProjectionConvert(expression);
 
-            if (expression is ProjectionExpression)
-                return (ProjectionExpression)expression;
+            if (expression is ProjectionExpression pe2)
+                return pe2;
 
             if (expression.NodeType == ExpressionType.New && expression.Type.IsInstantiationOf(typeof(Grouping<,>)))
             {
@@ -566,19 +584,34 @@ namespace Signum.Engine.Linq
 
             string value = (string)((ConstantExpression)separator).Value;
 
-            ColumnDeclaration cd = new ColumnDeclaration(null!, Expression.Add(new SqlConstantExpression(value, typeof(string)), nominated, miStringConcat));
-
-            Alias alias = NextSelectAlias();
-
-            SelectExpression select = new SelectExpression(alias, false, null, new[] { cd }, projection.Select, null, null, null, SelectOptions.ForXmlPathEmpty);
-
-            return new SqlFunctionExpression(typeof(string), null, SqlFunction.STUFF.ToString(), new Expression[]
+            
+            if (isPostgres)
             {
-                new ScalarExpression(typeof(string), select),
-                new SqlConstantExpression(1),
-                new SqlConstantExpression(value.Length),
-                new SqlConstantExpression("")
-            });
+                ColumnDeclaration cd = new ColumnDeclaration(null!, new AggregateExpression(typeof(string), AggregateSqlFunction.string_agg, 
+                    new[] { nominated, new SqlConstantExpression(value, typeof(string)) }));
+
+                Alias alias = NextSelectAlias();
+
+                var select = new SelectExpression(alias, false, null, new[] { cd }, projection.Select, null, null, null, 0);
+
+                return new ScalarExpression(typeof(string), select);
+            }
+            else
+            {
+                ColumnDeclaration cd = new ColumnDeclaration(null!, Expression.Add(new SqlConstantExpression(value, typeof(string)), nominated, miStringConcat));
+
+                Alias alias = NextSelectAlias();
+
+                SelectExpression select = new SelectExpression(alias, false, null, new[] { cd }, projection.Select, null, null, null, SelectOptions.ForXmlPathEmpty);
+
+                return new SqlFunctionExpression(typeof(string), null, SqlFunction.STUFF.ToString(), new Expression[]
+                {
+                    new ScalarExpression(typeof(string), select),
+                    new SqlConstantExpression(1),
+                    new SqlConstantExpression(value.Length),
+                    new SqlConstantExpression("")
+                });
+            }
         }
 
         static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
@@ -767,10 +800,11 @@ namespace Signum.Engine.Linq
                     DbExpressionNominator.FullNominate(exp);
 
                 var result = new AggregateRequestsExpression(info.GroupAlias,
-                    new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
-                    nominated!,
-                    aggregateFunction,
-                    distinct));
+                    new AggregateExpression(
+                        aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
+                        aggregateFunction,
+                        new Expression[] { nominated! })
+                    );
 
                 return RestoreWrappedType(result, resultType);
             }
@@ -789,19 +823,19 @@ namespace Signum.Engine.Linq
                     var nominated = DbExpressionNominator.FullNominate(exp)!.Nullify();
 
                     aggregate = (Expression)Expression.Coalesce(
-                        new AggregateExpression(GetBasicType(nominated), nominated, aggregateFunction, distinct),
+                        new AggregateExpression(GetBasicType(nominated), aggregateFunction, new[] { nominated }),
                         new SqlConstantExpression(Activator.CreateInstance(nominated.Type.UnNullify())!));
                 }
                 else
                 {
-                    var nominated = aggregateFunction == AggregateSqlFunction.Count ? 
-                        DbExpressionNominator.FullNominateNotNullable(exp):
+                    var nominated = aggregateFunction == AggregateSqlFunction.Count ?
+                        (exp != null ? DbExpressionNominator.FullNominateNotNullable(exp) : new SqlLiteralExpression(typeof(object), "*")) :
                         DbExpressionNominator.FullNominate(exp);
 
-                    aggregate = new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
-                        nominated!,
-                        aggregateFunction,
-                        distinct);
+                    aggregate = new AggregateExpression(
+                        aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
+                        distinct ? AggregateSqlFunction.CountDistinct : aggregateFunction,
+                        new[] { nominated!});
                 }
 
                 Alias alias = NextSelectAlias();
@@ -927,7 +961,7 @@ namespace Signum.Engine.Linq
                 if (newItem.Type.UnNullify() == typeof(PrimaryKey))
                     return SmartEqualizer.InPrimaryKey(newItem, col.Cast<PrimaryKey>().ToArray());
 
-                return SmartEqualizer.In(newItem, col.Cast<object>().ToArray());
+                return SmartEqualizer.In(newItem, col.Cast<object>().ToArray(), isPostgres);
             }
             else
             {
@@ -1339,27 +1373,52 @@ namespace Signum.Engine.Linq
             Type returnType = mce.Method.ReturnType;
             var type = returnType.GetGenericArguments()[0];
 
-            Table table = schema.ViewBuilder.NewView(type);
+            var functionName = ObjectName.Parse(mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name, Schema.Current.Settings.IsPostgres);
 
-            Alias tableAlias = NextTableAlias(table.Name);
+            var arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
-            Expression exp = table.GetProjectorExpression(tableAlias, this);
 
-            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
+            if (typeof(IView).IsAssignableFrom(type))
+            {
+                Table table = schema.ViewBuilder.NewView(type);
 
-            var argumens = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
+                Alias tableAlias = NextTableAlias(table.Name);
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias, argumens);
+                Expression exp = table.GetProjectorExpression(tableAlias, this);
 
-            Alias selectAlias = NextSelectAlias();
+                SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments);
 
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias);
+                Alias selectAlias = NextSelectAlias();
 
-            ProjectionExpression projection = new ProjectionExpression(
-                new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
-            pc.Projector, null, returnType);
+                ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias);
 
-            return projection;
+                ProjectionExpression projection = new ProjectionExpression(
+                    new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
+                pc.Projector, null, returnType);
+
+                return projection;
+            }
+            else
+            {
+                if (!isPostgres)
+                    throw new InvalidOperationException("TableValuedFunctions should return an IQueryable<IView>");
+
+                Alias tableAlias = NextTableAlias(functionName);
+
+                SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, null, type, tableAlias, arguments);
+
+                var columnExpression = new ColumnExpression(type, tableAlias, null);
+
+                Alias selectAlias = NextSelectAlias();
+
+                var cd = new ColumnDeclaration("val", columnExpression);
+
+                return new ProjectionExpression(
+                    new SelectExpression(selectAlias, false, null, new[] { cd }, tableExpression, null, null, null, 0),
+                    new ColumnExpression(type, selectAlias, "val"),
+                    null,
+                    returnType);
+            }
         }
 
         internal Expression VisitConstant(object value, Type type)
@@ -2221,16 +2280,16 @@ namespace Signum.Engine.Linq
                 commands.AddRange(ee.Table.TablesMList().Select(t =>
                 {
                     Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.GetName(isHistory)));
-                    return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId));
+                    return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId), returnRowCount: false);
                 }));
 
-                commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId)));
+                commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId), returnRowCount: true));
             }
             else if (pr.Projector is MListElementExpression mlee)
             {
                 Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
-                commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
+                commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId), returnRowCount: true));
             }
             else if (pr.Projector is EmbeddedEntityExpression eee)
             {
@@ -2238,12 +2297,10 @@ namespace Signum.Engine.Linq
 
                 Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name)).ThrowIfNull(() => $"{vn.Name} has no primary name");
 
-                commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
+                commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId()), returnRowCount: true));
             }
             else
                 throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));
-
-            commands.Add(new SelectRowCountExpression());
 
             return new CommandAggregateExpression(commands);
         }
@@ -2332,8 +2389,7 @@ namespace Signum.Engine.Linq
 
             var result = new CommandAggregateExpression(new CommandExpression[]
             {
-                new UpdateExpression(table, isHistory && table.SystemVersioned != null, pr.Select, condition, assignments),
-                new SelectRowCountExpression()
+                new UpdateExpression(table, isHistory && table.SystemVersioned != null, pr.Select, condition, assignments, returnRowCount: true),
             });
 
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
@@ -2377,8 +2433,7 @@ namespace Signum.Engine.Linq
 
             var result = new CommandAggregateExpression(new CommandExpression[]
             {
-                new InsertSelectExpression(table, isHistory && table.SystemVersioned != null, pr.Select, assignments),
-                new SelectRowCountExpression()
+                new InsertSelectExpression(table, isHistory && table.SystemVersioned != null, pr.Select, assignments, returnRowCount: true),
             });
 
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
@@ -2545,7 +2600,7 @@ namespace Signum.Engine.Linq
             if (col == null)
                 throw new InvalidOperationException("{0} does not represent a column".FormatWith(column.ToString()));
 
-            return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression)!);
+            return new ColumnAssignment(col.Name!, DbExpressionNominator.FullNominate(expression)!);
         }
         #region BinderTools
 
@@ -2676,7 +2731,6 @@ namespace Signum.Engine.Linq
                 var newAlias = NextTableAlias(table.Name);
                 var id = table.GetIdExpression(newAlias)!;
                 var period = table.GenerateSystemPeriod(newAlias, this);
-                var intersect = period.Intesection(entity.ExternalPeriod); //TODO intersect not used! 
                 var bindings = table.GenerateBindings(newAlias, this, id, period);
                 var mixins = table.GenerateMixins(newAlias, this, id, period);
 
@@ -3102,7 +3156,7 @@ namespace Signum.Engine.Linq
         static string GetDefaultName(Expression expression)
         {
             if (expression is ColumnExpression)
-                return ((ColumnExpression)expression).Name;
+                return ((ColumnExpression)expression).Name ?? "val";
 
             if (expression is UnaryExpression)
                 return GetDefaultName(((UnaryExpression)expression).Operand);
@@ -3274,7 +3328,7 @@ namespace Signum.Engine.Linq
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
             {
                 var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
-                return new UpdateExpression(update.Table, update.UseHistoryTable, select, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, select, where, assigments, update.ReturnRowCount);
             }
             return update;
         }
@@ -3286,7 +3340,7 @@ namespace Signum.Engine.Linq
             if (source != insertSelect.Source || assigments != insertSelect.Assigments)
             {
                 var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
-                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, select, assigments);
+                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, select, assigments, insertSelect.ReturnRowCount);
             }
             return insertSelect;
         }

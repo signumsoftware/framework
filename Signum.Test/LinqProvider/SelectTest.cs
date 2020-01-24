@@ -8,7 +8,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities.DataStructures;
-
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
@@ -636,7 +636,14 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectView()
         {
-            var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            if (Schema.Current.Settings.IsPostgres)
+            {
+                var list = Database.View<Signum.Engine.PostgresCatalog.PgClass>().ToList();
+            }
+            else
+            {
+                var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            }
         }
 
         [Fact]
@@ -649,7 +656,10 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectWithHint()
         {
-            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
+            if (!Schema.Current.Settings.IsPostgres)
+            {
+                var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
+            }
         }
 
         [Fact]

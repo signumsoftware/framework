@@ -32,7 +32,7 @@ namespace Signum.Engine.Linq
             var source = VisitSource(delete.Source);
             var where = Visit(delete.Where);
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where);
+                return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount);
             return delete;
         }
 
@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
             var where = Visit(update.Where);
             var assigments = Visit(update.Assigments, VisitColumnAssigment);
             if(source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, update.UseHistoryTable, (SourceWithAliasExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SourceWithAliasExpression)source, where, assigments, update.ReturnRowCount);
             return update;
         }
 
@@ -51,7 +51,7 @@ namespace Signum.Engine.Linq
             var source = VisitSource(insertSelect.Source);
             var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
             if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
-                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, (SourceWithAliasExpression)source, assigments);
+                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, (SourceWithAliasExpression)source, assigments, insertSelect.ReturnRowCount);
             return insertSelect;
         }
 
@@ -61,11 +61,6 @@ namespace Signum.Engine.Linq
             if (exp != c.Expression)
                 return new ColumnAssignment(c.Column, exp);
             return c;
-        }
-
-        protected internal virtual Expression VisitSelectRowCount(SelectRowCountExpression src)
-        {
-            return src;
         }
 
         protected internal virtual Expression VisitLiteReference(LiteReferenceExpression lite)
@@ -147,7 +142,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitMList(MListExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
-            var externalPeriod = (NewExpression)Visit(ml.ExternalPeriod);
+            var externalPeriod = (IntervalExpression)Visit(ml.ExternalPeriod);
             if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
                 return new MListExpression(ml.Type, newBackID, externalPeriod, ml.TableMList);
             return ml;
@@ -167,7 +162,7 @@ namespace Signum.Engine.Linq
             var parent = (EntityExpression)Visit(mle.Parent);
             var order = Visit(mle.Order);
             var element = Visit(mle.Element);
-            var period = (NewExpression)Visit(mle.TablePeriod);
+            var period = (IntervalExpression)Visit(mle.TablePeriod);
             if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
                 return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
             return mle;
@@ -176,13 +171,13 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitAdditionalField(AdditionalFieldExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
-            var externalPeriod = (NewExpression)Visit(ml.ExternalPeriod);
+            var externalPeriod = (IntervalExpression)Visit(ml.ExternalPeriod);
             if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
                 return new AdditionalFieldExpression(ml.Type, newBackID, externalPeriod, ml.Route);
             return ml;
         }
 
-        protected internal virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
+        protected internal virtual Expression VisitSqlLiteral(SqlLiteralExpression sqlEnum)
         {
             return sqlEnum;
         }
@@ -191,7 +186,7 @@ namespace Signum.Engine.Linq
         {
             var expression = Visit(castExpr.Expression);
             if (expression != castExpr.Expression)
-                return new SqlCastExpression(castExpr.Type, expression,castExpr.SqlDbType);
+                return new SqlCastExpression(castExpr.Type, expression,castExpr.DbType);
             return castExpr;
         }
 
@@ -209,7 +204,7 @@ namespace Signum.Engine.Linq
         {
             var id = Visit(iba.Id);
             var typeId = (TypeImplementedByAllExpression)Visit(iba.TypeId);
-            var externalPeriod = (NewExpression)Visit(iba.ExternalPeriod);
+            var externalPeriod = (IntervalExpression)Visit(iba.ExternalPeriod);
 
             if (id != iba.Id || typeId != iba.TypeId || externalPeriod != iba.ExternalPeriod)
                 return new ImplementedByAllExpression(iba.Type, id, typeId, externalPeriod);
@@ -231,9 +226,9 @@ namespace Signum.Engine.Linq
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
             var externalId = (PrimaryKeyExpression)Visit(ee.ExternalId);
-            var externalPeriod = (NewExpression)Visit(ee.ExternalPeriod);
+            var externalPeriod = (IntervalExpression)Visit(ee.ExternalPeriod);
 
-            var period = (NewExpression)Visit(ee.TablePeriod);
+            var period = (IntervalExpression)Visit(ee.TablePeriod);
 
             if (ee.Bindings != bindings || ee.ExternalId != externalId || ee.ExternalPeriod != externalPeriod || ee.Mixins != mixins || ee.TablePeriod != period)
                 return new EntityExpression(ee.Type, externalId, externalPeriod, ee.TableAlias, bindings, mixins, period, ee.AvoidExpandOnRetrieving);
@@ -339,9 +334,9 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = Visit(aggregate.Expression);
-            if (source != aggregate.Expression)
-                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction, aggregate.Distinct);
+            var expressions = Visit(aggregate.Arguments);
+            if (expressions != aggregate.Arguments)
+                return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, expressions);
             return aggregate;
         }
 
@@ -433,7 +428,7 @@ namespace Signum.Engine.Linq
         {
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments)
-                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
             return sqlFunction;
         }
 
@@ -510,6 +505,16 @@ namespace Signum.Engine.Linq
                 return pk;
 
             return new PrimaryKeyStringExpression(id, (TypeImplementedByAllExpression)typeId);
+        }
+
+        protected internal virtual Expression VisitInterval(IntervalExpression interval)
+        {
+            Expression min = Visit(interval.Min);
+            Expression max = Visit(interval.Max);
+            Expression postgresRange = Visit(interval.PostgresRange);
+            if (min != interval.Min || max != interval.Max || postgresRange != interval.PostgresRange)
+                return new IntervalExpression(interval.Type, min, max, postgresRange, interval.AsUtc);
+            return interval;
         }
     }
 }
