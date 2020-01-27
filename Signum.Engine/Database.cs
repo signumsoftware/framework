@@ -78,7 +78,7 @@ namespace Signum.Engine
             var view = schema.View<T>();
             var parameters = view.GetInsertParameters(viewObject);
 
-            var sql = $@"INSERT {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(schema.Settings.IsPostgres), ", ")})
+            var sql = $@"INSERT INTO {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(schema.Settings.IsPostgres), ", ")})
 VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             return Executor.ExecuteNonQuery(sql, parameters);
