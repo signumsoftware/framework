@@ -50,7 +50,7 @@ namespace Signum.Test.Environment
             if (connectionString.Contains("Data Source"))
             {
                 var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
-                Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
+                Connector.Default = new SqlServerConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
             }
             else
             {
@@ -68,7 +68,7 @@ namespace Signum.Test.Environment
                 sb.Schema.Settings.TypeAttributes<FolderEntity>().Add(new SystemVersionedAttribute());
             }
 
-            if(Connector.Default is SqlConnector c && c.Version > SqlServerVersion.SqlServer2008)
+            if(Connector.Default is SqlServerConnector c && c.Version > SqlServerVersion.SqlServer2008)
             {
                 sb.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
             }

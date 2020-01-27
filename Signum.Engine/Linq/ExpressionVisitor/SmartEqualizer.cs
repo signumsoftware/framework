@@ -587,7 +587,7 @@ namespace Signum.Engine.Linq
                 else
                 {
 
-                    byte dateFirs = ((SqlConnector)Connector.Current).DateFirst;
+                    byte dateFirs = ((SqlServerConnector)Connector.Current).DateFirst;
                     var sqlWeekDays = values.Cast<DayOfWeek>()
                         .Select(a => (object)ToDayOfWeekExpression.ToSqlWeekDay(a, dateFirs))
                         .ToArray();

@@ -260,7 +260,7 @@ namespace Signum.Engine.Linq
                 {
                     var dayNumber = c.Value == null ? (int?)null :
                         isPostgres ? (int)(DayOfWeek)c.Value :
-                        ToDayOfWeekExpression.ToSqlWeekDay((DayOfWeek)c.Value, ((SqlConnector)Connector.Current).DateFirst);
+                        ToDayOfWeekExpression.ToSqlWeekDay((DayOfWeek)c.Value, ((SqlServerConnector)Connector.Current).DateFirst);
 
                     return new ToDayOfWeekExpression(Add(Expression.Constant(dayNumber, typeof(int?))));
                 }

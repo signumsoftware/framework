@@ -553,7 +553,7 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    var dateFirst = ((SqlConnector)Connector.Current).DateFirst;
+                    var dateFirst = ((SqlServerConnector)Connector.Current).DateFirst;
                     return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekSql, result, Expression.Constant(dateFirst, typeof(byte)));
                 }
             }
