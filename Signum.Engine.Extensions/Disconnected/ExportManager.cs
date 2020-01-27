@@ -100,7 +100,7 @@ namespace Signum.Engine.Disconnected
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateDatabase, s => l).Execute()))
                             connectionString = CreateDatabase(machine);
 
-                        var newDatabase = new SqlConnector(connectionString, Schema.Current, ((SqlConnector)Connector.Current).Version);
+                        var newDatabase = new SqlServerConnector(connectionString, Schema.Current, ((SqlServerConnector)Connector.Current).Version);
 
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateSchema, s => l).Execute()))
@@ -172,7 +172,7 @@ namespace Signum.Engine.Disconnected
                         CopyExport(export, newDatabase);
 
                         machine.InDB().UnsafeUpdate().Set(s => s.State, s => DisconnectedMachineState.Disconnected).Execute(); 
-                        using (SqlConnector.Override(newDatabase))
+                        using (SqlServerConnector.Override(newDatabase))
                         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                             machine.InDB().UnsafeUpdate().Set(s => s.State, s => DisconnectedMachineState.Disconnected).Execute();
 
@@ -216,7 +216,7 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
-        private void CopyExport(Lite<DisconnectedExportEntity> export, SqlConnector newDatabase)
+        private void CopyExport(Lite<DisconnectedExportEntity> export, SqlServerConnector newDatabase)
         {
             var clone = export.RetrieveAndRemember().Clone();
 
@@ -303,7 +303,7 @@ namespace Signum.Engine.Disconnected
 
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
+            return ((SqlServerConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
         }
 
         protected virtual void EnableForeignKeys(Table table)

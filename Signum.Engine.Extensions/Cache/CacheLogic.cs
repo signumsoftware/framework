@@ -169,7 +169,7 @@ namespace Signum.Engine.Cache
             Table table = Schema.Current.Table(type);
             DatabaseName? db = table.Name.Schema?.Database;
 
-            SqlConnector subConnector = (SqlConnector)Connector.Current.ForDatabase(db);
+            SqlServerConnector subConnector = (SqlServerConnector)Connector.Current.ForDatabase(db);
 
             if (CacheLogic.LogWriter != null)
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
@@ -195,7 +195,7 @@ namespace Signum.Engine.Cache
         {
             if (WithSqlDependency)
             {
-                ((SqlConnector)connector).ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
+                ((SqlServerConnector)connector).ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
             }
             else
             {
@@ -263,7 +263,7 @@ namespace Signum.Engine.Cache
 
             lock (startKeyLock)
             {
-                SqlConnector connector = (SqlConnector)Connector.Current;
+                SqlServerConnector connector = (SqlServerConnector)Connector.Current;
                 bool isPostgree = false;
 
                 if (DropStaleServices)
@@ -302,7 +302,7 @@ namespace Signum.Engine.Cache
 
                 foreach (var database in Schema.Current.DatabaseNames())
                 {
-                    SqlConnector sub = (SqlConnector)connector.ForDatabase(database);
+                    SqlServerConnector sub = (SqlServerConnector)connector.ForDatabase(database);
 
                     try
                     {
@@ -423,10 +423,10 @@ namespace Signum.Engine.Cache
             if (GloballyDisabled || !WithSqlDependency)
                 return;
 
-            var connector = ((SqlConnector)Connector.Current);
+            var connector = ((SqlServerConnector)Connector.Current);
             foreach (var database in Schema.Current.DatabaseNames())
             {
-                SqlConnector sub = (SqlConnector)connector.ForDatabase(database);
+                SqlServerConnector sub = (SqlServerConnector)connector.ForDatabase(database);
 
                 SqlDependency.Stop(sub.ConnectionString);
             }

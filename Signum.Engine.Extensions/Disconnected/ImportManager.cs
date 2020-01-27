@@ -137,7 +137,7 @@ namespace Signum.Engine.Disconnected
 
                             string connectionString = GetImportConnectionString(machine);
 
-                            var newDatabase = new SqlConnector(connectionString, Schema.Current, ((SqlConnector)Connector.Current).Version);
+                            var newDatabase = new SqlServerConnector(connectionString, Schema.Current, ((SqlServerConnector)Connector.Current).Version);
 
                             using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.SynchronizeSchema, s => l).Execute()))
                             using (Connector.Override(newDatabase))
@@ -267,7 +267,7 @@ namespace Signum.Engine.Disconnected
             DisconnectedTools.DropIfExists(DatabaseName(machine));
         }
 
-        private void DropDatabase(SqlConnector newDatabase)
+        private void DropDatabase(SqlServerConnector newDatabase)
         {
             var isPostgres = Schema.Current.Settings.IsPostgres;
             DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName(), isPostgres));
@@ -301,7 +301,7 @@ namespace Signum.Engine.Disconnected
 
         private string GetImportConnectionString(DisconnectedMachineEntity machine)
         {
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), DatabaseName(machine).Name);
+            return ((SqlServerConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), DatabaseName(machine).Name);
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineEntity machine)
@@ -358,20 +358,20 @@ namespace Signum.Engine.Disconnected
 
     public interface ICustomImporter
     {
-        ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase);
+        ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlServerConnector newDatabase);
     }
 
 
     public class BasicImporter<T> : ICustomImporter where T : Entity
     {
-        public virtual ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
+        public virtual ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlServerConnector newDatabase)
         {
             int inserts = Insert(machine, table, strategy, newDatabase);
 
             return new ImportResult { Inserted = inserts, Updated = 0 };
         }
 
-        protected virtual int Insert(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
+        protected virtual int Insert(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlServerConnector newDatabase)
         {
             var isPostgres = Schema.Current.Settings.IsPostgres;
             DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName(), isPostgres);
@@ -472,7 +472,7 @@ table.PrimaryKey.Name.SqlEscape(isPostgres));
 
     public class UpdateImporter<T> : BasicImporter<T> where T : Entity
     {
-        public override ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
+        public override ImportResult Import(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, SqlServerConnector newDatabase)
         {
             var isPostgres = Schema.Current.Settings.IsPostgres;
             int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, new DatabaseName(null, newDatabase.DatabaseName(), isPostgres)) : 0;
