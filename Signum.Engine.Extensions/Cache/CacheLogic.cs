@@ -28,8 +28,9 @@ namespace Signum.Engine.Cache
 {
     public interface ICacheMultiServerInvalidator
     {
-        void SendInvalidation(string tableName);
-        event Action<string> ReceiveInvalidation;
+        void Start();
+        void SendInvalidation(string cleanName);
+        event Action<string>? ReceiveInvalidation;
     }
 
     public static class CacheLogic
@@ -79,6 +80,7 @@ namespace Signum.Engine.Cache
                 if(CacheInvalidator != null)
                 {
                     CacheInvalidator!.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
+                    sb.Schema.BeforeDatabaseAccess += () => CacheInvalidator!.Start();
                 }
 
                 sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
@@ -113,9 +115,9 @@ namespace Signum.Engine.Cache
             }
         }
 
-        static void CacheInvalidator_ReceiveInvalidation(string tableName)
+        static void CacheInvalidator_ReceiveInvalidation(string cleanName)
         {
-            Type type = TypeEntity.TryGetType(tableName)!;
+            Type type = TypeEntity.TryGetType(cleanName)!;
 
             var c = controllers.GetOrThrow(type)!;
 
@@ -716,10 +718,7 @@ Remember that the Start could be called with an empty database!");
                 if (controller != null)
                     controller.NotifyInvalidated();
 
-                var ci = CacheInvalidator;
-
-                if (ci != null)
-                    ci.SendInvalidation(TypeLogic.GetCleanName(stype));
+                CacheInvalidator?.SendInvalidation(TypeLogic.GetCleanName(stype));
             }
         }
 
