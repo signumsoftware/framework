@@ -377,7 +377,11 @@ namespace Signum.Engine.Linq
             if(join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
             {
                 if (right is TableExpression)
-                    return new JoinExpression(join.JoinType == JoinType.OuterApply ? JoinType.LeftOuterJoin : JoinType.InnerJoin, left, right, new SqlConstantExpression(true));
+                {
+                    return new JoinExpression(join.JoinType == JoinType.OuterApply ? JoinType.LeftOuterJoin : JoinType.InnerJoin, left, right,
+                        Schema.Current.Settings.IsPostgres ? (Expression)new SqlConstantExpression(true) :
+                        Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1)));
+                }
             }
 
             if (left != join.Left || right != join.Right || condition != join.Condition)
