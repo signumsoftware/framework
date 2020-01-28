@@ -689,7 +689,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
   if (ti == null || !ti.requiresEntityPack)
     return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
-  return API.fetchEntityPackEntity(entity as Entity);
+  return API.fetchEntityPackEntity(entity as Entity).then(ep => ({...ep, entity}));
 }
 
 function cloneEntity(obj: any) {
