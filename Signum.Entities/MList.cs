@@ -858,7 +858,7 @@ namespace Signum.Entities
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class PreserveOrderAttribute : SqlDbTypeAttribute
+    public sealed class PreserveOrderAttribute : DbTypeAttribute
     {
         public string? Name { get; set; }
 

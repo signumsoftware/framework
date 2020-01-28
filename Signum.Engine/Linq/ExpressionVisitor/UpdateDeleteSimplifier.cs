@@ -3,7 +3,7 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
-    class CommandSimplifier: DbExpressionVisitor
+    class CommandSimplifier : DbExpressionVisitor
     {
         bool removeSelectRowCount;
         AliasGenerator aliasGenerator;
@@ -16,15 +16,10 @@ namespace Signum.Engine.Linq
 
         public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount, AliasGenerator aliasGenerator)
         {
-            return (CommandExpression)new CommandSimplifier(removeSelectRowCount, aliasGenerator).Visit(ce);
-        }
-
-        protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
-        {
             if (removeSelectRowCount)
-                return null!;
+                ce = (CommandExpression)new SelectRowRemover().Visit(ce);
 
-            return base.VisitSelectRowCount(src);
+            return (CommandExpression)new CommandSimplifier(removeSelectRowCount, aliasGenerator).Visit(ce);
         }
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
@@ -39,7 +34,7 @@ namespace Signum.Engine.Linq
             if (!TrivialWhere(delete, select))
                 return delete;
 
-            return new DeleteExpression(delete.Table, delete.UseHistoryTable, table, select.Where);
+            return new DeleteExpression(delete.Table, delete.UseHistoryTable, table, select.Where, delete.ReturnRowCount);
         }
 
         private bool TrivialWhere(DeleteExpression delete, SelectExpression select)
@@ -86,7 +81,7 @@ namespace Signum.Engine.Linq
 
                 var result = cd.Expression as ColumnExpression;
 
-                if(result == null)
+                if (result == null)
                     return ce;
 
                 TableExpression table = (TableExpression)select.From!;
@@ -100,6 +95,33 @@ namespace Signum.Engine.Linq
             }
 
             return ce;
+        }
+    }
+
+    class SelectRowRemover : DbExpressionVisitor
+    {   
+        protected internal override Expression VisitUpdate(UpdateExpression update)
+        {
+            if (update.ReturnRowCount == false)
+                return update;
+
+            return new UpdateExpression(update.Table, update.UseHistoryTable, update.Source, update.Where, update.Assigments, returnRowCount: false);
+        }
+
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            if (insertSelect.ReturnRowCount == false)
+                return insertSelect;
+
+            return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, insertSelect.Source, insertSelect.Assigments, returnRowCount: false);
+        }
+
+        protected internal override Expression VisitDelete(DeleteExpression delete)
+        {
+            if (delete.ReturnRowCount == false)
+                return delete;
+
+            return new DeleteExpression(delete.Table, delete.UseHistoryTable, delete.Source, delete.Where, returnRowCount: false);
         }
     }
 }

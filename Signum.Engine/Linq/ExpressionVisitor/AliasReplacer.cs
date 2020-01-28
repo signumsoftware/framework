@@ -60,9 +60,9 @@ namespace Signum.Engine.Linq
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
             var externalId = (PrimaryKeyExpression)Visit(ee.ExternalId);
-            var externalPeriod = (NewExpression)Visit(ee.ExternalPeriod);
+            var externalPeriod = (IntervalExpression?)Visit(ee.ExternalPeriod);
 
-            var period = (NewExpression)Visit(ee.TablePeriod);
+            var period = (IntervalExpression?)Visit(ee.TablePeriod);
 
             Alias? newAlias = ee.TableAlias == null ? null : aliasMap.TryGetC(ee.TableAlias) ?? ee.TableAlias;
 

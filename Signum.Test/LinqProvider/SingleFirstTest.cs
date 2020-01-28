@@ -5,6 +5,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Test.Environment;
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
@@ -70,7 +71,7 @@ namespace Signum.Test.LinqProvider
 
             query.ToList();
 
-            Assert.Equal(1, query.QueryText().CountRepetitions("APPLY"));
+            Assert.Equal(1, query.QueryText().CountRepetitions(Schema.Current.Settings.IsPostgres ? "LATERAL" : "APPLY"));
         }
 
         [Fact]

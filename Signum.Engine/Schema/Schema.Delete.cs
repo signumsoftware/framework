@@ -18,31 +18,52 @@ namespace Signum.Engine.Maps
             var declaration = where != null ? DeclarePrimaryKeyVariable(entity, where) : null;
 
             var variableOrId = entity.Id.VariableName ?? entity.Id.Object;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             var pre = OnPreDeleteSqlSync(entity);
             var collections = (from tml in this.TablesMList()
-                               select new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                                   .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
+                               select new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
+                                   .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
 
-            var main = new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                    .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(), variableOrId, comment ?? entity.ToString()));
+            var main = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
+                    .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
+
+            if (isPostgres && declaration != null)
+                return PostgresDoBlock(entity.Id.VariableName!, declaration, SqlPreCommand.Combine(Spacing.Simple, pre, collections, main)!);
 
             return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, main)!;
         }
 
         int parameterIndex;
-        private SqlPreCommand DeclarePrimaryKeyVariable<T>(T entity, Expression<Func<T, bool>> where) where T : Entity
+        private SqlPreCommandSimple DeclarePrimaryKeyVariable<T>(T entity, Expression<Func<T, bool>> where) where T : Entity
         {
             var query = DbQueryProvider.Single.GetMainSqlCommand(Database.Query<T>().Where(where).Select(a => a.Id).Expression);
 
-            string variableName = SqlParameterBuilder.GetParameterName(this.Name.Name + "Id_" + (parameterIndex++));
+            string variableName = this.Name.Name + "Id_" + (parameterIndex++);
+            if (!Schema.Current.Settings.IsPostgres)
+                variableName = SqlParameterBuilder.GetParameterName(variableName);
+
             entity.SetId(new Entities.PrimaryKey(entity.id!.Value.Object, variableName));
 
             string queryString = query.PlainSql().Lines().ToString(" ");
 
-            var result = new SqlPreCommandSimple($"DECLARE {variableName} {SqlBuilder.GetColumnType(this.PrimaryKey)}; SET {variableName} = COALESCE(({queryString}), 1 / 0)");
+            var result = Schema.Current.Settings.IsPostgres ?
+            new SqlPreCommandSimple(@$"{variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = ({queryString});") :
+            new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)}; SET {variableName} = COALESCE(({queryString}), 1 / 0);");
 
             return result;
+        }
+
+        private SqlPreCommandSimple PostgresDoBlock(string variableName, SqlPreCommandSimple declaration, SqlPreCommand block)
+        {
+            return new SqlPreCommandSimple(@$"DO $$
+DECLARE 
+{declaration.PlainSql().Indent(4)}
+BEGIN
+    IF {variableName} IS NULL THEN 
+        RAISE EXCEPTION 'Not found';
+    END IF; 
+{block.PlainSql().Indent(4)}
+END $$;");
         }
 
         public event Func<Entity, SqlPreCommand?> PreDeleteSqlSync;

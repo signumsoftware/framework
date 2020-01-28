@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
 {
@@ -7,21 +10,29 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class AggregateFinder : DbExpressionVisitor
     {
-        bool hasAggregates = false;
+        List<AggregateExpression>? aggregates;
 
         private AggregateFinder() { }
 
-        public static bool HasAggregates(Expression source)
-        {
-            AggregateFinder ap = new AggregateFinder();
-            ap.Visit(source);
-            return ap.hasAggregates;
-        }
-
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            hasAggregates = true;
+            if (aggregates == null)
+                aggregates = new List<AggregateExpression>();
+
+            aggregates.Add(aggregate);
             return base.VisitAggregate(aggregate);
+        }
+
+        public static List<AggregateExpression>? GetAggregates(ReadOnlyCollection<ColumnDeclaration> columns)
+        {
+            AggregateFinder ap = new AggregateFinder();
+            Visit(columns, ap.VisitColumnDeclaration);
+            return ap.aggregates;
+        }
+
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
+        {
+            return scalar;
         }
     }
 }
