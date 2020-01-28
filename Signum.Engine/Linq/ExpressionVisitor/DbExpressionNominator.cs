@@ -506,7 +506,7 @@ namespace Signum.Engine.Linq
                 {
                     return Add(new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.CONVERT.ToString(), new[]
                     {
-                        new SqlConstantExpression(SqlDbType.Date.ToString()),
+                        new SqlConstantExpression(SqlDbType.Date),
                         expr,
                         new SqlConstantExpression(101)
                     }));
@@ -532,7 +532,7 @@ namespace Signum.Engine.Linq
             if (Connector.Current.AllowsConvertToTime)
                 return Add(new SqlFunctionExpression(typeof(TimeSpan), null, SqlFunction.CONVERT.ToString(), new[]
                 {
-                    new SqlConstantExpression(isPostgres ? NpgsqlDbType.Time.ToString() : SqlDbType.Time.ToString()),
+                    isPostgres ? new SqlConstantExpression(NpgsqlDbType.Time) : new SqlConstantExpression(SqlDbType.Time),
                     expr,
                 }));
 
@@ -1502,10 +1502,10 @@ namespace Signum.Engine.Linq
 
                     var value = m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value");
                     var digits = m.TryGetArgument("decimals") ?? m.TryGetArgument("digits");
-                    if (digits == null)
+                    if (digits == null && isPostgres)
                         return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value);
                     else
-                        return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value, digits);
+                        return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value, digits ?? new SqlConstantExpression(0));
 
                 case "Math.Truncate":
                     if(isPostgres)

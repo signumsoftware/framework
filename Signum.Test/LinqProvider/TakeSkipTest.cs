@@ -98,7 +98,7 @@ namespace Signum.Test.LinqProvider
         public void InnerTake()
         {
             var result = Database.Query<AlbumEntity>()
-                .Where(dr => dr.Songs.OrderByDescending(a => a.Seconds).Take(1).Where(a => a.Name.Contains("Tonight")).Any())
+                .Where(dr => dr.Songs.OrderByDescending(a => a.Seconds).Take(1).Where(a => a.Name.Contains("Zero")).Any())
                 .Select(a => a.ToLite())
                 .ToList();
 
