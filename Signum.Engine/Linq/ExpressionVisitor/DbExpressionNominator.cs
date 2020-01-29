@@ -506,7 +506,7 @@ namespace Signum.Engine.Linq
                 {
                     return Add(new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.CONVERT.ToString(), new[]
                     {
-                        new SqlConstantExpression(SqlDbType.Date.ToString()),
+                        new SqlConstantExpression(SqlDbType.Date),
                         expr,
                         new SqlConstantExpression(101)
                     }));
@@ -532,7 +532,7 @@ namespace Signum.Engine.Linq
             if (Connector.Current.AllowsConvertToTime)
                 return Add(new SqlFunctionExpression(typeof(TimeSpan), null, SqlFunction.CONVERT.ToString(), new[]
                 {
-                    new SqlConstantExpression(isPostgres ? NpgsqlDbType.Time.ToString() : SqlDbType.Time.ToString()),
+                    isPostgres ? new SqlConstantExpression(NpgsqlDbType.Time) : new SqlConstantExpression(SqlDbType.Time),
                     expr,
                 }));
 
@@ -595,8 +595,10 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(exprDate) || !Has(exprTime))
                 return null;
 
-            var castDate = new SqlCastExpression(typeof(DateTime), exprDate, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Timestamp)); //Just in case is a Date
-            var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, new AbstractDbType(SqlDbType.Time, NpgsqlDbType.Time)); //Just in case is a Date
+            //Sql Server DateTime + DateTim
+            //Postgres TimeSpan + Time
+            var castDate = new SqlCastExpression(typeof(DateTime), exprDate, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Timestamp)); 
+            var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Time)); 
 
             var result = add ? Expression.Add(castDate, castTime) :
                 Expression.Subtract(castDate, castTime);
@@ -1502,10 +1504,10 @@ namespace Signum.Engine.Linq
 
                     var value = m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value");
                     var digits = m.TryGetArgument("decimals") ?? m.TryGetArgument("digits");
-                    if (digits == null)
+                    if (digits == null && isPostgres)
                         return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value);
                     else
-                        return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value, digits);
+                        return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value, digits ?? new SqlConstantExpression(0));
 
                 case "Math.Truncate":
                     if(isPostgres)

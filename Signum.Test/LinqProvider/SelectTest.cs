@@ -658,7 +658,7 @@ namespace Signum.Test.LinqProvider
         {
             if (!Schema.Current.Settings.IsPostgres)
             {
-                var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
+                var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_Album_LabelID)").Select(a => a.Label.Name).ToList();
             }
         }
 

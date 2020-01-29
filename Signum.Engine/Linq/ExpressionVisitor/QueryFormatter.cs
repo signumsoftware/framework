@@ -936,7 +936,8 @@ namespace Signum.Engine.Linq
             {
                 return new Disposable(() =>
                 {
-                    sb.Append("SELECT @@rowcount");
+                    sb.AppendLine();
+                    sb.AppendLine("SELECT @@rowcount");
                 });
             }
             else
