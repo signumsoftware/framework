@@ -85,7 +85,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
   }
 }
 
-export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
+export const EntityStrip = React.memo(React.forwardRef(function EntityStrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
   const c = useController(EntityStripController, props, ref);
   const p = c.props;
 

@@ -114,8 +114,6 @@ namespace Signum.Engine.Linq
                     return CompareInsertSelect((InsertSelectExpression)a, (InsertSelectExpression)b);
                 case DbExpressionType.CommandAggregate:
                     return CompareCommandAggregate((CommandAggregateExpression)a, (CommandAggregateExpression)b);
-                case DbExpressionType.SelectRowCount:
-                    return CompareSelectRowCount((SelectRowCountExpression)a, (SelectRowCountExpression)b);
                 case DbExpressionType.Entity:
                     return CompareEntityInit((EntityExpression)a, (EntityExpression)b);
                 case DbExpressionType.EmbeddedInit:
@@ -305,7 +303,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareAggregate(AggregateExpression a, AggregateExpression b)
         {
-            return a.AggregateFunction == b.AggregateFunction && Compare(a.Expression, b.Expression);
+            return a.AggregateFunction == b.AggregateFunction && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
         protected virtual bool CompareAggregateSubquery(AggregateRequestsExpression a, AggregateRequestsExpression b)
@@ -316,7 +314,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareSqlCast(SqlCastExpression a, SqlCastExpression b)
         {
-            return a.SqlDbType == b.SqlDbType
+            return a.DbType.Equals(b.DbType)
                 && Compare(a.Expression, b.Expression);
         }
 
@@ -330,7 +328,7 @@ namespace Signum.Engine.Linq
 
         private bool CompareTableValuedSqlFunction(SqlTableValuedFunctionExpression a, SqlTableValuedFunctionExpression b)
         {
-            return a.Table == b.Table
+            return a.ViewTable == b.ViewTable
               && CompareAlias(a.Alias, b.Alias)
               && CompareList(a.Arguments, b.Arguments, Compare);
         }
@@ -423,7 +421,8 @@ namespace Signum.Engine.Linq
             return a.Table == b.Table
                 && a.UseHistoryTable == b.UseHistoryTable
                 && Compare(a.Source, b.Source)
-                && Compare(a.Where, b.Where);
+                && Compare(a.Where, b.Where)
+                && a.ReturnRowCount == b.ReturnRowCount;
         }
 
         protected virtual bool CompareUpdate(UpdateExpression a, UpdateExpression b)
@@ -432,7 +431,8 @@ namespace Signum.Engine.Linq
                 && a.UseHistoryTable == b.UseHistoryTable
                 && CompareList(a.Assigments, b.Assigments, CompareAssigment)
                 && Compare(a.Source, b.Source)
-                && Compare(a.Where, b.Where);
+                && Compare(a.Where, b.Where)
+                && a.ReturnRowCount == b.ReturnRowCount;
         }
 
         protected virtual bool CompareInsertSelect(InsertSelectExpression a, InsertSelectExpression b)
@@ -440,7 +440,8 @@ namespace Signum.Engine.Linq
             return a.Table == b.Table
                 && a.UseHistoryTable == b.UseHistoryTable
                 && CompareList(a.Assigments, b.Assigments, CompareAssigment)
-                && Compare(a.Source, b.Source);
+                && Compare(a.Source, b.Source)
+                && a.ReturnRowCount == b.ReturnRowCount;
         }
 
         protected virtual bool CompareAssigment(ColumnAssignment a, ColumnAssignment b)
@@ -451,11 +452,6 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareCommandAggregate(CommandAggregateExpression a, CommandAggregateExpression b)
         {
             return CompareList(a.Commands, b.Commands, Compare);
-        }
-
-        protected virtual bool CompareSelectRowCount(SelectRowCountExpression a, SelectRowCountExpression b)
-        {
-            return true;
         }
 
         protected virtual bool CompareEntityInit(EntityExpression a, EntityExpression b)
