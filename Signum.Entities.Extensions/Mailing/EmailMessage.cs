@@ -37,7 +37,7 @@ namespace Signum.Entities.Mailing
 
         public DateTime? ReceptionNotified { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string? subject;
         [StringLengthValidator(AllowLeadingSpaces = true, AllowTrailingSpaces = true)]
         public string? Subject
@@ -46,7 +46,7 @@ namespace Signum.Entities.Mailing
             set { if (Set(ref subject, value)) CalculateHash(); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string? body;
         [StringLengthValidator(MultiLine = true)]
         public string? Body
@@ -130,7 +130,7 @@ namespace Signum.Entities.Mailing
         
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-        [SqlDbType(Size = int.MaxValue), ForceNotNullable]
+        [DbType(Size = int.MaxValue), ForceNotNullable]
         public string RawContent { get; set; }
 
         public DateTime SentDate { get; set; }

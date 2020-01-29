@@ -568,7 +568,8 @@ namespace Signum.Engine.Dynamic
 
         private string ParseTableName(string value)
         {
-            var objName = ObjectName.Parse(value);
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            var objName = ObjectName.Parse(value, isPostgres);
 
             return new List<string?>
             {
