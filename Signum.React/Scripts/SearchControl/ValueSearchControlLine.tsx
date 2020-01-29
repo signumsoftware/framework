@@ -219,7 +219,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                 .then(pack => pack && Navigator.navigate(pack!, {
                   getViewPromise: getViewPromise as any,
                   createNew: () => Finder.getPropsFromFilters(tn, fos)
-                    .then(props => { debugger; return Constructor.constructPack(tn, props)!;}),
+                    .then(props => { return Constructor.constructPack(tn, props)!;}),
                 })))
               .then(() => this.props.avoidAutoRefresh ? undefined : this.valueSearchControl!.refreshValue())
               .done();
