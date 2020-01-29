@@ -12,12 +12,12 @@ namespace Signum.Engine.Disconnected
             FileTools.CreateParentDirectory(databaseFile);
 
             var csb = new SqlConnectionStringBuilder(connectionString);
-
-            DatabaseName databaseName = new DatabaseName(null, csb.InitialCatalog);
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            DatabaseName databaseName = new DatabaseName(null, csb.InitialCatalog, isPostgres);
 
             csb.InitialCatalog = "";
 
-            using (SqlConnector.Override(new SqlConnector(csb.ToString(), null!, SqlServerVersion.SqlServer2012)))
+            using (SqlServerConnector.Override(new SqlServerConnector(csb.ToString(), null!, SqlServerVersion.SqlServer2012)))
             {
                 DropIfExists(databaseName);
 

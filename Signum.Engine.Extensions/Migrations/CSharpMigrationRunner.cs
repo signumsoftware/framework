@@ -75,7 +75,7 @@ namespace Signum.Engine.Migrations
                     return true;
 
                 }
-                catch (MigrationException)
+                catch (ExecuteSqlScriptException)
                 {
                     if (autoRun)
                         throw;
@@ -104,7 +104,7 @@ namespace Signum.Engine.Migrations
 
                 Console.WriteLine();
 
-                throw new MigrationException(e.Message, e);
+                throw new ExecuteSqlScriptException(e.Message, e);
             }
 
             CSharpMigrationEntity m = new CSharpMigrationEntity

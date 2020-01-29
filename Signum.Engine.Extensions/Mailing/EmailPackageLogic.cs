@@ -25,7 +25,7 @@ namespace Signum.Engine.Mailing
 
         [AutoExpressionField]
         public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p) => 
-            As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending));
+            As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending || a.State == EmailMessageState.Draft || a.State == EmailMessageState.ReadyToSend));
 
         [AutoExpressionField]
         public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p) => 
