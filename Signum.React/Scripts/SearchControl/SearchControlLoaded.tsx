@@ -724,7 +724,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-
     return Promise.all(filters.map(fs => Finder.fetchEntitiesWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
   }
 
@@ -739,7 +738,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   loadMenuItems() {
     var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
-
     if (cm == "Basic")
       this.setState({ currentMenuItems: [] });
     else {
