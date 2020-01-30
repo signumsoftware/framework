@@ -45,7 +45,7 @@ interface PackAndComponent {
   lastEntity: string;
   refreshCount: number;
   getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  }
+}
 
 export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
@@ -98,9 +98,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }
 
   function handleOkClicked() {
-    const pack = packComponent!.pack;
+    const pack = packComponent?.pack;
     if (hasChanges() &&
-      (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack.entity.Type))) {
+      (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack!.entity.Type))) {
       MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
@@ -119,12 +119,12 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         return;
       }
 
-      Navigator.API.validateEntity(pack.entity)
+      Navigator.API.validateEntity(pack!.entity)
         .then(() => {
           okClicked.current = true;
           setShow(false);
         }, ifError(ValidationError, e => {
-          GraphExplorer.setModelState(pack.entity, e.modelState, "entity");
+          GraphExplorer.setModelState(pack!.entity, e.modelState, "entity");
           forceUpdate();
         })).done();
     }
@@ -188,7 +188,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
-      frameComponent: { forceUpdate },
+      frameComponent: { forceUpdate, createNew: p.createNew },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;

@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.Reflection;
+using NpgsqlTypes;
 
 namespace Signum.Engine.Maps
 {
@@ -21,8 +22,10 @@ namespace Signum.Engine.Maps
     {
         public SchemaSettings()
         {
-
         }
+
+        public bool IsPostgres { get; set; }
+        public bool PostresVersioningFunctionNoChecks { get; set; }
 
         public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "ID");
         public int DefaultImplementedBySize = 40;
@@ -36,6 +39,15 @@ namespace Signum.Engine.Maps
         public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
 
         public Dictionary<Type, LambdaExpression> CustomOrder = new Dictionary<Type, LambdaExpression>();
+        
+        internal Dictionary<Type, string>? desambiguatedNames;
+        public void Desambiguate(Type type, string cleanName)
+        {
+            if (desambiguatedNames == null)
+                desambiguatedNames = new Dictionary<Type, string>();
+
+            desambiguatedNames[type] = cleanName;
+        }
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
@@ -44,31 +56,32 @@ namespace Signum.Engine.Maps
             //{ typeof(SqlGeometry), "Geometry"},
         };
 
-        public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
+        public Dictionary<Type, AbstractDbType> TypeValues = new Dictionary<Type, AbstractDbType>
         {
-            {typeof(bool), SqlDbType.Bit},
+            {typeof(bool),           new AbstractDbType(SqlDbType.Bit,              NpgsqlDbType.Boolean)},
+                                                                                    
+            {typeof(byte),           new AbstractDbType(SqlDbType.TinyInt,          NpgsqlDbType.Smallint)},
+            {typeof(short),          new AbstractDbType(SqlDbType.SmallInt,         NpgsqlDbType.Smallint)},
+            {typeof(int),            new AbstractDbType(SqlDbType.Int,              NpgsqlDbType.Integer)},
+            {typeof(long),           new AbstractDbType(SqlDbType.BigInt,           NpgsqlDbType.Bigint)},
+                                                                                    
+            {typeof(float),          new AbstractDbType(SqlDbType.Real,             NpgsqlDbType.Real)},
+            {typeof(double),         new AbstractDbType(SqlDbType.Float,            NpgsqlDbType.Double)},
+            {typeof(decimal),        new AbstractDbType(SqlDbType.Decimal,          NpgsqlDbType.Numeric)},
+                                                                                    
+            {typeof(char),           new AbstractDbType(SqlDbType.NChar,            NpgsqlDbType.Char)},
+            {typeof(string),         new AbstractDbType(SqlDbType.NVarChar,         NpgsqlDbType.Varchar)},
+            {typeof(Date),           new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
+            {typeof(DateTime),       new AbstractDbType(SqlDbType.DateTime2,        NpgsqlDbType.Timestamp)},
+            {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset,   NpgsqlDbType.TimestampTz)},
+            {typeof(TimeSpan),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
-            {typeof(byte), SqlDbType.TinyInt},
-            {typeof(short), SqlDbType.SmallInt},
-            {typeof(int), SqlDbType.Int},
-            {typeof(long), SqlDbType.BigInt},
+            {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},
 
-            {typeof(float), SqlDbType.Real},
-            {typeof(double), SqlDbType.Float},
-            {typeof(decimal), SqlDbType.Decimal},
-
-            {typeof(char), SqlDbType.NChar},
-            {typeof(string), SqlDbType.NVarChar},
-            {typeof(DateTime), SqlDbType.DateTime2},
-            {typeof(DateTimeOffset), SqlDbType.DateTimeOffset},
-
-            {typeof(byte[]), SqlDbType.VarBinary},
-
-            {typeof(Guid), SqlDbType.UniqueIdentifier},
+            {typeof(Guid),           new AbstractDbType(SqlDbType.UniqueIdentifier, NpgsqlDbType.Uuid)},
         };
 
-        internal Dictionary<Type, string>? desambiguatedNames;
-        readonly Dictionary<SqlDbType, int> defaultSize = new Dictionary<SqlDbType, int>()
+        readonly Dictionary<SqlDbType, int> defaultSizeSqlServer = new Dictionary<SqlDbType, int>()
         {
             {SqlDbType.NVarChar, 200},
             {SqlDbType.VarChar, 200},
@@ -79,9 +92,22 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 18},
         };
 
-        readonly Dictionary<SqlDbType, int> defaultScale = new Dictionary<SqlDbType, int>()
+        readonly Dictionary<NpgsqlDbType, int> defaultSizePostgreSql = new Dictionary<NpgsqlDbType, int>()
+        {
+            {NpgsqlDbType.Varbit, 200},
+            {NpgsqlDbType.Varchar, 200},
+            {NpgsqlDbType.Char, 1},
+            {NpgsqlDbType.Numeric, 18},
+        };
+
+        readonly Dictionary<SqlDbType, int> defaultScaleSqlServer = new Dictionary<SqlDbType, int>()
         {
             {SqlDbType.Decimal, 2},
+        };
+
+        readonly Dictionary<NpgsqlDbType, int> defaultScalePostgreSql = new Dictionary<NpgsqlDbType, int>()
+        {
+            {NpgsqlDbType.Numeric, 2},
         };
 
         public AttributeCollection FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute)
@@ -268,58 +294,98 @@ namespace Signum.Engine.Maps
                 FieldAttribute<ImplementedByAllAttribute>(propertyRoute));
         }
 
-        internal SqlDbTypePair GetSqlDbType(SqlDbTypeAttribute? att, Type type)
+        public AbstractDbType ToAbstractDbType(DbTypeAttribute att)
         {
-            if (att != null && att.HasSqlDbType)
-                return new SqlDbTypePair(att.SqlDbType, att.UserDefinedTypeName);
+            if (att.HasNpgsqlDbType && att.HasSqlDbType)
+                return new AbstractDbType(att.SqlDbType, att.NpgsqlDbType);
+
+            if (att.HasNpgsqlDbType)
+                return new AbstractDbType(att.NpgsqlDbType);
+
+            if (att.HasNpgsqlDbType && att.HasSqlDbType)
+                return new AbstractDbType(att.SqlDbType, att.NpgsqlDbType);
+
+            throw new InvalidOperationException("Not type found in DbTypeAttribute");
+        }
+
+        internal DbTypePair GetSqlDbType(DbTypeAttribute? att, Type type)
+        {
+            if (att != null && (att.HasSqlDbType || att.HasNpgsqlDbType))
+                return new DbTypePair(ToAbstractDbType(att), att.UserDefinedTypeName);
 
             return GetSqlDbTypePair(type.UnNullify());
         }
 
-        internal SqlDbTypePair? TryGetSqlDbType(SqlDbTypeAttribute? att, Type type)
+        internal DbTypePair? TryGetSqlDbType(DbTypeAttribute? att, Type type)
         {
-            if (att != null && att.HasSqlDbType)
-                return new SqlDbTypePair(att.SqlDbType, att.UserDefinedTypeName);
+            if (att != null && (att.HasSqlDbType || att.HasNpgsqlDbType))
+                return new DbTypePair(ToAbstractDbType(att), att.UserDefinedTypeName);
 
             return TryGetSqlDbTypePair(type.UnNullify());
         }
 
-        internal int? GetSqlSize(SqlDbTypeAttribute? att, PropertyRoute? route, SqlDbType sqlDbType)
+        internal int? GetSqlSize(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
         {
+            if (this.IsPostgres && dbType.PostgreSql == NpgsqlDbType.Bytea)
+                return null;
+
             if (att != null && att.HasSize)
                 return att.Size;
 
-            if(route != null && route.Type == typeof(string))
+            if (route != null && route.Type == typeof(string))
             {
                 var sla = ValidatorAttribute<StringLengthValidatorAttribute>(route);
                 if (sla != null)
                     return sla.Max == -1 ? int.MaxValue : sla.Max;
             }
 
-            return defaultSize.TryGetS(sqlDbType);
+            if (!this.IsPostgres)
+                return defaultSizeSqlServer.TryGetS(dbType.SqlServer);
+            else
+                return defaultSizePostgreSql.TryGetS(dbType.PostgreSql);
         }
 
-        internal int? GetSqlScale(SqlDbTypeAttribute? att, PropertyRoute? route, SqlDbType sqlDbType)
+        internal int? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
         {
+            bool isDecimal = dbType.IsDecimal();
             if (att != null && att.HasScale)
             {
-                if(sqlDbType != SqlDbType.Decimal)
-                    throw  new InvalidOperationException($"{sqlDbType} can not have Scale");
-
-                return att.Scale;
+                    if (!isDecimal)
+                        throw new InvalidOperationException($"{dbType} can not have Scale");
             }
 
-            if(sqlDbType == SqlDbType.Decimal && route != null)
+            if(isDecimal && route != null)
             {
                 var dv = ValidatorAttribute<DecimalsValidatorAttribute>(route);
                 if (dv != null)
                     return dv.DecimalPlaces;
             }
 
-            return defaultScale.TryGetS(sqlDbType);
+            if (!this.IsPostgres)
+                return defaultScaleSqlServer.TryGetS(dbType.SqlServer);
+            else
+                return defaultScalePostgreSql.TryGetS(dbType.PostgreSql);
         }
 
-        internal string? GetCollate(SqlDbTypeAttribute? att)
+        internal int? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, NpgsqlDbType npgsqlDbType)
+        {
+            if (att != null && att.HasScale)
+            {
+
+                return att.Scale;
+            }
+
+            if (npgsqlDbType == NpgsqlDbType.Numeric && route != null)
+            {
+                var dv = ValidatorAttribute<DecimalsValidatorAttribute>(route);
+                if (dv != null)
+                    return dv.DecimalPlaces;
+            }
+
+            return defaultScalePostgreSql.TryGetS(npgsqlDbType);
+        }
+
+        internal string? GetCollate(DbTypeAttribute? att)
         {
             if (att != null && att.Collation != null)
                 return att.Collation;
@@ -327,20 +393,12 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        internal SqlDbType DefaultSqlType(Type type)
+        internal AbstractDbType DefaultSqlType(Type type)
         {
             return this.TypeValues.GetOrThrow(type, "Type {0} not registered");
         }
 
-        public void Desambiguate(Type type, string cleanName)
-        {
-            if (desambiguatedNames == null)
-                desambiguatedNames = new Dictionary<Type, string>();
-
-            desambiguatedNames[type] = cleanName;
-        }
-
-        public SqlDbTypePair GetSqlDbTypePair(Type type)
+        public DbTypePair GetSqlDbTypePair(Type type)
         {
             var result = TryGetSqlDbTypePair(type);
             if (result == null)
@@ -349,14 +407,14 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public SqlDbTypePair? TryGetSqlDbTypePair(Type type)
+        public DbTypePair? TryGetSqlDbTypePair(Type type)
         {
-            if (TypeValues.TryGetValue(type, out SqlDbType result))
-                return new SqlDbTypePair(result, null);
+            if (TypeValues.TryGetValue(type, out AbstractDbType result))
+                return new DbTypePair(result, null);
 
             string? udtTypeName = GetUdtName(type);
             if (udtTypeName != null)
-                return new SqlDbTypePair(SqlDbType.Udt, udtTypeName);
+                return new DbTypePair(new  AbstractDbType(SqlDbType.Udt), udtTypeName);
 
             return null;
         }
@@ -382,14 +440,16 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public class SqlDbTypePair
+
+
+    public class DbTypePair
     {
-        public SqlDbType SqlDbType { get; private set; }
+        public AbstractDbType DbType { get; private set; }
         public string? UserDefinedTypeName { get; private set; }
         
-        public SqlDbTypePair(SqlDbType type, string? udtTypeName)
+        public DbTypePair(AbstractDbType type, string? udtTypeName)
         {
-            this.SqlDbType = type;
+            this.DbType = type;
             this.UserDefinedTypeName = udtTypeName;
         }
     }

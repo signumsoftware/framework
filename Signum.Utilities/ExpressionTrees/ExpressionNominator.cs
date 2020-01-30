@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -156,5 +157,8 @@ namespace Signum.Utilities.ExpressionTrees
 
             return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo) MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }), new Expression[] { source.Expression, Expression.Constant(hint, typeof(string)) }));
         }
+
+        [return: NotNullIfNotNull("str")]
+        public static string? Collate(this string? str, string collation) => throw new InvalidOperationException("Collate only supported inside queries");
     }
 }

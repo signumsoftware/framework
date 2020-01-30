@@ -164,7 +164,13 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
     return null;
 
   return ValueLineRenderers.renderers[c.props.valueLineType!](c);
-}), (prev, next) => LineBaseController.propEquals(prev, next));
+}), (prev, next) => {
+  if (
+    next.extraButtons || prev.extraButtons)
+    return false;
+
+  return LineBaseController.propEquals(prev, next);
+});
 
 export namespace ValueLineRenderers {
   export const renderers: {
@@ -176,6 +182,7 @@ export function isNumber(e: React.KeyboardEvent<any>) {
   const c = e.keyCode;
   return ((c >= 48 && c <= 57) /*0-9*/ ||
     (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+    (c == KeyCodes.enter) ||
     (c == KeyCodes.backspace) ||
     (c == KeyCodes.tab) ||
     (c == KeyCodes.clear) ||

@@ -1,9 +1,18 @@
-﻿using System.Text;
+using System.Text;
 
 namespace Signum.Entities.Reflection
 {
     public static class StringHashEncoder
     {
+        public const int HashSize = 7;
+        public static string ChopHash(string str, int maxLength)
+        {
+            if (str.Length > maxLength)
+                return str.Substring(0, maxLength - HashSize) + Codify(str.Substring(maxLength - HashSize));
+
+            return str;
+        }
+
         static readonly string letters = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
         public static string Codify(string str)
