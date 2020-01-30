@@ -26,14 +26,14 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
   ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
-    if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
+    if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
       return undefined;
 
     return <UserChartMenu chartRequestView={ctx.chartRequestView} />;
   });
 
   QuickLinks.registerGlobalQuickLink(ctx => {
-    if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
+    if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
       return undefined;
 
     var promise = ctx.widgetContext ?
