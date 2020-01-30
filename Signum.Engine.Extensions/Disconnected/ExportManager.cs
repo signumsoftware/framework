@@ -100,7 +100,7 @@ namespace Signum.Engine.Disconnected
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateDatabase, s => l).Execute()))
                             connectionString = CreateDatabase(machine);
 
-                        var newDatabase = new SqlConnector(connectionString, Schema.Current, ((SqlConnector)Connector.Current).Version);
+                        var newDatabase = new SqlServerConnector(connectionString, Schema.Current, ((SqlServerConnector)Connector.Current).Version);
 
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateSchema, s => l).Execute()))
@@ -122,7 +122,8 @@ namespace Signum.Engine.Disconnected
                             }
                         }
 
-                        DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
+                        var isPostgres = Schema.Current.Settings.IsPostgres;
+                        DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName(), isPostgres);
 
                         foreach (var tuple in downloadTables)
                         {
@@ -171,7 +172,7 @@ namespace Signum.Engine.Disconnected
                         CopyExport(export, newDatabase);
 
                         machine.InDB().UnsafeUpdate().Set(s => s.State, s => DisconnectedMachineState.Disconnected).Execute(); 
-                        using (SqlConnector.Override(newDatabase))
+                        using (SqlServerConnector.Override(newDatabase))
                         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                             machine.InDB().UnsafeUpdate().Set(s => s.State, s => DisconnectedMachineState.Disconnected).Execute();
 
@@ -215,7 +216,7 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
-        private void CopyExport(Lite<DisconnectedExportEntity> export, SqlConnector newDatabase)
+        private void CopyExport(Lite<DisconnectedExportEntity> export, SqlServerConnector newDatabase)
         {
             var clone = export.RetrieveAndRemember().Clone();
 
@@ -270,7 +271,8 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropDatabase(Connector newDatabase)
         {
-            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName(), isPostgres));
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineEntity machine)
@@ -286,7 +288,8 @@ namespace Signum.Engine.Disconnected
 
         protected virtual DatabaseName DatabaseName(DisconnectedMachineEntity machine)
         {
-            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName));
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName), isPostgres);
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineEntity machine)
@@ -300,7 +303,7 @@ namespace Signum.Engine.Disconnected
 
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
+            return ((SqlServerConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
         }
 
         protected virtual void EnableForeignKeys(Table table)
@@ -323,7 +326,8 @@ namespace Signum.Engine.Disconnected
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
             FileTools.CreateParentDirectory(backupFileName);
-            DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName()), backupFileName);
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName(), isPostgres), backupFileName);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineEntity machine, Lite<DisconnectedExportEntity> export)
@@ -364,15 +368,15 @@ namespace Signum.Engine.Disconnected
         protected virtual int CopyTableBasic(ITable table, DatabaseName newDatabaseName, SqlPreCommandSimple? filter)
         {
             ObjectName newTableName = table.Name.OnDatabase(newDatabaseName);
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
                     from {1} as [table]".FormatWith(
                     newTableName,
                     table.Name,
-                    table.Columns.Keys.ToString(a => a.SqlEscape(), ", "),
-                    table.Columns.Keys.ToString(a => "[table]." + a.SqlEscape(), ", "));
+                    table.Columns.Keys.ToString(a => a.SqlEscape(isPostgres), ", "),
+                    table.Columns.Keys.ToString(a => "[table]." + a.SqlEscape(isPostgres), ", "));
 
             if (filter != null)
             {
@@ -384,7 +388,7 @@ SELECT {3}
                 {
                     TableMList rt = (TableMList)table;
                     command +=
-                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".FormatWith(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape()) +
+                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".FormatWith(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape(isPostgres)) +
                         "\r\nWHERE [masterTable].Id in ({0})".FormatWith(filter.Sql);
                 }
             }

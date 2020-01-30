@@ -150,7 +150,7 @@ namespace Signum.Entities.Disconnected
         [Unit("ms")]
         public int? CopyTable { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string Errors { get; set; }
     }
 }

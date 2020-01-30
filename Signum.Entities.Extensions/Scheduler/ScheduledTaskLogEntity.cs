@@ -65,7 +65,7 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SchedulerTaskExceptionLineEntity : Entity
     {
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? ElementInfo { get; set; }
 
         public Lite<ScheduledTaskLogEntity>? SchedulerTaskLog { get; set; }

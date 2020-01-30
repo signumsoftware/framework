@@ -17,18 +17,18 @@ namespace Signum.Entities.MachineLearning
         public int OriginalColumnIndex { get; set; }
 
         //For flatting collections
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? SplitKey0 { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? SplitKey1 { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? SplitKey2 { get; set; }
 
 
         //For 1-hot encoding
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? IsValue { get; set; }
 
         public float? Average { get; set; }
