@@ -59,7 +59,7 @@ export function useExpand() {
 }
 
 
-interface Size {
+export interface Size {
   width: number;
   height: number;
 }
