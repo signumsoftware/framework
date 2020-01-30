@@ -244,7 +244,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
     .then(r => {
       var newToken = r.headers.get("New_Token");
       if (newToken) {
-        setAuthToken(newToken, getAuthorizationType());
+        setAuthToken(newToken, getAuthenticationType());
         API.fetchCurrentUser()
           .then(cu => setCurrentUser(cu))
           .done();
@@ -267,13 +267,13 @@ export function getAuthToken(): string | undefined {
   return sessionStorage.getItem("authToken") ?? undefined;
 }
 
-export function getAuthorizationType(): string | undefined {
-  return sessionStorage.getItem("authorizationType") ?? undefined;
+export function getAuthenticationType(): string | undefined {
+  return sessionStorage.getItem("authenticationType") ?? undefined;
 }
 
-export function setAuthToken(authToken: string | undefined, authorizationType: string | undefined): void {
+export function setAuthToken(authToken: string | undefined, authenticationType: string | undefined): void {
   sessionStorage.setItem("authToken", authToken ?? "");
-  sessionStorage.setItem("authorizationType", authorizationType ?? "");
+  sessionStorage.setItem("authenticationType", authenticationType ?? "");
 }
 
 export function autoLogin(): Promise<UserEntity | undefined> {
