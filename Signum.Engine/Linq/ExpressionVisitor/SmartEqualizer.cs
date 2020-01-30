@@ -571,18 +571,28 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("Impossible to resolve '{0}' in '{1}'".FormatWith(typeExpr.ToString(), collection.ToString(t=>t.TypeName(), ", ")));
         }
 
-        public static Expression In(Expression element, object[] values)
+        public static Expression In(Expression element, object[] values, bool isPostgres)
         {
             var nominate = DbExpressionNominator.FullNominate(element)!;
 
             if (nominate is ToDayOfWeekExpression dowe)
             {
-                byte dateFirs = ToDayOfWeekExpression.DateFirst.Value.Item1;
-                var sqlWeekDays = values.Cast<DayOfWeek>()
-                    .Select(a => (object)ToDayOfWeekExpression.ToSqlWeekDay(a, dateFirs))
-                    .ToArray();
+                if (isPostgres)
+                {
+                    var sqlWeekDays = values.Cast<DayOfWeek>()
+                       .Select(a => (object)(int)a)
+                       .ToArray();
+                    return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+                }
+                else
+                {
 
-                return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+                    byte dateFirs = ((SqlServerConnector)Connector.Current).DateFirst;
+                    var sqlWeekDays = values.Cast<DayOfWeek>()
+                        .Select(a => (object)ToDayOfWeekExpression.ToSqlWeekDay(a, dateFirs))
+                        .ToArray();
+                    return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+                }
             }
             else
                 return InExpression.FromValues(nominate, values);
@@ -597,7 +607,12 @@ namespace Signum.Engine.Linq
             if (cleanElement == NewId)
                 return False;
 
-            return InExpression.FromValues(DbExpressionNominator.FullNominate(cleanElement)!, cleanValues);
+            cleanElement = DbExpressionNominator.FullNominate(cleanElement)!;
+
+            if (cleanElement.Type == typeof(string))
+                return InExpression.FromValues(cleanElement, cleanValues.Select(a => (object)a.ToString()!).ToArray());
+            else
+                return InExpression.FromValues(cleanElement, cleanValues);
         }
 
         private static Expression DispachConditionalTypesIn(ConditionalExpression ce, IEnumerable<Type> collection)

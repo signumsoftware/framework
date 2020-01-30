@@ -199,7 +199,7 @@ Consider the following options:
         {
             if (ident.IsGraphModified &&
                 EntityKindCache.RequiresSaveOperation(ident.GetType()) && !AllowSaveGlobally && !IsSaveAllowedInContext(ident.GetType()))
-                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".FormatWith(
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use using(OperationLogic.AllowSave<{0}>()) or execute {1}".FormatWith(
                     ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Values
                     .Where(IsSaveLike)
@@ -311,7 +311,7 @@ Consider the following options:
                 CanBeModified = (oper as IEntityOperation)?.CanBeModified,
                 Returns = oper.Returns,
                 ReturnType = oper.ReturnType,
-                HasStates = (oper as IGraphHasFromStatesOperation)?.HasFromStates,
+                HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
                 HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
                 CanBeNew = (oper as IEntityOperation)?.CanBeNew,
                 BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType

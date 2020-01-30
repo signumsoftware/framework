@@ -63,7 +63,7 @@ label > input[type=checkbox] {
     overflow: hidden;
 }
 
-.sf-entity-line .input-group .form-control{
+.sf-entity-line .input-group .form-control {
     overflow: hidden;
 }
 
@@ -452,7 +452,7 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     border-left: 2px solid red;
 }
 
-.sf-no-padding{
+.sf-no-padding {
     padding: 1px !important;
 }
 
