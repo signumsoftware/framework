@@ -393,15 +393,9 @@ namespace Signum.React.ApiControllers
                 startDate = between.StartDateTime;
                 endDate = between.EndtDateTime;
             }
-            else if (systemTime is SystemTime.FromTo fromTo)
-            {
-                mode = SystemTimeMode.Between; //Same
-                startDate = fromTo.StartDateTime;
-                endDate = fromTo.EndtDateTime;
-            }
             else if (systemTime is SystemTime.ContainedIn containedIn)
             {
-                mode = SystemTimeMode.Between; //Same
+                mode = SystemTimeMode.ContainedIn;
                 startDate = containedIn.StartDateTime;
                 endDate = containedIn.EndtDateTime;
             }

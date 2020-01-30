@@ -21,7 +21,7 @@ namespace Signum.Entities
         internal PrimaryKey? id;
 
 
-        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never), ColumnName("ToStr")]
         protected internal string? toStr; //for queries and lites on entities with non-expression ToString
 
         [HiddenProperty, Description("Id")]

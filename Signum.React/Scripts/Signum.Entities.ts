@@ -212,11 +212,14 @@ export function isLite(obj: any): obj is Lite<Entity> {
 }
 
 export function isModifiableEntity(obj: any): obj is ModifiableEntity {
-  return obj != null && (obj as ModifiableEntity).Type != undefined;
+return obj != null && (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-  return obj != null && (obj as Entity).Type != undefined;
+if(!isModifiableEntity(obj))
+return false;
+const ti = Reflection.getTypeInfo(obj.Type);
+return ti != null && ti.entityKind != null;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {

@@ -255,6 +255,20 @@ namespace Signum.Entities
             get { return ValidationMessage.Telephone.NiceToString(); }
         }
     }
+    public class AlphanumericOnlyValidatorAttribute : RegexValidatorAttribute
+    {
+        public static Regex AlphanumericOnlyRegex = new Regex($@"[A-Za-z0-9]");
+
+        public AlphanumericOnlyValidatorAttribute()
+            : base(AlphanumericOnlyRegex)
+        {
+        }
+
+        public override string FormatName
+        {
+            get { return ValidationMessage._0IsNotAllowed.NiceToString(@"Special characters (-_#+%&...)"); }
+        }
+    }
 
     public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
     {
