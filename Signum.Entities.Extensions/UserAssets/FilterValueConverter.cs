@@ -522,13 +522,12 @@ namespace Signum.Entities.UserAssets
 
         public Result<string?>? TryToStringValue(object? value, Type type)
         {
-            if (value is Lite<UserEntity> lu && lu.EntityType == typeof(UserEntity) && lu.IdOrNull == UserEntity.Current.Id)
+            if (value is Lite<UserEntity> lu && lu.Is(UserEntity.Current))
             {
                 return new Result<string?>.Success(CurrentUserKey);
             }
 
             return null;
-
         }
 
         public Result<object?>? TryParseValue(string? value, Type type)

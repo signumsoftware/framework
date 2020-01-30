@@ -21,8 +21,6 @@ namespace Signum.Engine.Translation
         public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
          new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
-
-
         public static void Start(SchemaBuilder sb, bool countLocalizationHits)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -144,7 +142,23 @@ namespace Signum.Engine.Translation
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
+            var parentDir = $@"{rootDir}\{appName}.React\bin\";
+
+            var reactDirs = new DirectoryInfo(parentDir).GetDirectories("Translations", SearchOption.AllDirectories).ToList();
+
+            if(reactDirs.Count == 0)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "No Translations directory found in: " + parentDir);
+                return;
+            }
+
+            var reactDir = reactDirs.Only() ??
+                reactDirs.ChooseConsole(
+                    message: $"More than one 'Translations' folder found in '{parentDir}'",
+                    getString: d => $"{d.FullName} ({d.GetFiles("*.xml").Max(a => (DateTime?)a.LastWriteTime)?.ToAgoString() ?? "-No Files-"})");
+
+            if (reactDir == null)
+                return;
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {

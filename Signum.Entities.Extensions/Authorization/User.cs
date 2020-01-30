@@ -31,7 +31,7 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Min = 2, Max = 100)]
         public string UserName { get; set; }
 
-        [SqlDbType(Size = 128)]
+        [DbType(Size = 128)]
         public byte[] PasswordHash { get; set; }
 
         public Lite<RoleEntity> Role { get; set; }

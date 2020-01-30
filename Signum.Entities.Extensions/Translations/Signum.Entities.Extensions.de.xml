@@ -2504,7 +2504,7 @@
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQueries" Description="Benutzer-Abfragen" />
   </Type>
-  <Type Name="ViewLogEntity" Description="Anzeigerotokoll" PluralDescription="Anzeigerotokolle" Gender="n">
+  <Type Name="ViewLogEntity" Description="Anzeigeprotokoll" PluralDescription="Anzeigeprotokolle" Gender="n">
     <Member Name="Data" Description="Daten" />
     <Member Name="Duration" Description="Dauer" />
     <Member Name="EndDate" Description="Enddatum" />

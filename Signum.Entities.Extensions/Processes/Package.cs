@@ -9,7 +9,7 @@ namespace Signum.Entities.Processes
         [StringLengthValidator(Max = 200)]
         public string? Name { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public byte[]? OperationArguments { get; private set; }
 
         [HiddenProperty]

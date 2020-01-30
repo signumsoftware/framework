@@ -243,7 +243,7 @@ namespace Signum.Entities.Mailing
         
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string text;
         [StringLengthValidator(MultiLine=true)]
         public string Text
