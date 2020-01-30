@@ -164,7 +164,7 @@ namespace Signum.React.Facades
             var settings = Schema.Current.Settings;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
-                          where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
+                          where !type.IsEnumEntity() && !type.IsGenericType &&!ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                           select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
