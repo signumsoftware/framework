@@ -35,6 +35,7 @@ namespace Signum.Engine.Basics
             {
                 sb.Include<CultureInfoEntity>()
                     .WithSave(CultureInfoOperation.Save)
+                    .WithDelete(CultureInfoOperation.Delete)
                     .WithQuery(() => c => new
                     {
                         Entity = c,
