@@ -184,6 +184,10 @@ namespace Signum.Engine.Maps
             return new SchemaName(DatabaseName.Parse(tuple.prefix, isPostgres), tuple.name, isPostgres);
         }
 
+        internal SchemaName OnDatabase(DatabaseName? database)
+        {
+            return new SchemaName(database, this.Name, this.IsPostgres);
+        }
     }
 
     public class ObjectName : IEquatable<ObjectName>
