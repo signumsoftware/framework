@@ -302,8 +302,8 @@ namespace Signum.Engine.Maps
             if (att.HasNpgsqlDbType)
                 return new AbstractDbType(att.NpgsqlDbType);
 
-            if (att.HasNpgsqlDbType && att.HasSqlDbType)
-                return new AbstractDbType(att.SqlDbType, att.NpgsqlDbType);
+            if (att.HasSqlDbType)
+                return new AbstractDbType(att.SqlDbType);
 
             throw new InvalidOperationException("Not type found in DbTypeAttribute");
         }
