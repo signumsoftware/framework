@@ -125,5 +125,10 @@ namespace Signum.Entities.Isolation
         {
             return entity.SetMixin((IsolationMixin m) => m.Isolation, isolation);
         }
+        public static T SetIsolationCurrent<T>(this T entity)
+        where T : IEntity
+        {
+            return entity.SetMixin((IsolationMixin m) => m.Isolation, IsolationEntity.Current);
+        }
     }
 }
