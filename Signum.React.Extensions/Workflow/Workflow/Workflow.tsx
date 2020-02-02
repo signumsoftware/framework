@@ -64,7 +64,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     setIssues: (value) => setIssues(value),
     getXml: () => bpmnModelerComponentRef.current!.getXml(),
     getSvg: () => bpmnModelerComponentRef.current!.getSvg()
-  } as WorkflowHandle), [bpmnModelerComponentRef.current]);
+  } as WorkflowHandle), [bpmnModelerComponentRef.current, workflowState]);
 
   function handleHighlightClick(e: React.MouseEvent<HTMLAnchorElement>, issue: API.WorkflowIssue) {
     e.preventDefault();
