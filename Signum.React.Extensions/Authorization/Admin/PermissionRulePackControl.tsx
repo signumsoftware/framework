@@ -4,7 +4,7 @@ import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'
-import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
+import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
@@ -26,7 +26,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
 
   function renderButtons(bc: ButtonsContext) {
     return [
-      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
     ];
   }
 

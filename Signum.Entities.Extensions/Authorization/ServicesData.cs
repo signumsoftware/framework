@@ -153,7 +153,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(TypeEntity).NiceName(), Role);
+            return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(TypeEntity).NiceName(), Role);
         }
     }
 
@@ -328,7 +328,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
+            return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
         }
     }
     [Serializable]
@@ -345,7 +345,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(QueryEntity).NiceName(), Role);
+            return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(QueryEntity).NiceName(), Role);
         }
     }
     [Serializable]
@@ -360,7 +360,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);
+            return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);
         }
     }
     [Serializable]
@@ -371,7 +371,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PermissionSymbol).NiceName(), Role);
+            return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(PermissionSymbol).NiceName(), Role);
         }
     }
     [Serializable]
