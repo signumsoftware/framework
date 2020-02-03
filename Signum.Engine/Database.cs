@@ -366,6 +366,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
 
+
         public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
         static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>>((id, token) => GetToStrAsync<Entity>(id, token));

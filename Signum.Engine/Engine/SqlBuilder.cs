@@ -490,7 +490,7 @@ WHERE {primaryKey.Name} NOT IN
         public SqlPreCommandSimple SP_RENAME(DatabaseName? database, string oldName, string newName, string? objectType)
         {
             return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3};".FormatWith(
-                database == null ? null: (SchemaName.Default(isPostgres).ToString() + "."),
+                database == null ? null: SchemaName.Default(isPostgres).OnDatabase(database).ToString() + ".",
                 oldName,
                 newName,
                 objectType == null ? null : ", '{0}'".FormatWith(objectType)
