@@ -676,7 +676,7 @@ export interface DurationTextBoxProps {
 
 export function DurationTextBox(p: DurationTextBoxProps) {
 
-  const [text, setState] = React.useState<string | undefined>(undefined);
+  const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
     p.value != undefined ? durationToString(p.value, p.format) :
@@ -701,14 +701,16 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     var format = p.format!;
 
     function fixNumber(val: string) {
-      if (!val.contains(":")) {
-        if (format.startsWith("hh"))
-          return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
-        if (format.startsWith("mm"))
-          return format.replace("mm", val.toString()).replace("ss", "00");
-        return val;
+      var valParts = val.split(":");
+      var formatParts = format.split(":");
+      var result = format;
+      for (var i = 0; i < formatParts.length; i++) {
+        var formP = formatParts[i];
+        var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
+        result = result.replace(formP, valP);
       }
-      return val;
+
+      return result;
     }
 
     function normalize(val: string) {
@@ -720,7 +722,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
     const input = e.currentTarget as HTMLInputElement;
     const result = input.value == undefined || input.value.length == 0 ? null : normalize(fixNumber(input.value));
-    setState(undefined);
+    setText(undefined);
     if (p.value != result)
       p.onChange(result);;
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
@@ -729,7 +731,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
-    setState(input.value);
+    setText(input.value);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
