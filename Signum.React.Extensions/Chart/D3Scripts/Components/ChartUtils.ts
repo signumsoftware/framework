@@ -5,7 +5,7 @@ import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
-import { getTypeInfo } from "@framework/Reflection";
+import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
 
 
 
@@ -152,7 +152,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       return complete(values, [false, true], column, insertPoint);
     }
 
-    var typeInfo = getTypeInfo(column.token!.type.name);
+    var typeInfo = tryGetTypeInfo(column.token!.type.name);
     if (typeInfo == null)
       throw new Error("No Metadata found for " + typeName);
 

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import { ValueLine, EntityLine, RenderEntity } from '@framework/Lines'
-import { getTypeInfos, New } from '@framework/Reflection'
+import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
