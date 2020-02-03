@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
-import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
+import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
 import * as Navigator from '../Navigator';
@@ -21,7 +21,7 @@ import { notifySuccess } from "../Operations";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
-  const ti = getTypeInfo(ctx.pack.entity.Type);
+  const ti = tryGetTypeInfo(ctx.pack.entity.Type);
 
   if (ti == undefined)
     return undefined;
@@ -53,7 +53,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
       if (eos?.hideOnCanExecute && eoc.canExecute)
         return false;
 
-      if (Navigator.isReadOnly(ctx.pack, true) && !(eos?.showOnReadOnly))
+      if (Navigator.isReadOnly(ctx.pack, { ignoreTypeIsReadonly: true }) && !(eos?.showOnReadOnly))
         return false;
 
       return true;
@@ -120,7 +120,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
     text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
     keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
-    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
+    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
     inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {

@@ -5,7 +5,7 @@ import { Dic, classes, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, OperationType, TypeReference, IsByAll } from './Reflection';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
@@ -84,18 +84,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
-  if (isTypeEmbeddedOrValue(entity.Type)) {
-
-    return pr!.typeReference().typeNiceName;
-
-  } else if (isTypeModel(entity.Type)) {
-
-    const typeInfo = getTypeInfo(entity.Type);
-
-    return typeInfo.niceName;
-
-  }
-  else {
+  if (isTypeEntity(entity.Type)) {
 
     const typeInfo = getTypeInfo(entity.Type);
 
@@ -103,6 +92,17 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
     return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
+
+  }
+  else if (isTypeModel(entity.Type)) {
+
+    const typeInfo = getTypeInfo(entity.Type);
+    return typeInfo.niceName;
+
+  } else {
+
+    return pr!.typeReference().typeNiceName;
+
   }
 }
 
@@ -118,6 +118,7 @@ export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: st
   let typeName: string;
   let id: number | string | undefined;
   if (isEntity(entityOrLite)) {
+
     typeName = entityOrLite.Type;
     id = entityOrLite.id;
   }
@@ -287,47 +288,51 @@ export function getViewPromise<T extends ModifiableEntity>(entity: T, viewName?:
   return viewDispatcher.getViewPromise(entity, viewName);
 }
 
-export const isCreableEvent: Array<(typeName: string) => boolean> = [];
+export const isCreableEvent: Array<(typeName: string, options: IsCreableOptions | undefined) => boolean> = [];
 
-export function isCreable(type: PseudoType, customView = false, isSearch = false) {
+export interface IsCreableOptions {
+  customComponent?: boolean;
+  isSearch?: boolean;
+  isEmbedded?: boolean;
+}
+
+export function isCreable(type: PseudoType, options?: IsCreableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
+  const baseIsCreable = checkFlag(typeIsCreable(typeName, options?.isEmbedded), options?.isSearch);
 
-  const hasView = customView || viewDispatcher.hasDefaultView(typeName);
+  const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
   const hasConstructor = hasAllowedConstructor(typeName);
 
-  return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName));
+  return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName, options));
 }
 
 function hasAllowedConstructor(typeName: string) {
-  const ti = getTypeInfo(typeName);
+  const ti = tryGetTypeInfo(typeName);
 
   if (ti == undefined || ti.operations == undefined)
     return true;
 
-  const constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
-
-  if (!constructOperations.length)
+  if (!ti.hasConstructorOperation)
     return true;
 
-  const allowed = constructOperations.filter(oi => Operations.isOperationInfoAllowed(oi));
+  const allowed = Dic.getValues(ti.operations).some(oi => oi.operationType == OperationType.Constructor && Operations.isOperationInfoAllowed(oi));
 
-  return allowed.length > 0;
+  return allowed;
 }
 
-function typeIsCreable(typeName: string): EntityWhen {
+function typeIsCreable(typeName: string, isEmbedded?: boolean): EntityWhen {
 
   const es = entitySettings[typeName];
   if (es != undefined && es.isCreable != undefined)
     return es.isCreable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
     return "IsLine";
 
+  const typeInfo = getTypeInfo(typeName);
   if (typeInfo.kind == "Enum")
     return "Never";
 
@@ -347,13 +352,18 @@ function typeIsCreable(typeName: string): EntityWhen {
 
 export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>) => boolean> = [];
 
-export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, ignoreTypeIsReadonly: boolean = false) {
+export interface IsReadonlyOptions {
+  ignoreTypeIsReadonly?: boolean;
+  isEmbedded?: boolean;
+}
+
+export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsReadonlyOptions) {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsReadOnly = ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName);
+  const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName);
 
   return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
 }
@@ -364,7 +374,7 @@ function typeIsReadOnly(typeName: string): boolean {
   if (es != undefined && es.isReadOnly != undefined)
     return es.isReadOnly;
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
   if (typeInfo == undefined)
     return false;
 
@@ -386,7 +396,7 @@ function typeIsReadOnly(typeName: string): boolean {
 
 export function typeRequiresSaveOperation(typeName: string): boolean {
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
   if (typeInfo == undefined)
     return false;
 
@@ -403,28 +413,31 @@ export function typeRequiresSaveOperation(typeName: string): boolean {
   }
 }
 
-export const isFindableEvent: Array<(typeName: string) => boolean> = [];
+export interface IsFindableOptions {
+    isSearch?: boolean;
+    isEmbedded?: boolean;
+}
 
-export function isFindable(type: PseudoType, isSearch?: boolean) {
+export function isFindable(type: PseudoType, options?: IsFindableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsReadOnly = typeIsFindable(typeName);
+  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbedded);
 
   return baseIsReadOnly && Finder.isFindable(typeName, true);
 }
 
-function typeIsFindable(typeName: string) {
+function typeIsFindable(typeName: string, isEmbedded: boolean | undefined) {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isFindable != undefined)
     return es.isFindable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
     return false;
 
+  const typeInfo = getTypeInfo(typeName);
   if (typeInfo.kind == "Enum")
     return true;
 
@@ -441,33 +454,38 @@ function typeIsFindable(typeName: string) {
   }
 }
 
-export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = [];
+export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<ModifiableEntity> | undefined, options: IsViewableOptions | undefined) => boolean> = [];
 
-export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean {
+export interface IsViewableOptions {
+  customComponent?: boolean;
+  isSearch?: boolean;
+  isEmbedded?: boolean;
+}
+
+export function isViewable(typeOrEntity: TypeReference | PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsViewable = typeIsViewable(typeName);
+  const baseIsViewable = typeIsViewable(typeName, options?.isEmbedded);
 
-  const hasView = customView || viewDispatcher.hasDefaultView(typeName);
+  const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
-  return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
+  return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
 }
 
-
-function typeIsViewable(typeName: string): boolean {
+function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): boolean {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isViewable != undefined)
     return es.isViewable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
     return true;
 
+  const typeInfo = getTypeInfo(typeName);
   if (typeInfo.kind == "Enum")
     return false;
 
@@ -484,30 +502,30 @@ function typeIsViewable(typeName: string): boolean {
   }
 }
 
-export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customComponent = false, isSearch = false): boolean {
+export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
+  const baseTypeName = checkFlag(typeIsNavigable(typeName, options?.isEmbedded), options?.isSearch);
 
-  const hasView = customComponent || viewDispatcher.hasDefaultView(typeName);
+  const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
-  return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
+  return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
 }
 
-function typeIsNavigable(typeName: string): EntityWhen {
+function typeIsNavigable(typeName: string, isEmbedded: boolean | undefined): EntityWhen {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isNavigable != undefined)
     return es.isNavigable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
     return "Never";
 
+  const typeInfo = getTypeInfo(typeName);
   if (typeInfo.kind == "Enum")
     return "Never";
 
@@ -685,7 +703,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
   if (entity == undefined)
     return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-  let ti = getTypeInfo(entity.Type);
+  let ti = tryGetTypeInfo(entity.Type);
   if (ti == null || !ti.requiresEntityPack)
     return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
@@ -988,7 +1006,7 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   return result;
 }
 
-export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
+export function checkFlag(entityWhen: EntityWhen, isSearch: boolean | undefined) {
   return entityWhen == "Always" ||
     entityWhen == (isSearch ? "IsSearch" : "IsLine");
 }
@@ -1073,7 +1091,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
     return undefined;
   }
 
-  const ti = getTypeInfo(type.name);
+  const ti = tryGetTypeInfo(type.name);
 
   if (ti?.kind == "Entity") {
 

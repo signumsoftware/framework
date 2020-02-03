@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -246,13 +246,15 @@ ValueLineRenderers.renderers["ComboBox"] = (vl) => {
   return internalComboBox(vl);
 };
 
-
-
 function getOptionsItems(vl: ValueLineController): OptionItem[] {
-  var ti = getTypeInfo(vl.props.type!.name);
+  var ti: TypeInfo;
+  function getTi() {
+    return ti ?? (ti = getTypeInfo(vl.props.type!.name));
+  }
+
   if (vl.props.comboBoxItems)
     return vl.props.comboBoxItems.map(a =>
-      typeof a == "string" ? ti.members[a] && toOptionItem(ti.members[a]) :
+      typeof a == "string" ? getTi().members[a] && toOptionItem(getTi().members[a]) :
         toOptionItem(a)).filter(a => !!a);
 
   if (vl.props.type!.name == "boolean")
@@ -261,7 +263,7 @@ function getOptionsItems(vl: ValueLineController): OptionItem[] {
       { label: BooleanEnum.niceToString("True")!, value: true }
     ]);
 
-  return Dic.getValues(ti.members).map(m => toOptionItem(m));
+  return Dic.getValues(getTi().members).map(m => toOptionItem(m));
 }
 
 function toOptionItem(m: MemberInfo | OptionItem): OptionItem {

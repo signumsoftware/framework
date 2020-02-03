@@ -8,7 +8,7 @@ import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
-import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel } from '../Reflection'
+import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
 import { EntityOperationContext } from '../Operations'
@@ -67,7 +67,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }));
 
   const typeName = getTypeName(p.entityOrPack);
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
 
 
   React.useEffect(() => {
@@ -214,7 +214,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     };
 
     const styleOptions: StyleOptions = {
-      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack),
+      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack, { isEmbedded: p.propertyRoute?.member?.type.isEmbedded }),
       frame: frame,
     };
 
@@ -316,9 +316,9 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
     if (entity == undefined || entity.isNew)
       return undefined;
 
-    const ti = getTypeInfo(entity.Type);
+    const ti = tryGetTypeInfo(entity.Type);
 
-    if (ti == undefined || !Navigator.isNavigable(ti, false)) //Embedded
+    if (ti == undefined || !Navigator.isNavigable(ti)) //Embedded
       return undefined;
 
     return (

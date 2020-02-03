@@ -7,9 +7,9 @@ import { MList } from "./Signum.Entities";
 import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
 import { AggregateType } from './FindOptions';
 
-export function getEnumInfo(enumTypeName: string, enumId: number) {
+export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
-  const ti = getTypeInfo(enumTypeName);
+  const ti = tryGetTypeInfo(enumTypeName);
 
   if (!ti || ti.kind != "Enum")
     throw new Error(`${enumTypeName} is not an Enum`);
@@ -34,7 +34,7 @@ export interface TypeInfo {
   requiresEntityPack?: boolean;
   members: { [name: string]: MemberInfo };
   membersById?: { [name: string]: MemberInfo };
-
+  hasConstructorOperation?: boolean;
   operations?: { [name: string]: OperationInfo };
 }
 
@@ -250,42 +250,46 @@ export function getTypeName(pseudoType: IType | TypeInfo | string | Lite<Entity>
 }
 
 export function isTypeEntity(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return ti && ti.kind == "Entity" && !!ti.members["Id"];
+  const ti = tryGetTypeInfo(type);
+  return ti != null && ti.kind == "Entity" && !!ti.members["Id"];
 }
 
 export function isTypeEnum(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return ti && ti.kind == "Enum";
+  const ti = tryGetTypeInfo(type);
+  return ti != null && ti.kind == "Enum";
 }
 
 export function isTypeModel(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return ti && ti.kind == "Entity" && !ti.members["Id"];
-}
-
-export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return !ti;
+  const ti = tryGetTypeInfo(type);
+  return ti != null && ti.kind == "Entity" && !ti.members["Id"];
 }
 
 export function isTypeModifiableEntity(type: TypeReference): boolean {
-  return type.isEmbedded == true || getTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
+  return type.isEmbedded == true || tryGetTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
 }
-
 
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
-  if ((type as TypeInfo).kind != undefined)
-    return type as TypeInfo;
+  const typeName = getTypeName(type);
 
-  if ((type as IType).typeName)
-    return _types[((type as IType).typeName).toLowerCase()];
+  const ti = _types[typeName.toLowerCase()];
 
-  if (typeof type == "string")
-    return _types[(type as string).toLowerCase()];
+  if (ti == null)
+    throw new Error(`Type not found: ${typeName}`);
 
-  throw new Error("Unexpected type: " + type);
+  return ti;
+}
+
+export function tryGetTypeInfo(type: PseudoType): TypeInfo | undefined {
+
+  const typeName = getTypeName(type);
+
+  if (typeName == null)
+    throw new Error("Unexpected type: " + type);
+
+  const ti: TypeInfo | undefined = _types[typeName.toLowerCase()];
+
+  return ti;
 }
 
 export function isLowPopulationSymbol(type: PseudoType) {
@@ -308,7 +312,16 @@ export function getTypeInfos(typeReference: TypeReference | string): TypeInfo[] 
     return [];
 
   return name.split(", ").map(getTypeInfo);
+}
 
+export function tryGetTypeInfos(typeReference: TypeReference | string): (TypeInfo | undefined)[] {
+
+  const name = typeof typeReference == "string" ? typeReference : typeReference.name;
+
+  if (name == IsByAll || name == "")
+    return [];
+
+  return name.split(", ").map(tryGetTypeInfo);
 }
 
 export function getQueryNiceName(queryName: PseudoType | QueryKey): string {
@@ -345,7 +358,7 @@ export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | Typ
     return queryName.memberInfo();
   }
   else {
-    const ti = getTypeInfo(queryName);
+    const ti = tryGetTypeInfo(queryName);
     if (ti)
       return ti;
 
@@ -751,7 +764,7 @@ export type MemberType = "Member" | "Mixin" | "Indexer";
 
 export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute): ModifiableEntity {
 
-  const ti = getTypeInfo(type);
+  const ti = tryGetTypeInfo(type);
 
   const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
   
@@ -804,7 +817,7 @@ function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
 
 
 export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute) {
-  const ti = getTypeInfo(original.Type);
+  const ti = tryGetTypeInfo(original.Type);
 
   const result = { Type: original.Type, isNew: true, modified: true } as any as ModifiableEntity;
 
@@ -877,7 +890,7 @@ function cloneIfNeeded(original: any, pr: PropertyRoute) {
   if (tr.isEmbedded)
     return clone(original, pr);
 
-  if (tr.name == IsByAll || getTypeInfos(tr.name).length > 0)
+  if (tr.name == IsByAll || tryGetTypeInfos(tr.name).length > 0)
     return JSON.parse(JSON.stringify(original));
 
   return original; //string, number, boolean, etc...
@@ -905,7 +918,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
 
-    if (props && props.Type && (propertyRoute|| getTypeInfo(props.Type))) {
+    if (props && props.Type && (propertyRoute || tryGetTypeInfo(props.Type))) {
       if (props.Type != this.typeName)
         throw new Error("Cloning with another type");
       return clone(props as ModifiableEntity, propertyRoute) as T;
@@ -1430,7 +1443,7 @@ export class PropertyRoute {
           return PropertyRoute.liteEntity(this);
         }
 
-        const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
+        const ti = tryGetTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
           const m = ti.members[memberName];
@@ -1526,7 +1539,11 @@ export class PropertyRoute {
       case "Field":
       case "MListItem":
         {
-          const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
+          var tr = this.typeReference();
+          if (tr.name == IsByAll)
+            return {};
+
+          const ti = tryGetTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
           if (ti && isTypeEntity(ti))
             return simpleMembersAfter(ti, "");
           else

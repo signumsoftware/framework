@@ -7,7 +7,7 @@ import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getTypeInfos, getTypeInfo } from '../Reflection';
+import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
@@ -72,7 +72,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
   function renderElements() {
     const readOnly = ctx.readOnly;
-    const showType = getTypeInfos(ctx.propertyRoute.typeReference().name).length > 1;
+    const showType = tryGetTypeInfos(ctx.propertyRoute.typeReference().name).length > 1;
     return (
       <div className="sf-repater-elements">
         {

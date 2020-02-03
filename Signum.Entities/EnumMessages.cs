@@ -1,10 +1,17 @@
 
 
 using Signum.Utilities;
+using System;
 using System.ComponentModel;
 
 namespace Signum.Entities
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class AllowUnathenticatedAttribute : Attribute
+    {
+
+    }
+
     public enum OperationMessage
     {
         [Description("Create...")]
@@ -264,6 +271,7 @@ Lose changes?")]
         Today,
     }
 
+    [AllowUnathenticated]
     public enum JavascriptMessage
     {
         [Description("Choose a type")]
