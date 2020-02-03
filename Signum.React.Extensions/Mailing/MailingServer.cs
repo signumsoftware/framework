@@ -1,4 +1,4 @@
-﻿using Signum.React.Json;
+using Signum.React.Json;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Engine.Basics;
@@ -10,6 +10,12 @@ using Signum.Entities.Templating;
 using Signum.Engine.Mailing;
 using Signum.React.TypeHelp;
 using Microsoft.AspNetCore.Builder;
+using Signum.Engine.Authorization;
+using Signum.Entities.Word;
+using Signum.React.Extensions.Templating;
+using Microsoft.Exchange.WebServices.Data;
+using Signum.Entities.Authorization;
+using System.Net.Mail;
 
 namespace Signum.React.Mailing
 {
@@ -19,8 +25,11 @@ namespace Signum.React.Mailing
         {
             TypeHelpServer.Start(app);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(ExchangeVersion).Namespace!, () => TypeAuthLogic.GetAllowed(typeof(EmailSenderConfigurationEntity)).MaxUI() > TypeAllowedBasic.None);
+            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(SmtpDeliveryMethod).Namespace!, () => TypeAuthLogic.GetAllowed(typeof(EmailSenderConfigurationEntity)).MaxUI() > TypeAllowedBasic.None);
 
-            ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
+
+            TemplatingServer.Start(app);
 
             EntityJsonConverter.AfterDeserilization.Register((EmailTemplateEntity et) =>
             {

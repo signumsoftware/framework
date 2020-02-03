@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System.Reflection;
 using Signum.Engine.Basics;
 using Signum.React.Maps;
@@ -6,6 +6,7 @@ using Signum.Entities.Map;
 using Signum.React.Facades;
 using Signum.Engine.Isolation;
 using Microsoft.AspNetCore.Builder;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Isolation
 {
@@ -13,7 +14,7 @@ namespace Signum.React.Isolation
     {
         public static void Start(IApplicationBuilder app)
         {
-            ReflectionServer.RegisterLike(typeof(MapMessage));
+            ReflectionServer.RegisterLike(typeof(MapMessage), () => MapPermission.ViewMap.IsAuthorized());
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             SchemaMap.GetColorProviders += GetMapColors;
