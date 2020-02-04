@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -89,7 +90,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 if (!TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
-                    var parts = subString.Trim().SplitNoEmpty(' ');
+                    var parts = subString.SplitParts();
 
                     results.AddRange(giLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
@@ -129,7 +130,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 if (!TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
-                    var parts = subString.Trim().SplitNoEmpty(' ');
+                    var parts = subString.SplitParts();
 
                     var list = await giLiteContainingAsync.GetInvoker(t)(parts, count - results.Count, cancellationToken);
                     results.AddRange(list);
@@ -164,7 +165,7 @@ namespace Signum.Engine.DynamicQuery
             where T : Entity
         {
             return Database.Query<T>()
-                .Where(a => a.ToString().ContainsAll(parts))
+                .Where(a => a.ToString().ContainsAllParts(parts))
                 .OrderBy(a => a.ToString().Length)
                 .Select(a => a.ToLite())
                 .Take(count)
@@ -179,7 +180,7 @@ namespace Signum.Engine.DynamicQuery
             where T : Entity
         {
             var list = await Database.Query<T>()
-                .Where(a => a.ToString().ContainsAll(parts))
+                .Where(a => a.ToString().ContainsAllParts(parts))
                 .OrderBy(a => a.ToString().Length)
                 .Select(a => a.ToLite())
                 .Take(count)
@@ -245,10 +246,10 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
                 var list = query
-                    .Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAll(parts))
+                    .Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAllParts(parts))
                     .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
                     .Take(count - results.Count)
                     .ToList();
@@ -276,9 +277,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                var list = await query.Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAll(parts))
+                var list = await query.Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAllParts(parts))
                     .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
                     .Take(count - results.Count)
                     .ToListAsync();
@@ -308,9 +309,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                results.AddRange(query.Where(a => a.ToString()!.ContainsAll(parts))
+                results.AddRange(query.Where(a => a.ToString()!.ContainsAllParts(parts))
                     .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count));
 
@@ -336,9 +337,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                var list = await query.Where(a => a.ToString()!.ContainsAll(parts))
+                var list = await query.Where(a => a.ToString()!.ContainsAllParts(parts))
                     .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count)
                     .ToListAsync(token);
@@ -367,9 +368,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                var list = collection.Where(a => a.ToString()!.ContainsAll(parts))
+                var list = collection.Where(a => a.ToString()!.ContainsAllParts(parts))
                     .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count);
 
@@ -378,6 +379,20 @@ namespace Signum.Engine.DynamicQuery
                 return results;
             }
         }
+
+        public static string[] SplitParts(this string str)
+        {
+            if (FilterCondition.ToLowerString())
+                return str.Trim().ToLower().SplitNoEmpty(' ');
+
+            return str.Trim().SplitNoEmpty(' ');
+        }
+
+        [AutoExpressionField]
+        public static bool ContainsAllParts(this string str, string[] parts) => As.Expression(() =>
+            FilterCondition.ToLowerString() ?
+            str.ToLower().ContainsAll(parts) :
+            str.ContainsAll(parts));
 
     }
 }
