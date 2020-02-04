@@ -17,6 +17,7 @@ using System.IO;
 using Signum.Engine.Scheduler;
 using Signum.Engine;
 using System.Linq.Expressions;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Authorization
 {
@@ -618,6 +619,8 @@ namespace Signum.Engine.Authorization
                 else
                     command.OpenSqlFileRetry();
 
+                CacheLogic.ForceReset();
+                GlobalLazy.ResetAll();
             }
 
             void Export()
