@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Dic } from '../Globals'
 import { FindOptionsParsed, QueryToken, getTokenParents, isFilterGroupOptionParsed } from '../FindOptions'
 import { ValidationMessage, External } from '../Signum.Entities'
-import { getTypeInfos, TypeReference } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, getTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FilterOptionParsed } from '../Search';
 

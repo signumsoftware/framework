@@ -21,8 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -223,7 +223,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 export function getTypeNiceName(tr: TypeReference) {
 
   const niceName = tr.typeNiceName ??
-    getTypeInfos(tr)
+    tryGetTypeInfos(tr)
       .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName ?? ti.name))
       .joinComma(External.CollectionMessage.Or.niceToString());
 
@@ -581,7 +581,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
 
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
-  const tis = getTypeInfos(qd.columns["Entity"].type);
+  const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
 
   if (!fo.groupResults && (!fo.orderOptions || fo.orderOptions.length == 0)) {
@@ -1515,7 +1515,7 @@ export const entityFormatRules: EntityFormatRule[] = [
   {
     name: "View",
     isApplicable: row => true,
-    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc?.handleOnNavigated}
