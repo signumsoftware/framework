@@ -438,10 +438,18 @@ namespace Signum.Engine.Authorization
 
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
-                new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                UseDatabase(),
                 dbOnlyWarnings,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
+        }
+
+        private static SqlPreCommandSimple? UseDatabase()
+        {
+            if (Schema.Current.Settings.IsPostgres)
+                return null;
+
+            return new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName().SqlEscape(Schema.Current.Settings.IsPostgres)));
         }
 
         public static void LoadRoles(XDocument doc)
@@ -498,7 +506,7 @@ namespace Signum.Engine.Authorization
                 {
                     SqlPreCommand.Combine(Spacing.Triple,
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
-                       new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                       UseDatabase(),
                        roleInsertsDeletes,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
@@ -535,7 +543,7 @@ namespace Signum.Engine.Authorization
                 {
                     SqlPreCommand.Combine(Spacing.Triple,
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
-                       new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                       UseDatabase(),
                        roleRelationships,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 

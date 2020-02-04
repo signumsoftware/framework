@@ -17,6 +17,7 @@ export interface CultureInfoEntity extends Entities.Entity {
 
 export module CultureInfoOperation {
   export const Save : Entities.ExecuteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Save");
+  export const Delete : Entities.DeleteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Delete");
 }
 
 export const DateSpanEmbedded = new Type<DateSpanEmbedded>("DateSpanEmbedded");
