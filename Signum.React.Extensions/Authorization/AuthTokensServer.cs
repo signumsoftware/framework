@@ -85,16 +85,16 @@ namespace Signum.React.Authorization
             var user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 
             if (user == null)
-                throw new AuthenticationException(AuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
+                throw new AuthenticationException(LoginAuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
             if (user.State == UserState.Disabled)
-                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(user));
+                throw new AuthenticationException(LoginAuthMessage.User0IsDisabled.NiceToString(user));
 
             if (user.UserName != oldToken.User.UserName)
-                throw new AuthenticationException(AuthMessage.InvalidUsername.NiceToString());
+                throw new AuthenticationException(LoginAuthMessage.InvalidUsername.NiceToString());
 
             if (!user.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
-                throw new AuthenticationException(AuthMessage.InvalidPassword.NiceToString());
+                throw new AuthenticationException(LoginAuthMessage.InvalidPassword.NiceToString());
 
             AuthToken newToken = new AuthToken
             {

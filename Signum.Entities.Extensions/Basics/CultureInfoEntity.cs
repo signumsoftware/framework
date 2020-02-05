@@ -77,5 +77,6 @@ namespace Signum.Entities.Basics
     public static class CultureInfoOperation
     {
         public static ExecuteSymbol<CultureInfoEntity> Save;
+        public static DeleteSymbol<CultureInfoEntity> Delete;
     }
 }

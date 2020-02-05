@@ -460,6 +460,7 @@
     <Member Name="NativeName" Description="Nativer Name" />
   </Type>
   <Type Name="CultureInfoOperation">
+    <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="D3ChartScript">

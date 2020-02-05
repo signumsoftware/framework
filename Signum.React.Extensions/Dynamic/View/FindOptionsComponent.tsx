@@ -4,7 +4,7 @@ import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, E
 import { classes, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
-import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding } from '@framework/Reflection'
+import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding, getTypeInfos } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { Typeahead } from '@framework/Components'
@@ -21,7 +21,7 @@ import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } 
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import SelectorModal from '@framework/SelectorModal';
-import { getTypeInfos } from '@framework/Reflection';
+import { tryGetTypeInfos } from '@framework/Reflection';
 import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 

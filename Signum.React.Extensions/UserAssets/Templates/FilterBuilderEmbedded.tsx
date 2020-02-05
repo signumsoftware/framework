@@ -5,7 +5,7 @@ import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
-import { Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
@@ -337,7 +337,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
   const type = p.type;
 
   if (p.filterType == "Enum") {
-    const ti = getTypeInfos(type).single();
+    const ti = tryGetTypeInfos(type).single();
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);

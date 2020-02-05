@@ -23,10 +23,10 @@ namespace Signum.React.Authorization
         public ActionResult<LoginResponse> Login([Required, FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
-                return ModelError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
+                return ModelError("userName", LoginAuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(data.password))
-                return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("password", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             string authenticationType; 
             // Attempt to login
@@ -42,15 +42,15 @@ namespace Signum.React.Authorization
             {
                 if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
                 {
-                    return ModelError("login", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                    return ModelError("login", LoginAuthMessage.InvalidUsernameOrPassword.NiceToString());
                 }
                 else if (e is IncorrectUsernameException)
                 {
-                    return ModelError("userName", AuthMessage.InvalidUsername.NiceToString());
+                    return ModelError("userName", LoginAuthMessage.InvalidUsername.NiceToString());
                 }
                 else if (e is IncorrectPasswordException)
                 {
-                    return ModelError("password", AuthMessage.InvalidPassword.NiceToString());
+                    return ModelError("password", LoginAuthMessage.InvalidPassword.NiceToString());
                 }
                 throw;
             }
@@ -157,10 +157,10 @@ namespace Signum.React.Authorization
         public ActionResult<LoginResponse> ChangePassword([Required, FromBody]ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
-                return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("oldPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(request.newPassword))
-                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var error = UserEntity.OnValidatePassword(request.newPassword);
             if (error.HasText())
@@ -169,7 +169,7 @@ namespace Signum.React.Authorization
             var user = UserEntity.Current;
 
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
-                return ModelError("oldPassword", AuthMessage.InvalidPassword.NiceToString());
+                return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
 
             user.PasswordHash = Security.EncodePassword(request.newPassword);
             using (AuthLogic.Disable())
@@ -186,7 +186,7 @@ namespace Signum.React.Authorization
         public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.eMail))
-                return AuthMessage.PasswordMustHaveAValue.NiceToString();
+                return LoginAuthMessage.PasswordMustHaveAValue.NiceToString();
 
             try
             {
@@ -195,7 +195,7 @@ namespace Signum.React.Authorization
             catch (Exception ex)
             {
                 ex.LogException();
-                return AuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
+                return LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
             }
 
             return null;
@@ -205,7 +205,7 @@ namespace Signum.React.Authorization
         public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.newPassword))
-                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 

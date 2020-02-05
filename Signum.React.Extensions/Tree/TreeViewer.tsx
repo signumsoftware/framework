@@ -243,7 +243,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     let type = this.props.typeName;
 
     var menuItems = [
-      Navigator.isNavigable(type, undefined, true) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
+      Navigator.isNavigable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
       Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
       Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];

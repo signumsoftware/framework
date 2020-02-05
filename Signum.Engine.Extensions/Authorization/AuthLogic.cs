@@ -17,6 +17,7 @@ using System.IO;
 using Signum.Engine.Scheduler;
 using Signum.Engine;
 using System.Linq.Expressions;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Authorization
 {
@@ -158,7 +159,7 @@ namespace Signum.Engine.Authorization
 
                     if (problems.Count > 0)
                         throw new ApplicationException(
-                            AuthMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
+                            AuthAdminMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
                             problems.ToString("\r\n"));
                 }
             }
@@ -180,7 +181,7 @@ namespace Signum.Engine.Authorization
 
                 if (problems.Count > 0)
                     throw new ApplicationException(
-                        AuthMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
+                        AuthAdminMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
                         problems.ToString("\r\n"));
 
                 return newRoles;
@@ -194,7 +195,7 @@ namespace Signum.Engine.Authorization
             {
                 user = RetrieveUser(username);
                 if (user == null)
-                    throw new ApplicationException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
+                    throw new ApplicationException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
             }
 
             return UserHolder.UserSession(user);
@@ -207,7 +208,7 @@ namespace Signum.Engine.Authorization
             var result = RetrieveUserByUsername(username);
 
             if (result != null && result.State == UserState.Disabled)
-                throw new ApplicationException(AuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
+                throw new ApplicationException(LoginAuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
 
             return result;
         }
@@ -302,10 +303,10 @@ namespace Signum.Engine.Authorization
             {
                 UserEntity? user = RetrieveUser(username);
                 if (user == null)
-                    throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
+                    throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
                 if (!user.PasswordHash.SequenceEqual(passwordHash))
-                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());
+                    throw new IncorrectPasswordException(LoginAuthMessage.IncorrectPassword.NiceToString());
 
                 return user;
             }
@@ -438,10 +439,18 @@ namespace Signum.Engine.Authorization
 
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
-                new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                UseDatabase(),
                 dbOnlyWarnings,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
+        }
+
+        private static SqlPreCommandSimple? UseDatabase()
+        {
+            if (Schema.Current.Settings.IsPostgres)
+                return null;
+
+            return new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName().SqlEscape(Schema.Current.Settings.IsPostgres)));
         }
 
         public static void LoadRoles(XDocument doc)
@@ -498,7 +507,7 @@ namespace Signum.Engine.Authorization
                 {
                     SqlPreCommand.Combine(Spacing.Triple,
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
-                       new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                       UseDatabase(),
                        roleInsertsDeletes,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
@@ -535,7 +544,7 @@ namespace Signum.Engine.Authorization
                 {
                     SqlPreCommand.Combine(Spacing.Triple,
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
-                       new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                       UseDatabase(),
                        roleRelationships,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
@@ -610,6 +619,8 @@ namespace Signum.Engine.Authorization
                 else
                     command.OpenSqlFileRetry();
 
+                CacheLogic.ForceReset();
+                GlobalLazy.ResetAll();
             }
 
             void Export()

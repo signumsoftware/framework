@@ -9,11 +9,11 @@ import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
 import { ImportRoute } from '@framework/AsyncImport';
-import { getTypeInfo } from '@framework/Reflection';
+import { getTypeInfo, getTypeInfos } from '@framework/Reflection';
 import { EntityLink, SearchControl } from '@framework/Search';
 import { liteKey } from '@framework/Signum.Entities';
 import { EntityControlMessage } from '@framework/Signum.Entities';
-import { getTypeInfos } from '@framework/Reflection';
+import { tryGetTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
@@ -40,7 +40,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
       {
         name: "ViewHistory",
         isApplicable: (row, sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
           <TimeMachineLink lite={row.entity}
             inSearch={true}>
             {EntityControlMessage.View.niceToString()}
@@ -110,7 +110,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
   }
   const { lite, inSearch, children, ...htmlAtts } = p;
 
-  if (!Navigator.isNavigable(lite.EntityType, undefined, p.inSearch || false))
+  if (!Navigator.isNavigable(lite.EntityType, { isSearch: p.inSearch }))
     return <span data-entity={liteKey(lite)}>{p.children ?? lite.toStr}</span>;
 
 

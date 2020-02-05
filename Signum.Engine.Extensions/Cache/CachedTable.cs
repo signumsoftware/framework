@@ -758,16 +758,25 @@ namespace Signum.Engine.Cache
                 return base.VisitUnary(node);
             }
 
+            static MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity e) => e.Mixin<MixinEntity>()).GetGenericMethodDefinition();
+
             protected override Expression VisitMember(MemberExpression node)
             {
                 if (node.Expression == param)
                 {
                     var field = table.GetField(node.Member);
-
                     var column = GetColumn(field);
-
                     columns.Add(column);
+                    return FieldReader.GetExpression(reader, columns.Count - 1, column.Type);
+                }
 
+                if (node.Expression is MethodCallExpression me && me.Method.IsInstantiationOf(miMixin))
+                {
+                    var type = me.Method.GetGenericArguments()[0];
+                    var mixin = table.Mixins!.GetOrThrow(type);
+                    var field = mixin.GetField(node.Member);
+                    var column = GetColumn(field);
+                    columns.Add(column);
                     return FieldReader.GetExpression(reader, columns.Count - 1, column.Type);
                 }
 
