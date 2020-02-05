@@ -499,7 +499,12 @@ END; $$;");
         public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
         {
             if (dbType.IsDate())
-                AssertDateTime((DateTime?)value);
+            {
+                if (value is DateTime dt)
+                    AssertDateTime(dt);
+                else if (value is Date d)
+                    value = new NpgsqlDate((DateTime)d);
+            }
 
             var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
             {

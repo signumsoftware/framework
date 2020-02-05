@@ -84,6 +84,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
+        public void DateParameters()
+        {
+            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == DateTime.Today).ToList();
+            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == Date.Today).ToList();
+        }
+
+        [Fact]
         public void DateTimeFunctions()
         {
             Dump((NoteWithDateEntity n) => n.CreationTime.Year);
