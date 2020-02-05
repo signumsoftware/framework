@@ -286,8 +286,12 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         public SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
             if (objectName.Schema.Database == null)
-                return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
-
+            {
+                if (IsPostgres)
+                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
+                else
+                    return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
+            }
             else
                 return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1} ON {2}';"
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(isPostgres), indexName.SqlEscape(isPostgres), objectName.OnDatabase(null).ToString()));
