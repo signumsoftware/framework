@@ -189,6 +189,16 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
                 arrayOrType is Type t ? t.AssemblyQualifiedName :
                 arrayOrType is Type[] ts ? ts.ToString(a => a.AssemblyQualifiedName, "|") : null);
         }
+
+        public static bool operator ==(Implementations left, Implementations right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Implementations left, Implementations right)
+        {
+            return !(left == right);
+        }
     }
 
     [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]

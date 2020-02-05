@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Navigator from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, getTypeInfo, ReadonlyBinding } from '../Reflection'
+import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
 import { ViewPromise } from "../Navigator";
 import { ErrorBoundary } from '../Components';
@@ -44,7 +44,7 @@ export function RenderEntity(p: RenderEntityProps) {
   if (componentBox == null)
     return null;
 
-  const ti = getTypeInfo(entity.Type);
+  const ti = tryGetTypeInfo(entity.Type);
 
   const ctx = p.ctx;
 

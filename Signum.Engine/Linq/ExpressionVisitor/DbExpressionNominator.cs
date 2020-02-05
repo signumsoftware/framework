@@ -383,13 +383,79 @@ namespace Signum.Engine.Linq
 
             var obj = Visit(m.Object);
 
-            if (!culture.IsReadOnly && obj.Type.UnNullify() == typeof(DateTime))
+            if ((!culture.IsReadOnly || isPostgres)&& obj.Type.UnNullify() == typeof(DateTime))
                 format = DateTimeExtensions.ToCustomFormatString(format, culture);
+
+            if (isPostgres)
+                return Add(new SqlFunctionExpression(typeof(string), null, "to_char", new[] {
+                obj,
+                new SqlConstantExpression(ToPostgres(format), typeof(string))
+                }));
 
             return Add(new SqlFunctionExpression(typeof(string), null, "Format", new[] {
                 obj,
                 new SqlConstantExpression(format, typeof(string)),
                 new SqlConstantExpression(culture.Name) }));
+        }
+
+        //https://database.guide/list-of-the-custom-date-time-format-strings-supported-by-the-format-function-in-sql-server/
+        //https://www.postgresql.org/docs/current/functions-formatting.html
+        static Dictionary<string, string> postgresReplacement = new Dictionary<string, string>()
+        {
+            { "d", "DD"},
+            { "dd", "DD"},
+            { "ddd", "Dy"},
+            { "dddd", "Day"},
+            { "f", "MS"},
+            { "ff", "MS"},
+            { "fff", "MS"},
+            { "ffff", "US"},
+            { "fffff", "US"},
+            { "ffffff", "US"},
+            { "fffffff", "US"},
+            { "ffffffff", "US"},
+            { "F", "MS"},
+            { "FF", "MS"},
+            { "FFF", "MS"},
+            { "FFFF", "US"},
+            { "FFFFF", "US"},
+            { "FFFFFF", "US"},
+            { "FFFFFFF", "US"},
+            { "FFFFFFFF", "US"},
+            { "g", "ad"},
+            { "gg", "ad"},
+            { "h", "HH12"},
+            { "hh", "HH12"},
+            { "H", "HH24"},
+            { "HH", "HH24"},
+            { "K", "OF"},
+            { "m", "MI"},
+            { "mm", "MI"},
+            { "M", "MM"},
+            { "MM", "MM"},
+            { "MMM", "Mon"},
+            { "MMMM", "Month"},
+            { "s", "SS"},
+            { "ss", "SS"},
+            { "t", "AM"},
+            { "tt", "AM"},
+            { "y", "Y"},
+            { "yy", "YY"},
+            { "yyy", "YYY"},
+            { "yyyy", "YYYY"},
+            { "yyyyy", "YYYY"},
+            { "z", "TZ"},
+            { "zz", "TZ"},
+            { "zzz", "TZ"},
+        };
+
+        static string? ToPostgres(string? format)
+        {
+            if (format == null)
+                return null;
+
+            var result= Regex.Replace(format, @"\b\w+\b", m => postgresReplacement.TryGetC(m.Value) ?? m.Value);
+            return result;
         }
 
         protected Expression? TrySqlFunction(Expression? obj, PostgresFunction postgresFunction, Type type, params Expression[] expression)
