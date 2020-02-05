@@ -26,6 +26,7 @@ namespace Signum.Engine
         private const TypeCode tcGuid = (TypeCode)20;
         private const TypeCode tcTimeSpan = (TypeCode)21;
         private const TypeCode tcDateTimeOffset = (TypeCode)22;
+        private const TypeCode tcNpgsqlDate = (TypeCode)24;
 
         public int LastOrdinal;
 
@@ -43,6 +44,9 @@ namespace Signum.Engine
 
                 if (type == typeof(DateTimeOffset))
                     tc = tcDateTimeOffset;
+
+                if (type == typeof(NpgsqlTypes.NpgsqlDate))
+                    tc = tcNpgsqlDate;
             }
             return tc;
         }
@@ -444,6 +448,7 @@ namespace Signum.Engine
             return new DateTime(dt.Ticks, DateTimeKind.Local);
         }
 
+
         public DateTime? GetNullableDateTime(int ordinal)
         {
             LastOrdinal = ordinal;
@@ -454,6 +459,36 @@ namespace Signum.Engine
             return GetDateTime(ordinal);
         }
 
+        public Date GetDate(int ordinal)
+        {
+
+            LastOrdinal = ordinal;
+            Date dt;
+            switch (typeCodes[ordinal])
+            {
+                case TypeCode.DateTime:
+                    dt = new Date(reader.GetDateTime(ordinal));
+                    break;
+                case FieldReader.tcNpgsqlDate:
+                    dt = new Date((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal));
+                    break;
+                default:
+                    dt = new Date(ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)));
+                    break;
+            }
+
+            return dt;
+        }
+
+        public Date? GetNullableDate(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            if (reader.IsDBNull(ordinal))
+            {
+                return null;
+            }
+            return GetDate(ordinal);
+        }
 
         public DateTimeOffset GetDateTimeOffset(int ordinal)
         {

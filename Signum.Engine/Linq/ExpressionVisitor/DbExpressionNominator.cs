@@ -444,6 +444,8 @@ namespace Signum.Engine.Linq
             return null;
         }
 
+        static int DaysBetween(Date a, Date b) => 0;
+
         private Expression? TrySqlDifference(SqlEnums sqlEnums, Type type, Expression leftSide, Expression rightSide)
         {
             Expression left = Visit(leftSide);
@@ -456,6 +458,9 @@ namespace Signum.Engine.Linq
 
             if (isPostgres)
             {
+                if (sqlEnums == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
+                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(Date.Today, Date.Today))), typeof(double)));
+
                 var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
                 {
                     new SqlLiteralExpression(SqlEnums.epoch),
@@ -1257,17 +1262,22 @@ namespace Signum.Engine.Linq
             {
                 case "string.Length": return TrySqlFunction(null, isPostgres ? PostgresFunction.length.ToString() : SqlFunction.LEN.ToString(), m.Type, m.Expression);
                 case "Math.PI": return TrySqlFunction(null, SqlFunction.PI, m.Type);
+                case "Date.Year":
                 case "DateTime.Year": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.year), m.Expression);
+                case "Date.Month":
                 case "DateTime.Month": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.month), m.Expression);
+                case "Date.Day":
                 case "DateTime.Day": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.day), m.Expression);
+                case "Date.DayOfYear":
                 case "DateTime.DayOfYear": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(isPostgres? SqlEnums.doy: SqlEnums.dayofyear), m.Expression);
+                case "Date.DayOfWeek":
+                case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
                 case "DateTime.Hour": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression);
                 case "DateTime.Minute": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression);
                 case "DateTime.Second": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression);
                 case "DateTime.Millisecond": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression);
                 case "DateTime.Date": return TrySqlDate(m.Expression);
                 case "DateTime.TimeOfDay": return TrySqlTime(m.Expression);
-                case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
 
                 case "TimeSpan.Days":
                     {
@@ -1472,9 +1482,10 @@ namespace Signum.Engine.Linq
                 case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
                 //dateadd(month, datediff(month, 0, SomeDate),0);
-                case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.month);
-                case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.quarter);
-                case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.week);
+                case "DateTimeExtensions.YearStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.year);
+                case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.month);
+                case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.quarter);
+                case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.week);
                 case "DateTimeExtensions.HourStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour);
                 case "DateTimeExtensions.MinuteStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute);
                 case "DateTimeExtensions.SecondStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second);

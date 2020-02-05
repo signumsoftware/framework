@@ -87,6 +87,7 @@ namespace Signum.Test.LinqProvider
         public void DateTimeFunctions()
         {
             Dump((NoteWithDateEntity n) => n.CreationTime.Year);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Quarter());
             Dump((NoteWithDateEntity n) => n.CreationTime.Month);
             Dump((NoteWithDateEntity n) => n.CreationTime.Day);
             Dump((NoteWithDateEntity n) => n.CreationTime.DayOfYear);
@@ -94,17 +95,31 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => n.CreationTime.Minute);
             Dump((NoteWithDateEntity n) => n.CreationTime.Second);
             Dump((NoteWithDateEntity n) => n.CreationTime.Millisecond);
+
+
+            Dump((NoteWithDateEntity n) => n.CreationDate.Year);
+            Dump((NoteWithDateEntity n) => n.CreationDate.Quarter());
+            Dump((NoteWithDateEntity n) => n.CreationDate.Month);
+            Dump((NoteWithDateEntity n) => n.CreationDate.Day);
+            Dump((NoteWithDateEntity n) => n.CreationDate.DayOfYear);
         }
 
         [Fact]
         public void DateTimeFunctionsStart()
         {
+            Dump((NoteWithDateEntity n) => n.CreationTime.YearStart());
+            Dump((NoteWithDateEntity n) => n.CreationTime.QuarterStart());
             Dump((NoteWithDateEntity n) => n.CreationTime.MonthStart());
-            Dump((NoteWithDateEntity n) => n.CreationTime.Date);
             Dump((NoteWithDateEntity n) => n.CreationTime.WeekStart());
+            Dump((NoteWithDateEntity n) => n.CreationTime.Date);
             Dump((NoteWithDateEntity n) => n.CreationTime.HourStart());
             Dump((NoteWithDateEntity n) => n.CreationTime.MinuteStart());
             Dump((NoteWithDateEntity n) => n.CreationTime.SecondStart());
+
+            Dump((NoteWithDateEntity n) => n.CreationDate.YearStart());
+            Dump((NoteWithDateEntity n) => n.CreationDate.QuarterStart());
+            Dump((NoteWithDateEntity n) => n.CreationDate.MonthStart());
+            Dump((NoteWithDateEntity n) => n.CreationDate.WeekStart());
         }
 
         [Fact]
@@ -113,6 +128,10 @@ namespace Signum.Test.LinqProvider
             var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();
             var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();
             Assert.Equal(memCount, dbCount);
+
+            var memCount2 = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationDate.DayOfWeek == a.CreationDate.DayOfWeek).Count();
+            var dbCount2 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate.DayOfWeek == a.CreationDate.DayOfWeek).Count();
+            Assert.Equal(memCount2, dbCount2);
         }
 
         [Fact]
@@ -121,6 +140,10 @@ namespace Signum.Test.LinqProvider
             var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
             var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
             Assert.Equal(memCount, dbCount);
+
+            var memCount2 = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationDate.DayOfWeek == DayOfWeek.Sunday).Count();
+            var dbCount2 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate.DayOfWeek == DayOfWeek.Sunday).Count();
+            Assert.Equal(memCount2, dbCount2);
         }
 
 
@@ -139,6 +162,10 @@ namespace Signum.Test.LinqProvider
             var memCount = Database.Query<NoteWithDateEntity>().ToList().Select(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
             var dbCount = Database.Query<NoteWithDateEntity>().Select(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
             Assert.Equal(memCount, dbCount);
+
+            var memCount2 = Database.Query<NoteWithDateEntity>().ToList().Select(a => a.CreationDate.DayOfWeek == DayOfWeek.Sunday).ToList();
+            var dbCount2 = Database.Query<NoteWithDateEntity>().Select(a => a.CreationDate.DayOfWeek == DayOfWeek.Sunday).ToList();
+            Assert.Equal(memCount2, dbCount2);
         }
 
         [Fact]
@@ -149,6 +176,10 @@ namespace Signum.Test.LinqProvider
             var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
             var dbCount = Database.Query<NoteWithDateEntity>().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
             Assert.Equal(memCount, dbCount);
+
+            var memCount2 = Database.Query<NoteWithDateEntity>().ToList().Where(a => dows.Contains(a.CreationDate.DayOfWeek)).Count();
+            var dbCount2 = Database.Query<NoteWithDateEntity>().Where(a => dows.Contains(a.CreationDate.DayOfWeek)).Count();
+            Assert.Equal(memCount2, dbCount2);
         }
 
         [Fact]
@@ -160,6 +191,13 @@ namespace Signum.Test.LinqProvider
             Assert.Equal(
                 listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","), 
                 listB.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","));
+
+            var listA2 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var listB2 = Database.Query<NoteWithDateEntity>().ToList().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() });
+
+            Assert.Equal(
+                listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","),
+                listB.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","));
         }
 
         [Fact]
@@ -170,11 +208,16 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
             Dump((NoteWithDateEntity n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
+
+            Dump((NoteWithDateEntity n) => (n.CreationDate - n.CreationDate).TotalDays.InSql());
         }
 
         [Fact]
         public void DateDiffFunctionsTo()
         {
+            Dump((NoteWithDateEntity n) => n.CreationTime.YearsTo(n.CreationTime).InSql());
+            Dump((NoteWithDateEntity n) => n.CreationTime.MonthsTo(n.CreationTime).InSql());
+
             Dump((NoteWithDateEntity n) => n.CreationTime.YearsTo(n.CreationTime).InSql());
             Dump((NoteWithDateEntity n) => n.CreationTime.MonthsTo(n.CreationTime).InSql());
         }
@@ -195,6 +238,9 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<NoteWithDateEntity>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
                 .Select(n => n.CreationTime.DayOfWeek).ToList();
+
+            var list2 = Database.Query<NoteWithDateEntity>().Where(n => n.CreationDate.DayOfWeek != DayOfWeek.Sunday)
+                .Select(n => n.CreationDate.DayOfWeek).ToList();
         }
 
         [Fact]
