@@ -18,7 +18,7 @@ namespace Signum.Engine
 
             var schemas = s.GetDatabaseTables()
                 .Select(a => a.Name.Schema)
-                .Where(sn => !sn.Equals(defaultSchema) && !s.IsExternalDatabase(sn.Database))
+                .Where(sn => !sn.OnDatabase(null).Equals(defaultSchema) && !s.IsExternalDatabase(sn.Database))
                 .Distinct();
 
             return schemas
