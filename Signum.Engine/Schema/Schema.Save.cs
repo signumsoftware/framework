@@ -683,12 +683,12 @@ SELECT {id} FROM rows;";
 
             var identityBehaviour = IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this);
 
-            string? parentId = collections != null && identityBehaviour && (isPostgres || isGuid)? Table.Var(isPostgres, "parentId") : null;
+            string? parentId = collections != null && identityBehaviour ? Table.Var(isPostgres, "parentId") : null;
             string? newIds = collections != null && identityBehaviour && (!isPostgres && isGuid) ? Table.Var(isPostgres, "newIDs") : null;
 
             SqlPreCommandSimple insert = identityBehaviour ?
                 new SqlPreCommandSimple(
-                    inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, newIds ?? parentId),
+                    inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, newIds ?? (isPostgres ? parentId : null)),
                     new List<DbParameter>().Do(dbParams => inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment) :
                 new SqlPreCommandSimple(
                     inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
