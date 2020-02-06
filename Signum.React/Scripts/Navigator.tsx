@@ -332,7 +332,10 @@ function typeIsCreable(typeName: string, isEmbedded?: boolean): EntityWhen {
   if (isEmbedded)
     return "IsLine";
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
+    return "Never";
+
   if (typeInfo.kind == "Enum")
     return "Never";
 
@@ -363,20 +366,23 @@ export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName);
+  const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName, options?.isEmbedded);
 
   return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
 }
 
-function typeIsReadOnly(typeName: string): boolean {
+function typeIsReadOnly(typeName: string, isEmbedded: boolean | undefined): boolean {
 
   const es = entitySettings[typeName];
   if (es != undefined && es.isReadOnly != undefined)
     return es.isReadOnly;
 
+  if (isEmbedded)
+    return false;
+
   const typeInfo = tryGetTypeInfo(typeName);
   if (typeInfo == undefined)
-    return false;
+    return true;
 
   if (typeInfo.kind == "Enum")
     return true;
@@ -437,7 +443,10 @@ function typeIsFindable(typeName: string, isEmbedded: boolean | undefined) {
   if (isEmbedded)
     return false;
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
+    return false;
+
   if (typeInfo.kind == "Enum")
     return true;
 
@@ -485,7 +494,10 @@ function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): bool
   if (isEmbedded)
     return true;
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
+    return false;
+
   if (typeInfo.kind == "Enum")
     return false;
 
@@ -525,7 +537,10 @@ function typeIsNavigable(typeName: string, isEmbedded: boolean | undefined): Ent
   if (isEmbedded)
     return "Never";
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
+    return "Never";
+
   if (typeInfo.kind == "Enum")
     return "Never";
 
