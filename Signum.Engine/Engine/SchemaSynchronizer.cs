@@ -630,7 +630,9 @@ WHERE {where}"))!;
             }
 
             string typeDefault = forceDefaultValue ??
-                (column.DbType.IsNumber() ? "0" :
+                (
+                column.DbType.IsBoolean() ? (Schema.Current.Settings.IsPostgres ? "false" : "0") :
+                column.DbType.IsNumber() ? "0" :
                 column.DbType.IsString() ? "''" :
                 column.DbType.IsDate() ? "GetDate()" :
                 column.DbType.IsGuid() ? "NEWID()" :
@@ -640,8 +642,21 @@ WHERE {where}"))!;
             if (defaultValue == "force")
                 return defaultValue;
 
-            if (defaultValue.HasText() && column.DbType.IsString() && !defaultValue.Contains("'"))
-                defaultValue = "'" + defaultValue + "'";
+            if (defaultValue.HasText())
+            {
+                if (column.DbType.IsString() && !defaultValue.Contains("'"))
+                    defaultValue = "'" + defaultValue + "'";
+
+                if ((column.DbType.IsDate() || column.DbType.IsTime()) && !defaultValue.Contains("'") && defaultValue != typeDefault)
+                    defaultValue = "'" + defaultValue + "'";
+
+                if(column.DbType.IsBoolean() && defaultValue != typeDefault)
+                {
+                    defaultValue = Schema.Current.Settings.IsPostgres ?
+                         (defaultValue == "0" ? "false" : defaultValue == "1" ? "true" : defaultValue) :
+                         (defaultValue.ToLower() == "false" ? "0" : defaultValue.ToLower() == "true" ? "1" : defaultValue);
+                }
+            }
 
             if (string.IsNullOrEmpty(defaultValue))
                 return typeDefault;

@@ -1346,8 +1346,33 @@ namespace Signum.Engine.Maps
                 {
                     case NpgsqlDbType.Date:
                     case NpgsqlDbType.Timestamp: 
+                    case NpgsqlDbType.TimestampTz: 
                         return true;
                     default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsTime()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Time:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Time:
+                    case NpgsqlDbType.TimeTz:
+                        return true;
+                    default:
                         return false;
                 }
 
@@ -1447,6 +1472,30 @@ namespace Signum.Engine.Maps
                 return "double precision";
 
             return pg.ToString()!;
+        }
+
+        public bool IsBoolean()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Bit:
+                        return true;
+                    default:
+                        return false;
+                }
+
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Boolean:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
         }
 
         public bool IsGuid()
