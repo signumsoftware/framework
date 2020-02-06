@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { getTypeInfos, TypeReference } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, TypeInfo } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
@@ -75,7 +75,7 @@ export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeCont
 }
 
 export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
-  let tis = getTypeInfos(tr);
+  let tis = tryGetTypeInfos(tr) as TypeInfo[];
   if (tis.length == 1 && tis[0] == undefined)
     tis = [];
 

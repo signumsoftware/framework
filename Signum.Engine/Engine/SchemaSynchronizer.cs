@@ -523,18 +523,18 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
         private static SqlPreCommand UpdateCompatible(SqlBuilder sqlBuilder, Replacements replacements, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol)
         {
             if (!(difCol.Nullable && !tabCol.Nullable.ToBool()))
-                return sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name);
+                return sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol);
             
             var defaultValue = GetDefaultValue(tab, tabCol, replacements, forNewColumn: false);
 
             if (defaultValue == "force")
-                return sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name);
+                return sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol);
 
             bool goBefore = difCol.Name != tabCol.Name;
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 NotNullUpdate(tab.Name, tabCol, defaultValue, goBefore),
-                sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name)
+                sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol)
             )!;
         }
 
@@ -1118,8 +1118,8 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == (other.Nullable.ToBool())
-                && (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1)
-                && (other.Scale == null || other.Scale.Value == Scale)
+                && SizeEquals(other)
+                && ScaleEquals(other)
                 && (ignoreIdentity || Identity == other.Identity)
                 && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
                 && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
@@ -1128,6 +1128,16 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 return false;
 
             return result;
+        }
+
+        public bool ScaleEquals(IColumn other)
+        {
+            return (other.Scale == null || other.Scale.Value == Scale);
+        }
+
+        public bool SizeEquals(IColumn other)
+        {
+            return (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
         }
 
         public bool DefaultEquals(IColumn other)

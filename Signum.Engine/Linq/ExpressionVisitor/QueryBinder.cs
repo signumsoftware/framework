@@ -1812,6 +1812,18 @@ namespace Signum.Engine.Linq
                                                 throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member));
                                         }
                                     }
+                                case DbExpressionType.Interval:
+                                    {
+                                        IntervalExpression interval = (IntervalExpression)source;
+
+                                        switch (m.Member.Name)
+                                        {
+                                            case "Min": return interval.Min ?? Expression.Field(interval.PostgresRange, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.LowerBound));
+                                            case "Max": return interval.Max ?? Expression.Field(interval.PostgresRange, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.UpperBound));
+                                            default:
+                                                throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member));
+                                        }
+                                    }
                             }
                         }
                         break;

@@ -1,6 +1,6 @@
 import { Dic } from './Globals';
 import { Entity, ModifiableEntity, SelectorMessage, EntityPack } from './Signum.Entities';
-import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute } from './Reflection';
+import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute, tryGetTypeInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
@@ -20,10 +20,9 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
 
   const typeName = (type as Type<any>).typeName ?? type as string;
 
-  const ti = getTypeInfo(typeName);
+  const ti = tryGetTypeInfo(typeName);
   if (ti)
     pr = PropertyRoute.root(ti);
- 
   
   const c = customConstructors[typeName];
   if (c)

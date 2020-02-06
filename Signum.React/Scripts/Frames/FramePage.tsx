@@ -35,10 +35,9 @@ export default function FramePage(p: FramePageProps) {
   const mounted = useMounted();
   const forceUpdate = useForceUpdate();
 
-  const type = getTypeInfo(p.match.params.type).name;
+  const ti = getTypeInfo(p.match.params.type);
+  const type = ti.name;
   const id = p.match.params.id;
-
-  const ti = getTypeInfo(type);
 
   useTitle(state?.pack.entity.toStr ?? "", [state?.pack.entity]);
 
