@@ -320,7 +320,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     const ti = getTypeInfo(entity.Type);
 
-    if (ti == null || !Navigator.isNavigable(ti, false)) //Embedded
+    if (!Navigator.isNavigable(ti)) //Embedded
       return null;
 
     return (

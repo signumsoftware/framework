@@ -1911,7 +1911,7 @@
     <Member Name="Task" Description="Geplante Aufgabe" />
     <Member Name="User" Description="Benutzer" />
   </Type>
-  <Type Name="ScheduledTaskLogEntity" Description="Geplante Task-Protokoll" PluralDescription="Geplanten Task-Protokolle" Gender="n">
+  <Type Name="ScheduledTaskLogEntity" Description="Geplantes Aufgabenprotokoll" PluralDescription="Geplanten Aufgabenprotokolle" Gender="n">
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="Duration" Description="Dauer" />
     <Member Name="EndTime" Description="Endzeit" />
@@ -1970,7 +1970,7 @@
   <Type Name="SchedulerTaskExceptionLineEntity" Description="Scheduler Aufgabe Ausnahmezeile">
     <Member Name="ElementInfo" Description="Elementinfo" />
     <Member Name="Exception" Description="Ausnahme" />
-    <Member Name="SchedulerTaskLog" Description="Scheduler Task-Protokoll" />
+    <Member Name="SchedulerTaskLog" Description="Geplantes Aufgaben-Protokoll" />
   </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich">
     <Member Name="EachMinutes" Description="Alle Minuten" />

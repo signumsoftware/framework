@@ -6,7 +6,7 @@ import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Enti
 import { classes, Dic } from '@framework/Globals'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
-import { TypeInfo, MemberInfo, getTypeInfo, getTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
+import { TypeInfo, MemberInfo, getTypeInfo, tryGetTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext, ButtonBarElement } from '@framework/TypeContext'
 import { EntityTableColumn } from '@framework/Lines/EntityTable'
@@ -452,11 +452,11 @@ function getTypes(route: PropertyRoute | undefined): string[] | ((query: string)
   if (tr.name == IsByAll)
     return autoCompleteType;
 
-  var types = getTypeInfos(tr);
+  var types = tryGetTypeInfos(tr);
   if (types.length == 0 || types[0] == undefined)
     return [];
 
-  return types.map(a => a.name);
+  return types.map(a => a!.name);
 }
 
 function autoCompleteType(query: string): string[] {
@@ -1522,7 +1522,7 @@ NodeUtils.register<ButtonNode>({
 
     var ti = dn.route && getTypeInfo(dn.route.typeReference().name);
 
-    var operations = (ti?.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key)) ?? [];
+    var operations = (ti?.operations && Dic.getValues(ti.operations).map(o => o.key)) ?? [];
 
     return (<div>
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
@@ -1589,7 +1589,7 @@ export namespace NodeConstructor {
         return result;
     }
 
-    const tis = getTypeInfos(tr);
+    const tis = tryGetTypeInfos(tr);
     const ti = tis.firstOrNull();
 
     if (tr.isCollection) {

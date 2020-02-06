@@ -4,6 +4,7 @@ using System.Linq;
 using Signum.Utilities;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Omnibox
 {
@@ -152,7 +153,6 @@ namespace Signum.Entities.Omnibox
         }
     }
 
-
     public enum OmniboxMessage
     {
         [Description("no")]
@@ -190,5 +190,11 @@ namespace Signum.Entities.Omnibox
         ComplementWordsRegex,
         [Description("Search...")]
         Search,
+    }
+
+    [AutoInit]
+    public static class OmniboxPermission
+    {
+        public static PermissionSymbol ViewOmnibox;
     }
 }

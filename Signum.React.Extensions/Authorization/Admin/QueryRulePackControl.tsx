@@ -4,7 +4,7 @@ import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'
-import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, AuthMessage, QueryAllowed } from '../Signum.Entities.Authorization'
+import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, QueryAllowed } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { Button } from 'react-bootstrap'
 import "./AuthAdmin.css"
@@ -28,7 +28,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
     ];
   }
 

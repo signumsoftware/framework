@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '@framework/Globals'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext, StyleContext } from '@framework/TypeContext'
-import { getTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, FormGroup } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity, ChartColumnType } from '../Signum.Entities.Chart'
@@ -82,7 +82,7 @@ export function ChartColumn(p: ChartColumnProps) {
     if (!t.isLite && !isTypeEnum(t.name))
       return [];
 
-    return getTypeInfos(t);
+    return tryGetTypeInfos(t);
   }
 
   function orderClassName(c: ChartColumnEmbedded) {
@@ -141,7 +141,7 @@ export function ChartColumn(p: ChartColumnProps) {
               </div>
               {getColorPalettes().map((t, i) =>
                 <div className="col-sm-4" key={i}>
-                  <ChartPaletteLink ctx={ctx} type={t} currentPalettes={p.colorPalettes} />
+                  {t && <ChartPaletteLink ctx={ctx} type={t} currentPalettes={p.colorPalettes} />}
                 </div>)
               }
             </div>
