@@ -8,6 +8,7 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttachment");
@@ -31,6 +32,10 @@ export module ExcelMessage {
   export const TheExcelTemplateHasAColumn0NotPresentInTheFindWindow = new MessageKey("ExcelMessage", "TheExcelTemplateHasAColumn0NotPresentInTheFindWindow");
   export const ThereAreNoResultsToWrite = new MessageKey("ExcelMessage", "ThereAreNoResultsToWrite");
   export const CreateNew = new MessageKey("ExcelMessage", "CreateNew");
+}
+
+export module ExcelPermission {
+  export const PlainExcel : Authorization.PermissionSymbol = registerSymbol("Permission", "ExcelPermission.PlainExcel");
 }
 
 export const ExcelReportEntity = new Type<ExcelReportEntity>("ExcelReport");
