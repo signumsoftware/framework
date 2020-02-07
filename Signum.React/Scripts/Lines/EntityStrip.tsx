@@ -56,7 +56,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
       window.open(route);
     }
     else {
-      const pr = ctx.propertyRoute.addLambda(a => a[0]);
+      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
 
       const promise = this.props.onView ?
         this.props.onView(entity, pr) :

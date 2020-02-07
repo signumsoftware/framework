@@ -8,7 +8,7 @@ import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
   operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString, isOperationAllowed
+  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString
 } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -57,8 +57,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         return false;
 
       return true;
-    })
-    .map(eoc => eoc!);
+    });
 
   operations.forEach(eoc => eoc.complete());
 
@@ -143,7 +142,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
 }
 
 interface OperationButtonProps extends ButtonProps {
-  eoc: EntityOperationContext<any /*Entity*/>;
+  eoc: EntityOperationContext<any /*Entity*/> | undefined;
   group?: EntityOperationGroup;
   variant?: BsColor;
   canExecute?: string | null;
@@ -152,10 +151,12 @@ interface OperationButtonProps extends ButtonProps {
   children?: React.ReactNode
 }
 
-export function OperationButton({ eoc, group, onOperationClick, canExecute, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
-  if (!isOperationAllowed(eoc.operationInfo.key, (eoc.entity as Entity).Type))
+  if (props.eoc == null)
     return null;
+
+  const eoc = props.eoc;
 
   if (canExecute === undefined)
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
@@ -256,7 +257,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
         className={aos.classes}
         key={aos.name}
         title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}
-        onClick={() => aos.onClick(eoc)}
+        onClick={() => aos.onClick(eoc!)}
         data-alternative={aos.name}>
         {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}
       </Dropdown.Item>

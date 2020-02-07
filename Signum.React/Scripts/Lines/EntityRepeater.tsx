@@ -72,7 +72,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
   function renderElements() {
     const readOnly = ctx.readOnly;
-    const showType = tryGetTypeInfos(ctx.propertyRoute.typeReference().name).length > 1;
+    const showType = tryGetTypeInfos(ctx.propertyRoute!.typeReference().name).length > 1;
     return (
       <div className="sf-repater-elements">
         {

@@ -27,7 +27,7 @@ export default function DynamicComponent({ ctx, viewName }: { ctx: TypeContext<M
   }
 
   function subContext(ctx: TypeContext<ModifiableEntity>): TypeContext<any>[] {
-    const members = ctx.propertyRoute.subMembers();
+    const members = ctx.propertyRoute!.subMembers();
     const result = Dic.map(members, (field, m) => ctx.subCtx(field));
 
     return result;
@@ -43,11 +43,16 @@ export const customPropertyComponent: {
 } = {};
 
 export function registerCustomPropertyComponent<T extends ModifiableEntity, V>(type: Type<T>, property: (e: T) => V, component: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined) {
-  customPropertyComponent[type.propertyRoute(property).toString()] = component;
+
+  var pi = type.tryPropertyRoute(property);
+  if (pi == null)
+    return;
+
+  customPropertyComponent[pi.toString()] = component;
 }
 
 export function getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
-  return getAppropiateComponentFactory(ctx.propertyRoute)(ctx);
+  return getAppropiateComponentFactory(ctx.propertyRoute!)(ctx);
 }
 
 export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {

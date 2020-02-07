@@ -44,7 +44,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
   function codeTab(tabId: number, property: (ex: ExceptionEntity) => any) {
     const tc = p.ctx.subCtx(property);
 
-    if (!tc.value || tc.value == "")
+    if (tc.propertyRoute == null || !tc.value || tc.value == "")
       return undefined;
 
     return (
