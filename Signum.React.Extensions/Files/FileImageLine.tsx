@@ -35,7 +35,7 @@ export class FileImageLineController extends EntityBaseController<FileImageLineP
 
     super.getDefaultProps(state);
 
-    const m = state.ctx.propertyRoute.member;
+    const m = state.ctx.propertyRoute?.member;
     if (m?.defaultFileTypeInfo) {
 
       if (state.fileType == null)
@@ -78,7 +78,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
           dragAndDropMessage={c.props.dragAndDropMessage}
           fileType={c.props.fileType}
           onFileLoaded={c.handleFileLoaded}
-          typeName={p.ctx.propertyRoute.typeReference().name}
+          typeName={p.ctx.propertyRoute!.typeReference().name}
           buttonCss={p.ctx.buttonClass}
           divHtmlAttributes={{ className: "sf-file-line-new" }} />
       }
@@ -91,7 +91,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
 
     const val = ctx.value!;
 
-    var content = ctx.propertyRoute.typeReference().isLite ?
+    var content = ctx.propertyRoute!.typeReference().isLite ?
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
       <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />;
 

@@ -44,7 +44,9 @@ export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: st
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: (a: AppendixHelpEntity) => void }) {
 
-  if (!Operations.isOperationAllowed(AppendixHelpOperation.Save, AppendixHelpEntity))
+  const oi = Operations.tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
+
+  if (!oi)
     return null;
 
   function onClick() {
@@ -56,12 +58,12 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
       .done();
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>{oi.niceName}</button>;
 }
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
-  if (!Operations.isOperationAllowed(AppendixHelpOperation.Delete, AppendixHelpEntity))
+  if (!Operations.tryGetOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity))
     return null;
 
   function onClick() {

@@ -1374,7 +1374,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
 
     if (dn.node.valueToken && !dn.node.findOptions) {
       if (ctx) {
-        var name = ctx.propertyRoute.typeReference().name;
+        var name = ctx.propertyRoute!.typeReference().name;
         if (!isTypeEntity(name))
           return DynamicViewValidationMessage.ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity.niceToString(name);
       }

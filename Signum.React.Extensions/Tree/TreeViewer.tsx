@@ -244,8 +244,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     var menuItems = [
       Navigator.isNavigable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
-      Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
-      Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
+      Operations.tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
+      Operations.tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];
 
     if (this.state.currentMenuItems == undefined) {
@@ -393,7 +393,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           onClick={this.handleToggleFilters}
           title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><FontAwesomeIcon icon="filter" /></a>
         <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
-        {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star" />&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
+        {Operations.tryGetOperationInfo(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star" />&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
         <Dropdown
           onToggle={this.handleSelectedToggle}
           show={s.isSelectOpen}>

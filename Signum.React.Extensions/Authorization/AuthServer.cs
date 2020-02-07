@@ -64,8 +64,11 @@ namespace Signum.React.Authorization
                     }
                     else
                     {
+                        if (t.HasAttribute<AllowUnathenticatedAttribute>())
+                            return ti;
+
                         if (UserEntity.Current == null)
-                            return t.HasAttribute<AllowUnathenticatedAttribute>() ? ti : null;
+                            return null;
 
                         if (!AuthServer.IsNamespaceAllowed(t))
                             return null;

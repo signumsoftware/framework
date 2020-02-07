@@ -106,7 +106,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
+    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
       e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red" }));
   }
@@ -125,7 +125,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
+    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
       e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange" }));
   }
@@ -135,10 +135,6 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     key: "DownloadAuthRules",
     onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
   });
-
-  PropertyRoute.prototype.canRead = function () {
-    return this.member != null
-  }
 
   PropertyRoute.prototype.canModify = function () {
     return this.member != null && this.member.propertyAllowed == "Write"
@@ -151,11 +147,6 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
   return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 }
 
-export function isOperationAllowed(type: PseudoType, operation: OperationSymbol) {
-  var ti = tryGetTypeInfo(type);
-  return ti != null && ti.operations != null && ti.operations[operation.key] != null;
-}
-
 export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
@@ -164,7 +155,7 @@ export function taskAuthorizeProperties(lineBase: LineBaseController<LineBasePro
 
     switch (member!.propertyAllowed) {
       case "None":
-        state.visible = false;
+        //state.visible = false;  //None is just not retuning the member info, LineBaseController.isHidden
         break;
       case "Read":
         state.ctx.readOnly = true;

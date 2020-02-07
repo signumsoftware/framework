@@ -394,7 +394,7 @@ export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNo
       </div>
     );
 
-  const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
+  const es = Navigator.getSettings(parentCtx.propertyRoute!.typeReference().name);
   if (vos.length) {
     const replacer = new ViewReplacer(result, parentCtx);
     vos.forEach(vo => vo.override(replacer));
