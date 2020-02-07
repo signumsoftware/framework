@@ -45,7 +45,7 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
     event.preventDefault();
 
     const p = this.props;
-    const pr = p.ctx.propertyRoute.addLambda(a => a[0]);
+    const pr = p.ctx.propertyRoute!.addLambda(a => a[0]);
     const promise = p.onCreate ?
       p.onCreate(pr) : this.defaultCreate(pr);
 

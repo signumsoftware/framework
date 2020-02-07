@@ -41,12 +41,12 @@ export function start(options: { routes: JSX.Element[] }) {
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr ?? "", e => {
+      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => uc.toStr ?? "", e => {
         window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
       }, { icon: "chart-bar", iconColor: "darkviolet" })));
   });
 
-  QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
         if (uc.entityType == undefined)

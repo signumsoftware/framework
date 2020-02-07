@@ -63,7 +63,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
           placeholder: ctx.niceName(),
           size: ctx.value ? ctx.value.length : ctx.niceName().length
         }}
-        getItems={query => handleGetItems(query, ctx.propertyRoute.member!.name == "ReturnType" ? "ReturnType" : "FromType")}
+        getItems={query => handleGetItems(query, ctx.propertyRoute!.member!.name == "ReturnType" ? "ReturnType" : "FromType")}
         value={ctx.value ?? undefined}
         onChange={txt => { ctx.value = txt; forceUpdate(); }} />
     );

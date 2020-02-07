@@ -190,7 +190,7 @@ function QueryColumnLine({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryC
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSuccess: () => void }) {
 
-  if (!Operations.isOperationAllowed(TypeHelpOperation.Save, TypeHelpEntity))
+  if (!Operations.tryGetOperationInfo(TypeHelpOperation.Save, TypeHelpEntity))
     return null;
 
   function onClick() {

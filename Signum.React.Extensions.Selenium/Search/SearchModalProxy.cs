@@ -14,7 +14,7 @@ namespace Signum.React.Selenium
         public SearchModalProxy(IWebElement element , bool waitInitialSearch = true)
             : base(element)
         {
-            this.SearchControl = new SearchControlProxy(element.FindElement(By.CssSelector(".sf-search-control")));
+            this.SearchControl = new SearchControlProxy(element.WaitElementVisible(By.CssSelector(".sf-search-control")));
             if (waitInitialSearch)
                 this.SearchControl.WaitInitialSearchCompleted();
         }

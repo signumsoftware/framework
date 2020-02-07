@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using OpenQA.Selenium;
 using Signum.Engine.Basics;
 using Signum.Utilities;
@@ -39,7 +40,9 @@ namespace Signum.React.Selenium
 
         public static void Select(IWebElement element, string name)
         {
-            element.FindElement(By.CssSelector("button[name={0}]".FormatWith(name))).Click();
+            var button = element.WaitElementVisible(By.CssSelector("button[name={0}]".FormatWith(name)));
+            Thread.Sleep(500);
+            button.Click();
         }
     }
 }

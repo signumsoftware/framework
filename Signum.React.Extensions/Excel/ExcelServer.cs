@@ -13,7 +13,7 @@ namespace Signum.React.Excel
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            ReflectionServer.RegisterLike(typeof(ExcelMessage), () => TypeAuthLogic.GetAllowed(typeof(ExcelReportEntity)).MaxUI() > TypeAllowedBasic.None);
+            ReflectionServer.RegisterLike(typeof(ExcelMessage), () => ExcelPermission.PlainExcel.IsAuthorized());
         }
     }
 }
