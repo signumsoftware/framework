@@ -14,7 +14,7 @@ import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { EntityOperationSettings, EntityOperationContext, assertOperationInfoAllowed } from '@framework/Operations'
+import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { confirmInNecessary } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
@@ -103,7 +103,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   ]);
 
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
-    new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
+    new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       Navigator.API.fetchAndForget(ctx.lite)
         .then(ca => Navigator.navigate(ca.case, { extraProps: { caseActivity: ca } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
@@ -210,7 +210,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   caseActivityOperation(CaseActivityOperation.Undo, "danger");
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
-    WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
+    () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
     workflowActivityMonitorUrl(ctx.lite),
     { icon: "tachometer-alt", iconColor: "green" }));
 
@@ -335,7 +335,7 @@ function registerCustomContexts() {
       cc.assignments["cctx"] = "actx?.subCtx(a => a.case)";
       return cc.createNewContext("cctx");
     },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case)
+    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case)
   };
 
 
@@ -349,7 +349,7 @@ function registerCustomContexts() {
       cc.assignments["pcctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
       return cc.createNewContext("pcctx");
     },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase)
+    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase)
   };
 
   DynamicViewClient.registeredCustomContexts["parentCaseMainEntity"] = {
@@ -362,7 +362,7 @@ function registerCustomContexts() {
       cc.assignments["pmctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
       return cc.createNewContext("pmctx");
     },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase!.mainEntity)
+    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase!.mainEntity)
   };
 }
 
@@ -557,7 +557,6 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
 
       if (mainEntityStrategy == "Clone") {
         coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
-        assertOperationInfoAllowed(coi);
       }
 
       return Finder.find({ queryName: wf.mainEntityType!.cleanName })

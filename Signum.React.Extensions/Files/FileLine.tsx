@@ -33,7 +33,7 @@ export class FileLineController extends EntityBaseController<FileLineProps>{
 
     super.getDefaultProps(state);
 
-    const m = state.ctx.propertyRoute.member;
+    const m = state.ctx.propertyRoute?.member;
     if (m?.defaultFileTypeInfo) {
 
       if (state.fileType == null)
@@ -78,7 +78,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
           dragAndDropMessage={p.dragAndDropMessage}
           fileType={p.fileType}
           onFileLoaded={c.handleFileLoaded}
-          typeName={p.ctx.propertyRoute.typeReference().name}
+          typeName={p.ctx.propertyRoute!.typeReference().name}
           buttonCss={p.ctx.buttonClass}
           divHtmlAttributes={{ className: "sf-file-line-new" }} />
       }

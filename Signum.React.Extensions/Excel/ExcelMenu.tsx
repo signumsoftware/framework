@@ -78,8 +78,8 @@ export default function ExcelMenu(p: ExcelMenuProps) {
             </Dropdown.Item>)
         }
         {(p.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}
-        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
-        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
+        {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
+        {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );

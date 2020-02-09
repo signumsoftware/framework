@@ -160,31 +160,31 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const currentUserQueryToStr = currentUserQuery ? currentUserQuery.toStr : undefined;
   const labelText = p.searchControl.props.largeToolbarButtons == true ?
-      (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
+    (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
 
-    const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
-    return (
+  const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
+  return (
     <Dropdown
       onToggle={handleSelectedToggle} show={isOpen}>
       <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-          {
-            userQueries?.map((uq, i) =>
+        {
+          userQueries?.map((uq, i) =>
             <Dropdown.Item key={i}
               className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
               onClick={() => handleOnClick(uq)}>
-                {uq.toStr}
+              {uq.toStr}
             </Dropdown.Item>)
-          }
-          {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
+        }
+        {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
         <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
         {currentUserQuery && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
-        {Operations.isOperationAllowed(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
+        {Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
-      </Dropdown>
-    );
+    </Dropdown>
+  );
 }
 
 function anyPinned(filterOptions?: FilterOptionParsed[]): boolean {

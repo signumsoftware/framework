@@ -31,11 +31,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   customTypeComponent[type.typeName] = ctx => {
-    const tr = ctx.propertyRoute.typeReference();
+    const tr = ctx.propertyRoute!.typeReference();
     if (tr.isCollection)
       return <MultiFileLine ctx={ctx} />;
 
-    var m = ctx.propertyRoute.member;
+    var m = ctx.propertyRoute!.member;
     if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
       return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
 

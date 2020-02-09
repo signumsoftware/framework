@@ -475,6 +475,7 @@ export interface LineBaseNode extends BaseNode {
   onChange?: Expression<() => void>;
   labelHtmlAttributes?: HtmlAttributesExpression;
   formGroupHtmlAttributes?: HtmlAttributesExpression;
+  mandatory?: ExpressionOrValue<boolean>;
 }
 
 export interface ValueLineNode extends LineBaseNode {
@@ -504,6 +505,7 @@ NodeUtils.register<ValueLineNode>({
     unitText: node.unitText,
     formatText: node.formatText,
     readOnly: node.readOnly,
+    mandatory: node.mandatory,
     inlineCheckbox: node.inlineCheckbox,
     valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
     comboBoxItems: node.comboBoxItems,
@@ -520,6 +522,7 @@ NodeUtils.register<ValueLineNode>({
     unitText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
     formatText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+    mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
     inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
     valueLineType={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
     comboBoxItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
@@ -539,6 +542,7 @@ NodeUtils.register<ValueLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m?.unit ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m?.format ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
@@ -1374,7 +1378,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
 
     if (dn.node.valueToken && !dn.node.findOptions) {
       if (ctx) {
-        var name = ctx.propertyRoute.typeReference().name;
+        var name = ctx.propertyRoute!.typeReference().name;
         if (!isTypeEntity(name))
           return DynamicViewValidationMessage.ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity.niceToString(name);
       }
