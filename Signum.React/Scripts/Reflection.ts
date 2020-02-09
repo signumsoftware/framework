@@ -294,7 +294,7 @@ export function tryGetTypeInfo(type: PseudoType): TypeInfo | undefined {
 
 export function isLowPopulationSymbol(type: PseudoType) {
 
-  var ti = getTypeInfo(type);
+  var ti = tryGetTypeInfo(type);
 
   return ti != null && ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
 }
@@ -402,8 +402,10 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
   if ((queryName as TypeInfo).kind != undefined)
     return (queryName as TypeInfo).queryDefined || false;
 
-  if (queryName instanceof Type)
-    return getTypeInfo(queryName).queryDefined || false;
+  if (queryName instanceof Type) {
+    var ti = tryGetTypeInfo(queryName)
+    return ti && ti.queryDefined || false;
+  }
 
   if (queryName instanceof QueryKey)
     return !!_queryNames[queryName.name.toLowerCase()];
@@ -781,7 +783,7 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
 
         var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
 
-        initializeCollections(m, pr.addMember("Mixin", gr.key));
+        initializeCollections(m, pr.addMember("Mixin", gr.key, true)!);
 
         if (!e.mixins)
           e.mixins = {};
@@ -834,7 +836,7 @@ export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRou
         
         var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
 
-        copyProperties(m, (original as Entity).mixins![gr.key], pr.addMember("Mixin", gr.key));
+        copyProperties(m, (original as Entity).mixins![gr.key], pr.addMember("Mixin", gr.key, true));
         
         if (!e.mixins)
           e.mixins = {};
@@ -861,7 +863,7 @@ function copyProperties(result: any, original: any, pr: PropertyRoute){
     .forEach(t => {
       var memberName = t.key.firstLower();
       var orinalProp = (original as any)[memberName];
-      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", t.key));
+      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", t.key, true));
       (result as any)[memberName] = clonedProp;
     });
 }
@@ -927,12 +929,11 @@ export class Type<T extends ModifiableEntity> implements IType {
     return New(this.typeName, props, propertyRoute) as T;
   }
 
-
   constructor(
     public typeName: string) { }
 
-  tryTypeInfo(): TypeInfo {
-    return getTypeInfo(this.typeName);
+  tryTypeInfo(): TypeInfo | undefined {
+    return tryGetTypeInfo(this.typeName);
   }
 
   typeInfo(): TypeInfo {
@@ -940,18 +941,24 @@ export class Type<T extends ModifiableEntity> implements IType {
     const result = this.tryTypeInfo();
 
     if (!result)
-      throw new Error(`Type ${this.typeName} has no TypeInfo. If is an embedded? Then start from some main entity type containing it to get metadata for the embedded properties (i.e. MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
+      throw new Error(`Type ${this.typeName} has no TypeInfo. \nNote: If is an EmbeddedEntity, start from some main Entity Type containing it to get metadata for the embedded properties (example: MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
 
     return result;
   }
 
   memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-    var pr = this.propertyRoute(lambdaToProperty);
+    var pr = this.propertyRouteAssert(lambdaToProperty);
 
     if (!pr.member)
       throw new Error(`${pr.propertyPath()} has no member`);
 
     return pr.member;
+  }
+
+  tryMemberInfo(lambdaToProperty: (v: T) => any): MemberInfo | undefined {
+    var pr = this.tryPropertyRoute(lambdaToProperty);
+
+    return pr?.member;
   }
 
   hasMixin(mixinType: Type<MixinEntity>): boolean {
@@ -959,7 +966,7 @@ export class Type<T extends ModifiableEntity> implements IType {
   }
 
   mixinMemberInfo<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): MemberInfo {
-    var pr = this.mixinPropertyRoute(mixinType, lambdaToProperty);
+    var pr = this.mixinPropertyRouteAssert(mixinType, lambdaToProperty);
 
     if (!pr.member)
       throw new Error(`${pr.propertyPath()} has no member`);
@@ -967,12 +974,34 @@ export class Type<T extends ModifiableEntity> implements IType {
     return pr.member;
   }
 
-  propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
+  tryMixinMemberInfo<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): MemberInfo | undefined {
+    var pr = this.tryMixinPropertyRoute(mixinType, lambdaToProperty);
+
+    return pr?.member;
+  }
+
+  propertyRouteAssert(lambdaToProperty: (v: T) => any): PropertyRoute {
     return PropertyRoute.root(this.typeInfo()).addLambda(lambdaToProperty);
   }
 
-  mixinPropertyRoute<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute {
-    return PropertyRoute.root(this.typeInfo()).addMember("Mixin", mixinType.typeName).addLambda(lambdaToProperty);
+  tryPropertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute | undefined {
+
+    var ti = this.tryTypeInfo();
+    if (ti == null)
+      return undefined;
+    return PropertyRoute.root(ti).tryAddLambda(lambdaToProperty);
+  }
+
+  mixinPropertyRouteAssert<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute {
+    return PropertyRoute.root(this.typeInfo()).addMember("Mixin", mixinType.typeName, true).addLambda(lambdaToProperty);
+  }
+
+  tryMixinPropertyRoute<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute | undefined {
+    var ti = this.tryTypeInfo();
+    if (ti == null)
+      return undefined;
+
+    return PropertyRoute.root(ti).addMember("Mixin", mixinType.typeName, false)?.tryAddLambda(lambdaToProperty);
   }
 
   niceName(): string {
@@ -1345,7 +1374,7 @@ export class PropertyRoute {
       return { type: "Member", name: p };
     });
 
-    parts.forEach(m => result = result.addMember(m.type, m.name));
+    parts.forEach(m => result = result.addMember(m.type, m.name, true));
 
     return result;
   }
@@ -1370,6 +1399,16 @@ export class PropertyRoute {
       getFieldMembers(property);
 
     let result: PropertyRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addLambdaMember(m), this)
+
+    return result;
+  }
+
+  tryAddLambda(property: ((val: any) => any) | string): PropertyRoute | undefined {
+    const lambdaMembers = typeof property == "function" ?
+      getLambdaMembers(property) :
+      getFieldMembers(property);
+
+    let result: PropertyRoute | undefined = lambdaMembers.reduce<PropertyRoute | undefined>((pr, m) => pr && pr.tryAddLambdaMember(m), this)
 
     return result;
   }
@@ -1413,19 +1452,23 @@ export class PropertyRoute {
 
   tryAddMember(memberType: MemberType, memberName: string): PropertyRoute | undefined {
     try {
-      return this.addMember(memberType, memberName);
+      return this.addMember(memberType, memberName, false);
     } catch (e) {
       return undefined;
     }
   }
 
-
   addLambdaMember(lm: LambdaMember): PropertyRoute {
-    return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name)
+    return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name, true);
   }
 
+  tryAddLambdaMember(lm: LambdaMember): PropertyRoute | undefined {
+    return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name, false);
+  }
 
-  addMember(memberType: MemberType, memberName: string): PropertyRoute {
+    addMember(memberType: MemberType, memberName: string, throwIfNotFound: true): PropertyRoute;
+    addMember(memberType: MemberType, memberName: string, throwIfNotFound: false): PropertyRoute | undefined;
+    addMember(memberType: MemberType, memberName: string, throwIfNotFound: boolean): PropertyRoute | undefined {
 
     var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
 
@@ -1447,8 +1490,11 @@ export class PropertyRoute {
         if (ti) {
 
           const m = ti.members[memberName];
-          if (!m)
-            throw new Error(`member '${memberName}' not found` + getErrorContext());
+          if (!m) {
+            if (throwIfNotFound)
+              throw new Error(`member '${memberName}' not found` + getErrorContext());
+            return undefined;
+          }
 
           return PropertyRoute.member(PropertyRoute.root(ti), m);
         } else if (this.propertyRouteType == "LiteEntity") {
@@ -1461,9 +1507,12 @@ export class PropertyRoute {
           this.propertyPath() + "." + memberName;
 
       const m = this.findRootType().members[fullMemberName];
-      if (!m)
-        throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
+      if (!m) {
+        if (throwIfNotFound)
+          throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
 
+        return undefined;
+      }
       return PropertyRoute.member(this, m);
     }
 

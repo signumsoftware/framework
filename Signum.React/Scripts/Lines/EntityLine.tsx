@@ -122,8 +122,6 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
 
- 
-
   if (c.isHidden)
     return null;
 

@@ -20,12 +20,15 @@ export function RenderEntity(p: RenderEntityProps) {
 
   var e = p.ctx.value
 
-  var entityFromLite = useFetchAndRemember(isLite(e) ? e : null, p.onEntityLoaded);
+  var entityFromLite = useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
   var entity = isLite(e) ? e.entity : e;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
   var componentBox = useAPI(() => {
+    if (p.ctx.propertyRoute == null)
+      return Promise.resolve(null);
+
     if (p.getComponent)
       return Promise.resolve({ func: p.getComponent });
 
@@ -37,12 +40,15 @@ export function RenderEntity(p: RenderEntityProps) {
     return viewPromise.promise.then(p => ({ func: p }));
   }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))]);
 
+  if (p.ctx.propertyRoute == null)
+    return null;
 
   if (entity == undefined)
     return null;
 
   if (componentBox == null)
     return null;
+
 
   const ti = tryGetTypeInfo(entity.Type);
 
@@ -69,7 +75,7 @@ export function RenderEntity(p: RenderEntityProps) {
     }
   }
 
-  var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
+  var prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 

@@ -69,7 +69,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     super.overrideProps(state, overridenProps);
 
     if (!state.columns) {
-      var elementPr = state.ctx.propertyRoute.addLambda(a => a[0].element);
+      var elementPr = state.ctx.propertyRoute!.addLambda(a => a[0].element);
 
       state.columns = Dic.getKeys(elementPr.subMembers())
         .filter(a => a != "Id")
@@ -78,13 +78,13 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
         }) as EntityTableColumn<ModifiableEntity, any>);
     }
 
-    var pr = state.ctx.propertyRoute.addMember("Indexer", "");
+    var pr = state.ctx.propertyRoute!.addMember("Indexer", "", true)!;
     state.columns.forEach(c => {
       if (c.template === undefined) {
         if (c.property == null)
           throw new Error("Column has no property and no template");
 
-        var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property) : pr.addLambda(c.property!));
+        var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!));
 
         c.template = (ctx, row, state) => {
           var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
@@ -134,7 +134,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
         });
 
       if (focusable.last() == e.target) {
-        var pr = this.props.ctx.propertyRoute.addLambda(a => a[0]);
+        var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
         const promise = p.onCreate ? p.onCreate(pr) : this.defaultCreate(pr);
         if (promise == null)
           return;
@@ -167,7 +167,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
       window.open(route);
     }
     else {
-      const pr = ctx.propertyRoute.addLambda(a => a[0]);
+      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
 
       const promise = p.onView ?
         p.onView(entity, pr) :
@@ -248,7 +248,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
   function renderTable() {
 
     const readOnly = ctx.readOnly;
-    const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
+    const elementPr = ctx.propertyRoute!.addLambda(a => a[0].element);
 
     var elementCtxs = c.getMListItemContext(ctx);
     var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;

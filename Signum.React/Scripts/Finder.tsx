@@ -1406,10 +1406,11 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-export function registerPropertyFormatter(pr: PropertyRoute, formater: CellFormatter) {
+export function registerPropertyFormatter(pr: PropertyRoute | undefined, formater: CellFormatter) {
+  if (pr == null)
+    return;
   registeredPropertyFormatters[pr.toString()] = formater;
 }
-
 
 export const formatRules: FormatRule[] = [
   {

@@ -318,7 +318,7 @@ function hasAllowedConstructor(typeName: string) {
   if (!ti.hasConstructorOperation)
     return true;
 
-  const allowed = Dic.getValues(ti.operations).some(oi => oi.operationType == OperationType.Constructor && Operations.isOperationInfoAllowed(oi));
+  const allowed = Dic.getValues(ti.operations).some(oi => oi.operationType == OperationType.Constructor);
 
   return allowed;
 }
@@ -561,9 +561,9 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   if (type.isEmbedded || type.name == IsByAll)
     return undefined;
 
-  const types = getTypeInfos(type);
+  const types = tryGetTypeInfos(type);
 
-  if (types.length == 1) {
+  if (types.length == 1 && types[0] != null) {
     var s = getSettings(types[0]);
 
     if (s?.findOptions) {
@@ -585,10 +585,10 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
     });
 
-  const types = getTypeInfos(type);
+  const types = tryGetTypeInfos(type);
   var delay: number | undefined;
 
-  if (types.length == 1) {
+  if (types.length == 1 && types[0] != null) {
     var s = getSettings(types[0]);
 
     if (s) {

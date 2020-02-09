@@ -41,13 +41,10 @@ export interface RegisteredQuickLink<T extends Entity> {
   options?: QuickLinkOptions;
 }
 
-export interface QuickLinkOptions {
-  allowsMultiple?: boolean
-}
 
 export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
 export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
-  onGlobalQuickLinks.push({ factory: quickLinkGenerator,  options: options });
+  onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
 }
 
 export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
@@ -203,16 +200,17 @@ class QuickLinkToggle extends React.Component<{ onClick?: (e: React.MouseEvent<a
 
 export interface QuickLinkOptions {
   isVisible?: boolean;
-  text?: string;
+  text?: () => string; //To delay niceName and avoid exceptions
   order?: number;
   icon?: IconProp;
   iconColor?: string;
   isShy?: boolean;
+  allowsMultiple?: boolean
 }
 
 export abstract class QuickLink {
   isVisible!: boolean;
-  text!: string;
+  text!: () => string;
   order!: number;
   name: string;
   icon?: IconProp;
@@ -222,7 +220,7 @@ export abstract class QuickLink {
   constructor(name: string, options?: QuickLinkOptions) {
     this.name = name;
 
-    Dic.assign(this, { isVisible: true, text: "", order: 0, ...options });
+    Dic.assign(this, { isVisible: true, text: () => "", order: 0, ...options });
   }
 
   abstract toDropDownItem(): React.ReactElement<any>;
@@ -240,7 +238,7 @@ export abstract class QuickLink {
 export class QuickLinkAction extends QuickLink {
   action: (e: React.MouseEvent<any>) => void;
 
-  constructor(name: string, text: string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
+  constructor(name: string, text: () => string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
     super(name, options);
     this.text = text;
     this.action = action;
@@ -264,7 +262,7 @@ export class QuickLinkAction extends QuickLink {
 export class QuickLinkLink extends QuickLink {
   url: string;
 
-  constructor(name: string, text: string, url: string, options?: QuickLinkOptions) {
+  constructor(name: string, text: () => string, url: string, options?: QuickLinkOptions) {
     super(name, options);
     this.text = text;
     this.url = url;
@@ -290,7 +288,7 @@ export class QuickLinkExplore extends QuickLink {
   constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
     super(getQueryKey(findOptions.queryName), {
       isVisible: Finder.isFindable(findOptions.queryName, false),
-      text: getQueryNiceName(findOptions.queryName),
+      text: () => getQueryNiceName(findOptions.queryName),
       ...options
     });
 
@@ -324,7 +322,7 @@ export class QuickLinkNavigate extends QuickLink {
   constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions) {
     super(lite.EntityType, {
       isVisible: Navigator.isNavigable(lite.EntityType),
-      text: getTypeInfo(lite.EntityType).niceName,
+      text: () => getTypeInfo(lite.EntityType).niceName!,
       ...options
     });
 

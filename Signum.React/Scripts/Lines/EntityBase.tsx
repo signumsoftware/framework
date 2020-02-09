@@ -50,19 +50,19 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   static defaultIsCreable(type: TypeReference, customComponent: boolean) {
     return type.isEmbedded ? Navigator.isCreable(type.name, { customComponent, isEmbedded: type.isEmbedded }) :
       type.name == IsByAll ? false :
-        getTypeInfos(type).some(ti => Navigator.isCreable(ti, { customComponent }));
+        tryGetTypeInfos(type).some(ti => ti && Navigator.isCreable(ti, { customComponent }));
   }
 
   static defaultIsViewable(type: TypeReference, customComponent: boolean) {
     return type.isEmbedded ? Navigator.isViewable(type.name, { customComponent, isEmbedded: type.isEmbedded }) :
       type.name == IsByAll ? true :
-        getTypeInfos(type).some(ti => Navigator.isViewable(ti, { customComponent }));
+        tryGetTypeInfos(type).some(ti => ti && Navigator.isViewable(ti, { customComponent }));
   }
 
   static defaultIsFindable(type: TypeReference) {
     return type.isEmbedded ? false :
       type.name == IsByAll ? true :
-        getTypeInfos(type).some(ti => Navigator.isFindable(ti));
+        tryGetTypeInfos(type).some(ti => ti && Navigator.isFindable(ti));
   }
 
   static propEquals(prevProps: EntityBaseProps, nextProps: EntityBaseProps): boolean {
@@ -123,7 +123,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   }
 
   doView(entity: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | undefined> | undefined {
-    const pr = this.props.ctx.propertyRoute;
+    const pr = this.props.ctx.propertyRoute!;
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
@@ -203,7 +203,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     if (t.name == IsByAll)
       return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t?.toStr /*CleanName*/);
 
-    const tis = getTypeInfos(t).filter(ti => predicate(ti));
+    const tis = tryGetTypeInfos(t).notNull().filter(ti => predicate(ti));
 
     return SelectorModal.chooseType(tis)
       .then(ti => ti ? ti.name : undefined);
@@ -227,7 +227,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     event.preventDefault();
 
-    var pr = this.props.ctx.propertyRoute;
+    var pr = this.props.ctx.propertyRoute!;
     const promise = this.props.onCreate ?
       this.props.onCreate(pr) : this.defaultCreate(pr);
 

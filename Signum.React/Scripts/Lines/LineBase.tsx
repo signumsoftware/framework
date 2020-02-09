@@ -85,7 +85,7 @@ export class LineBaseController<P extends LineBaseProps> {
 
     const so: StyleOptions = { readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-    const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute.typeReference()) } as LineBaseProps as P;
+    const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute?.typeReference()) } as LineBaseProps as P;
 
     this.getDefaultProps(p);
     runTasks(this as any as LineBaseController<LineBaseProps>, p);
@@ -124,7 +124,7 @@ export class LineBaseController<P extends LineBaseProps> {
   }
 
   get isHidden() {
-    return this.props.visible == false || this.props.hideIfNull && this.props.ctx.value == undefined;
+    return this.props.type == null || this.props.visible == false || this.props.hideIfNull && this.props.ctx.value == undefined;
   }
 }
 
