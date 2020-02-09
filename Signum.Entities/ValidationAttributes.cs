@@ -668,28 +668,6 @@ namespace Signum.Entities
         LessThanOrEqualTo,
     }
 
-    public class DaysPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public DaysPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Days)
-        { }
-    }
-
-    public class SecondsPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public SecondsPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Seconds)
-        { }
-    }
-
-    public class MinutesPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public MinutesPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Minutes)
-        { }
-
-    }
-
     public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }

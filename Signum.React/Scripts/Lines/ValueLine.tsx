@@ -106,7 +106,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset")
+    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "Date")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")

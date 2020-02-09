@@ -483,6 +483,13 @@ namespace Signum.Utilities
             return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
         }
 
+        public static int WeekNumber(this Date date)
+        {
+            var cc = CultureInfo.CurrentCulture;
+
+            return cc.Calendar.GetWeekOfYear(date, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
+        }
+
         /// <summary>
         /// Returns the unix time (also known as POSIX time or epoch time) for the give date time.
         /// </summary>
@@ -501,11 +508,6 @@ namespace Signum.Utilities
         public static long ToUnixTimeMilliseconds(this DateTime dateTime)
         {
             return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
-        }
-
-        public static Date ToDate(this DateTime dt)
-        {
-            return new Date(dt);
         }
     }
 

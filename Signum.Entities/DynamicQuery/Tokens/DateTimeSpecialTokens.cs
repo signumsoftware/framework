@@ -21,7 +21,7 @@ namespace Signum.Entities.DynamicQuery
             this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
-        private static MethodInfo GetMethodInfo(QueryTokenMessage name)
+        private static MethodInfo GetMethodInfoDateTime(QueryTokenMessage name)
         {
             return
                 name == QueryTokenMessage.MonthStart ? miMonthStart :
@@ -30,6 +30,15 @@ namespace Signum.Entities.DynamicQuery
                 name == QueryTokenMessage.HourStart ? miHourStart :
                 name == QueryTokenMessage.MinuteStart ? miMinuteStart :
                 name == QueryTokenMessage.SecondStart ? miSecondStart :
+                throw new InvalidOperationException("Unexpected name");
+        }
+
+        private static MethodInfo GetMethodInfoDate(QueryTokenMessage name)
+        {
+            return
+                name == QueryTokenMessage.MonthStart ? miDMonthStart :
+                name == QueryTokenMessage.QuarterStart ? miDQuarterStart :
+                name == QueryTokenMessage.WeekStart ? miDWeekStart :
                 throw new InvalidOperationException("Unexpected name");
         }
 
@@ -65,7 +74,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return typeof(DateTime?); }
+            get { return Parent!.Type.Nullify(); }
         }
 
         public override string Key
@@ -85,10 +94,17 @@ namespace Signum.Entities.DynamicQuery
         public static MethodInfo miMinuteStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MinuteStart(DateTime.MinValue));
         public static MethodInfo miSecondStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.SecondStart(DateTime.MinValue));
 
+        public static MethodInfo miDMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(Date.MinValue));
+        public static MethodInfo miDQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(Date.MinValue));
+        public static MethodInfo miDWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(Date.MinValue));
+
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = parent.BuildExpression(context);
-            var mi = GetMethodInfo(this.Name);
+            var mi = parent.Type.UnNullify() == typeof(Date) ? 
+                    GetMethodInfoDate(this.Name) :
+                    GetMethodInfoDateTime(this.Name);
+
             return Expression.Call(mi, exp.UnNullify()).Nullify();
         }
 
