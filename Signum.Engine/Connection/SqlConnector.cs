@@ -528,7 +528,12 @@ namespace Signum.Engine
         public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
         {
             if (dbType.IsDate())
-                AssertDateTime((DateTime?)value);
+            {
+                if (value is DateTime dt)
+                    AssertDateTime(dt);
+                else if (value is Date d)
+                    value = (DateTime)d;
+            }
 
             var result = new SqlParameter(parameterName, value ?? DBNull.Value)
             {
