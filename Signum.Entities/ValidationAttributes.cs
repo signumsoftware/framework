@@ -719,7 +719,13 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (((DateTime)value) > TimeZoneManager.Now)
+            var dateTime =
+                value is DateTime dt ? dt :
+                value is Date d ? (DateTime)d :
+                value is DateTimeOffset dto ? dto.DateTime :
+                throw new UnexpectedValueException(value);
+
+            if (dateTime > TimeZoneManager.Now)
                 return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
 
             return null;

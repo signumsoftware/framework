@@ -383,7 +383,7 @@ namespace Signum.Engine.Linq
 
             var obj = Visit(m.Object);
 
-            if ((!culture.IsReadOnly || isPostgres)&& obj.Type.UnNullify() == typeof(DateTime))
+            if ((!culture.IsReadOnly || isPostgres) && (obj.Type.UnNullify() == typeof(DateTime) || obj.Type.UnNullify() == typeof(Date)))
                 format = DateTimeExtensions.ToCustomFormatString(format, culture);
 
             if (isPostgres)
@@ -1542,8 +1542,10 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.minute); 
                 case "DateTime.AddSeconds": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.second); 
                 case "DateTime.AddMilliseconds": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.millisecond); 
+                case "Date.ToShortString": return GetDateTimeToStringSqlFunction(m, "d");
                 case "DateTime.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
                 case "DateTime.ToShortTimeString": return GetDateTimeToStringSqlFunction(m, "t");
+                case "Date.ToLongString": return GetDateTimeToStringSqlFunction(m, "D");
                 case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
                 case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
