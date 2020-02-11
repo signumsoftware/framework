@@ -748,7 +748,7 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (((DateTime)value).Year < MinYear)
+            if (((Date)value).Year < MinYear)
                 return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
 
             return null;

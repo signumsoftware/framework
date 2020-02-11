@@ -67,13 +67,13 @@ namespace Signum.Entities
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
                     foreach (var item in (IEnumerable<IModifiableEntity>)colb!)
-                        ((ModifiableEntity)item).SetParentEntity(null);
+                        ((ModifiableEntity)item).ClearParentEntity(this);
             }
 
             if (field is ModifiableEntity modb)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    modb.SetParentEntity(null);
+                    modb.ClearParentEntity(this);
             }
 
             SetSelfModified();
@@ -217,13 +217,13 @@ namespace Signum.Entities
         [NonSerialized, Ignore]
         ModifiableEntity? parentEntity;
 
-        public T? TryGetParentEntity<T>()
+        public virtual T? TryGetParentEntity<T>()
             where T: class, IModifiableEntity 
         {
             return ((IModifiableEntity?)parentEntity) as T;
         }
 
-        public T GetParentEntity<T>()
+        public virtual T GetParentEntity<T>()
             where T : IModifiableEntity
         {
             if (parentEntity == null)
@@ -232,12 +232,18 @@ namespace Signum.Entities
             return (T)(IModifiableEntity)parentEntity;
         }
 
-        private void SetParentEntity(ModifiableEntity? p)
+        protected virtual void SetParentEntity(ModifiableEntity p)
         {
             if (p != null && this.parentEntity != null && this.parentEntity != p)
                 throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
 
             this.parentEntity = p;
+        }
+
+        protected virtual void ClearParentEntity(ModifiableEntity p)
+        {
+            if (p == this.parentEntity)
+                this.parentEntity = null;
         }
 
         internal string? OnParentChildPropertyValidation(PropertyInfo pi)
