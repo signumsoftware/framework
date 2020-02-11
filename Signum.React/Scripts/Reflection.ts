@@ -487,6 +487,8 @@ export function setTypes(types: TypeInfoDictionary) {
     const m = getMember(s.key);
     if (m)
       s.id = m.id;
+
+    return s.id == null;
   });
 }
 
