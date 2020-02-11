@@ -683,9 +683,9 @@ namespace Signum.Entities
                 return null;
 
 
-            var dto= value as DateTimeOffset?;
+            var dto = ToDateTime(value);
 
-            var prec = dto!=null?dto.Value.Date.GetPrecision():((DateTime)value).GetPrecision();
+            var prec = dto.GetPrecision();
             if (prec > Precision)
                 return ValidationMessage._0HasAPrecisionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
@@ -709,6 +709,14 @@ namespace Signum.Entities
             }
         }
 
+        internal static DateTime ToDateTime(object? value)
+        {
+            return value is DateTime dt ? dt :
+                value is Date d ? (DateTime)d :
+                value is DateTimeOffset dto ? dto.DateTime :
+                throw new UnexpectedValueException(value);
+        }
+
         public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
     }
 
@@ -719,17 +727,15 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            var dateTime =
-                value is DateTime dt ? dt :
-                value is Date d ? (DateTime)d :
-                value is DateTimeOffset dto ? dto.DateTime :
-                throw new UnexpectedValueException(value);
+            DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
 
             if (dateTime > TimeZoneManager.Now)
                 return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
 
             return null;
         }
+
+        
 
         public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
     }
@@ -748,7 +754,10 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (((Date)value).Year < MinYear)
+            DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
+
+
+            if (dateTime.Year < MinYear)
                 return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
 
             return null;
