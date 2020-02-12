@@ -7,9 +7,9 @@ import { MList } from "./Signum.Entities";
 import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
 import { AggregateType } from './FindOptions';
 
-export function getEnumInfo(enumTypeName: string, enumId: number) {
+export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
-  const ti = getTypeInfo(enumTypeName);
+  const ti = tryGetTypeInfo(enumTypeName);
 
   if (!ti || ti.kind != "Enum")
     throw new Error(`${enumTypeName} is not an Enum`);
@@ -34,7 +34,7 @@ export interface TypeInfo {
   requiresEntityPack?: boolean;
   members: { [name: string]: MemberInfo };
   membersById?: { [name: string]: MemberInfo };
-
+  hasConstructorOperation?: boolean;
   operations?: { [name: string]: OperationInfo };
 }
 
@@ -250,47 +250,51 @@ export function getTypeName(pseudoType: IType | TypeInfo | string | Lite<Entity>
 }
 
 export function isTypeEntity(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return ti && ti.kind == "Entity" && !!ti.members["Id"];
+  const ti = tryGetTypeInfo(type);
+  return ti != null && ti.kind == "Entity" && !!ti.members["Id"];
 }
 
 export function isTypeEnum(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return ti && ti.kind == "Enum";
+  const ti = tryGetTypeInfo(type);
+  return ti != null && ti.kind == "Enum";
 }
 
 export function isTypeModel(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return ti && ti.kind == "Entity" && !ti.members["Id"];
-}
-
-export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
-  const ti = getTypeInfo(type);
-  return !ti;
+  const ti = tryGetTypeInfo(type);
+  return ti != null && ti.kind == "Entity" && !ti.members["Id"];
 }
 
 export function isTypeModifiableEntity(type: TypeReference): boolean {
-  return type.isEmbedded == true || getTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
+  return type.isEmbedded == true || tryGetTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
 }
-
 
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
-  if ((type as TypeInfo).kind != undefined)
-    return type as TypeInfo;
+  const typeName = getTypeName(type);
 
-  if ((type as IType).typeName)
-    return _types[((type as IType).typeName).toLowerCase()];
+  const ti = _types[typeName.toLowerCase()];
 
-  if (typeof type == "string")
-    return _types[(type as string).toLowerCase()];
+  if (ti == null)
+    throw new Error(`Type not found: ${typeName}`);
 
-  throw new Error("Unexpected type: " + type);
+  return ti;
+}
+
+export function tryGetTypeInfo(type: PseudoType): TypeInfo | undefined {
+
+  const typeName = getTypeName(type);
+
+  if (typeName == null)
+    throw new Error("Unexpected type: " + type);
+
+  const ti: TypeInfo | undefined = _types[typeName.toLowerCase()];
+
+  return ti;
 }
 
 export function isLowPopulationSymbol(type: PseudoType) {
 
-  var ti = getTypeInfo(type);
+  var ti = tryGetTypeInfo(type);
 
   return ti != null && ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
 }
@@ -308,7 +312,16 @@ export function getTypeInfos(typeReference: TypeReference | string): TypeInfo[] 
     return [];
 
   return name.split(", ").map(getTypeInfo);
+}
 
+export function tryGetTypeInfos(typeReference: TypeReference | string): (TypeInfo | undefined)[] {
+
+  const name = typeof typeReference == "string" ? typeReference : typeReference.name;
+
+  if (name == IsByAll || name == "")
+    return [];
+
+  return name.split(", ").map(tryGetTypeInfo);
 }
 
 export function getQueryNiceName(queryName: PseudoType | QueryKey): string {
@@ -345,7 +358,7 @@ export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | Typ
     return queryName.memberInfo();
   }
   else {
-    const ti = getTypeInfo(queryName);
+    const ti = tryGetTypeInfo(queryName);
     if (ti)
       return ti;
 
@@ -389,8 +402,10 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
   if ((queryName as TypeInfo).kind != undefined)
     return (queryName as TypeInfo).queryDefined || false;
 
-  if (queryName instanceof Type)
-    return getTypeInfo(queryName).queryDefined || false;
+  if (queryName instanceof Type) {
+    var ti = tryGetTypeInfo(queryName)
+    return ti && ti.queryDefined || false;
+  }
 
   if (queryName instanceof QueryKey)
     return !!_queryNames[queryName.name.toLowerCase()];
@@ -751,7 +766,7 @@ export type MemberType = "Member" | "Mixin" | "Indexer";
 
 export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute): ModifiableEntity {
 
-  const ti = getTypeInfo(type);
+  const ti = tryGetTypeInfo(type);
 
   const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
   
@@ -768,7 +783,7 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
 
         var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
 
-        initializeCollections(m, pr.addMember("Mixin", gr.key));
+        initializeCollections(m, pr.addMember("Mixin", gr.key, true)!);
 
         if (!e.mixins)
           e.mixins = {};
@@ -804,7 +819,7 @@ function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
 
 
 export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute) {
-  const ti = getTypeInfo(original.Type);
+  const ti = tryGetTypeInfo(original.Type);
 
   const result = { Type: original.Type, isNew: true, modified: true } as any as ModifiableEntity;
 
@@ -821,7 +836,7 @@ export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRou
         
         var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
 
-        copyProperties(m, (original as Entity).mixins![gr.key], pr.addMember("Mixin", gr.key));
+        copyProperties(m, (original as Entity).mixins![gr.key], pr.addMember("Mixin", gr.key, true));
         
         if (!e.mixins)
           e.mixins = {};
@@ -848,7 +863,7 @@ function copyProperties(result: any, original: any, pr: PropertyRoute){
     .forEach(t => {
       var memberName = t.key.firstLower();
       var orinalProp = (original as any)[memberName];
-      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", t.key));
+      var clonedProp = cloneIfNeeded(orinalProp, pr.addMember("Member", t.key, true));
       (result as any)[memberName] = clonedProp;
     });
 }
@@ -877,7 +892,7 @@ function cloneIfNeeded(original: any, pr: PropertyRoute) {
   if (tr.isEmbedded)
     return clone(original, pr);
 
-  if (tr.name == IsByAll || getTypeInfos(tr.name).length > 0)
+  if (tr.name == IsByAll || tryGetTypeInfos(tr.name).length > 0)
     return JSON.parse(JSON.stringify(original));
 
   return original; //string, number, boolean, etc...
@@ -905,7 +920,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
 
-    if (props && props.Type && (propertyRoute|| getTypeInfo(props.Type))) {
+    if (props && props.Type && (propertyRoute || tryGetTypeInfo(props.Type))) {
       if (props.Type != this.typeName)
         throw new Error("Cloning with another type");
       return clone(props as ModifiableEntity, propertyRoute) as T;
@@ -914,12 +929,11 @@ export class Type<T extends ModifiableEntity> implements IType {
     return New(this.typeName, props, propertyRoute) as T;
   }
 
-
   constructor(
     public typeName: string) { }
 
-  tryTypeInfo(): TypeInfo {
-    return getTypeInfo(this.typeName);
+  tryTypeInfo(): TypeInfo | undefined {
+    return tryGetTypeInfo(this.typeName);
   }
 
   typeInfo(): TypeInfo {
@@ -927,18 +941,24 @@ export class Type<T extends ModifiableEntity> implements IType {
     const result = this.tryTypeInfo();
 
     if (!result)
-      throw new Error(`Type ${this.typeName} has no TypeInfo. If is an embedded? Then start from some main entity type containing it to get metadata for the embedded properties (i.e. MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
+      throw new Error(`Type ${this.typeName} has no TypeInfo. \nNote: If is an EmbeddedEntity, start from some main Entity Type containing it to get metadata for the embedded properties (example: MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
 
     return result;
   }
 
   memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-    var pr = this.propertyRoute(lambdaToProperty);
+    var pr = this.propertyRouteAssert(lambdaToProperty);
 
     if (!pr.member)
       throw new Error(`${pr.propertyPath()} has no member`);
 
     return pr.member;
+  }
+
+  tryMemberInfo(lambdaToProperty: (v: T) => any): MemberInfo | undefined {
+    var pr = this.tryPropertyRoute(lambdaToProperty);
+
+    return pr?.member;
   }
 
   hasMixin(mixinType: Type<MixinEntity>): boolean {
@@ -946,7 +966,7 @@ export class Type<T extends ModifiableEntity> implements IType {
   }
 
   mixinMemberInfo<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): MemberInfo {
-    var pr = this.mixinPropertyRoute(mixinType, lambdaToProperty);
+    var pr = this.mixinPropertyRouteAssert(mixinType, lambdaToProperty);
 
     if (!pr.member)
       throw new Error(`${pr.propertyPath()} has no member`);
@@ -954,12 +974,34 @@ export class Type<T extends ModifiableEntity> implements IType {
     return pr.member;
   }
 
-  propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
+  tryMixinMemberInfo<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): MemberInfo | undefined {
+    var pr = this.tryMixinPropertyRoute(mixinType, lambdaToProperty);
+
+    return pr?.member;
+  }
+
+  propertyRouteAssert(lambdaToProperty: (v: T) => any): PropertyRoute {
     return PropertyRoute.root(this.typeInfo()).addLambda(lambdaToProperty);
   }
 
-  mixinPropertyRoute<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute {
-    return PropertyRoute.root(this.typeInfo()).addMember("Mixin", mixinType.typeName).addLambda(lambdaToProperty);
+  tryPropertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute | undefined {
+
+    var ti = this.tryTypeInfo();
+    if (ti == null)
+      return undefined;
+    return PropertyRoute.root(ti).tryAddLambda(lambdaToProperty);
+  }
+
+  mixinPropertyRouteAssert<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute {
+    return PropertyRoute.root(this.typeInfo()).addMember("Mixin", mixinType.typeName, true).addLambda(lambdaToProperty);
+  }
+
+  tryMixinPropertyRoute<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute | undefined {
+    var ti = this.tryTypeInfo();
+    if (ti == null)
+      return undefined;
+
+    return PropertyRoute.root(ti).addMember("Mixin", mixinType.typeName, false)?.tryAddLambda(lambdaToProperty);
   }
 
   niceName(): string {
@@ -1332,7 +1374,7 @@ export class PropertyRoute {
       return { type: "Member", name: p };
     });
 
-    parts.forEach(m => result = result.addMember(m.type, m.name));
+    parts.forEach(m => result = result.addMember(m.type, m.name, true));
 
     return result;
   }
@@ -1357,6 +1399,16 @@ export class PropertyRoute {
       getFieldMembers(property);
 
     let result: PropertyRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addLambdaMember(m), this)
+
+    return result;
+  }
+
+  tryAddLambda(property: ((val: any) => any) | string): PropertyRoute | undefined {
+    const lambdaMembers = typeof property == "function" ?
+      getLambdaMembers(property) :
+      getFieldMembers(property);
+
+    let result: PropertyRoute | undefined = lambdaMembers.reduce<PropertyRoute | undefined>((pr, m) => pr && pr.tryAddLambdaMember(m), this)
 
     return result;
   }
@@ -1400,19 +1452,23 @@ export class PropertyRoute {
 
   tryAddMember(memberType: MemberType, memberName: string): PropertyRoute | undefined {
     try {
-      return this.addMember(memberType, memberName);
+      return this.addMember(memberType, memberName, false);
     } catch (e) {
       return undefined;
     }
   }
 
-
   addLambdaMember(lm: LambdaMember): PropertyRoute {
-    return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name)
+    return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name, true);
   }
 
+  tryAddLambdaMember(lm: LambdaMember): PropertyRoute | undefined {
+    return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name, false);
+  }
 
-  addMember(memberType: MemberType, memberName: string): PropertyRoute {
+    addMember(memberType: MemberType, memberName: string, throwIfNotFound: true): PropertyRoute;
+    addMember(memberType: MemberType, memberName: string, throwIfNotFound: false): PropertyRoute | undefined;
+    addMember(memberType: MemberType, memberName: string, throwIfNotFound: boolean): PropertyRoute | undefined {
 
     var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
 
@@ -1430,12 +1486,15 @@ export class PropertyRoute {
           return PropertyRoute.liteEntity(this);
         }
 
-        const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
+        const ti = tryGetTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
           const m = ti.members[memberName];
-          if (!m)
-            throw new Error(`member '${memberName}' not found` + getErrorContext());
+          if (!m) {
+            if (throwIfNotFound)
+              throw new Error(`member '${memberName}' not found` + getErrorContext());
+            return undefined;
+          }
 
           return PropertyRoute.member(PropertyRoute.root(ti), m);
         } else if (this.propertyRouteType == "LiteEntity") {
@@ -1448,9 +1507,12 @@ export class PropertyRoute {
           this.propertyPath() + "." + memberName;
 
       const m = this.findRootType().members[fullMemberName];
-      if (!m)
-        throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
+      if (!m) {
+        if (throwIfNotFound)
+          throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
 
+        return undefined;
+      }
       return PropertyRoute.member(this, m);
     }
 
@@ -1526,7 +1588,11 @@ export class PropertyRoute {
       case "Field":
       case "MListItem":
         {
-          const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
+          var tr = this.typeReference();
+          if (tr.name == IsByAll)
+            return {};
+
+          const ti = tryGetTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
           if (ti && isTypeEntity(ti))
             return simpleMembersAfter(ti, "");
           else

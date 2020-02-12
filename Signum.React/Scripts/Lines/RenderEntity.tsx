@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Navigator from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, getTypeInfo, ReadonlyBinding } from '../Reflection'
+import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
 import { ViewPromise } from "../Navigator";
 import { ErrorBoundary } from '../Components';
@@ -20,12 +20,15 @@ export function RenderEntity(p: RenderEntityProps) {
 
   var e = p.ctx.value
 
-  var entityFromLite = useFetchAndRemember(isLite(e) ? e : null, p.onEntityLoaded);
+  var entityFromLite = useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
   var entity = isLite(e) ? e.entity : e;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
   var componentBox = useAPI(() => {
+    if (p.ctx.propertyRoute == null)
+      return Promise.resolve(null);
+
     if (p.getComponent)
       return Promise.resolve({ func: p.getComponent });
 
@@ -37,6 +40,8 @@ export function RenderEntity(p: RenderEntityProps) {
     return viewPromise.promise.then(p => ({ func: p }));
   }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))]);
 
+  if (p.ctx.propertyRoute == null)
+    return null;
 
   if (entity == undefined)
     return null;
@@ -44,7 +49,8 @@ export function RenderEntity(p: RenderEntityProps) {
   if (componentBox == null)
     return null;
 
-  const ti = getTypeInfo(entity.Type);
+
+  const ti = tryGetTypeInfo(entity.Type);
 
   const ctx = p.ctx;
 
@@ -69,7 +75,7 @@ export function RenderEntity(p: RenderEntityProps) {
     }
   }
 
-  var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
+  var prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 

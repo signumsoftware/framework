@@ -122,8 +122,15 @@ namespace Signum.Engine
             where N : class
             where K : notnull
         {
-            return newDictionary.OuterJoinDictionaryCC(oldDictionary, (key, newVal, oldVal) =>
+            HashSet<K> set = new HashSet<K>();
+            set.UnionWith(newDictionary.Keys);
+            set.UnionWith(oldDictionary.Keys);
+
+            return set.Select(key =>
             {
+                var newVal = newDictionary.TryGetC(key);
+                var oldVal = oldDictionary.TryGetC(key);
+
                 if (newVal == null)
                     return removeOld == null ? null : removeOld(key, oldVal!);
 
@@ -131,7 +138,7 @@ namespace Signum.Engine
                     return createNew == null ? null : createNew(key, newVal);
 
                 return mergeBoth == null ? null : mergeBoth(key, newVal, oldVal);
-            }).Values.Combine(spacing);
+            }).Combine(spacing);
         }
 
 
@@ -157,7 +164,7 @@ namespace Signum.Engine
             return SynchronizeScript(spacing, newDictionary, repOldDictionary, createNew, removeOld, mergeBoth);
         }
 
-        public static IDisposable? RenameTable(Table table, Replacements replacements)
+        public static IDisposable? UseOldTableName(Table table, Replacements replacements)
         {
             string? fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
             if (fullName == null)
@@ -165,7 +172,7 @@ namespace Signum.Engine
 
             ObjectName realName = table.Name;
 
-            table.Name = ObjectName.Parse(fullName);
+            table.Name = ObjectName.Parse(fullName, Schema.Current.Settings.IsPostgres);
 
             return new Disposable(() => table.Name = realName);
         }

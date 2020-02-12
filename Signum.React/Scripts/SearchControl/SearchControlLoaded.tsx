@@ -8,7 +8,7 @@ import {
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity } from '../Signum.Entities'
-import { getTypeInfos, TypeInfo, isTypeModel } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
@@ -174,9 +174,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   canFilter() {
     const p = this.props;
-    return p.showHeader && (p.showFilterButton || p.showFilters)
+    return p.showHeader == true && (p.showFilterButton || p.showFilters);
   }
-
 
   getQueryRequest(): QueryRequest {
     const fo = this.props.findOptions;
@@ -620,7 +619,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   chooseType(): Promise<string | undefined> {
 
     const tis = getTypeInfos(this.props.queryDescription.columns["Entity"].type)
-      .filter(ti => Navigator.isCreable(ti, false, true));
+      .filter(ti => Navigator.isCreable(ti, { isSearch: true }));
 
     return SelectorModal.chooseType(tis)
       .then(ti => ti ? ti.name : undefined);
@@ -724,7 +723,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-
     return Promise.all(filters.map(fs => Finder.fetchEntitiesWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
   }
 
@@ -739,7 +737,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   loadMenuItems() {
     var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
-
     if (cm == "Basic")
       this.setState({ currentMenuItems: [] });
     else {
@@ -1180,7 +1177,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.navigate) {
       var lite = row.entity!;
 
-      if (!Navigator.isNavigable(lite.EntityType, undefined, true))
+      if (!Navigator.isNavigable(lite.EntityType, { isSearch: true }))
         return;
 
       e.preventDefault();

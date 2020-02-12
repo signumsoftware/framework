@@ -76,7 +76,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
     const list = ctx.value!;
     const entity = list[selectedIndex].element;
 
-    const pr = ctx.propertyRoute.addLambda(a => a[0]);
+    const pr = ctx.propertyRoute!.addLambda(a => a[0]);
 
     const openWindow = (event.button == 1 || event.ctrlKey) && !this.props.type!.isEmbedded;
 

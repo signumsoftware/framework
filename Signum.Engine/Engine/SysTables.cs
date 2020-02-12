@@ -75,13 +75,6 @@ namespace Signum.Engine.SchemaInfoTables
             As.Expression(() => Database.View<SysTables>().Where(t => t.schema_id == this.schema_id));
     }
 
-    public enum SysTableTemporalType
-    {
-        None = 0,
-        HistoryTable = 1,
-        SystemVersionTemporalTable = 2
-    }
-
     [TableName("sys.periods")]
     public class SysPeriods : IView
     {

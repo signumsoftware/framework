@@ -104,7 +104,7 @@ export interface MultiValueLineElementProps {
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
   const ctx = props.ctx;
 
-  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute)
+  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute!)
 
   return (
     <tr>

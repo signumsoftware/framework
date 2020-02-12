@@ -97,6 +97,17 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
+        public void DateTimeFunctionsStart()
+        {
+            Dump((NoteWithDateEntity n) => n.CreationTime.MonthStart());
+            Dump((NoteWithDateEntity n) => n.CreationTime.Date);
+            Dump((NoteWithDateEntity n) => n.CreationTime.WeekStart());
+            Dump((NoteWithDateEntity n) => n.CreationTime.HourStart());
+            Dump((NoteWithDateEntity n) => n.CreationTime.MinuteStart());
+            Dump((NoteWithDateEntity n) => n.CreationTime.SecondStart());
+        }
+
+        [Fact]
         public void DayOfWeekWhere()
         {
             var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();
@@ -159,6 +170,13 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
             Dump((NoteWithDateEntity n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
+        }
+
+        [Fact]
+        public void DateDiffFunctionsTo()
+        {
+            Dump((NoteWithDateEntity n) => n.CreationTime.YearsTo(n.CreationTime).InSql());
+            Dump((NoteWithDateEntity n) => n.CreationTime.MonthsTo(n.CreationTime).InSql());
         }
 
         [Fact]
@@ -355,9 +373,11 @@ namespace Signum.Test.LinqProvider
                         select MinimumExtensions.MinimumScalar(x, y)).ToList();
 
             var t4 = PerfCounter.Ticks;
-
-            Assert.True(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
-            Assert.True(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
+            if (!Schema.Current.Settings.IsPostgres)
+            {
+                Assert.True(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
+                Assert.True(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
+            }
         }
 
         [Fact]

@@ -129,7 +129,7 @@ namespace Signum.Engine.Linq
                         return mapped;
                     }
 
-                    mapped = request.AddIndependentColumn(column.Type, column.Name, implementation, column);
+                    mapped = request.AddIndependentColumn(column.Type, column.Name!, implementation, column);
                     this.map[column] = mapped;
                     return mapped;
                 }
@@ -188,7 +188,7 @@ namespace Signum.Engine.Linq
 
         public ColumnDeclaration MapColumn(ColumnExpression ce)
         {
-            string columnName = GetUniqueColumnName(ce.Name);
+            string columnName = GetUniqueColumnName(ce.Name!);
             var result = new ColumnDeclaration(columnName, ce);
             columns.Add(result.Name, result);
             return result;

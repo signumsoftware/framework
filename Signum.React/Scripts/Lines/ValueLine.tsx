@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -164,7 +164,13 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
     return null;
 
   return ValueLineRenderers.renderers[c.props.valueLineType!](c);
-}), (prev, next) => LineBaseController.propEquals(prev, next));
+}), (prev, next) => {
+  if (
+    next.extraButtons || prev.extraButtons)
+    return false;
+
+  return LineBaseController.propEquals(prev, next);
+});
 
 export namespace ValueLineRenderers {
   export const renderers: {
@@ -176,6 +182,7 @@ export function isNumber(e: React.KeyboardEvent<any>) {
   const c = e.keyCode;
   return ((c >= 48 && c <= 57) /*0-9*/ ||
     (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+    (c == KeyCodes.enter) ||
     (c == KeyCodes.backspace) ||
     (c == KeyCodes.tab) ||
     (c == KeyCodes.clear) ||
@@ -239,13 +246,15 @@ ValueLineRenderers.renderers["ComboBox"] = (vl) => {
   return internalComboBox(vl);
 };
 
-
-
 function getOptionsItems(vl: ValueLineController): OptionItem[] {
-  var ti = getTypeInfo(vl.props.type!.name);
+  var ti: TypeInfo;
+  function getTi() {
+    return ti ?? (ti = getTypeInfo(vl.props.type!.name));
+  }
+
   if (vl.props.comboBoxItems)
     return vl.props.comboBoxItems.map(a =>
-      typeof a == "string" ? ti.members[a] && toOptionItem(ti.members[a]) :
+      typeof a == "string" ? getTi().members[a] && toOptionItem(getTi().members[a]) :
         toOptionItem(a)).filter(a => !!a);
 
   if (vl.props.type!.name == "boolean")
@@ -254,7 +263,7 @@ function getOptionsItems(vl: ValueLineController): OptionItem[] {
       { label: BooleanEnum.niceToString("True")!, value: true }
     ]);
 
-  return Dic.getValues(ti.members).map(m => toOptionItem(m));
+  return Dic.getValues(getTi().members).map(m => toOptionItem(m));
 }
 
 function toOptionItem(m: MemberInfo | OptionItem): OptionItem {
@@ -669,7 +678,7 @@ export interface DurationTextBoxProps {
 
 export function DurationTextBox(p: DurationTextBoxProps) {
 
-  const [text, setState] = React.useState<string | undefined>(undefined);
+  const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
     p.value != undefined ? durationToString(p.value, p.format) :
@@ -694,14 +703,16 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     var format = p.format!;
 
     function fixNumber(val: string) {
-      if (!val.contains(":")) {
-        if (format.startsWith("hh"))
-          return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
-        if (format.startsWith("mm"))
-          return format.replace("mm", val.toString()).replace("ss", "00");
-        return val;
+      var valParts = val.split(":");
+      var formatParts = format.split(":");
+      var result = format;
+      for (var i = 0; i < formatParts.length; i++) {
+        var formP = formatParts[i];
+        var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
+        result = result.replace(formP, valP);
       }
-      return val;
+
+      return result;
     }
 
     function normalize(val: string) {
@@ -713,7 +724,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
     const input = e.currentTarget as HTMLInputElement;
     const result = input.value == undefined || input.value.length == 0 ? null : normalize(fixNumber(input.value));
-    setState(undefined);
+    setText(undefined);
     if (p.value != result)
       p.onChange(result);;
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
@@ -722,7 +733,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
-    setState(input.value);
+    setText(input.value);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {

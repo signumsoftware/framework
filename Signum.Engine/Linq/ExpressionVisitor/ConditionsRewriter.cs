@@ -4,6 +4,7 @@ using Signum.Utilities;
 using System.Collections.ObjectModel;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlTypes;
+using System.Linq;
 
 namespace Signum.Engine.Linq
 {
@@ -159,7 +160,7 @@ namespace Signum.Engine.Linq
         {
             var expression = MakeSqlValue(Visit(castExpr.Expression));
             if (expression != castExpr.Expression)
-                return new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+                return new SqlCastExpression(castExpr.Type, expression, castExpr.DbType);
             return castExpr;
         }
 
@@ -282,7 +283,7 @@ namespace Signum.Engine.Linq
         {
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments)
-                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
             return sqlFunction;
         }
 
@@ -307,9 +308,9 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = MakeSqlValue(Visit(aggregate.Expression));
-            if (source != aggregate.Expression)
-                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction, aggregate.Distinct);
+            var arguments = Visit(aggregate.Arguments).Select(a => MakeSqlValue(a)).ToReadOnly();
+            if (arguments != aggregate.Arguments)
+                return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, arguments);
             return aggregate;
         }
 
@@ -374,7 +375,7 @@ namespace Signum.Engine.Linq
                 return c;
             });
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments, update.ReturnRowCount);
             return update;
         }
 

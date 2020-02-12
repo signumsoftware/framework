@@ -457,6 +457,11 @@ namespace Signum.Utilities
         {
             return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
         }
+
+        public static Date ToDate(this DateTime dt)
+        {
+            return new Date(dt);
+        }
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
