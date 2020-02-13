@@ -1050,6 +1050,8 @@ namespace Signum.Entities
         _0IsNotAllowedOnState1,
         [Description("{0} is not set")]
         _0IsNotSet,
+        [Description("{0} are not set")]
+        _0AreNotSet,
         [Description("{0} is set")]
         _0IsSet,
         [Description("{0} is not a {1}")]
