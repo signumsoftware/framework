@@ -37,7 +37,7 @@ namespace Signum.Engine
 
                         var version = (string)result.Rows[0]["server_version"]!;
 
-                        return new Version(version);
+                        return new Version(version.TryBefore("(") ?? version);
                     }
                 }
             });
