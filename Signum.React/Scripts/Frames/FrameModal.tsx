@@ -61,9 +61,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const forceUpdate = useForceUpdate();
 
   React.useImperativeHandle(ref, () => ({
-  handleKeyDown(e: KeyboardEvent) {
+    handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
-  }
+    }
   }));
 
   const typeName = getTypeName(p.entityOrPack);
@@ -167,7 +167,13 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }
 
   function handleOnExited() {
-    p.onExited!(okClicked.current ? packComponent!.pack.entity : undefined);
+    if (okClicked.current)
+      p.onExited!(packComponent!.pack.entity);
+    else {
+      var oldEntity = JSON.parse(packComponent!.lastEntity) as ModifiableEntity;
+      GraphExplorer.propagateAll(oldEntity);
+      p.onExited!(oldEntity.modified ? undefined : oldEntity);
+    }
   }
 
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
