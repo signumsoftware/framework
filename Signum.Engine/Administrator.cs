@@ -23,12 +23,16 @@ namespace Signum.Engine
         public static void TotalGeneration()
         {
             foreach (var db in Schema.Current.DatabaseNames())
+            {
                 Connector.Current.CleanDatabase(db);
+                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            }
 
             SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
             foreach (SqlPreCommand command in totalScript.Commands)
             {
                 command.ExecuteLeaves();
+                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
             }
         }
 
