@@ -10,11 +10,11 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";
 import { NavDropdown, Dropdown } from 'react-bootstrap';
-import { Nav } from 'react-bootstrap';
+import { Nav, Navbar } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
 
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
@@ -43,6 +43,7 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
 
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
+  const forceUpdate = useForceUpdate();
   const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
   const responseRef = useUpdatedRef(response);
   const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
@@ -84,6 +85,19 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
     );
 
 
+  function handleOnToggle(res: ToolbarClient.ToolbarResponse<any>) {
+
+    if (avoidCollapse.contains(res))
+      avoidCollapse.remove(res);
+    else
+    if (!expanded.contains(res))
+      expanded.push(res);
+    else
+      expanded.clear();
+
+    forceUpdate();
+  }
+
   function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
 
     switch (res.type) {
@@ -98,10 +112,18 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
         if (res.elements && res.elements.length) {
           var title = res.label ?? res.content!.toStr;
           var icon = getIcon(res);
+
           return (
-            <NavDropdown id={"button" + index} title={!icon ? title : (<span>{icon}{title}</span>)}>
+            <Dropdown
+              onToggle={() => handleOnToggle(res)}
+              show={expanded.contains(res)}>
+              <Dropdown.Toggle id="dropdown-toolbar" as={CustomToggle} onClick={() => handleOnToggle(res)}>
+                {!icon ? title : (<span>{icon}{title}</span>)}
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
                 {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
-            </NavDropdown>
+              </Dropdown.Menu>
+            </Dropdown>
           );
         }
 
@@ -278,3 +300,17 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
 
   return null;
 }
+
+const CustomToggle = React.forwardRef(function CustomToggle(p: { children: React.ReactNode, onClick: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
+
+  return (
+    <a
+      ref={ref}
+      className="dropdown-toggle nav-link"
+      href="#"
+      onClick={e => { e.preventDefault(); p.onClick(e); }}>
+      {p.children}
+    </a>
+  );
+});
+
