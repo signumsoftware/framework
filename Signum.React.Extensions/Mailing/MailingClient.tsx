@@ -110,7 +110,7 @@ export function start(options: {
   API.getAllTypes().then(types => {
     allTypes = types;
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("emailMessages",
-      EmailMessageEntity.nicePluralName(),
+      () => EmailMessageEntity.nicePluralName(),
       e => getEmailMessages(ctx.lite),
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(EmailMessageEntity),

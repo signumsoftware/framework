@@ -29,7 +29,7 @@ namespace Signum.React.Omnibox
             QueryNameJsonConverter.GetQueryKey = qn => QueryUtils.GetKey(qn);
             OmniboxParser.Manager = new ReactOmniboxManager();
 
-            ReflectionServer.RegisterLike(typeof(OmniboxMessage));
+            ReflectionServer.RegisterLike(typeof(OmniboxMessage), () => OmniboxPermission.ViewOmnibox.IsAuthorized());
 
             foreach (var g in generators)
             {

@@ -33,7 +33,7 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
       return undefined;
 
-    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), () => {
+    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), () => {
       API.exportAsset(ctx.lites);
     }, {
         iconColor: "#FCAE25",

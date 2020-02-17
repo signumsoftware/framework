@@ -16,7 +16,7 @@ namespace Signum.Entities.Authorization
             if (p.Length >= 5)
                 return null;
 
-            return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
+            return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(p.Length);
         };
 
         public static string? OnValidatePassword(string password)
@@ -50,7 +50,7 @@ namespace Signum.Entities.Authorization
             if (pi.Name == nameof(State))
             {
                 if (DisabledOn != null && State != UserState.Disabled)
-                    return AuthMessage.TheUserStateMustBeDisabled.NiceToString();
+                    return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
             return base.PropertyValidation(pi);

@@ -7,7 +7,7 @@ import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templat
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
-import IFrameRenderer from './IFrameRenderer'
+import IFrameRenderer from './IframeRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
 import { useForceUpdate } from '@framework/Hooks'

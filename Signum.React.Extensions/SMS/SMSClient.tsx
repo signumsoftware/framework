@@ -37,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
   API.getAllTypes().then(types => {
     allTypes = types;
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("smsMessages",
-      SMSMessageEntity.nicePluralName(),
+      () => SMSMessageEntity.nicePluralName(),
       e => getSMSMessages(ctx.lite),
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(SMSMessageEntity),

@@ -58,7 +58,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   registerChartScriptComponent(D3ChartScript.StackedBars, () => import("./D3Scripts/StackedBars"));
   registerChartScriptComponent(D3ChartScript.StackedColumns, () => import("./D3Scripts/StackedColumns"));
   registerChartScriptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
-  registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/Treemap"));
+  registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/TreeMap"));
 
   if (options.googleMapsApiKey) {
     window.__google_api_key = options.googleMapsApiKey;

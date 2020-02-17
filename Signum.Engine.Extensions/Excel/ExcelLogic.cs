@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Excel;
@@ -13,6 +13,7 @@ using Signum.Engine.Operations;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Excel
 {
@@ -22,6 +23,8 @@ namespace Signum.Engine.Excel
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                PermissionAuthLogic.RegisterTypes(typeof(ExcelPermission));
+                
                 if (excelReport)
                 {
                     QueryLogic.Start(sb);

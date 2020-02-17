@@ -169,9 +169,9 @@ namespace Signum.Engine.Authorization
 
         public static PropertyAllowed GetNoUserPropertyAllowed(this PropertyRoute route)
         {
-            var hasAttr = route.RootType.HasAttribute<AllowedNoUserAttribute>() ||
-                (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowedNoUserAttribute>()) ||
-                (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowedNoUserAttribute>());
+            var hasAttr = route.RootType.HasAttribute<AllowUnathenticatedAttribute>() ||
+                (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowUnathenticatedAttribute>()) ||
+                (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowUnathenticatedAttribute>());
 
             return hasAttr ? PropertyAllowed.Write : PropertyAllowed.None;
         }

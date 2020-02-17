@@ -121,12 +121,12 @@ export function start(options: { routes: JSX.Element[] }) {
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(das =>
-      das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr ?? "", e => {
+      das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => d.toStr ?? "", e => {
         Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
       }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
   });
 
-  QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", DashboardMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
     e => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)

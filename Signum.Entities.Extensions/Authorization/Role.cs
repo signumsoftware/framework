@@ -54,7 +54,7 @@ namespace Signum.Entities.Authorization
             {
                 UserEntity user = UserEntity.Current;
                 if (user == null)
-                    throw new AuthenticationException(AuthMessage.NotUserLogged.NiceToString());
+                    throw new AuthenticationException(LoginAuthMessage.NotUserLogged.NiceToString());
 
                 return user.Role;
             }
