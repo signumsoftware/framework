@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 5,
@@ -24,7 +24,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,
@@ -119,8 +119,8 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 }
 
 class CanvasScatterplot extends React.Component<{
-  xRule: Rule,
-  yRule: Rule,
+  xRule: Rule<"content">,
+  yRule: Rule<"content">,
   colorKeyColumn: ChartClient.ChartColumn<unknown>,
   horizontalColumn: ChartClient.ChartColumn<number>,
   verticalColumn: ChartClient.ChartColumn<number>,

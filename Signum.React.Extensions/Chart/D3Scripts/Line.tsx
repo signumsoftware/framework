@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderLine({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
   
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -24,7 +24,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _2: parseFloat(parameters["NumberOpacity"]) > 0 ? 20 : 5,
     content: '*',
     ticks: 4,

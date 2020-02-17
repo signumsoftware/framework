@@ -57,7 +57,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var cleanDate = (d: Date) => d.toJSON().beforeLast(".");
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: '*',
     title: 14,
     _2: 4,
@@ -66,7 +66,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   }, height);
   //yRule.debugY(chart);
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: '*',
     title: 14,
     _2: 4,
