@@ -248,7 +248,7 @@ export class QuickLinkAction extends QuickLink {
 
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
@@ -272,7 +272,7 @@ export class QuickLinkLink extends QuickLink {
 
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
@@ -298,7 +298,7 @@ export class QuickLinkExplore extends QuickLink {
   toDropDownItem() {
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
@@ -333,7 +333,7 @@ export class QuickLinkNavigate extends QuickLink {
   toDropDownItem() {
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }

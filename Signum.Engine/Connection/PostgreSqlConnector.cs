@@ -37,7 +37,7 @@ namespace Signum.Engine
 
                         var version = (string)result.Rows[0]["server_version"]!;
 
-                        return new Version(version);
+                        return new Version(version.TryBefore("(") ?? version);
                     }
                 }
             });
@@ -436,6 +436,7 @@ BEGIN
                 FROM pg_class pc, pg_namespace pns
                 WHERE pns.oid=pc.relnamespace
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pc.relname NOT LIKE 'pg_%'
                     AND pc.relkind IN ('v', 'm')
             ) LOOP
                 EXECUTE format('DROP VIEW %I.%I;',

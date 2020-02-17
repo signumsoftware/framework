@@ -728,7 +728,7 @@ namespace Signum.Engine.CodeGeneration
             List<string> parts = GetSqlDbTypeParts(col, type);
 
             if (parts.Any() && SqlTypeAttributeNecessary(parts, table, col))
-                return "SqlDbType(" + parts.ToString(", ") + ")";
+                return "DbType(" + parts.ToString(", ") + ")";
 
             return null;
         }
