@@ -18,6 +18,7 @@ namespace Signum.Entities.Authorization
         IncorrectPassword,
 
         Login,
+        Password,
         ChangePassword,
         SwitchUser,
         [Description("Logout")]
