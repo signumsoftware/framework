@@ -114,7 +114,11 @@ namespace Signum.Engine
             try
             {
                 var script = File.ReadAllText(fileName);
-                ExecuteScript("script", script);
+                using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+                {
+                    ExecuteScript("script", script);
+                    tr.Commit();
+                }
             }
             catch (ExecuteSqlScriptException)
             {
