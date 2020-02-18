@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
@@ -14,7 +14,10 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
-  <Type Name="CollectionAnyAllType" />
+  <Type Name="CollectionAnyAllType">
+    <Member Name="All" Description="Alle" />
+    <Member Name="Any" Description="jegliche" />
+  </Type>
   <Type Name="CollectionElementType">
     <Member Name="Element" Description="Element" />
     <Member Name="Element2" Description="Element (2)" />
@@ -141,11 +144,13 @@
   </Type>
   <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
+    <Member Name="activateTimeMachine" Description="Aktivieren der Zeitmaschine" />
     <Member Name="addFilter" Description="Filter hinzufügen" />
     <Member Name="cancel" Description="Abbrechen" />
     <Member Name="chooseAType" Description="Wählen Sie einen Typ" />
     <Member Name="chooseAValue" Description="Wählen Sie einen Wert" />
     <Member Name="create" Description="Erstellen" />
+    <Member Name="deactivateTimeMachine" Description="Deaktivieren der Zeitmaschine" />
     <Member Name="editColumn" Description="Spalte bearbeiten" />
     <Member Name="enterTheNewColumnName" Description="Geben Sie den neuen Spaltennamen ein" />
     <Member Name="error" Description="Fehler" />
@@ -181,6 +186,7 @@
     <Member Name="showFilters" Description="Filter anzeigen" />
     <Member Name="showPeriod" Description="Zeit zeigen" />
     <Member Name="showPreviousOperation" Description="Vorherige Operation zeigen" />
+    <Member Name="showRecords" Description="Zeige Aufzeichnungen" />
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
@@ -298,9 +304,12 @@
     <Member Name="Month" Description="Monat" />
     <Member Name="MonthStart" Description="Monatsbeginn " />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
+    <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Null" />
     <Member Name="Number" Description="Nummer" />
     <Member Name="Of" Description=" von " />
+    <Member Name="Quarter" Description="Quartal" />
+    <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="Second" Description="Sekunde" />
     <Member Name="SecondStart" Description="Start Sekunde" />
     <Member Name="Step0" Description="Schritt {0}" />
@@ -324,9 +333,11 @@
     <Member Name="_0Results_N" Description="{0} Ergebnis[se]." />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
     <Member Name="AddFilter" Description="Filter hinzufügen" />
+    <Member Name="AddGroup" Description="Gruppe hinzufügen" />
     <Member Name="AddValue" Description="Wert hinzufügen" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
+    <Member Name="Column" Description="Spalte" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
@@ -345,16 +356,22 @@
     <Member Name="Of" Description="von" />
     <Member Name="Operation" Description="Verknüpfung" />
     <Member Name="Operations" Description="Operationen" />
+    <Member Name="ParentValue" Description="Übergeordneter Wert" />
+    <Member Name="PinnedFilter" Description="Angehefteten Filter" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotRegistered" Description="Abfrage {0} ist nicht in der QueryLogic.Queries registriert." />
+    <Member Name="Refresh" Description="Aktualisieren" />
     <Member Name="Rename" Description="Umbenennen" />
+    <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
     <Member Name="SearchControl_Pagination_All" Description="Alle" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
     <Member Name="Value" Description="Wert" />
     <Member Name="View" Description="Anzeigen" />
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />
+    <Member Name="WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound" Description="Wenn gedrückt wird, wird der Filterwert geteilt und alle Wörter müssen gefunden werden" />
+    <Member Name="WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull" Description="Wenn der Filter gedrückt wird, wird er keine Wirkung erzielen, wenn der Wert null ist." />
   </Type>
   <Type Name="SelectorMessage">
     <Member Name="ChooseAValue" Description="Wählen Sie einen Wert" />
@@ -382,8 +399,16 @@
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
-  <Type Name="SystemTimeMode" />
-  <Type Name="SystemTimeProperty" />
+  <Type Name="SystemTimeMode">
+    <Member Name="All" Description="Alle" />
+    <Member Name="AsOf" Description="Ab" />
+    <Member Name="Between" Description="Zwischen" />
+    <Member Name="ContainedIn" Description="Enthalten in" />
+  </Type>
+  <Type Name="SystemTimeProperty">
+    <Member Name="SystemValidFrom" Description="System gültig von" />
+    <Member Name="SystemValidTo" Description="System gültig für" />
+  </Type>
   <Type Name="TypeEntity" Description="Typ">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />
@@ -395,13 +420,16 @@
     <Member Name="_0And1And2CanNotBeSetAtTheSameTime" Description="{0} und {1} und {2} können nicht zur gleichen Zeit gesetzt werden" />
     <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} und {1} können nicht gleichzeitig festgelegt werden" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} hat kein gültiges {1}-Format" />
+    <Member Name="_0DoesNotHaveAValid1IdentifierFormat" Description="'{0}' hat kein gültiges {1}-Bezeichnerformat" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} hat ein ungültiges Format" />
+    <Member Name="_0HasAPrecisionOf1InsteadOf2" Description="{0} hat eine Genauigkeit von {1} statt {2}" />
     <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} hat mehr als {1} Dezimalstellen" />
     <Member Name="_0HasSomeRepeatedElements1" Description="{0} hat einige wiederholte Elemente: {1}" />
     <Member Name="_0HasToBeBetween1And2" Description="{0} muss zwischen {1} und {2} sein" />
     <Member Name="_0HasToBeLowercase" Description="{0} muss kleingeschrieben sein" />
     <Member Name="_0HasToBeUppercase" Description="{0} muss großgeschrieben sein" />
     <Member Name="_0Have1ElementsButAllowedOnly2" Description="{0} hat {1} Elemente, erlaubt sind aber nur {2}" />
+    <Member Name="_0IsEmpty" Description="{0} ist leer" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist Pflicht, wenn {1} nicht festgesetzt ist" />
     <Member Name="_0IsMandatoryWhen1IsNotSetTo2" Description="{0} ist Pflicht, wenn {1} nicht auf {2} gesetzt ist." />
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist Pflicht, wenn {1} festgesetzt ist" />
