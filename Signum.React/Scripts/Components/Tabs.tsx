@@ -126,7 +126,7 @@ export class Tabs extends React.Component<TabsProps> {
 
 interface TabProps extends React.HTMLAttributes<any> {
   eventKey: string | number;
-  title?: string /* | React.ReactChild*/;
+  title?: any /* | React.ReactChild*/;
   anchorHtmlProps?: React.HTMLAttributes<HTMLAnchorElement>;
 }
 
