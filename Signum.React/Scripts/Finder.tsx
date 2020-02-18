@@ -1369,7 +1369,7 @@ export interface SimpleFilterBuilderContext {
 
 export interface FormatRule {
   name: string;
-  formatter: (column: ColumnOptionParsed) => CellFormatter;
+  formatter: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => CellFormatter;
   isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
 }
 
@@ -1383,6 +1383,8 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  row: ResultRow;
+  rowIndex: number;
 }
 
 
@@ -1401,7 +1403,7 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
 
   const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
 
-  return rule.formatter(co);
+  return rule.formatter(co, sc);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
