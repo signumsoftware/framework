@@ -13,7 +13,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -25,7 +25,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,

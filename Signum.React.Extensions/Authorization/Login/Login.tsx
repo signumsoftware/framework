@@ -80,7 +80,7 @@ export default function Login() {
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
                 </div>
-                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder="Password" />
+                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} />
               </div>
               {error("password") && <span className="help-block">{error("password")}</span>}
             </div>

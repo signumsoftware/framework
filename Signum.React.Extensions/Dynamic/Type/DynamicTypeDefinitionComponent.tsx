@@ -1400,6 +1400,10 @@ function isDateTime(type: string) {
   return type == "DateTime";
 }
 
+function isDate(type: string) {
+  return type == "Date";
+}
+
 function isTimeSpan(type: string) {
   return type == "TimeSpan";
 }
@@ -1442,6 +1446,7 @@ function allowFormat(type: string) {
     isDecimal(type) ||
     isReal(type) ||
     isDateTime(type) ||
+    isDate(type) ||
     isTimeSpan(type);
 }
 
@@ -1527,7 +1532,7 @@ registerValidator<Validators.CountIs>({
     </div>
 });
 
-registerValidator<Validators.DynamicValidator>({ name: "DateInPast", allowed: p => !p.isMList && isDateTime(p.type) });
+registerValidator<Validators.DynamicValidator>({ name: "DateInPast", allowed: p => !p.isMList && isDateTime(p.type) || isDate(p.type) });
 registerValidator<Validators.DateTimePrecision>({
   name: "DateTimePrecision",
   allowed: p => !p.isMList && isDateTime(p.type),
