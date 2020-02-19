@@ -169,8 +169,10 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function handleOnExited() {
     if (okClicked.current)
       p.onExited!(packComponent!.pack.entity);
+    else if (packComponent == null)
+      p.onExited!(undefined);
     else {
-      var oldEntity = JSON.parse(packComponent!.lastEntity) as ModifiableEntity;
+      var oldEntity = JSON.parse(packComponent.lastEntity) as ModifiableEntity;
       GraphExplorer.propagateAll(oldEntity);
       p.onExited!(oldEntity.modified ? undefined : oldEntity);
     }
