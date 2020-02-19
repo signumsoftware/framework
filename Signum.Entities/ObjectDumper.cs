@@ -272,7 +272,7 @@ namespace Signum.Entities
 
             private bool IsMixinField(FieldInfo field)
             {
-                return field.Name == "mixin" && field.DeclaringType == typeof(Entity) ||
+                return  field.Name == "mixin" && field.DeclaringType == typeof(ModifiableEntity) ||
                     field.Name == "next" && field.DeclaringType == typeof(MixinEntity);
             }
 
