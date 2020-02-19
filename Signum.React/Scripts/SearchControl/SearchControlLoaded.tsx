@@ -324,6 +324,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   handleColumnChanged = (token: QueryToken | undefined) => {
+    if (this.props.findOptions.groupResults) {
+      var allKeys = this.props.findOptions.columnOptions.filter(a => a.token && a.token.queryTokenType != "Aggregate").map(a => a.token!.fullKey);
+      this.props.findOptions.orderOptions = this.props.findOptions.orderOptions.filter(o => allKeys.contains(o.token.fullKey));
+    }
     this.setState({ lastToken: token });
   }
 
