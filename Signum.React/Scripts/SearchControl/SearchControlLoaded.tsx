@@ -1233,11 +1233,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
     }));
 
-    const ctx: Finder.CellFormatterContext = {
-      refresh: () => this.doSearch(true).done(),
-      systemTime: this.props.findOptions.systemTime,
-    };
-
     const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
     return this.state.resultTable.rows.map((row, i) => {
@@ -1246,6 +1241,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
+      const ctx: Finder.CellFormatterContext = {
+        refresh: () => this.doSearch(true).done(),
+        systemTime: this.props.findOptions.systemTime,
+        row: row,
+        rowIndex : i,
+      };
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}

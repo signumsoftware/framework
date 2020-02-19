@@ -10,6 +10,8 @@ import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { useController } from './LineBase'
+import { getTypeInfo, getTypeName } from '../Reflection'
+
 
 export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -24,6 +26,10 @@ export interface EntityStripProps extends EntityListBaseProps {
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
+
+    if (p.showType == undefined)
+      p.showType = p.type!.name.contains(",");
+
     if (p.autocomplete === undefined) {
       p.autocomplete = Navigator.getAutoComplete(p.type!, p.findOptions, p.ctx, p.create!, p.showType);
     }
@@ -110,6 +116,7 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityStrip(prop
                 onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
                 onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
                 onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
+                showType={p.showType!}
               />))
           }
           {renderLastElement()}
@@ -175,6 +182,7 @@ export interface EntityStripElementProps {
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
+  showType: boolean;
 }
 
 export function EntityStripElement(p: EntityStripElementProps) {
@@ -212,12 +220,20 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   }, [p.ctx.value]);
 
-
-
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
       currentItem?.item ? p.autoComplete!.renderItem(currentItem.item) :
-        getToString(p.ctx.value);
+        getToStr();
+
+  function getToStr() {
+    const toStr = getToString(p.ctx.value);
+    return !p.showType ? toStr :
+      <span style={{ wordBreak: "break-all" }} title={toStr}>
+        <span className="sf-type-badge">{getTypeInfo(getTypeName(p.ctx.value)).niceName}</span>
+        &nbsp;{toStr}
+      </span>;
+  }
+
 
   var drag = p.drag;
   const htmlAttributes = p.onItemHtmlAttributes && p.onItemHtmlAttributes(p.ctx.value);
