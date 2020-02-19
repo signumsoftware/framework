@@ -274,8 +274,9 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
 export interface EntityGridItemProps {
   title?: React.ReactElement<any>;
   bsStyle?: PanelStyle;
+  containerDOMAttributes?: React.DOMAttributes<any>;
   children?: React.ReactNode;
-
+  
   onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
   onTitleDragStart?: (e: React.DragEvent<any>) => void;
   onTitleDragEnd?: (e: React.DragEvent<any>) => void;
@@ -287,7 +288,7 @@ export function EntityGridItem(p : EntityGridItemProps){
   var style = p.bsStyle == undefined ? undefined : p.bsStyle.toLowerCase();
 
     return (
-      <div className={classes("card", style && ("border-" + style))}>
+      <div className={classes("card", style && ("border-" + style))}  {...p.containerDOMAttributes}>
         <div className={classes("card-header",
           style && style != "light" && "text-white",
           style && ("bg-" + style)
