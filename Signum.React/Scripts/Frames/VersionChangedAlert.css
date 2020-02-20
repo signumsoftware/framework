@@ -3,6 +3,7 @@
     margin-top:10px;
     margin-bottom: 0px;
     font-size: 1.3em;
+    flex-grow: 0 !important;
 }
 
 .blink {

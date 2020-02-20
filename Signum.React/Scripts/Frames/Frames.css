@@ -178,6 +178,7 @@ a.expand-window:hover {
 
 .sf-page-container {
   display: flex;
+  flex-direction: column;
 }
 
 .sf-page-container > div{
