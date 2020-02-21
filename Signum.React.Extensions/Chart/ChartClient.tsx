@@ -7,7 +7,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
@@ -20,6 +20,7 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
+import * as ChartPaletteClient from './ChartPalette/ChartPaletteClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
 import { toMomentFormat } from '@framework/Reflection';
@@ -40,7 +41,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   });
 
   UserChartClient.start({ routes: options.routes });
-
+  ChartPaletteClient.start({ routes: options.routes });
 
   registerChartScriptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
   registerChartScriptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
@@ -168,14 +169,6 @@ export function getChartScripts(): Promise<ChartScript[]> {
 
 export function getChartScript(symbol: ChartScriptSymbol): Promise<ChartScript> {
   return getChartScripts().then(cs => cs.single(a => a.symbol.key == symbol.key));
-}
-
-export let colorPalettes: string[];
-export function getColorPalettes(): Promise<string[]> {
-  if (colorPalettes)
-    return Promise.resolve(colorPalettes);
-
-  return API.fetchColorPalettes().then(cs => colorPalettes = cs);
 }
 
 export function hasAggregates(chartBase: IChartBase): boolean {
@@ -591,7 +584,18 @@ export module API {
     return v => String(v);
   }
 
-  export function getColor(token: QueryToken): ((val: unknown) => string | null) {
+  export function getColor(token: QueryToken, palettes: { [type: string] : ChartPaletteClient.ColorPalette }): ((val: unknown) => string | null) {
+
+    var tis = tryGetTypeInfos(token.type);
+
+    if (tis[0] && tis[0].kind == "Enum") {
+      var typeName = tis[0].name;
+      return v => v == null ? "#555" : palettes[typeName] && palettes[typeName][v as string] || null;
+    }
+
+    if (tis.some(a => a && a.kind == "Entity")) {
+      return v => v == null ? "#555" : palettes[(v as Lite<Entity>).EntityType] && palettes[(v as Lite<Entity>).EntityType][(v as Lite<Entity>).id!] || null;
+    }
 
     return v => v == null ? "#555" : null;
   }
@@ -642,7 +646,7 @@ export module API {
     return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
-  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript): ExecuteChartResult {
+  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ChartPaletteClient.ColorPalette }): ExecuteChartResult {
 
     var cols = request.columns.map((mle, i) => {
       const token = mle.element.token && mle.element.token.token;
@@ -655,8 +659,7 @@ export module API {
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
       const niceName = getNiceName(token);
-      const color = getColor(token);
-
+      const color = getColor(token, palettes);
 
       return {
         name: "c" + i,
@@ -743,8 +746,21 @@ export module API {
 
       const queryRequest = getRequest(request);
 
+      var allTypes = request.columns
+        .map(c => c.element.token)
+        .notNull()
+        .map(a => a.token && a.token.type.name)
+        .notNull()
+        .flatMap(a => tryGetTypeInfos(a))
+        .notNull()
+        .distinctBy(a => a.name);
+
+      var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
+        .then(list => list.toObject(a => a.type, a => a.palette));
+
+      ChartPaletteClient.getColorPaletteTypes()
       return Finder.API.executeQuery(queryRequest, abortSignal)
-        .then(rt => toChartResult(request, rt, chartScript));
+        .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
     });
   }
 
@@ -756,12 +772,6 @@ export module API {
   export function fetchScripts(): Promise<ChartScript[]> {
     return ajaxGet({
       url: "~/api/chart/scripts"
-    });
-  }
-
-  export function fetchColorPalettes(): Promise<string[]> {
-    return ajaxGet({
-      url: "~/api/chart/colorPalettes"
     });
   }
 }

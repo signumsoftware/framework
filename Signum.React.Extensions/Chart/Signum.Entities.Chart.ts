@@ -31,7 +31,7 @@ export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
   Type: "ChartColor";
   related: Entities.Lite<Entities.Entity>;
-  color: Basics.ColorEmbedded | null;
+  color: string;
 }
 
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");

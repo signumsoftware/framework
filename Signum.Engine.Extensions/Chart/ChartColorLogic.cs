@@ -15,7 +15,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors = null!;
+        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, string>>> Colors = null!;
 
         public static readonly int Limit = 360;
 
@@ -33,8 +33,8 @@ namespace Signum.Engine.Chart
 
                 Colors = sb.GlobalLazy(() =>
                     Database.Query<ChartColorEntity>()
-                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color!.Argb })
-                        .AgGroupToDictionary(a => a.EntityType!, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
+                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color })
+                        .AgGroupToDictionary(a => a.EntityType!, gr => gr.ToDictionary(a => a.Id, a => a.Color)),
                     new InvalidateWith(typeof(ChartColorEntity)));
             }
         }
@@ -60,7 +60,7 @@ namespace Signum.Engine.Chart
 
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].Color = ColorEmbedded.FromRGBHex(cats[i % cats.Length]);
+                list[i].Color = cats[i % cats.Length];
             }
 
             list.SaveList();
@@ -118,22 +118,22 @@ namespace Signum.Engine.Chart
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic?.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
+                    Color = dic?.TryGetC(l.Id)!
                 }).ToMList()
             };
         }
 
-        public static Color? ColorFor(Type type, PrimaryKey id)
+        public static string? ColorFor(Type type, PrimaryKey id)
         {
-            return Colors.Value.TryGetC(type)?.TryGetS(id);
+            return Colors.Value.TryGetC(type)?.TryGetC(id);
         }
 
-        public static Color? ColorFor(Lite<Entity> lite)
+        public static string? ColorFor(Lite<Entity> lite)
         {
             return ColorFor(lite.EntityType, lite.Id);
         }
 
-        public static Color? ColorFor(Entity ident)
+        public static string? ColorFor(Entity ident)
         {
             return ColorFor(ident.GetType(), ident.Id);
         }
