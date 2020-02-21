@@ -172,10 +172,13 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
 
-      p.isBadge == false ? "" : "badge badge-pill " +
-        (p.badgeColor && typeof p.badgeColor == "function" ? "badge-" + p.badgeColor(this.state.value) :
-          p.badgeColor ? "badge-" + p.badgeColor :
-            p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted"),
+      p.isBadge == false ? "" :
+        "badge badge-pill " +
+        (p.isBadge == "MoreThanZero" && (this.state.value == 0 || this.state.value == null) ? "badge-light text-muted" :
+          p.badgeColor && typeof p.badgeColor == "function" ? "badge-" + p.badgeColor(this.state.value) :
+            p.badgeColor ? "badge-" + p.badgeColor :
+              "badge-secondary"),
+
       p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass
     );
 
