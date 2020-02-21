@@ -10,7 +10,7 @@ import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IframeRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
-import { useForceUpdate } from '@framework/Hooks'
+import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 
 export default function EmailTemplate(p : { ctx: TypeContext<EmailTemplateEntity> }){
   const forceUpdate = useForceUpdate();
@@ -136,6 +136,7 @@ export interface EmailTemplateMessageComponentProps {
 export function EmailTemplateMessageComponent(p : EmailTemplateMessageComponentProps){
   const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(false);
+  const showPreviewRef = useUpdatedRef(showPreview);
 
   function handlePreviewClick(e: React.FormEvent<any>) {
     e.preventDefault();
@@ -143,7 +144,7 @@ export function EmailTemplateMessageComponent(p : EmailTemplateMessageComponentP
   }
 
   function handleCodeMirrorChange() {
-    if (showPreview)
+    if (showPreviewRef.current)
       forceUpdate();
   }
 
