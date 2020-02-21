@@ -35,12 +35,12 @@
     <Member Name="Replace" Description="Ersetzen" />
   </Type>
   <Type Name="ComparisonType">
-    <Member Name="DistinctTo" Description="anders als" />
+    <Member Name="DistinctTo" Description="ungleich" />
     <Member Name="EqualTo" Description="gleich" />
     <Member Name="GreaterThan" Description="größer als" />
-    <Member Name="GreaterThanOrEqualTo" Description="Größer oder gleich" />
-    <Member Name="LessThan" Description="weniger als" />
-    <Member Name="LessThanOrEqualTo" Description="Kleiner oder gleich" />
+    <Member Name="GreaterThanOrEqualTo" Description="größer oder gleich" />
+    <Member Name="LessThan" Description="kleiner als" />
+    <Member Name="LessThanOrEqualTo" Description="kleiner oder gleich" />
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Um fortzufahren ist eine Verbindung mit dem Server ist erforderlich" />
