@@ -92,13 +92,11 @@ namespace Signum.Entities.Chart
 
         internal void ParseData(QueryDescription description)
         {
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
+            foreach (var f in Filters)
+                f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
 
-            if (Columns != null)
-                foreach (var c in Columns)
-                    c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+            foreach (var c in Columns)
+                c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
 
         static Func<QueryEntity, object> ToQueryName;
