@@ -9,6 +9,7 @@ using System.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Entities.Templating;
 using System.Xml.Linq;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Mailing
 {
@@ -50,6 +51,14 @@ namespace Signum.Entities.Mailing
         [NoRepeatValidator]
         public MList<EmailTemplateRecipientEmbedded> Recipients { get; set; } = new MList<EmailTemplateRecipientEmbedded>();
 
+        public bool GroupResults { get; set; }
+
+        [PreserveOrder]
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+
+        [PreserveOrder]
+        public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
+
         [PreserveOrder]
         [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
         public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
@@ -82,14 +91,21 @@ namespace Signum.Entities.Mailing
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name);
 
-        internal void ParseData(QueryDescription queryDescription)
+        internal void ParseData(QueryDescription description)
         {
-            if (Recipients != null)
-                foreach (var r in Recipients.Where(r => r.Token != null))
-                    r.Token!.ParseData(this, queryDescription, SubTokensOptions.CanElement);
+            var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
+
+            foreach (var r in Recipients.Where(r => r.Token != null))
+                r.Token!.ParseData(this, description, SubTokensOptions.CanElement);
 
             if (From != null && From.Token != null)
-                From.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
+                From.Token.ParseData(this, description, SubTokensOptions.CanElement);
+
+            foreach (var f in Filters)
+                f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
+
+            foreach (var o in Orders)
+                o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
         }
 
         public bool IsApplicable(Entity? entity)
@@ -123,6 +139,9 @@ namespace Signum.Entities.Mailing
                 Model == null ? null : new XAttribute("Model", Model.FullClassName),
                 new XAttribute("SendDifferentMessages", SendDifferentMessages),
                 MasterTemplate == null ? null : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
+                new XAttribute("GroupResults", GroupResults),
+                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
                 new XAttribute("IsBodyHtml", IsBodyHtml),
                 From == null ? null : new XElement("From",
                     From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null,
@@ -158,6 +177,11 @@ namespace Signum.Entities.Mailing
             SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
 
             MasterTemplate = element.Attribute("MasterTemplate")?.Let(a=>(Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLite());
+
+            SendDifferentMessages = bool.Parse(element.Attribute("GroupResults").Value);
+            Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+            Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
+
             IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml").Value);
 
             From = element.Element("From")?.Let(from =>  new EmailTemplateContactEmbedded
@@ -180,6 +204,7 @@ namespace Signum.Entities.Mailing
                 Subject = elem.Attribute("Subject").Value,
                 Text = elem.Value
             }).ToMList();
+
 
             Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script =  app.Value});
             ParseData(ctx.GetQueryDescription(Query));
