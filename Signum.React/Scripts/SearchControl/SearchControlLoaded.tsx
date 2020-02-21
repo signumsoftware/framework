@@ -1171,6 +1171,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         columnOptions: extraColumns,
         columnOptionsMode: "Add",
         systemTime: resFo.systemTime && { ...resFo.systemTime },
+        includeDefaultFilters: false,
       }).then(() => {
         this.doSearch(true);
       }).done();
