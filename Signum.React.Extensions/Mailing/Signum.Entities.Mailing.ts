@@ -395,7 +395,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   Type: "SendEmailTask";
   name: string;
   emailTemplate: Entities.Lite<EmailTemplateEntity>;
-  uniqueTarget: Entities.Lite<Entities.Entity>;
+  uniqueTarget: Entities.Lite<Entities.Entity> | null;
   targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity> | null;
   modelConverter: Templating.ModelConverterSymbol | null;
 }
