@@ -386,7 +386,7 @@ namespace Signum.Entities
         static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
 
 
-        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true)
+        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true, bool includeMixins = false, bool includeMListElements = false)
         {
             PropertyRoute root = PropertyRoute.Root(type);
             List<PropertyRoute> result = new List<PropertyRoute>();
@@ -402,26 +402,36 @@ namespace Signum.Entities
                     result.Add(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements));
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
+                        PropertyRoute itemRoute = route.Add("Item");
+
+                        if (includeMListElements)
+                            result.Add(itemRoute);
+
                         Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
-                            result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements));
                     }
                 }
             }
 
             foreach (var t in MixinDeclarations.GetMixinDeclarations(type))
             {
-                result.AddRange(GenerateEmbeddedProperties(root.Add(t), includeIgnored));
+                var mixinRoute = root.Add(t);
+
+                if (includeMixins)
+                    result.Add(mixinRoute);
+
+                result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements));
             }
 
             return result;
         }
 
-        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedProperty, bool includeIgnored)
+        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedProperty, bool includeIgnored, bool includeMListElements)
         {
             List<PropertyRoute> result = new List<PropertyRoute>();
             foreach (var pi in Reflector.PublicInstancePropertiesInOrder(embeddedProperty.Type))
@@ -432,13 +442,18 @@ namespace Signum.Entities
                     result.AddRange(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements));
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
+                        PropertyRoute itemRoute = route.Add("Item");
+
+                        if (includeMListElements)
+                            result.Add(itemRoute);
+
                         Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
-                            result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements));
                     }
                 }
             }
