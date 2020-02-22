@@ -6,12 +6,6 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
-export const ColorEmbedded = new Type<ColorEmbedded>("ColorEmbedded");
-export interface ColorEmbedded extends Entities.EmbeddedEntity {
-  Type: "ColorEmbedded";
-  argb: number;
-}
-
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogParametersEmbedded";
