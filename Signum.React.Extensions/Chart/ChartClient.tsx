@@ -584,17 +584,29 @@ export module API {
     return v => String(v);
   }
 
-  export function getColor(token: QueryToken, palettes: { [type: string] : ChartPaletteClient.ColorPalette }): ((val: unknown) => string | null) {
+  export function getColor(token: QueryToken, palettes: { [type: string] : ChartPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
 
     var tis = tryGetTypeInfos(token.type);
 
     if (tis[0] && tis[0].kind == "Enum") {
       var typeName = tis[0].name;
-      return v => v == null ? "#555" : palettes[typeName] && palettes[typeName][v as string] || null;
+      return v => {
+        if (v == null)
+          return "#555";
+
+        var cp = palettes[typeName];
+        return cp && cp[v as string] || null;
+      }
     }
 
     if (tis.some(a => a && a.kind == "Entity")) {
-      return v => v == null ? "#555" : palettes[(v as Lite<Entity>).EntityType] && palettes[(v as Lite<Entity>).EntityType][(v as Lite<Entity>).id!] || null;
+      return v => {
+        if (v == null)
+          return "#555";
+
+        var cp = palettes[(v as Lite<Entity>).EntityType];
+        return cp && cp[(v as Lite<Entity>).id!] || null;
+      };
     }
 
     return v => v == null ? "#555" : null;
@@ -646,7 +658,7 @@ export module API {
     return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
-  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ChartPaletteClient.ColorPalette }): ExecuteChartResult {
+  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ChartPaletteClient.ColorPalette | null }): ExecuteChartResult {
 
     var cols = request.columns.map((mle, i) => {
       const token = mle.element.token && mle.element.token.token;

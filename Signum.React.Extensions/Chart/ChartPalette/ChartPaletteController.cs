@@ -17,9 +17,13 @@ namespace Signum.React.Chart
         }
 
         [HttpGet("api/chart/colorPalette/{typeName}")]
-        public ChartPaletteModel ColorPelette(string typeName)
+        public ChartPaletteModel? ColorPelette(string typeName)
         {
-            return ChartColorLogic.GetPalette(TypeLogic.GetType(typeName));
+            var type = TypeLogic.TryGetType(typeName);
+            if (type == null)
+                return null;
+
+            return ChartColorLogic.GetPalette(type);
         }
 
         [HttpPost("api/chart/colorPalette/{typeName}/new/{paletteName}")]

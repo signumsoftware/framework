@@ -20,8 +20,8 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
     const pal = (bc.pack.entity as ChartPaletteModel);
     ChartPaletteClient.API.fetchColorPalette(pal.type.cleanName)
       .then(newPack => {
-        ChartPaletteClient.setColorPalette(newPack);
-        bc.frame.onReload({ entity: newPack, canExecute: {} });
+        ChartPaletteClient.setColorPalette(newPack!);
+        bc.frame.onReload({ entity: newPack!, canExecute: {} });
       })
       .done();
   }

@@ -17,6 +17,7 @@ import { OrderRequest } from '@framework/FindOptions';
 import { toFilterRequests } from '@framework/Finder';
 import { PseudoType, getTypeName, getTypeInfo, tryGetTypeInfo } from '@framework/Reflection';
 import { asFieldFunction } from '../../Dynamic/View/NodeUtils';
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(ChartPaletteModel, e => import('./ChartPaletteControl')));
@@ -24,7 +25,12 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export function navigatePalette(type: PseudoType): Promise<void> {
   return API.fetchColorPalette(getTypeName(type))
-    .then(cp => Navigator.navigate(cp));
+    .then(cp => {
+      if (cp == null)
+        return MessageModal.showError(ChartMessage.Type0NotFoundInTheDatabase.niceToString(getTypeName(type)), ChartMessage.TypeNotFound.niceToString());
+
+      return Navigator.navigate(cp)
+    });
 }
 
 export let colorPalettesTypes: string[];
@@ -39,15 +45,15 @@ export interface ColorPalette {
   [id: string]: string;
 }
 
-export let colorPalette: { [typeName: string]: ColorPalette } = {};
-export function getColorPalette(type: PseudoType): Promise<ColorPalette> {
+export let colorPalette: { [typeName: string]: ColorPalette | null } = {};
+export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> {
 
   const typeName = getTypeName(type);
 
   if (colorPalette[typeName])
     return Promise.resolve(colorPalette[typeName]);
 
-  return API.fetchColorPalette(typeName).then(cs => colorPalette[typeName] = toColorPalete(cs));
+  return API.fetchColorPalette(typeName).then(cs => colorPalette[typeName] = cs && toColorPalete(cs));
 }
 
 export function toColorPalete(model: ChartPaletteModel): ColorPalette {
@@ -84,7 +90,7 @@ export module API {
     return ajaxGet({ url: "~/api/chart/colorPalette" });
   }
 
-  export function fetchColorPalette(typeName: string): Promise<ChartPaletteModel> {
+  export function fetchColorPalette(typeName: string): Promise<ChartPaletteModel | null> {
     return ajaxGet({ url: `~/api/chart/colorPalette/${typeName}` });
   }
 
