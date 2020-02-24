@@ -51,7 +51,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
       </div>
 
       {ctx.value.query &&
-        <Tabs id={ctx.prefix + "tabs"}>
+        <Tabs id={ctx.prefix + "tabs"} mountOnEnter={true}>
           <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
             <ValueLine ctx={ctx.subCtx(f => f.fileName)} />
             <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
