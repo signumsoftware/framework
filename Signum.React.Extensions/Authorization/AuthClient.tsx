@@ -48,6 +48,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
   options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
+  options.routes.push(<ImportRoute path="~/auth/changePasswordSuccess" onImportModule={() => import("./Login/ChangePasswordSuccess")} />);
   options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
   options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
 

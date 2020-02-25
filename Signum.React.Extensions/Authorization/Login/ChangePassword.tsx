@@ -10,7 +10,6 @@ import { useStateWithPromise } from '@framework/Hooks'
 export default function ChangePassword() {
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
-  const [success, setSuccess] = React.useState(false);
 
   const oldPassword = React.useRef<HTMLInputElement>(null);
   const newPassword = React.useRef<HTMLInputElement>(null);
@@ -35,7 +34,7 @@ export default function ChangePassword() {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
           Navigator.resetUI();
-          setSuccess(true);
+          Navigator.history.push(Navigator.toAbsoluteUrl("~/auth/changePasswordSuccess"));
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
@@ -75,15 +74,6 @@ export default function ChangePassword() {
             newPassword2.current!.value != newPassword.current!.value ? [LoginAuthMessage.PasswordsAreDifferent.niceToString()] :
               []
     }
-  }
-
-  if (success) {
-    return (
-      <div>
-        <h2 className="sf-entity-title">{LoginAuthMessage.PasswordChanged.niceToString()}</h2>
-        <p>{LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
-      </div>
-    );
   }
 
   return (
