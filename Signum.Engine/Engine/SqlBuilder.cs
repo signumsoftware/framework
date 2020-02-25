@@ -298,7 +298,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             if (objectName.Schema.Database == null)
             {
                 if (IsPostgres)
-                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
+                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(new ObjectName(objectName.Schema, indexName, IsPostgres)));
                 else
                     return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
             }

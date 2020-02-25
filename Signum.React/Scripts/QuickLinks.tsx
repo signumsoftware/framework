@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type } from './Reflection'
+import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo } from './Reflection'
 import { classes, Dic } from './Globals'
 import { FindOptions } from './FindOptions'
 import * as Finder from './Finder'
@@ -148,7 +148,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
   const entity = p.wc.ctx.value;
 
   const links = useAPI(signal => {
-    if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind)
+    if (entity.isNew || !tryGetTypeInfo(entity.Type)?.entityKind)
       return Promise.resolve([]);
     else
       return getQuickLinks({

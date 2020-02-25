@@ -38,7 +38,7 @@ export class StyleContext {
       labelColumns: { sm: 2 },
       readOnly: false,
       placeholderLabels: false,
-      titleLabels: false,
+      titleLabels: true,
       readonlyAsPlainText: false,
       frame: undefined,
     });

@@ -518,8 +518,14 @@ namespace Signum.Engine.Maps
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
-                        if (dt.Rows.Count > 0)
-                            throw new EntityNotFoundException(table.Type, dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToArray());
+                        if (dt.Rows.Count != idents.Count)
+                        {
+                            var updated = dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToList();
+
+                            var missing = idents.Select(a => a.Id).Except(updated).ToArray();
+
+                            throw new EntityNotFoundException(table.Type, missing);
+                        }
 
                         for (int i = 0; i < num; i++)
                         {
