@@ -121,7 +121,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     queryName: CaseActivityEntity,
     defaultFilters: [
       { token: CaseActivityEntity.token(a => a.doneDate).expression("HasValue"), value: null, pinned: { active: "WhenHasValue", column: 1, label: "Is Done" } },
-      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { active: "WhenHasValue", column: 2, label: WorkflowActivityEntity.niceName() } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { active: "WhenHasValue", column: 2, label: () => WorkflowActivityEntity.niceName() } },
       { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(w => w.lane.pool.workflow), pinned: { active: "WhenHasValue", column: 3 } },
       { token: CaseActivityEntity.token(a => a.case), pinned: { active: "WhenHasValue", column: 4 } },
     ]
