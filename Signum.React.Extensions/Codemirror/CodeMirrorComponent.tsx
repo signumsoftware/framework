@@ -3,6 +3,7 @@ import * as CodeMirror from 'codemirror'
 import { classes } from '@framework/Globals'
 
 import "codemirror/lib/codemirror.css"
+import { useUpdatedRef } from '../../../Framework/Signum.React/Scripts/Hooks';
 
 export interface CodeMirrorProps {
   onChange?: (value: string) => void,
@@ -23,14 +24,15 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
 
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const codeMirrorRef = React.useRef<CodeMirror.EditorFromTextArea | undefined>(undefined);
+  const onChangeRef = useUpdatedRef(p.onChange);
+
 
   const [isFocused, setIsFocused] = React.useState(false);
 
   React.useEffect(() => {
 
     const codeMirror = codeMirrorRef.current = CodeMirror.fromTextArea(textAreaRef.current!, p.options);
-    if (p.onChange)
-      codeMirror.on('change', codemirrorValueChanged);
+    codeMirror.on('change', codemirrorValueChanged);
     codeMirror.on('focus', () => focusChanged(true));
     codeMirror.on('blur', () => focusChanged.bind(false));
     codeMirror.setValue(p.value ?? '');
@@ -88,8 +90,8 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
 
   function codemirrorValueChanged(doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) {
     const newValue = doc.getValue();
-    if (newValue != p.value && p.onChange)
-      p.onChange(newValue);
+    if (newValue != p.value && onChangeRef.current)
+      onChangeRef.current(newValue);
   }
 
   const editorClassName = classes(

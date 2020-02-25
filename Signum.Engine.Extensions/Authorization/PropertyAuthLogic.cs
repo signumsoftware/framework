@@ -89,7 +89,6 @@ namespace Signum.Engine.Authorization
 
                         var property = routes.GetOrCreate(route, () => new PropertyRouteEntity
                          {
-                             Route = route,
                              RootType = TypeLogic.TypeToEntity[route.RootType],
                              Path = route.PropertyString()
                          }.Save());

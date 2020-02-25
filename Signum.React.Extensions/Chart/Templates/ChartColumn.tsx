@@ -8,8 +8,10 @@ import { ValueLine, FormGroup } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity, ChartColumnType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
+import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { External } from '@framework/Signum.Entities';
+import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;
@@ -25,6 +27,8 @@ export interface ChartColumnProps {
 
 
 export function ChartColumn(p: ChartColumnProps) {
+
+  const forceUpdate = useForceUpdate();
 
   const [expanded, setExpanded] = React.useState<boolean>(false);
 
@@ -76,7 +80,7 @@ export function ChartColumn(p: ChartColumnProps) {
 
     const t = token?.token!.type;
 
-    if (t == undefined || Navigator.isReadOnly(ChartColorEntity))
+    if (t == undefined || Navigator.isReadOnly(ChartColorEntity, { ignoreTypeIsReadonly: true }))
       return [];
 
     if (!t.isLite && !isTypeEnum(t.name))
@@ -97,6 +101,8 @@ export function ChartColumn(p: ChartColumnProps) {
   const subTokenOptions = SubTokensOptions.CanElement | SubTokensOptions.CanAggregate;
 
   const ctx = p.ctx;
+
+  const ctxBasic = ctx.subCtx({ formSize: "Small", formGroupStyle: "Basic" });
 
   return (
     <>
@@ -137,11 +143,11 @@ export function ChartColumn(p: ChartColumnProps) {
           <div>
             <div className="row">
               <div className="col-sm-4">
-                <ValueLine ctx={ctx.subCtx(a => a.displayName, { formSize: "Small", formGroupStyle: "Basic" })} valueHtmlAttributes={{ onBlur: p.onRedraw }} />
+                <ValueLine ctx={ctxBasic.subCtx(a => a.displayName)} valueHtmlAttributes={{ onBlur: p.onRedraw }} />
               </div>
               {getColorPalettes().map((t, i) =>
                 <div className="col-sm-4" key={i}>
-                  {t && <ChartPaletteLink ctx={ctx} type={t} currentPalettes={p.colorPalettes} />}
+                  {t && <ChartPaletteLink ctx={ctxBasic} type={t} currentPalettes={p.colorPalettes} refresh={forceUpdate} />}
                 </div>)
               }
             </div>
@@ -165,13 +171,19 @@ function getTitle(ct: ChartColumnType): ChartColumnType[] {
 export interface ChartPaletteLinkProps {
   type: TypeInfo;
   currentPalettes: string[];
+  refresh: () => void;
   ctx: StyleContext;
 }
 
 export const ChartPaletteLink = (props: ChartPaletteLinkProps) =>
-  <FormGroup ctx={props.ctx as any}
+  <FormGroup ctx={props.ctx}
     labelText={ChartMessage.ColorsFor0.niceToString(props.type.niceName)}>
-    <a href={"/chartColors/" + props.type.name} className="form-control">
+    <a href="#" className={props.ctx.formControlPlainTextClass} onClick={e => {
+      e.preventDefault();
+      ChartPaletteClient.navigatePalette(props.type)
+        .then(() => props.refresh())
+        .done();
+    }}>
       {props.currentPalettes.contains(props.type.name) ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
     </a>
   </FormGroup>;

@@ -218,7 +218,7 @@ namespace Signum.Entities.UserAssets
             if (value == null)
                 return null;
 
-            DateTime dateTime = type.UnNullify() == typeof(Date) ? ((DateTime)(Date)value) :  (DateTime)value;
+            DateTime dateTime = value is Date d ? (DateTime)d : value is DateTime dt ? dt : throw new UnexpectedValueException(value);
 
             SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now);
 

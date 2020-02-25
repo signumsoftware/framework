@@ -139,7 +139,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       includeDefaultFilters: fo.includeDefaultFilters,
       columns: (fo.columnOptions ?? []).map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
-        displayName: c.displayName
+        displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
       }))),
       columnsMode: fo.columnOptionsMode,
       orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({

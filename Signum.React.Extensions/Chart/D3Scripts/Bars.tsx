@@ -13,7 +13,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -24,7 +24,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
     _4: 5,
   }, width);
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,

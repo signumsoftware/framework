@@ -68,13 +68,13 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         })));
       }
 
-      function toPinnedQueryFilterEmbedded(pinned: PinnedFilter): PinnedQueryFilterEmbedded {
+      function toPinnedQueryFilterEmbedded(p: PinnedFilter): PinnedQueryFilterEmbedded {
         return PinnedQueryFilterEmbedded.New({
-          label: pinned.label,
-          column: pinned.column,
-          row: pinned.row,
-          active: pinned.active,
-          splitText: pinned.splitText,
+          label: typeof p.label == "function" ? p.label() : p.label,
+          column: p.column,
+          row: p.row,
+          active: p.active,
+          splitText: p.splitText,
         });
       }
     }

@@ -117,7 +117,7 @@ export module Converter {
 
     function toPinnedFilterEmbedded(e: PinnedFilter): PinnedQueryFilterEmbedded {
       return PinnedQueryFilterEmbedded.New({
-        label: e.label,
+        label: typeof e.label == "function" ? e.label() : e.label,
         column: e.column,
         row: e.row,
         active: e.active,

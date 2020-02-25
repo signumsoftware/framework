@@ -5,6 +5,7 @@ import { is } from '@framework/Signum.Entities'
 import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
+import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
@@ -22,7 +23,7 @@ export interface ChartBuilderProps {
 export default function ChartBuilder(p: ChartBuilderProps) {
   const forceUpdate = useForceUpdate();
 
-  const colorPalettes = useAPI(signal => ChartClient.getColorPalettes(), []);
+  const colorPalettes = useAPI(signal => ChartPaletteClient.getColorPaletteTypes(), []);
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
   function chartTypeImgClass(script: ChartScript): string {

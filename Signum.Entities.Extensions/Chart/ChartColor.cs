@@ -1,4 +1,5 @@
 using System;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 
@@ -10,8 +11,8 @@ namespace Signum.Entities.Chart
         [ImplementedByAll, UniqueIndex]
         public Lite<Entity> Related { get; set; }
 
-        [ForceNotNullable]
-        public ColorEmbedded? Color { get; set; }
+        [StringLengthValidator(Max = 100), NotNullValidator(DisabledInModelBinder = true)]
+        public string Color { get; set; }
 
         public override string ToString()
         {
@@ -25,10 +26,8 @@ namespace Signum.Entities.Chart
 
     [Serializable]
     public class ChartPaletteModel : ModelEntity
-    {
-        
+    {   
         public TypeEntity Type { get; set; }
-
         
         public MList<ChartColorEntity> Colors { get; set; } = new MList<ChartColorEntity>();
 

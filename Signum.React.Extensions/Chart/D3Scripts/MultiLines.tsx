@@ -14,7 +14,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
   
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -26,7 +26,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     legend: 15,
     _2: 20,

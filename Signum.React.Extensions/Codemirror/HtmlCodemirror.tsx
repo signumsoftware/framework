@@ -23,16 +23,15 @@ export default function HtmlCodemirror(p: {
   onChange?: (newValue: string) => void;
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
 }) {
-  function handleOnChange(newValue: string) {
-    const { ctx, onChange } = p;
 
+  const { ctx, onChange, innerRef } = p;
+
+  function handleOnChange(newValue: string) {
     ctx.value = newValue;
     if (onChange != undefined)
       onChange(ctx.value);
   };
 
-
-  const ctx = p.ctx;
 
   const options = {
     lineNumbers: true,
@@ -53,7 +52,7 @@ export default function HtmlCodemirror(p: {
 
   return (
     <div>
-      <CodeMirrorComponent value={p.ctx.value} ref={p.innerRef}
+      <CodeMirrorComponent value={p.ctx.value} ref={innerRef}
         options={options}
         onChange={handleOnChange} />
     </div>

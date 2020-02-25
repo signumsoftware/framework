@@ -15,7 +15,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -27,7 +27,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     legend: 15,
     _2: 5,

@@ -60,9 +60,6 @@ export default function TemplateControls(p: TemplateControlsProps) {
     if (token.type.isCollection)
       return TemplateTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.niceToString();
 
-    if (token.key != "Element" || token.parent == undefined || !token.parent.type.isCollection)
-      return TemplateTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.niceToString();
-
     if (hasAnyOrAll(token))
       return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
