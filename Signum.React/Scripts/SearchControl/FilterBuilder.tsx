@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { Dic, areEqual, classes} from '../Globals'
-import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter } from '../FindOptions'
+import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import { isNumber} from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
@@ -517,7 +517,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
 
 interface PinnedFilterEditorProps {
-  pinned: PinnedFilter;
+  pinned: PinnedFilterParsed;
   readonly: boolean;
   onChange: () => void;
 }
