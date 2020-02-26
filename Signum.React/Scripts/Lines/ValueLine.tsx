@@ -27,6 +27,7 @@ export interface ValueLineProps extends LineBaseProps {
   incrementWithArrow?: boolean | number;
   columnCount?: number;
   columnWidth?: number;
+  showTimeBox?: boolean;
 }
 
 export interface OptionItem {
@@ -580,7 +581,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const momentFormat = toMomentFormat(s.formatText);
 
   const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = momentFormat != "L" && momentFormat != "LL";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : momentFormat != "L" && momentFormat != "LL";
 
   if (s.ctx.readOnly)
     return (

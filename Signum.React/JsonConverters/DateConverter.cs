@@ -14,13 +14,19 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            writer.WriteValue(((DateTime?)(Date?)value)?.ToString("o"));
+            writer.WriteValue(((Date?)value)?.ToString("o"));
         }
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
+            if (reader.Value == null)
+                return null;
+
             var date = reader.Value as DateTime?;
-            return  (Date?)date;
+            if(date != null)
+                return (Date?)date;
+
+            return Date.ParseExact((string)reader.Value, "o", CultureInfo.CurrentCulture);
         }
     }
 }
