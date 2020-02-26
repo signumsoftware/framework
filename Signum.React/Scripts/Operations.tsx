@@ -6,7 +6,7 @@ import {
   OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
-import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo } from './Reflection';
+import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
@@ -215,7 +215,7 @@ export class ContextualOperationContext<T extends Entity> {
 
 export class EntityOperationContext<T extends Entity> {
 
-  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string): EntityOperationContext<T> | undefined {
+  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     if (!ctx.frame)
       throw new Error("a frame is necessary");
 
@@ -225,7 +225,7 @@ export class EntityOperationContext<T extends Entity> {
     return EntityOperationContext.fromEntityPack(ctx.frame, ctx.frame.pack! as EntityPack<T>, operation);
   }
 
-  static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string): EntityOperationContext<T> | undefined {
+  static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     const operationKey = (operation as OperationSymbol).key || operation as string;
 
     const oi = getTypeInfo(pack.entity.Type).operations![operationKey];
@@ -481,8 +481,8 @@ export function isEntityOperation(operationType: OperationType) {
 
 export namespace API {
 
-  export function construct<T extends Entity>(type: string, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T>> {
-    return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type });
+  export function construct<T extends Entity>(type: string | Type<T>, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T>> {
+    return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type: getTypeName(type) });
   }
 
   export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
