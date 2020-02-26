@@ -80,5 +80,19 @@ namespace Signum.Test
             Assert.Equal("1 Woman", manWoman.ForGenderAndNumber(gender: 'f', number: 1).FormatWith(1));
             Assert.Equal("2 Women", manWoman.ForGenderAndNumber(gender: 'f', number: 2).FormatWith(2));
         }
+
+
+        [Fact]
+        public void IndentEndLine()
+        {
+          Assert.Equal(
+              @"  hola\n
+  dola\r\n
+  juanola\n", @"hola\n
+dola\r\n
+juanola\n".Indent(2));
+
+        }
+
     }
 }

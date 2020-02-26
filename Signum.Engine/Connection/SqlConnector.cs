@@ -549,7 +549,12 @@ namespace Signum.Engine
 
         public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
         {
-            Expression valueExpr = Expression.Convert(dbType.IsDate() ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) : value, typeof(object));
+            Expression valueExpr = Expression.Convert(
+                !dbType.IsDate() ? value: 
+                value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
+                value.Type.UnNullify() == typeof(Date) ? Expression.Convert(Expression.Convert(value, typeof(Date?)), typeof(DateTime?)) : //Converting from Date -> DateTime? directly produces null always
+                value,
+                typeof(object));
 
             if (nullable)
                 valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),

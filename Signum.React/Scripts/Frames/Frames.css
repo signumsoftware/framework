@@ -101,6 +101,13 @@ button.dropdown-item:not(:disabled):not(.disabled) {
     margin-bottom: 1rem;
 }
 
+.tab-content .tab-pane {
+    padding: 1em;
+    margin-top: -1em;
+    border: 1px solid #e5e5e5;
+    border-top: 0;
+}
+
 a.expand-window {
     cursor: pointer;
     color: lightgray;
@@ -178,6 +185,7 @@ a.expand-window:hover {
 
 .sf-page-container {
   display: flex;
+  flex-direction: column;
 }
 
 .sf-page-container > div{
