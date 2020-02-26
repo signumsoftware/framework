@@ -1786,7 +1786,6 @@ export class GraphExplorer {
       if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
 
         if (p == "mixins") {
-          debugger;
           const propertyPrefix = dot(modelStatePrefix, p);
           if (this.isModifiedMixinDictionary(obj[p], propertyPrefix))
             mod.modified = true;

@@ -350,8 +350,10 @@ namespace Signum.Engine.Maps
             bool isDecimal = dbType.IsDecimal();
             if (att != null && att.HasScale)
             {
-                    if (!isDecimal)
-                        throw new InvalidOperationException($"{dbType} can not have Scale");
+                if (!isDecimal)
+                    throw new InvalidOperationException($"{dbType} can not have Scale");
+
+                return att.Scale;
             }
 
             if(isDecimal && route != null)
@@ -366,25 +368,6 @@ namespace Signum.Engine.Maps
             else
                 return defaultScalePostgreSql.TryGetS(dbType.PostgreSql);
         }
-
-        internal int? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, NpgsqlDbType npgsqlDbType)
-        {
-            if (att != null && att.HasScale)
-            {
-
-                return att.Scale;
-            }
-
-            if (npgsqlDbType == NpgsqlDbType.Numeric && route != null)
-            {
-                var dv = ValidatorAttribute<DecimalsValidatorAttribute>(route);
-                if (dv != null)
-                    return dv.DecimalPlaces;
-            }
-
-            return defaultScalePostgreSql.TryGetS(npgsqlDbType);
-        }
-
         internal string? GetCollate(DbTypeAttribute? att)
         {
             if (att != null && att.Collation != null)
