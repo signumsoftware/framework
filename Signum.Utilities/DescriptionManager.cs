@@ -93,6 +93,7 @@ namespace Signum.Utilities
         }
     }
 
+    //https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class FormatAttribute : Attribute
     {
