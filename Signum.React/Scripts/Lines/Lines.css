@@ -203,11 +203,6 @@ ul.sf-strip-vertical > li {
     margin-bottom: 7px; /*sf-strip-horizontal*/
 }
 
-    .sf-strip.sf-strip-vertical {
-        margin-top: 7px; /*sf-strip-vertical*/
-    }
-
-
 .sf-strip-element .sf-line-button {
     margin-left: 2px;
 }
