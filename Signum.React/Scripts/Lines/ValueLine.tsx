@@ -82,10 +82,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   getDefaultProps(state: ValueLineProps) {
     super.getDefaultProps(state);
-    state.valueLineType = ValueLineController.getValueLineType(state.type!);
+    if (state.type) {
+      state.valueLineType = ValueLineController.getValueLineType(state.type);
 
-    if (state.valueLineType == undefined)
-      throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+      if (state.valueLineType == undefined)
+        throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+    }
   }
 
   overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
