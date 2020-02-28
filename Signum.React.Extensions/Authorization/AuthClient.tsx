@@ -566,7 +566,6 @@ declare module '@framework/Reflection' {
   }
 
   export interface PropertyRoute {
-    canRead(): boolean;
     canModify(): boolean;
   }
 }
