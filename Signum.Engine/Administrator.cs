@@ -96,7 +96,7 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().FormatWith(DateTime.Now)),
 
-                new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                Connector.Current.SqlBuilder.UseDatabase(),
                 command,
                 new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
         }
