@@ -42,29 +42,32 @@ namespace Signum.Engine
 
         public static string GenerateViewCode(ObjectName tableName)
         {
-            var columns =
-                (from t in Database.View<SysTables>()
-                 where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
-                 from c in t.Columns()
-                 select new DiffColumn
-                 {
-                     Name = c.name,
-                     DbType = new AbstractDbType(SysTablesSchema.ToSqlDbType(c.Type()!.name)),
-                     UserTypeName = null,
-                     PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
-                     Nullable = c.is_nullable,
-                 }).ToList();
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($@"[TableName(""{tableName.ToString()}"")]");
-            sb.AppendLine($"public class {tableName.Name} : IView");
-            sb.AppendLine(@"{");
-            foreach (var c in columns)
+            using (OverrideDatabaseInSysViews(tableName.Schema.Database))
             {
-                sb.Append(GenerateColumnCode(c).Indent(4));
+                var columns =
+                    (from t in Database.View<SysTables>()
+                     where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
+                     from c in t.Columns()
+                     select new DiffColumn
+                     {
+                         Name = c.name,
+                         DbType = new AbstractDbType(SysTablesSchema.ToSqlDbType(c.Type()!.name)),
+                         UserTypeName = null,
+                         PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
+                         Nullable = c.is_nullable,
+                     }).ToList();
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($@"[TableName(""{tableName.ToString()}"")]");
+                sb.AppendLine($"public class {tableName.Name} : IView");
+                sb.AppendLine(@"{");
+                foreach (var c in columns)
+                {
+                    sb.Append(GenerateColumnCode(c).Indent(4));
+                }
+                sb.AppendLine(@"}");
+                return sb.ToString();
             }
-            sb.AppendLine(@"}");
-            return sb.ToString();
         }
 
         private static string GenerateColumnCode(DiffColumn c)
