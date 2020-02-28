@@ -272,18 +272,14 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
   }
 });
 
-interface CustomToggleProps {
-  onClick?: (e: React.MouseEvent<any>) => void;
-}
 
-
-const CustomToggle = React.forwardRef(function CustomToggle(p: { children: React.ReactNode, onClick: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
+const CustomToggle = React.forwardRef(function CustomToggle(p: { children?: React.ReactNode, onClick?: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
 
   return (
     <a
       ref={ref}
       href=""
-      onClick={e => { e.preventDefault(); p.onClick(e); }}>
+      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
       {p.children}
     </a>
   );
