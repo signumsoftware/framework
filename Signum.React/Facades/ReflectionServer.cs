@@ -42,10 +42,13 @@ namespace Signum.React.Facades
             t.IsEnum && !t.Name.EndsWith("Query") && !t.Name.EndsWith("Message"))
             .ToDictionaryEx(GetTypeName, "Types"));
 
-        public static void RegisterLike(Type type)
+        public static Dictionary<string, Func<bool>> OverrideIsNamespaceAllowed = new Dictionary<string, Func<bool>>();
+
+        public static void RegisterLike(Type type, Func<bool> allowed)
         {
             TypesByName.Reset();
             EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace!);
+            OverrideIsNamespaceAllowed[type.Namespace!] = allowed;
         }
 
         internal static void Start()
@@ -64,53 +67,67 @@ namespace Signum.React.Facades
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        public static event Action<TypeInfoTS, Type>? AddTypeExtension;
-        static TypeInfoTS OnAddTypeExtension(TypeInfoTS ti, Type t)
+        public static event Func<TypeInfoTS, Type, TypeInfoTS?>? TypeExtension;
+        static TypeInfoTS? OnTypeExtension(TypeInfoTS ti, Type t)
         {
-            foreach (var a in AddTypeExtension.GetInvocationListTyped())
-                a(ti, t);
+            foreach (var a in TypeExtension.GetInvocationListTyped())
+            {
+                ti = a(ti, t)!;
+                if (ti == null)
+                    return null;
+            }
 
             return ti;
         }
 
-        public static event Action<MemberInfoTS, PropertyRoute>? AddPropertyRouteExtension;
-        static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
+        public static event Func<MemberInfoTS, PropertyRoute, MemberInfoTS?>? PropertyRouteExtension;
+        static MemberInfoTS? OnPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
-            if (AddPropertyRouteExtension == null)
+            if (PropertyRouteExtension == null)
                 return mi;
 
-            foreach (var a in AddPropertyRouteExtension.GetInvocationListTyped())
-                a(mi, m);
+            foreach (var a in PropertyRouteExtension.GetInvocationListTyped())
+            {
+                mi = a(mi, m)!;
+                if (mi == null)
+                    return null;
+            }
 
             return mi;
         }
 
 
-        public static event Action<MemberInfoTS, FieldInfo>? AddFieldInfoExtension;
-        static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
+        public static event Func<MemberInfoTS, FieldInfo, MemberInfoTS?>? FieldInfoExtension;
+        static MemberInfoTS? OnFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
         {
-            if (AddFieldInfoExtension == null)
+            if (FieldInfoExtension == null)
                 return mi;
 
-            foreach (var a in AddFieldInfoExtension.GetInvocationListTyped())
-                a(mi, m);
+            foreach (var a in FieldInfoExtension.GetInvocationListTyped())
+            {
+                mi = a(mi, m)!;
+                if (mi == null)
+                    return null;
+            }
 
             return mi;
         }
 
-        public static event Action<OperationInfoTS, OperationInfo, Type>? AddOperationExtension;
-        static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
+        public static event Func<OperationInfoTS, OperationInfo, Type, OperationInfoTS?>? OperationExtension;
+        static OperationInfoTS? OnOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
         {
-            if (AddOperationExtension == null)
+            if (OperationExtension == null)
                 return oi;
 
-            foreach (var a in AddOperationExtension.GetInvocationListTyped())
-                a(oi, o, type);
+            foreach (var a in OperationExtension.GetInvocationListTyped())
+            {
+                oi = a(oi, o, type)!;
+                if (oi == null)
+                    return null;
+            }
 
             return oi;
         }
-
-
 
         public static HashSet<Type> ExcludeTypes = new HashSet<Type>();
 
@@ -167,7 +184,7 @@ namespace Signum.React.Facades
                           where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
                               FullName = type.FullName!,
@@ -182,7 +199,7 @@ namespace Signum.React.Facades
                               QueryDefined = queries.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .Where(pr => InTypeScript(pr))
-                                .ToDictionary(p => p.PropertyString(), p =>
+                                .Select(p =>
                                 {
                                     var validators = Validator.TryGetPropertyValidator(p)?.Validators;
 
@@ -196,19 +213,24 @@ namespace Signum.React.Facades
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo!.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                         IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-										IsVirtualMList = p.IsVirtualMList(),
+                                        IsVirtualMList = p.IsVirtualMList(),
                                         MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                         PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     };
 
-                                    return OnAddPropertyRouteExtension(mi, p);
-                                }),
+                                    return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
+                                })
+                                .Where(kvp => kvp.Value != null)
+                                .ToDictionaryEx("properties"),
 
-                              Operations = allOperations == null ? null : allOperations.ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type)),
+                              HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
+                              Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
                               RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
 
-                          }, type))).ToDictionaryEx("entities");
+                          }, type)))
+                          .Where(kvp => kvp.Value != null)
+                          .ToDictionaryEx("entities");
 
             return result;
         }
@@ -248,19 +270,23 @@ namespace Signum.React.Facades
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                                      type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
                               FullName = type.FullName!,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
                               .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)!))
-                              .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
+                              .Select(fi => KeyValuePair.Create(fi.Name, OnFieldInfoExtension(new MemberInfoTS
                               {
                                   NiceName = fi.NiceName(),
                                   IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
-                              }, fi)),
-                          }, type))).ToDictionaryEx("enums");
+                              }, fi)!))
+                              .Where(a=>a.Value != null)
+                              .ToDictionaryEx("query"),
+                          }, type)))
+                          .Where(a => a.Value != null)
+                          .ToDictionaryEx("enums");
 
             return result;
         }
@@ -271,7 +297,7 @@ namespace Signum.React.Facades
 
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
                               FullName = type.FullName!,
@@ -280,13 +306,15 @@ namespace Signum.React.Facades
                                   .Where(s =>
                                   s.FieldInfo != null && /*Duplicated like in Dynamic*/
                                   s.IdOrNull.HasValue /*Not registered*/)
-                                  .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
+                                  .Select(s => KeyValuePair.Create(s.FieldInfo.Name, OnFieldInfoExtension(new MemberInfoTS
                                   {
                                       NiceName = s.FieldInfo.NiceName(),
                                       Id = s.IdOrNull!.Value.Object
-                                  }, s.FieldInfo))
+                                  }, s.FieldInfo)!))
+                                  .Where(a => a.Value != null)
+                                  .ToDictionaryEx("fields"),
                           }, type)))
-                          .Where(a => a.Value.Members.Any())
+                          .Where(a => a.Value != null && a.Value.Members.Any())
                           .ToDictionaryEx("symbols");
 
             return result;
@@ -340,9 +368,11 @@ namespace Signum.React.Facades
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
         public string? ToStringFunction { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
-        public bool QueryDefined { get; internal set; }
+        public bool QueryDefined { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "hasConstructorOperation")]
+        public bool HasConstructorOperation { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
         public Dictionary<string, OperationInfoTS>? Operations { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "requiresEntityPack")]

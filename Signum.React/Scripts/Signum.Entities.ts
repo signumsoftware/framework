@@ -90,7 +90,7 @@ function getOrCreateToStringFunction(type: string) {
   if (f || f === null)
     return f;
 
-  const ti = Reflection.getTypeInfo(type);
+  const ti = Reflection.tryGetTypeInfo(type);
 
   const getToString2 = getToString;
 
@@ -216,10 +216,10 @@ return obj != null && (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-if(!isModifiableEntity(obj))
-return false;
-const ti = Reflection.getTypeInfo(obj.Type);
-return ti != null && ti.entityKind != null;
+  if(!isModifiableEntity(obj))
+    return false;
+  const ti = Reflection.tryGetTypeInfo(obj.Type);
+  return ti != null && ti.entityKind != null;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {
@@ -510,6 +510,7 @@ export module ValidationMessage {
   export const _0IsNotAllowed = new MessageKey("ValidationMessage", "_0IsNotAllowed");
   export const _0IsNotAllowedOnState1 = new MessageKey("ValidationMessage", "_0IsNotAllowedOnState1");
   export const _0IsNotSet = new MessageKey("ValidationMessage", "_0IsNotSet");
+  export const _0AreNotSet = new MessageKey("ValidationMessage", "_0AreNotSet");
   export const _0IsSet = new MessageKey("ValidationMessage", "_0IsSet");
   export const _0IsNotA1_G = new MessageKey("ValidationMessage", "_0IsNotA1_G");
   export const BeA0_G = new MessageKey("ValidationMessage", "BeA0_G");

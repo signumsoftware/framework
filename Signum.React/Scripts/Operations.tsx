@@ -6,7 +6,7 @@ import {
   OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
-import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer } from './Reflection';
+import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
@@ -60,18 +60,19 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
   return operationSettings[operationKey];
 }
 
-export const isOperationInfoAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
-export function isOperationInfoAllowed(oi: OperationInfo) {
-  return isOperationInfoAllowedEvent.every(a => a(oi));
-}
+export function tryGetOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo | undefined {
+  let operationKey = typeof operation == "string" ? operation : operation.key;
 
-export function isOperationAllowed(operation: OperationSymbol | string, type: PseudoType): boolean {
-  return isOperationInfoAllowed(getOperationInfo(operation, type));
-}
+  let ti = tryGetTypeInfo(type);
+  if (ti == null)
+    return undefined;
 
-export function isSomeOperationAllowed(operations: (OperationSymbol | string)[], type: PseudoType): boolean {
-  return operations.some(a => isOperationAllowed(a, type))
+  let oi = ti.operations && ti.operations[operationKey];
 
+  if (oi == undefined)
+    return undefined;
+
+  return oi;
 }
 
 export function getOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo {
@@ -87,19 +88,8 @@ export function getOperationInfo(operation: OperationSymbol | string, type: Pseu
   return oi;
 }
 
-export function assertOperationInfoAllowed(operation: OperationInfo) {
-  if (!isOperationInfoAllowed(operation))
-    throw new Error(`Operation ${operation.key} is denied`);
-}
-
-export function assertOperationAllowed(operation: OperationSymbol | string, type: PseudoType) {
-  var oi = getOperationInfo(operation, type);
-  if (!isOperationInfoAllowed(oi))
-    throw new Error(`Operation ${oi.key} is denied for ${getTypeInfo(type).name}`);
-}
-
 export function operationInfos(ti: TypeInfo) {
-  return Dic.getValues(ti.operations!).filter(isOperationInfoAllowed);
+  return Dic.getValues(ti.operations!);
 }
 
 export function notifySuccess(message?: string, timeout?: number) {
@@ -225,8 +215,7 @@ export class ContextualOperationContext<T extends Entity> {
 
 export class EntityOperationContext<T extends Entity> {
 
-  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string): EntityOperationContext<T> {
-
+  static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     if (!ctx.frame)
       throw new Error("a frame is necessary");
 
@@ -236,10 +225,13 @@ export class EntityOperationContext<T extends Entity> {
     return EntityOperationContext.fromEntityPack(ctx.frame, ctx.frame.pack! as EntityPack<T>, operation);
   }
 
-  static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any> | string) {
+  static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     const operationKey = (operation as OperationSymbol).key || operation as string;
 
     const oi = getTypeInfo(pack.entity.Type).operations![operationKey];
+
+    if (oi == null)
+      return undefined;
 
     const result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
@@ -287,10 +279,6 @@ export class EntityOperationContext<T extends Entity> {
       this.settings.onClick(this);
     else
       defaultOnClick(this);
-  }
-
-  isAllowed() {
-    return isOperationInfoAllowed(this.operationInfo);
   }
 
   textOrNiceName() {
@@ -493,8 +481,8 @@ export function isEntityOperation(operationType: OperationType) {
 
 export namespace API {
 
-  export function construct<T extends Entity>(type: string, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T>> {
-    return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type });
+  export function construct<T extends Entity>(type: string | Type<T>, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T>> {
+    return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type: getTypeName(type) });
   }
 
   export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {

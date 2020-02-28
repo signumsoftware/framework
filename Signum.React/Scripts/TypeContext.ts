@@ -38,7 +38,7 @@ export class StyleContext {
       labelColumns: { sm: 2 },
       readOnly: false,
       placeholderLabels: false,
-      titleLabels: false,
+      titleLabels: true,
       readonlyAsPlainText: false,
       frame: undefined,
     });
@@ -229,7 +229,7 @@ export interface BsColumns {
 
 export class TypeContext<T> extends StyleContext {
 
-  propertyRoute: PropertyRoute;
+  propertyRoute: PropertyRoute | undefined; /*Because of optional TypeInfo*/
   binding: IBinding<T>;
   prefix: string;
 
@@ -263,7 +263,7 @@ export class TypeContext<T> extends StyleContext {
     return new TypeContext(parent, styleOptions, PropertyRoute.root(value.Type), new ReadonlyBinding<T>(value, ""));
   }
 
-  constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute /*| undefined*/, binding: IBinding<T>, prefix?: string) {
+  constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute | undefined, binding: IBinding<T>, prefix?: string) {
     super(parent, styleOptions);
     this.propertyRoute = propertyRoute;
     this.binding = binding;
@@ -284,7 +284,7 @@ export class TypeContext<T> extends StyleContext {
         isType(arg) ? [{ type: "Mixin", name: arg.typeName } as LambdaMember] :
           getFieldMembers(arg);
 
-    const subRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addLambdaMember(m), this.propertyRoute);
+    const subRoute = lambdaMembers.reduce<PropertyRoute | undefined>((pr, m) => pr && pr.tryAddLambdaMember(m), this.propertyRoute);
 
     const binding = createBinding(this.value, lambdaMembers);
 
@@ -300,7 +300,7 @@ export class TypeContext<T> extends StyleContext {
     if (type.typeName != entity.Type)
       throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
 
-    var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+    var newPr = this.propertyRoute == null ? undefined : this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
 
     const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, ""));
 
@@ -314,7 +314,7 @@ export class TypeContext<T> extends StyleContext {
     if (type.typeName != entity.Type)
       return undefined;
 
-    var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+    var newPr = this.propertyRoute!.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
 
     const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, ""));
 
@@ -455,9 +455,8 @@ export interface EntityFrame {
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
-
-  return ctx.value!.map((mle, i) => new TypeContext<T>(ctx, undefined,
-    ctx.propertyRoute.addMember("Indexer", ""),
+  const elemPR = ctx.propertyRoute!.addMember("Indexer", "", true);
+  return ctx.value!.map((mle, i) => new TypeContext<T>(ctx, undefined, elemPR,
     new MListElementBinding<T>(ctx.binding, i),
   ));
 }

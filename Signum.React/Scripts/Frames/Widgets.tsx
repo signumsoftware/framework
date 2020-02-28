@@ -2,6 +2,7 @@ import * as React from 'react'
 import { EntityPack, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import "./Widgets.css"
+import { ErrorBoundary } from '../Components';
 
 export interface WidgetContext<T extends ModifiableEntity> {
   ctx: TypeContext<T>;
@@ -20,9 +21,13 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactN
   if (widgets.length == 0)
     return undefined;
 
-  return <ul className="sf-widgets">
-    {widgets.map((w, i) => <li key={i}>{w}</li>)}
-  </ul>;
+  return (
+    <ErrorBoundary>
+      <ul className="sf-widgets">
+        {widgets.map((w, i) => <li key={i}>{w}</li>)}
+      </ul>
+    </ErrorBoundary>
+  );
 }
 
 export interface EmbeddedWidget {

@@ -21,8 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -223,7 +223,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 export function getTypeNiceName(tr: TypeReference) {
 
   const niceName = tr.typeNiceName ??
-    getTypeInfos(tr)
+    tryGetTypeInfos(tr)
       .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName ?? ti.name))
       .joinComma(External.CollectionMessage.Or.niceToString());
 
@@ -379,7 +379,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
   return completer.finished()
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
-      displayName: co.displayName ?? completer.get(co.token.toString()).niceName,
+      displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
     }) as ColumnOptionParsed));
 }
 
@@ -489,7 +489,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
-      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualsTo") &&
+      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
       (a.value == b.value || is(a.value, b.value)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
       isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
@@ -581,7 +581,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
 
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
-  const tis = getTypeInfos(qd.columns["Entity"].type);
+  const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
 
   if (!fo.groupResults && (!fo.orderOptions || fo.orderOptions.length == 0)) {
@@ -620,7 +620,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
       columnOptions: (fo.columnOptions ?? []).map(co => ({
         token: completer.get(co.token.toString()),
-        displayName: co.displayName ?? completer.get(co.token.toString()).niceName
+        displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions ?? []).map(oo => ({
@@ -1153,7 +1153,7 @@ export module Encoder {
 
       if (fo.pinned) {
         var p = fo.pinned;
-        query["filterPinned" + index + identSuffix] = scapeTilde(p.label ?? "") +
+        query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
@@ -1182,7 +1182,7 @@ export module Encoder {
 
   export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
     if (columnOptions)
-      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : ""));
   }
 
   export function stringValue(value: any): string {
@@ -1369,7 +1369,7 @@ export interface SimpleFilterBuilderContext {
 
 export interface FormatRule {
   name: string;
-  formatter: (column: ColumnOptionParsed) => CellFormatter;
+  formatter: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => CellFormatter;
   isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
 }
 
@@ -1383,6 +1383,8 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  row: ResultRow;
+  rowIndex: number;
 }
 
 
@@ -1401,15 +1403,16 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
 
   const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
 
-  return rule.formatter(co);
+  return rule.formatter(co, sc);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-export function registerPropertyFormatter(pr: PropertyRoute, formater: CellFormatter) {
+export function registerPropertyFormatter(pr: PropertyRoute | undefined, formater: CellFormatter) {
+  if (pr == null)
+    return;
   registeredPropertyFormatters[pr.toString()] = formater;
 }
-
 
 export const formatRules: FormatRule[] = [
   {
@@ -1515,7 +1518,7 @@ export const entityFormatRules: EntityFormatRule[] = [
   {
     name: "View",
     isApplicable: row => true,
-    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc?.handleOnNavigated}

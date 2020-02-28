@@ -230,4 +230,3 @@ function renderText(message: React.ReactChild | null | undefined, style?: Messag
   return message;
 }
 
-

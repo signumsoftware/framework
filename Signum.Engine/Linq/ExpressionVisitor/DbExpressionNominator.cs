@@ -383,13 +383,79 @@ namespace Signum.Engine.Linq
 
             var obj = Visit(m.Object);
 
-            if (!culture.IsReadOnly && obj.Type.UnNullify() == typeof(DateTime))
+            if ((!culture.IsReadOnly || isPostgres) && (obj.Type.UnNullify() == typeof(DateTime) || obj.Type.UnNullify() == typeof(Date)))
                 format = DateTimeExtensions.ToCustomFormatString(format, culture);
+
+            if (isPostgres)
+                return Add(new SqlFunctionExpression(typeof(string), null, "to_char", new[] {
+                obj,
+                new SqlConstantExpression(ToPostgres(format), typeof(string))
+                }));
 
             return Add(new SqlFunctionExpression(typeof(string), null, "Format", new[] {
                 obj,
                 new SqlConstantExpression(format, typeof(string)),
                 new SqlConstantExpression(culture.Name) }));
+        }
+
+        //https://database.guide/list-of-the-custom-date-time-format-strings-supported-by-the-format-function-in-sql-server/
+        //https://www.postgresql.org/docs/current/functions-formatting.html
+        static Dictionary<string, string> postgresReplacement = new Dictionary<string, string>()
+        {
+            { "d", "DD"},
+            { "dd", "DD"},
+            { "ddd", "Dy"},
+            { "dddd", "Day"},
+            { "f", "MS"},
+            { "ff", "MS"},
+            { "fff", "MS"},
+            { "ffff", "US"},
+            { "fffff", "US"},
+            { "ffffff", "US"},
+            { "fffffff", "US"},
+            { "ffffffff", "US"},
+            { "F", "MS"},
+            { "FF", "MS"},
+            { "FFF", "MS"},
+            { "FFFF", "US"},
+            { "FFFFF", "US"},
+            { "FFFFFF", "US"},
+            { "FFFFFFF", "US"},
+            { "FFFFFFFF", "US"},
+            { "g", "ad"},
+            { "gg", "ad"},
+            { "h", "HH12"},
+            { "hh", "HH12"},
+            { "H", "HH24"},
+            { "HH", "HH24"},
+            { "K", "OF"},
+            { "m", "MI"},
+            { "mm", "MI"},
+            { "M", "MM"},
+            { "MM", "MM"},
+            { "MMM", "Mon"},
+            { "MMMM", "Month"},
+            { "s", "SS"},
+            { "ss", "SS"},
+            { "t", "AM"},
+            { "tt", "AM"},
+            { "y", "Y"},
+            { "yy", "YY"},
+            { "yyy", "YYY"},
+            { "yyyy", "YYYY"},
+            { "yyyyy", "YYYY"},
+            { "z", "TZ"},
+            { "zz", "TZ"},
+            { "zzz", "TZ"},
+        };
+
+        static string? ToPostgres(string? format)
+        {
+            if (format == null)
+                return null;
+
+            var result= Regex.Replace(format, @"\b\w+\b", m => postgresReplacement.TryGetC(m.Value) ?? m.Value);
+            return result;
         }
 
         protected Expression? TrySqlFunction(Expression? obj, PostgresFunction postgresFunction, Type type, params Expression[] expression)
@@ -444,6 +510,8 @@ namespace Signum.Engine.Linq
             return null;
         }
 
+        static int DaysBetween(Date a, Date b) => 0;
+
         private Expression? TrySqlDifference(SqlEnums sqlEnums, Type type, Expression leftSide, Expression rightSide)
         {
             Expression left = Visit(leftSide);
@@ -456,6 +524,9 @@ namespace Signum.Engine.Linq
 
             if (isPostgres)
             {
+                if (sqlEnums == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
+                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(Date.Today, Date.Today))), typeof(double)));
+
                 var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
                 {
                     new SqlLiteralExpression(SqlEnums.epoch),
@@ -1257,17 +1328,22 @@ namespace Signum.Engine.Linq
             {
                 case "string.Length": return TrySqlFunction(null, isPostgres ? PostgresFunction.length.ToString() : SqlFunction.LEN.ToString(), m.Type, m.Expression);
                 case "Math.PI": return TrySqlFunction(null, SqlFunction.PI, m.Type);
+                case "Date.Year":
                 case "DateTime.Year": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.year), m.Expression);
+                case "Date.Month":
                 case "DateTime.Month": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.month), m.Expression);
+                case "Date.Day":
                 case "DateTime.Day": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.day), m.Expression);
+                case "Date.DayOfYear":
                 case "DateTime.DayOfYear": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(isPostgres? SqlEnums.doy: SqlEnums.dayofyear), m.Expression);
+                case "Date.DayOfWeek":
+                case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
                 case "DateTime.Hour": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression);
                 case "DateTime.Minute": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression);
                 case "DateTime.Second": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression);
                 case "DateTime.Millisecond": return TrySqlFunction(null, getDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression);
                 case "DateTime.Date": return TrySqlDate(m.Expression);
                 case "DateTime.TimeOfDay": return TrySqlTime(m.Expression);
-                case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
 
                 case "TimeSpan.Days":
                     {
@@ -1466,15 +1542,18 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.minute); 
                 case "DateTime.AddSeconds": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.second); 
                 case "DateTime.AddMilliseconds": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.millisecond); 
+                case "Date.ToShortString": return GetDateTimeToStringSqlFunction(m, "d");
                 case "DateTime.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
                 case "DateTime.ToShortTimeString": return GetDateTimeToStringSqlFunction(m, "t");
+                case "Date.ToLongString": return GetDateTimeToStringSqlFunction(m, "D");
                 case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
                 case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
                 //dateadd(month, datediff(month, 0, SomeDate),0);
-                case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.month);
-                case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.quarter);
-                case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.week);
+                case "DateTimeExtensions.YearStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.year);
+                case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.month);
+                case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.quarter);
+                case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.week);
                 case "DateTimeExtensions.HourStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour);
                 case "DateTimeExtensions.MinuteStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute);
                 case "DateTimeExtensions.SecondStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second);

@@ -437,6 +437,9 @@ namespace Signum.Entities.Reflection
             if (type.IsEnum)
                 return null;
 
+            if (type == typeof(Date))
+                return "d";
+
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.DateTime:

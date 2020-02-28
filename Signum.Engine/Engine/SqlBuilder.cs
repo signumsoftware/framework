@@ -160,9 +160,19 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, CreateOldColumn(column)));
         }
 
-        public SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
+        public SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, DiffColumn diffColumn, ObjectName? forceTableName = null)
         {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(forceTableName ?? table.Name, this.ColumnLine(column, null, isChange: true)));
+            var tableName = forceTableName ?? table.Name;
+
+            var alterColumn = !IsPostgres ?
+                 new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, this.ColumnLine(column, null, isChange: true))) :
+                 new[] 
+                 {
+                     !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ? 
+                        new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null, 
+                     diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                     !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                 }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
 
             if (column.Default == null)
                 return alterColumn;
@@ -170,7 +180,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             var defCons = GetDefaultConstaint(table, column)!;
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                AlterTableDropConstraint(table.Name, defaultConstraintName ?? defCons.Name),
+                AlterTableDropConstraint(table.Name, diffColumn.DefaultConstraint?.Name ?? defCons.Name),
                 alterColumn,
                 AlterTableAddDefaultConstraint(table.Name, defCons)
             )!;
@@ -294,8 +304,12 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         public SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
             if (objectName.Schema.Database == null)
-                return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
-
+            {
+                if (IsPostgres)
+                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(new ObjectName(objectName.Schema, indexName, IsPostgres)));
+                else
+                    return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
+            }
             else
                 return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1} ON {2}';"
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(isPostgres), indexName.SqlEscape(isPostgres), objectName.OnDatabase(null).ToString()));

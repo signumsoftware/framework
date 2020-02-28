@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -27,6 +27,7 @@ export interface ValueLineProps extends LineBaseProps {
   incrementWithArrow?: boolean | number;
   columnCount?: number;
   columnWidth?: number;
+  showTimeBox?: boolean;
 }
 
 export interface OptionItem {
@@ -82,10 +83,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   getDefaultProps(state: ValueLineProps) {
     super.getDefaultProps(state);
-    state.valueLineType = ValueLineController.getValueLineType(state.type!);
+    if (state.type) {
+      state.valueLineType = ValueLineController.getValueLineType(state.type);
 
-    if (state.valueLineType == undefined)
-      throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+      if (state.valueLineType == undefined)
+        throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+    }
   }
 
   overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
@@ -106,7 +109,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset")
+    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "Date")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")
@@ -246,13 +249,15 @@ ValueLineRenderers.renderers["ComboBox"] = (vl) => {
   return internalComboBox(vl);
 };
 
-
-
 function getOptionsItems(vl: ValueLineController): OptionItem[] {
-  var ti = getTypeInfo(vl.props.type!.name);
+  var ti: TypeInfo;
+  function getTi() {
+    return ti ?? (ti = getTypeInfo(vl.props.type!.name));
+  }
+
   if (vl.props.comboBoxItems)
     return vl.props.comboBoxItems.map(a =>
-      typeof a == "string" ? ti.members[a] && toOptionItem(ti.members[a]) :
+      typeof a == "string" ? getTi().members[a] && toOptionItem(getTi().members[a]) :
         toOptionItem(a)).filter(a => !!a);
 
   if (vl.props.type!.name == "boolean")
@@ -261,7 +266,7 @@ function getOptionsItems(vl: ValueLineController): OptionItem[] {
       { label: BooleanEnum.niceToString("True")!, value: true }
     ]);
 
-  return Dic.getValues(ti.members).map(m => toOptionItem(m));
+  return Dic.getValues(getTi().members).map(m => toOptionItem(m));
 }
 
 function toOptionItem(m: MemberInfo | OptionItem): OptionItem {
@@ -576,7 +581,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const momentFormat = toMomentFormat(s.formatText);
 
   const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = momentFormat != "L" && momentFormat != "LL";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : momentFormat != "L" && momentFormat != "LL";
 
   if (s.ctx.readOnly)
     return (
@@ -676,7 +681,7 @@ export interface DurationTextBoxProps {
 
 export function DurationTextBox(p: DurationTextBoxProps) {
 
-  const [text, setState] = React.useState<string | undefined>(undefined);
+  const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
     p.value != undefined ? durationToString(p.value, p.format) :
@@ -701,17 +706,46 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     var format = p.format!;
 
     function fixNumber(val: string) {
-      if (!val.contains(":")) {
-        if (format.startsWith("hh"))
-          return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
-        if (format.startsWith("mm"))
-          return format.replace("mm", val.toString()).replace("ss", "00");
-        return val;
+      var valParts = val.split(":");
+      var formatParts = format.split(":");
+      if (valParts.length == 1 && formatParts.length > 1) {
+        const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
+
+        var inferedFormat = validFormats.firstOrNull(f => f.length >= val.length);
+        if (inferedFormat == null)
+          return null;
+
+        var fixedVal = val.padStart(inferedFormat.length, '0');
+
+        const getPart = (part: string) => {
+          var index = inferedFormat!.indexOf(part);
+          if (index == -1)
+            return "".padStart(part.length, '0');
+
+          return fixedVal.substr(index, part.length);
+        }
+
+        return format
+          .replace("hh", getPart("hh"))
+          .replace("mm", getPart("mm"))
+          .replace("ss", getPart("ss"));
+
+      } else {
+
+        var result = format;
+        for (var i = 0; i < formatParts.length; i++) {
+          var formP = formatParts[i];
+          var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
+          result = result.replace(formP, valP);
+        }
+        return result;
       }
-      return val;
     }
 
-    function normalize(val: string) {
+    function normalize(val: string | null) {
+      if (val == null)
+        return null;
+
       if (!"hh:mm:ss".contains(format))
         throw new Error("not implemented");
 
@@ -720,7 +754,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
     const input = e.currentTarget as HTMLInputElement;
     const result = input.value == undefined || input.value.length == 0 ? null : normalize(fixNumber(input.value));
-    setState(undefined);
+    setText(undefined);
     if (p.value != result)
       p.onChange(result);;
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
@@ -729,7 +763,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
-    setState(input.value);
+    setText(input.value);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {

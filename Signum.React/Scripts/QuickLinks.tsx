@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type } from './Reflection'
+import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo } from './Reflection'
 import { classes, Dic } from './Globals'
 import { FindOptions } from './FindOptions'
 import * as Finder from './Finder'
@@ -41,13 +41,10 @@ export interface RegisteredQuickLink<T extends Entity> {
   options?: QuickLinkOptions;
 }
 
-export interface QuickLinkOptions {
-  allowsMultiple?: boolean
-}
 
 export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
 export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
-  onGlobalQuickLinks.push({ factory: quickLinkGenerator,  options: options });
+  onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
 }
 
 export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
@@ -151,7 +148,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
   const entity = p.wc.ctx.value;
 
   const links = useAPI(signal => {
-    if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind)
+    if (entity.isNew || !tryGetTypeInfo(entity.Type)?.entityKind)
       return Promise.resolve([]);
     else
       return getQuickLinks({
@@ -177,42 +174,38 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 }
 
 
-class QuickLinkToggle extends React.Component<{ onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }> {
+const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick: React.MouseEventHandler, links: any[] | undefined }, ref: React.Ref<HTMLAnchorElement>) {
 
-  handleClick = (e: React.MouseEvent<any>) => {
-    e.preventDefault();
-    this.props.onClick!(e);
-  }
+  const links = p.links;
 
-  render() {
-    const links = this.props.links;
-    return (
-      <a
-        className={classes("badge badge-pill", links?.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
-        title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
-        role="button"
-        href="#"
-        data-toggle="dropdown"
-        onClick={this.handleClick} >
-        {links && <FontAwesomeIcon icon="star" />}
-        {links ? "\u00A0" + links.length : "…"}
-      </a>
-    );
-  }
-}
+  return (
+    <a
+      ref={ref}
+      className={classes("badge badge-pill", links?.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
+      title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
+      role="button"
+      href="#"
+      data-toggle="dropdown"
+      onClick={e => { e.preventDefault(); p.onClick(e); }}>
+      {links && <FontAwesomeIcon icon="star" />}
+      {links ? "\u00A0" + links.length : "…"}
+    </a>
+  );
+});
 
 export interface QuickLinkOptions {
   isVisible?: boolean;
-  text?: string;
+  text?: () => string; //To delay niceName and avoid exceptions
   order?: number;
   icon?: IconProp;
   iconColor?: string;
   isShy?: boolean;
+  allowsMultiple?: boolean
 }
 
 export abstract class QuickLink {
   isVisible!: boolean;
-  text!: string;
+  text!: () => string;
   order!: number;
   name: string;
   icon?: IconProp;
@@ -222,7 +215,7 @@ export abstract class QuickLink {
   constructor(name: string, options?: QuickLinkOptions) {
     this.name = name;
 
-    Dic.assign(this, { isVisible: true, text: "", order: 0, ...options });
+    Dic.assign(this, { isVisible: true, text: () => "", order: 0, ...options });
   }
 
   abstract toDropDownItem(): React.ReactElement<any>;
@@ -240,7 +233,7 @@ export abstract class QuickLink {
 export class QuickLinkAction extends QuickLink {
   action: (e: React.MouseEvent<any>) => void;
 
-  constructor(name: string, text: string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
+  constructor(name: string, text: () => string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
     super(name, options);
     this.text = text;
     this.action = action;
@@ -250,7 +243,7 @@ export class QuickLinkAction extends QuickLink {
 
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
@@ -264,7 +257,7 @@ export class QuickLinkAction extends QuickLink {
 export class QuickLinkLink extends QuickLink {
   url: string;
 
-  constructor(name: string, text: string, url: string, options?: QuickLinkOptions) {
+  constructor(name: string, text: () => string, url: string, options?: QuickLinkOptions) {
     super(name, options);
     this.text = text;
     this.url = url;
@@ -274,7 +267,7 @@ export class QuickLinkLink extends QuickLink {
 
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
@@ -290,7 +283,7 @@ export class QuickLinkExplore extends QuickLink {
   constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
     super(getQueryKey(findOptions.queryName), {
       isVisible: Finder.isFindable(findOptions.queryName, false),
-      text: getQueryNiceName(findOptions.queryName),
+      text: () => getQueryNiceName(findOptions.queryName),
       ...options
     });
 
@@ -300,7 +293,7 @@ export class QuickLinkExplore extends QuickLink {
   toDropDownItem() {
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
@@ -324,7 +317,7 @@ export class QuickLinkNavigate extends QuickLink {
   constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions) {
     super(lite.EntityType, {
       isVisible: Navigator.isNavigable(lite.EntityType),
-      text: getTypeInfo(lite.EntityType).niceName,
+      text: () => getTypeInfo(lite.EntityType).niceName!,
       ...options
     });
 
@@ -335,7 +328,7 @@ export class QuickLinkNavigate extends QuickLink {
   toDropDownItem() {
     return (
       <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
-        {this.renderIcon()}&nbsp;{this.text}
+        {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }

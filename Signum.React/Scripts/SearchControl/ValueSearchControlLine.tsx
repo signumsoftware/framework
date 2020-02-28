@@ -4,7 +4,7 @@ import * as Finder from '../Finder'
 import * as Constructor from '../Constructor'
 import { FindOptions, QueryDescription } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
-import { getQueryKey, getQueryNiceName, QueryTokenString, getTypeInfos } from '../Reflection'
+import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../TypeContext'
 import ValueSearchControl from './ValueSearchControl'
@@ -232,7 +232,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
   chooseType(qd: QueryDescription): Promise<string | undefined> {
 
     const tis = getTypeInfos(qd.columns["Entity"].type)
-      .filter(ti => Navigator.isCreable(ti, false, true));
+      .filter(ti => Navigator.isCreable(ti, { isSearch: true }));
 
     return SelectorModal.chooseType(tis)
       .then(ti => ti ? ti.name : undefined);

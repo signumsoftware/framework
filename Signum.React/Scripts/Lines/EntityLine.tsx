@@ -80,9 +80,8 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 
   overrideProps(p: EntityLineProps, overridenProps: EntityLineProps) {
     super.overrideProps(p, overridenProps);
-    if (p.autocomplete === undefined) {
-      const type = p.type!;
-      p.autocomplete = Navigator.getAutoComplete(type, p.findOptions, p.ctx, p.create!, p.showType);
+    if (p.autocomplete === undefined && p.type) {
+      p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.ctx, p.create!, p.showType);
     }
   }
 
@@ -121,8 +120,6 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 export const EntityLine = React.memo(React.forwardRef(function EntityLine(props: EntityLineProps, ref: React.Ref<EntityLineController>) {
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
-
- 
 
   if (c.isHidden)
     return null;

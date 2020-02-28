@@ -8,7 +8,7 @@ import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
-import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel } from '../Reflection'
+import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
 import { EntityOperationContext } from '../Operations'
@@ -61,13 +61,13 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const forceUpdate = useForceUpdate();
 
   React.useImperativeHandle(ref, () => ({
-  handleKeyDown(e: KeyboardEvent) {
+    handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
-  }
+    }
   }));
 
   const typeName = getTypeName(p.entityOrPack);
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
 
 
   React.useEffect(() => {
@@ -167,7 +167,15 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }
 
   function handleOnExited() {
-    p.onExited!(okClicked.current ? packComponent!.pack.entity : undefined);
+    if (okClicked.current)
+      p.onExited!(packComponent!.pack.entity);
+    else if (packComponent == null)
+      p.onExited!(undefined);
+    else {
+      var oldEntity = JSON.parse(packComponent.lastEntity) as ModifiableEntity;
+      GraphExplorer.propagateAll(oldEntity);
+      p.onExited!(oldEntity.modified ? undefined : oldEntity);
+    }
   }
 
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
@@ -214,7 +222,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     };
 
     const styleOptions: StyleOptions = {
-      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack),
+      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack, { isEmbedded: p.propertyRoute?.member?.type.isEmbedded }),
       frame: frame,
     };
 
@@ -316,9 +324,9 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
     if (entity == undefined || entity.isNew)
       return undefined;
 
-    const ti = getTypeInfo(entity.Type);
+    const ti = tryGetTypeInfo(entity.Type);
 
-    if (ti == undefined || !Navigator.isNavigable(ti, false)) //Embedded
+    if (ti == undefined || !Navigator.isNavigable(ti)) //Embedded
       return undefined;
 
     return (

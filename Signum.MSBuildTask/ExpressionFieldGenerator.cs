@@ -145,7 +145,7 @@ namespace Signum.MSBuildTask
             {
                 var newObj = reader.Get(OpCodes.Newobj);
                 closureType = ((MethodDefinition)newObj.Operand).DeclaringType;
-                if(reader.TryGet(OpCodes.Stloc) != null) //General case
+                if(reader.TryGet(OpCodes.Stloc) != null) //DEBUG: stloc(ldloc ldarg sfld) * ldloc
                 {
                     //c.a = a;
                     while (LookaheadClosureAssignment(isDup, ref reader, out var oldParameter, out var fieldReference))
@@ -153,13 +153,13 @@ namespace Signum.MSBuildTask
                         captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
                     }
                 }
-                else if (reader.TryGet(OpCodes.Dup) != null) //only found for 1 parameter in release
+                else if (reader.Is(OpCodes.Dup)) //RELEASE: (dup ldarg stfld)*
                 {
                     isDup = true;
-                    if (!LookaheadClosureAssignment(isDup, ref reader, out var oldParameter, out var fieldReference))
-                        throw new InvalidOperationException($"Not expected (in {method.FullName})");
-
-                    captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
+                    while (LookaheadClosureAssignment(isDup, ref reader, out var oldParameter, out var fieldReference))
+                    {
+                        captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
+                    }
                 }
             }
 
@@ -266,7 +266,7 @@ namespace Signum.MSBuildTask
             fieldReference = null;
             parameterReference = null;
             var fork = reader.Clone();
-            if ((isDup || fork.TryGet(OpCodes.Ldloc, 0) != null) &&
+            if ((isDup ? fork.TryGet(OpCodes.Dup) : fork.TryGet(OpCodes.Ldloc, 0)) != null &&
                 fork.TryGet(OpCodes.Ldarg) is Instruction ldarg &&
                 fork.TryGet(OpCodes.Stfld) is Instruction stfld)
             {

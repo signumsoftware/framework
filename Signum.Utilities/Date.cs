@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
@@ -9,7 +11,7 @@ using System.Text;
 namespace Signum.Utilities
 {
 
-    [Serializable]
+    [Serializable, TypeConverter(typeof(DateTypeConverter))]
     public struct Date : IComparable, IFormattable, ISerializable, IComparable<Date>, IEquatable<Date>
     {
         private DateTime _dt;
@@ -225,12 +227,12 @@ namespace Signum.Utilities
 
         public static Date ParseExact(string s, string format, IFormatProvider provider)
         {
-            return new Date(DateTime.ParseExact(s, format, provider));
+            return new Date(DateTime.ParseExact(s, ConvertFormat(format), provider));
         }
 
         public static Date ParseExact(string s, string format, IFormatProvider provider, DateTimeStyles style)
         {
-            return new Date(DateTime.ParseExact(s, format, provider, style));
+            return new Date(DateTime.ParseExact(s, ConvertFormat(format), provider, style));
         }
 
         public static Date ParseExact(string s, string[] formats, IFormatProvider provider, DateTimeStyles style)
@@ -263,24 +265,23 @@ namespace Signum.Utilities
             return this.ToShortString();
         }
 
-        public string ToString(IFormatProvider provider)
-        {
-            return this._dt.ToString(provider);
-        }
-
-        public string ToString(string format)
-        {
-            if (format == "O" || format == "o" || format == "s")
-            {
-                return this.ToString("yyyy-MM-dd");
-            }
-
-            return this._dt.ToString(format);
-        }
+        public string ToString(IFormatProvider provider) => ToString(null, CultureInfo.CurrentCulture);
+        public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
 
         public string ToString(string? format, IFormatProvider? provider)
         {
-            return this._dt.ToString(format, provider);
+            return this._dt.ToString(ConvertFormat(format), provider);
+        }
+
+        [return: NotNullIfNotNull("format")]
+        private static string? ConvertFormat(string? format)
+        {
+            if (format == "O" || format == "o" || format == "s")
+            {
+                format = "yyyy-MM-dd";
+            }
+
+            return format;
         }
 
         public static bool TryParse(string s, out Date result)
@@ -301,6 +302,11 @@ namespace Signum.Utilities
 
         public static bool TryParseExact(string s, string format, IFormatProvider provider, DateTimeStyles style, out Date result)
         {
+            if (format == "O" || format == "o" || format == "s")
+            {
+                format = "yyyy-MM-dd";
+            }
+
             DateTime d;
             bool success = DateTime.TryParseExact(s, format, provider, style, out d);
             result = new Date(d);
@@ -313,6 +319,30 @@ namespace Signum.Utilities
             bool success = DateTime.TryParseExact(s, formats, provider, style, out d);
             result = new Date(d);
             return success;
+        }
+    }
+
+    public class DateTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return sourceType == typeof(string);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            return destinationType == typeof(string);
+        }
+
+        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            return string.IsNullOrEmpty((string)value) ? (Date?)null : (Date?)Date.ParseExact((string)value, "o", CultureInfo.InvariantCulture);
+        }
+
+        public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
+            var date = (Date?)value;
+            return date == null ? null : date.Value.ToString("o");
         }
     }
 }

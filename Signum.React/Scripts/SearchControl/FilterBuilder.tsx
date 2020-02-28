@@ -1,11 +1,11 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { Dic, areEqual, classes} from '../Globals'
-import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter } from '../FindOptions'
+import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import { isNumber} from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
-import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, toMomentFormat, getTypeInfos } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -517,7 +517,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
 
 interface PinnedFilterEditorProps {
-  pinned: PinnedFilter;
+  pinned: PinnedFilterParsed;
   readonly: boolean;
   onChange: () => void;
 }
@@ -606,7 +606,7 @@ export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToke
     case "Embedded":
       return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
     case "Enum":
-      const ti = getTypeInfos(tokenType).single();
+      const ti = tryGetTypeInfos(tokenType).single();
       if (!ti)
         throw new Error(`EnumType ${tokenType.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);

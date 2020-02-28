@@ -17,7 +17,7 @@ export default function EntityLink(p: EntityLinkProps) {
 
   const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, ...htmlAtts } = p;
 
-  if (!Navigator.isNavigable(lite.EntityType, undefined, p.inSearch || false))
+  if (!Navigator.isNavigable(lite.EntityType, { isSearch: p.inSearch || false }))
     return <span data-entity={liteKey(lite)}>{p.children ?? getToString(lite)}</span>;
 
 

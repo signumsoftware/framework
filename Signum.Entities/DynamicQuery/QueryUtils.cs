@@ -45,6 +45,9 @@ namespace Signum.Entities.DynamicQuery
             if (uType == typeof(Guid))
                 return FilterType.Guid;
 
+            if (uType == typeof(Date))
+                return FilterType.DateTime;
+
             if (uType.IsEnum)
                 return FilterType.Enum;
 

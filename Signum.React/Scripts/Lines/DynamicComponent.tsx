@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { getTypeInfos, TypeReference } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, TypeInfo } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
@@ -27,7 +27,7 @@ export default function DynamicComponent({ ctx, viewName }: { ctx: TypeContext<M
   }
 
   function subContext(ctx: TypeContext<ModifiableEntity>): TypeContext<any>[] {
-    const members = ctx.propertyRoute.subMembers();
+    const members = ctx.propertyRoute!.subMembers();
     const result = Dic.map(members, (field, m) => ctx.subCtx(field));
 
     return result;
@@ -43,11 +43,16 @@ export const customPropertyComponent: {
 } = {};
 
 export function registerCustomPropertyComponent<T extends ModifiableEntity, V>(type: Type<T>, property: (e: T) => V, component: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined) {
-  customPropertyComponent[type.propertyRoute(property).toString()] = component;
+
+  var pi = type.tryPropertyRoute(property);
+  if (pi == null)
+    return;
+
+  customPropertyComponent[pi.toString()] = component;
 }
 
 export function getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
-  return getAppropiateComponentFactory(ctx.propertyRoute)(ctx);
+  return getAppropiateComponentFactory(ctx.propertyRoute!)(ctx);
 }
 
 export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
@@ -75,7 +80,7 @@ export function getAppropiateComponentFactory(pr: PropertyRoute): (ctx: TypeCont
 }
 
 export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: TypeContext<any>) => React.ReactElement<any> | undefined {
-  let tis = getTypeInfos(tr);
+  let tis = tryGetTypeInfos(tr) as TypeInfo[];
   if (tis.length == 1 && tis[0] == undefined)
     tis = [];
 

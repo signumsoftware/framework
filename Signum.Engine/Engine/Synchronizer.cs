@@ -351,7 +351,7 @@ namespace Signum.Engine
             }
 
             if (!interactive)
-                throw new InvalidOperationException("Impossible to synchronize {0} without interactive Console. Consider running the Load project.".FormatWith(replacementsKey));
+                throw new InvalidOperationException($"Unable to ask for renames for '{oldValue}' (in {replacementsKey}) without interactive Console. Please use your Terminal application");
 
             int startingIndex = 0;
             Console.WriteLine();

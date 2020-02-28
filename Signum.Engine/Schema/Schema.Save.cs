@@ -238,13 +238,13 @@ namespace Signum.Engine.Maps
         {
             internal Table table;
 
-            public Func<string[], bool, string> SqlInsertPattern;
+            public Func<string[], string?, string> SqlInsertPattern;
             public Action<Entity, Forbidden, string, List<DbParameter>> InsertParameters;
 
             ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>> insertIdentityCache =
                new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>?>>();
 
-            public InsertCacheIdentity(Table table, Func<string[], bool, string> sqlInsertPattern, Action<Entity, Forbidden, string, List<DbParameter>> insertParameters)
+            public InsertCacheIdentity(Table table, Func<string[], string?, string> sqlInsertPattern, Action<Entity, Forbidden, string, List<DbParameter>> insertParameters)
             {
                 this.table = table;
                 SqlInsertPattern = sqlInsertPattern;
@@ -259,8 +259,7 @@ namespace Signum.Engine.Maps
             Action<List<Entity>, DirectedGraph<Entity>?> GetInsertMultiIdentity(int num)
             {
                 var isPostgres = Schema.Current.Settings.IsPostgres;
-                var newIds = Var(isPostgres, "newIDs");
-                string sqlMulti = SqlInsertPattern(Enumerable.Range(0, num).Select(i => i.ToString()).ToArray(), true);
+                string sqlMulti = SqlInsertPattern(Enumerable.Range(0, num).Select(i => i.ToString()).ToArray(), "" /*output but no name*/);
 
                 return (entities, graph) =>
                 {
@@ -316,14 +315,13 @@ namespace Signum.Engine.Maps
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
                     var isPostgres = Schema.Current.Settings.IsPostgres;
-                    var newIds = Var(isPostgres, "newIDs");
-                    Func<string[], bool, string> sqlInsertPattern = (suffixes, output) =>
+                    Func<string[], string?, string> sqlInsertPattern = (suffixes, output) =>
                     "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
                     table.Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    output && !isPostgres ?  $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}\r\n" : null,
+                    output != null && !isPostgres ?  $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
                     suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
-                    output && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
+                    output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
 
 
                     var expr = Expression.Lambda<Action<Entity, Forbidden, string, List<DbParameter>>>(
@@ -520,8 +518,14 @@ namespace Signum.Engine.Maps
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
-                        if (dt.Rows.Count > 0)
-                            throw new EntityNotFoundException(table.Type, dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToArray());
+                        if (dt.Rows.Count != idents.Count)
+                        {
+                            var updated = dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToList();
+
+                            var missing = idents.Select(a => a.Id).Except(updated).ToArray();
+
+                            throw new EntityNotFoundException(table.Type, missing);
+                        }
 
                         for (int i = 0; i < num; i++)
                         {
@@ -679,12 +683,18 @@ SELECT {id} FROM rows;";
             SetToStrField(ident);
 
             bool isGuid = this.PrimaryKey.DbType.IsGuid();
+            var isPostgres = Schema.Current.Settings.IsPostgres;
 
             SqlPreCommand? collections = GetInsertCollectionSync(ident, includeCollections, suffix);
 
-            SqlPreCommandSimple insert = IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this) ?
+            var identityBehaviour = IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this);
+
+            string? parentId = collections != null && identityBehaviour ? Table.Var(isPostgres, "parentId") : null;
+            string? newIds = collections != null && identityBehaviour && (!isPostgres && isGuid) ? Table.Var(isPostgres, "newIDs") : null;
+
+            SqlPreCommandSimple insert = identityBehaviour ?
                 new SqlPreCommandSimple(
-                    inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, isGuid && collections != null),
+                    inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, newIds ?? (isPostgres ? parentId : null)),
                     new List<DbParameter>().Do(dbParams => inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment) :
                 new SqlPreCommandSimple(
                     inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
@@ -693,12 +703,26 @@ SELECT {id} FROM rows;";
             if (collections == null)
                 return insert;
 
-            bool isPostgres = Schema.Current.Settings.IsPostgres;
-            var pkType = this.PrimaryKey.DbType.ToString(isPostgres);
-            var newIds = Table.Var(isPostgres, "newIDs");
-            var parentId = Table.Var(isPostgres, "parentId");
+            if (!identityBehaviour)
+            {
+                return SqlPreCommand.Combine(Spacing.Simple,
+                   insert,
+                   collections)!;
+            }
 
-            if (isGuid)
+            var pkType = this.PrimaryKey.DbType.ToString(isPostgres);
+
+            if (isPostgres)
+            {
+                return new SqlPreCommandSimple(@$"DO $$
+DECLARE {parentId} {pkType};
+BEGIN
+{insert.PlainSql().Indent(4)}
+
+{collections.PlainSql().Indent(4)}
+END $$;"); ;
+            }
+            else if (isGuid)
             {
                 return SqlPreCommand.Combine(Spacing.Simple, 
                     insert, 
@@ -938,7 +962,6 @@ SELECT {id} FROM rows;";
                 return insertCache.GetOrAdd(numElements, num =>
                 {
                     bool isPostgres = Schema.Current.Settings.IsPostgres;
-                    var newIds = Table.Var(isPostgres, "newIDs");
 
                     string sqlMulti = sqlInsert(Enumerable.Range(0, num).Select(i => i.ToString()).ToArray(), true);
 
@@ -1177,8 +1200,6 @@ SELECT {id} FROM rows;";
                 if (this.Order != null)
                     Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
                 Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
-
-                var newIds = Table.Var(isPostgres, "newIDs");
 
                 result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),

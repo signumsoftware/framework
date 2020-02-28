@@ -43,7 +43,7 @@ namespace Signum.Test.Environment
 
             smashingPumpkins.Execute(BandOperation.Save);
 
-            new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }
+            new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), CreationDate = (Date)DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }
                 .Execute(NoteWithDateOperation.Save);
 
             LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
@@ -73,7 +73,7 @@ namespace Signum.Test.Environment
                 Label = virgin
             }.Execute(AlbumOperation.Save);
 
-            new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
+            new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), CreationDate = (Date)DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
                 .Execute(NoteWithDateOperation.Save);
 
             LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
@@ -109,10 +109,10 @@ namespace Signum.Test.Environment
                 Friends = { smashingPumpkins.Members.SingleEx(a=>a.Name.Contains("Billy Corgan")).ToLite() }
             }.Execute(ArtistOperation.Save); ;
 
-            new NoteWithDateEntity { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }
+            new NoteWithDateEntity { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), CreationDate = new Date(2009, 6, 25), Text = "Death on June, 25th", Target = michael }
                 .Execute(NoteWithDateOperation.Save);
 
-            new NoteWithDateEntity { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null!, Target = michael }
+            new NoteWithDateEntity { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), CreationDate = new Date(2000, 1, 1), Text = null!, Target = michael }
                 .SetMixin((CorruptMixin c) => c.Corrupt, true)
                 .Do(n => n.Mixin<ColaboratorsMixin>().Colaborators.Add(michael))
                 .Execute(NoteWithDateOperation.Save);
